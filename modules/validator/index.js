@@ -1,7 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
 import { constants } from "node:fs";
-import { access, mkdir, readFile, stat } from "node:fs/promises";
+import { access, chmod, mkdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
@@ -10,11 +10,19 @@ const ajv = new Ajv2020({ allErrors: true });
 const validateTagging = ajv.compile(taggingSchema);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
-const defaultVeraPdfPath = path.join(moduleDir, "vendor", "verapdf", "app", "verapdf.bat");
+const vendorDir = path.join(moduleDir, "vendor");
+const bundledJavaHome = path.join(vendorDir, "java");
+const defaultVeraPdfPaths =
+  process.platform === "win32"
+    ? [path.join(vendorDir, "verapdf", "app", "verapdf.bat")]
+    : [
+        path.join(vendorDir, "verapdf", "app", "verapdf"),
+        path.join(vendorDir, "verapdf", "app", "bin", "verapdf")
+      ];
 const buildDir = path.join(moduleDir, ".build");
 const metadataProbeSourcePath = path.join(moduleDir, "java", "MetadataProbeCli.java");
 const metadataProbeClassPath = path.join(buildDir, "MetadataProbeCli.class");
-const veraPdfJarPath = path.join(moduleDir, "vendor", "verapdf", "app", "bin", "pdfbox-apps-1.28.2.jar");
+const veraPdfJarPath = path.join(vendorDir, "verapdf", "app", "bin", "pdfbox-apps-1.28.2.jar");
 
 function parseArgs(argv) {
   const args = new Map();
@@ -27,31 +35,135 @@ function parseArgs(argv) {
   };
 }
 
-function execCommand(command, args, { allowExitCodes = [] } = {}) {
+function execCommand(command, args, { allowExitCodes = [], env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { maxBuffer: 1024 * 1024 * 20, shell: process.platform === "win32" && /\.bat$/i.test(command) }, (error, stdout, stderr) => {
-      if (error && !allowExitCodes.includes(error.code)) {
-        reject(new Error(stderr || stdout || error.message));
-        return;
-      }
+    execFile(
+      command,
+      args,
+      {
+        env,
+        maxBuffer: 1024 * 1024 * 20,
+        shell: process.platform === "win32" && /\.bat$/i.test(command)
+      },
+      (error, stdout, stderr) => {
+        if (error && !allowExitCodes.includes(error.code)) {
+          reject(new Error(stderr || stdout || error.message));
+          return;
+        }
 
-      resolve({
-        stdout,
-        stderr,
-        exitCode: error ? error.code : 0
-      });
-    });
+        resolve({
+          stdout,
+          stderr,
+          exitCode: error ? error.code : 0
+        });
+      }
+    );
   });
 }
 
-async function resolveVeraPdfPath() {
-  const configuredPath = process.env.VERAPDF_PATH ? path.resolve(process.env.VERAPDF_PATH) : defaultVeraPdfPath;
+function executableName(commandName) {
+  return process.platform === "win32" ? `${commandName}.exe` : commandName;
+}
+
+async function isReadable(targetPath) {
   try {
-    await access(configuredPath, constants.R_OK);
+    await access(targetPath, constants.R_OK);
+    return true;
   } catch {
-    throw new Error(`veraPDF CLI not found at ${configuredPath}. Run 'npm run install:verapdf' or set VERAPDF_PATH.`);
+    return false;
   }
-  return configuredPath;
+}
+
+async function ensureExecutable(targetPath) {
+  if (process.platform !== "win32") {
+    await chmod(targetPath, 0o755).catch(() => {});
+  }
+}
+
+async function resolveConfiguredPath(envVarName, description) {
+  const configuredPath = process.env[envVarName];
+  if (!configuredPath) {
+    return null;
+  }
+
+  const resolvedPath = path.resolve(configuredPath);
+  if (!(await isReadable(resolvedPath))) {
+    throw new Error(`${description} not found at ${resolvedPath}.`);
+  }
+
+  await ensureExecutable(resolvedPath);
+  return resolvedPath;
+}
+
+async function resolveJavaHome() {
+  const configuredJavaHome = process.env.VALIDATOR_JAVA_HOME;
+  if (configuredJavaHome) {
+    const resolvedJavaHome = path.resolve(configuredJavaHome);
+    if (!(await isReadable(path.join(resolvedJavaHome, "bin", executableName("java"))))) {
+      throw new Error(`Validator Java home not found at ${resolvedJavaHome}.`);
+    }
+    return resolvedJavaHome;
+  }
+
+  const envJavaHome = process.env.JAVA_HOME ? path.resolve(process.env.JAVA_HOME) : null;
+  if (envJavaHome && (await isReadable(path.join(envJavaHome, "bin", executableName("java"))))) {
+    return envJavaHome;
+  }
+
+  if (await isReadable(path.join(bundledJavaHome, "bin", executableName("java")))) {
+    return bundledJavaHome;
+  }
+
+  return null;
+}
+
+async function resolveJavaTool(commandName, envVarName) {
+  const configuredPath = await resolveConfiguredPath(envVarName, `${commandName} executable`);
+  if (configuredPath) {
+    return configuredPath;
+  }
+
+  const javaHome = await resolveJavaHome();
+  if (javaHome) {
+    const javaToolPath = path.join(javaHome, "bin", executableName(commandName));
+    if (await isReadable(javaToolPath)) {
+      await ensureExecutable(javaToolPath);
+      return javaToolPath;
+    }
+  }
+
+  return commandName;
+}
+
+async function buildJavaExecEnv() {
+  const javaHome = await resolveJavaHome();
+  if (!javaHome) {
+    return process.env;
+  }
+
+  return {
+    ...process.env,
+    JAVA_HOME: javaHome,
+    PATH: `${path.join(javaHome, "bin")}${path.delimiter}${process.env.PATH || ""}`
+  };
+}
+
+async function resolveVeraPdfPath() {
+  const configuredPath = await resolveConfiguredPath("VERAPDF_PATH", "veraPDF CLI");
+  if (configuredPath) {
+    return configuredPath;
+  }
+
+  for (const candidatePath of defaultVeraPdfPaths) {
+    if (await isReadable(candidatePath)) {
+      await ensureExecutable(candidatePath);
+      return candidatePath;
+    }
+  }
+
+  throw new Error(
+    `veraPDF CLI not found at ${defaultVeraPdfPaths[0]}. Run 'npm run install:verapdf' or set VERAPDF_PATH.`
+  );
 }
 
 async function needsJavaCompilation(sourcePath, classPath) {
@@ -70,15 +182,28 @@ async function ensureMetadataProbeCompiled() {
     return;
   }
 
-  await execCommand("javac", [
-    "-encoding",
-    "UTF-8",
-    "-cp",
-    veraPdfJarPath,
-    "-d",
-    buildDir,
-    metadataProbeSourcePath
-  ]);
+  const javacCommand = await resolveJavaTool("javac", "VALIDATOR_JAVAC_PATH");
+  try {
+    await execCommand(
+      javacCommand,
+      [
+        "-encoding",
+        "UTF-8",
+        "-cp",
+        veraPdfJarPath,
+        "-d",
+        buildDir,
+        metadataProbeSourcePath
+      ],
+      {
+        env: await buildJavaExecEnv()
+      }
+    );
+  } catch (error) {
+    throw new Error(
+      `Unable to compile validator metadata probe. Install a JDK, set VALIDATOR_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
+    );
+  }
 }
 
 function sanitizeCode(value) {
@@ -107,24 +232,48 @@ function parseVeraPdfReport(stdout) {
 async function runVeraPdf(pdfPath) {
   const veraPdfPath = await resolveVeraPdfPath();
   const flavour = process.env.VERAPDF_FLAVOUR || "ua1";
-  const { stdout } = await execCommand(
-    veraPdfPath,
-    ["--format", "json", "--flavour", flavour, "--loglevel", "0", pdfPath],
-    { allowExitCodes: [1] }
-  );
+  let stdout;
+  try {
+    ({ stdout } = await execCommand(
+      veraPdfPath,
+      ["--format", "json", "--flavour", flavour, "--loglevel", "0", pdfPath],
+      {
+        allowExitCodes: [1],
+        env: await buildJavaExecEnv()
+      }
+    ));
+  } catch (error) {
+    throw new Error(
+      `veraPDF failed to execute. Install Java, set VALIDATOR_JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${error.message}`
+    );
+  }
 
   return parseVeraPdfReport(stdout);
 }
 
 async function runMetadataProbe(pdfPath) {
   await ensureMetadataProbeCompiled();
-  const { stdout } = await execCommand("java", [
-    "-cp",
-    `${buildDir}${path.delimiter}${veraPdfJarPath}`,
-    "MetadataProbeCli",
-    "--pdf",
-    pdfPath
-  ]);
+  const javaCommand = await resolveJavaTool("java", "VALIDATOR_JAVA_PATH");
+  let stdout;
+  try {
+    ({ stdout } = await execCommand(
+      javaCommand,
+      [
+        "-cp",
+        `${buildDir}${path.delimiter}${veraPdfJarPath}`,
+        "MetadataProbeCli",
+        "--pdf",
+        pdfPath
+      ],
+      {
+        env: await buildJavaExecEnv()
+      }
+    ));
+  } catch (error) {
+    throw new Error(
+      `Unable to run validator metadata probe. Set VALIDATOR_JAVA_PATH, JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${error.message}`
+    );
+  }
   return JSON.parse(stdout.trim());
 }
 

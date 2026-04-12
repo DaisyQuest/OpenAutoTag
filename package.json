@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Contract-first scaffold for a parallel PDF accessibility tagging pipeline.",
   "scripts": {
-    "install:verapdf": "powershell -ExecutionPolicy Bypass -File scripts/install-verapdf.ps1",
+    "install:verapdf": "node scripts/install-verapdf.js",
+    "test:ci": "node scripts/run-ci-tests.js",
     "test": "node --test",
     "test:integration": "node --test test/integration",
     "test:goldmaster": "node --test test/integration/goldmaster.test.js",
@@ -16,10 +17,11 @@
     "map:source-text": "node scripts/build-source-text-map.js",
     "map:table-structure": "node scripts/build-table-structure-map.js",
     "inspect:pdf": "node scripts/inspect-pdf-low-level.js",
-    "serve": "node orchestrator/server.js"
+    "serve": "node orchestrator/server.js",
+    "start": "node orchestrator/server.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   },
   "dependencies": {
     "ajv": "^8.17.1",
