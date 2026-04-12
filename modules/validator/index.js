@@ -1,10 +1,11 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
 import { constants } from "node:fs";
-import { access, chmod, mkdir, readFile, stat } from "node:fs/promises";
+import { access, chmod, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
+import { ensureJavaBuildArtifact } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -178,34 +179,34 @@ async function needsJavaCompilation(sourcePath, classPath) {
 }
 
 async function ensureMetadataProbeCompiled() {
-  await mkdir(buildDir, { recursive: true });
-
-  if (!(await needsJavaCompilation(metadataProbeSourcePath, metadataProbeClassPath))) {
-    return;
-  }
-
-  const javacCommand = await resolveJavaTool("javac", "VALIDATOR_JAVAC_PATH");
-  try {
-    await execCommand(
-      javacCommand,
-      [
-        "-encoding",
-        "UTF-8",
-        "-cp",
-        veraPdfJarPath,
-        "-d",
-        buildDir,
-        metadataProbeSourcePath
-      ],
-      {
-        env: await buildJavaExecEnv()
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsJavaCompilation(metadataProbeSourcePath, metadataProbeClassPath)),
+    compile: async () => {
+      const javacCommand = await resolveJavaTool("javac", "VALIDATOR_JAVAC_PATH");
+      try {
+        await execCommand(
+          javacCommand,
+          [
+            "-encoding",
+            "UTF-8",
+            "-cp",
+            veraPdfJarPath,
+            "-d",
+            buildDir,
+            metadataProbeSourcePath
+          ],
+          {
+            env: await buildJavaExecEnv()
+          }
+        );
+      } catch (error) {
+        throw new Error(
+          `Unable to compile validator metadata probe. Install a JDK, set VALIDATOR_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
+        );
       }
-    );
-  } catch (error) {
-    throw new Error(
-      `Unable to compile validator metadata probe. Install a JDK, set VALIDATOR_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
-    );
-  }
+    }
+  });
 }
 
 function sanitizeCode(value) {

@@ -1,6 +1,11 @@
-import { access, chmod } from "node:fs/promises";
+import os from "node:os";
+import { access, chmod, mkdir, rm, stat, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import path from "node:path";
+
+const DEFAULT_BUILD_LOCK_TIMEOUT_MS = 120000;
+const DEFAULT_BUILD_LOCK_STALE_MS = 300000;
+const BUILD_LOCK_RETRY_MS = 200;
 
 function executableName(commandName) {
   return process.platform === "win32" ? `${commandName}.exe` : commandName;
@@ -18,6 +23,102 @@ async function isReadable(targetPath) {
 async function ensureExecutable(targetPath) {
   if (process.platform !== "win32") {
     await chmod(targetPath, 0o755).catch(() => {});
+  }
+}
+
+function wait(delayMs) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+function getBuildLockDir(buildDir) {
+  return `${buildDir}.lock`;
+}
+
+async function isBuildLockPresent(lockDir) {
+  try {
+    await access(lockDir, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function isBuildLockStale(lockDir, staleMs) {
+  try {
+    const ownerPath = path.join(lockDir, "owner.json");
+    const lockStats = await stat(ownerPath).catch(() => stat(lockDir));
+    return Date.now() - lockStats.mtimeMs >= staleMs;
+  } catch {
+    return false;
+  }
+}
+
+async function clearBuildLock(lockDir) {
+  await rm(lockDir, { recursive: true, force: true }).catch(() => {});
+}
+
+async function releaseStaleBuildLock(lockDir, staleMs) {
+  if (!(await isBuildLockStale(lockDir, staleMs))) {
+    return false;
+  }
+
+  await clearBuildLock(lockDir);
+  return true;
+}
+
+async function waitForBuildLockRelease(lockDir, { timeoutMs, staleMs }) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (await isBuildLockPresent(lockDir)) {
+    if (await releaseStaleBuildLock(lockDir, staleMs)) {
+      continue;
+    }
+
+    if (Date.now() >= deadline) {
+      throw new Error(`Timed out waiting for Java helper build lock at ${lockDir}.`);
+    }
+
+    await wait(BUILD_LOCK_RETRY_MS);
+  }
+}
+
+async function acquireBuildLock(buildDir, { timeoutMs, staleMs }) {
+  const lockDir = getBuildLockDir(buildDir);
+  const deadline = Date.now() + timeoutMs;
+
+  while (true) {
+    try {
+      await mkdir(lockDir);
+      await writeFile(
+        path.join(lockDir, "owner.json"),
+        JSON.stringify(
+          {
+            pid: process.pid,
+            hostname: os.hostname(),
+            startedAt: new Date().toISOString()
+          },
+          null,
+          2
+        )
+      );
+      return lockDir;
+    } catch (error) {
+      if (error?.code !== "EEXIST") {
+        throw error;
+      }
+
+      if (await releaseStaleBuildLock(lockDir, staleMs)) {
+        continue;
+      }
+
+      if (Date.now() >= deadline) {
+        throw new Error(`Timed out acquiring Java helper build lock at ${lockDir}.`);
+      }
+
+      await wait(BUILD_LOCK_RETRY_MS);
+    }
   }
 }
 
@@ -91,4 +192,40 @@ export async function buildJavaExecEnv({ bundledJavaHome } = {}) {
     JAVA_HOME: javaHome,
     PATH: `${path.join(javaHome, "bin")}${path.delimiter}${process.env.PATH || ""}`
   };
+}
+
+export async function ensureJavaBuildArtifact({
+  buildDir,
+  isCurrent,
+  compile,
+  timeoutMs = DEFAULT_BUILD_LOCK_TIMEOUT_MS,
+  staleMs = DEFAULT_BUILD_LOCK_STALE_MS
+}) {
+  const lockDir = getBuildLockDir(buildDir);
+  await mkdir(buildDir, { recursive: true });
+
+  if (await isCurrent()) {
+    await waitForBuildLockRelease(lockDir, { timeoutMs, staleMs });
+    if (await isCurrent()) {
+      return;
+    }
+  }
+
+  const acquiredLockDir = await acquireBuildLock(buildDir, { timeoutMs, staleMs });
+
+  try {
+    if (await isCurrent()) {
+      return;
+    }
+
+    try {
+      await compile();
+    } catch (error) {
+      await rm(buildDir, { recursive: true, force: true }).catch(() => {});
+      await mkdir(buildDir, { recursive: true });
+      throw error;
+    }
+  } finally {
+    await clearBuildLock(acquiredLockDir);
+  }
 }

@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import redactionPlanSchema from "../../contracts/redaction-plan.schema.json" with { type: "json" };
-import { buildJavaExecEnv, resolveJavaTool } from "../../scripts/java-runtime.js";
+import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -59,28 +59,28 @@ async function needsCompilation() {
 }
 
 async function ensureJavaHelperCompiled() {
-  await mkdir(buildDir, { recursive: true });
-
-  if (!(await needsCompilation())) {
-    return;
-  }
-
-  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
-  await execCommand(
-    javacCommand,
-    [
-      "-encoding",
-      "UTF-8",
-      "-cp",
-      pdfboxJarPath,
-      "-d",
-      buildDir,
-      javaSourcePath
-    ],
-    {
-      env: await buildJavaExecEnv({ bundledJavaHome })
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsCompilation()),
+    compile: async () => {
+      const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      await execCommand(
+        javacCommand,
+        [
+          "-encoding",
+          "UTF-8",
+          "-cp",
+          pdfboxJarPath,
+          "-d",
+          buildDir,
+          javaSourcePath
+        ],
+        {
+          env: await buildJavaExecEnv({ bundledJavaHome })
+        }
+      );
     }
-  );
+  });
 }
 
 function countTagNodes(node) {

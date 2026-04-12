@@ -34,7 +34,7 @@ export function getRuntimeSubdir(subdirectory, options = {}) {
 }
 
 export function getRuntimeBuildDir(namespace, options = {}) {
-  return path.join(getRuntimeRoot(options), "build", namespace, String(process.pid));
+  return path.join(getRuntimeRoot(options), "build", namespace);
 }
 
 export function getRuntimeCacheDir(namespace, options = {}) {

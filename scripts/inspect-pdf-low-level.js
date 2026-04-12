@@ -1,8 +1,8 @@
 import { execFile } from "node:child_process";
-import { mkdir, stat } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { buildJavaExecEnv, resolveJavaTool } from "./java-runtime.js";
+import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "./java-runtime.js";
 import { getRuntimeBuildDir } from "./runtime-paths.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -47,34 +47,34 @@ async function needsCompilation() {
 }
 
 async function ensureJavaHelperCompiled() {
-  await mkdir(buildDir, { recursive: true });
-
-  if (!(await needsCompilation())) {
-    return;
-  }
-
-  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
-  try {
-    await execCommand(
-      javacCommand,
-      [
-        "-encoding",
-        "UTF-8",
-        "-cp",
-        pdfboxJarPath,
-        "-d",
-        buildDir,
-        javaSourcePath
-      ],
-      {
-        env: await buildJavaExecEnv({ bundledJavaHome })
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsCompilation()),
+    compile: async () => {
+      const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      try {
+        await execCommand(
+          javacCommand,
+          [
+            "-encoding",
+            "UTF-8",
+            "-cp",
+            pdfboxJarPath,
+            "-d",
+            buildDir,
+            javaSourcePath
+          ],
+          {
+            env: await buildJavaExecEnv({ bundledJavaHome })
+          }
+        );
+      } catch (error) {
+        throw new Error(
+          `Unable to compile low-level PDF inspector helper. Install a JDK, set PIPELINE_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
+        );
       }
-    );
-  } catch (error) {
-    throw new Error(
-      `Unable to compile low-level PDF inspector helper. Install a JDK, set PIPELINE_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
-    );
-  }
+    }
+  });
 }
 
 export async function inspectPdfLowLevel({ pdfPath }) {

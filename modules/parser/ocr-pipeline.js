@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { buildJavaExecEnv, resolveJavaTool } from "../../scripts/java-runtime.js";
+import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir, getRuntimeCacheDir } from "../../scripts/runtime-paths.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
@@ -92,29 +92,29 @@ async function resolvePdfboxJarPath() {
 }
 
 async function ensureJavaHelperCompiled() {
-  await mkdir(buildDir, { recursive: true });
-
-  if (!(await needsCompilation())) {
-    return;
-  }
-
-  const pdfboxJarPath = await resolvePdfboxJarPath();
-  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
-  await execCommand(
-    javacCommand,
-    [
-      "-encoding",
-      "UTF-8",
-      "-cp",
-      pdfboxJarPath,
-      "-d",
-      buildDir,
-      javaSourcePath
-    ],
-    {
-      env: await buildJavaExecEnv({ bundledJavaHome })
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsCompilation()),
+    compile: async () => {
+      const pdfboxJarPath = await resolvePdfboxJarPath();
+      const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      await execCommand(
+        javacCommand,
+        [
+          "-encoding",
+          "UTF-8",
+          "-cp",
+          pdfboxJarPath,
+          "-d",
+          buildDir,
+          javaSourcePath
+        ],
+        {
+          env: await buildJavaExecEnv({ bundledJavaHome })
+        }
+      );
     }
-  );
+  });
 }
 
 function round(value) {
