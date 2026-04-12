@@ -29,10 +29,12 @@ This repository is a contract-first scaffold for a horizontally scalable PDF acc
 ```bash
 npm install
 npm run install:verapdf
+npm run test:ci
 npm test
 npm run test:goldmaster
 npm run goldmaster:update
 npm run testing-matrix:update
+npm start
 npm run serve
 npm run map:source-text -- --pdf tmp/sample.pdf --layout tmp/run/01-layout.json --output tmp/run/01b-source-text-map.json
 npm run map:table-structure -- --pdf tmp/sample.pdf --layout tmp/run/01-layout.json --output tmp/run/01c-table-structure-map.json
@@ -40,7 +42,7 @@ npm run inspect:pdf -- --pdf tmp/run/06-tagged.pdf
 ```
 
 Java 21 is required for the native PDFBox-backed writer and validator modules.
-The validator uses veraPDF for PDF/UA validation. Override the CLI path with `VERAPDF_PATH` or the flavour with `VERAPDF_FLAVOUR` if needed.
+The validator uses veraPDF for PDF/UA validation. `npm run install:verapdf` now installs it cross-platform, and the validator also accepts `VERAPDF_PATH`, `VALIDATOR_JAVA_HOME`, `VALIDATOR_JAVA_PATH`, `VALIDATOR_JAVAC_PATH`, and `VERAPDF_FLAVOUR` overrides when needed.
 The OCR fallback uses `tesseract.js`, which downloads language data on first use and caches it locally.
 
 Open the local UI:
