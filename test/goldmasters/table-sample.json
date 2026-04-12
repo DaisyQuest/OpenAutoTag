@@ -1,0 +1,1379 @@
+{
+  "job": {
+    "status": "completed",
+    "stageSummary": {
+      "total": 10,
+      "completedStages": 10,
+      "failedStages": 0,
+      "skippedStages": 0,
+      "totalAttempts": 10,
+      "retryableFailures": 0
+    },
+    "stages": [
+      {
+        "key": "layout",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "sourceTextMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tableStructureMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "layoutEnriched",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "readingOrder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagBuilder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "pdfWriter",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagDeltaReport",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "validator",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      }
+    ]
+  },
+  "layout": {
+    "source": {
+      "pageCount": 1,
+      "language": "en-US",
+      "languageConfidence": 0.99,
+      "ocr": {
+        "mode": "auto",
+        "status": "skipped",
+        "languages": [
+          "eng"
+        ],
+        "languageStrategy": "detected-english",
+        "languageHint": "en-US",
+        "attemptedPages": 0,
+        "appliedPages": 0,
+        "failedPages": 0,
+        "partialPages": 0,
+        "skippedPages": 1
+      }
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "language": "en-US",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Performance Tables",
+            "bbox": [
+              72,
+              42,
+              210.298,
+              22
+            ],
+            "fontSize": 22,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Section",
+            "bbox": [
+              72,
+              100,
+              43.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Players",
+            "bbox": [
+              220,
+              100,
+              42.696,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Strings",
+            "bbox": [
+              72,
+              124,
+              37.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "34",
+            "bbox": [
+              220,
+              124,
+              13.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Brass",
+            "bbox": [
+              72,
+              148,
+              30.672,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "12",
+            "bbox": [
+              220,
+              148,
+              13.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "The personnel table should stay separate from the venue table below.",
+            "bbox": [
+              72,
+              190,
+              370.86,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Venue",
+            "bbox": [
+              72,
+              260,
+              36.012,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "City",
+            "bbox": [
+              220,
+              260,
+              22.668,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Palace Theatre",
+            "bbox": [
+              72,
+              284,
+              81.372,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Albany",
+            "bbox": [
+              220,
+              284,
+              36.684,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Troy Savings",
+            "bbox": [
+              72,
+              308,
+              70.02,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Troy",
+            "bbox": [
+              220,
+              308,
+              24,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      }
+    ]
+  },
+  "layoutEnriched": {
+    "pages": [
+      {
+        "pageNumber": 1,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 2,
+          "vectorTableCount": 0,
+          "textGridTableCount": 2,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Performance Tables",
+            "blockType": "heading",
+            "headingLevel": 2,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Section",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Players",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Strings",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "34",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Brass",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "12",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "The personnel table should stay separate from the venue table below.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Venue",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "City",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Palace Theatre",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Albany",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Troy Savings",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Troy",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:1:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      }
+    ]
+  },
+  "semanticOrdered": {
+    "source": {
+      "language": "en-US",
+      "languageConfidence": 0.99
+    },
+    "nodes": [
+      {
+        "id": "n-1-1",
+        "role": "H2",
+        "text": "Performance Tables",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          42,
+          210.298,
+          22
+        ],
+        "readingOrder": 0,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-2",
+        "role": "TH",
+        "text": "Section",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          100,
+          43.344,
+          12
+        ],
+        "readingOrder": 1,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-3",
+        "role": "TH",
+        "text": "Players",
+        "pageNumber": 1,
+        "bbox": [
+          220,
+          100,
+          42.696,
+          12
+        ],
+        "readingOrder": 2,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-4",
+        "role": "TD",
+        "text": "Strings",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          124,
+          37.344,
+          12
+        ],
+        "readingOrder": 3,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-5",
+        "role": "TD",
+        "text": "34",
+        "pageNumber": 1,
+        "bbox": [
+          220,
+          124,
+          13.344,
+          12
+        ],
+        "readingOrder": 4,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-6",
+        "role": "TD",
+        "text": "Brass",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          148,
+          30.672,
+          12
+        ],
+        "readingOrder": 5,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-7",
+        "role": "TD",
+        "text": "12",
+        "pageNumber": 1,
+        "bbox": [
+          220,
+          148,
+          13.344,
+          12
+        ],
+        "readingOrder": 6,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-8",
+        "role": "P",
+        "text": "The personnel table should stay separate from the venue table below.",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          190,
+          370.86,
+          12
+        ],
+        "readingOrder": 7,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-9",
+        "role": "TD",
+        "text": "Venue",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          260,
+          36.012,
+          12
+        ],
+        "readingOrder": 8,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-10",
+        "role": "TD",
+        "text": "City",
+        "pageNumber": 1,
+        "bbox": [
+          220,
+          260,
+          22.668,
+          12
+        ],
+        "readingOrder": 9,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-11",
+        "role": "TD",
+        "text": "Palace Theatre",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          284,
+          81.372,
+          12
+        ],
+        "readingOrder": 10,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-12",
+        "role": "TD",
+        "text": "Albany",
+        "pageNumber": 1,
+        "bbox": [
+          220,
+          284,
+          36.684,
+          12
+        ],
+        "readingOrder": 11,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-13",
+        "role": "TD",
+        "text": "Troy Savings",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          308,
+          70.02,
+          12
+        ],
+        "readingOrder": 12,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-14",
+        "role": "TD",
+        "text": "Troy",
+        "pageNumber": 1,
+        "bbox": [
+          220,
+          308,
+          24,
+          12
+        ],
+        "readingOrder": 13,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:1:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      }
+    ]
+  },
+  "tagging": {
+    "type": "Document",
+    "label": "",
+    "sourceNodeIds": [],
+    "rowSpan": null,
+    "columnSpan": null,
+    "tableSection": "",
+    "tableSource": "",
+    "children": [
+      {
+        "type": "Sect",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "H1",
+            "label": "Performance Tables",
+            "sourceNodeIds": [
+              "n-1-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "Table",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "THead",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TH",
+                        "label": "Section",
+                        "sourceNodeIds": [
+                          "n-1-2"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Players",
+                        "sourceNodeIds": [
+                          "n-1-3"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "TBody",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Strings",
+                        "sourceNodeIds": [
+                          "n-1-4"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "34",
+                        "sourceNodeIds": [
+                          "n-1-5"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Brass",
+                        "sourceNodeIds": [
+                          "n-1-6"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "12",
+                        "sourceNodeIds": [
+                          "n-1-7"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "P",
+            "label": "The personnel table should stay separate from the venue table below.",
+            "sourceNodeIds": [
+              "n-1-8"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "Table",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "TBody",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Venue",
+                        "sourceNodeIds": [
+                          "n-1-9"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "City",
+                        "sourceNodeIds": [
+                          "n-1-10"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Palace Theatre",
+                        "sourceNodeIds": [
+                          "n-1-11"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "Albany",
+                        "sourceNodeIds": [
+                          "n-1-12"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Troy Savings",
+                        "sourceNodeIds": [
+                          "n-1-13"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "Troy",
+                        "sourceNodeIds": [
+                          "n-1-14"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "sourceTextMap": {
+    "summary": {
+      "totalRuns": 14,
+      "matchedBlocks": 14,
+      "unmatchedBlocks": 0,
+      "averageConfidence": 1
+    },
+    "matches": [
+      {
+        "blockId": "p1-b1",
+        "blockText": "Performance Tables",
+        "runIds": [
+          "r-1-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b2",
+        "blockText": "Section",
+        "runIds": [
+          "r-1-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b3",
+        "blockText": "Players",
+        "runIds": [
+          "r-1-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b4",
+        "blockText": "Strings",
+        "runIds": [
+          "r-1-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b5",
+        "blockText": "34",
+        "runIds": [
+          "r-1-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b6",
+        "blockText": "Brass",
+        "runIds": [
+          "r-1-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b7",
+        "blockText": "12",
+        "runIds": [
+          "r-1-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b8",
+        "blockText": "The personnel table should stay separate from the venue table below.",
+        "runIds": [
+          "r-1-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b9",
+        "blockText": "Venue",
+        "runIds": [
+          "r-1-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b10",
+        "blockText": "City",
+        "runIds": [
+          "r-1-10"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b11",
+        "blockText": "Palace Theatre",
+        "runIds": [
+          "r-1-11"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b12",
+        "blockText": "Albany",
+        "runIds": [
+          "r-1-12"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b13",
+        "blockText": "Troy Savings",
+        "runIds": [
+          "r-1-13"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b14",
+        "blockText": "Troy",
+        "runIds": [
+          "r-1-14"
+        ],
+        "confidence": 1
+      }
+    ]
+  },
+  "tableStructureMap": {
+    "summary": {
+      "detectedTables": 0,
+      "pagesWithTables": 0,
+      "totalMergeSignals": 0
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      }
+    ]
+  },
+  "writer": {
+    "status": "completed",
+    "nativeTaggingApplied": true,
+    "structureElementCount": 27,
+    "markedContentCount": 14,
+    "tableAttributeCount": 2,
+    "metadataApplied": true,
+    "language": "en-US",
+    "title": "Performance Tables"
+  },
+  "tagDelta": {
+    "status": "completed",
+    "source": {
+      "hasStructTreeRoot": false,
+      "totalTypedNodes": 0,
+      "markedContentOperatorCount": 0,
+      "artifactMarkedContentCount": 0,
+      "tableAttributeNodeCount": 0
+    },
+    "tagged": {
+      "hasStructTreeRoot": true,
+      "totalTypedNodes": 27,
+      "markedContentOperatorCount": 15,
+      "artifactMarkedContentCount": 1,
+      "tableAttributeNodeCount": 2
+    },
+    "delta": {
+      "structTreeAdded": true,
+      "metadataAdded": true,
+      "markInfoAdded": true,
+      "markedFlagEnabled": true,
+      "totalTypedNodesDelta": 27,
+      "markedContentOperatorCountDelta": 15,
+      "artifactMarkedContentCountDelta": 1,
+      "tableAttributeNodeCountDelta": 2,
+      "imageXObjectCountDelta": 1
+    }
+  },
+  "validation": {
+    "status": "completed",
+    "isCompliant": true,
+    "profileName": "PDF/UA-1 validation profile",
+    "engine": {
+      "name": "veraPDF",
+      "version": "1.28.2"
+    },
+    "findingCodes": [],
+    "metadataDiagnostics": {
+      "infoMatchesXmp": true,
+      "dcTitleDetected": true,
+      "pdfUaIdentificationDetected": true,
+      "suspectedVeraPdfMetadataMismatch": true
+    }
+  }
+}

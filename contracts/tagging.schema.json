@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/tagging.schema.json",
+  "title": "TaggingDocument",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "documentId",
+    "source",
+    "root"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "documentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "semanticDocumentId"
+      ],
+      "properties": {
+        "semanticDocumentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filePath": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "root": {
+      "$ref": "#/$defs/tagNode"
+    }
+  },
+  "$defs": {
+    "tagNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Document",
+            "Sect",
+            "H1",
+            "H2",
+            "H3",
+            "P",
+            "L",
+            "LI",
+            "Table",
+            "THead",
+            "TBody",
+            "TFoot",
+            "TR",
+            "TH",
+            "TD"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "sourceNodeIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tagNode"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

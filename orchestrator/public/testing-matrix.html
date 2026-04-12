@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Testing Matrix</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="testing-matrix">
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <header class="hero report-hero">
+        <div class="report-hero-copy">
+          <p class="eyebrow">Coverage Map</p>
+          <h1 id="matrix-title">Loading testing matrix...</h1>
+          <p id="matrix-subtitle" class="lede">
+            Building a visual matrix of unit, integration, goldmaster, runtime, and browser-facing coverage.
+          </p>
+        </div>
+        <div class="report-hero-actions">
+          <a class="ghost-link" href="/">Back to batch dashboard</a>
+          <div class="hero-status-card">
+            <span class="summary-label">Snapshot</span>
+            <strong id="matrix-generated-at">Loading...</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="report-layout testing-layout">
+        <aside class="panel report-sidebar">
+          <div class="section-heading">
+            <h2>Coverage Summary</h2>
+            <span id="matrix-row-count">0 rows</span>
+          </div>
+          <div id="matrix-summary-cards" class="report-tabs"></div>
+          <div class="section-heading matrix-gap-heading">
+            <h2>Gaps</h2>
+            <span id="matrix-gap-count">0 open</span>
+          </div>
+          <div id="matrix-gap-list" class="report-links"></div>
+        </aside>
+
+        <section class="panel report-main">
+          <div class="matrix-legend">
+            <span class="legend-chip legend-covered">Covered</span>
+            <span class="legend-chip legend-partial">Partial</span>
+            <span class="legend-chip legend-gap">Gap</span>
+            <span class="legend-chip legend-na">N/A</span>
+          </div>
+          <div id="matrix-sections" class="matrix-sections">
+            <div class="empty-report">Rendering matrix...</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/testing-matrix.js"></script>
+  </body>
+</html>

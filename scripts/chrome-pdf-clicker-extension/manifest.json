@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "PDF Link Clicker",
+  "version": "0.1.0",
+  "description": "Collects every PDF link on the current page and opens them in background tabs with one click.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "action": {
+    "default_title": "Open PDF links",
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "source": {
+    "pageCount": 1,
+    "language": "en-US",
+    "languageConfidence": 0.99,
+    "ocr": {
+      "mode": "required",
+      "status": "completed",
+      "languages": [
+        "eng",
+        "spa"
+      ],
+      "languageStrategy": "bilingual-fallback",
+      "languageHint": "und",
+      "attemptedPages": 1,
+      "appliedPages": 1,
+      "failedPages": 0,
+      "partialPages": 0,
+      "skippedPages": 0
+    }
+  },
+  "pages": [
+    {
+      "pageNumber": 1,
+      "language": "en-US",
+      "languageConfidence": 0.99,
+      "textBlocks": [
+        {
+          "text": "Accessibility Report",
+          "bbox": [
+            72,
+            54.737,
+            230.4,
+            22.327
+          ],
+          "fontSize": 22.327,
+          "fontName": "ocr",
+          "blockType": "",
+          "columnHint": null,
+          "textSource": "ocr"
+        },
+        {
+          "text": "This paragraph explains the report output.",
+          "bbox": [
+            72.24,
+            103.471,
+            221.52,
+            11.043
+          ],
+          "fontSize": 11.043,
+          "fontName": "ocr",
+          "blockType": "",
+          "columnHint": null,
+          "textSource": "ocr"
+        },
+        {
+          "text": "Right column note",
+          "bbox": [
+            330.96,
+            103.471,
+            95.28,
+            11.043
+          ],
+          "fontSize": 11.043,
+          "fontName": "ocr",
+          "blockType": "",
+          "columnHint": null,
+          "textSource": "ocr"
+        },
+        {
+          "text": "- First checklist item",
+          "bbox": [
+            72.48,
+            133.48,
+            104.64,
+            8.643
+          ],
+          "fontSize": 9.939,
+          "fontName": "ocr",
+          "blockType": "",
+          "columnHint": null,
+          "textSource": "ocr"
+        },
+        {
+          "text": "- Second checklist item",
+          "bbox": [
+            72.48,
+            153.406,
+            122.16,
+            8.883
+          ],
+          "fontSize": 10.179,
+          "fontName": "ocr",
+          "blockType": "",
+          "columnHint": null,
+          "textSource": "ocr"
+        }
+      ],
+      "ocr": {
+        "status": "applied",
+        "mergeStrategy": "replace-empty-page",
+        "trigger": {
+          "blockCount": 0,
+          "characterCount": 0,
+          "coverageRatio": 0
+        },
+        "selectedCandidate": {
+          "candidateName": "binary-300/sparse",
+          "profileName": "sparse",
+          "variantName": "binary-300",
+          "averageConfidence": 95.2,
+          "score": 0.808,
+          "consensusScore": 1,
+          "finalScore": 0.843
+        },
+        "errorMessages": []
+      }
+    }
+  ]
+}

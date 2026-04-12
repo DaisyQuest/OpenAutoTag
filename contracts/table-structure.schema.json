@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/table-structure.schema.json",
+  "title": "TableStructureMap",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "status",
+    "pdfPath",
+    "layoutPath",
+    "pageCount",
+    "pages",
+    "summary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "unavailable"
+      ]
+    },
+    "pdfPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "layoutPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pageCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "vectorSummary",
+          "tables"
+        ],
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "vectorSummary": {
+            "type": "object",
+            "required": [
+              "strokedSegmentCount",
+              "horizontalSegmentCount",
+              "verticalSegmentCount"
+            ],
+            "properties": {
+              "strokedSegmentCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "horizontalSegmentCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "verticalSegmentCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": true
+          },
+          "tables": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "source",
+                "bbox",
+                "rowCount",
+                "columnCount",
+                "confidence",
+                "mergeSignals",
+                "cells",
+                "assignedBlockIds"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source": {
+                  "type": "string",
+                  "const": "vector-grid"
+                },
+                "bbox": {
+                  "type": "array",
+                  "minItems": 4,
+                  "maxItems": 4,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ],
+                  "items": false
+                },
+                "rowCount": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "columnCount": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "assignedBlockIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "mergeSignals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "rowIndex",
+                      "columnIndex",
+                      "reason"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "colspan",
+                          "rowspan"
+                        ]
+                      },
+                      "rowIndex": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "columnIndex": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "cells": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "rowIndex",
+                      "columnIndex",
+                      "rowSpan",
+                      "columnSpan",
+                      "bbox",
+                      "assignedBlockIds"
+                    ],
+                    "properties": {
+                      "rowIndex": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "columnIndex": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "rowSpan": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "columnSpan": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "bbox": {
+                        "type": "array",
+                        "minItems": 4,
+                        "maxItems": 4,
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        ],
+                        "items": false
+                      },
+                      "assignedBlockIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "detectedTables",
+        "pagesWithTables",
+        "totalMergeSignals"
+      ],
+      "properties": {
+        "detectedTables": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pagesWithTables": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalMergeSignals": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

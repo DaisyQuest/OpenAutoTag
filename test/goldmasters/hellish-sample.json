@@ -1,0 +1,3187 @@
+{
+  "job": {
+    "status": "completed",
+    "stageSummary": {
+      "total": 10,
+      "completedStages": 10,
+      "failedStages": 0,
+      "skippedStages": 0,
+      "totalAttempts": 10,
+      "retryableFailures": 0
+    },
+    "stages": [
+      {
+        "key": "layout",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "sourceTextMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tableStructureMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "layoutEnriched",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "readingOrder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagBuilder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "pdfWriter",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagDeltaReport",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "validator",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      }
+    ]
+  },
+  "layout": {
+    "source": {
+      "pageCount": 3,
+      "language": "en-US",
+      "languageConfidence": 0.99,
+      "ocr": {
+        "mode": "auto",
+        "status": "skipped",
+        "languages": [
+          "eng"
+        ],
+        "languageStrategy": "detected-english",
+        "languageHint": "en-US",
+        "attemptedPages": 0,
+        "appliedPages": 0,
+        "failedPages": 0,
+        "partialPages": 0,
+        "skippedPages": 3
+      }
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "language": "en-US",
+        "languageConfidence": 0.839,
+        "textBlocks": [
+          {
+            "text": "Hell Matrix Report",
+            "bbox": [
+              72,
+              28,
+              188.254,
+              22
+            ],
+            "fontSize": 22,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- R alpha: area=pi*r^2.",
+            "bbox": [
+              454,
+              62,
+              120.012,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- L alpha: f(x)=x^2+1.",
+            "bbox": [
+              75,
+              91,
+              113.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- R beta: slope=dy/dx.",
+            "bbox": [
+              455,
+              97,
+              117.06,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- L beta: g(t)=sin(t)+3.",
+            "bbox": [
+              73,
+              126,
+              116.052,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- R gamma: integral[0,1]=0.5.",
+            "bbox": [
+              455,
+              133,
+              155.736,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- L gamma: h(n)=2*n+5.",
+            "bbox": [
+              72,
+              160,
+              127.392,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- R delta: matrix rank=2.",
+            "bbox": [
+              454,
+              169,
+              128.376,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- L delta: limit(k)=42.",
+            "bbox": [
+              70,
+              192,
+              109.032,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      },
+      {
+        "pageNumber": 2,
+        "language": "en-US",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Ruled Table Gauntlet",
+            "bbox": [
+              72,
+              26,
+              180.036,
+              18
+            ],
+            "fontSize": 18,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Weighted Revenue Matrix",
+            "bbox": [
+              220.817,
+              79,
+              170.366,
+              14
+            ],
+            "fontSize": 14,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Region",
+            "bbox": [
+              148.666,
+              107,
+              40.668,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Quarter One",
+            "bbox": [
+              299.49,
+              107,
+              70.02,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Quarter Two",
+            "bbox": [
+              436.16,
+              107,
+              70.68,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "North",
+            "bbox": [
+              154.33,
+              131,
+              29.34,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "120",
+            "bbox": [
+              324.492,
+              131,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "128",
+            "bbox": [
+              461.492,
+              131,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "South",
+            "bbox": [
+              153.322,
+              155,
+              31.356,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "098",
+            "bbox": [
+              324.492,
+              155,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "101",
+            "bbox": [
+              461.492,
+              155,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Delta",
+            "bbox": [
+              154.996,
+              179,
+              28.008,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "+22",
+            "bbox": [
+              324.324,
+              179,
+              20.352,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "+27",
+            "bbox": [
+              461.324,
+              179,
+              20.352,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Post-table theorem: this paragraph must stay outside the ruled grid.",
+            "bbox": [
+              72,
+              228,
+              358.164,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      },
+      {
+        "pageNumber": 3,
+        "language": "en-US",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Alignment Trap",
+            "bbox": [
+              72,
+              32,
+              132.012,
+              18
+            ],
+            "fontSize": 18,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "This page aligns prose like a table but intentionally lacks a header band.",
+            "bbox": [
+              72,
+              64,
+              382.86,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Composer",
+            "bbox": [
+              75,
+              105,
+              55.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Ada Lovelace",
+            "bbox": [
+              239,
+              105,
+              72.708,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Venue",
+            "bbox": [
+              92,
+              132,
+              34.692,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Albany Hall",
+            "bbox": [
+              268,
+              132,
+              60.684,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Duration",
+            "bbox": [
+              108,
+              157,
+              45.348,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "47 minutes",
+            "bbox": [
+              295,
+              157,
+              58.692,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Aligned prose must remain paragraph text instead of collapsing into a table.",
+            "bbox": [
+              72,
+              214,
+              400.86,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "1. Verify false table rejection.",
+            "bbox": [
+              72,
+              260,
+              154.068,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "2. Preserve ordered list semantics.",
+            "bbox": [
+              72,
+              284,
+              184.728,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      }
+    ]
+  },
+  "layoutEnriched": {
+    "pages": [
+      {
+        "pageNumber": 1,
+        "columns": 2,
+        "structureSignals": {
+          "tableCount": 0,
+          "vectorTableCount": 0,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Hell Matrix Report",
+            "blockType": "heading",
+            "headingLevel": 2,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- R alpha: area=pi*r^2.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- L alpha: f(x)=x^2+1.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- R beta: slope=dy/dx.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- L beta: g(t)=sin(t)+3.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- R gamma: integral[0,1]=0.5.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- L gamma: h(n)=2*n+5.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- R delta: matrix rank=2.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- L delta: limit(k)=42.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 1,
+          "vectorTableCount": 1,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 2
+        },
+        "textBlocks": [
+          {
+            "text": "Ruled Table Gauntlet",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Weighted Revenue Matrix",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 0,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 3
+          },
+          {
+            "text": "Region",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 1,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "Quarter One",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 1,
+            "tableColumn": 1,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "Quarter Two",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 1,
+            "tableColumn": 2,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "North",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 2,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "120",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 2,
+            "tableColumn": 1,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "128",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 2,
+            "tableColumn": 2,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "South",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 3,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "098",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 3,
+            "tableColumn": 1,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "101",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 3,
+            "tableColumn": 2,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "Delta",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 4,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "+22",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 4,
+            "tableColumn": 1,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "+27",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 4,
+            "tableColumn": 2,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "Post-table theorem: this paragraph must stay outside the ruled grid.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      },
+      {
+        "pageNumber": 3,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 0,
+          "vectorTableCount": 0,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Alignment Trap",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "This page aligns prose like a table but intentionally lacks a header band.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Composer",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Ada Lovelace",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Venue",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Albany Hall",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Duration",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "47 minutes",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Aligned prose must remain paragraph text instead of collapsing into a table.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "1. Verify false table rejection.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "2. Preserve ordered list semantics.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      }
+    ]
+  },
+  "semanticOrdered": {
+    "source": {
+      "language": "en-US",
+      "languageConfidence": 0.99
+    },
+    "nodes": [
+      {
+        "id": "n-1-1",
+        "role": "H2",
+        "text": "Hell Matrix Report",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          28,
+          188.254,
+          22
+        ],
+        "readingOrder": 0,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-2",
+        "role": "LI",
+        "text": "- R alpha: area=pi*r^2.",
+        "pageNumber": 1,
+        "bbox": [
+          454,
+          62,
+          120.012,
+          12
+        ],
+        "readingOrder": 5,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-3",
+        "role": "LI",
+        "text": "- L alpha: f(x)=x^2+1.",
+        "pageNumber": 1,
+        "bbox": [
+          75,
+          91,
+          113.016,
+          12
+        ],
+        "readingOrder": 1,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-4",
+        "role": "LI",
+        "text": "- R beta: slope=dy/dx.",
+        "pageNumber": 1,
+        "bbox": [
+          455,
+          97,
+          117.06,
+          12
+        ],
+        "readingOrder": 6,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-5",
+        "role": "LI",
+        "text": "- L beta: g(t)=sin(t)+3.",
+        "pageNumber": 1,
+        "bbox": [
+          73,
+          126,
+          116.052,
+          12
+        ],
+        "readingOrder": 2,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-6",
+        "role": "LI",
+        "text": "- R gamma: integral[0,1]=0.5.",
+        "pageNumber": 1,
+        "bbox": [
+          455,
+          133,
+          155.736,
+          12
+        ],
+        "readingOrder": 7,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-7",
+        "role": "LI",
+        "text": "- L gamma: h(n)=2*n+5.",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          160,
+          127.392,
+          12
+        ],
+        "readingOrder": 3,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-8",
+        "role": "LI",
+        "text": "- R delta: matrix rank=2.",
+        "pageNumber": 1,
+        "bbox": [
+          454,
+          169,
+          128.376,
+          12
+        ],
+        "readingOrder": 8,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-9",
+        "role": "LI",
+        "text": "- L delta: limit(k)=42.",
+        "pageNumber": 1,
+        "bbox": [
+          70,
+          192,
+          109.032,
+          12
+        ],
+        "readingOrder": 4,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-2-1",
+        "role": "P",
+        "text": "Ruled Table Gauntlet",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          26,
+          180.036,
+          18
+        ],
+        "readingOrder": 9,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-2-2",
+        "role": "TH",
+        "text": "Weighted Revenue Matrix",
+        "pageNumber": 2,
+        "bbox": [
+          220.817,
+          79,
+          170.366,
+          14
+        ],
+        "readingOrder": 10,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 0,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 3
+      },
+      {
+        "id": "n-2-3",
+        "role": "TH",
+        "text": "Region",
+        "pageNumber": 2,
+        "bbox": [
+          148.666,
+          107,
+          40.668,
+          12
+        ],
+        "readingOrder": 11,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 1,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-4",
+        "role": "TH",
+        "text": "Quarter One",
+        "pageNumber": 2,
+        "bbox": [
+          299.49,
+          107,
+          70.02,
+          12
+        ],
+        "readingOrder": 12,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 1,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-5",
+        "role": "TH",
+        "text": "Quarter Two",
+        "pageNumber": 2,
+        "bbox": [
+          436.16,
+          107,
+          70.68,
+          12
+        ],
+        "readingOrder": 13,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 1,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-6",
+        "role": "TD",
+        "text": "North",
+        "pageNumber": 2,
+        "bbox": [
+          154.33,
+          131,
+          29.34,
+          12
+        ],
+        "readingOrder": 14,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 2,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-7",
+        "role": "TD",
+        "text": "120",
+        "pageNumber": 2,
+        "bbox": [
+          324.492,
+          131,
+          20.016,
+          12
+        ],
+        "readingOrder": 15,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 2,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-8",
+        "role": "TD",
+        "text": "128",
+        "pageNumber": 2,
+        "bbox": [
+          461.492,
+          131,
+          20.016,
+          12
+        ],
+        "readingOrder": 16,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 2,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-9",
+        "role": "TD",
+        "text": "South",
+        "pageNumber": 2,
+        "bbox": [
+          153.322,
+          155,
+          31.356,
+          12
+        ],
+        "readingOrder": 17,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 3,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-10",
+        "role": "TD",
+        "text": "098",
+        "pageNumber": 2,
+        "bbox": [
+          324.492,
+          155,
+          20.016,
+          12
+        ],
+        "readingOrder": 18,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 3,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-11",
+        "role": "TD",
+        "text": "101",
+        "pageNumber": 2,
+        "bbox": [
+          461.492,
+          155,
+          20.016,
+          12
+        ],
+        "readingOrder": 19,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 3,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-12",
+        "role": "TD",
+        "text": "Delta",
+        "pageNumber": 2,
+        "bbox": [
+          154.996,
+          179,
+          28.008,
+          12
+        ],
+        "readingOrder": 20,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 4,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-13",
+        "role": "TD",
+        "text": "+22",
+        "pageNumber": 2,
+        "bbox": [
+          324.324,
+          179,
+          20.352,
+          12
+        ],
+        "readingOrder": 21,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 4,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-14",
+        "role": "TD",
+        "text": "+27",
+        "pageNumber": 2,
+        "bbox": [
+          461.324,
+          179,
+          20.352,
+          12
+        ],
+        "readingOrder": 22,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 4,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-15",
+        "role": "P",
+        "text": "Post-table theorem: this paragraph must stay outside the ruled grid.",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          228,
+          358.164,
+          12
+        ],
+        "readingOrder": 23,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-1",
+        "role": "P",
+        "text": "Alignment Trap",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          32,
+          132.012,
+          18
+        ],
+        "readingOrder": 24,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-2",
+        "role": "P",
+        "text": "This page aligns prose like a table but intentionally lacks a header band.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          64,
+          382.86,
+          12
+        ],
+        "readingOrder": 25,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-3",
+        "role": "P",
+        "text": "Composer",
+        "pageNumber": 3,
+        "bbox": [
+          75,
+          105,
+          55.344,
+          12
+        ],
+        "readingOrder": 26,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-4",
+        "role": "P",
+        "text": "Ada Lovelace",
+        "pageNumber": 3,
+        "bbox": [
+          239,
+          105,
+          72.708,
+          12
+        ],
+        "readingOrder": 27,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-5",
+        "role": "P",
+        "text": "Venue",
+        "pageNumber": 3,
+        "bbox": [
+          92,
+          132,
+          34.692,
+          12
+        ],
+        "readingOrder": 28,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-6",
+        "role": "P",
+        "text": "Albany Hall",
+        "pageNumber": 3,
+        "bbox": [
+          268,
+          132,
+          60.684,
+          12
+        ],
+        "readingOrder": 29,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-7",
+        "role": "P",
+        "text": "Duration",
+        "pageNumber": 3,
+        "bbox": [
+          108,
+          157,
+          45.348,
+          12
+        ],
+        "readingOrder": 30,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-8",
+        "role": "P",
+        "text": "47 minutes",
+        "pageNumber": 3,
+        "bbox": [
+          295,
+          157,
+          58.692,
+          12
+        ],
+        "readingOrder": 31,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-9",
+        "role": "P",
+        "text": "Aligned prose must remain paragraph text instead of collapsing into a table.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          214,
+          400.86,
+          12
+        ],
+        "readingOrder": 32,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-10",
+        "role": "LI",
+        "text": "1. Verify false table rejection.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          260,
+          154.068,
+          12
+        ],
+        "readingOrder": 33,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-11",
+        "role": "LI",
+        "text": "2. Preserve ordered list semantics.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          284,
+          184.728,
+          12
+        ],
+        "readingOrder": 34,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      }
+    ]
+  },
+  "tagging": {
+    "type": "Document",
+    "label": "",
+    "sourceNodeIds": [],
+    "rowSpan": null,
+    "columnSpan": null,
+    "tableSection": "",
+    "tableSource": "",
+    "children": [
+      {
+        "type": "Sect",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "H1",
+            "label": "Hell Matrix Report",
+            "sourceNodeIds": [
+              "n-1-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "L",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "LI",
+                "label": "- L alpha: f(x)=x^2+1.",
+                "sourceNodeIds": [
+                  "n-1-3"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- L beta: g(t)=sin(t)+3.",
+                "sourceNodeIds": [
+                  "n-1-5"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- L gamma: h(n)=2*n+5.",
+                "sourceNodeIds": [
+                  "n-1-7"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- L delta: limit(k)=42.",
+                "sourceNodeIds": [
+                  "n-1-9"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- R alpha: area=pi*r^2.",
+                "sourceNodeIds": [
+                  "n-1-2"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- R beta: slope=dy/dx.",
+                "sourceNodeIds": [
+                  "n-1-4"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- R gamma: integral[0,1]=0.5.",
+                "sourceNodeIds": [
+                  "n-1-6"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- R delta: matrix rank=2.",
+                "sourceNodeIds": [
+                  "n-1-8"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              }
+            ]
+          },
+          {
+            "type": "P",
+            "label": "Ruled Table Gauntlet",
+            "sourceNodeIds": [
+              "n-2-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "Table",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "THead",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TH",
+                        "label": "Weighted Revenue Matrix",
+                        "sourceNodeIds": [
+                          "n-2-2"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": 3,
+                        "tableSection": "head",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TH",
+                        "label": "Region",
+                        "sourceNodeIds": [
+                          "n-2-3"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Quarter One",
+                        "sourceNodeIds": [
+                          "n-2-4"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Quarter Two",
+                        "sourceNodeIds": [
+                          "n-2-5"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "TBody",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "North",
+                        "sourceNodeIds": [
+                          "n-2-6"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "120",
+                        "sourceNodeIds": [
+                          "n-2-7"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "128",
+                        "sourceNodeIds": [
+                          "n-2-8"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "South",
+                        "sourceNodeIds": [
+                          "n-2-9"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "098",
+                        "sourceNodeIds": [
+                          "n-2-10"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "101",
+                        "sourceNodeIds": [
+                          "n-2-11"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Delta",
+                        "sourceNodeIds": [
+                          "n-2-12"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "+22",
+                        "sourceNodeIds": [
+                          "n-2-13"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "+27",
+                        "sourceNodeIds": [
+                          "n-2-14"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "vector-grid",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "P",
+            "label": "Post-table theorem: this paragraph must stay outside the ruled grid.",
+            "sourceNodeIds": [
+              "n-2-15"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Alignment Trap",
+            "sourceNodeIds": [
+              "n-3-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "This page aligns prose like a table but intentionally lacks a header band.",
+            "sourceNodeIds": [
+              "n-3-2"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Composer",
+            "sourceNodeIds": [
+              "n-3-3"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Ada Lovelace",
+            "sourceNodeIds": [
+              "n-3-4"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Venue",
+            "sourceNodeIds": [
+              "n-3-5"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Albany Hall",
+            "sourceNodeIds": [
+              "n-3-6"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Duration",
+            "sourceNodeIds": [
+              "n-3-7"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "47 minutes",
+            "sourceNodeIds": [
+              "n-3-8"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Aligned prose must remain paragraph text instead of collapsing into a table.",
+            "sourceNodeIds": [
+              "n-3-9"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "L",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "LI",
+                "label": "1. Verify false table rejection.",
+                "sourceNodeIds": [
+                  "n-3-10"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "2. Preserve ordered list semantics.",
+                "sourceNodeIds": [
+                  "n-3-11"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "sourceTextMap": {
+    "summary": {
+      "totalRuns": 35,
+      "matchedBlocks": 35,
+      "unmatchedBlocks": 0,
+      "averageConfidence": 1
+    },
+    "matches": [
+      {
+        "blockId": "p1-b1",
+        "blockText": "Hell Matrix Report",
+        "runIds": [
+          "r-1-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b2",
+        "blockText": "- R alpha: area=pi*r^2.",
+        "runIds": [
+          "r-1-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b3",
+        "blockText": "- L alpha: f(x)=x^2+1.",
+        "runIds": [
+          "r-1-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b4",
+        "blockText": "- R beta: slope=dy/dx.",
+        "runIds": [
+          "r-1-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b5",
+        "blockText": "- L beta: g(t)=sin(t)+3.",
+        "runIds": [
+          "r-1-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b6",
+        "blockText": "- R gamma: integral[0,1]=0.5.",
+        "runIds": [
+          "r-1-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b7",
+        "blockText": "- L gamma: h(n)=2*n+5.",
+        "runIds": [
+          "r-1-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b8",
+        "blockText": "- R delta: matrix rank=2.",
+        "runIds": [
+          "r-1-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b9",
+        "blockText": "- L delta: limit(k)=42.",
+        "runIds": [
+          "r-1-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b1",
+        "blockText": "Ruled Table Gauntlet",
+        "runIds": [
+          "r-2-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b2",
+        "blockText": "Weighted Revenue Matrix",
+        "runIds": [
+          "r-2-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b3",
+        "blockText": "Region",
+        "runIds": [
+          "r-2-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b4",
+        "blockText": "Quarter One",
+        "runIds": [
+          "r-2-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b5",
+        "blockText": "Quarter Two",
+        "runIds": [
+          "r-2-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b6",
+        "blockText": "North",
+        "runIds": [
+          "r-2-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b7",
+        "blockText": "120",
+        "runIds": [
+          "r-2-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b8",
+        "blockText": "128",
+        "runIds": [
+          "r-2-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b9",
+        "blockText": "South",
+        "runIds": [
+          "r-2-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b10",
+        "blockText": "098",
+        "runIds": [
+          "r-2-10"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b11",
+        "blockText": "101",
+        "runIds": [
+          "r-2-11"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b12",
+        "blockText": "Delta",
+        "runIds": [
+          "r-2-12"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b13",
+        "blockText": "+22",
+        "runIds": [
+          "r-2-13"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b14",
+        "blockText": "+27",
+        "runIds": [
+          "r-2-14"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b15",
+        "blockText": "Post-table theorem: this paragraph must stay outside the ruled grid.",
+        "runIds": [
+          "r-2-15"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b1",
+        "blockText": "Alignment Trap",
+        "runIds": [
+          "r-3-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b2",
+        "blockText": "This page aligns prose like a table but intentionally lacks a header band.",
+        "runIds": [
+          "r-3-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b3",
+        "blockText": "Composer",
+        "runIds": [
+          "r-3-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b4",
+        "blockText": "Ada Lovelace",
+        "runIds": [
+          "r-3-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b5",
+        "blockText": "Venue",
+        "runIds": [
+          "r-3-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b6",
+        "blockText": "Albany Hall",
+        "runIds": [
+          "r-3-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b7",
+        "blockText": "Duration",
+        "runIds": [
+          "r-3-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b8",
+        "blockText": "47 minutes",
+        "runIds": [
+          "r-3-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b9",
+        "blockText": "Aligned prose must remain paragraph text instead of collapsing into a table.",
+        "runIds": [
+          "r-3-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b10",
+        "blockText": "1. Verify false table rejection.",
+        "runIds": [
+          "r-3-10"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b11",
+        "blockText": "2. Preserve ordered list semantics.",
+        "runIds": [
+          "r-3-11"
+        ],
+        "confidence": 1
+      }
+    ]
+  },
+  "tableStructureMap": {
+    "summary": {
+      "detectedTables": 1,
+      "pagesWithTables": 1,
+      "totalMergeSignals": 2
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      },
+      {
+        "pageNumber": 2,
+        "vectorSummary": {
+          "strokedSegmentCount": 13,
+          "horizontalSegmentCount": 6,
+          "verticalSegmentCount": 4
+        },
+        "tables": [
+          {
+            "id": "vector-table:2:1",
+            "bbox": [
+              72,
+              72,
+              468,
+              126
+            ],
+            "rowCount": 5,
+            "columnCount": 3,
+            "confidence": 0.969,
+            "mergeSignals": [
+              {
+                "kind": "colspan",
+                "rowIndex": 0,
+                "columnIndex": 0
+              },
+              {
+                "kind": "colspan",
+                "rowIndex": 0,
+                "columnIndex": 1
+              }
+            ],
+            "cells": [
+              {
+                "rowIndex": 0,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 3,
+                "bbox": [
+                  72,
+                  72,
+                  468,
+                  30
+                ],
+                "assignedBlockIds": [
+                  "p2-b2"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  72,
+                  102,
+                  194,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b3"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "columnIndex": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  266,
+                  102,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b4"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "columnIndex": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  403,
+                  102,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b5"
+                ]
+              },
+              {
+                "rowIndex": 2,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  72,
+                  126,
+                  194,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b6"
+                ]
+              },
+              {
+                "rowIndex": 2,
+                "columnIndex": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  266,
+                  126,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b7"
+                ]
+              },
+              {
+                "rowIndex": 2,
+                "columnIndex": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  403,
+                  126,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b8"
+                ]
+              },
+              {
+                "rowIndex": 3,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  72,
+                  150,
+                  194,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b9"
+                ]
+              },
+              {
+                "rowIndex": 3,
+                "columnIndex": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  266,
+                  150,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b10"
+                ]
+              },
+              {
+                "rowIndex": 3,
+                "columnIndex": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  403,
+                  150,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b11"
+                ]
+              },
+              {
+                "rowIndex": 4,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  72,
+                  174,
+                  194,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b12"
+                ]
+              },
+              {
+                "rowIndex": 4,
+                "columnIndex": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  266,
+                  174,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b13"
+                ]
+              },
+              {
+                "rowIndex": 4,
+                "columnIndex": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  403,
+                  174,
+                  137,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p2-b14"
+                ]
+              }
+            ],
+            "assignedBlockIds": [
+              "p2-b2",
+              "p2-b3",
+              "p2-b4",
+              "p2-b5",
+              "p2-b6",
+              "p2-b7",
+              "p2-b8",
+              "p2-b9",
+              "p2-b10",
+              "p2-b11",
+              "p2-b12",
+              "p2-b13",
+              "p2-b14"
+            ]
+          }
+        ]
+      },
+      {
+        "pageNumber": 3,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      }
+    ]
+  },
+  "writer": {
+    "status": "completed",
+    "nativeTaggingApplied": true,
+    "structureElementCount": 47,
+    "markedContentCount": 35,
+    "tableAttributeCount": 4,
+    "metadataApplied": true,
+    "language": "en-US",
+    "title": "Hell Matrix Report"
+  },
+  "tagDelta": {
+    "status": "completed",
+    "source": {
+      "hasStructTreeRoot": false,
+      "totalTypedNodes": 0,
+      "markedContentOperatorCount": 0,
+      "artifactMarkedContentCount": 0,
+      "tableAttributeNodeCount": 0
+    },
+    "tagged": {
+      "hasStructTreeRoot": true,
+      "totalTypedNodes": 47,
+      "markedContentOperatorCount": 38,
+      "artifactMarkedContentCount": 3,
+      "tableAttributeNodeCount": 4
+    },
+    "delta": {
+      "structTreeAdded": true,
+      "metadataAdded": true,
+      "markInfoAdded": true,
+      "markedFlagEnabled": true,
+      "totalTypedNodesDelta": 47,
+      "markedContentOperatorCountDelta": 38,
+      "artifactMarkedContentCountDelta": 3,
+      "tableAttributeNodeCountDelta": 4,
+      "imageXObjectCountDelta": 3
+    }
+  },
+  "validation": {
+    "status": "completed",
+    "isCompliant": true,
+    "profileName": "PDF/UA-1 validation profile",
+    "engine": {
+      "name": "veraPDF",
+      "version": "1.28.2"
+    },
+    "findingCodes": [],
+    "metadataDiagnostics": {
+      "infoMatchesXmp": true,
+      "dcTitleDetected": true,
+      "pdfUaIdentificationDetected": true,
+      "suspectedVeraPdfMetadataMismatch": true
+    }
+  }
+}

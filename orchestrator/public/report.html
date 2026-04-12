@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Report Viewer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="report">
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <header class="hero report-hero">
+        <div class="report-hero-copy">
+          <p class="eyebrow">On-Demand Browser Reports</p>
+          <h1 id="report-title">Loading report…</h1>
+          <p id="report-subtitle" class="lede">
+            Fetching the latest job artifacts and building a browser-native report view.
+          </p>
+        </div>
+        <div class="report-hero-actions">
+          <a class="ghost-link" href="/">Back to batch dashboard</a>
+          <div id="report-job-status" class="hero-status-card">
+            <span class="summary-label">Job status</span>
+            <strong>Loading…</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="report-layout">
+        <aside class="panel report-sidebar">
+          <div class="section-heading">
+            <h2>Artifacts</h2>
+            <span id="report-artifact-count">0 available</span>
+          </div>
+          <nav id="report-tabs" class="report-tabs" aria-label="Report artifacts"></nav>
+          <div id="report-links" class="report-links"></div>
+        </aside>
+
+        <section class="panel report-main">
+          <div id="report-summary" class="report-summary-grid">
+            <article class="summary-card">
+              <span class="summary-label">State</span>
+              <strong>Loading…</strong>
+            </article>
+          </div>
+          <div id="report-content" class="report-content">
+            <div class="empty-report">Rendering report…</div>
+          </div>
+          <details class="raw-json-panel">
+            <summary>Raw JSON</summary>
+            <pre id="report-raw-json" class="code-block"></pre>
+          </details>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/report.js"></script>
+  </body>
+</html>

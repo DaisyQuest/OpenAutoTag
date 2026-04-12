@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/redaction-report.schema.json",
+  "title": "RedactionReport",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "workloadId",
+    "status",
+    "sourcePdf",
+    "outputPdf",
+    "summary",
+    "matches"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "workloadId": {
+      "type": "string",
+      "enum": [
+        "ssn-redaction",
+        "tag-and-ssn-redact"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed"
+      ]
+    },
+    "sourcePdf": {
+      "type": "string"
+    },
+    "outputPdf": {
+      "type": "string"
+    },
+    "accessibilityTreeRedacted": {
+      "type": "boolean"
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "pagesProcessed",
+        "candidateMatches",
+        "redactedMatches",
+        "pagesRedacted",
+        "outputMode"
+      ],
+      "properties": {
+        "pagesProcessed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidateMatches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "redactedMatches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pagesRedacted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outputMode": {
+          "type": "string",
+          "enum": [
+            "passthrough-copy",
+            "raster-redaction",
+            "tagged-raster-copy",
+            "tagged-raster-redaction"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "matchId",
+          "pageNumber",
+          "sourceBlockId",
+          "maskedText",
+          "bbox"
+        ],
+        "properties": {
+          "matchId": {
+            "type": "string"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceBlockId": {
+            "type": "string"
+          },
+          "sourceNodeId": {
+            "type": "string"
+          },
+          "maskedText": {
+            "type": "string"
+          },
+          "bbox": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

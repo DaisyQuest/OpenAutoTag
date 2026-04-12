@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Link Clicker</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <p class="eyebrow">Chrome Extension</p>
+      <h1>PDF Link Clicker</h1>
+      <p class="lede">
+        Scan the active page, find every PDF link, and launch each one in a background tab.
+      </p>
+
+      <button id="run-button" type="button">Open PDF Links</button>
+
+      <section class="status-card">
+        <h2>Status</h2>
+        <p id="status-text">Ready.</p>
+      </section>
+
+      <section class="results-card">
+        <div class="results-header">
+          <h2>Links</h2>
+          <span id="result-count">0</span>
+        </div>
+        <ol id="result-list"></ol>
+      </section>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
