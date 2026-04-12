@@ -114,6 +114,24 @@ export function createJobQueue({ processor, outputRoot = getRuntimeSubdir("jobs"
     },
     list() {
       return [...jobs.values()].map(clone);
+    },
+    stats() {
+      const summary = {
+        total: jobs.size,
+        queued: 0,
+        running: 0,
+        completed: 0,
+        failed: 0,
+        pendingQueueDepth: queue.length
+      };
+
+      for (const job of jobs.values()) {
+        if (summary[job.status] !== undefined) {
+          summary[job.status] += 1;
+        }
+      }
+
+      return clone(summary);
     }
   };
 }

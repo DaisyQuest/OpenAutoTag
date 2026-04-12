@@ -7,9 +7,25 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body data-view="dashboard">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="page-shell">
       <div class="orb orb-a"></div>
       <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">BuildEverything</a>
+        <div class="topbar-links">
+          <a class="topbar-link is-active" href="/">Workspace</a>
+          <a class="topbar-link" href="/admin/keys.html">API Keys</a>
+          <a class="topbar-link" href="/admin/system.html">System</a>
+          <a class="topbar-link" href="/admin/queue.html">Queue</a>
+          <a class="topbar-link" href="/admin/history.html">History</a>
+        </div>
+        <div class="topbar-actions">
+          <span id="session-pill" class="session-pill">Loading access</span>
+          <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+        </div>
+      </nav>
 
       <header class="hero hero-dashboard">
         <div class="hero-grid">
@@ -21,6 +37,10 @@
               workload selection, live batch state, report signals, and artifact access in one tabular workspace.
             </p>
             <div class="hero-link-row">
+              <a class="ghost-link" href="/admin/keys.html">Manage API keys</a>
+              <a class="ghost-link" href="/admin/system.html">System monitor</a>
+              <a class="ghost-link" href="/admin/queue.html">Queue monitor</a>
+              <a class="ghost-link" href="/admin/history.html">Job history</a>
               <a class="ghost-link" href="/testing-matrix.html">Testing Matrix</a>
             </div>
             <div class="hero-step-grid" aria-label="Dashboard workflow">
@@ -43,6 +63,34 @@
           </div>
 
           <aside class="hero-command">
+            <section class="auth-panel" aria-labelledby="auth-title">
+              <div class="surface-header auth-panel-header">
+                <div>
+                  <p class="eyebrow surface-eyebrow">Access</p>
+                  <h2 id="auth-title">Unlock the workspace</h2>
+                </div>
+                <span id="auth-caption" class="surface-caption">Checking mode</span>
+              </div>
+              <p id="auth-copy" class="section-copy">
+                Private mode accepts an API key for workload actions, and an admin key also unlocks the workspace.
+              </p>
+              <form id="auth-form" class="auth-form">
+                <label class="field-stack" for="auth-key">
+                  <span class="field-label">Access key</span>
+                  <input
+                    id="auth-key"
+                    class="url-input auth-input"
+                    type="password"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="Paste an API key or admin key"
+                  />
+                </label>
+                <button id="auth-submit" class="action-button" type="submit">Unlock workspace</button>
+              </form>
+              <p id="auth-message" class="message-line" aria-live="polite">Checking access requirements.</p>
+            </section>
+
             <div class="hero-stat-grid">
               <article class="summary-card">
                 <span class="summary-label">Queued PDFs</span>
@@ -135,7 +183,7 @@
         </div>
       </header>
 
-      <main class="dashboard">
+      <main id="main-content" class="dashboard">
         <section class="panel queue-panel">
           <div class="section-heading">
             <div class="heading-stack">

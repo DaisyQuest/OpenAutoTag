@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="buildeverything-servlet" default="war" basedir=".">
+    <property name="javac.release" value="21"/>
+    <property name="servlet.api.version" value="6.0.0"/>
+    <property name="jackson.version" value="2.18.3"/>
+    <property name="jetty.version" value="12.0.16"/>
+    <property name="slf4j.version" value="2.0.16"/>
+    <property name="junit.platform.version" value="1.11.4"/>
+
+    <property name="repo.root" location=".."/>
+    <property name="src.main.java.dir" location="src/main/java"/>
+    <property name="src.test.java.dir" location="src/test/java"/>
+    <property name="src.webxml" location="src/main/webapp/WEB-INF/web.xml"/>
+    <property name="build.dir" location="build"/>
+    <property name="classes.main.dir" location="${build.dir}/classes/main"/>
+    <property name="classes.test.dir" location="${build.dir}/classes/test"/>
+    <property name="generated.resources.dir" location="${build.dir}/generated-resources/main/public"/>
+    <property name="dist.dir" location="${build.dir}/dist"/>
+    <property name="dependency.copy.dir" location="${build.dir}/dependencies"/>
+    <property name="tools.dir" location="${build.dir}/tools"/>
+    <property name="maven.ant.tasks.version" value="2.1.3"/>
+
+    <target name="bootstrap-maven-ant-tasks">
+        <mkdir dir="${tools.dir}"/>
+        <get
+            src="https://repo.maven.apache.org/maven2/org/apache/maven/maven-ant-tasks/${maven.ant.tasks.version}/maven-ant-tasks-${maven.ant.tasks.version}.jar"
+            dest="${tools.dir}/maven-ant-tasks-${maven.ant.tasks.version}.jar"
+            skipexisting="true"/>
+        <path id="maven.ant.tasks.classpath">
+            <fileset dir="${tools.dir}" includes="maven-ant-tasks-*.jar"/>
+        </path>
+        <taskdef
+            resource="org/apache/maven/artifact/ant/antlib.xml"
+            uri="antlib:org.apache.maven.artifact.ant"
+            classpathref="maven.ant.tasks.classpath"/>
+    </target>
+
+    <target name="resolve-dependencies" depends="bootstrap-maven-ant-tasks">
+        <mkdir dir="${dependency.copy.dir}"/>
+
+        <artifact:dependencies pathId="jackson.path" filesetId="jackson.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-databind" version="${jackson.version}"/>
+        </artifact:dependencies>
+
+        <artifact:dependencies pathId="servlet.path" filesetId="servlet.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <dependency groupId="jakarta.servlet" artifactId="jakarta.servlet-api" version="${servlet.api.version}"/>
+        </artifact:dependencies>
+
+        <artifact:dependencies pathId="jetty.path" filesetId="jetty.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <dependency groupId="org.eclipse.jetty.ee10" artifactId="jetty-ee10-servlet" version="${jetty.version}"/>
+            <dependency groupId="org.slf4j" artifactId="slf4j-simple" version="${slf4j.version}"/>
+        </artifact:dependencies>
+
+        <artifact:dependencies pathId="junit.path" filesetId="junit.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <dependency groupId="org.junit.platform" artifactId="junit-platform-console-standalone" version="${junit.platform.version}"/>
+        </artifact:dependencies>
+
+        <path id="main.compile.path">
+            <path refid="jackson.path"/>
+            <path refid="servlet.path"/>
+            <path refid="jetty.path"/>
+        </path>
+
+        <path id="test.compile.path">
+            <path refid="main.compile.path"/>
+            <pathelement location="${classes.main.dir}"/>
+            <path refid="junit.path"/>
+        </path>
+    </target>
+
+    <target name="download-dependencies" depends="resolve-dependencies">
+        <mkdir dir="${dependency.copy.dir}/war"/>
+        <mkdir dir="${dependency.copy.dir}/standalone"/>
+        <mkdir dir="${dependency.copy.dir}/test"/>
+
+        <copy todir="${dependency.copy.dir}/war">
+            <fileset refid="jackson.files"/>
+        </copy>
+        <copy todir="${dependency.copy.dir}/standalone">
+            <fileset refid="jackson.files"/>
+            <fileset refid="servlet.files"/>
+            <fileset refid="jetty.files"/>
+        </copy>
+        <copy todir="${dependency.copy.dir}/test">
+            <fileset refid="jackson.files"/>
+            <fileset refid="servlet.files"/>
+            <fileset refid="jetty.files"/>
+            <fileset refid="junit.files"/>
+        </copy>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="stage-public-assets">
+        <mkdir dir="${generated.resources.dir}"/>
+        <copy todir="${generated.resources.dir}">
+            <fileset dir="${repo.root}/orchestrator/public"/>
+        </copy>
+    </target>
+
+    <target name="compile" depends="resolve-dependencies,stage-public-assets">
+        <mkdir dir="${classes.main.dir}"/>
+        <javac
+            srcdir="${src.main.java.dir}"
+            destdir="${classes.main.dir}"
+            includeantruntime="false"
+            source="${javac.release}"
+            target="${javac.release}"
+            encoding="UTF-8">
+            <classpath refid="main.compile.path"/>
+        </javac>
+        <copy todir="${classes.main.dir}">
+            <fileset dir="${build.dir}/generated-resources/main"/>
+        </copy>
+    </target>
+
+    <target name="compile-tests" depends="compile">
+        <mkdir dir="${classes.test.dir}"/>
+        <javac
+            srcdir="${src.test.java.dir}"
+            destdir="${classes.test.dir}"
+            includeantruntime="false"
+            source="${javac.release}"
+            target="${javac.release}"
+            encoding="UTF-8">
+            <classpath refid="test.compile.path"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="compile-tests">
+        <java classname="org.junit.platform.console.ConsoleLauncher" fork="true" failonerror="true">
+            <classpath>
+                <path refid="test.compile.path"/>
+                <pathelement location="${classes.test.dir}"/>
+            </classpath>
+            <sysproperty key="buildeverything.repoRoot" value="${repo.root}"/>
+            <arg value="execute"/>
+            <arg value="--scan-classpath"/>
+            <arg value="${classes.main.dir}"/>
+            <arg value="--scan-classpath"/>
+            <arg value="${classes.test.dir}"/>
+        </java>
+    </target>
+
+    <target name="war" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${build.dir}/war-lib"/>
+        <copy todir="${build.dir}/war-lib">
+            <fileset refid="jackson.files"/>
+        </copy>
+
+        <war destfile="${dist.dir}/buildeverything-servlet.war" webxml="${src.webxml}">
+            <classes dir="${classes.main.dir}"/>
+            <lib dir="${build.dir}/war-lib"/>
+        </war>
+    </target>
+
+    <target name="run-standalone" depends="compile">
+        <java classname="buildeverything.servlet.BuildEverythingServerLauncher" fork="true" failonerror="true">
+            <classpath>
+                <path refid="main.compile.path"/>
+                <pathelement location="${classes.main.dir}"/>
+            </classpath>
+            <sysproperty key="buildeverything.repoRoot" value="${repo.root}"/>
+        </java>
+    </target>
+</project>

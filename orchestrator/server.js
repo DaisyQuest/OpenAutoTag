@@ -3,12 +3,14 @@ import dns from "node:dns/promises";
 import { createWriteStream } from "node:fs";
 import http from "node:http";
 import net from "node:net";
+import os from "node:os";
 import path from "node:path";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../scripts/runtime-paths.js";
+import { createEnvironmentAuthController } from "./auth-controller.js";
 import { createJobQueue } from "./job-queue.js";
 import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } from "./workloads/index.js";
 
@@ -24,6 +26,18 @@ const DEFAULT_REMOTE_DOWNLOAD_POLICY = Object.freeze({
   probeBytes: 1024,
   timeoutMs: 15000
 });
+const DEFAULT_JSON_BODY_LIMIT = 1024 * 1024;
+const DEFAULT_TEXT_BODY_LIMIT = 16 * 1024;
+const BASE_SECURITY_HEADERS = Object.freeze({
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Resource-Policy": "same-origin",
+  "Content-Security-Policy":
+    "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; img-src 'self' data: blob:; object-src 'none'; script-src 'self'; style-src 'self'; form-action 'self'"
+});
 
 const contentTypes = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -33,11 +47,26 @@ const contentTypes = new Map([
   [".pdf", "application/pdf"]
 ]);
 
-async function readJsonBody(request) {
+function buildResponseHeaders(headers = {}) {
+  return {
+    ...BASE_SECURITY_HEADERS,
+    ...headers
+  };
+}
+
+async function readJsonBody(request, { maxBytes = DEFAULT_JSON_BODY_LIMIT } = {}) {
   const chunks = [];
+  let totalBytes = 0;
 
   for await (const chunk of request) {
-    chunks.push(chunk);
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buffer.length;
+
+    if (totalBytes > maxBytes) {
+      throw createHttpError(413, `Request body exceeded the ${maxBytes} byte limit.`);
+    }
+
+    chunks.push(buffer);
   }
 
   const body = Buffer.concat(chunks).toString("utf8");
@@ -70,13 +99,45 @@ async function readFormData(request) {
   return requestLike.formData();
 }
 
-function writeJson(response, statusCode, payload) {
-  response.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
+async function readTextBody(request, { maxBytes = DEFAULT_TEXT_BODY_LIMIT } = {}) {
+  const chunks = [];
+  let totalBytes = 0;
+
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buffer.length;
+
+    if (totalBytes > maxBytes) {
+      throw createHttpError(413, `Request body exceeded the ${maxBytes} byte limit.`);
+    }
+
+    chunks.push(buffer);
+  }
+
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+function writeJson(response, statusCode, payload, headers = {}) {
+  response.writeHead(
+    statusCode,
+    buildResponseHeaders({
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      ...headers
+    })
+  );
   response.end(JSON.stringify(payload, null, 2));
 }
 
-function writeText(response, statusCode, text, contentType = "text/plain; charset=utf-8") {
-  response.writeHead(statusCode, { "Content-Type": contentType });
+function writeText(response, statusCode, text, contentType = "text/plain; charset=utf-8", headers = {}) {
+  response.writeHead(
+    statusCode,
+    buildResponseHeaders({
+      "Content-Type": contentType,
+      "Cache-Control": "no-store",
+      ...headers
+    })
+  );
   response.end(text);
 }
 
@@ -88,6 +149,14 @@ function createHttpError(statusCode, message) {
 
 function getContentType(filePath) {
   return contentTypes.get(path.extname(filePath).toLowerCase()) || "application/octet-stream";
+}
+
+function getCacheControl(contentType) {
+  if (contentType.startsWith("text/html") || contentType.includes("json")) {
+    return "no-store";
+  }
+
+  return "public, max-age=300";
 }
 
 function createAbortSignal(timeoutMs) {
@@ -524,7 +593,14 @@ function resolvePublicAsset(urlPath) {
 async function serveStaticAsset(response, assetPath) {
   try {
     const body = await readFile(assetPath);
-    response.writeHead(200, { "Content-Type": getContentType(assetPath) });
+    const contentType = getContentType(assetPath);
+    response.writeHead(
+      200,
+      buildResponseHeaders({
+        "Content-Type": contentType,
+        "Cache-Control": getCacheControl(contentType)
+      })
+    );
     response.end(body);
     return true;
   } catch {
@@ -618,6 +694,84 @@ async function buildJobResponse(jobId, job) {
     summary: workloadSummary.summary,
     validation: workloadSummary.validation,
     artifactLinks: buildArtifactLinks(jobId, job)
+  };
+}
+
+async function buildJobList(queue) {
+  const jobs = queue.list().sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  return Promise.all(
+    jobs.map(async (job) => ({
+      ...(await buildJobResponse(job.jobId, job)),
+      hasArtifacts: Object.keys(job?.artifacts || {}).length > 0
+    }))
+  );
+}
+
+async function buildQueueSnapshot(queue, batches) {
+  const [jobs, batchList] = await Promise.all([buildJobList(queue), batches.list()]);
+
+  return {
+    generatedAt: new Date().toISOString(),
+    queue: queue.stats(),
+    totalBatches: batchList.length,
+    activeJobs: jobs.filter((job) => job.status === "queued" || job.status === "running"),
+    recentJobs: jobs.slice(0, 24),
+    batches: batchList.slice(0, 12)
+  };
+}
+
+async function buildHistorySnapshot(queue) {
+  const jobs = await buildJobList(queue);
+  const jobsByStatus = jobs.reduce(
+    (summary, job) => {
+      summary.total += 1;
+      summary[job.status] = (summary[job.status] || 0) + 1;
+      return summary;
+    },
+    {
+      total: 0,
+      queued: 0,
+      running: 0,
+      completed: 0,
+      failed: 0
+    }
+  );
+
+  return {
+    generatedAt: new Date().toISOString(),
+    summary: jobsByStatus,
+    jobs
+  };
+}
+
+async function buildSystemSnapshot({ queue, batches, auth, uploadRoot }) {
+  await mkdir(runtimeRoot, { recursive: true });
+  const [authSnapshot, queueSnapshot] = await Promise.all([auth.getManagementSnapshot(), buildQueueSnapshot(queue, batches)]);
+  const memory = process.memoryUsage();
+
+  return {
+    generatedAt: new Date().toISOString(),
+    process: {
+      pid: process.pid,
+      uptimeSeconds: Math.round(process.uptime()),
+      platform: process.platform,
+      arch: process.arch,
+      nodeVersion: process.version,
+      cpuCount: os.cpus().length,
+      loadAverage: os.loadavg(),
+      memory
+    },
+    runtime: {
+      root: runtimeRoot,
+      jobsRoot: getRuntimeSubdir("jobs", { repoRoot }),
+      uploadRoot,
+      home: process.env.HOME || null,
+      azureAppService: isAzureAppServiceRuntime(),
+      runFromPackage: process.env.WEBSITE_RUN_FROM_PACKAGE || null
+    },
+    auth: authSnapshot,
+    queue: queueSnapshot.queue,
+    batchCount: queueSnapshot.totalBatches
   };
 }
 
@@ -739,6 +893,10 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
     async get(batchId) {
       const batch = batches.get(batchId);
       return batch ? buildBatchSnapshot(batch) : null;
+    },
+    async list() {
+      const snapshots = await Promise.all([...batches.values()].map((batch) => buildBatchSnapshot(batch)));
+      return snapshots.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
     }
   };
 }
@@ -746,22 +904,50 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
 export function createAppServer({
   queue,
   uploadRoot = getRuntimeSubdir("uploads", { repoRoot }),
-  remoteDownloadPolicy = DEFAULT_REMOTE_DOWNLOAD_POLICY
+  remoteDownloadPolicy = DEFAULT_REMOTE_DOWNLOAD_POLICY,
+  auth = createEnvironmentAuthController({ runtimeRoot })
 }) {
   const batches = createBatchRegistry({ queue, uploadRoot });
   const remoteDownloadRoot = path.join(uploadRoot, "remote");
+
+  async function authenticate(request, policy = {}) {
+    return auth.requireAccess(request, policy);
+  }
 
   return http.createServer(async (request, response) => {
     try {
       const url = new URL(request.url, "http://localhost");
 
       if (request.method === "GET" && url.pathname === "/favicon.ico") {
-        response.writeHead(204);
+        response.writeHead(204, buildResponseHeaders({ "Cache-Control": "public, max-age=300" }));
         response.end();
         return;
       }
 
+      if (request.method === "GET" && url.pathname === "/auth/config") {
+        writeJson(response, 200, auth.getClientConfig());
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/auth/access") {
+        const access = await auth.describeAccess(request);
+        const ok = access.publicMode || access.apiAuthorized || access.adminAuthorized;
+
+        writeJson(response, ok ? 200 : 401, {
+          ok,
+          publicMode: access.publicMode,
+          access: {
+            api: Boolean(access.apiAuthorized || access.adminAuthorized),
+            admin: Boolean(access.adminAuthorized),
+            mode: access.mode
+          },
+          headers: auth.headers
+        });
+        return;
+      }
+
       if (request.method === "GET" && url.pathname === "/health") {
+        await authenticate(request, { admin: true });
         await mkdir(runtimeRoot, { recursive: true });
         writeJson(response, 200, {
           ok: true,
@@ -778,11 +964,13 @@ export function createAppServer({
       }
 
       if (request.method === "GET" && url.pathname === "/workloads") {
+        await authenticate(request, { api: true });
         writeJson(response, 200, { workloads: listWorkloads() });
         return;
       }
 
       if (request.method === "POST" && url.pathname === "/process-pdf") {
+        await authenticate(request, { api: true });
         const body = await readJsonBody(request);
         if (!body.filePath) {
           writeJson(response, 400, { error: "filePath is required" });
@@ -805,6 +993,7 @@ export function createAppServer({
       }
 
       if (request.method === "POST" && url.pathname === "/process-pdf-url") {
+        await authenticate(request, { api: true });
         const body = await readJsonBody(request);
         if (!body.fileUrl) {
           writeJson(response, 400, { error: "fileUrl is required" });
@@ -835,6 +1024,7 @@ export function createAppServer({
       }
 
       if (request.method === "POST" && url.pathname === "/process-pdf-upload") {
+        await authenticate(request, { api: true });
         const formData = await readFormData(request);
         const files = formData
           .getAll("files")
@@ -860,6 +1050,7 @@ export function createAppServer({
 
       const artifactMatch = url.pathname.match(/^\/jobs\/([^/]+)\/artifacts\/([^/]+)$/);
       if (request.method === "GET" && artifactMatch) {
+        await authenticate(request, { api: true });
         const [, jobId, artifactName] = artifactMatch;
         const job = queue.get(jobId);
         const artifactPath = job?.artifacts?.[artifactName];
@@ -870,16 +1061,21 @@ export function createAppServer({
         }
 
         const body = await readFile(artifactPath);
-        response.writeHead(200, {
-          "Content-Type": getContentType(artifactPath),
-          "Content-Disposition": `attachment; filename="${path.basename(artifactPath)}"`
-        });
+        response.writeHead(
+          200,
+          buildResponseHeaders({
+            "Content-Type": getContentType(artifactPath),
+            "Content-Disposition": `attachment; filename="${path.basename(artifactPath)}"`,
+            "Cache-Control": "no-store"
+          })
+        );
         response.end(body);
         return;
       }
 
       const batchMatch = url.pathname.match(/^\/batches\/([^/]+)$/);
       if (request.method === "GET" && batchMatch) {
+        await authenticate(request, { api: true });
         const batch = await batches.get(batchMatch[1]);
         if (!batch) {
           writeJson(response, 404, { error: "Batch not found" });
@@ -892,6 +1088,7 @@ export function createAppServer({
 
       const jobMatch = url.pathname.match(/^\/jobs\/([^/]+)$/);
       if (request.method === "GET" && jobMatch) {
+        await authenticate(request, { api: true });
         const job = queue.get(jobMatch[1]);
         if (!job) {
           writeJson(response, 404, { error: "Job not found" });
@@ -899,6 +1096,50 @@ export function createAppServer({
         }
 
         writeJson(response, 200, await buildJobResponse(jobMatch[1], job));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/admin/system") {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, await buildSystemSnapshot({ queue, batches, auth, uploadRoot }));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/admin/queue") {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, await buildQueueSnapshot(queue, batches));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/admin/history") {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, await buildHistorySnapshot(queue));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/admin/api-keys") {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, await auth.getManagementSnapshot());
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/admin/api-keys") {
+        await authenticate(request, { admin: true });
+        const body = await readJsonBody(request);
+        const created = await auth.createManagedKey({
+          label: body.label,
+          description: body.description
+        });
+        writeJson(response, 201, created);
+        return;
+      }
+
+      const apiKeyMatch = url.pathname.match(/^\/admin\/api-keys\/([^/]+)$/);
+      if (request.method === "DELETE" && apiKeyMatch) {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, {
+          record: await auth.revokeManagedKey(apiKeyMatch[1])
+        });
         return;
       }
 

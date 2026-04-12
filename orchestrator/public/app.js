@@ -5,6 +5,17 @@ import {
   formatStatus,
   renderSummaryCards
 } from "./report-renderers.js";
+import {
+  clearStoredKeys,
+  downloadWithAuth,
+  fetchJson,
+  fetchWithAuth,
+  formatTimestamp,
+  getSessionAccess,
+  loadAuthConfig,
+  sanitizeStatusToken,
+  verifyAndStoreAccess
+} from "./auth-client.js";
 
 const fallbackWorkloads = [
   {
@@ -36,12 +47,21 @@ const state = {
   workloads: [...fallbackWorkloads],
   previewSelectionByJob: Object.create(null),
   previewCache: new Map(),
-  pollHandle: null
+  pollHandle: null,
+  authConfig: null
 };
 
 const queuedCount = document.querySelector("#queued-count");
 const queuedSize = document.querySelector("#queued-size");
 const batchState = document.querySelector("#batch-state");
+const sessionPill = document.querySelector("#session-pill");
+const clearSessionButton = document.querySelector("#clear-session");
+const authCaption = document.querySelector("#auth-caption");
+const authCopy = document.querySelector("#auth-copy");
+const authForm = document.querySelector("#auth-form");
+const authKeyInput = document.querySelector("#auth-key");
+const authSubmitButton = document.querySelector("#auth-submit");
+const authMessage = document.querySelector("#auth-message");
 const workloadCaption = document.querySelector("#workload-caption");
 const workloadList = document.querySelector("#workload-list");
 const dropzone = document.querySelector("#dropzone");
@@ -58,6 +78,66 @@ const batchCaption = document.querySelector("#batch-caption");
 const batchOverview = document.querySelector("#batch-overview");
 const resultsBody = document.querySelector("#results-body");
 const detailPanel = document.querySelector("#detail-panel");
+
+function hasWorkspaceAccess() {
+  return Boolean(state.authConfig?.publicMode || getSessionAccess().api);
+}
+
+function getAccessTone() {
+  const access = getSessionAccess();
+  if (state.authConfig?.publicMode) {
+    return { label: "Public mode", description: "This workspace is open. Protected headers are not required." };
+  }
+
+  if (access.admin) {
+    return { label: "Admin session", description: "Admin access is active in this tab and can operate the workspace." };
+  }
+
+  if (access.api) {
+    return { label: "API session", description: "An API key is active in this tab for workload and artifact access." };
+  }
+
+  return { label: "Locked", description: "Enter an API key or admin key to use protected workload actions." };
+}
+
+function setAuthMessage(message) {
+  authMessage.textContent = message;
+}
+
+function renderSessionChrome() {
+  const tone = getAccessTone();
+  sessionPill.textContent = tone.label;
+  authCaption.textContent = tone.label;
+  authCopy.textContent = tone.description;
+
+  const isPublic = Boolean(state.authConfig?.publicMode);
+  authForm.hidden = isPublic;
+  authKeyInput.disabled = isPublic;
+  authSubmitButton.disabled = isPublic;
+  clearSessionButton.disabled = isPublic && !getSessionAccess().api && !getSessionAccess().admin;
+}
+
+function updateActionAvailability() {
+  const locked = !hasWorkspaceAccess();
+  const interactiveNodes = [
+    startBatchButton,
+    startUrlJobButton,
+    filePicker,
+    directoryPicker,
+    urlInput
+  ];
+
+  for (const node of interactiveNodes) {
+    node.disabled = locked;
+  }
+
+  dropzone.setAttribute("aria-disabled", locked ? "true" : "false");
+  dropzone.classList.toggle("is-disabled", locked);
+
+  if (locked) {
+    workloadCaption.textContent = "Unlock the workspace to load workload definitions.";
+  }
+}
 
 function getSelectedWorkload() {
   return state.workloads.find((workload) => workload.id === state.selectedWorkloadId) || state.workloads[0];
@@ -110,18 +190,6 @@ function formatBytes(bytes) {
   return `${scaled.toFixed(scaled >= 10 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
 }
 
-function formatTimestamp(value) {
-  if (!value) {
-    return "n/a";
-  }
-
-  try {
-    return new Date(value).toLocaleString();
-  } catch {
-    return value;
-  }
-}
-
 function normalizeSignalList(summary) {
   return Array.isArray(summary?.signals) ? summary.signals.filter(Boolean).slice(0, 6) : [];
 }
@@ -135,10 +203,6 @@ function summarizeSelectionQueue() {
     },
     { count: 0, bytes: 0 }
   );
-}
-
-function sanitizeStatusToken(value) {
-  return String(value || "unknown").toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
 }
 
 function statusToneForSummary(summary, status) {
@@ -216,6 +280,16 @@ function updateRunButton() {
 }
 
 function renderWorkloads() {
+  if (!hasWorkspaceAccess()) {
+    workloadList.innerHTML = `
+      <div class="empty-workload">
+        Unlock the workspace to load the available workload catalog.
+      </div>
+    `;
+    updateRunButton();
+    return;
+  }
+
   const workload = getSelectedWorkload();
   workloadCaption.textContent = workload ? workload.description : "No workloads available.";
 
@@ -374,7 +448,7 @@ function renderPrimaryActionCell(item) {
     return `
       <a class="action-link primary compact-link" href="/report.html?jobId=${encodeURIComponent(item.jobId)}&artifact=${encodeURIComponent(
         previewArtifact
-      )}" target="_blank" rel="noreferrer">
+      )}">
         Open ${escapeHtml(artifactLabels[previewArtifact] || "report")}
       </a>
     `;
@@ -383,9 +457,14 @@ function renderPrimaryActionCell(item) {
   const downloadArtifact = getDownloadArtifactsForItem(item)[0];
   if (downloadArtifact) {
     return `
-      <a class="action-link download compact-link" href="${escapeHtml(item.artifacts[downloadArtifact])}" target="_blank" rel="noreferrer">
+      <button
+        class="action-link download compact-link button-link"
+        type="button"
+        data-download-url="${escapeHtml(item.artifacts[downloadArtifact])}"
+        data-download-name="${escapeHtml(downloadLabels[downloadArtifact] || `artifact-${downloadArtifact}`)}"
+      >
         ${escapeHtml(downloadLabels[downloadArtifact] || `Download ${downloadArtifact}`)}
-      </a>
+      </button>
     `;
   }
 
@@ -519,14 +598,16 @@ function renderDetailPanel() {
         {
           href: `/report.html?jobId=${encodeURIComponent(item.jobId)}&artifact=${encodeURIComponent(selectedArtifact)}`,
           label: `Open full ${artifactLabels[selectedArtifact] || "report"}`,
-          variant: "primary"
+          variant: "primary",
+          kind: "link"
         }
       ]
     : [];
   const downloadLinks = getDownloadArtifactsForItem(item).map((artifactName) => ({
     href: item.artifacts[artifactName],
     label: downloadLabels[artifactName] || `Download ${artifactName}`,
-    variant: artifactName.endsWith("Pdf") ? "download" : "subtle"
+    variant: artifactName.endsWith("Pdf") ? "download" : "subtle",
+    kind: "download"
   }));
 
   const previewCacheKey = selectedArtifact ? createPreviewCacheKey(item.jobId, selectedArtifact) : null;
@@ -570,9 +651,24 @@ function renderDetailPanel() {
         ${[...previewLinks, ...downloadLinks]
           .map(
             (link) => `
-              <a class="action-link ${link.variant || "subtle"} compact-link" href="${escapeHtml(link.href)}" target="_blank" rel="noreferrer">
-                ${escapeHtml(link.label)}
-              </a>
+              ${
+                link.kind === "download"
+                  ? `
+                    <button
+                      class="action-link ${link.variant || "subtle"} compact-link button-link"
+                      type="button"
+                      data-download-url="${escapeHtml(link.href)}"
+                      data-download-name="${escapeHtml(link.label)}"
+                    >
+                      ${escapeHtml(link.label)}
+                    </button>
+                  `
+                  : `
+                    <a class="action-link ${link.variant || "subtle"} compact-link" href="${escapeHtml(link.href)}">
+                      ${escapeHtml(link.label)}
+                    </a>
+                  `
+              }
             `
           )
           .join("")}
@@ -634,9 +730,9 @@ async function ensurePreviewLoaded(item, artifactName) {
 
   try {
     const [response, tagDeltaResponse] = await Promise.all([
-      fetch(item.artifacts[artifactName]),
+      fetchWithAuth(item.artifacts[artifactName], { auth: "api" }),
       artifactName !== "tagDeltaReport" && item.artifacts?.tagDeltaReport
-        ? fetch(item.artifacts.tagDeltaReport)
+        ? fetchWithAuth(item.artifacts.tagDeltaReport, { auth: "api" })
         : Promise.resolve(null)
     ]);
     const report = await response.json();
@@ -670,6 +766,8 @@ async function ensurePreviewLoaded(item, artifactName) {
 }
 
 function render() {
+  renderSessionChrome();
+  updateActionAvailability();
   renderHeroStats();
   renderWorkloads();
   renderSelectionTable();
@@ -792,13 +890,8 @@ function clearPolling() {
 
 async function pollBatch(batchId) {
   try {
-    const response = await fetch(`/batches/${encodeURIComponent(batchId)}`);
-    const batch = await response.json();
-    if (!response.ok) {
-      throw new Error(batch.error || "Unable to refresh batch status.");
-    }
-
-    state.batch = batch;
+    state.batch = await fetchJson(`/batches/${encodeURIComponent(batchId)}`, { auth: "api" });
+    const batch = state.batch;
     if (!state.selectedJobId && batch.items[0]) {
       state.selectedJobId = batch.items[0].jobId;
     }
@@ -821,12 +914,7 @@ async function pollBatch(batchId) {
 
 async function pollJob(jobId) {
   try {
-    const response = await fetch(`/jobs/${encodeURIComponent(jobId)}`);
-    const job = await response.json();
-    if (!response.ok) {
-      throw new Error(job.error || "Unable to refresh job status.");
-    }
-
+    const job = await fetchJson(`/jobs/${encodeURIComponent(jobId)}`, { auth: "api" });
     state.batch = buildSingleJobBatch(job);
     state.selectedJobId = job.jobId;
     render();
@@ -847,6 +935,11 @@ async function pollJob(jobId) {
 }
 
 async function startBatch() {
+  if (!hasWorkspaceAccess()) {
+    setIntakeMessage("Unlock the workspace before starting a batch.");
+    return;
+  }
+
   if (!state.selections.length) {
     setIntakeMessage("Queue at least one PDF before starting a batch.");
     return;
@@ -865,7 +958,8 @@ async function startBatch() {
       formData.append("relativePaths", item.relativePath);
     }
 
-    const response = await fetch("/process-pdf-upload", {
+    const response = await fetchWithAuth("/process-pdf-upload", {
+      auth: "api",
       method: "POST",
       body: formData
     });
@@ -891,6 +985,11 @@ async function startBatch() {
 }
 
 async function startUrlJob() {
+  if (!hasWorkspaceAccess()) {
+    setIntakeMessage("Unlock the workspace before starting a remote job.");
+    return;
+  }
+
   const fileUrl = String(urlInput.value || "").trim();
   if (!fileUrl) {
     setIntakeMessage("Enter a remote PDF URL before starting the selected workload.");
@@ -902,7 +1001,8 @@ async function startUrlJob() {
   setIntakeMessage(`Fetching ${fileUrl}.`);
 
   try {
-    const response = await fetch("/process-pdf-url", {
+    const response = await fetchWithAuth("/process-pdf-url", {
+      auth: "api",
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -936,12 +1036,14 @@ async function startUrlJob() {
 }
 
 async function loadWorkloads() {
+  if (!hasWorkspaceAccess()) {
+    state.workloads = [...fallbackWorkloads];
+    render();
+    return;
+  }
+
   try {
-    const response = await fetch("/workloads");
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.error || "Unable to load workload definitions.");
-    }
+    const payload = await fetchJson("/workloads", { auth: "api" });
 
     if (Array.isArray(payload.workloads) && payload.workloads.length) {
       state.workloads = payload.workloads;
@@ -955,6 +1057,80 @@ async function loadWorkloads() {
   }
 
   render();
+}
+
+async function initializeAccess() {
+  state.authConfig = await loadAuthConfig();
+
+  if (state.authConfig.publicMode) {
+    setAuthMessage("Public mode is enabled. Protected headers are not required in this tab.");
+    render();
+    await loadWorkloads();
+    return;
+  }
+
+  const access = getSessionAccess();
+  if (access.admin) {
+    setAuthMessage("Admin access is active in this tab.");
+  } else if (access.api) {
+    setAuthMessage("API access is active in this tab.");
+  } else {
+    setAuthMessage("Enter an API key or admin key to use protected workspace actions.");
+  }
+
+  render();
+
+  if (hasWorkspaceAccess()) {
+    await loadWorkloads();
+  }
+}
+
+async function unlockWorkspace(event) {
+  event.preventDefault();
+
+  authSubmitButton.disabled = true;
+  setAuthMessage("Verifying the supplied key.");
+
+  try {
+    const payload = await verifyAndStoreAccess({
+      key: authKeyInput.value,
+      admin: false
+    });
+
+    authKeyInput.value = "";
+    setAuthMessage(payload.access?.admin ? "Admin access is active in this tab." : "API access is active in this tab.");
+    render();
+    await loadWorkloads();
+  } catch (error) {
+    setAuthMessage(error.message);
+    render();
+  } finally {
+    authSubmitButton.disabled = false;
+  }
+}
+
+async function handleDownloadClick(event) {
+  const button = event.target.closest("[data-download-url]");
+  if (!button) {
+    return;
+  }
+
+  const url = button.getAttribute("data-download-url");
+  const filename = button.getAttribute("data-download-name") || undefined;
+  if (!url) {
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    await downloadWithAuth(url, { auth: "api", filename });
+    setIntakeMessage("Artifact download started.");
+  } catch (error) {
+    setIntakeMessage(error.message);
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function handlePreviewTabClick(event) {
@@ -980,6 +1156,11 @@ function handlePreviewTabClick(event) {
 }
 
 workloadList.addEventListener("click", (event) => {
+  if (!hasWorkspaceAccess()) {
+    setIntakeMessage("Unlock the workspace before choosing a workload.");
+    return;
+  }
+
   const button = event.target.closest("[data-workload-id]");
   if (!button) {
     return;
@@ -990,6 +1171,8 @@ workloadList.addEventListener("click", (event) => {
 });
 
 resultsBody.addEventListener("click", (event) => {
+  void handleDownloadClick(event);
+
   const button = event.target.closest("[data-job-id]");
   if (!button) {
     return;
@@ -999,12 +1182,41 @@ resultsBody.addEventListener("click", (event) => {
   render();
 });
 
-detailPanel.addEventListener("click", handlePreviewTabClick);
+detailPanel.addEventListener("click", (event) => {
+  void handleDownloadClick(event);
+  handlePreviewTabClick(event);
+});
 
-dropzone.addEventListener("click", () => filePicker.click());
+authForm.addEventListener("submit", (event) => {
+  void unlockWorkspace(event);
+});
+
+clearSessionButton.addEventListener("click", async () => {
+  clearPolling();
+  clearStoredKeys();
+  state.batch = null;
+  state.selectedJobId = null;
+  state.previewCache.clear();
+  setAuthMessage("Session keys cleared from this tab.");
+  render();
+  await loadWorkloads();
+});
+
+dropzone.addEventListener("click", () => {
+  if (!hasWorkspaceAccess()) {
+    setIntakeMessage("Unlock the workspace before queueing PDFs.");
+    return;
+  }
+
+  filePicker.click();
+});
 dropzone.addEventListener("keydown", (event) => {
   if (event.key === "Enter" || event.key === " ") {
     event.preventDefault();
+    if (!hasWorkspaceAccess()) {
+      setIntakeMessage("Unlock the workspace before queueing PDFs.");
+      return;
+    }
     filePicker.click();
   }
 });
@@ -1024,6 +1236,11 @@ for (const eventName of ["dragleave", "dragend", "drop"]) {
 }
 
 dropzone.addEventListener("drop", async (event) => {
+  if (!hasWorkspaceAccess()) {
+    setIntakeMessage("Unlock the workspace before queueing PDFs.");
+    return;
+  }
+
   const records = await collectDroppedSelections(event.dataTransfer);
   addSelections(records);
 });
@@ -1059,4 +1276,4 @@ urlInput.addEventListener("keydown", (event) => {
 });
 
 updateSelectionState();
-void loadWorkloads();
+void initializeAccess();

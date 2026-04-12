@@ -1,0 +1,100 @@
+plugins {
+  id "java"
+  id "war"
+}
+
+group = "buildeverything"
+version = "0.1.0"
+
+def javaVersion = providers.gradleProperty("javaVersion").map(Integer.&parseInt).getOrElse(21)
+def servletApiVersion = providers.gradleProperty("servletApiVersion").getOrElse("6.0.0")
+def jacksonVersion = providers.gradleProperty("jacksonVersion").getOrElse("2.18.3")
+def jettyVersion = providers.gradleProperty("jettyVersion").getOrElse("12.0.16")
+def slf4jVersion = providers.gradleProperty("slf4jVersion").getOrElse("2.0.16")
+def junitVersion = providers.gradleProperty("junitVersion").getOrElse("5.11.4")
+def repoRoot = providers.gradleProperty("repoRoot")
+  .map { file(it) }
+  .orElse(provider { projectDir.parentFile })
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(javaVersion)
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+configurations {
+  standaloneRuntime
+}
+
+sourceSets {
+  main {
+    resources.srcDir(layout.buildDirectory.dir("generated-resources/main"))
+  }
+}
+
+dependencies {
+  compileOnly "jakarta.servlet:jakarta.servlet-api:${servletApiVersion}"
+  implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+
+  compileOnly "org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}"
+  standaloneRuntime "jakarta.servlet:jakarta.servlet-api:${servletApiVersion}"
+  standaloneRuntime "org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}"
+  standaloneRuntime "org.slf4j:slf4j-simple:${slf4jVersion}"
+
+  testImplementation platform("org.junit:junit-bom:${junitVersion}")
+  testImplementation "org.junit.jupiter:junit-jupiter"
+  testImplementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}"
+  testRuntimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
+}
+
+tasks.register("syncPublicAssets", Copy) {
+  from(repoRoot.map { new File(it, "orchestrator/public") })
+  into(layout.buildDirectory.dir("generated-resources/main/public"))
+}
+
+tasks.processResources {
+  dependsOn(tasks.named("syncPublicAssets"))
+}
+
+tasks.named("test") {
+  useJUnitPlatform()
+  systemProperty "buildeverything.repoRoot", repoRoot.get().absolutePath
+}
+
+tasks.register("runStandalone", JavaExec) {
+  group = "application"
+  description = "Run the servlet with embedded Jetty."
+  dependsOn(tasks.named("classes"))
+  classpath = sourceSets.main.runtimeClasspath + configurations.standaloneRuntime
+  mainClass = "buildeverything.servlet.BuildEverythingServerLauncher"
+  systemProperty "buildeverything.repoRoot", repoRoot.get().absolutePath
+  if (project.hasProperty("port")) {
+    systemProperty "buildeverything.port", String.valueOf(project.property("port"))
+  }
+}
+
+tasks.register("downloadDependencies", Copy) {
+  group = "build"
+  description = "Resolve and copy compile, runtime, standalone, and test dependencies."
+  into(layout.buildDirectory.dir("dependencies"))
+  into("compile") {
+    from(configurations.compileClasspath)
+  }
+  into("runtime") {
+    from(configurations.runtimeClasspath)
+  }
+  into("standalone") {
+    from(configurations.standaloneRuntime)
+  }
+  into("test") {
+    from(configurations.testRuntimeClasspath)
+  }
+}
+
+tasks.named("war") {
+  archiveBaseName = "buildeverything-servlet"
+}
