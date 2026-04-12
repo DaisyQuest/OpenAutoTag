@@ -83,6 +83,34 @@ test("server accepts process-pdf jobs and exposes job status", async () => {
   }
 });
 
+test("server blocks private-network remote PDF URLs by default", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-url-private-host-test-"));
+  const queue = createJobQueue({ processor: runWorkload });
+  const server = createAppServer({ queue, uploadRoot: path.join(tempDir, "uploads") });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/process-pdf-url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fileUrl: "http://127.0.0.1:8123/private.pdf"
+      })
+    });
+
+    assert.equal(response.status, 403);
+    const payload = await response.json();
+    assert.match(payload.error, /blocked by download safety policy/i);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
 test("server accepts remote PDF URLs and exposes job status plus artifact links", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-url-test-"));
   const pdfPath = path.join(tempDir, "sample.pdf");
@@ -99,7 +127,13 @@ test("server accepts remote PDF URLs and exposes job status plus artifact links"
   const fileUrl = `http://127.0.0.1:${remoteAddress.port}/fixtures/sample.pdf`;
 
   const queue = createJobQueue({ processor: runWorkload });
-  const server = createAppServer({ queue, uploadRoot: path.join(tempDir, "uploads") });
+  const server = createAppServer({
+    queue,
+    uploadRoot: path.join(tempDir, "uploads"),
+    remoteDownloadPolicy: {
+      allowPrivateHosts: true
+    }
+  });
 
   await new Promise((resolve) => server.listen(0, resolve));
   const address = server.address();
@@ -150,7 +184,13 @@ test("server rejects remote URLs that do not resolve to a PDF", async () => {
   const fileUrl = `http://127.0.0.1:${remoteAddress.port}/fixtures/not-a-pdf.txt`;
 
   const queue = createJobQueue({ processor: runWorkload });
-  const server = createAppServer({ queue, uploadRoot: path.join(tempDir, "uploads") });
+  const server = createAppServer({
+    queue,
+    uploadRoot: path.join(tempDir, "uploads"),
+    remoteDownloadPolicy: {
+      allowPrivateHosts: true
+    }
+  });
 
   await new Promise((resolve) => server.listen(0, resolve));
   const address = server.address();
@@ -167,10 +207,99 @@ test("server rejects remote URLs that do not resolve to a PDF", async () => {
 
     assert.equal(response.status, 415);
     const payload = await response.json();
-    assert.match(payload.error, /did not resolve to a PDF/i);
+    assert.match(payload.error, /did not (look like|resolve to) a PDF/i);
   } finally {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
     await new Promise((resolve, reject) => remoteTextServer.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("server rejects remote files that fail PDF signature validation", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-url-signature-test-"));
+  const remoteTextServer = http.createServer((_request, response) => {
+    response.writeHead(200, { "Content-Type": "application/pdf" });
+    response.end("<html>definitely not a pdf</html>");
+  });
+
+  await new Promise((resolve) => remoteTextServer.listen(0, resolve));
+  const remoteAddress = remoteTextServer.address();
+  const fileUrl = `http://127.0.0.1:${remoteAddress.port}/fixtures/bad-signature.pdf`;
+
+  const queue = createJobQueue({ processor: runWorkload });
+  const server = createAppServer({
+    queue,
+    uploadRoot: path.join(tempDir, "uploads"),
+    remoteDownloadPolicy: {
+      allowPrivateHosts: true
+    }
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/process-pdf-url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ fileUrl })
+    });
+
+    assert.equal(response.status, 415);
+    const payload = await response.json();
+    assert.match(payload.error, /signature validation/i);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+    await new Promise((resolve, reject) => remoteTextServer.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("server rejects remote PDFs that exceed the configured size limit", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-url-size-test-"));
+  const remotePdfServer = http.createServer((_request, response) => {
+    const body = Buffer.concat([Buffer.from("%PDF-1.7\n"), Buffer.alloc(512, 0x20)]);
+    response.writeHead(200, {
+      "Content-Type": "application/pdf",
+      "Content-Length": String(body.length)
+    });
+    response.end(body);
+  });
+
+  await new Promise((resolve) => remotePdfServer.listen(0, resolve));
+  const remoteAddress = remotePdfServer.address();
+  const fileUrl = `http://127.0.0.1:${remoteAddress.port}/fixtures/too-large.pdf`;
+
+  const queue = createJobQueue({ processor: runWorkload });
+  const server = createAppServer({
+    queue,
+    uploadRoot: path.join(tempDir, "uploads"),
+    remoteDownloadPolicy: {
+      allowPrivateHosts: true,
+      maxBytes: 64
+    }
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/process-pdf-url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ fileUrl })
+    });
+
+    assert.equal(response.status, 413);
+    const payload = await response.json();
+    assert.match(payload.error, /safety limit/i);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+    await new Promise((resolve, reject) => remotePdfServer.close((error) => (error ? reject(error) : resolve())));
   }
 });
 

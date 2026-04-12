@@ -1,10 +1,12 @@
 import crypto from "node:crypto";
+import dns from "node:dns/promises";
 import { createWriteStream } from "node:fs";
 import http from "node:http";
+import net from "node:net";
 import path from "node:path";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { Readable } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createJobQueue } from "./job-queue.js";
 import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } from "./workloads/index.js";
@@ -12,6 +14,14 @@ import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } f
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const publicDir = path.join(__dirname, "public");
+const PDF_SIGNATURE = Buffer.from("%PDF-");
+const DEFAULT_REMOTE_DOWNLOAD_POLICY = Object.freeze({
+  allowPrivateHosts: false,
+  maxBytes: 50 * 1024 * 1024,
+  maxRedirects: 5,
+  probeBytes: 1024,
+  timeoutMs: 15000
+});
 
 const contentTypes = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -78,6 +88,10 @@ function getContentType(filePath) {
   return contentTypes.get(path.extname(filePath).toLowerCase()) || "application/octet-stream";
 }
 
+function createAbortSignal(timeoutMs) {
+  return AbortSignal.timeout(Math.max(1, Number(timeoutMs) || DEFAULT_REMOTE_DOWNLOAD_POLICY.timeoutMs));
+}
+
 function parseHttpUrl(value) {
   const candidate = String(value || "").trim();
   if (!candidate) {
@@ -115,10 +129,262 @@ function extractFilenameFromContentDisposition(headerValue) {
   return plainMatch ? plainMatch[1].trim() : "";
 }
 
-function isPdfResponse(url, response) {
+function isPdfContentType(value) {
+  const contentType = String(value || "").toLowerCase();
+  return (
+    contentType.includes("application/pdf") ||
+    contentType.includes("application/x-pdf") ||
+    contentType.includes("application/octet-stream")
+  );
+}
+
+function isPdfMetadata(url, response) {
   const decodedPath = decodeUriComponent(url.pathname || "").toLowerCase();
-  const contentType = String(response.headers.get("content-type") || "").toLowerCase();
-  return decodedPath.endsWith(".pdf") || contentType.includes("application/pdf");
+  const dispositionFileName = extractFilenameFromContentDisposition(response.headers.get("content-disposition")).toLowerCase();
+  return decodedPath.endsWith(".pdf") || dispositionFileName.endsWith(".pdf") || isPdfContentType(response.headers.get("content-type"));
+}
+
+function getContentLength(response) {
+  const rawValue = String(response.headers.get("content-length") || "").trim();
+  const parsedValue = Number(rawValue);
+  return Number.isFinite(parsedValue) && parsedValue >= 0 ? parsedValue : null;
+}
+
+function assertMaxContentLength(response, policy) {
+  const contentLength = getContentLength(response);
+  if (contentLength != null && contentLength > policy.maxBytes) {
+    throw createHttpError(413, `Remote PDF exceeds the ${policy.maxBytes} byte safety limit.`);
+  }
+}
+
+function ipv4ToInt(address) {
+  return address
+    .split(".")
+    .map((part) => Number(part))
+    .reduce((value, octet) => ((value << 8) | (octet & 0xff)) >>> 0, 0);
+}
+
+function isUnsafeIpv4Address(address) {
+  const value = ipv4ToInt(address);
+  const ranges = [
+    [0x00000000, 0x00ffffff],
+    [0x0a000000, 0x0affffff],
+    [0x64400000, 0x647fffff],
+    [0x7f000000, 0x7fffffff],
+    [0xa9fe0000, 0xa9feffff],
+    [0xac100000, 0xac1fffff],
+    [0xc0000000, 0xc00000ff],
+    [0xc0000200, 0xc00002ff],
+    [0xc0a80000, 0xc0a8ffff],
+    [0xc6120000, 0xc613ffff],
+    [0xc6336400, 0xc63364ff],
+    [0xcb007100, 0xcb0071ff],
+    [0xe0000000, 0xffffffff]
+  ];
+
+  return ranges.some(([start, end]) => value >= start && value <= end);
+}
+
+function isUnsafeIpv6Address(address) {
+  const normalized = String(address || "").toLowerCase().split("%")[0];
+
+  if (normalized === "::" || normalized === "::1") {
+    return true;
+  }
+
+  const mappedIpv4Match = normalized.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mappedIpv4Match) {
+    return isUnsafeIpv4Address(mappedIpv4Match[1]);
+  }
+
+  if (normalized.startsWith("2001:db8:")) {
+    return true;
+  }
+
+  const firstSegment = normalized.startsWith("::") ? "0" : normalized.split(":")[0] || "0";
+  const firstHextet = parseInt(firstSegment, 16);
+  if (!Number.isFinite(firstHextet)) {
+    return true;
+  }
+
+  return (
+    (firstHextet >= 0xfc00 && firstHextet <= 0xfdff) ||
+    (firstHextet >= 0xfe80 && firstHextet <= 0xfebf) ||
+    (firstHextet >= 0xfec0 && firstHextet <= 0xfeff) ||
+    (firstHextet >= 0xff00 && firstHextet <= 0xffff)
+  );
+}
+
+function isUnsafeIpAddress(address) {
+  const family = net.isIP(address);
+  if (family === 4) {
+    return isUnsafeIpv4Address(address);
+  }
+
+  if (family === 6) {
+    return isUnsafeIpv6Address(address);
+  }
+
+  return true;
+}
+
+async function assertSafeRemoteHost(url, policy) {
+  if (policy.allowPrivateHosts) {
+    return;
+  }
+
+  const hostname = String(url.hostname || "").trim().toLowerCase();
+  if (!hostname) {
+    throw createHttpError(400, "Remote URL is missing a hostname.");
+  }
+
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+    throw createHttpError(403, "Remote URL host is blocked by download safety policy.");
+  }
+
+  const resolvedAddresses = [];
+  if (net.isIP(hostname)) {
+    resolvedAddresses.push(hostname);
+  } else {
+    let lookupRecords;
+    try {
+      lookupRecords = await dns.lookup(hostname, { all: true, verbatim: true });
+    } catch (error) {
+      throw createHttpError(502, `Unable to resolve remote host: ${error.message}`);
+    }
+
+    resolvedAddresses.push(...lookupRecords.map((record) => record.address));
+  }
+
+  if (!resolvedAddresses.length) {
+    throw createHttpError(502, "Remote host did not resolve to any IP addresses.");
+  }
+
+  if (resolvedAddresses.some((address) => isUnsafeIpAddress(address))) {
+    throw createHttpError(403, "Remote URL host is blocked by download safety policy.");
+  }
+}
+
+async function followRemoteRequest(startUrl, { method, headers = {}, policy }) {
+  let currentUrl = new URL(startUrl.toString());
+  let currentMethod = method;
+  const visited = new Set();
+
+  for (let redirectCount = 0; redirectCount <= policy.maxRedirects; redirectCount += 1) {
+    const visitKey = `${currentMethod}:${currentUrl.toString()}`;
+    if (visited.has(visitKey)) {
+      throw createHttpError(502, "Remote URL redirect loop detected.");
+    }
+    visited.add(visitKey);
+
+    await assertSafeRemoteHost(currentUrl, policy);
+
+    let response;
+    try {
+      response = await fetch(currentUrl, {
+        method: currentMethod,
+        headers,
+        redirect: "manual",
+        signal: createAbortSignal(policy.timeoutMs)
+      });
+    } catch (error) {
+      throw createHttpError(502, `Unable to fetch remote PDF: ${error.message}`);
+    }
+
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+      const location = response.headers.get("location");
+      if (!location) {
+        throw createHttpError(502, "Remote server returned a redirect without a location header.");
+      }
+
+      currentUrl = new URL(location, currentUrl);
+      currentMethod = response.status === 303 ? "GET" : currentMethod;
+      continue;
+    }
+
+    return {
+      response,
+      finalUrl: currentUrl
+    };
+  }
+
+  throw createHttpError(502, `Remote URL redirected more than ${policy.maxRedirects} times.`);
+}
+
+async function readProbeBuffer(response, maxBytes) {
+  if (!response.body) {
+    return Buffer.alloc(0);
+  }
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let totalBytes = 0;
+
+  try {
+    while (totalBytes < maxBytes) {
+      const { value, done } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      const chunk = Buffer.from(value);
+      const remainingBytes = maxBytes - totalBytes;
+      const slice = chunk.subarray(0, remainingBytes);
+      chunks.push(slice);
+      totalBytes += slice.length;
+
+      if (slice.length < chunk.length) {
+        break;
+      }
+    }
+  } finally {
+    try {
+      await reader.cancel();
+    } catch {
+      // Ignore cancellation errors from already-finished streams.
+    }
+  }
+
+  return Buffer.concat(chunks);
+}
+
+function assertPdfSignature(buffer, policy) {
+  const headerOffset = buffer.indexOf(PDF_SIGNATURE);
+  if (headerOffset === -1 || headerOffset >= policy.probeBytes) {
+    throw createHttpError(415, "Remote file failed PDF signature validation.");
+  }
+}
+
+function createPdfSafetyTransform(policy) {
+  let totalBytes = 0;
+  let probeBuffer = Buffer.alloc(0);
+
+  return new Transform({
+    transform(chunk, _encoding, callback) {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      totalBytes += buffer.length;
+
+      if (totalBytes > policy.maxBytes) {
+        callback(createHttpError(413, `Remote PDF exceeds the ${policy.maxBytes} byte safety limit.`));
+        return;
+      }
+
+      if (probeBuffer.length < policy.probeBytes) {
+        const remainingBytes = policy.probeBytes - probeBuffer.length;
+        probeBuffer = Buffer.concat([probeBuffer, buffer.subarray(0, remainingBytes)]);
+      }
+
+      callback(null, buffer);
+    },
+    flush(callback) {
+      try {
+        assertPdfSignature(probeBuffer, policy);
+        callback();
+      } catch (error) {
+        callback(error);
+      }
+    }
+  });
 }
 
 function buildRemoteFileName(sourceUrl, response) {
@@ -129,29 +395,89 @@ function buildRemoteFileName(sourceUrl, response) {
   return baseName.toLowerCase().endsWith(".pdf") ? baseName : `${baseName}.pdf`;
 }
 
-async function downloadRemotePdf({ fileUrl, downloadRoot }) {
+async function performRemotePdfPreflight(sourceUrl, policy) {
+  const headResult = await followRemoteRequest(sourceUrl, {
+    method: "HEAD",
+    headers: {
+      Accept: "application/pdf,application/octet-stream;q=0.9,*/*;q=0.1"
+    },
+    policy
+  });
+
+  if (!headResult.response.ok && ![405, 501].includes(headResult.response.status)) {
+    throw createHttpError(502, `Remote server returned ${headResult.response.status} ${headResult.response.statusText}.`);
+  }
+
+  if (headResult.response.ok) {
+    assertMaxContentLength(headResult.response, policy);
+    if (!isPdfMetadata(headResult.finalUrl, headResult.response)) {
+      throw createHttpError(415, "Remote URL did not look like a PDF during preflight checks.");
+    }
+  }
+
+  const probeResult = await followRemoteRequest(sourceUrl, {
+    method: "GET",
+    headers: {
+      Accept: "application/pdf,application/octet-stream;q=0.9,*/*;q=0.1",
+      Range: `bytes=0-${policy.probeBytes - 1}`
+    },
+    policy
+  });
+
+  if (!probeResult.response.ok) {
+    throw createHttpError(502, `Remote server returned ${probeResult.response.status} ${probeResult.response.statusText}.`);
+  }
+
+  assertMaxContentLength(probeResult.response, policy);
+  if (!isPdfMetadata(probeResult.finalUrl, probeResult.response)) {
+    throw createHttpError(415, "Remote URL did not resolve to a PDF.");
+  }
+
+  const probeBuffer = await readProbeBuffer(probeResult.response, policy.probeBytes);
+  if (!probeBuffer.length) {
+    throw createHttpError(502, "Remote server returned an empty response body.");
+  }
+
+  assertPdfSignature(probeBuffer, policy);
+
+  return {
+    finalUrl: probeResult.finalUrl
+  };
+}
+
+async function downloadRemotePdf({ fileUrl, downloadRoot, policy = DEFAULT_REMOTE_DOWNLOAD_POLICY }) {
   const sourceUrl = parseHttpUrl(fileUrl);
   if (!sourceUrl) {
     throw createHttpError(400, "fileUrl must be an absolute http or https URL.");
   }
 
-  let response;
-  try {
-    response = await fetch(sourceUrl, { redirect: "follow" });
-  } catch (error) {
-    throw createHttpError(502, `Unable to fetch remote PDF: ${error.message}`);
+  if (sourceUrl.username || sourceUrl.password) {
+    throw createHttpError(400, "Remote PDF URLs with embedded credentials are not allowed.");
   }
 
-  if (!response.ok) {
-    throw createHttpError(502, `Remote server returned ${response.status} ${response.statusText}.`);
+  const resolvedPolicy = {
+    ...DEFAULT_REMOTE_DOWNLOAD_POLICY,
+    ...(policy || {})
+  };
+  const preflight = await performRemotePdfPreflight(sourceUrl, resolvedPolicy);
+  const downloadResult = await followRemoteRequest(sourceUrl, {
+    method: "GET",
+    headers: {
+      Accept: "application/pdf,application/octet-stream;q=0.9,*/*;q=0.1"
+    },
+    policy: resolvedPolicy
+  });
+
+  if (!downloadResult.response.ok) {
+    throw createHttpError(502, `Remote server returned ${downloadResult.response.status} ${downloadResult.response.statusText}.`);
   }
 
-  const finalUrl = parseHttpUrl(response.url) || sourceUrl;
-  if (!isPdfResponse(finalUrl, response)) {
+  assertMaxContentLength(downloadResult.response, resolvedPolicy);
+  if (!isPdfMetadata(downloadResult.finalUrl, downloadResult.response)) {
     throw createHttpError(415, "Remote URL did not resolve to a PDF.");
   }
 
-  if (!response.body) {
+  if (!downloadResult.response.body) {
     throw createHttpError(502, "Remote server returned an empty response body.");
   }
 
@@ -159,15 +485,26 @@ async function downloadRemotePdf({ fileUrl, downloadRoot }) {
   const downloadDir = path.join(downloadRoot, crypto.randomUUID());
   await mkdir(downloadDir, { recursive: true });
 
-  const fileName = buildRemoteFileName(sourceUrl, response);
+  const fileName = buildRemoteFileName(sourceUrl, downloadResult.response);
   const targetPath = path.join(downloadDir, fileName);
-  await pipeline(Readable.fromWeb(response.body), createWriteStream(targetPath));
+
+  try {
+    await pipeline(
+      Readable.fromWeb(downloadResult.response.body),
+      createPdfSafetyTransform(resolvedPolicy),
+      createWriteStream(targetPath, { flags: "wx" })
+    );
+  } catch (error) {
+    await rm(targetPath, { force: true }).catch(() => {});
+    await rm(downloadDir, { recursive: true, force: true }).catch(() => {});
+    throw error;
+  }
 
   return {
     absolutePath: targetPath,
     fileName,
     sourceUrl: sourceUrl.toString(),
-    finalUrl: finalUrl.toString()
+    finalUrl: (preflight.finalUrl || downloadResult.finalUrl).toString()
   };
 }
 
@@ -404,7 +741,11 @@ function createBatchRegistry({ queue, uploadRoot = path.join(repoRoot, "tmp", "u
   };
 }
 
-export function createAppServer({ queue, uploadRoot = path.join(repoRoot, "tmp", "uploads") }) {
+export function createAppServer({
+  queue,
+  uploadRoot = path.join(repoRoot, "tmp", "uploads"),
+  remoteDownloadPolicy = DEFAULT_REMOTE_DOWNLOAD_POLICY
+}) {
   const batches = createBatchRegistry({ queue, uploadRoot });
   const remoteDownloadRoot = path.join(uploadRoot, "remote");
 
@@ -460,7 +801,8 @@ export function createAppServer({ queue, uploadRoot = path.join(repoRoot, "tmp",
         const workload = getPublicWorkload(body.workloadId);
         const remotePdf = await downloadRemotePdf({
           fileUrl: body.fileUrl,
-          downloadRoot: remoteDownloadRoot
+          downloadRoot: remoteDownloadRoot,
+          policy: remoteDownloadPolicy
         });
         const job = queue.enqueue({
           filePath: remotePdf.absolutePath,
