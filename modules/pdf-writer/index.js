@@ -6,6 +6,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import redactionPlanSchema from "../../contracts/redaction-plan.schema.json" with { type: "json" };
+import { buildJavaExecEnv, resolveJavaTool } from "../../scripts/java-runtime.js";
+import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateTagging = ajv.compile(taggingSchema);
@@ -13,10 +15,12 @@ const validateSemantic = ajv.compile(semanticSchema);
 const validateRedactionPlan = ajv.compile(redactionPlanSchema);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
-const buildDir = path.join(moduleDir, ".build");
+const repoRoot = path.resolve(moduleDir, "..", "..");
+const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfTagWriterCli.java");
 const javaClassPath = path.join(buildDir, "PdfTagWriterCli.class");
 const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
+const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {
   const args = new Map();
@@ -32,9 +36,9 @@ function parseArgs(argv) {
   };
 }
 
-function execCommand(command, args) {
+function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, (error, stdout, stderr) => {
+    execFile(command, args, { env }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || error.message));
         return;
@@ -61,15 +65,22 @@ async function ensureJavaHelperCompiled() {
     return;
   }
 
-  await execCommand("javac", [
-    "-encoding",
-    "UTF-8",
-    "-cp",
-    pdfboxJarPath,
-    "-d",
-    buildDir,
-    javaSourcePath
-  ]);
+  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+  await execCommand(
+    javacCommand,
+    [
+      "-encoding",
+      "UTF-8",
+      "-cp",
+      pdfboxJarPath,
+      "-d",
+      buildDir,
+      javaSourcePath
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
 }
 
 function countTagNodes(node) {
@@ -277,7 +288,10 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
     args.push("--redactions", redactionInstructionPath);
   }
 
-  const stdout = await execCommand("java", args);
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(javaCommand, args, {
+    env: await buildJavaExecEnv({ bundledJavaHome })
+  });
 
   return JSON.parse(stdout);
 }

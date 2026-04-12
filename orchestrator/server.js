@@ -8,12 +8,14 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../scripts/runtime-paths.js";
 import { createJobQueue } from "./job-queue.js";
 import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } from "./workloads/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const publicDir = path.join(__dirname, "public");
+const runtimeRoot = getRuntimeRoot({ repoRoot });
 const PDF_SIGNATURE = Buffer.from("%PDF-");
 const DEFAULT_REMOTE_DOWNLOAD_POLICY = Object.freeze({
   allowPrivateHosts: false,
@@ -619,7 +621,7 @@ async function buildJobResponse(jobId, job) {
   };
 }
 
-function createBatchRegistry({ queue, uploadRoot = path.join(repoRoot, "tmp", "uploads") }) {
+function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", { repoRoot }) }) {
   const batches = new Map();
 
   async function buildBatchSnapshot(batch) {
@@ -743,7 +745,7 @@ function createBatchRegistry({ queue, uploadRoot = path.join(repoRoot, "tmp", "u
 
 export function createAppServer({
   queue,
-  uploadRoot = path.join(repoRoot, "tmp", "uploads"),
+  uploadRoot = getRuntimeSubdir("uploads", { repoRoot }),
   remoteDownloadPolicy = DEFAULT_REMOTE_DOWNLOAD_POLICY
 }) {
   const batches = createBatchRegistry({ queue, uploadRoot });
@@ -760,7 +762,18 @@ export function createAppServer({
       }
 
       if (request.method === "GET" && url.pathname === "/health") {
-        writeJson(response, 200, { ok: true });
+        await mkdir(runtimeRoot, { recursive: true });
+        writeJson(response, 200, {
+          ok: true,
+          runtime: {
+            root: runtimeRoot,
+            jobsRoot: getRuntimeSubdir("jobs", { repoRoot }),
+            uploadRoot,
+            azureAppService: isAzureAppServiceRuntime(),
+            home: process.env.HOME || null,
+            runFromPackage: process.env.WEBSITE_RUN_FROM_PACKAGE || null
+          }
+        });
         return;
       }
 
@@ -906,13 +919,14 @@ export function createAppServer({
 
 async function main() {
   const port = Number(process.env.PORT || 3000);
+  const jobsRoot = getRuntimeSubdir("jobs", { repoRoot });
   const queue = createJobQueue({
     processor: runWorkload,
-    outputRoot: path.join(repoRoot, "tmp", "jobs")
+    outputRoot: jobsRoot
   });
   const server = createAppServer({
     queue,
-    uploadRoot: path.join(repoRoot, "tmp", "uploads")
+    uploadRoot: getRuntimeSubdir("uploads", { repoRoot })
   });
 
   server.listen(port, () => {

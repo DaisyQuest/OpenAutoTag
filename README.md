@@ -43,6 +43,7 @@ npm run inspect:pdf -- --pdf tmp/run/06-tagged.pdf
 
 Java 21 is required for the native PDFBox-backed writer and validator modules.
 The validator uses veraPDF for PDF/UA validation. `npm run install:verapdf` now installs it cross-platform, and the validator also accepts `VERAPDF_PATH`, `VALIDATOR_JAVA_HOME`, `VALIDATOR_JAVA_PATH`, `VALIDATOR_JAVAC_PATH`, and `VERAPDF_FLAVOUR` overrides when needed.
+On Azure App Service Linux, runtime uploads, job artifacts, OCR cache, and Java helper build outputs should live under a writable runtime root. Set `PIPELINE_DATA_ROOT` if you need to override the default. `GET /health` now reports the active runtime paths.
 The OCR fallback uses `tesseract.js`, which downloads language data on first use and caches it locally.
 
 Open the local UI:
