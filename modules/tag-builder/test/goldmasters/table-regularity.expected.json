@@ -1,0 +1,553 @@
+{
+  "cases": [
+    {
+      "name": "body-gap-normalization",
+      "expected": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic:body-gap:tagging",
+        "source": {
+          "semanticDocumentId": "semantic:body-gap",
+          "headingNormalization": {
+            "applied": false,
+            "totalHeadingCount": 0,
+            "adjustedHeadingCount": 0,
+            "firstDetectedHeading": null,
+            "maxNormalizedHeading": null,
+            "adjustments": []
+          },
+          "tableRegularityCorrection": {
+            "applied": true,
+            "algorithm": "grid-normalization-v1",
+            "tablesInspected": 1,
+            "correctedTables": 1,
+            "repairedRowCount": 1,
+            "insertedPlaceholderCellCount": 1,
+            "insertedSyntheticRowCount": 0,
+            "shiftedCellCount": 0
+          }
+        },
+        "root": {
+          "id": "tag:document",
+          "type": "Document",
+          "children": [
+            {
+              "id": "tag:table:table-1",
+              "type": "Table",
+              "sourceNodeIds": [],
+              "children": [
+                {
+                  "id": "tag:table:table-1:head",
+                  "type": "THead",
+                  "children": [
+                    {
+                      "id": "tag:table:table-1:head:row:0",
+                      "type": "TR",
+                      "tableRowIndex": 0,
+                      "children": [
+                        {
+                          "id": "tag:n1",
+                          "type": "TH",
+                          "label": "Item",
+                          "sourceNodeIds": ["n1"],
+                          "children": [],
+                          "tableSection": "head",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 0
+                        },
+                        {
+                          "id": "tag:n2",
+                          "type": "TH",
+                          "label": "Qty",
+                          "sourceNodeIds": ["n2"],
+                          "children": [],
+                          "tableSection": "head",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 1
+                        },
+                        {
+                          "id": "tag:n3",
+                          "type": "TH",
+                          "label": "Total",
+                          "sourceNodeIds": ["n3"],
+                          "children": [],
+                          "tableSection": "head",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 2
+                        }
+                      ],
+                      "tableColumnCount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tag:table:table-1:body",
+                  "type": "TBody",
+                  "children": [
+                    {
+                      "id": "tag:table:table-1:body:row:1",
+                      "type": "TR",
+                      "tableRowIndex": 1,
+                      "children": [
+                        {
+                          "id": "tag:n4",
+                          "type": "TD",
+                          "label": "Bolts",
+                          "sourceNodeIds": ["n4"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 0
+                        },
+                        {
+                          "id": "tag:n5",
+                          "type": "TD",
+                          "label": "10",
+                          "sourceNodeIds": ["n5"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 1
+                        },
+                        {
+                          "id": "tag:n6",
+                          "type": "TD",
+                          "label": "$5",
+                          "sourceNodeIds": ["n6"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 2
+                        }
+                      ],
+                      "tableColumnCount": 3
+                    },
+                    {
+                      "id": "tag:table:table-1:body:row:2",
+                      "type": "TR",
+                      "tableRowIndex": 2,
+                      "children": [
+                        {
+                          "id": "tag:n7",
+                          "type": "TD",
+                          "label": "Nuts",
+                          "sourceNodeIds": ["n7"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 2,
+                          "tableColumnIndex": 0
+                        },
+                        {
+                          "id": "tag:table:table-1:body:row:2:placeholder:1",
+                          "type": "TD",
+                          "label": "",
+                          "sourceNodeIds": [],
+                          "synthetic": true,
+                          "repairReason": "table-row-irregularity",
+                          "tableSection": "body",
+                          "tableRowIndex": 2,
+                          "tableColumnIndex": 1,
+                          "children": []
+                        },
+                        {
+                          "id": "tag:n8",
+                          "type": "TD",
+                          "label": "$3",
+                          "sourceNodeIds": ["n8"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 2,
+                          "tableColumnIndex": 2
+                        }
+                      ],
+                      "tableColumnCount": 3,
+                      "repairReason": "table-row-irregularity"
+                    }
+                  ]
+                }
+              ],
+              "tableColumnCount": 3,
+              "tableRegularity": {
+                "applied": true,
+                "expectedColumnCount": 3,
+                "repairedRowCount": 1,
+                "insertedPlaceholderCellCount": 1,
+                "insertedSyntheticRowCount": 0,
+                "shiftedCellCount": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "header-gap-normalization",
+      "expected": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic:header-gap:tagging",
+        "source": {
+          "semanticDocumentId": "semantic:header-gap",
+          "headingNormalization": {
+            "applied": false,
+            "totalHeadingCount": 0,
+            "adjustedHeadingCount": 0,
+            "firstDetectedHeading": null,
+            "maxNormalizedHeading": null,
+            "adjustments": []
+          },
+          "tableRegularityCorrection": {
+            "applied": true,
+            "algorithm": "grid-normalization-v1",
+            "tablesInspected": 1,
+            "correctedTables": 1,
+            "repairedRowCount": 1,
+            "insertedPlaceholderCellCount": 1,
+            "insertedSyntheticRowCount": 0,
+            "shiftedCellCount": 0
+          }
+        },
+        "root": {
+          "id": "tag:document",
+          "type": "Document",
+          "children": [
+            {
+              "id": "tag:table:table-2",
+              "type": "Table",
+              "sourceNodeIds": [],
+              "children": [
+                {
+                  "id": "tag:table:table-2:head",
+                  "type": "THead",
+                  "children": [
+                    {
+                      "id": "tag:table:table-2:head:row:0",
+                      "type": "TR",
+                      "tableRowIndex": 0,
+                      "children": [
+                        {
+                          "id": "tag:n1",
+                          "type": "TH",
+                          "label": "Sales Overview",
+                          "sourceNodeIds": ["n1"],
+                          "children": [],
+                          "columnSpan": 3,
+                          "tableSection": "head",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 0
+                        }
+                      ],
+                      "tableColumnCount": 3
+                    },
+                    {
+                      "id": "tag:table:table-2:head:row:1",
+                      "type": "TR",
+                      "tableRowIndex": 1,
+                      "children": [
+                        {
+                          "id": "tag:table:table-2:head:row:1:placeholder:0",
+                          "type": "TH",
+                          "label": "",
+                          "sourceNodeIds": [],
+                          "synthetic": true,
+                          "repairReason": "table-row-irregularity",
+                          "tableSection": "head",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 0,
+                          "children": []
+                        },
+                        {
+                          "id": "tag:n2",
+                          "type": "TH",
+                          "label": "Region",
+                          "sourceNodeIds": ["n2"],
+                          "children": [],
+                          "tableSection": "head",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 1
+                        },
+                        {
+                          "id": "tag:n3",
+                          "type": "TH",
+                          "label": "Revenue",
+                          "sourceNodeIds": ["n3"],
+                          "children": [],
+                          "tableSection": "head",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 2
+                        }
+                      ],
+                      "tableColumnCount": 3,
+                      "repairReason": "table-row-irregularity"
+                    }
+                  ]
+                },
+                {
+                  "id": "tag:table:table-2:body",
+                  "type": "TBody",
+                  "children": [
+                    {
+                      "id": "tag:table:table-2:body:row:2",
+                      "type": "TR",
+                      "tableRowIndex": 2,
+                      "children": [
+                        {
+                          "id": "tag:n4",
+                          "type": "TD",
+                          "label": "East",
+                          "sourceNodeIds": ["n4"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 2,
+                          "tableColumnIndex": 0
+                        },
+                        {
+                          "id": "tag:n5",
+                          "type": "TD",
+                          "label": "$9M",
+                          "sourceNodeIds": ["n5"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 2,
+                          "tableColumnIndex": 1
+                        },
+                        {
+                          "id": "tag:n6",
+                          "type": "TD",
+                          "label": "North",
+                          "sourceNodeIds": ["n6"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 2,
+                          "tableColumnIndex": 2
+                        }
+                      ],
+                      "tableColumnCount": 3
+                    }
+                  ]
+                }
+              ],
+              "tableColumnCount": 3,
+              "tableRegularity": {
+                "applied": true,
+                "expectedColumnCount": 3,
+                "repairedRowCount": 1,
+                "insertedPlaceholderCellCount": 1,
+                "insertedSyntheticRowCount": 0,
+                "shiftedCellCount": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "rowspan-carry-preservation",
+      "expected": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic:rowspan-carry:tagging",
+        "source": {
+          "semanticDocumentId": "semantic:rowspan-carry",
+          "headingNormalization": {
+            "applied": false,
+            "totalHeadingCount": 0,
+            "adjustedHeadingCount": 0,
+            "firstDetectedHeading": null,
+            "maxNormalizedHeading": null,
+            "adjustments": []
+          },
+          "tableRegularityCorrection": {
+            "applied": false,
+            "algorithm": "grid-normalization-v1",
+            "tablesInspected": 1,
+            "correctedTables": 0,
+            "repairedRowCount": 0,
+            "insertedPlaceholderCellCount": 0,
+            "insertedSyntheticRowCount": 0,
+            "shiftedCellCount": 0
+          }
+        },
+        "root": {
+          "id": "tag:document",
+          "type": "Document",
+          "children": [
+            {
+              "id": "tag:table:table-3",
+              "type": "Table",
+              "sourceNodeIds": [],
+              "children": [
+                {
+                  "id": "tag:table:table-3:body",
+                  "type": "TBody",
+                  "children": [
+                    {
+                      "id": "tag:table:table-3:body:row:0",
+                      "type": "TR",
+                      "tableRowIndex": 0,
+                      "children": [
+                        {
+                          "id": "tag:n1",
+                          "type": "TH",
+                          "label": "Region",
+                          "sourceNodeIds": ["n1"],
+                          "children": [],
+                          "rowSpan": 2,
+                          "tableSection": "body",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 0
+                        },
+                        {
+                          "id": "tag:n2",
+                          "type": "TD",
+                          "label": "Q1",
+                          "sourceNodeIds": ["n2"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 1
+                        }
+                      ],
+                      "tableColumnCount": 2
+                    },
+                    {
+                      "id": "tag:table:table-3:body:row:1",
+                      "type": "TR",
+                      "tableRowIndex": 1,
+                      "children": [
+                        {
+                          "id": "tag:n3",
+                          "type": "TD",
+                          "label": "Q2",
+                          "sourceNodeIds": ["n3"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 1
+                        }
+                      ],
+                      "tableColumnCount": 2
+                    }
+                  ]
+                }
+              ],
+              "tableColumnCount": 2,
+              "tableRegularity": {
+                "applied": false,
+                "expectedColumnCount": 2,
+                "repairedRowCount": 0,
+                "insertedPlaceholderCellCount": 0,
+                "insertedSyntheticRowCount": 0,
+                "shiftedCellCount": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "trailing-rowspan-continuation",
+      "expected": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic:trailing-rowspan:tagging",
+        "source": {
+          "semanticDocumentId": "semantic:trailing-rowspan",
+          "headingNormalization": {
+            "applied": false,
+            "totalHeadingCount": 0,
+            "adjustedHeadingCount": 0,
+            "firstDetectedHeading": null,
+            "maxNormalizedHeading": null,
+            "adjustments": []
+          },
+          "tableRegularityCorrection": {
+            "applied": true,
+            "algorithm": "grid-normalization-v1",
+            "tablesInspected": 1,
+            "correctedTables": 1,
+            "repairedRowCount": 1,
+            "insertedPlaceholderCellCount": 1,
+            "insertedSyntheticRowCount": 1,
+            "shiftedCellCount": 0
+          }
+        },
+        "root": {
+          "id": "tag:document",
+          "type": "Document",
+          "children": [
+            {
+              "id": "tag:table:table-4",
+              "type": "Table",
+              "sourceNodeIds": [],
+              "children": [
+                {
+                  "id": "tag:table:table-4:body",
+                  "type": "TBody",
+                  "children": [
+                    {
+                      "id": "tag:table:table-4:body:row:0",
+                      "type": "TR",
+                      "tableRowIndex": 0,
+                      "children": [
+                        {
+                          "id": "tag:n1",
+                          "type": "TH",
+                          "label": "Region",
+                          "sourceNodeIds": ["n1"],
+                          "children": [],
+                          "rowSpan": 2,
+                          "tableSection": "body",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 0
+                        },
+                        {
+                          "id": "tag:n2",
+                          "type": "TD",
+                          "label": "Q1",
+                          "sourceNodeIds": ["n2"],
+                          "children": [],
+                          "tableSection": "body",
+                          "tableRowIndex": 0,
+                          "tableColumnIndex": 1
+                        }
+                      ],
+                      "tableColumnCount": 2
+                    },
+                    {
+                      "id": "tag:table:table-4:body:row:1",
+                      "type": "TR",
+                      "tableRowIndex": 1,
+                      "children": [
+                        {
+                          "id": "tag:table:table-4:body:row:1:placeholder:1",
+                          "type": "TD",
+                          "label": "",
+                          "sourceNodeIds": [],
+                          "synthetic": true,
+                          "repairReason": "table-row-irregularity",
+                          "tableSection": "body",
+                          "tableRowIndex": 1,
+                          "tableColumnIndex": 1,
+                          "children": []
+                        }
+                      ],
+                      "synthetic": true,
+                      "repairReason": "table-rowspan-continuation",
+                      "tableColumnCount": 2
+                    }
+                  ]
+                }
+              ],
+              "tableColumnCount": 2,
+              "tableRegularity": {
+                "applied": true,
+                "expectedColumnCount": 2,
+                "repairedRowCount": 1,
+                "insertedPlaceholderCellCount": 1,
+                "insertedSyntheticRowCount": 1,
+                "shiftedCellCount": 0
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
