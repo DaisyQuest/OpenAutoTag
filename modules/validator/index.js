@@ -384,6 +384,10 @@ function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
     return null;
   }
 
+  const suppressedFindingCodes = suppressedFindings
+    .map((finding) => finding.code)
+    .sort((left, right) => left.localeCompare(right));
+
   return {
     metadataPresent: Boolean(metadataProbe.metadataPresent),
     infoMatchesXmp: Boolean(metadataProbe.infoMatchesXmp),
@@ -397,7 +401,7 @@ function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
       metadataProbe.dcTitleDetected === true &&
       metadataProbe.pdfUaIdentificationDetected === true,
     correctedByValidator: suppressedFindings.length > 0,
-    suppressedFindingCodes: suppressedFindings.map((finding) => finding.code)
+    suppressedFindingCodes
   };
 }
 
