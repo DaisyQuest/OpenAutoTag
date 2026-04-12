@@ -6,6 +6,8 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import redactionReportSchema from "../../contracts/redaction-report.schema.json" with { type: "json" };
+import { buildJavaExecEnv, resolveJavaTool } from "../../scripts/java-runtime.js";
+import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 import {
   applySsnMasking,
   estimateMatchBbox,
@@ -19,7 +21,8 @@ const validateLayout = ajv.compile(layoutSchema);
 const validateRedactionReport = ajv.compile(redactionReportSchema);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
-const buildDir = path.join(moduleDir, ".build");
+const repoRoot = path.resolve(moduleDir, "..", "..");
+const buildDir = getRuntimeBuildDir("modules-redactor", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfSsnRedactorCli.java");
 const javaClassPath = path.join(buildDir, "PdfSsnRedactorCli.class");
 const pdfboxJarCandidates = [
@@ -27,6 +30,7 @@ const pdfboxJarCandidates = [
   path.join(moduleDir, "..", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar"),
   path.join(moduleDir, "..", "validator", "vendor", "pdfbox-app-3.0.7.jar")
 ];
+const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {
   const args = new Map();
@@ -41,9 +45,9 @@ function parseArgs(argv) {
   };
 }
 
-function execCommand(command, args) {
+function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, (error, stdout, stderr) => {
+    execFile(command, args, { env }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -84,15 +88,22 @@ async function ensureJavaHelperCompiled() {
   }
 
   const pdfboxJarPath = await resolvePdfboxJarPath();
-  await execCommand("javac", [
-    "-encoding",
-    "UTF-8",
-    "-cp",
-    pdfboxJarPath,
-    "-d",
-    buildDir,
-    javaSourcePath
-  ]);
+  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+  await execCommand(
+    javacCommand,
+    [
+      "-encoding",
+      "UTF-8",
+      "-cp",
+      pdfboxJarPath,
+      "-d",
+      buildDir,
+      javaSourcePath
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
 }
 
 export function buildRedactionPlan(layoutDocument) {
@@ -135,17 +146,24 @@ async function buildInstructionFile(outputPath, matches) {
 async function runJavaRedactor({ pdfPath, instructionPath, outputPath }) {
   await ensureJavaHelperCompiled();
   const pdfboxJarPath = await resolvePdfboxJarPath();
-  const stdout = await execCommand("java", [
-    "-cp",
-    `${buildDir}${path.delimiter}${pdfboxJarPath}`,
-    "PdfSsnRedactorCli",
-    "--pdf",
-    path.resolve(pdfPath),
-    "--instructions",
-    path.resolve(instructionPath),
-    "--output",
-    path.resolve(outputPath)
-  ]);
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "PdfSsnRedactorCli",
+      "--pdf",
+      path.resolve(pdfPath),
+      "--instructions",
+      path.resolve(instructionPath),
+      "--output",
+      path.resolve(outputPath)
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
 
   return JSON.parse(stdout);
 }

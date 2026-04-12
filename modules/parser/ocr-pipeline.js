@@ -4,10 +4,13 @@ import os from "node:os";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { buildJavaExecEnv, resolveJavaTool } from "../../scripts/java-runtime.js";
+import { getRuntimeBuildDir, getRuntimeCacheDir } from "../../scripts/runtime-paths.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
-const buildDir = path.join(moduleDir, ".build");
-const defaultCachePath = path.join(moduleDir, ".cache", "tesseract");
+const repoRoot = path.resolve(moduleDir, "..", "..");
+const buildDir = getRuntimeBuildDir("modules-parser-ocr", { repoRoot });
+const defaultCachePath = getRuntimeCacheDir("tesseract", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfOcrRenderCli.java");
 const javaClassPath = path.join(buildDir, "PdfOcrRenderCli.class");
 const pdfboxJarCandidates = [
@@ -15,6 +18,7 @@ const pdfboxJarCandidates = [
   path.join(moduleDir, "..", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar"),
   path.join(moduleDir, "..", "validator", "vendor", "pdfbox-app-3.0.7.jar")
 ];
+const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 export const DEFAULT_RENDER_VARIANTS = [
   {
@@ -52,9 +56,9 @@ export const DEFAULT_RECOGNITION_PROFILES = [
   }
 ];
 
-function execCommand(command, args) {
+function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+    execFile(command, args, { env, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -95,15 +99,22 @@ async function ensureJavaHelperCompiled() {
   }
 
   const pdfboxJarPath = await resolvePdfboxJarPath();
-  await execCommand("javac", [
-    "-encoding",
-    "UTF-8",
-    "-cp",
-    pdfboxJarPath,
-    "-d",
-    buildDir,
-    javaSourcePath
-  ]);
+  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+  await execCommand(
+    javacCommand,
+    [
+      "-encoding",
+      "UTF-8",
+      "-cp",
+      pdfboxJarPath,
+      "-d",
+      buildDir,
+      javaSourcePath
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
 }
 
 function round(value) {
@@ -474,19 +485,26 @@ export async function renderPageVariantsWithPdfBox({
   const pdfboxJarPath = await resolvePdfboxJarPath();
   const pageNumbers = pages.map((page) => page.pageNumber).join(",");
 
-  const stdout = await execCommand("java", [
-    "-cp",
-    `${buildDir}${path.delimiter}${pdfboxJarPath}`,
-    "PdfOcrRenderCli",
-    "--pdf",
-    path.resolve(pdfPath),
-    "--output-dir",
-    path.resolve(outputDir),
-    "--pages",
-    pageNumbers,
-    "--variants",
-    serializeRenderVariants(renderVariants)
-  ]);
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "PdfOcrRenderCli",
+      "--pdf",
+      path.resolve(pdfPath),
+      "--output-dir",
+      path.resolve(outputDir),
+      "--pages",
+      pageNumbers,
+      "--variants",
+      serializeRenderVariants(renderVariants)
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
 
   return JSON.parse(stdout.trim());
 }

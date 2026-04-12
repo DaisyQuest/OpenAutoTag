@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import layoutSchema from "../contracts/layout.schema.json" with { type: "json" };
 import tableStructureSchema from "../contracts/table-structure.schema.json" with { type: "json" };
 import { buildJavaExecEnv, resolveJavaTool } from "./java-runtime.js";
+import { getRuntimeBuildDir } from "./runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateLayout = ajv.compile(layoutSchema);
@@ -13,7 +14,7 @@ const validateTableStructure = ajv.compile(tableStructureSchema);
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
-const buildDir = path.join(scriptDir, ".build");
+const buildDir = getRuntimeBuildDir("scripts-table-structure-map", { repoRoot });
 const javaSourcePath = path.join(scriptDir, "java", "TableStructureExtractorCli.java");
 const javaClassPath = path.join(buildDir, "TableStructureExtractorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");

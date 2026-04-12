@@ -5,6 +5,7 @@ import { access, chmod, mkdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
+import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateTagging = ajv.compile(taggingSchema);
@@ -12,6 +13,7 @@ const validateTagging = ajv.compile(taggingSchema);
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const vendorDir = path.join(moduleDir, "vendor");
 const bundledJavaHome = path.join(vendorDir, "java");
+const repoRoot = path.resolve(moduleDir, "..", "..");
 const defaultVeraPdfPaths =
   process.platform === "win32"
     ? [path.join(vendorDir, "verapdf", "app", "verapdf.bat")]
@@ -19,7 +21,7 @@ const defaultVeraPdfPaths =
         path.join(vendorDir, "verapdf", "app", "verapdf"),
         path.join(vendorDir, "verapdf", "app", "bin", "verapdf")
       ];
-const buildDir = path.join(moduleDir, ".build");
+const buildDir = getRuntimeBuildDir("modules-validator", { repoRoot });
 const metadataProbeSourcePath = path.join(moduleDir, "java", "MetadataProbeCli.java");
 const metadataProbeClassPath = path.join(buildDir, "MetadataProbeCli.class");
 const veraPdfJarPath = path.join(vendorDir, "verapdf", "app", "bin", "pdfbox-apps-1.28.2.jar");

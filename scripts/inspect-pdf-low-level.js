@@ -3,10 +3,11 @@ import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { buildJavaExecEnv, resolveJavaTool } from "./java-runtime.js";
+import { getRuntimeBuildDir } from "./runtime-paths.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
-const buildDir = path.join(scriptDir, ".build");
+const buildDir = getRuntimeBuildDir("scripts-low-level-inspector", { repoRoot });
 const javaSourcePath = path.join(scriptDir, "java", "LowLevelPdfInspectorCli.java");
 const javaClassPath = path.join(buildDir, "LowLevelPdfInspectorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");

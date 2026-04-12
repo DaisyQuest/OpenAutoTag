@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pipelineJobSchema from "../contracts/pipeline-job.schema.json" with { type: "json" };
+import { getRuntimeSubdir } from "../scripts/runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateJob = ajv.compile(pipelineJobSchema);
@@ -287,7 +288,7 @@ export async function runManagedWorkload({
   buildStagePlan
 }) {
   const resolvedFilePath = path.resolve(filePath);
-  const resolvedOutputDir = path.resolve(outputDir || path.join(repoRoot, "tmp", jobId));
+  const resolvedOutputDir = path.resolve(outputDir || path.join(getRuntimeSubdir("jobs", { repoRoot }), jobId));
   await mkdir(resolvedOutputDir, { recursive: true });
 
   const artifacts = {};

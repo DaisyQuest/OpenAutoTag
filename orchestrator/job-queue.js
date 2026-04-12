@@ -1,11 +1,12 @@
 import crypto from "node:crypto";
 import path from "node:path";
+import { getRuntimeSubdir } from "../scripts/runtime-paths.js";
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-export function createJobQueue({ processor, outputRoot = path.resolve("tmp", "jobs") }) {
+export function createJobQueue({ processor, outputRoot = getRuntimeSubdir("jobs", { repoRoot: process.cwd() }) }) {
   const jobs = new Map();
   const queue = [];
   let running = false;
