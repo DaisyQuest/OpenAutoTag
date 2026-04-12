@@ -6,7 +6,7 @@ import path from "node:path";
 import { createSamplePdf } from "../../../test/fixtures/create-sample-pdf.js";
 import { createSpanishSamplePdf } from "../../../test/fixtures/create-spanish-sample-pdf.js";
 import { createImageOnlyPdf } from "../../../test/fixtures/create-image-only-pdf.js";
-import { groupTextItemsToBlocks, parsePdf } from "../index.js";
+import { createPdfDocumentLoadOptions, groupTextItemsToBlocks, parsePdf } from "../index.js";
 import { renderPageVariantsWithPdfBox, selectBestOcrCandidate } from "../ocr-pipeline.js";
 
 test("parser groups fragmented extractor items into a single line block", () => {
@@ -73,6 +73,14 @@ test("parser extracts text blocks with bounding boxes", async () => {
   assert.ok(layout.pages[0].textBlocks.length >= 4);
   assert.equal(layout.pages[0].textBlocks[0].bbox.length, 4);
   assert.ok(layout.pages[0].textBlocks.some((block) => block.text.includes("Accessibility Report")));
+});
+
+test("parser suppresses pdfjs warnings in CLI JSON output", () => {
+  const options = createPdfDocumentLoadOptions(new Uint8Array([1, 2, 3]));
+
+  assert.equal(options.verbosity, 0);
+  assert.equal(options.useSystemFonts, true);
+  assert.equal(options.isEvalSupported, false);
 });
 
 test("parser detects Spanish language in native text PDFs", async () => {
