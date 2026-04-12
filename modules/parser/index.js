@@ -2,7 +2,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, VerbosityLevel } from "pdfjs-dist/legacy/build/pdf.mjs";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import {
   DEFAULT_RECOGNITION_PROFILES,
@@ -22,6 +22,15 @@ const validateLayout = ajv.compile(layoutSchema);
 function createDocumentId(filePath) {
   const base = path.basename(filePath, path.extname(filePath));
   return `layout:${base}`;
+}
+
+export function createPdfDocumentLoadOptions(data) {
+  return {
+    data,
+    useSystemFonts: true,
+    isEvalSupported: false,
+    verbosity: VerbosityLevel.ERRORS
+  };
 }
 
 function normalizeText(value) {
@@ -432,11 +441,7 @@ async function applyOcrEnhancement(pdfPath, pages, ocrOptions) {
 export async function parsePdf(filePath, options = {}) {
   const absolutePath = path.resolve(filePath);
   const data = new Uint8Array(await readFile(absolutePath));
-  const pdf = await getDocument({
-    data,
-    useSystemFonts: true,
-    isEvalSupported: false
-  }).promise;
+  const pdf = await getDocument(createPdfDocumentLoadOptions(data)).promise;
 
   const pages = [];
 
