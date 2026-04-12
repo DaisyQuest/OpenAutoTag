@@ -4,6 +4,7 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import layoutSchema from "../contracts/layout.schema.json" with { type: "json" };
+import { buildJavaExecEnv, resolveJavaTool } from "./java-runtime.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateLayout = ajv.compile(layoutSchema);
@@ -14,6 +15,7 @@ const buildDir = path.join(scriptDir, ".build");
 const javaSourcePath = path.join(scriptDir, "java", "SourceTextRunExtractorCli.java");
 const javaClassPath = path.join(buildDir, "SourceTextRunExtractorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {
   const args = new Map();
@@ -28,9 +30,9 @@ function parseArgs(argv) {
   };
 }
 
-function execCommand(command, args) {
+function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { cwd: repoRoot, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+    execFile(command, args, { cwd: repoRoot, env, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -57,15 +59,22 @@ async function ensureJavaHelperCompiled() {
     return;
   }
 
-  await execCommand("javac", [
-    "-encoding",
-    "UTF-8",
-    "-cp",
-    pdfboxJarPath,
-    "-d",
-    buildDir,
-    javaSourcePath
-  ]);
+  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+  await execCommand(
+    javacCommand,
+    [
+      "-encoding",
+      "UTF-8",
+      "-cp",
+      pdfboxJarPath,
+      "-d",
+      buildDir,
+      javaSourcePath
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
 }
 
 function normalizeText(value) {
@@ -277,13 +286,20 @@ function buildBlockMappings(layoutDocument, sourceRuns) {
 
 async function extractSourceRuns(pdfPath) {
   await ensureJavaHelperCompiled();
-  const stdout = await execCommand("java", [
-    "-cp",
-    `${buildDir}${path.delimiter}${pdfboxJarPath}`,
-    "SourceTextRunExtractorCli",
-    "--pdf",
-    path.resolve(pdfPath)
-  ]);
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "SourceTextRunExtractorCli",
+      "--pdf",
+      path.resolve(pdfPath)
+    ],
+    {
+      env: await buildJavaExecEnv({ bundledJavaHome })
+    }
+  );
   return JSON.parse(stdout);
 }
 
