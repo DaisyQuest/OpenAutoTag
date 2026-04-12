@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import layoutSchema from "../contracts/layout.schema.json" with { type: "json" };
 import tableStructureSchema from "../contracts/table-structure.schema.json" with { type: "json" };
-import { buildJavaExecEnv, resolveJavaTool } from "./java-runtime.js";
+import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "./java-runtime.js";
 import { getRuntimeBuildDir } from "./runtime-paths.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -56,28 +56,28 @@ async function needsCompilation() {
 }
 
 async function ensureJavaHelperCompiled() {
-  await mkdir(buildDir, { recursive: true });
-
-  if (!(await needsCompilation())) {
-    return;
-  }
-
-  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
-  await execCommand(
-    javacCommand,
-    [
-      "-encoding",
-      "UTF-8",
-      "-cp",
-      pdfboxJarPath,
-      "-d",
-      buildDir,
-      javaSourcePath
-    ],
-    {
-      env: await buildJavaExecEnv({ bundledJavaHome })
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsCompilation()),
+    compile: async () => {
+      const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      await execCommand(
+        javacCommand,
+        [
+          "-encoding",
+          "UTF-8",
+          "-cp",
+          pdfboxJarPath,
+          "-d",
+          buildDir,
+          javaSourcePath
+        ],
+        {
+          env: await buildJavaExecEnv({ bundledJavaHome })
+        }
+      );
     }
-  );
+  });
 }
 
 function round(value) {

@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import redactionReportSchema from "../../contracts/redaction-report.schema.json" with { type: "json" };
-import { buildJavaExecEnv, resolveJavaTool } from "../../scripts/java-runtime.js";
+import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 import {
   applySsnMasking,
@@ -81,29 +81,29 @@ async function needsCompilation() {
 }
 
 async function ensureJavaHelperCompiled() {
-  await mkdir(buildDir, { recursive: true });
-
-  if (!(await needsCompilation())) {
-    return;
-  }
-
-  const pdfboxJarPath = await resolvePdfboxJarPath();
-  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
-  await execCommand(
-    javacCommand,
-    [
-      "-encoding",
-      "UTF-8",
-      "-cp",
-      pdfboxJarPath,
-      "-d",
-      buildDir,
-      javaSourcePath
-    ],
-    {
-      env: await buildJavaExecEnv({ bundledJavaHome })
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsCompilation()),
+    compile: async () => {
+      const pdfboxJarPath = await resolvePdfboxJarPath();
+      const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      await execCommand(
+        javacCommand,
+        [
+          "-encoding",
+          "UTF-8",
+          "-cp",
+          pdfboxJarPath,
+          "-d",
+          buildDir,
+          javaSourcePath
+        ],
+        {
+          env: await buildJavaExecEnv({ bundledJavaHome })
+        }
+      );
     }
-  );
+  });
 }
 
 export function buildRedactionPlan(layoutDocument) {

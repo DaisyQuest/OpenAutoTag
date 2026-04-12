@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../../scripts/runtime-paths.js";
+import {
+  getRuntimeBuildDir,
+  getRuntimeRoot,
+  getRuntimeSubdir,
+  isAzureAppServiceRuntime
+} from "../../scripts/runtime-paths.js";
 
 function withEnv(overrides, callback) {
   const previousValues = new Map();
@@ -70,6 +75,23 @@ test("runtime paths stay repo-local outside Azure when no override is configured
     () => {
       assert.equal(isAzureAppServiceRuntime(), false);
       assert.equal(getRuntimeRoot({ repoRoot: "/repo" }), path.resolve("/repo", "tmp"));
+    }
+  );
+});
+
+test("runtime build paths stay stable across processes for shared helper reuse", () => {
+  withEnv(
+    {
+      PIPELINE_DATA_ROOT: null,
+      WEBSITE_SITE_NAME: null,
+      WEBSITE_RUN_FROM_PACKAGE: null,
+      WEBSITES_ENABLE_APP_SERVICE_STORAGE: null
+    },
+    () => {
+      assert.equal(
+        getRuntimeBuildDir("modules-validator", { repoRoot: "/repo" }),
+        path.resolve("/repo", "tmp", "build", "modules-validator")
+      );
     }
   );
 });
