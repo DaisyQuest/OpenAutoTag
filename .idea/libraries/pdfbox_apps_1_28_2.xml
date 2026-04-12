@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="pdfbox-apps-1.28.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf/app/bin/pdfbox-apps-1.28.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

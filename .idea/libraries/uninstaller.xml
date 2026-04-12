@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="uninstaller">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf/app/Uninstaller/uninstaller.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
