@@ -53,6 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
+          include-hidden-files: true
           path: |
             package.json
             package-lock.json

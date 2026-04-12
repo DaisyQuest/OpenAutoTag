@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { buildJavaExecEnv, resolveJavaTool } from "./java-runtime.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
@@ -9,6 +10,7 @@ const buildDir = path.join(scriptDir, ".build");
 const javaSourcePath = path.join(scriptDir, "java", "LowLevelPdfInspectorCli.java");
 const javaClassPath = path.join(buildDir, "LowLevelPdfInspectorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {
   const args = new Map();
@@ -21,9 +23,9 @@ function parseArgs(argv) {
   };
 }
 
-function execCommand(command, args) {
+function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { cwd: repoRoot, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+    execFile(command, args, { cwd: repoRoot, env, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -50,15 +52,28 @@ async function ensureJavaHelperCompiled() {
     return;
   }
 
-  await execCommand("javac", [
-    "-encoding",
-    "UTF-8",
-    "-cp",
-    pdfboxJarPath,
-    "-d",
-    buildDir,
-    javaSourcePath
-  ]);
+  const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+  try {
+    await execCommand(
+      javacCommand,
+      [
+        "-encoding",
+        "UTF-8",
+        "-cp",
+        pdfboxJarPath,
+        "-d",
+        buildDir,
+        javaSourcePath
+      ],
+      {
+        env: await buildJavaExecEnv({ bundledJavaHome })
+      }
+    );
+  } catch (error) {
+    throw new Error(
+      `Unable to compile low-level PDF inspector helper. Install a JDK, set PIPELINE_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
+    );
+  }
 }
 
 export async function inspectPdfLowLevel({ pdfPath }) {
@@ -67,13 +82,27 @@ export async function inspectPdfLowLevel({ pdfPath }) {
   }
 
   await ensureJavaHelperCompiled();
-  const stdout = await execCommand("java", [
-    "-cp",
-    `${buildDir}${path.delimiter}${pdfboxJarPath}`,
-    "LowLevelPdfInspectorCli",
-    "--pdf",
-    path.resolve(pdfPath)
-  ]);
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  let stdout;
+  try {
+    stdout = await execCommand(
+      javaCommand,
+      [
+        "-cp",
+        `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+        "LowLevelPdfInspectorCli",
+        "--pdf",
+        path.resolve(pdfPath)
+      ],
+      {
+        env: await buildJavaExecEnv({ bundledJavaHome })
+      }
+    );
+  } catch (error) {
+    throw new Error(
+      `Unable to run low-level PDF inspector. Set PIPELINE_JAVA_PATH, JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${error.message}`
+    );
+  }
 
   return JSON.parse(stdout);
 }
