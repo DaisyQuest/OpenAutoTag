@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="verapdf-izpack-installer-1.28.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf/verapdf-pdfbox-1.28.2/verapdf-izpack-installer-1.28.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
