@@ -1,7 +1,9 @@
 import Ajv2020 from "ajv/dist/2020.js";
-import { execFile } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { createWriteStream } from "node:fs";
+import { mkdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import pipelineJobSchema from "../contracts/pipeline-job.schema.json" with { type: "json" };
 import { getRuntimeSubdir } from "../scripts/runtime-paths.js";
@@ -12,24 +14,67 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const repoRoot = path.resolve(__dirname, "..");
 export const DEFAULT_STAGE_ATTEMPTS = 3;
+const STDERR_TAIL_LIMIT = 64 * 1024;
 
-function execNode(scriptPath, args) {
-  return new Promise((resolve, reject) => {
-    execFile("node", [scriptPath, ...args], { cwd: repoRoot, maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
-      if (error) {
-        reject(new Error(stderr || error.message));
-        return;
-      }
+function captureStderrTail(buffer, chunk) {
+  const next = buffer + chunk.toString("utf8");
+  return next.length <= STDERR_TAIL_LIMIT ? next : next.slice(-STDERR_TAIL_LIMIT);
+}
 
-      resolve(stdout);
-    });
+function resolveScriptPath(scriptPath) {
+  return path.isAbsolute(scriptPath) ? scriptPath : path.join(repoRoot, scriptPath);
+}
+
+async function execNodeToFile(scriptPath, args, outputPath) {
+  const resolvedScriptPath = resolveScriptPath(scriptPath);
+  const resolvedOutputPath = path.resolve(outputPath);
+  const tempOutputPath = path.join(
+    path.dirname(resolvedOutputPath),
+    `.${path.basename(resolvedOutputPath)}.${process.pid}.${Date.now()}.tmp`
+  );
+
+  await mkdir(path.dirname(resolvedOutputPath), { recursive: true });
+
+  const child = spawn("node", [resolvedScriptPath, ...args], {
+    cwd: repoRoot,
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true
   });
+
+  let stderrTail = "";
+  child.stderr.on("data", (chunk) => {
+    stderrTail = captureStderrTail(stderrTail, chunk);
+  });
+
+  const stdoutPromise = pipeline(child.stdout, createWriteStream(tempOutputPath, { flags: "wx" })).catch((error) => {
+    child.kill();
+    throw error;
+  });
+
+  const exitPromise = new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code, signal) => resolve({ code, signal }));
+  });
+
+  try {
+    const [{ code, signal }] = await Promise.all([exitPromise, stdoutPromise]);
+
+    if (code !== 0) {
+      const message = stderrTail.trim();
+      throw new Error(message || signal || `Node process exited with code ${code}`);
+    }
+
+    await rm(resolvedOutputPath, { force: true });
+    await rename(tempOutputPath, resolvedOutputPath);
+    return resolvedOutputPath;
+  } catch (error) {
+    await rm(tempOutputPath, { force: true }).catch(() => {});
+    throw new Error(stderrTail.trim() || error.message);
+  }
 }
 
 export async function runJsonStage(scriptRelativePath, args, outputPath) {
-  const stdout = await execNode(path.join(repoRoot, scriptRelativePath), args);
-  await writeFile(outputPath, stdout);
-  return path.resolve(outputPath);
+  return execNodeToFile(scriptRelativePath, args, outputPath);
 }
 
 function isRetryableStageError(error) {

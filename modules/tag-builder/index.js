@@ -129,6 +129,9 @@ function createLeaf(node, headingNormalization) {
   }
 
   if (resolvedRole === "TH" || resolvedRole === "TD") {
+    const tableRowIndex = getTableRowIndex(node);
+    const tableColumnIndex = getTableColumnIndex(node);
+
     if ((node.tableRowSpan || 1) > 1) {
       leaf.rowSpan = node.tableRowSpan;
     }
@@ -140,6 +143,12 @@ function createLeaf(node, headingNormalization) {
     }
     if (node.tableSource) {
       leaf.tableSource = node.tableSource;
+    }
+    if (Number.isInteger(tableRowIndex) && tableRowIndex >= 0) {
+      leaf.tableRowIndex = tableRowIndex;
+    }
+    if (Number.isInteger(tableColumnIndex) && tableColumnIndex >= 0) {
+      leaf.tableColumnIndex = tableColumnIndex;
     }
   }
 
@@ -176,6 +185,10 @@ function getTableGroupId(node) {
 
 function getTableRowIndex(node) {
   return node.tableRowIndex ?? node.rowIndex ?? node.tableRow ?? 0;
+}
+
+function getTableColumnIndex(node) {
+  return node.tableColumnIndex ?? node.columnIndex ?? node.tableColumn ?? null;
 }
 
 function createTableNode(node, groupId) {
@@ -233,10 +246,400 @@ function createTableRowNode(containerNode, rowIndex) {
   const rowNode = {
     id: `${containerNode.id}:row:${rowIndex}`,
     type: "TR",
+    tableRowIndex: rowIndex,
     children: []
   };
   containerNode.children.push(rowNode);
   return rowNode;
+}
+
+function isTableCellNode(node) {
+  return node?.type === "TH" || node?.type === "TD";
+}
+
+function toTableCoordinate(value) {
+  const coordinate = Number(value);
+  return Number.isInteger(coordinate) && coordinate >= 0 ? coordinate : null;
+}
+
+function getSectionKeyFromNode(sectionNode) {
+  switch (sectionNode?.type) {
+    case "THead":
+      return "head";
+    case "TFoot":
+      return "foot";
+    default:
+      return "body";
+  }
+}
+
+function getMaxOccupiedColumn(occupiedColumns) {
+  let maxColumn = -1;
+  for (const column of occupiedColumns) {
+    if (column > maxColumn) {
+      maxColumn = column;
+    }
+  }
+  return maxColumn;
+}
+
+function getOccupiedColumnCount(occupiedColumns) {
+  return getMaxOccupiedColumn(occupiedColumns) + 1;
+}
+
+function findNextAvailableColumn(occupiedColumns, startColumn = 0) {
+  let column = Math.max(0, Number(startColumn) || 0);
+  while (occupiedColumns.has(column)) {
+    column += 1;
+  }
+  return column;
+}
+
+function isRangeAvailable(occupiedColumns, startColumn, span) {
+  for (let column = startColumn; column < startColumn + span; column += 1) {
+    if (occupiedColumns.has(column)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function sumDeclaredColumnWidths(cells) {
+  return cells.reduce((total, cell) => total + Math.max(1, Number(cell.columnSpan || 1)), 0);
+}
+
+function inferPlaceholderCellType(sectionNode, rowNode) {
+  if (sectionNode?.type === "THead") {
+    return "TH";
+  }
+
+  const rowCells = (rowNode?.children || []).filter(isTableCellNode);
+  if (rowCells.length > 0 && rowCells.every((cell) => cell.type === "TH")) {
+    return "TH";
+  }
+
+  return "TD";
+}
+
+function createPlaceholderCell(rowNode, sectionNode, rowIndex, columnIndex, type) {
+  return {
+    id: `${rowNode.id}:placeholder:${columnIndex}`,
+    type,
+    label: "",
+    sourceNodeIds: [],
+    synthetic: true,
+    repairReason: "table-row-irregularity",
+    tableSection: getSectionKeyFromNode(sectionNode),
+    tableRowIndex: rowIndex,
+    tableColumnIndex: columnIndex,
+    children: []
+  };
+}
+
+function sameChildSequence(existingChildren, replacementChildren) {
+  if (existingChildren.length !== replacementChildren.length) {
+    return false;
+  }
+
+  for (let index = 0; index < existingChildren.length; index += 1) {
+    if (existingChildren[index] !== replacementChildren[index]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function collectTableRowDescriptors(tableNode) {
+  const rowDescriptors = [];
+  let fallbackRowIndex = 0;
+
+  for (const sectionNode of tableNode.children || []) {
+    if (!["THead", "TBody", "TFoot"].includes(sectionNode.type)) {
+      continue;
+    }
+
+    for (const rowNode of sectionNode.children || []) {
+      if (rowNode.type !== "TR") {
+        continue;
+      }
+
+      const firstCell = (rowNode.children || []).find(isTableCellNode);
+      const rowIndex =
+        toTableCoordinate(rowNode.tableRowIndex) ?? toTableCoordinate(firstCell?.tableRowIndex) ?? fallbackRowIndex;
+
+      rowNode.tableRowIndex = rowIndex;
+      fallbackRowIndex = rowIndex + 1;
+      rowDescriptors.push({
+        sectionNode,
+        rowNode,
+        rowIndex
+      });
+    }
+  }
+
+  return rowDescriptors;
+}
+
+function buildRowPlacementPlan(rowDescriptors, targetColumnCount = null) {
+  const plans = [];
+  let requiredColumnCount = Math.max(0, Number(targetColumnCount) || 0);
+  let carry = [];
+
+  for (const descriptor of rowDescriptors) {
+    const carryColumns = new Set();
+    for (let column = 0; column < carry.length; column += 1) {
+      if ((carry[column] || 0) > 0) {
+        carryColumns.add(column);
+      }
+    }
+
+    const occupiedColumns = new Set(carryColumns);
+    const rowCells = (descriptor.rowNode.children || []).filter(isTableCellNode);
+    const placements = [];
+    let nextAvailableColumn = findNextAvailableColumn(occupiedColumns, 0);
+
+    for (let cellIndex = 0; cellIndex < rowCells.length; cellIndex += 1) {
+      const cell = rowCells[cellIndex];
+      const columnSpan = Math.max(1, Number(cell.columnSpan || 1));
+      const remainingDeclaredWidth = sumDeclaredColumnWidths(rowCells.slice(cellIndex));
+      const hintedColumn = toTableCoordinate(cell.tableColumnIndex);
+      const maxReasonableStart = getOccupiedColumnCount(occupiedColumns) + remainingDeclaredWidth + 2;
+
+      let startColumn =
+        hintedColumn != null && hintedColumn <= maxReasonableStart ? hintedColumn : nextAvailableColumn;
+      startColumn = findNextAvailableColumn(occupiedColumns, startColumn);
+
+      while (!isRangeAvailable(occupiedColumns, startColumn, columnSpan)) {
+        startColumn = findNextAvailableColumn(occupiedColumns, startColumn + 1);
+      }
+
+      placements.push({
+        cell,
+        startColumn,
+        columnSpan
+      });
+
+      for (let column = startColumn; column < startColumn + columnSpan; column += 1) {
+        occupiedColumns.add(column);
+      }
+
+      nextAvailableColumn = findNextAvailableColumn(occupiedColumns, startColumn + columnSpan);
+    }
+
+    requiredColumnCount = Math.max(requiredColumnCount, getOccupiedColumnCount(occupiedColumns));
+
+    plans.push({
+      ...descriptor,
+      carryColumns,
+      placements
+    });
+
+    const nextCarry = [];
+    for (let column = 0; column < carry.length; column += 1) {
+      const remainingRows = (carry[column] || 0) - 1;
+      if (remainingRows > 0) {
+        nextCarry[column] = remainingRows;
+      }
+    }
+
+    for (const placement of placements) {
+      const rowSpan = Math.max(1, Number(placement.cell.rowSpan || 1));
+      const remainingRows = rowSpan - 1;
+      if (remainingRows <= 0) {
+        continue;
+      }
+
+      for (let column = placement.startColumn; column < placement.startColumn + placement.columnSpan; column += 1) {
+        nextCarry[column] = Math.max(nextCarry[column] || 0, remainingRows);
+      }
+    }
+
+    carry = nextCarry;
+  }
+
+  return {
+    plans,
+    requiredColumnCount,
+    remainingCarry: carry
+  };
+}
+
+function normalizeTableNode(tableNode) {
+  const rowDescriptors = collectTableRowDescriptors(tableNode);
+  if (rowDescriptors.length === 0) {
+    tableNode.tableRegularity = {
+      applied: false,
+      expectedColumnCount: 0,
+      repairedRowCount: 0,
+      insertedPlaceholderCellCount: 0,
+      insertedSyntheticRowCount: 0,
+      shiftedCellCount: 0
+    };
+    return tableNode.tableRegularity;
+  }
+
+  const initialPlan = buildRowPlacementPlan(rowDescriptors);
+  const expectedColumnCount = Math.max(1, initialPlan.requiredColumnCount);
+  const normalizedPlan = buildRowPlacementPlan(rowDescriptors, expectedColumnCount);
+
+  let repairedRowCount = 0;
+  let insertedPlaceholderCellCount = 0;
+  let insertedSyntheticRowCount = 0;
+  let shiftedCellCount = 0;
+
+  for (const rowPlan of normalizedPlan.plans) {
+    const placeholderType = inferPlaceholderCellType(rowPlan.sectionNode, rowPlan.rowNode);
+    const replacementEntries = [];
+    const occupiedColumns = new Set(rowPlan.carryColumns);
+
+    for (const placement of rowPlan.placements) {
+      replacementEntries.push({
+        startColumn: placement.startColumn,
+        node: placement.cell,
+        synthetic: false
+      });
+
+      for (let column = placement.startColumn; column < placement.startColumn + placement.columnSpan; column += 1) {
+        occupiedColumns.add(column);
+      }
+    }
+
+    for (let column = 0; column < expectedColumnCount; column += 1) {
+      if (occupiedColumns.has(column)) {
+        continue;
+      }
+
+      replacementEntries.push({
+        startColumn: column,
+        node: createPlaceholderCell(rowPlan.rowNode, rowPlan.sectionNode, rowPlan.rowIndex, column, placeholderType),
+        synthetic: true
+      });
+      insertedPlaceholderCellCount += 1;
+    }
+
+    replacementEntries.sort((left, right) => left.startColumn - right.startColumn);
+    const replacementChildren = replacementEntries.map((entry) => entry.node);
+    let rowRepaired = replacementEntries.some((entry) => entry.synthetic);
+
+    for (const placement of rowPlan.placements) {
+      const normalizedColumnIndex = placement.startColumn;
+      const previousColumnIndex = toTableCoordinate(placement.cell.tableColumnIndex);
+
+      if (previousColumnIndex != null && previousColumnIndex !== normalizedColumnIndex) {
+        shiftedCellCount += 1;
+        rowRepaired = true;
+      }
+
+      placement.cell.tableRowIndex = rowPlan.rowIndex;
+      placement.cell.tableColumnIndex = normalizedColumnIndex;
+    }
+
+    if (!sameChildSequence(rowPlan.rowNode.children || [], replacementChildren)) {
+      rowRepaired = true;
+    }
+
+    rowPlan.rowNode.children = replacementChildren;
+    rowPlan.rowNode.tableRowIndex = rowPlan.rowIndex;
+    rowPlan.rowNode.tableColumnCount = expectedColumnCount;
+    if (rowRepaired) {
+      rowPlan.rowNode.repairReason = "table-row-irregularity";
+      repairedRowCount += 1;
+    }
+  }
+
+  const lastRow = rowDescriptors.at(-1);
+  let trailingCarry = [...normalizedPlan.remainingCarry];
+  let nextSyntheticRowIndex = (lastRow?.rowIndex ?? -1) + 1;
+
+  while (trailingCarry.some((remainingRows) => Number(remainingRows || 0) > 0)) {
+    const targetSectionNode = lastRow?.sectionNode || tableNode.children.at(-1);
+    if (!targetSectionNode) {
+      break;
+    }
+
+    const syntheticRow = createTableRowNode(targetSectionNode, nextSyntheticRowIndex);
+    syntheticRow.synthetic = true;
+    syntheticRow.repairReason = "table-rowspan-continuation";
+    syntheticRow.tableColumnCount = expectedColumnCount;
+
+    const placeholderType = inferPlaceholderCellType(targetSectionNode, lastRow?.rowNode || syntheticRow);
+    const occupiedColumns = new Set();
+    for (let column = 0; column < trailingCarry.length; column += 1) {
+      if ((trailingCarry[column] || 0) > 0) {
+        occupiedColumns.add(column);
+      }
+    }
+
+    syntheticRow.children = [];
+    for (let column = 0; column < expectedColumnCount; column += 1) {
+      if (occupiedColumns.has(column)) {
+        continue;
+      }
+
+      syntheticRow.children.push(
+        createPlaceholderCell(syntheticRow, targetSectionNode, nextSyntheticRowIndex, column, placeholderType)
+      );
+      insertedPlaceholderCellCount += 1;
+    }
+
+    insertedSyntheticRowCount += 1;
+    repairedRowCount += 1;
+    nextSyntheticRowIndex += 1;
+    trailingCarry = trailingCarry.map((remainingRows) => Math.max(0, Number(remainingRows || 0) - 1));
+  }
+
+  tableNode.tableColumnCount = expectedColumnCount;
+  tableNode.tableRegularity = {
+    applied: repairedRowCount > 0,
+    expectedColumnCount,
+    repairedRowCount,
+    insertedPlaceholderCellCount,
+    insertedSyntheticRowCount,
+    shiftedCellCount
+  };
+
+  return tableNode.tableRegularity;
+}
+
+function normalizeTableRegularity(rootNode) {
+  const summary = {
+    applied: false,
+    algorithm: "grid-normalization-v1",
+    tablesInspected: 0,
+    correctedTables: 0,
+    repairedRowCount: 0,
+    insertedPlaceholderCellCount: 0,
+    insertedSyntheticRowCount: 0,
+    shiftedCellCount: 0
+  };
+
+  const visit = (node) => {
+    if (!node) {
+      return;
+    }
+
+    if (node.type === "Table") {
+      const tableSummary = normalizeTableNode(node);
+      summary.tablesInspected += 1;
+      summary.repairedRowCount += tableSummary.repairedRowCount;
+      summary.insertedPlaceholderCellCount += tableSummary.insertedPlaceholderCellCount;
+      summary.insertedSyntheticRowCount += tableSummary.insertedSyntheticRowCount;
+      summary.shiftedCellCount += tableSummary.shiftedCellCount;
+
+      if (tableSummary.applied) {
+        summary.correctedTables += 1;
+      }
+    }
+
+    for (const child of node.children || []) {
+      visit(child);
+    }
+  };
+
+  visit(rootNode);
+  summary.applied = summary.correctedTables > 0;
+  return summary;
 }
 
 export async function buildTagTree(inputPath) {
@@ -359,13 +762,15 @@ export async function buildTagTree(inputPath) {
     currentContainer().children.push(createLeaf(node, headingNormalization));
   }
 
+  const tableRegularityCorrection = normalizeTableRegularity(root);
   const taggingDocument = {
     schemaVersion: "1.0.0",
     documentId: `${semanticDocument.documentId}:tagging`,
     source: {
       semanticDocumentId: semanticDocument.documentId,
-      filePath: semanticDocument.source.filePath,
-      headingNormalization: headingNormalization.summary
+      ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
+      headingNormalization: headingNormalization.summary,
+      tableRegularityCorrection
     },
     root
   };
