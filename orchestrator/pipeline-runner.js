@@ -1,0 +1,60 @@
+import { pathToFileURL } from "node:url";
+import { createAccessibilityPreparationStages, createTaggingOutputStages } from "./accessibility-stage-plan.js";
+import { DEFAULT_STAGE_ATTEMPTS, runManagedWorkload } from "./workload-runner.js";
+
+function createPipelineStages({ filePath, resolvedOutputDir, artifacts }) {
+  return [
+    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts }),
+    ...createTaggingOutputStages({ filePath, resolvedOutputDir, artifacts })
+  ];
+}
+
+export async function runPipeline({
+  filePath,
+  outputDir,
+  jobId = "manual-run",
+  workload = {
+    id: "accessibility-tagging",
+    label: "Accessibility Tagging"
+  },
+  options = {},
+  stageRunner = async ({ run }) => run(),
+  maxStageAttempts = DEFAULT_STAGE_ATTEMPTS
+}) {
+  return runManagedWorkload({
+    filePath,
+    outputDir,
+    jobId,
+    workload,
+    options,
+    stageRunner,
+    maxStageAttempts,
+    buildStagePlan: createPipelineStages
+  });
+}
+
+async function main() {
+  const args = new Map();
+  for (let index = 2; index < process.argv.length; index += 2) {
+    args.set(process.argv[index], process.argv[index + 1]);
+  }
+
+  const filePath = args.get("--pdf");
+  const outputDir = args.get("--output-dir");
+
+  if (!filePath) {
+    throw new Error("Usage: node orchestrator/pipeline-runner.js --pdf <input.pdf> --output-dir <outputDir>");
+  }
+
+  const result = await runPipeline({ filePath, outputDir });
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+}
+
+const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isCli) {
+  main().catch((error) => {
+    process.stderr.write(`${error.message}\n`);
+    process.exitCode = 1;
+  });
+}

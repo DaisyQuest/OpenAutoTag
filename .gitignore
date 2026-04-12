@@ -1,0 +1,16 @@
+node_modules/
+coverage/
+.nyc_output/
+dist/
+tmp/
+output/
+.playwright-cli/
+*.log
+eng.traineddata
+org/verapdf/
+modules/parser/.cache/
+modules/*/.build/
+scripts/.build/
+test/fixtures/.build/
+modules/validator/vendor/verapdf/
+modules/validator/vendor/verapdf-pdfbox-installer.zip

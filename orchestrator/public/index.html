@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Workload Engine</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="dashboard">
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <header class="hero hero-dashboard">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Local PDF Workloads</p>
+            <h1>Run tagging, validation, and redaction from one control surface.</h1>
+            <p class="lede">
+              Drop a folder, queue local PDFs, or point the server at a remote PDF URL. The dashboard keeps
+              workload selection, live batch state, report signals, and artifact access in one tabular workspace.
+            </p>
+            <div class="hero-link-row">
+              <a class="ghost-link" href="/testing-matrix.html">Testing Matrix</a>
+            </div>
+            <div class="hero-step-grid" aria-label="Dashboard workflow">
+              <article class="hero-step">
+                <span class="hero-step-number">01</span>
+                <strong>Queue</strong>
+                <p>Collect PDFs from files, whole directories, or a single remote URL without losing context.</p>
+              </article>
+              <article class="hero-step">
+                <span class="hero-step-number">02</span>
+                <strong>Run</strong>
+                <p>Launch the selected PDF workload as one batch with a single local upload.</p>
+              </article>
+              <article class="hero-step">
+                <span class="hero-step-number">03</span>
+                <strong>Review</strong>
+                <p>Scan the results table, then inspect the selected document inline.</p>
+              </article>
+            </div>
+          </div>
+
+          <aside class="hero-command">
+            <div class="hero-stat-grid">
+              <article class="summary-card">
+                <span class="summary-label">Queued PDFs</span>
+                <strong id="queued-count">0</strong>
+              </article>
+              <article class="summary-card">
+                <span class="summary-label">Payload</span>
+                <strong id="queued-size">0 B</strong>
+              </article>
+              <article class="summary-card">
+                <span class="summary-label">Batch State</span>
+                <strong id="batch-state">Idle</strong>
+              </article>
+            </div>
+
+            <section class="intake-surface" aria-labelledby="intake-title">
+              <div class="surface-header">
+                <div>
+                  <p class="eyebrow surface-eyebrow">Intake</p>
+                  <h2 id="intake-title">Queue PDFs</h2>
+                </div>
+                <span class="surface-caption">Files, folders, or URL</span>
+              </div>
+
+              <section class="workload-surface" aria-labelledby="workload-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="workload-title">Workload</h4>
+                  <span id="workload-caption">Loading workloads</span>
+                </div>
+                <div id="workload-list" class="workload-list"></div>
+              </section>
+
+              <div
+                id="dropzone"
+                class="dropzone"
+                role="button"
+                tabindex="0"
+                aria-label="Drop PDF files or folders here"
+              >
+                <div class="dropzone-copy">
+                  <p class="dropzone-title">Drag PDFs or whole folders here</p>
+                  <p class="dropzone-subtitle">Directory drops keep relative paths intact.</p>
+                </div>
+              </div>
+
+              <section class="url-intake" aria-labelledby="url-intake-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="url-intake-title">Remote PDF</h4>
+                  <span>Single URL</span>
+                </div>
+                <div class="url-intake-row">
+                  <input
+                    id="url-input"
+                    class="url-input"
+                    type="url"
+                    inputmode="url"
+                    placeholder="https://example.com/document.pdf"
+                    aria-label="Remote PDF URL"
+                  />
+                  <button id="start-url-job" class="action-button secondary" type="button">Run URL</button>
+                </div>
+                <p class="section-copy url-copy">
+                  Fetch a remote PDF from the server side and run the selected workload without uploading it manually.
+                </p>
+              </section>
+
+              <div class="controls">
+                <label class="action-button">
+                  <input id="file-picker" type="file" accept=".pdf,application/pdf" multiple hidden />
+                  <span>Select PDFs</span>
+                </label>
+                <label class="action-button secondary">
+                  <input
+                    id="directory-picker"
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    webkitdirectory
+                    hidden
+                  />
+                  <span>Select Folder</span>
+                </label>
+                <button id="clear-selection" class="ghost-button" type="button">Clear</button>
+                <button id="start-batch" class="launch-button" type="button">Run Selected Workload</button>
+              </div>
+
+              <p id="intake-message" class="message-line" aria-live="polite">Nothing queued yet.</p>
+            </section>
+          </aside>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel queue-panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Selection Ledger</h2>
+              <p class="section-copy">
+                Review the queue before upload. Relative paths, source origin, and payload size stay visible.
+              </p>
+            </div>
+            <span id="selection-caption">0 documents ready</span>
+          </div>
+          <div class="table-shell">
+            <table class="dashboard-table" aria-describedby="selection-caption">
+              <thead>
+                <tr>
+                  <th scope="col">Document</th>
+                  <th scope="col">Relative Path</th>
+                  <th scope="col">Source</th>
+                  <th scope="col">Size</th>
+                </tr>
+              </thead>
+              <tbody id="selection-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel batch-panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Batch Operations</h2>
+              <p class="section-copy">
+                Scan the table for workload status and inline signals. The inspector shows the selected document in detail.
+              </p>
+            </div>
+            <span id="batch-caption">No batch running</span>
+          </div>
+
+          <div id="batch-overview" class="batch-overview empty-state">
+            Start a batch to see tagging and validation results here.
+          </div>
+
+          <div class="results-workspace">
+            <div class="table-shell results-table-shell">
+              <table class="dashboard-table results-table" aria-describedby="batch-caption">
+                <thead>
+                  <tr>
+                    <th scope="col">Document</th>
+                    <th scope="col">Workload</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Outcome</th>
+                    <th scope="col">Signals</th>
+                    <th scope="col">Updated</th>
+                    <th scope="col">Primary Action</th>
+                  </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+              </table>
+            </div>
+
+            <aside id="detail-panel" class="detail-panel">
+              <div class="empty-detail">
+                Select a batch row to inspect workload diagnostics, inline reports, and artifact actions.
+              </div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

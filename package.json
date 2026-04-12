@@ -1,0 +1,30 @@
+{
+  "name": "pdf-accessibility-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Contract-first scaffold for a parallel PDF accessibility tagging pipeline.",
+  "scripts": {
+    "install:verapdf": "powershell -ExecutionPolicy Bypass -File scripts/install-verapdf.ps1",
+    "test": "node --test",
+    "test:integration": "node --test test/integration",
+    "test:goldmaster": "node --test test/integration/goldmaster.test.js",
+    "test:modules": "node --test modules/*/test",
+    "goldmaster:update": "node scripts/update-goldmasters.js",
+    "testing-matrix:update": "node scripts/update-testing-matrix.js",
+    "process:fixture": "node orchestrator/pipeline-runner.js --pdf tmp/sample.pdf --output-dir tmp/run",
+    "map:source-text": "node scripts/build-source-text-map.js",
+    "map:table-structure": "node scripts/build-table-structure-map.js",
+    "inspect:pdf": "node scripts/inspect-pdf-low-level.js",
+    "serve": "node orchestrator/server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38",
+    "tesseract.js": "^7.0.0"
+  }
+}

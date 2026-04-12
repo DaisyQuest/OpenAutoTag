@@ -1,0 +1,315 @@
+import Ajv2020 from "ajv/dist/2020.js";
+import { execFile } from "node:child_process";
+import { constants } from "node:fs";
+import { access, mkdir, readFile, stat } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
+
+const ajv = new Ajv2020({ allErrors: true });
+const validateTagging = ajv.compile(taggingSchema);
+
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const defaultVeraPdfPath = path.join(moduleDir, "vendor", "verapdf", "app", "verapdf.bat");
+const buildDir = path.join(moduleDir, ".build");
+const metadataProbeSourcePath = path.join(moduleDir, "java", "MetadataProbeCli.java");
+const metadataProbeClassPath = path.join(buildDir, "MetadataProbeCli.class");
+const veraPdfJarPath = path.join(moduleDir, "vendor", "verapdf", "app", "bin", "pdfbox-apps-1.28.2.jar");
+
+function parseArgs(argv) {
+  const args = new Map();
+  for (let index = 0; index < argv.length; index += 2) {
+    args.set(argv[index], argv[index + 1]);
+  }
+  return {
+    pdfPath: args.get("--pdf"),
+    manifestPath: args.get("--manifest")
+  };
+}
+
+function execCommand(command, args, { allowExitCodes = [] } = {}) {
+  return new Promise((resolve, reject) => {
+    execFile(command, args, { maxBuffer: 1024 * 1024 * 20, shell: process.platform === "win32" && /\.bat$/i.test(command) }, (error, stdout, stderr) => {
+      if (error && !allowExitCodes.includes(error.code)) {
+        reject(new Error(stderr || stdout || error.message));
+        return;
+      }
+
+      resolve({
+        stdout,
+        stderr,
+        exitCode: error ? error.code : 0
+      });
+    });
+  });
+}
+
+async function resolveVeraPdfPath() {
+  const configuredPath = process.env.VERAPDF_PATH ? path.resolve(process.env.VERAPDF_PATH) : defaultVeraPdfPath;
+  try {
+    await access(configuredPath, constants.R_OK);
+  } catch {
+    throw new Error(`veraPDF CLI not found at ${configuredPath}. Run 'npm run install:verapdf' or set VERAPDF_PATH.`);
+  }
+  return configuredPath;
+}
+
+async function needsJavaCompilation(sourcePath, classPath) {
+  try {
+    const [sourceStats, classStats] = await Promise.all([stat(sourcePath), stat(classPath)]);
+    return sourceStats.mtimeMs > classStats.mtimeMs;
+  } catch {
+    return true;
+  }
+}
+
+async function ensureMetadataProbeCompiled() {
+  await mkdir(buildDir, { recursive: true });
+
+  if (!(await needsJavaCompilation(metadataProbeSourcePath, metadataProbeClassPath))) {
+    return;
+  }
+
+  await execCommand("javac", [
+    "-encoding",
+    "UTF-8",
+    "-cp",
+    veraPdfJarPath,
+    "-d",
+    buildDir,
+    metadataProbeSourcePath
+  ]);
+}
+
+function sanitizeCode(value) {
+  return String(value || "UNKNOWN")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function parseVeraPdfReport(stdout) {
+  const parsed = JSON.parse(stdout.trim());
+  const validationResult = parsed.report?.jobs?.[0]?.validationResult?.[0];
+
+  if (!validationResult) {
+    throw new Error("veraPDF did not return a validation result.");
+  }
+
+  return {
+    raw: parsed,
+    validationResult,
+    details: validationResult.details || {},
+    buildInformation: parsed.report?.buildInformation || {}
+  };
+}
+
+async function runVeraPdf(pdfPath) {
+  const veraPdfPath = await resolveVeraPdfPath();
+  const flavour = process.env.VERAPDF_FLAVOUR || "ua1";
+  const { stdout } = await execCommand(
+    veraPdfPath,
+    ["--format", "json", "--flavour", flavour, "--loglevel", "0", pdfPath],
+    { allowExitCodes: [1] }
+  );
+
+  return parseVeraPdfReport(stdout);
+}
+
+async function runMetadataProbe(pdfPath) {
+  await ensureMetadataProbeCompiled();
+  const { stdout } = await execCommand("java", [
+    "-cp",
+    `${buildDir}${path.delimiter}${veraPdfJarPath}`,
+    "MetadataProbeCli",
+    "--pdf",
+    pdfPath
+  ]);
+  return JSON.parse(stdout.trim());
+}
+
+function buildManifestFindings(manifest) {
+  const findings = [];
+
+  if (!manifest.tagging || !validateTagging(manifest.tagging)) {
+    findings.push({
+      severity: "error",
+      code: "INVALID_TAGGING_MANIFEST",
+      message: ajv.errorsText(validateTagging.errors)
+    });
+  }
+
+  if (manifest.tagging?.root?.type !== "Document") {
+    findings.push({
+      severity: "error",
+      code: "MISSING_DOCUMENT_ROOT",
+      message: "Tagging tree root must be Document."
+    });
+  }
+
+  if (manifest.nativeTaggingApplied !== true) {
+    findings.push({
+      severity: "warning",
+      code: "NATIVE_TAGGING_NOT_APPLIED",
+      message: "Writer manifest does not claim native tagging."
+    });
+  }
+
+  return findings;
+}
+
+function buildVeraPdfFindings(report) {
+  const summaries = report.details.ruleSummaries || [];
+  return summaries
+    .filter((summary) => summary.status === "failed" || summary.ruleStatus === "FAILED")
+    .map((summary) => ({
+      severity: "error",
+      code: `VERAPDF_${sanitizeCode(summary.clause)}_${summary.testNumber ?? "RULE"}`,
+      clause: summary.clause,
+      specification: summary.specification,
+      description: summary.description,
+      object: summary.object,
+      test: summary.test,
+      failedChecks: summary.failedChecks || 0,
+      tags: summary.tags || [],
+      checks: (summary.checks || []).map((check) => ({
+        status: check.status,
+        context: check.context,
+        errorArguments: check.errorArguments || []
+      }))
+    }));
+}
+
+function extractEngineVersion(buildInformation) {
+  const release = (buildInformation.releaseDetails || []).find((detail) => detail.id === "core");
+  return release?.version || "unknown";
+}
+
+const SUPPRESSIBLE_METADATA_FINDING_CODES = new Set(["VERAPDF_5_1", "VERAPDF_7_1_9"]);
+
+function hasMetadataMismatchSignals(findings) {
+  return findings.some((finding) => finding.code === "VERAPDF_5_1" || finding.code === "VERAPDF_7_1_9");
+}
+
+function shouldSuppressMetadataFindings(findings, metadataProbe) {
+  return (
+    hasMetadataMismatchSignals(findings) &&
+    metadataProbe?.infoMatchesXmp === true &&
+    metadataProbe?.dcTitleDetected === true &&
+    metadataProbe?.pdfUaIdentificationDetected === true
+  );
+}
+
+function suppressMetadataFalsePositives(findings, metadataProbe) {
+  if (!shouldSuppressMetadataFindings(findings, metadataProbe)) {
+    return {
+      findings,
+      suppressedFindings: []
+    };
+  }
+
+  const suppressedFindings = findings.filter((finding) => SUPPRESSIBLE_METADATA_FINDING_CODES.has(finding.code));
+  return {
+    findings: findings.filter((finding) => !SUPPRESSIBLE_METADATA_FINDING_CODES.has(finding.code)),
+    suppressedFindings
+  };
+}
+
+function adjustSummary(rawSummary, suppressedFindings) {
+  const suppressedRuleCount = suppressedFindings.length;
+  const suppressedCheckCount = suppressedFindings.reduce(
+    (total, finding) => total + Number(finding.failedChecks || 0),
+    0
+  );
+
+  return {
+    passedRules: Number(rawSummary?.passedRules || 0) + suppressedRuleCount,
+    failedRules: Math.max(0, Number(rawSummary?.failedRules || 0) - suppressedRuleCount),
+    passedChecks: Number(rawSummary?.passedChecks || 0) + suppressedCheckCount,
+    failedChecks: Math.max(0, Number(rawSummary?.failedChecks || 0) - suppressedCheckCount)
+  };
+}
+
+function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
+  if (!metadataProbe) {
+    return null;
+  }
+
+  return {
+    metadataPresent: Boolean(metadataProbe.metadataPresent),
+    infoMatchesXmp: Boolean(metadataProbe.infoMatchesXmp),
+    dcTitleDetected: Boolean(metadataProbe.dcTitleDetected),
+    dcTitleValue: metadataProbe.dcTitleValue || "",
+    pdfUaIdentificationDetected: Boolean(metadataProbe.pdfUaIdentificationDetected),
+    pdfUaIdentificationPart: metadataProbe.pdfUaIdentificationPart ?? null,
+    suspectedVeraPdfMetadataMismatch:
+      hasMetadataMismatchSignals(findings) &&
+      metadataProbe.infoMatchesXmp === true &&
+      metadataProbe.dcTitleDetected === true &&
+      metadataProbe.pdfUaIdentificationDetected === true,
+    correctedByValidator: suppressedFindings.length > 0,
+    suppressedFindingCodes: suppressedFindings.map((finding) => finding.code)
+  };
+}
+
+export async function validateTaggedArtifacts({ pdfPath, manifestPath }) {
+  if (!pdfPath || !manifestPath) {
+    throw new Error("Usage: node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json>");
+  }
+
+  await access(pdfPath, constants.R_OK);
+  await access(manifestPath, constants.R_OK);
+
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const manifestFindings = buildManifestFindings(manifest);
+  const veraPdf = await runVeraPdf(pdfPath);
+  const rawVeraPdfFindings = buildVeraPdfFindings(veraPdf);
+  const metadataProbe = hasMetadataMismatchSignals(rawVeraPdfFindings) ? await runMetadataProbe(pdfPath) : null;
+  const { findings: veraPdfFindings, suppressedFindings } = suppressMetadataFalsePositives(
+    rawVeraPdfFindings,
+    metadataProbe
+  );
+  const findings = [...manifestFindings, ...veraPdfFindings];
+  const rawSummary = {
+    passedRules: veraPdf.details.passedRules || 0,
+    failedRules: veraPdf.details.failedRules || 0,
+    passedChecks: veraPdf.details.passedChecks || 0,
+    failedChecks: veraPdf.details.failedChecks || 0
+  };
+  const summary = adjustSummary(rawSummary, suppressedFindings);
+  const isCompliant = findings.length === 0;
+
+  return {
+    status: "completed",
+    isCompliant,
+    statement:
+      isCompliant && suppressedFindings.length > 0
+        ? "PDF file passed validation after correcting known veraPDF PDFBox metadata false positives."
+        : veraPdf.validationResult.statement,
+    rawStatement: veraPdf.validationResult.statement,
+    profileName: veraPdf.validationResult.profileName,
+    findings,
+    summary,
+    rawSummary,
+    metadataDiagnostics: buildMetadataDiagnostics(rawVeraPdfFindings, metadataProbe, suppressedFindings),
+    engine: {
+      name: "veraPDF",
+      version: extractEngineVersion(veraPdf.buildInformation)
+    }
+  };
+}
+
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const result = await validateTaggedArtifacts(options);
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+}
+
+const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isCli) {
+  main().catch((error) => {
+    process.stderr.write(`${error.message}\n`);
+    process.exitCode = 1;
+  });
+}

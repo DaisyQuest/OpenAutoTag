@@ -1,0 +1,622 @@
+{
+  "job": {
+    "status": "completed",
+    "stageSummary": {
+      "total": 10,
+      "completedStages": 10,
+      "failedStages": 0,
+      "skippedStages": 0,
+      "totalAttempts": 10,
+      "retryableFailures": 0
+    },
+    "stages": [
+      {
+        "key": "layout",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "sourceTextMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tableStructureMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "layoutEnriched",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "readingOrder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagBuilder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "pdfWriter",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagDeltaReport",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "validator",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      }
+    ]
+  },
+  "layout": {
+    "source": {
+      "pageCount": 1,
+      "language": "es-ES",
+      "languageConfidence": 0.99,
+      "ocr": {
+        "mode": "auto",
+        "status": "skipped",
+        "languages": [
+          "spa",
+          "eng"
+        ],
+        "languageStrategy": "detected-spanish",
+        "languageHint": "es-ES",
+        "attemptedPages": 0,
+        "appliedPages": 0,
+        "failedPages": 0,
+        "partialPages": 0,
+        "skippedPages": 1
+      }
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "language": "es-ES",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Informe de accesibilidad",
+            "bbox": [
+              72,
+              48,
+              280.104,
+              24
+            ],
+            "fontSize": 24,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
+            "bbox": [
+              72,
+              100,
+              381.396,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Donde estan los datos y como se validan?",
+            "bbox": [
+              72,
+              128,
+              225.444,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- Primer elemento de verificacion",
+            "bbox": [
+              72,
+              156,
+              175.38,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "- Segundo elemento de verificacion",
+            "bbox": [
+              72,
+              176,
+              188.088,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      }
+    ]
+  },
+  "layoutEnriched": {
+    "pages": [
+      {
+        "pageNumber": 1,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 0,
+          "vectorTableCount": 0,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Informe de accesibilidad",
+            "blockType": "heading",
+            "headingLevel": 1,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Donde estan los datos y como se validan?",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- Primer elemento de verificacion",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "- Segundo elemento de verificacion",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      }
+    ]
+  },
+  "semanticOrdered": {
+    "source": {
+      "language": "es-ES",
+      "languageConfidence": 0.99
+    },
+    "nodes": [
+      {
+        "id": "n-1-1",
+        "role": "H1",
+        "text": "Informe de accesibilidad",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          48,
+          280.104,
+          24
+        ],
+        "readingOrder": 0,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-2",
+        "role": "P",
+        "text": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          100,
+          381.396,
+          12
+        ],
+        "readingOrder": 1,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-3",
+        "role": "P",
+        "text": "Donde estan los datos y como se validan?",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          128,
+          225.444,
+          12
+        ],
+        "readingOrder": 2,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-4",
+        "role": "LI",
+        "text": "- Primer elemento de verificacion",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          156,
+          175.38,
+          12
+        ],
+        "readingOrder": 3,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-5",
+        "role": "LI",
+        "text": "- Segundo elemento de verificacion",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          176,
+          188.088,
+          12
+        ],
+        "readingOrder": 4,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      }
+    ]
+  },
+  "tagging": {
+    "type": "Document",
+    "label": "",
+    "sourceNodeIds": [],
+    "rowSpan": null,
+    "columnSpan": null,
+    "tableSection": "",
+    "tableSource": "",
+    "children": [
+      {
+        "type": "Sect",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "H1",
+            "label": "Informe de accesibilidad",
+            "sourceNodeIds": [
+              "n-1-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
+            "sourceNodeIds": [
+              "n-1-2"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Donde estan los datos y como se validan?",
+            "sourceNodeIds": [
+              "n-1-3"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "L",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "LI",
+                "label": "- Primer elemento de verificacion",
+                "sourceNodeIds": [
+                  "n-1-4"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "- Segundo elemento de verificacion",
+                "sourceNodeIds": [
+                  "n-1-5"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "sourceTextMap": {
+    "summary": {
+      "totalRuns": 6,
+      "matchedBlocks": 5,
+      "unmatchedBlocks": 0,
+      "averageConfidence": 0.99
+    },
+    "matches": [
+      {
+        "blockId": "p1-b1",
+        "blockText": "Informe de accesibilidad",
+        "runIds": [
+          "r-1-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b2",
+        "blockText": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
+        "runIds": [
+          "r-1-2"
+        ],
+        "confidence": 0.951
+      },
+      {
+        "blockId": "p1-b3",
+        "blockText": "Donde estan los datos y como se validan?",
+        "runIds": [
+          "r-1-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b4",
+        "blockText": "- Primer elemento de verificacion",
+        "runIds": [
+          "r-1-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b5",
+        "blockText": "- Segundo elemento de verificacion",
+        "runIds": [
+          "r-1-5"
+        ],
+        "confidence": 1
+      }
+    ]
+  },
+  "tableStructureMap": {
+    "summary": {
+      "detectedTables": 0,
+      "pagesWithTables": 0,
+      "totalMergeSignals": 0
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      }
+    ]
+  },
+  "writer": {
+    "status": "completed",
+    "nativeTaggingApplied": true,
+    "structureElementCount": 8,
+    "markedContentCount": 5,
+    "tableAttributeCount": 0,
+    "metadataApplied": true,
+    "language": "es-ES",
+    "title": "Informe de accesibilidad"
+  },
+  "tagDelta": {
+    "status": "completed",
+    "source": {
+      "hasStructTreeRoot": false,
+      "totalTypedNodes": 0,
+      "markedContentOperatorCount": 0,
+      "artifactMarkedContentCount": 0,
+      "tableAttributeNodeCount": 0
+    },
+    "tagged": {
+      "hasStructTreeRoot": true,
+      "totalTypedNodes": 8,
+      "markedContentOperatorCount": 6,
+      "artifactMarkedContentCount": 1,
+      "tableAttributeNodeCount": 0
+    },
+    "delta": {
+      "structTreeAdded": true,
+      "metadataAdded": true,
+      "markInfoAdded": true,
+      "markedFlagEnabled": true,
+      "totalTypedNodesDelta": 8,
+      "markedContentOperatorCountDelta": 6,
+      "artifactMarkedContentCountDelta": 1,
+      "tableAttributeNodeCountDelta": 0,
+      "imageXObjectCountDelta": 1
+    }
+  },
+  "validation": {
+    "status": "completed",
+    "isCompliant": true,
+    "profileName": "PDF/UA-1 validation profile",
+    "engine": {
+      "name": "veraPDF",
+      "version": "1.28.2"
+    },
+    "findingCodes": [],
+    "metadataDiagnostics": {
+      "infoMatchesXmp": true,
+      "dcTitleDetected": true,
+      "pdfUaIdentificationDetected": true,
+      "suspectedVeraPdfMetadataMismatch": true
+    }
+  }
+}

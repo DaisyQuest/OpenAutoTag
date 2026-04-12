@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/redaction-plan.schema.json",
+  "title": "RedactionPlan",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "workloadId",
+    "sourcePdf",
+    "semanticDocumentId",
+    "summary",
+    "matches"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "workloadId": {
+      "type": "string",
+      "const": "tag-and-ssn-redact"
+    },
+    "sourcePdf": {
+      "type": "string"
+    },
+    "semanticDocumentId": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "pagesProcessed",
+        "candidateMatches",
+        "redactedMatches",
+        "pagesRedacted",
+        "outputMode"
+      ],
+      "properties": {
+        "pagesProcessed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidateMatches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "redactedMatches": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pagesRedacted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outputMode": {
+          "type": "string",
+          "const": "semantic-mask-plan"
+        }
+      },
+      "additionalProperties": true
+    },
+    "redactedNodeIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "matchId",
+          "pageNumber",
+          "sourceBlockId",
+          "sourceNodeId",
+          "maskedText",
+          "bbox"
+        ],
+        "properties": {
+          "matchId": {
+            "type": "string"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceBlockId": {
+            "type": "string"
+          },
+          "sourceNodeId": {
+            "type": "string"
+          },
+          "maskedText": {
+            "type": "string"
+          },
+          "bbox": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

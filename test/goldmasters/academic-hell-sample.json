@@ -1,0 +1,3963 @@
+{
+  "job": {
+    "status": "completed",
+    "stageSummary": {
+      "total": 10,
+      "completedStages": 10,
+      "failedStages": 0,
+      "skippedStages": 0,
+      "totalAttempts": 10,
+      "retryableFailures": 0
+    },
+    "stages": [
+      {
+        "key": "layout",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "sourceTextMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tableStructureMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "layoutEnriched",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "readingOrder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagBuilder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "pdfWriter",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagDeltaReport",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "validator",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      }
+    ]
+  },
+  "layout": {
+    "source": {
+      "pageCount": 3,
+      "language": "en-US",
+      "languageConfidence": 0.99,
+      "ocr": {
+        "mode": "auto",
+        "status": "skipped",
+        "languages": [
+          "eng"
+        ],
+        "languageStrategy": "detected-english",
+        "languageHint": "en-US",
+        "attemptedPages": 0,
+        "appliedPages": 0,
+        "failedPages": 0,
+        "partialPages": 0,
+        "skippedPages": 3
+      }
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "language": "en-US",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Academic Columns",
+            "bbox": [
+              72,
+              29,
+              194.88,
+              21
+            ],
+            "fontSize": 21,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Remark B. Failure",
+            "bbox": [
+              432,
+              67,
+              161.557,
+              19
+            ],
+            "fontSize": 19,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Lemma A. Stability",
+            "bbox": [
+              72,
+              101,
+              169.993,
+              19
+            ],
+            "fontSize": 19,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Take q_n = 2^n.",
+            "bbox": [
+              432,
+              126,
+              86.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "T is coercive on V.",
+            "bbox": [
+              72,
+              160,
+              98.7,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Bound fails without coercivity.",
+            "bbox": [
+              432,
+              178,
+              157.392,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Then ||u_n|| <= C exp(t).",
+            "bbox": [
+              72,
+              212,
+              129.876,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Right column remains second.",
+            "bbox": [
+              432,
+              230,
+              161.388,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Residual stays bounded.",
+            "bbox": [
+              72,
+              264,
+              131.4,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      },
+      {
+        "pageNumber": 2,
+        "language": "en-US",
+        "languageConfidence": 0.54,
+        "textBlocks": [
+          {
+            "text": "Borderless Results",
+            "bbox": [
+              72,
+              32,
+              164.052,
+              18
+            ],
+            "fontSize": 18,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Method",
+            "bbox": [
+              72,
+              90,
+              42.66,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Error",
+            "bbox": [
+              244,
+              90,
+              29.34,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Bound",
+            "bbox": [
+              394,
+              90,
+              37.992,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Fourier",
+            "bbox": [
+              72,
+              118,
+              38.004,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.120",
+            "bbox": [
+              244,
+              118,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.200",
+            "bbox": [
+              394,
+              118,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Wavelet",
+            "bbox": [
+              72,
+              144,
+              43.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.081",
+            "bbox": [
+              244,
+              144,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.180",
+            "bbox": [
+              394,
+              144,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Spline",
+            "bbox": [
+              72,
+              170,
+              33.348,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.053",
+            "bbox": [
+              244,
+              170,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.110",
+            "bbox": [
+              394,
+              170,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Dataset",
+            "bbox": [
+              72,
+              280,
+              43.344,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Samples",
+            "bbox": [
+              244,
+              280,
+              49.356,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Variance",
+            "bbox": [
+              394,
+              280,
+              50.028,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Spectral-A",
+            "bbox": [
+              72,
+              308,
+              56.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "128",
+            "bbox": [
+              244,
+              308,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.031",
+            "bbox": [
+              394,
+              308,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Spectral-B",
+            "bbox": [
+              72,
+              334,
+              56.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "256",
+            "bbox": [
+              244,
+              334,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.018",
+            "bbox": [
+              394,
+              334,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Spectral-C",
+            "bbox": [
+              72,
+              360,
+              56.676,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "512",
+            "bbox": [
+              244,
+              360,
+              20.016,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "0.011",
+            "bbox": [
+              394,
+              360,
+              30.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Interpretation paragraph below both borderless tables.",
+            "bbox": [
+              72,
+              428,
+              288.144,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      },
+      {
+        "pageNumber": 3,
+        "language": "en-US",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Notation Glossary",
+            "bbox": [
+              72,
+              32,
+              155.034,
+              18
+            ],
+            "fontSize": 18,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "This page aligns symbols and meanings but must not become a table.",
+            "bbox": [
+              72,
+              66,
+              371.508,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "lambda_n",
+            "bbox": [
+              72,
+              110,
+              52.692,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "principal eigenvalue",
+            "bbox": [
+              236,
+              110,
+              106.044,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "mu_n",
+            "bbox": [
+              88,
+              140,
+              30.012,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "stability factor",
+            "bbox": [
+              260,
+              140,
+              73.356,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "theta_n",
+            "bbox": [
+              104,
+              170,
+              40.032,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "time-step weight",
+            "bbox": [
+              284,
+              170,
+              87.36,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "rho_n",
+            "bbox": [
+              120,
+              200,
+              30.684,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "spectral radius",
+            "bbox": [
+              308,
+              200,
+              78.024,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "These rows are notation prose, not headers plus cells.",
+            "bbox": [
+              72,
+              262,
+              288.132,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "1. Establish compactness.",
+            "bbox": [
+              72,
+              306,
+              139.392,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "2. Apply discrete Gronwall.",
+            "bbox": [
+              72,
+              332,
+              142.716,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      }
+    ]
+  },
+  "layoutEnriched": {
+    "pages": [
+      {
+        "pageNumber": 1,
+        "columns": 2,
+        "structureSignals": {
+          "tableCount": 0,
+          "vectorTableCount": 0,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Academic Columns",
+            "blockType": "heading",
+            "headingLevel": 2,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Remark B. Failure",
+            "blockType": "heading",
+            "headingLevel": 2,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Lemma A. Stability",
+            "blockType": "heading",
+            "headingLevel": 2,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Take q_n = 2^n.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "T is coercive on V.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Bound fails without coercivity.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Then ||u_n|| <= C exp(t).",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Right column remains second.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 1,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Residual stays bounded.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 2,
+          "vectorTableCount": 0,
+          "textGridTableCount": 2,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Borderless Results",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Method",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Error",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Bound",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Fourier",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.120",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.200",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Wavelet",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.081",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.180",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Spline",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 3,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.053",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 3,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.110",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 3,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Dataset",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Samples",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Variance",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "",
+            "tableRow": 0,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Spectral-A",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "128",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.031",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 1,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Spectral-B",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "256",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.018",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 2,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Spectral-C",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 3,
+            "tableColumn": 0,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "512",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 3,
+            "tableColumn": 1,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "0.011",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "table:2:2",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "",
+            "tableRow": 3,
+            "tableColumn": 2,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "Interpretation paragraph below both borderless tables.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      },
+      {
+        "pageNumber": 3,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 0,
+          "vectorTableCount": 0,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 0
+        },
+        "textBlocks": [
+          {
+            "text": "Notation Glossary",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "This page aligns symbols and meanings but must not become a table.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "lambda_n",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "principal eigenvalue",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "mu_n",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "stability factor",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "theta_n",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "time-step weight",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "rho_n",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "spectral radius",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "These rows are notation prose, not headers plus cells.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "1. Establish compactness.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          },
+          {
+            "text": "2. Apply discrete Gronwall.",
+            "blockType": "list-item",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      }
+    ]
+  },
+  "semanticOrdered": {
+    "source": {
+      "language": "en-US",
+      "languageConfidence": 0.99
+    },
+    "nodes": [
+      {
+        "id": "n-1-1",
+        "role": "H2",
+        "text": "Academic Columns",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          29,
+          194.88,
+          21
+        ],
+        "readingOrder": 0,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-2",
+        "role": "H2",
+        "text": "Remark B. Failure",
+        "pageNumber": 1,
+        "bbox": [
+          432,
+          67,
+          161.557,
+          19
+        ],
+        "readingOrder": 5,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-3",
+        "role": "H2",
+        "text": "Lemma A. Stability",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          101,
+          169.993,
+          19
+        ],
+        "readingOrder": 1,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-4",
+        "role": "P",
+        "text": "Take q_n = 2^n.",
+        "pageNumber": 1,
+        "bbox": [
+          432,
+          126,
+          86.016,
+          12
+        ],
+        "readingOrder": 6,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-5",
+        "role": "P",
+        "text": "T is coercive on V.",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          160,
+          98.7,
+          12
+        ],
+        "readingOrder": 2,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-6",
+        "role": "P",
+        "text": "Bound fails without coercivity.",
+        "pageNumber": 1,
+        "bbox": [
+          432,
+          178,
+          157.392,
+          12
+        ],
+        "readingOrder": 7,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-7",
+        "role": "P",
+        "text": "Then ||u_n|| <= C exp(t).",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          212,
+          129.876,
+          12
+        ],
+        "readingOrder": 3,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-8",
+        "role": "P",
+        "text": "Right column remains second.",
+        "pageNumber": 1,
+        "bbox": [
+          432,
+          230,
+          161.388,
+          12
+        ],
+        "readingOrder": 8,
+        "columnHint": 1,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-9",
+        "role": "P",
+        "text": "Residual stays bounded.",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          264,
+          131.4,
+          12
+        ],
+        "readingOrder": 4,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-2-1",
+        "role": "P",
+        "text": "Borderless Results",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          32,
+          164.052,
+          18
+        ],
+        "readingOrder": 9,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-2-2",
+        "role": "TH",
+        "text": "Method",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          90,
+          42.66,
+          12
+        ],
+        "readingOrder": 10,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-3",
+        "role": "TH",
+        "text": "Error",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          90,
+          29.34,
+          12
+        ],
+        "readingOrder": 11,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-4",
+        "role": "TH",
+        "text": "Bound",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          90,
+          37.992,
+          12
+        ],
+        "readingOrder": 12,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-5",
+        "role": "TD",
+        "text": "Fourier",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          118,
+          38.004,
+          12
+        ],
+        "readingOrder": 13,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-6",
+        "role": "TD",
+        "text": "0.120",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          118,
+          30.024,
+          12
+        ],
+        "readingOrder": 14,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-7",
+        "role": "TD",
+        "text": "0.200",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          118,
+          30.024,
+          12
+        ],
+        "readingOrder": 15,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-8",
+        "role": "TD",
+        "text": "Wavelet",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          144,
+          43.344,
+          12
+        ],
+        "readingOrder": 16,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-9",
+        "role": "TD",
+        "text": "0.081",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          144,
+          30.024,
+          12
+        ],
+        "readingOrder": 17,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-10",
+        "role": "TD",
+        "text": "0.180",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          144,
+          30.024,
+          12
+        ],
+        "readingOrder": 18,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-11",
+        "role": "TD",
+        "text": "Spline",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          170,
+          33.348,
+          12
+        ],
+        "readingOrder": 19,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 3,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-12",
+        "role": "TD",
+        "text": "0.053",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          170,
+          30.024,
+          12
+        ],
+        "readingOrder": 20,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 3,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-13",
+        "role": "TD",
+        "text": "0.110",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          170,
+          30.024,
+          12
+        ],
+        "readingOrder": 21,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 3,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-14",
+        "role": "TH",
+        "text": "Dataset",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          280,
+          43.344,
+          12
+        ],
+        "readingOrder": 22,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-15",
+        "role": "TH",
+        "text": "Samples",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          280,
+          49.356,
+          12
+        ],
+        "readingOrder": 23,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-16",
+        "role": "TH",
+        "text": "Variance",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          280,
+          50.028,
+          12
+        ],
+        "readingOrder": 24,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "",
+        "tableRow": 0,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-17",
+        "role": "TD",
+        "text": "Spectral-A",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          308,
+          56.016,
+          12
+        ],
+        "readingOrder": 25,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-18",
+        "role": "TD",
+        "text": "128",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          308,
+          20.016,
+          12
+        ],
+        "readingOrder": 26,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-19",
+        "role": "TD",
+        "text": "0.031",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          308,
+          30.024,
+          12
+        ],
+        "readingOrder": 27,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 1,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-20",
+        "role": "TD",
+        "text": "Spectral-B",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          334,
+          56.016,
+          12
+        ],
+        "readingOrder": 28,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-21",
+        "role": "TD",
+        "text": "256",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          334,
+          20.016,
+          12
+        ],
+        "readingOrder": 29,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-22",
+        "role": "TD",
+        "text": "0.018",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          334,
+          30.024,
+          12
+        ],
+        "readingOrder": 30,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 2,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-23",
+        "role": "TD",
+        "text": "Spectral-C",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          360,
+          56.676,
+          12
+        ],
+        "readingOrder": 31,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 3,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-24",
+        "role": "TD",
+        "text": "512",
+        "pageNumber": 2,
+        "bbox": [
+          244,
+          360,
+          20.016,
+          12
+        ],
+        "readingOrder": 32,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 3,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-25",
+        "role": "TD",
+        "text": "0.011",
+        "pageNumber": 2,
+        "bbox": [
+          394,
+          360,
+          30.024,
+          12
+        ],
+        "readingOrder": 33,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "table:2:2",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "",
+        "tableRow": 3,
+        "tableColumn": 2,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-2-26",
+        "role": "P",
+        "text": "Interpretation paragraph below both borderless tables.",
+        "pageNumber": 2,
+        "bbox": [
+          72,
+          428,
+          288.144,
+          12
+        ],
+        "readingOrder": 34,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-1",
+        "role": "P",
+        "text": "Notation Glossary",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          32,
+          155.034,
+          18
+        ],
+        "readingOrder": 35,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-2",
+        "role": "P",
+        "text": "This page aligns symbols and meanings but must not become a table.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          66,
+          371.508,
+          12
+        ],
+        "readingOrder": 36,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-3",
+        "role": "P",
+        "text": "lambda_n",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          110,
+          52.692,
+          12
+        ],
+        "readingOrder": 37,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-4",
+        "role": "P",
+        "text": "principal eigenvalue",
+        "pageNumber": 3,
+        "bbox": [
+          236,
+          110,
+          106.044,
+          12
+        ],
+        "readingOrder": 38,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-5",
+        "role": "P",
+        "text": "mu_n",
+        "pageNumber": 3,
+        "bbox": [
+          88,
+          140,
+          30.012,
+          12
+        ],
+        "readingOrder": 39,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-6",
+        "role": "P",
+        "text": "stability factor",
+        "pageNumber": 3,
+        "bbox": [
+          260,
+          140,
+          73.356,
+          12
+        ],
+        "readingOrder": 40,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-7",
+        "role": "P",
+        "text": "theta_n",
+        "pageNumber": 3,
+        "bbox": [
+          104,
+          170,
+          40.032,
+          12
+        ],
+        "readingOrder": 41,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-8",
+        "role": "P",
+        "text": "time-step weight",
+        "pageNumber": 3,
+        "bbox": [
+          284,
+          170,
+          87.36,
+          12
+        ],
+        "readingOrder": 42,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-9",
+        "role": "P",
+        "text": "rho_n",
+        "pageNumber": 3,
+        "bbox": [
+          120,
+          200,
+          30.684,
+          12
+        ],
+        "readingOrder": 43,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-10",
+        "role": "P",
+        "text": "spectral radius",
+        "pageNumber": 3,
+        "bbox": [
+          308,
+          200,
+          78.024,
+          12
+        ],
+        "readingOrder": 44,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-11",
+        "role": "P",
+        "text": "These rows are notation prose, not headers plus cells.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          262,
+          288.132,
+          12
+        ],
+        "readingOrder": 45,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-12",
+        "role": "LI",
+        "text": "1. Establish compactness.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          306,
+          139.392,
+          12
+        ],
+        "readingOrder": 46,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-3-13",
+        "role": "LI",
+        "text": "2. Apply discrete Gronwall.",
+        "pageNumber": 3,
+        "bbox": [
+          72,
+          332,
+          142.716,
+          12
+        ],
+        "readingOrder": 47,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      }
+    ]
+  },
+  "tagging": {
+    "type": "Document",
+    "label": "",
+    "sourceNodeIds": [],
+    "rowSpan": null,
+    "columnSpan": null,
+    "tableSection": "",
+    "tableSource": "",
+    "children": [
+      {
+        "type": "Sect",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "H1",
+            "label": "Academic Columns",
+            "sourceNodeIds": [
+              "n-1-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "type": "Sect",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "H1",
+            "label": "Lemma A. Stability",
+            "sourceNodeIds": [
+              "n-1-3"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "T is coercive on V.",
+            "sourceNodeIds": [
+              "n-1-5"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Then ||u_n|| <= C exp(t).",
+            "sourceNodeIds": [
+              "n-1-7"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Residual stays bounded.",
+            "sourceNodeIds": [
+              "n-1-9"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "type": "Sect",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "H1",
+            "label": "Remark B. Failure",
+            "sourceNodeIds": [
+              "n-1-2"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Take q_n = 2^n.",
+            "sourceNodeIds": [
+              "n-1-4"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Bound fails without coercivity.",
+            "sourceNodeIds": [
+              "n-1-6"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Right column remains second.",
+            "sourceNodeIds": [
+              "n-1-8"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Borderless Results",
+            "sourceNodeIds": [
+              "n-2-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "Table",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "THead",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TH",
+                        "label": "Method",
+                        "sourceNodeIds": [
+                          "n-2-2"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Error",
+                        "sourceNodeIds": [
+                          "n-2-3"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Bound",
+                        "sourceNodeIds": [
+                          "n-2-4"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "TBody",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Fourier",
+                        "sourceNodeIds": [
+                          "n-2-5"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.120",
+                        "sourceNodeIds": [
+                          "n-2-6"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.200",
+                        "sourceNodeIds": [
+                          "n-2-7"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Wavelet",
+                        "sourceNodeIds": [
+                          "n-2-8"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.081",
+                        "sourceNodeIds": [
+                          "n-2-9"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.180",
+                        "sourceNodeIds": [
+                          "n-2-10"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Spline",
+                        "sourceNodeIds": [
+                          "n-2-11"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.053",
+                        "sourceNodeIds": [
+                          "n-2-12"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.110",
+                        "sourceNodeIds": [
+                          "n-2-13"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Table",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "THead",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TH",
+                        "label": "Dataset",
+                        "sourceNodeIds": [
+                          "n-2-14"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Samples",
+                        "sourceNodeIds": [
+                          "n-2-15"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TH",
+                        "label": "Variance",
+                        "sourceNodeIds": [
+                          "n-2-16"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "head",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "TBody",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Spectral-A",
+                        "sourceNodeIds": [
+                          "n-2-17"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "128",
+                        "sourceNodeIds": [
+                          "n-2-18"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.031",
+                        "sourceNodeIds": [
+                          "n-2-19"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Spectral-B",
+                        "sourceNodeIds": [
+                          "n-2-20"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "256",
+                        "sourceNodeIds": [
+                          "n-2-21"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.018",
+                        "sourceNodeIds": [
+                          "n-2-22"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TR",
+                    "label": "",
+                    "sourceNodeIds": [],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "",
+                    "tableSource": "",
+                    "children": [
+                      {
+                        "type": "TD",
+                        "label": "Spectral-C",
+                        "sourceNodeIds": [
+                          "n-2-23"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "512",
+                        "sourceNodeIds": [
+                          "n-2-24"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      },
+                      {
+                        "type": "TD",
+                        "label": "0.011",
+                        "sourceNodeIds": [
+                          "n-2-25"
+                        ],
+                        "rowSpan": null,
+                        "columnSpan": null,
+                        "tableSection": "body",
+                        "tableSource": "",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "P",
+            "label": "Interpretation paragraph below both borderless tables.",
+            "sourceNodeIds": [
+              "n-2-26"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "Notation Glossary",
+            "sourceNodeIds": [
+              "n-3-1"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "This page aligns symbols and meanings but must not become a table.",
+            "sourceNodeIds": [
+              "n-3-2"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "lambda_n",
+            "sourceNodeIds": [
+              "n-3-3"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "principal eigenvalue",
+            "sourceNodeIds": [
+              "n-3-4"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "mu_n",
+            "sourceNodeIds": [
+              "n-3-5"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "stability factor",
+            "sourceNodeIds": [
+              "n-3-6"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "theta_n",
+            "sourceNodeIds": [
+              "n-3-7"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "time-step weight",
+            "sourceNodeIds": [
+              "n-3-8"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "rho_n",
+            "sourceNodeIds": [
+              "n-3-9"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "spectral radius",
+            "sourceNodeIds": [
+              "n-3-10"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "P",
+            "label": "These rows are notation prose, not headers plus cells.",
+            "sourceNodeIds": [
+              "n-3-11"
+            ],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": []
+          },
+          {
+            "type": "L",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "LI",
+                "label": "1. Establish compactness.",
+                "sourceNodeIds": [
+                  "n-3-12"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              },
+              {
+                "type": "LI",
+                "label": "2. Apply discrete Gronwall.",
+                "sourceNodeIds": [
+                  "n-3-13"
+                ],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "sourceTextMap": {
+    "summary": {
+      "totalRuns": 48,
+      "matchedBlocks": 48,
+      "unmatchedBlocks": 0,
+      "averageConfidence": 1
+    },
+    "matches": [
+      {
+        "blockId": "p1-b1",
+        "blockText": "Academic Columns",
+        "runIds": [
+          "r-1-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b2",
+        "blockText": "Remark B. Failure",
+        "runIds": [
+          "r-1-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b3",
+        "blockText": "Lemma A. Stability",
+        "runIds": [
+          "r-1-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b4",
+        "blockText": "Take q_n = 2^n.",
+        "runIds": [
+          "r-1-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b5",
+        "blockText": "T is coercive on V.",
+        "runIds": [
+          "r-1-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b6",
+        "blockText": "Bound fails without coercivity.",
+        "runIds": [
+          "r-1-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b7",
+        "blockText": "Then ||u_n|| <= C exp(t).",
+        "runIds": [
+          "r-1-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b8",
+        "blockText": "Right column remains second.",
+        "runIds": [
+          "r-1-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b9",
+        "blockText": "Residual stays bounded.",
+        "runIds": [
+          "r-1-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b1",
+        "blockText": "Borderless Results",
+        "runIds": [
+          "r-2-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b2",
+        "blockText": "Method",
+        "runIds": [
+          "r-2-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b3",
+        "blockText": "Error",
+        "runIds": [
+          "r-2-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b4",
+        "blockText": "Bound",
+        "runIds": [
+          "r-2-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b5",
+        "blockText": "Fourier",
+        "runIds": [
+          "r-2-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b6",
+        "blockText": "0.120",
+        "runIds": [
+          "r-2-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b7",
+        "blockText": "0.200",
+        "runIds": [
+          "r-2-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b8",
+        "blockText": "Wavelet",
+        "runIds": [
+          "r-2-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b9",
+        "blockText": "0.081",
+        "runIds": [
+          "r-2-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b10",
+        "blockText": "0.180",
+        "runIds": [
+          "r-2-10"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b11",
+        "blockText": "Spline",
+        "runIds": [
+          "r-2-11"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b12",
+        "blockText": "0.053",
+        "runIds": [
+          "r-2-12"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b13",
+        "blockText": "0.110",
+        "runIds": [
+          "r-2-13"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b14",
+        "blockText": "Dataset",
+        "runIds": [
+          "r-2-14"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b15",
+        "blockText": "Samples",
+        "runIds": [
+          "r-2-15"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b16",
+        "blockText": "Variance",
+        "runIds": [
+          "r-2-16"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b17",
+        "blockText": "Spectral-A",
+        "runIds": [
+          "r-2-17"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b18",
+        "blockText": "128",
+        "runIds": [
+          "r-2-18"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b19",
+        "blockText": "0.031",
+        "runIds": [
+          "r-2-19"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b20",
+        "blockText": "Spectral-B",
+        "runIds": [
+          "r-2-20"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b21",
+        "blockText": "256",
+        "runIds": [
+          "r-2-21"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b22",
+        "blockText": "0.018",
+        "runIds": [
+          "r-2-22"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b23",
+        "blockText": "Spectral-C",
+        "runIds": [
+          "r-2-23"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b24",
+        "blockText": "512",
+        "runIds": [
+          "r-2-24"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b25",
+        "blockText": "0.011",
+        "runIds": [
+          "r-2-25"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p2-b26",
+        "blockText": "Interpretation paragraph below both borderless tables.",
+        "runIds": [
+          "r-2-26"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b1",
+        "blockText": "Notation Glossary",
+        "runIds": [
+          "r-3-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b2",
+        "blockText": "This page aligns symbols and meanings but must not become a table.",
+        "runIds": [
+          "r-3-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b3",
+        "blockText": "lambda_n",
+        "runIds": [
+          "r-3-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b4",
+        "blockText": "principal eigenvalue",
+        "runIds": [
+          "r-3-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b5",
+        "blockText": "mu_n",
+        "runIds": [
+          "r-3-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b6",
+        "blockText": "stability factor",
+        "runIds": [
+          "r-3-6"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b7",
+        "blockText": "theta_n",
+        "runIds": [
+          "r-3-7"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b8",
+        "blockText": "time-step weight",
+        "runIds": [
+          "r-3-8"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b9",
+        "blockText": "rho_n",
+        "runIds": [
+          "r-3-9"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b10",
+        "blockText": "spectral radius",
+        "runIds": [
+          "r-3-10"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b11",
+        "blockText": "These rows are notation prose, not headers plus cells.",
+        "runIds": [
+          "r-3-11"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b12",
+        "blockText": "1. Establish compactness.",
+        "runIds": [
+          "r-3-12"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p3-b13",
+        "blockText": "2. Apply discrete Gronwall.",
+        "runIds": [
+          "r-3-13"
+        ],
+        "confidence": 1
+      }
+    ]
+  },
+  "tableStructureMap": {
+    "summary": {
+      "detectedTables": 0,
+      "pagesWithTables": 0,
+      "totalMergeSignals": 0
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      },
+      {
+        "pageNumber": 2,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      },
+      {
+        "pageNumber": 3,
+        "vectorSummary": {
+          "strokedSegmentCount": 0,
+          "horizontalSegmentCount": 0,
+          "verticalSegmentCount": 0
+        },
+        "tables": []
+      }
+    ]
+  },
+  "writer": {
+    "status": "completed",
+    "nativeTaggingApplied": true,
+    "structureElementCount": 67,
+    "markedContentCount": 48,
+    "tableAttributeCount": 6,
+    "metadataApplied": true,
+    "language": "en-US",
+    "title": "Academic Columns"
+  },
+  "tagDelta": {
+    "status": "completed",
+    "source": {
+      "hasStructTreeRoot": false,
+      "totalTypedNodes": 0,
+      "markedContentOperatorCount": 0,
+      "artifactMarkedContentCount": 0,
+      "tableAttributeNodeCount": 0
+    },
+    "tagged": {
+      "hasStructTreeRoot": true,
+      "totalTypedNodes": 67,
+      "markedContentOperatorCount": 51,
+      "artifactMarkedContentCount": 3,
+      "tableAttributeNodeCount": 6
+    },
+    "delta": {
+      "structTreeAdded": true,
+      "metadataAdded": true,
+      "markInfoAdded": true,
+      "markedFlagEnabled": true,
+      "totalTypedNodesDelta": 67,
+      "markedContentOperatorCountDelta": 51,
+      "artifactMarkedContentCountDelta": 3,
+      "tableAttributeNodeCountDelta": 6,
+      "imageXObjectCountDelta": 3
+    }
+  },
+  "validation": {
+    "status": "completed",
+    "isCompliant": true,
+    "profileName": "PDF/UA-1 validation profile",
+    "engine": {
+      "name": "veraPDF",
+      "version": "1.28.2"
+    },
+    "findingCodes": [],
+    "metadataDiagnostics": {
+      "infoMatchesXmp": true,
+      "dcTitleDetected": true,
+      "pdfUaIdentificationDetected": true,
+      "suspectedVeraPdfMetadataMismatch": true
+    }
+  }
+}

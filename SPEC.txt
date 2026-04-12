@@ -1,0 +1,177 @@
+PDF Accessibility Engine
+Version: bootstrap-v1
+
+0. Purpose
+
+Build a contract-first PDF accessibility tagging pipeline that can be implemented in parallel with near-zero merge conflicts.
+
+This repository is intentionally split into isolated modules. Each module is independently buildable, independently testable, and replaceable behind a fixed CLI and fixed JSON contracts.
+
+1. Architecture rules
+
+1. Contracts are the source of truth.
+   Every module reads an input file and writes a contract-compliant output file or JSON payload to stdout.
+
+2. No cross-module imports.
+   Modules must not call each other as libraries. The orchestrator is responsible for process orchestration.
+
+3. File ownership is strict.
+   A module implementation only edits files under `modules/<module-name>/`.
+   Shared files are limited to `contracts/`, `SPEC.txt`, `AGENTS.md`, root docs, test fixtures, and orchestrator files when explicitly assigned.
+
+4. Deterministic rules before machine learning.
+   Bootstrap implementations should prefer deterministic heuristics so outputs are stable and testable.
+
+5. Replaceability matters more than local cleverness.
+   If a better implementation later needs PDFBox, OCR, or a distributed queue, it must fit the same CLI and contract boundary.
+
+2. Runtime model
+
+Pipeline order:
+
+1. `parser`
+2. `layout-analyzer`
+3. `semantic-engine`
+4. `reading-order`
+5. `tag-builder`
+6. `pdf-writer`
+7. `validator`
+
+The orchestrator invokes each stage as a separate Node process and stores intermediate JSON artifacts in the job output directory.
+
+3. Module CLI requirements
+
+3.1 Parser
+
+Command:
+`node modules/parser/index.js <input.pdf> > layout.json`
+
+Output:
+`contracts/layout.schema.json`
+
+3.2 Layout analyzer
+
+Command:
+`node modules/layout-analyzer/index.js <layout.json> > layout.enriched.json`
+
+Output:
+`contracts/layout.schema.json`
+
+3.3 Semantic engine
+
+Command:
+`node modules/semantic-engine/index.js <layout.enriched.json> > semantic.json`
+
+Output:
+`contracts/semantic.schema.json`
+
+3.4 Reading order
+
+Command:
+`node modules/reading-order/index.js <semantic.json> > semantic.ordered.json`
+
+Output:
+`contracts/semantic.schema.json`
+
+3.5 Tag builder
+
+Command:
+`node modules/tag-builder/index.js <semantic.ordered.json> > tagging.json`
+
+Output:
+`contracts/tagging.schema.json`
+
+3.6 PDF writer
+
+Command:
+`node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> > writer-report.json`
+
+Output:
+Writer report JSON plus output artifacts at the provided path.
+
+Bootstrap note:
+The current implementation uses Apache PDFBox to add a native structure tree, marked-content overlays, document metadata, and a sidecar manifest. Full content-level MCID tagging of the original source operators remains a later hardening step.
+
+3.7 Validator
+
+Command:
+`node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json> > validation-report.json`
+
+Output:
+Validation report JSON. Bootstrap validation checks contract completeness, native PDF structure markers, metadata, and known PDF/UA blockers.
+
+4. Shared contracts
+
+Contracts live under `contracts/`.
+
+- `layout.schema.json`
+  Raw and enriched geometric text blocks from the source PDF.
+
+- `semantic.schema.json`
+  Deterministic semantic roles and reading-order annotations.
+
+- `tagging.schema.json`
+  Hierarchical logical structure to drive PDF writing.
+
+- `pipeline-job.schema.json`
+  Queue and API contract for orchestrator job status.
+
+Contracts are frozen before parallel implementation begins.
+
+5. Repository structure
+
+```
+contracts/
+modules/
+  parser/
+  layout-analyzer/
+  semantic-engine/
+  reading-order/
+  tag-builder/
+  pdf-writer/
+  validator/
+orchestrator/
+scripts/codex/
+test/
+```
+
+6. Testing requirements
+
+Each module must include module-local tests.
+
+Baseline expectations:
+
+- parser extracts text blocks and bounding boxes from fixture PDFs
+- layout analyzer classifies headings, paragraphs, and list items
+- semantic engine emits deterministic roles
+- reading-order produces stable ordered node ids
+- tag builder constructs a tree with Document root
+- pdf writer produces output PDF and sidecar manifest
+- validator returns machine-readable findings
+- orchestrator runs the full pipeline end-to-end
+
+7. Parallel Codex execution
+
+Codex workers should read:
+
+1. `SPEC.txt`
+2. `AGENTS.md`
+3. `contracts/*.json`
+
+Then edit only their owned module.
+
+For shell automation, use the scripts under `scripts/codex/`.
+
+8. Definition of done
+
+Bootstrap done:
+
+- All contracts are in place
+- All modules expose stable CLIs
+- Tests pass
+- Orchestrator can process a sample PDF end-to-end
+
+Production done:
+
+- PDF writer injects native logical structure into the output PDF
+- Validator confirms baseline PDF/UA compliance against a real ruleset

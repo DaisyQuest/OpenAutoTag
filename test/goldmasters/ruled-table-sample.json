@@ -1,0 +1,841 @@
+{
+  "job": {
+    "status": "completed",
+    "stageSummary": {
+      "total": 10,
+      "completedStages": 10,
+      "failedStages": 0,
+      "skippedStages": 0,
+      "totalAttempts": 10,
+      "retryableFailures": 0
+    },
+    "stages": [
+      {
+        "key": "layout",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "sourceTextMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tableStructureMap",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "layoutEnriched",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "readingOrder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagBuilder",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "pdfWriter",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "tagDeltaReport",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "validator",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      }
+    ]
+  },
+  "layout": {
+    "source": {
+      "pageCount": 1,
+      "language": "en-US",
+      "languageConfidence": 0.99,
+      "ocr": {
+        "mode": "auto",
+        "status": "skipped",
+        "languages": [
+          "eng"
+        ],
+        "languageStrategy": "detected-english",
+        "languageHint": "en-US",
+        "attemptedPages": 0,
+        "appliedPages": 0,
+        "failedPages": 0,
+        "partialPages": 0,
+        "skippedPages": 1
+      }
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "language": "en-US",
+        "languageConfidence": 0.99,
+        "textBlocks": [
+          {
+            "text": "Revenue Summary",
+            "bbox": [
+              145,
+              77,
+              108.036,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Region",
+            "bbox": [
+              88,
+              101,
+              40.668,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "Amount",
+            "bbox": [
+              240,
+              101,
+              45.324,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f1",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "North",
+            "bbox": [
+              88,
+              125,
+              29.34,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "$120",
+            "bbox": [
+              240,
+              125,
+              26.688,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          },
+          {
+            "text": "This paragraph sits below the ruled table and should not be grouped into it.",
+            "bbox": [
+              72,
+              180,
+              397.548,
+              12
+            ],
+            "fontSize": 12,
+            "fontName": "g_d0_f3",
+            "blockType": "",
+            "columnHint": null,
+            "textSource": "native"
+          }
+        ],
+        "ocr": {
+          "status": "not-attempted",
+          "mergeStrategy": "",
+          "trigger": null,
+          "selectedCandidate": null,
+          "errorMessages": []
+        }
+      }
+    ]
+  },
+  "layoutEnriched": {
+    "pages": [
+      {
+        "pageNumber": 1,
+        "columns": 1,
+        "structureSignals": {
+          "tableCount": 1,
+          "vectorTableCount": 1,
+          "textGridTableCount": 0,
+          "tableMergeSignalCount": 1
+        },
+        "textBlocks": [
+          {
+            "text": "Revenue Summary",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:1:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 0,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 2
+          },
+          {
+            "text": "Region",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:1:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 1,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "Amount",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:1:1",
+            "tableRole": "header",
+            "tableSection": "head",
+            "tableSource": "vector-grid",
+            "tableRow": 1,
+            "tableColumn": 1,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "North",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:1:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 2,
+            "tableColumn": 0,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "$120",
+            "blockType": "table-cell",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "vector-table:1:1",
+            "tableRole": "cell",
+            "tableSection": "body",
+            "tableSource": "vector-grid",
+            "tableRow": 2,
+            "tableColumn": 1,
+            "tableRowSpan": 1,
+            "tableColumnSpan": 1
+          },
+          {
+            "text": "This paragraph sits below the ruled table and should not be grouped into it.",
+            "blockType": "paragraph",
+            "headingLevel": null,
+            "columnHint": 0,
+            "listId": "",
+            "tableId": "",
+            "tableRole": "",
+            "tableSection": "",
+            "tableSource": "",
+            "tableRow": null,
+            "tableColumn": null,
+            "tableRowSpan": null,
+            "tableColumnSpan": null
+          }
+        ]
+      }
+    ]
+  },
+  "semanticOrdered": {
+    "source": {
+      "language": "en-US",
+      "languageConfidence": 0.99
+    },
+    "nodes": [
+      {
+        "id": "n-1-1",
+        "role": "TH",
+        "text": "Revenue Summary",
+        "pageNumber": 1,
+        "bbox": [
+          145,
+          77,
+          108.036,
+          12
+        ],
+        "readingOrder": 0,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:1:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 0,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 2
+      },
+      {
+        "id": "n-1-2",
+        "role": "TH",
+        "text": "Region",
+        "pageNumber": 1,
+        "bbox": [
+          88,
+          101,
+          40.668,
+          12
+        ],
+        "readingOrder": 1,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:1:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 1,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-3",
+        "role": "TH",
+        "text": "Amount",
+        "pageNumber": 1,
+        "bbox": [
+          240,
+          101,
+          45.324,
+          12
+        ],
+        "readingOrder": 2,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:1:1",
+        "tableRole": "header",
+        "tableSection": "head",
+        "tableSource": "vector-grid",
+        "tableRow": 1,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-4",
+        "role": "TD",
+        "text": "North",
+        "pageNumber": 1,
+        "bbox": [
+          88,
+          125,
+          29.34,
+          12
+        ],
+        "readingOrder": 3,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:1:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 2,
+        "tableColumn": 0,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-5",
+        "role": "TD",
+        "text": "$120",
+        "pageNumber": 1,
+        "bbox": [
+          240,
+          125,
+          26.688,
+          12
+        ],
+        "readingOrder": 4,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "vector-table:1:1",
+        "tableRole": "cell",
+        "tableSection": "body",
+        "tableSource": "vector-grid",
+        "tableRow": 2,
+        "tableColumn": 1,
+        "tableRowSpan": 1,
+        "tableColumnSpan": 1
+      },
+      {
+        "id": "n-1-6",
+        "role": "P",
+        "text": "This paragraph sits below the ruled table and should not be grouped into it.",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          180,
+          397.548,
+          12
+        ],
+        "readingOrder": 5,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      }
+    ]
+  },
+  "tagging": {
+    "type": "Document",
+    "label": "",
+    "sourceNodeIds": [],
+    "rowSpan": null,
+    "columnSpan": null,
+    "tableSection": "",
+    "tableSource": "",
+    "children": [
+      {
+        "type": "Table",
+        "label": "",
+        "sourceNodeIds": [],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": [
+          {
+            "type": "THead",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "TR",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TH",
+                    "label": "Revenue Summary",
+                    "sourceNodeIds": [
+                      "n-1-1"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": 2,
+                    "tableSection": "head",
+                    "tableSource": "vector-grid",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "type": "TR",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TH",
+                    "label": "Region",
+                    "sourceNodeIds": [
+                      "n-1-2"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "head",
+                    "tableSource": "vector-grid",
+                    "children": []
+                  },
+                  {
+                    "type": "TH",
+                    "label": "Amount",
+                    "sourceNodeIds": [
+                      "n-1-3"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "head",
+                    "tableSource": "vector-grid",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TBody",
+            "label": "",
+            "sourceNodeIds": [],
+            "rowSpan": null,
+            "columnSpan": null,
+            "tableSection": "",
+            "tableSource": "",
+            "children": [
+              {
+                "type": "TR",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TD",
+                    "label": "North",
+                    "sourceNodeIds": [
+                      "n-1-4"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "body",
+                    "tableSource": "vector-grid",
+                    "children": []
+                  },
+                  {
+                    "type": "TD",
+                    "label": "$120",
+                    "sourceNodeIds": [
+                      "n-1-5"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "body",
+                    "tableSource": "vector-grid",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "P",
+        "label": "This paragraph sits below the ruled table and should not be grouped into it.",
+        "sourceNodeIds": [
+          "n-1-6"
+        ],
+        "rowSpan": null,
+        "columnSpan": null,
+        "tableSection": "",
+        "tableSource": "",
+        "children": []
+      }
+    ]
+  },
+  "sourceTextMap": {
+    "summary": {
+      "totalRuns": 6,
+      "matchedBlocks": 6,
+      "unmatchedBlocks": 0,
+      "averageConfidence": 1
+    },
+    "matches": [
+      {
+        "blockId": "p1-b1",
+        "blockText": "Revenue Summary",
+        "runIds": [
+          "r-1-1"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b2",
+        "blockText": "Region",
+        "runIds": [
+          "r-1-2"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b3",
+        "blockText": "Amount",
+        "runIds": [
+          "r-1-3"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b4",
+        "blockText": "North",
+        "runIds": [
+          "r-1-4"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b5",
+        "blockText": "$120",
+        "runIds": [
+          "r-1-5"
+        ],
+        "confidence": 1
+      },
+      {
+        "blockId": "p1-b6",
+        "blockText": "This paragraph sits below the ruled table and should not be grouped into it.",
+        "runIds": [
+          "r-1-6"
+        ],
+        "confidence": 1
+      }
+    ]
+  },
+  "tableStructureMap": {
+    "summary": {
+      "detectedTables": 1,
+      "pagesWithTables": 1,
+      "totalMergeSignals": 1
+    },
+    "pages": [
+      {
+        "pageNumber": 1,
+        "vectorSummary": {
+          "strokedSegmentCount": 7,
+          "horizontalSegmentCount": 4,
+          "verticalSegmentCount": 3
+        },
+        "tables": [
+          {
+            "id": "vector-table:1:1",
+            "bbox": [
+              72,
+              72,
+              288,
+              72
+            ],
+            "rowCount": 3,
+            "columnCount": 2,
+            "confidence": 0.857,
+            "mergeSignals": [
+              {
+                "kind": "colspan",
+                "rowIndex": 0,
+                "columnIndex": 0
+              }
+            ],
+            "cells": [
+              {
+                "rowIndex": 0,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 2,
+                "bbox": [
+                  72,
+                  72,
+                  288,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p1-b1"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  72,
+                  96,
+                  148,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p1-b2"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "columnIndex": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  220,
+                  96,
+                  140,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p1-b3"
+                ]
+              },
+              {
+                "rowIndex": 2,
+                "columnIndex": 0,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  72,
+                  120,
+                  148,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p1-b4"
+                ]
+              },
+              {
+                "rowIndex": 2,
+                "columnIndex": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "bbox": [
+                  220,
+                  120,
+                  140,
+                  24
+                ],
+                "assignedBlockIds": [
+                  "p1-b5"
+                ]
+              }
+            ],
+            "assignedBlockIds": [
+              "p1-b1",
+              "p1-b2",
+              "p1-b3",
+              "p1-b4",
+              "p1-b5"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "writer": {
+    "status": "completed",
+    "nativeTaggingApplied": true,
+    "structureElementCount": 13,
+    "markedContentCount": 6,
+    "tableAttributeCount": 3,
+    "metadataApplied": true,
+    "language": "en-US",
+    "title": "ruled-table-sample"
+  },
+  "tagDelta": {
+    "status": "completed",
+    "source": {
+      "hasStructTreeRoot": false,
+      "totalTypedNodes": 0,
+      "markedContentOperatorCount": 0,
+      "artifactMarkedContentCount": 0,
+      "tableAttributeNodeCount": 0
+    },
+    "tagged": {
+      "hasStructTreeRoot": true,
+      "totalTypedNodes": 13,
+      "markedContentOperatorCount": 7,
+      "artifactMarkedContentCount": 1,
+      "tableAttributeNodeCount": 3
+    },
+    "delta": {
+      "structTreeAdded": true,
+      "metadataAdded": true,
+      "markInfoAdded": true,
+      "markedFlagEnabled": true,
+      "totalTypedNodesDelta": 13,
+      "markedContentOperatorCountDelta": 7,
+      "artifactMarkedContentCountDelta": 1,
+      "tableAttributeNodeCountDelta": 3,
+      "imageXObjectCountDelta": 1
+    }
+  },
+  "validation": {
+    "status": "completed",
+    "isCompliant": true,
+    "profileName": "PDF/UA-1 validation profile",
+    "engine": {
+      "name": "veraPDF",
+      "version": "1.28.2"
+    },
+    "findingCodes": [],
+    "metadataDiagnostics": {
+      "infoMatchesXmp": true,
+      "dcTitleDetected": true,
+      "pdfUaIdentificationDetected": true,
+      "suspectedVeraPdfMetadataMismatch": true
+    }
+  }
+}

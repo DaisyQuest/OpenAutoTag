@@ -1,0 +1,591 @@
+{
+  "title": "Product Testing Matrix",
+  "description": "Coverage inventory across unit, integration, goldmaster, live-runtime, and browser-facing surfaces.",
+  "columns": [
+    {
+      "id": "unit",
+      "label": "Unit"
+    },
+    {
+      "id": "integration",
+      "label": "Integration"
+    },
+    {
+      "id": "goldmaster",
+      "label": "Goldmaster"
+    },
+    {
+      "id": "runtime",
+      "label": "Live Runtime"
+    },
+    {
+      "id": "ui",
+      "label": "Browser/UI"
+    }
+  ],
+  "sections": [
+    {
+      "id": "parser-ocr",
+      "title": "Parser and OCR",
+      "rows": [
+        {
+          "id": "parser-native",
+          "capability": "Native text extraction and line grouping",
+          "module": "parser",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Parser tests",
+              "path": "modules/parser/test/parser.test.js"
+            },
+            {
+              "label": "Native goldmaster",
+              "path": "test/goldmasters/native-sample.json"
+            }
+          ],
+          "notes": "Baseline text PDFs are locked at unit, end-to-end, and goldmaster layers."
+        },
+        {
+          "id": "ocr-gating",
+          "capability": "Selective OCR gating and replacement heuristics",
+          "module": "parser",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Parser OCR tests",
+              "path": "modules/parser/test/parser.test.js"
+            },
+            {
+              "label": "Scanned OCR goldmaster",
+              "path": "test/goldmasters/scanned-sample-ocr.json"
+            }
+          ],
+          "notes": "Scanned pages apply OCR while native-text pages stay on the native path."
+        },
+        {
+          "id": "ocr-reliability",
+          "capability": "OCR retries, partial failures, and consensus ranking",
+          "module": "parser",
+          "statuses": {
+            "unit": "covered",
+            "integration": "partial",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "OCR pipeline tests",
+              "path": "modules/parser/test/ocr-pipeline.test.js"
+            },
+            {
+              "label": "Parser required-mode test",
+              "path": "modules/parser/test/parser.test.js"
+            }
+          ],
+          "notes": "Core reliability paths are locked in focused tests, but there is not yet a full end-to-end fault-injection pipeline corpus."
+        },
+        {
+          "id": "spanish-language-support",
+          "capability": "Spanish language detection, OCR language targeting, and PDF language metadata",
+          "module": "parser / semantic-engine / pdf-writer",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Parser language tests",
+              "path": "modules/parser/test/parser.test.js"
+            },
+            {
+              "label": "Spanish pipeline test",
+              "path": "test/integration/spanish-pipeline.test.js"
+            },
+            {
+              "label": "Spanish goldmaster",
+              "path": "test/goldmasters/spanish-sample.json"
+            }
+          ],
+          "notes": "Native Spanish text now drives document language detection, bilingual OCR targeting, semantic propagation, and catalog `/Lang` emission in the tagged PDF."
+        },
+        {
+          "id": "ocr-corpus-depth",
+          "capability": "Noisy multi-page scanned corpus coverage",
+          "module": "parser",
+          "statuses": {
+            "unit": "partial",
+            "integration": "gap",
+            "goldmaster": "partial",
+            "runtime": "partial",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Scanned sample fixture",
+              "path": "test/fixtures/create-scanned-sample-pdf.js"
+            },
+            {
+              "label": "Scanned OCR goldmaster",
+              "path": "test/goldmasters/scanned-sample-ocr.json"
+            }
+          ],
+          "notes": "The current OCR corpus is a single-page rasterized sample, not a production-noise benchmark.",
+          "gap": {
+            "priority": "high",
+            "summary": "Add multi-page and degraded scanned fixtures with skew, dropout, and mixed text density."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pipeline-core",
+      "title": "Pipeline Core",
+      "rows": [
+        {
+          "id": "layout-semantic",
+          "capability": "Layout analysis and semantic role mapping",
+          "module": "layout-analyzer / semantic-engine",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Layout analyzer tests",
+              "path": "modules/layout-analyzer/test/layout-analyzer.test.js"
+            },
+            {
+              "label": "Semantic engine tests",
+              "path": "modules/semantic-engine/test/semantic-engine.test.js"
+            },
+            {
+              "label": "Table sample goldmaster",
+              "path": "test/goldmasters/table-sample.json"
+            },
+            {
+              "label": "Ruled table goldmaster",
+              "path": "test/goldmasters/ruled-table-sample.json"
+            },
+            {
+              "label": "Native goldmaster",
+              "path": "test/goldmasters/native-sample.json"
+            }
+          ],
+          "notes": "Headings, lists, multi-table segmentation, header cells, ruled-table fusion, and merged-cell spans are covered at both module and end-to-end levels."
+        },
+        {
+          "id": "reading-tagging",
+          "capability": "Reading order and tag tree construction",
+          "module": "reading-order / tag-builder",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Reading order tests",
+              "path": "modules/reading-order/test/reading-order.test.js"
+            },
+            {
+              "label": "Tag builder tests",
+              "path": "modules/tag-builder/test/tag-builder.test.js"
+            },
+            {
+              "label": "Native goldmaster",
+              "path": "test/goldmasters/native-sample.json"
+            }
+          ],
+          "notes": "Logical ordering and structural grouping are snapshot-locked in the native sample, including explicit table section wrappers for header and body regions."
+        },
+        {
+          "id": "source-text-map",
+          "capability": "Source-stream text mapping diagnostics",
+          "module": "scripts/build-source-text-map.js",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Source text map integration test",
+              "path": "test/integration/source-text-map.test.js"
+            },
+            {
+              "label": "Native goldmaster",
+              "path": "test/goldmasters/native-sample.json"
+            }
+          ],
+          "notes": "The original text-run alignment is verified as a pipeline diagnostic and preserved in the goldmaster."
+        },
+        {
+          "id": "table-structure-map",
+          "capability": "Ruled-table geometry and merged-cell diagnostics",
+          "module": "scripts/build-table-structure-map.js",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Table structure integration test",
+              "path": "test/integration/table-structure-map.test.js"
+            },
+            {
+              "label": "Ruled table goldmaster",
+              "path": "test/goldmasters/ruled-table-sample.json"
+            }
+          ],
+          "notes": "Vector line evidence is now extracted as a pipeline diagnostic, stitched across small border gaps, and can surface ruled grids plus merge-span signals."
+        },
+        {
+          "id": "hellish-corpus",
+          "capability": "Mathematically generated hell-document coverage",
+          "module": "test/fixtures/java/HellPdfFixtureCli.java",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Hellish pipeline test",
+              "path": "test/integration/hellish-pipeline.test.js"
+            },
+            {
+              "label": "Hellish goldmaster",
+              "path": "test/goldmasters/hellish-sample.json"
+            }
+          ],
+          "notes": "A PDFBox-built stress document mixes two-column reading order, merged ruled tables, broken borders, aligned label-value prose, and ordered lists under exact regression assertions."
+        },
+        {
+          "id": "academic-hell-corpus",
+          "capability": "Academic theorem and borderless-table hell coverage",
+          "module": "test/fixtures/java/AcademicHellPdfFixtureCli.java",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Academic hell pipeline test",
+              "path": "test/integration/academic-hell-pipeline.test.js"
+            },
+            {
+              "label": "Academic hell goldmaster",
+              "path": "test/goldmasters/academic-hell-sample.json"
+            }
+          ],
+          "notes": "A second PDFBox-built stress corpus targets theorem-style multi-column reading order, two independent borderless tables on one page, and notation rows that must resist false table detection."
+        }
+      ]
+    },
+    {
+      "id": "writer-validator",
+      "title": "Writer, Validation, and Diagnostics",
+      "rows": [
+        {
+          "id": "pdf-writer",
+          "capability": "Native PDF structure injection and overlay fallback",
+          "module": "pdf-writer",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "partial",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "PDF writer tests",
+              "path": "modules/pdf-writer/test/pdf-writer.test.js"
+            },
+            {
+              "label": "Pipeline integration test",
+              "path": "test/integration/pipeline-runner.test.js"
+            },
+            {
+              "label": "Low-level inspector test",
+              "path": "test/integration/pdf-low-level-inspector.test.js"
+            }
+          ],
+          "notes": "The writer is validated through module tests and low-level inspection, including native table-attribute emission for merged header cells, but the goldmaster currently normalizes pipeline artifacts instead of byte-for-byte PDF internals."
+        },
+        {
+          "id": "validator",
+          "capability": "veraPDF validation and metadata diagnostics",
+          "module": "validator",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "covered",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Validator tests",
+              "path": "modules/validator/test/validator.test.js"
+            },
+            {
+              "label": "Pipeline integration test",
+              "path": "test/integration/pipeline-runner.test.js"
+            },
+            {
+              "label": "Native goldmaster",
+              "path": "test/goldmasters/native-sample.json"
+            }
+          ],
+          "notes": "Validation logic is covered, but browser-side rendering is only indirectly asserted through static page delivery rather than DOM-level visual automation."
+        },
+        {
+          "id": "low-level-inspector",
+          "capability": "Low-level PDF inspection",
+          "module": "scripts/inspect-pdf-low-level.js",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Low-level inspector test",
+              "path": "test/integration/pdf-low-level-inspector.test.js"
+            }
+          ],
+          "notes": "Operator-level and structure-tree inspection is covered as an executable integration tool, including native table attribute samples such as `ColSpan`, `RowSpan`, and header scope."
+        }
+      ]
+    },
+    {
+      "id": "server-ui",
+      "title": "Server and Browser Surfaces",
+      "rows": [
+        {
+          "id": "single-job-api",
+          "capability": "Single job API processing",
+          "module": "orchestrator/server.js",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "na"
+          },
+          "evidence": [
+            {
+              "label": "Server integration tests",
+              "path": "test/integration/server.test.js"
+            }
+          ],
+          "notes": "JSON job submission and job status retrieval are exercised end-to-end."
+        },
+        {
+          "id": "workload-registry-redaction",
+          "capability": "Workload registry routing for standalone and combined SSN redaction workloads",
+          "module": "orchestrator/workloads / modules/redactor / modules/pdf-writer",
+          "statuses": {
+            "unit": "covered",
+            "integration": "covered",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Redactor module tests",
+              "path": "modules/redactor/test/redactor.test.js"
+            },
+            {
+              "label": "Redaction runner integration test",
+              "path": "test/integration/redaction-runner.test.js"
+            },
+            {
+              "label": "Server workload test",
+              "path": "test/integration/server.test.js"
+            },
+            {
+              "label": "Tag-and-redact runner test",
+              "path": "test/integration/tag-redaction-runner.test.js"
+            },
+            {
+              "label": "Writer redaction test",
+              "path": "modules/pdf-writer/test/pdf-writer.test.js"
+            },
+            {
+              "label": "Redaction renderer test",
+              "path": "test/unit/report-renderers.test.js"
+            }
+          ],
+          "notes": "The shared workload registry now supports both standalone SSN redaction and a composed tag-plus-redact flow, and the writer is explicitly covered for masking the accessibility layer as well as the visible page."
+        },
+        {
+          "id": "batch-upload-success",
+          "capability": "Batch upload success path and artifact serving",
+          "module": "orchestrator/server.js / public UI",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Server batch integration test",
+              "path": "test/integration/server.test.js"
+            }
+          ],
+          "notes": "The API and page delivery are covered, but drag-and-drop browser interactions are not yet automated."
+        },
+        {
+          "id": "batch-upload-mixed",
+          "capability": "Batch upload mixed success and failure handling",
+          "module": "orchestrator/server.js / job-queue",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Server mixed batch integration test",
+              "path": "test/integration/server.test.js"
+            }
+          ],
+          "notes": "Batch status aggregation is now covered when one job fails and another completes."
+        },
+        {
+          "id": "report-pages",
+          "capability": "Report viewer and testing matrix page serving",
+          "module": "orchestrator/public",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Server report page test",
+              "path": "test/integration/server.test.js"
+            }
+          ],
+          "notes": "Page delivery is verified, but the browser-side rendering is not yet covered with full DOM automation."
+        },
+        {
+          "id": "ui-interactions",
+          "capability": "Real browser interaction automation",
+          "module": "orchestrator/public",
+          "statuses": {
+            "unit": "na",
+            "integration": "gap",
+            "goldmaster": "na",
+            "runtime": "partial",
+            "ui": "gap"
+          },
+          "evidence": [],
+          "notes": "There is no automated browser workflow that performs drag-and-drop, batch polling, or report navigation in a real DOM.",
+          "gap": {
+            "priority": "high",
+            "summary": "Add Playwright-based browser flows for intake, batch progress, report viewing, and matrix browsing."
+          }
+        }
+      ]
+    }
+  ],
+  "generatedAt": "2026-04-12T07:06:30.743Z",
+  "summary": {
+    "sectionCount": 4,
+    "rowCount": 20,
+    "columnStatusCounts": {
+      "unit": {
+        "covered": 9,
+        "partial": 1,
+        "gap": 0,
+        "na": 10
+      },
+      "integration": {
+        "covered": 17,
+        "partial": 1,
+        "gap": 2,
+        "na": 0
+      },
+      "goldmaster": {
+        "covered": 10,
+        "partial": 2,
+        "gap": 0,
+        "na": 8
+      },
+      "runtime": {
+        "covered": 18,
+        "partial": 2,
+        "gap": 0,
+        "na": 0
+      },
+      "ui": {
+        "covered": 0,
+        "partial": 5,
+        "gap": 1,
+        "na": 14
+      }
+    },
+    "gapCount": 2
+  },
+  "gaps": [
+    {
+      "id": "ocr-corpus-depth",
+      "capability": "Noisy multi-page scanned corpus coverage",
+      "module": "parser",
+      "priority": "high",
+      "summary": "Add multi-page and degraded scanned fixtures with skew, dropout, and mixed text density.",
+      "sectionTitle": "Parser and OCR"
+    },
+    {
+      "id": "ui-interactions",
+      "capability": "Real browser interaction automation",
+      "module": "orchestrator/public",
+      "priority": "high",
+      "summary": "Add Playwright-based browser flows for intake, batch progress, report viewing, and matrix browsing.",
+      "sectionTitle": "Server and Browser Surfaces"
+    }
+  ]
+}
