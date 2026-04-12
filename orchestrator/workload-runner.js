@@ -1,7 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { mkdir, rename, rm } from "node:fs/promises";
+import { copyFile, link, mkdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
@@ -75,6 +75,21 @@ async function execNodeToFile(scriptPath, args, outputPath) {
 
 export async function runJsonStage(scriptRelativePath, args, outputPath) {
   return execNodeToFile(scriptRelativePath, args, outputPath);
+}
+
+async function stageInputFile(filePath, outputDir) {
+  const extension = path.extname(filePath) || ".pdf";
+  const stagedFilePath = path.join(outputDir, `00-source${extension}`);
+
+  await rm(stagedFilePath, { force: true }).catch(() => {});
+
+  try {
+    await link(filePath, stagedFilePath);
+  } catch {
+    await copyFile(filePath, stagedFilePath);
+  }
+
+  return path.resolve(stagedFilePath);
 }
 
 function isRetryableStageError(error) {
@@ -332,14 +347,16 @@ export async function runManagedWorkload({
   maxStageAttempts = DEFAULT_STAGE_ATTEMPTS,
   buildStagePlan
 }) {
-  const resolvedFilePath = path.resolve(filePath);
+  const resolvedSourceFilePath = path.resolve(filePath);
   const resolvedOutputDir = path.resolve(outputDir || path.join(getRuntimeSubdir("jobs", { repoRoot }), jobId));
   await mkdir(resolvedOutputDir, { recursive: true });
+  const stagedFilePath = await stageInputFile(resolvedSourceFilePath, resolvedOutputDir);
 
   const artifacts = {};
   const stages = [];
   const stagePlan = buildStagePlan({
-    filePath: resolvedFilePath,
+    filePath: stagedFilePath,
+    sourceFilePath: resolvedSourceFilePath,
     resolvedOutputDir,
     artifacts,
     options,
@@ -353,7 +370,15 @@ export async function runManagedWorkload({
     const stage = stagePlan[index];
     const result = await executeStageWithRetries(
       stage,
-      { filePath: resolvedFilePath, outputDir: resolvedOutputDir, jobId, artifacts, options, workload },
+      {
+        filePath: stagedFilePath,
+        sourceFilePath: resolvedSourceFilePath,
+        outputDir: resolvedOutputDir,
+        jobId,
+        artifacts,
+        options,
+        workload
+      },
       stageRunner,
       maxStageAttempts
     );
@@ -377,7 +402,8 @@ export async function runManagedWorkload({
       status: "failed",
       workload,
       input: {
-        filePath: resolvedFilePath,
+        filePath: resolvedSourceFilePath,
+        stagedFilePath,
         outputDir: resolvedOutputDir,
         workloadId: workload.id,
         options
@@ -394,7 +420,8 @@ export async function runManagedWorkload({
     status: "completed",
     workload,
     input: {
-      filePath: resolvedFilePath,
+      filePath: resolvedSourceFilePath,
+      stagedFilePath,
       outputDir: resolvedOutputDir,
       workloadId: workload.id,
       options
