@@ -117,6 +117,97 @@ test("tag builder infers table head and body sections when explicit section meta
   assert.deepEqual(table.children[1].children[0].children.map((child) => child.label), ["Q1", "$10M"]);
 });
 
+test("tag builder flattens redundant tbody wrappers for body-only tables", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-table-body-only-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:table-body-only",
+      source: { layoutDocumentId: "layout:table-body-only" },
+      nodes: [
+        { id: "n1", pageNumber: 1, sourceBlockId: "b1", role: "TH", text: "Model", bbox: [0, 20, 10, 10], confidence: 0.95, readingOrder: 0, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 0, tableSection: "body" },
+        { id: "n2", pageNumber: 1, sourceBlockId: "b2", role: "TD", text: "TK4N", bbox: [20, 20, 10, 10], confidence: 0.95, readingOrder: 1, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 1, tableSection: "body" },
+        { id: "n3", pageNumber: 1, sourceBlockId: "b3", role: "TH", text: "Power", bbox: [0, 35, 10, 10], confidence: 0.95, readingOrder: 2, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 0, tableSection: "body" },
+        { id: "n4", pageNumber: 1, sourceBlockId: "b4", role: "TD", text: "100-240 VAC", bbox: [20, 35, 10, 10], confidence: 0.95, readingOrder: 3, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 1, tableSection: "body" }
+      ],
+      orderedNodeIds: ["n1", "n2", "n3", "n4"]
+    }, null, 2)
+  );
+
+  const tagging = await buildTagTree(inputPath);
+  const table = tagging.root.children[0];
+
+  assert.equal(table.type, "Table");
+  assert.deepEqual(table.children.map((child) => child.type), ["TR", "TR"]);
+  assert.deepEqual(table.children[0].children.map((child) => child.type), ["TH", "TD"]);
+  assert.deepEqual(table.children[1].children.map((child) => child.label), ["Power", "100-240 VAC"]);
+});
+
+test("tag builder keeps mixed row-header rows together when section metadata is missing", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-table-row-header-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:table-row-header",
+      source: { layoutDocumentId: "layout:table-row-header" },
+      nodes: [
+        { id: "n1", pageNumber: 1, sourceBlockId: "b1", role: "TH", text: "Model", bbox: [0, 20, 10, 10], confidence: 0.95, readingOrder: 0, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 0 },
+        { id: "n2", pageNumber: 1, sourceBlockId: "b2", role: "TD", text: "TK4N", bbox: [20, 20, 10, 10], confidence: 0.95, readingOrder: 1, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 1 },
+        { id: "n3", pageNumber: 1, sourceBlockId: "b3", role: "TH", text: "Power", bbox: [0, 35, 10, 10], confidence: 0.95, readingOrder: 2, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 0 },
+        { id: "n4", pageNumber: 1, sourceBlockId: "b4", role: "TD", text: "100-240 VAC", bbox: [20, 35, 10, 10], confidence: 0.95, readingOrder: 3, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 1 }
+      ],
+      orderedNodeIds: ["n1", "n2", "n3", "n4"]
+    }, null, 2)
+  );
+
+  const tagging = await buildTagTree(inputPath);
+  const table = tagging.root.children[0];
+
+  assert.equal(table.type, "Table");
+  assert.deepEqual(table.children.map((child) => child.type), ["TR", "TR"]);
+  assert.deepEqual(table.children[0].children.map((child) => child.label), ["Model", "TK4N"]);
+  assert.deepEqual(table.children[0].children.map((child) => child.type), ["TH", "TD"]);
+  assert.deepEqual(table.children[1].children.map((child) => child.label), ["Power", "100-240 VAC"]);
+});
+
+test("tag builder promotes contiguous leading header rows into thead when metadata is incomplete", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-table-multihead-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:table-multihead",
+      source: { layoutDocumentId: "layout:table-multihead" },
+      nodes: [
+        { id: "n1", pageNumber: 1, sourceBlockId: "b1", role: "TH", text: "Specifications", bbox: [0, 20, 30, 10], confidence: 0.95, readingOrder: 0, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 0, tableColumnSpan: 2 },
+        { id: "n2", pageNumber: 1, sourceBlockId: "b2", role: "TH", text: "Item", bbox: [0, 35, 10, 10], confidence: 0.95, readingOrder: 1, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 0 },
+        { id: "n3", pageNumber: 1, sourceBlockId: "b3", role: "TH", text: "Value", bbox: [20, 35, 10, 10], confidence: 0.95, readingOrder: 2, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 1 },
+        { id: "n4", pageNumber: 1, sourceBlockId: "b4", role: "TD", text: "Power", bbox: [0, 50, 10, 10], confidence: 0.95, readingOrder: 3, tableGroupId: "table-1", tableRowIndex: 2, tableColumnIndex: 0 },
+        { id: "n5", pageNumber: 1, sourceBlockId: "b5", role: "TD", text: "100-240 VAC", bbox: [20, 50, 10, 10], confidence: 0.95, readingOrder: 4, tableGroupId: "table-1", tableRowIndex: 2, tableColumnIndex: 1 }
+      ],
+      orderedNodeIds: ["n1", "n2", "n3", "n4", "n5"]
+    }, null, 2)
+  );
+
+  const tagging = await buildTagTree(inputPath);
+  const table = tagging.root.children[0];
+
+  assert.equal(table.type, "Table");
+  assert.deepEqual(table.children.map((child) => child.type), ["THead", "TBody"]);
+  assert.equal(table.children[0].children.length, 2);
+  assert.deepEqual(table.children[0].children[0].children.map((child) => child.label), ["Specifications"]);
+  assert.deepEqual(table.children[0].children[1].children.map((child) => child.label), ["Item", "Value"]);
+  assert.deepEqual(table.children[1].children[0].children.map((child) => child.label), ["Power", "100-240 VAC"]);
+});
+
 test("tag builder normalizes heading levels so the first heading is H1 and skipped levels are compressed", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-heading-normalization-test-"));
   const inputPath = path.join(tempDir, "semantic.json");

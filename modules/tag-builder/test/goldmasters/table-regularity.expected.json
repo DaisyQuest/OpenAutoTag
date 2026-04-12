@@ -375,57 +375,51 @@
               "sourceNodeIds": [],
               "children": [
                 {
-                  "id": "tag:table:table-3:body",
-                  "type": "TBody",
+                  "id": "tag:table:table-3:body:row:0",
+                  "type": "TR",
+                  "tableRowIndex": 0,
                   "children": [
                     {
-                      "id": "tag:table:table-3:body:row:0",
-                      "type": "TR",
+                      "id": "tag:n1",
+                      "type": "TH",
+                      "label": "Region",
+                      "sourceNodeIds": ["n1"],
+                      "children": [],
+                      "rowSpan": 2,
+                      "tableSection": "body",
                       "tableRowIndex": 0,
-                      "children": [
-                        {
-                          "id": "tag:n1",
-                          "type": "TH",
-                          "label": "Region",
-                          "sourceNodeIds": ["n1"],
-                          "children": [],
-                          "rowSpan": 2,
-                          "tableSection": "body",
-                          "tableRowIndex": 0,
-                          "tableColumnIndex": 0
-                        },
-                        {
-                          "id": "tag:n2",
-                          "type": "TD",
-                          "label": "Q1",
-                          "sourceNodeIds": ["n2"],
-                          "children": [],
-                          "tableSection": "body",
-                          "tableRowIndex": 0,
-                          "tableColumnIndex": 1
-                        }
-                      ],
-                      "tableColumnCount": 2
+                      "tableColumnIndex": 0
                     },
                     {
-                      "id": "tag:table:table-3:body:row:1",
-                      "type": "TR",
-                      "tableRowIndex": 1,
-                      "children": [
-                        {
-                          "id": "tag:n3",
-                          "type": "TD",
-                          "label": "Q2",
-                          "sourceNodeIds": ["n3"],
-                          "children": [],
-                          "tableSection": "body",
-                          "tableRowIndex": 1,
-                          "tableColumnIndex": 1
-                        }
-                      ],
-                      "tableColumnCount": 2
+                      "id": "tag:n2",
+                      "type": "TD",
+                      "label": "Q1",
+                      "sourceNodeIds": ["n2"],
+                      "children": [],
+                      "tableSection": "body",
+                      "tableRowIndex": 0,
+                      "tableColumnIndex": 1
                     }
-                  ]
+                  ],
+                  "tableColumnCount": 2
+                },
+                {
+                  "id": "tag:table:table-3:body:row:1",
+                  "type": "TR",
+                  "tableRowIndex": 1,
+                  "children": [
+                    {
+                      "id": "tag:n3",
+                      "type": "TD",
+                      "label": "Q2",
+                      "sourceNodeIds": ["n3"],
+                      "children": [],
+                      "tableSection": "body",
+                      "tableRowIndex": 1,
+                      "tableColumnIndex": 1
+                    }
+                  ],
+                  "tableColumnCount": 2
                 }
               ],
               "tableColumnCount": 2,
@@ -478,61 +472,55 @@
               "sourceNodeIds": [],
               "children": [
                 {
-                  "id": "tag:table:table-4:body",
-                  "type": "TBody",
+                  "id": "tag:table:table-4:body:row:0",
+                  "type": "TR",
+                  "tableRowIndex": 0,
                   "children": [
                     {
-                      "id": "tag:table:table-4:body:row:0",
-                      "type": "TR",
+                      "id": "tag:n1",
+                      "type": "TH",
+                      "label": "Region",
+                      "sourceNodeIds": ["n1"],
+                      "children": [],
+                      "rowSpan": 2,
+                      "tableSection": "body",
                       "tableRowIndex": 0,
-                      "children": [
-                        {
-                          "id": "tag:n1",
-                          "type": "TH",
-                          "label": "Region",
-                          "sourceNodeIds": ["n1"],
-                          "children": [],
-                          "rowSpan": 2,
-                          "tableSection": "body",
-                          "tableRowIndex": 0,
-                          "tableColumnIndex": 0
-                        },
-                        {
-                          "id": "tag:n2",
-                          "type": "TD",
-                          "label": "Q1",
-                          "sourceNodeIds": ["n2"],
-                          "children": [],
-                          "tableSection": "body",
-                          "tableRowIndex": 0,
-                          "tableColumnIndex": 1
-                        }
-                      ],
-                      "tableColumnCount": 2
+                      "tableColumnIndex": 0
                     },
                     {
-                      "id": "tag:table:table-4:body:row:1",
-                      "type": "TR",
-                      "tableRowIndex": 1,
-                      "children": [
-                        {
-                          "id": "tag:table:table-4:body:row:1:placeholder:1",
-                          "type": "TD",
-                          "label": "",
-                          "sourceNodeIds": [],
-                          "synthetic": true,
-                          "repairReason": "table-row-irregularity",
-                          "tableSection": "body",
-                          "tableRowIndex": 1,
-                          "tableColumnIndex": 1,
-                          "children": []
-                        }
-                      ],
-                      "synthetic": true,
-                      "repairReason": "table-rowspan-continuation",
-                      "tableColumnCount": 2
+                      "id": "tag:n2",
+                      "type": "TD",
+                      "label": "Q1",
+                      "sourceNodeIds": ["n2"],
+                      "children": [],
+                      "tableSection": "body",
+                      "tableRowIndex": 0,
+                      "tableColumnIndex": 1
                     }
-                  ]
+                  ],
+                  "tableColumnCount": 2
+                },
+                {
+                  "id": "tag:table:table-4:body:row:1",
+                  "type": "TR",
+                  "tableRowIndex": 1,
+                  "children": [
+                    {
+                      "id": "tag:table:table-4:body:row:1:placeholder:1",
+                      "type": "TD",
+                      "label": "",
+                      "sourceNodeIds": [],
+                      "synthetic": true,
+                      "repairReason": "table-row-irregularity",
+                      "tableSection": "body",
+                      "tableRowIndex": 1,
+                      "tableColumnIndex": 1,
+                      "children": []
+                    }
+                  ],
+                  "synthetic": true,
+                  "repairReason": "table-rowspan-continuation",
+                  "tableColumnCount": 2
                 }
               ],
               "tableColumnCount": 2,

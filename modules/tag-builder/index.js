@@ -200,8 +200,8 @@ function createTableNode(node, groupId) {
   };
 }
 
-function normalizeTableSection(node) {
-  const explicitSection = String(node.tableSection || "").trim().toLowerCase();
+function normalizeExplicitTableSectionValue(value) {
+  const explicitSection = String(value || "").trim().toLowerCase();
   if (explicitSection === "head" || explicitSection === "thead" || explicitSection === "header") {
     return "head";
   }
@@ -212,6 +212,15 @@ function normalizeTableSection(node) {
 
   if (explicitSection === "body" || explicitSection === "tbody") {
     return "body";
+  }
+
+  return null;
+}
+
+function normalizeTableSection(node) {
+  const explicitSection = normalizeExplicitTableSectionValue(node.tableSection);
+  if (explicitSection) {
+    return explicitSection;
   }
 
   if (node.role === "TH" && getTableRowIndex(node) === 0) {
@@ -350,16 +359,31 @@ function sameChildSequence(existingChildren, replacementChildren) {
   return true;
 }
 
-function collectTableRowDescriptors(tableNode) {
-  const rowDescriptors = [];
+function collectOrderedTableRows(tableNode) {
+  const rowEntries = [];
   let fallbackRowIndex = 0;
 
-  for (const sectionNode of tableNode.children || []) {
-    if (!["THead", "TBody", "TFoot"].includes(sectionNode.type)) {
+  for (const childNode of tableNode.children || []) {
+    if (childNode?.type === "TR") {
+      const firstCell = (childNode.children || []).find(isTableCellNode);
+      const rowIndex =
+        toTableCoordinate(childNode.tableRowIndex) ?? toTableCoordinate(firstCell?.tableRowIndex) ?? fallbackRowIndex;
+
+      childNode.tableRowIndex = rowIndex;
+      fallbackRowIndex = rowIndex + 1;
+      rowEntries.push({
+        sectionNode: null,
+        rowNode: childNode,
+        rowIndex
+      });
       continue;
     }
 
-    for (const rowNode of sectionNode.children || []) {
+    if (!["THead", "TBody", "TFoot"].includes(childNode.type)) {
+      continue;
+    }
+
+    for (const rowNode of childNode.children || []) {
       if (rowNode.type !== "TR") {
         continue;
       }
@@ -370,15 +394,199 @@ function collectTableRowDescriptors(tableNode) {
 
       rowNode.tableRowIndex = rowIndex;
       fallbackRowIndex = rowIndex + 1;
-      rowDescriptors.push({
-        sectionNode,
+      rowEntries.push({
+        sectionNode: childNode,
         rowNode,
         rowIndex
       });
     }
   }
 
-  return rowDescriptors;
+  return rowEntries;
+}
+
+function collectTableRowDescriptors(tableNode) {
+  return collectOrderedTableRows(tableNode).map(({ sectionNode, rowNode, rowIndex }) => ({
+    sectionNode,
+    rowNode,
+    rowIndex
+  }));
+}
+
+function getSubstantiveTableCells(rowNode) {
+  return (rowNode?.children || []).filter((cell) => {
+    if (!isTableCellNode(cell)) {
+      return false;
+    }
+
+    if (!cell.synthetic) {
+      return true;
+    }
+
+    if ((cell.sourceNodeIds || []).length > 0) {
+      return true;
+    }
+
+    return String(cell.label || "").trim().length > 0;
+  });
+}
+
+function isHeaderLikeTableRow(rowNode) {
+  const cells = getSubstantiveTableCells(rowNode);
+  return cells.length > 0 && cells.every((cell) => cell.type === "TH");
+}
+
+function isBodyLikeTableRow(rowNode) {
+  return getSubstantiveTableCells(rowNode).some((cell) => cell.type === "TD");
+}
+
+function getExplicitRowSectionKey(rowNode, currentSectionKey) {
+  const explicitHints = new Set();
+  const rowHint = normalizeExplicitTableSectionValue(rowNode?.tableSection);
+  if (rowHint) {
+    explicitHints.add(rowHint);
+  }
+
+  for (const cell of rowNode?.children || []) {
+    if (!isTableCellNode(cell)) {
+      continue;
+    }
+
+    const cellHint = normalizeExplicitTableSectionValue(cell.tableSection);
+    if (cellHint) {
+      explicitHints.add(cellHint);
+    }
+  }
+
+  if (explicitHints.has("foot")) {
+    return "foot";
+  }
+
+  if (explicitHints.has("head") && !explicitHints.has("body")) {
+    return "head";
+  }
+
+  if (explicitHints.size === 1 && explicitHints.has("body")) {
+    return "body";
+  }
+
+  return currentSectionKey;
+}
+
+function rekeyRowForSection(tableNode, rowNode, sectionKey) {
+  const rowIndex = toTableCoordinate(rowNode.tableRowIndex) ?? 0;
+  const nextRowId = `${tableNode.id}:${sectionKey}:row:${rowIndex}`;
+  rowNode.id = nextRowId;
+
+  for (const cell of rowNode.children || []) {
+    if (!cell?.synthetic || !String(cell.id || "").includes(":placeholder:")) {
+      continue;
+    }
+
+    const columnIndex = toTableCoordinate(cell.tableColumnIndex) ?? 0;
+    cell.id = `${nextRowId}:placeholder:${columnIndex}`;
+  }
+}
+
+function applySectionKeyToRow(rowNode, sectionKey) {
+  for (const cell of rowNode.children || []) {
+    if (!isTableCellNode(cell)) {
+      continue;
+    }
+
+    cell.tableSection = sectionKey;
+    if (sectionKey === "head" && cell.synthetic && (cell.sourceNodeIds || []).length === 0 && !String(cell.label || "").trim()) {
+      cell.type = "TH";
+    }
+  }
+}
+
+function buildTableSectionChildren(tableNode, sectionKey, rowEntries) {
+  if (rowEntries.length === 0) {
+    return null;
+  }
+
+  for (const entry of rowEntries) {
+    rekeyRowForSection(tableNode, entry.rowNode, sectionKey);
+    applySectionKeyToRow(entry.rowNode, sectionKey);
+  }
+
+  return {
+    id: `${tableNode.id}:${sectionKey}`,
+    type: getTableSectionType(sectionKey),
+    children: rowEntries.map((entry) => entry.rowNode)
+  };
+}
+
+function normalizeTableSections(rootNode) {
+  const visit = (node) => {
+    if (!node) {
+      return;
+    }
+
+    for (const child of node.children || []) {
+      visit(child);
+    }
+
+    if (node.type !== "Table") {
+      return;
+    }
+
+    const rowEntries = collectOrderedTableRows(node).map((entry) => {
+      const currentSectionKey = entry.sectionNode ? getSectionKeyFromNode(entry.sectionNode) : "body";
+      return {
+        ...entry,
+        currentSectionKey,
+        assignedSectionKey: getExplicitRowSectionKey(entry.rowNode, currentSectionKey),
+        headerLike: isHeaderLikeTableRow(entry.rowNode),
+        bodyLike: isBodyLikeTableRow(entry.rowNode)
+      };
+    });
+
+    if (rowEntries.length === 0) {
+      return;
+    }
+
+    const firstBodyLikeIndex = rowEntries.findIndex((entry) => entry.bodyLike);
+    if (firstBodyLikeIndex > 0) {
+      for (let index = 0; index < firstBodyLikeIndex; index += 1) {
+        const entry = rowEntries[index];
+        if (entry.assignedSectionKey === "foot") {
+          break;
+        }
+
+        if (!entry.headerLike && entry.assignedSectionKey !== "head") {
+          break;
+        }
+
+        entry.assignedSectionKey = "head";
+      }
+    }
+
+    const headRows = rowEntries.filter((entry) => entry.assignedSectionKey === "head");
+    const bodyRows = rowEntries.filter((entry) => entry.assignedSectionKey === "body");
+    const footRows = rowEntries.filter((entry) => entry.assignedSectionKey === "foot");
+    const nextChildren = [];
+
+    const headSection = buildTableSectionChildren(node, "head", headRows);
+    if (headSection) {
+      nextChildren.push(headSection);
+    }
+
+    const bodySection = buildTableSectionChildren(node, "body", bodyRows);
+    if (bodySection) {
+      nextChildren.push(bodySection);
+    }
+
+    const footSection = buildTableSectionChildren(node, "foot", footRows);
+    if (footSection) {
+      nextChildren.push(footSection);
+    }
+
+    node.children = nextChildren;
+  };
+
+  visit(rootNode);
 }
 
 function buildRowPlacementPlan(rowDescriptors, targetColumnCount = null) {
@@ -642,6 +850,35 @@ function normalizeTableRegularity(rootNode) {
   return summary;
 }
 
+function flattenRedundantTableBodySections(rootNode) {
+  const visit = (node) => {
+    if (!node) {
+      return;
+    }
+
+    for (const child of node.children || []) {
+      visit(child);
+    }
+
+    if (node.type !== "Table") {
+      return;
+    }
+
+    const sectionChildren = (node.children || []).filter((child) =>
+      ["THead", "TBody", "TFoot"].includes(child?.type)
+    );
+
+    if (sectionChildren.length !== 1 || sectionChildren[0]?.type !== "TBody") {
+      return;
+    }
+
+    const [bodySection] = sectionChildren;
+    node.children = (node.children || []).flatMap((child) => (child === bodySection ? bodySection.children || [] : [child]));
+  };
+
+  visit(rootNode);
+}
+
 export async function buildTagTree(inputPath) {
   const semanticDocument = JSON.parse(await readFile(inputPath, "utf8"));
 
@@ -720,7 +957,6 @@ export async function buildTagTree(inputPath) {
       activeTable = {
         groupId,
         node: tableNode,
-        sections: new Map(),
         rows: new Map()
       };
       continue;
@@ -734,24 +970,15 @@ export async function buildTagTree(inputPath) {
         activeTable = {
           groupId,
           node: tableNode,
-          sections: new Map(),
           rows: new Map()
         };
       }
 
       const rowIndex = getTableRowIndex(node);
-      const sectionKey = normalizeTableSection(node);
-      let sectionNode = activeTable.sections.get(sectionKey);
-      if (!sectionNode) {
-        sectionNode = createTableSectionNode(activeTable.node, sectionKey);
-        activeTable.sections.set(sectionKey, sectionNode);
-      }
-
-      const rowKey = `${sectionKey}:${rowIndex}`;
-      let rowNode = activeTable.rows.get(rowKey);
+      let rowNode = activeTable.rows.get(rowIndex);
       if (!rowNode) {
-        rowNode = createTableRowNode(sectionNode, rowIndex);
-        activeTable.rows.set(rowKey, rowNode);
+        rowNode = createTableRowNode(activeTable.node, rowIndex);
+        activeTable.rows.set(rowIndex, rowNode);
       }
 
       rowNode.children.push(createLeaf(node, headingNormalization));
@@ -762,7 +989,10 @@ export async function buildTagTree(inputPath) {
     currentContainer().children.push(createLeaf(node, headingNormalization));
   }
 
+  normalizeTableSections(root);
   const tableRegularityCorrection = normalizeTableRegularity(root);
+  normalizeTableSections(root);
+  flattenRedundantTableBodySections(root);
   const taggingDocument = {
     schemaVersion: "1.0.0",
     documentId: `${semanticDocument.documentId}:tagging`,
