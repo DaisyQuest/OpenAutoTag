@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Command Center</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="dashboard" data-admin-page="agents">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">BuildEverything</a>
+        <div class="topbar-links">
+          <a class="topbar-link" href="/">Workspace</a>
+          <a class="topbar-link" href="/admin/keys.html">API Keys</a>
+          <a class="topbar-link" href="/admin/system.html">System</a>
+          <a class="topbar-link is-active" href="/admin/agents.html">Agents</a>
+          <a class="topbar-link" href="/admin/queue.html">Queue</a>
+          <a class="topbar-link" href="/admin/history.html">History</a>
+          <a class="topbar-link" href="/admin/artifacts.html">Artifacts</a>
+        </div>
+        <div class="topbar-actions">
+          <span id="session-pill" class="session-pill">Loading access</span>
+          <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+        </div>
+      </nav>
+
+      <header class="hero admin-hero agent-command-hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Agent Command</p>
+            <h1>Watch the remote fleet, live claims, and fallback pressure in one room.</h1>
+            <p class="lede">
+              This board is tuned for dispatch. Track idle App Service workers, active leases, stale heartbeats, and the
+              point where the primary server has to absorb overflow.
+            </p>
+          </div>
+          <aside class="hero-command">
+            <div class="agent-radar">
+              <div class="agent-radar-ring ring-a"></div>
+              <div class="agent-radar-ring ring-b"></div>
+              <div class="agent-radar-ring ring-c"></div>
+              <div class="agent-radar-sweep"></div>
+              <div id="agent-radar-readout" class="agent-radar-readout">
+                <span>Fleet</span>
+                <strong>Loading</strong>
+                <small>Waiting for telemetry</small>
+              </div>
+            </div>
+            <div id="agent-summary" class="hero-stat-grid">
+              <article class="summary-card">
+                <span class="summary-label">Agents</span>
+                <strong>Loading</strong>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </header>
+
+      <section class="panel auth-strip" aria-labelledby="auth-title">
+        <div class="section-heading">
+          <div class="heading-stack">
+            <h2 id="auth-title">Admin access</h2>
+            <p id="auth-copy" class="section-copy">
+              Use an admin key to inspect agent heartbeats, queue coupling, and remote execution telemetry.
+            </p>
+          </div>
+          <span id="auth-caption">Checking mode</span>
+        </div>
+        <form id="auth-form" class="auth-form">
+          <label class="field-stack" for="auth-key">
+            <span class="field-label">Admin key</span>
+            <input
+              id="auth-key"
+              class="url-input auth-input"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste the X-ADMIN-KEY value"
+            />
+          </label>
+          <button id="auth-submit" class="action-button" type="submit">Unlock agent command center</button>
+        </form>
+        <p id="auth-message" class="message-line" aria-live="polite">Checking access requirements.</p>
+      </section>
+
+      <main id="main-content" class="dashboard admin-dashboard">
+        <section class="panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Dispatch lanes</h2>
+              <p class="section-copy">Queue pressure, local fallback, and remote capacity are recomputed on every poll.</p>
+            </div>
+            <span id="dispatch-caption">Loading lanes</span>
+          </div>
+          <div id="dispatch-matrix" class="definition-grid">
+            <article class="definition-card">
+              <span class="definition-label">Dispatch</span>
+              <strong>Locked</strong>
+            </article>
+          </div>
+        </section>
+
+        <div class="results-workspace agent-command-workspace">
+          <section class="panel results-table-shell">
+            <div class="section-heading">
+              <div class="heading-stack">
+                <h2>Fleet board</h2>
+                <p class="section-copy">Select an agent to inspect the most recent heartbeat, stage context, and workload fit.</p>
+              </div>
+              <span id="agent-grid-caption">Loading fleet</span>
+            </div>
+            <div id="agent-grid" class="agent-grid-shell">
+              <article class="agent-card empty-agent-card">
+                <strong>Locked</strong>
+                <p>Enter an admin key to inspect checked-in agents.</p>
+              </article>
+            </div>
+          </section>
+
+          <aside class="detail-panel agent-detail-panel">
+            <div class="detail-header">
+              <div>
+                <p class="eyebrow detail-eyebrow">Selected agent</p>
+                <h3 id="agent-detail-title">Agent telemetry locked</h3>
+                <p id="agent-detail-subtitle" class="detail-subtitle">
+                  Unlock admin access to inspect the live worker fleet.
+                </p>
+              </div>
+              <span id="agent-detail-status" class="status-pill status-unknown">Locked</span>
+            </div>
+
+            <div id="agent-detail-meta" class="definition-grid detail-stat-grid">
+              <article class="definition-card">
+                <span class="definition-label">Access</span>
+                <strong>Required</strong>
+              </article>
+            </div>
+            <div id="agent-detail-summary" class="report-summary-grid detail-stat-grid">
+              <article class="summary-card">
+                <span class="summary-label">Heartbeat</span>
+                <strong>Locked</strong>
+              </article>
+            </div>
+            <section class="detail-section">
+              <div class="section-heading compact-heading">
+                <h4>Current stage</h4>
+                <span id="agent-stage-caption">No telemetry</span>
+              </div>
+              <div id="agent-stage-panel" class="agent-stage-panel">
+                <div class="empty-report">No agent selected.</div>
+              </div>
+            </section>
+            <section class="detail-section">
+              <div class="section-heading compact-heading">
+                <h4>Capabilities</h4>
+                <span id="agent-capabilities-caption">Unavailable</span>
+              </div>
+              <div id="agent-capabilities" class="finding-list compact-list">
+                <span class="finding-chip">Locked</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="/admin/agents.js"></script>
+  </body>
+</html>

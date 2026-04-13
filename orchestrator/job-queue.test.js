@@ -136,3 +136,84 @@ test("createJobQueue surfaces worker check-ins while a job is running", async (t
   assert.equal(completedJob.statusDetail.lastStage?.label, "validator");
   assert.ok(completedJob.statusDetail.checkInCount > runningJob.statusDetail.checkInCount);
 });
+
+test("createJobQueue holds work for remote capacity and falls back locally after lease expiry", async (t) => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "job-queue-remote-lease-"));
+  t.after(() => rm(tempDir, { recursive: true, force: true }));
+
+  const sourcePath = path.join(tempDir, "source.pdf");
+  await writeFile(sourcePath, "remote lease payload");
+
+  const processorInvocations = [];
+  const workload = {
+    id: "test-workload",
+    label: "Test Workload"
+  };
+  const queue = createJobQueue({
+    outputRoot: tempDir,
+    remoteLeaseGraceMs: 30,
+    processor: async ({ jobId, filePath, outputDir, options }) => {
+      processorInvocations.push(jobId);
+      return {
+        jobId,
+        status: "completed",
+        workload,
+        input: {
+          filePath,
+          outputDir,
+          workloadId: workload.id,
+          options
+        },
+        artifacts: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        statusDetail: {
+          state: "completed",
+          message: "Completed locally after lease expiry.",
+          completedStages: 1,
+          totalStages: 1,
+          currentStage: null
+        }
+      };
+    }
+  });
+
+  queue.setRemoteCapacityProvider(() => 1);
+  const queuedJob = queue.enqueue({
+    filePath: sourcePath,
+    workload,
+    options: {}
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 40));
+  assert.equal(processorInvocations.length, 0);
+  assert.equal(queue.get(queuedJob.jobId)?.status, "queued");
+
+  const claimedJob = queue.claimNextRemoteJob({
+    agent: {
+      agentId: "agent-alpha",
+      label: "Agent Alpha"
+    },
+    heartbeatIntervalMs: 10
+  });
+
+  assert.equal(claimedJob?.status, "running");
+  assert.equal(claimedJob?.worker?.kind, "agent");
+
+  await new Promise((resolve) => setTimeout(resolve, 40));
+  const expiredAssignments = queue.recoverExpiredRemoteClaims();
+  assert.equal(expiredAssignments.length, 1);
+  assert.equal(queue.get(queuedJob.jobId)?.status, "queued");
+
+  queue.setRemoteCapacityProvider(() => 0);
+  queue.requestDrain();
+
+  const completedJob = await waitFor(() => {
+    const snapshot = queue.get(queuedJob.jobId);
+    return snapshot?.status === "completed" ? snapshot : null;
+  });
+
+  assert.equal(processorInvocations.length, 1);
+  assert.equal(completedJob.worker?.kind, "local");
+  assert.equal(completedJob.statusDetail.state, "completed");
+});
