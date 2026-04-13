@@ -23,7 +23,7 @@ const JSON_PREVIEW_DEPTH_LIMIT = 4;
 function humanizeArtifactName(value) {
   const normalized = String(value || "")
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[_-.]+/g, " ")
+    .replace(/[_.\-]+/g, " ")
     .trim();
 
   if (!normalized) {

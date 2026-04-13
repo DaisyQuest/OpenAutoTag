@@ -1713,6 +1713,128 @@ body {
   font-size: 0.82rem;
 }
 
+.artifact-browser-workspace {
+  grid-template-columns: minmax(0, 1.16fr) minmax(340px, 0.94fr);
+}
+
+.artifact-filter-row {
+  margin-top: 0;
+}
+
+.artifact-filter-field {
+  min-width: min(100%, 16rem);
+  flex: 1 1 16rem;
+}
+
+.artifact-preview-panel .report-content,
+.artifact-preview-panel .raw-json-panel {
+  margin-top: 0;
+}
+
+.json-preview-group {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: rgba(245, 248, 247, 0.82);
+  overflow: hidden;
+}
+
+.json-preview-group + .json-preview-group {
+  margin-top: 0.8rem;
+}
+
+.json-preview-group summary {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.json-preview-grid {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+
+.json-preview-item {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(19, 38, 40, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.json-preview-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.json-preview-item-header strong {
+  font-size: 0.95rem;
+}
+
+.json-preview-item-header span {
+  color: var(--muted);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.82rem;
+  word-break: break-word;
+}
+
+.json-preview-leaf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.json-preview-leaf code {
+  margin: 0;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.88rem;
+  color: #204346;
+  word-break: break-word;
+}
+
+.json-value-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.9rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.json-value-chip.type-object,
+.json-value-chip.type-array {
+  background: rgba(11, 122, 117, 0.12);
+  color: var(--signal-deep);
+}
+
+.json-value-chip.type-string {
+  background: rgba(66, 95, 98, 0.12);
+  color: #244043;
+}
+
+.json-value-chip.type-number,
+.json-value-chip.type-boolean {
+  background: rgba(202, 107, 47, 0.14);
+  color: #8b4318;
+}
+
+.json-value-chip.type-null,
+.json-value-chip.type-undefined {
+  background: rgba(19, 38, 40, 0.08);
+  color: var(--muted);
+}
+
 [data-view="report"] .page-shell {
   padding-top: 2.8rem;
 }
