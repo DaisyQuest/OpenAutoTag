@@ -1,10 +1,60 @@
 export const artifactLabels = {
+  layout: "Layout extract",
+  sourceTextMap: "Source text map",
+  tableStructureMap: "Table structure map",
+  layoutEnriched: "Layout analysis",
+  semantic: "Semantic document",
+  semanticOrdered: "Reading-order document",
+  semanticRedacted: "Semantic redaction output",
+  redactionPlan: "Redaction plan",
+  tagging: "Tagging plan",
+  taggedPdf: "Tagged PDF",
+  redactedPdf: "Redacted PDF",
   validationReport: "Validation report",
   tagDeltaReport: "Tag delta",
   writerReport: "Writer report",
   tagManifest: "Tag tree",
   redactionReport: "Redaction report"
 };
+
+const JSON_PREVIEW_ITEM_LIMIT = 8;
+const JSON_PREVIEW_DEPTH_LIMIT = 4;
+
+function humanizeArtifactName(value) {
+  const normalized = String(value || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-.]+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return "Artifact";
+  }
+
+  const acronymMap = new Map([
+    ["pdf", "PDF"],
+    ["ssn", "SSN"],
+    ["ocr", "OCR"],
+    ["xmp", "XMP"],
+    ["mcid", "MCID"],
+    ["json", "JSON"]
+  ]);
+
+  return normalized
+    .split(/\s+/)
+    .map((segment) => {
+      const lowered = segment.toLowerCase();
+      if (acronymMap.has(lowered)) {
+        return acronymMap.get(lowered);
+      }
+
+      return `${lowered.charAt(0).toUpperCase()}${lowered.slice(1)}`;
+    })
+    .join(" ");
+}
+
+export function getArtifactLabel(artifactName) {
+  return artifactLabels[artifactName] || humanizeArtifactName(artifactName);
+}
 
 export function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => {
@@ -24,6 +74,18 @@ export function formatStatus(value) {
   return String(value || "unknown").replace(/_/g, " ");
 }
 
+function getJsonValueType(value) {
+  if (Array.isArray(value)) {
+    return "array";
+  }
+
+  if (value === null) {
+    return "null";
+  }
+
+  return typeof value;
+}
+
 function formatBoolean(value) {
   return value ? "Yes" : "No";
 }
@@ -35,6 +97,143 @@ function formatSignedNumber(value) {
   }
 
   return String(numeric);
+}
+
+function formatPrimitiveValue(value, { maxLength = 120 } = {}) {
+  const type = getJsonValueType(value);
+
+  if (type === "string") {
+    return value.length > maxLength ? `${value.slice(0, Math.max(0, maxLength - 3))}...` : value;
+  }
+
+  if (type === "number" || type === "boolean") {
+    return String(value);
+  }
+
+  if (type === "null") {
+    return "null";
+  }
+
+  if (type === "undefined") {
+    return "undefined";
+  }
+
+  return JSON.stringify(value);
+}
+
+function formatJsonCountLabel(value) {
+  const type = getJsonValueType(value);
+  if (type === "array") {
+    return `${value.length} item${value.length === 1 ? "" : "s"}`;
+  }
+
+  if (type === "object") {
+    const count = Object.keys(value).length;
+    return `${count} key${count === 1 ? "" : "s"}`;
+  }
+
+  return type;
+}
+
+function getTopLevelEntryCount(value) {
+  const type = getJsonValueType(value);
+  if (type === "array") {
+    return value.length;
+  }
+
+  if (type === "object") {
+    return Object.keys(value).length;
+  }
+
+  return 1;
+}
+
+function buildScalarDefinitions(report) {
+  if (getJsonValueType(report) !== "object") {
+    return [];
+  }
+
+  return Object.entries(report)
+    .filter(([, value]) => {
+      const type = getJsonValueType(value);
+      return type === "string" || type === "number" || type === "boolean" || type === "null";
+    })
+    .slice(0, 8)
+    .map(([key, value]) => ({
+      label: humanizeArtifactName(key),
+      value: formatPrimitiveValue(value)
+    }));
+}
+
+function renderJsonPreviewValue(value, { depth }) {
+  const type = getJsonValueType(value);
+
+  if (type === "object" || type === "array") {
+    return renderJsonPreview(value, { depth });
+  }
+
+  return `
+    <div class="json-preview-leaf">
+      <span class="json-value-chip type-${escapeHtml(type)}">${escapeHtml(type)}</span>
+      <code>${escapeHtml(formatPrimitiveValue(value))}</code>
+    </div>
+  `;
+}
+
+function renderJsonPreview(value, { depth = 0 } = {}) {
+  const type = getJsonValueType(value);
+
+  if (type !== "object" && type !== "array") {
+    return renderJsonPreviewValue(value, { depth });
+  }
+
+  const entries = type === "array" ? value.map((item, index) => [`[${index}]`, item]) : Object.entries(value);
+
+  if (!entries.length) {
+    return `<div class="empty-report">This ${type} is empty.</div>`;
+  }
+
+  const visibleEntries = entries.slice(0, JSON_PREVIEW_ITEM_LIMIT);
+  const overflow = entries.length - visibleEntries.length;
+  const openAttribute = depth < 2 ? " open" : "";
+  const limitReached = depth >= JSON_PREVIEW_DEPTH_LIMIT;
+
+  return `
+    <details class="json-preview-group"${openAttribute}>
+      <summary>
+        <span class="json-value-chip type-${escapeHtml(type)}">${escapeHtml(type)}</span>
+        <span>${escapeHtml(formatJsonCountLabel(value))}</span>
+      </summary>
+      ${
+        limitReached
+          ? `<p class="report-note compact-preview-note">Nested ${escapeHtml(type)} content is truncated at depth ${escapeHtml(
+              String(JSON_PREVIEW_DEPTH_LIMIT)
+            )}. Use Raw JSON for the full payload.</p>`
+          : `
+            <div class="json-preview-grid">
+              ${visibleEntries
+                .map(
+                  ([key, childValue]) => `
+                    <article class="json-preview-item">
+                      <div class="json-preview-item-header">
+                        <strong>${escapeHtml(humanizeArtifactName(key))}</strong>
+                        <span>${escapeHtml(key)}</span>
+                      </div>
+                      ${renderJsonPreviewValue(childValue, { depth: depth + 1 })}
+                    </article>
+                  `
+                )
+                .join("")}
+            </div>
+          `
+      }
+      ${
+        !limitReached && overflow > 0
+          ? `<p class="report-note compact-preview-note">Showing ${visibleEntries.length} of ${entries.length} entries. Use Raw JSON for the full payload.</p>`
+          : ""
+      }
+    </details>
+  `;
 }
 
 export function renderSummaryCards(cards) {
@@ -627,21 +826,85 @@ function buildTagDeltaView(report, { compact = false } = {}) {
   };
 }
 
-function buildGenericView(report, artifactName) {
+function buildGenericView(report, artifactName, { compact = false } = {}) {
+  const type = getJsonValueType(report);
+  const summaryCards = [
+    {
+      label: "Artifact",
+      value: getArtifactLabel(artifactName)
+    },
+    {
+      label: "Root type",
+      value: humanizeArtifactName(type)
+    },
+    {
+      label: "Top-level",
+      value: formatJsonCountLabel(report)
+    }
+  ];
+
+  if (type === "object" && typeof report?.status === "string") {
+    summaryCards.push({
+      label: "Status",
+      value: report.status
+    });
+  } else if (type === "object" && typeof report?.schemaVersion === "string") {
+    summaryCards.push({
+      label: "Schema",
+      value: report.schemaVersion
+    });
+  }
+
+  const overviewEntries = [
+    {
+      label: "Artifact name",
+      value: artifactName
+    },
+    {
+      label: "Display label",
+      value: getArtifactLabel(artifactName)
+    },
+    {
+      label: "Root type",
+      value: humanizeArtifactName(type)
+    },
+    {
+      label: "Top-level count",
+      value: String(getTopLevelEntryCount(report))
+    }
+  ];
+
+  const scalarDefinitions = buildScalarDefinitions(report);
+
   return {
-    summaryCards: [
-      {
-        label: "Artifact",
-        value: artifactLabels[artifactName] || artifactName
-      }
-    ],
+    summaryCards,
     contentHtml: `
-      <section class="report-section">
+      <section class="report-section ${compact ? "compact-section" : ""}">
         <div class="section-heading">
-          <h2>Artifact preview</h2>
-          <span>${escapeHtml(artifactName)}</span>
+          <h2>Artifact overview</h2>
+          <span>${escapeHtml(getArtifactLabel(artifactName))}</span>
         </div>
-        <div class="empty-report">No specialized renderer exists for this artifact yet.</div>
+        ${renderDefinitionGrid(overviewEntries)}
+      </section>
+      ${
+        scalarDefinitions.length
+          ? `
+            <section class="report-section ${compact ? "compact-section" : ""}">
+              <div class="section-heading">
+                <h2>Quick facts</h2>
+                <span>${escapeHtml(String(scalarDefinitions.length))} surfaced</span>
+              </div>
+              ${renderDefinitionGrid(scalarDefinitions)}
+            </section>
+          `
+          : ""
+      }
+      <section class="report-section ${compact ? "compact-section" : ""}">
+        <div class="section-heading">
+          <h2>Structured preview</h2>
+          <span>Browser JSON explorer</span>
+        </div>
+        ${renderJsonPreview(report)}
       </section>
     `
   };
@@ -668,5 +931,5 @@ export function buildArtifactView(report, artifactName, options = {}) {
     return buildRedactionView(report, options);
   }
 
-  return buildGenericView(report, artifactName);
+  return buildGenericView(report, artifactName, options);
 }

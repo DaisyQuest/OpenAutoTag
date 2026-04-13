@@ -115,7 +115,9 @@ export async function runTagAndRedactPipeline({
   },
   options = {},
   stageRunner = async ({ run }) => run(),
-  maxStageAttempts = DEFAULT_STAGE_ATTEMPTS
+  maxStageAttempts = DEFAULT_STAGE_ATTEMPTS,
+  onProgress,
+  heartbeatIntervalMs
 }) {
   const resolvedOutputDir = path.resolve(outputDir || path.join(repoRoot, "tmp", jobId));
   await mkdir(resolvedOutputDir, { recursive: true });
@@ -128,6 +130,8 @@ export async function runTagAndRedactPipeline({
     options,
     stageRunner,
     maxStageAttempts,
+    onProgress,
+    heartbeatIntervalMs,
     buildStagePlan: (context) => createTagAndRedactStages({ ...context, workload })
   });
 }
