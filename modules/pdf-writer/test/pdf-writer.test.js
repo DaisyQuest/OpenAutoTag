@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { access, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { PDFDocument, PDFName } from "pdf-lib";
 import { createSamplePdf } from "../../../test/fixtures/create-sample-pdf.js";
 import { createSsnSamplePdf } from "../../../test/fixtures/create-ssn-sample-pdf.js";
 import { createSpanishSamplePdf } from "../../../test/fixtures/create-spanish-sample-pdf.js";
@@ -64,12 +65,15 @@ test("pdf writer adds native structure and creates a sidecar manifest", async ()
   const manifest = JSON.parse(await readFile(report.manifestPath, "utf8"));
   const outputBytes = await readFile(report.outputPath);
   const outputText = outputBytes.toString("latin1");
+  const outputPdf = await PDFDocument.load(outputBytes);
+  const tabsValues = outputPdf.getPages().map((page) => page.node.get(PDFName.of("Tabs"))?.toString() || "");
 
   await access(report.outputPath);
   await access(report.manifestPath);
   assert.equal(report.nativeTaggingApplied, true);
   assert.equal(manifest.writerMode, "pdfbox-native-structure");
   assert.equal(report.markedContentCount, 1);
+  assert.deepEqual(tabsValues, ["/S"]);
   assert.match(outputText, /<dc:creator>/);
   assert.match(outputText, /<dc:description>/);
   assert.match(outputText, /<pdfuaid:part>1<\/pdfuaid:part>/);

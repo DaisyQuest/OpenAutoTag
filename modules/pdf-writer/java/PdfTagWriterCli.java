@@ -549,6 +549,7 @@ public class PdfTagWriterCli {
         state.pageKey = pageKey;
         state.contentStream = new PDPageContentStream(document, page, AppendMode.APPEND, true, true);
         page.setStructParents(pageKey);
+        page.getCOSObject().setItem(COSName.getPDFName("Tabs"), COSName.S);
         return state;
     }
 

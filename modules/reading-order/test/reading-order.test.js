@@ -164,3 +164,79 @@ test("reading-order keeps headers first, tables row-major, and footers last", as
   assert.equal(ordered.nodes.find((node) => node.id === "table-4").readingOrder, 6);
   assert.equal(ordered.nodes.find((node) => node.id === "footer").readingOrder, 8);
 });
+
+test("reading-order lets full-width spans break two-column regions", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "order-span-break-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:span-break",
+      source: { layoutDocumentId: "layout:span-break" },
+      nodes: [
+        {
+          id: "left-top",
+          pageNumber: 1,
+          sourceBlockId: "b1",
+          role: "P",
+          text: "Left column intro",
+          bbox: [72, 80, 120, 12],
+          columnHint: 0,
+          confidence: 0.92
+        },
+        {
+          id: "right-top",
+          pageNumber: 1,
+          sourceBlockId: "b2",
+          role: "P",
+          text: "Right column intro",
+          bbox: [332, 84, 120, 12],
+          columnHint: 1,
+          confidence: 0.92
+        },
+        {
+          id: "bridge",
+          pageNumber: 1,
+          sourceBlockId: "b3",
+          role: "H2",
+          text: "Wide section break",
+          bbox: [72, 160, 380, 18],
+          confidence: 0.95
+        },
+        {
+          id: "left-bottom",
+          pageNumber: 1,
+          sourceBlockId: "b4",
+          role: "P",
+          text: "Left column after break",
+          bbox: [72, 220, 120, 12],
+          columnHint: 0,
+          confidence: 0.92
+        },
+        {
+          id: "right-bottom",
+          pageNumber: 1,
+          sourceBlockId: "b5",
+          role: "P",
+          text: "Right column after break",
+          bbox: [332, 224, 120, 12],
+          columnHint: 1,
+          confidence: 0.92
+        }
+      ]
+    }, null, 2)
+  );
+
+  const ordered = await assignReadingOrder(inputPath);
+
+  assert.deepEqual(ordered.orderedNodeIds, [
+    "left-top",
+    "right-top",
+    "bridge",
+    "left-bottom",
+    "right-bottom"
+  ]);
+  assert.equal(ordered.nodes.find((node) => node.id === "bridge").readingOrder, 2);
+});

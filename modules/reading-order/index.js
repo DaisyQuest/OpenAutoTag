@@ -45,6 +45,14 @@ function getNodeLeft(node) {
   return Array.isArray(node.bbox) ? node.bbox[0] : 0;
 }
 
+function getNodeRight(node) {
+  return Array.isArray(node.bbox) ? node.bbox[0] + node.bbox[2] : getNodeLeft(node);
+}
+
+function getNodeBottom(node) {
+  return Array.isArray(node.bbox) ? node.bbox[1] + node.bbox[3] : getNodeTop(node);
+}
+
 function getNodeColumnHint(node) {
   return Number.isInteger(node.columnHint) ? node.columnHint : null;
 }
@@ -148,14 +156,38 @@ function compareUnits(left, right) {
   );
 }
 
+function compareSpanningUnits(left, right) {
+  return (
+    compareNumbers(left.pageNumber, right.pageNumber) ||
+    compareNumbers(left.top, right.top) ||
+    compareNumbers(left.left, right.left) ||
+    compareNumbers(left.priority, right.priority) ||
+    left.sortKey.localeCompare(right.sortKey)
+  );
+}
+
+function collectUnitBounds(nodes) {
+  return {
+    top: Math.min(...nodes.map(getNodeTop)),
+    left: Math.min(...nodes.map(getNodeLeft)),
+    right: Math.max(...nodes.map(getNodeRight)),
+    bottom: Math.max(...nodes.map(getNodeBottom))
+  };
+}
+
+function collectExplicitColumnHints(nodes) {
+  return [...new Set(nodes.map(getNodeColumnHint).filter((value) => Number.isInteger(value)))];
+}
+
 function makeContentUnit(node) {
+  const bounds = collectUnitBounds([node]);
   return {
     kind: "content",
     pageNumber: node.pageNumber,
     nodes: [node],
-    top: getNodeTop(node),
-    left: getNodeLeft(node),
+    ...bounds,
     explicitColumnHint: getNodeColumnHint(node),
+    explicitColumnHints: collectExplicitColumnHints([node]),
     priority: rolePriority(node),
     sortKey: node.id,
     phase: 1
@@ -163,13 +195,14 @@ function makeContentUnit(node) {
 }
 
 function makeArtifactUnit(node) {
+  const bounds = collectUnitBounds([node]);
   return {
     kind: "artifact",
     pageNumber: node.pageNumber,
     nodes: [node],
-    top: getNodeTop(node),
-    left: getNodeLeft(node),
+    ...bounds,
     explicitColumnHint: getNodeColumnHint(node),
+    explicitColumnHints: collectExplicitColumnHints([node]),
     priority: 0,
     sortKey: node.id,
     phase: isFooterArtifact(node) ? 2 : 0
@@ -187,15 +220,16 @@ function makeListUnit(groupId, nodes) {
   });
 
   const firstNode = sortedNodes[0];
+  const bounds = collectUnitBounds(sortedNodes);
   return {
     kind: "list",
     pageNumber: firstNode.pageNumber,
     nodes: sortedNodes,
-    top: Math.min(...sortedNodes.map(getNodeTop)),
-    left: Math.min(...sortedNodes.map(getNodeLeft)),
+    ...bounds,
     explicitColumnHint: sortedNodes
       .map(getNodeColumnHint)
       .find((value) => Number.isInteger(value)),
+    explicitColumnHints: collectExplicitColumnHints(sortedNodes),
     priority: 1,
     sortKey: `list:${groupId}`,
     phase: 1
@@ -214,19 +248,104 @@ function makeTableUnit(tableId, nodes) {
   });
 
   const firstNode = sortedNodes[0];
+  const bounds = collectUnitBounds(sortedNodes);
   return {
     kind: "table",
     pageNumber: firstNode.pageNumber,
     nodes: sortedNodes,
-    top: Math.min(...sortedNodes.map(getNodeTop)),
-    left: Math.min(...sortedNodes.map(getNodeLeft)),
+    ...bounds,
     explicitColumnHint: sortedNodes
       .map(getNodeColumnHint)
       .find((value) => Number.isInteger(value)),
+    explicitColumnHints: collectExplicitColumnHints(sortedNodes),
     priority: 3,
     sortKey: `table:${tableId}`,
     phase: 1
   };
+}
+
+function buildColumnRanges(units) {
+  const rangesByColumn = new Map();
+
+  for (const unit of units) {
+    const existingRange = rangesByColumn.get(unit.columnIndex);
+    if (existingRange) {
+      existingRange.minLeft = Math.min(existingRange.minLeft, unit.left);
+      existingRange.maxRight = Math.max(existingRange.maxRight, unit.right);
+      continue;
+    }
+
+    rangesByColumn.set(unit.columnIndex, {
+      columnIndex: unit.columnIndex,
+      minLeft: unit.left,
+      maxRight: unit.right
+    });
+  }
+
+  return [...rangesByColumn.values()].sort((left, right) => left.columnIndex - right.columnIndex);
+}
+
+function isColumnSpanningUnit(unit, columnRanges, contentSpanWidth) {
+  if ((unit.explicitColumnHints || []).length > 1) {
+    return true;
+  }
+
+  const tolerance = Math.max(12, contentSpanWidth * 0.03);
+
+  for (let index = 0; index < columnRanges.length - 1; index += 1) {
+    const separator = (columnRanges[index].maxRight + columnRanges[index + 1].minLeft) / 2;
+    if (unit.left < separator - tolerance && unit.right > separator + tolerance) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function orderContentUnits(contentUnits) {
+  if (contentUnits.length === 0) {
+    return [];
+  }
+
+  const columnRanges = buildColumnRanges(contentUnits);
+  if (columnRanges.length <= 1) {
+    return [...contentUnits].sort((left, right) => compareUnits(left, right));
+  }
+
+  const contentSpanWidth =
+    Math.max(...contentUnits.map((unit) => unit.right)) - Math.min(...contentUnits.map((unit) => unit.left));
+  const spanningUnits = contentUnits
+    .filter((unit) => isColumnSpanningUnit(unit, columnRanges, contentSpanWidth))
+    .sort((left, right) => compareSpanningUnits(left, right));
+
+  if (spanningUnits.length === 0) {
+    return [...contentUnits].sort((left, right) => compareUnits(left, right));
+  }
+
+  const remainingUnits = [...contentUnits];
+  const orderedUnits = [];
+
+  for (const spanningUnit of spanningUnits) {
+    if (remainingUnits.indexOf(spanningUnit) < 0) {
+      continue;
+    }
+
+    const verticalTolerance = Math.max(8, (spanningUnit.bottom - spanningUnit.top) * 0.25);
+    const precedingUnits = remainingUnits
+      .filter((unit) => unit !== spanningUnit && unit.bottom <= spanningUnit.top + verticalTolerance)
+      .sort((left, right) => compareUnits(left, right));
+
+    for (const unit of precedingUnits) {
+      orderedUnits.push(unit);
+      remainingUnits.splice(remainingUnits.indexOf(unit), 1);
+    }
+
+    orderedUnits.push(spanningUnit);
+    remainingUnits.splice(remainingUnits.indexOf(spanningUnit), 1);
+  }
+
+  orderedUnits.push(...remainingUnits.sort((left, right) => compareUnits(left, right)));
+  return orderedUnits;
 }
 
 function buildPageUnits(pageNodes) {
@@ -288,13 +407,11 @@ function buildPageUnits(pageNodes) {
     columnIndex: assignColumnIndex(unit, bands)
   }));
 
-  const sortedUnits = [
-    ...headerArtifacts,
-    ...contentUnits,
-    ...footerArtifacts
-  ].sort((left, right) => compareUnits(left, right));
-
-  return sortedUnits;
+  return [
+    ...headerArtifacts.sort((left, right) => compareUnits(left, right)),
+    ...orderContentUnits(contentUnits),
+    ...footerArtifacts.sort((left, right) => compareUnits(left, right))
+  ];
 }
 
 function flattenUnits(units) {
