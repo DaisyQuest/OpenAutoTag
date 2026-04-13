@@ -113,3 +113,59 @@ test("runManagedWorkload stages the source file so later stages survive source r
   assert.equal(job.input.filePath, path.resolve(sourcePath));
   assert.equal(job.input.stagedFilePath, path.resolve(path.join(outputDir, "00-source.pdf")));
 });
+
+test("runManagedWorkload emits detailed progress states and stage heartbeats", async (t) => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "workload-runner-progress-"));
+  t.after(() => rm(tempDir, { recursive: true, force: true }));
+
+  const sourcePath = path.join(tempDir, "source.pdf");
+  const outputDir = path.join(tempDir, "output");
+  const slowStageOutputPath = path.join(outputDir, "01-slow-stage.json");
+  const progressUpdates = [];
+
+  await writeFile(sourcePath, "progress payload");
+
+  const job = await runManagedWorkload({
+    filePath: sourcePath,
+    outputDir,
+    jobId: "progress-heartbeat-test",
+    workload: {
+      id: "test-workload",
+      label: "Test Workload"
+    },
+    heartbeatIntervalMs: 10,
+    onProgress: async (update) => {
+      progressUpdates.push(JSON.parse(JSON.stringify(update)));
+    },
+    buildStagePlan: () => [
+      {
+        key: "slowStage",
+        label: "slow-stage",
+        outputPath: slowStageOutputPath,
+        run: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 35));
+          await writeFile(slowStageOutputPath, `${JSON.stringify({ ok: true }, null, 2)}\n`);
+          return {
+            outputPath: slowStageOutputPath
+          };
+        }
+      }
+    ]
+  });
+
+  const states = progressUpdates.map((update) => update.state);
+  const runningStageUpdates = progressUpdates.filter((update) => update.state === "running_stage");
+
+  assert.equal(job.status, "completed");
+  assert.ok(states.includes("preparing_workspace"));
+  assert.ok(states.includes("staging_input"));
+  assert.ok(states.includes("building_stage_plan"));
+  assert.ok(states.includes("stage_completed"));
+  assert.ok(states.includes("finalizing_job"));
+  assert.ok(runningStageUpdates.length >= 2);
+  assert.ok(runningStageUpdates.some((update) => String(update.message || "").startsWith("Still running stage")));
+  assert.equal(job.statusDetail.state, "completed");
+  assert.equal(job.statusDetail.totalStages, 1);
+  assert.equal(job.statusDetail.completedStages, 1);
+  assert.equal(job.statusDetail.lastStage?.label, "slow-stage");
+});

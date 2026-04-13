@@ -6,10 +6,121 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function cloneJsonValue(value) {
+  return value == null ? value : JSON.parse(JSON.stringify(value));
+}
+
+function hasOwn(object, key) {
+  return Object.prototype.hasOwnProperty.call(object, key);
+}
+
+function createInitialStatusDetail(timestamp) {
+  return {
+    state: "queued_waiting_for_worker",
+    message: "Waiting for an available worker.",
+    stateSinceAt: timestamp,
+    lastCheckInAt: timestamp,
+    checkInCount: 1,
+    completedStages: 0,
+    totalStages: null,
+    currentStage: null,
+    lastStage: null
+  };
+}
+
+function mergeStatusDetail(previous, update = {}, timestamp = new Date().toISOString()) {
+  const source = previous && typeof previous === "object" ? previous : {};
+  const patch = update && typeof update === "object" ? update : {};
+  const nextState = hasOwn(patch, "state") ? patch.state : source.state || null;
+
+  const next = {
+    state: nextState,
+    message: hasOwn(patch, "message") ? patch.message : source.message || null,
+    stateSinceAt: hasOwn(patch, "stateSinceAt")
+      ? patch.stateSinceAt
+      : nextState && nextState !== source.state
+        ? timestamp
+        : source.stateSinceAt || timestamp,
+    lastCheckInAt: hasOwn(patch, "lastCheckInAt") ? patch.lastCheckInAt : timestamp,
+    checkInCount: Math.max(1, Number(source.checkInCount || 0) + 1),
+    completedStages: hasOwn(patch, "completedStages") ? patch.completedStages : source.completedStages ?? 0,
+    totalStages: hasOwn(patch, "totalStages") ? patch.totalStages : source.totalStages ?? null,
+    currentStage: hasOwn(patch, "currentStage") ? cloneJsonValue(patch.currentStage) ?? null : cloneJsonValue(source.currentStage) ?? null,
+    lastStage: hasOwn(patch, "lastStage") ? cloneJsonValue(patch.lastStage) ?? null : cloneJsonValue(source.lastStage) ?? null
+  };
+
+  if (hasOwn(patch, "heartbeatIntervalMs")) {
+    next.heartbeatIntervalMs = patch.heartbeatIntervalMs;
+  } else if (source.heartbeatIntervalMs != null) {
+    next.heartbeatIntervalMs = source.heartbeatIntervalMs;
+  }
+
+  return next;
+}
+
 export function createJobQueue({ processor, outputRoot = getRuntimeSubdir("jobs", { repoRoot: process.cwd() }) }) {
   const jobs = new Map();
   const queue = [];
   let running = false;
+
+  function updateJob(jobId, patch = {}) {
+    const currentJob = jobs.get(jobId);
+
+    if (!currentJob) {
+      return null;
+    }
+
+    const timestamp = patch.updatedAt || new Date().toISOString();
+    const nextJob = {
+      ...currentJob,
+      ...patch,
+      updatedAt: timestamp
+    };
+
+    if (hasOwn(patch, "statusDetail")) {
+      nextJob.statusDetail = mergeStatusDetail(currentJob.statusDetail, patch.statusDetail, timestamp);
+    } else if (!currentJob.statusDetail) {
+      nextJob.statusDetail = createInitialStatusDetail(timestamp);
+    }
+
+    if (hasOwn(patch, "error") && patch.error == null) {
+      delete nextJob.error;
+    }
+
+    jobs.set(jobId, nextJob);
+    return nextJob;
+  }
+
+  function finalizeJob(jobId, baseJob, result) {
+    const currentJob = jobs.get(jobId) || baseJob;
+    const timestamp = result.updatedAt || new Date().toISOString();
+
+    jobs.set(jobId, {
+      ...result,
+      workload: result.workload || baseJob.workload,
+      input: {
+        ...(baseJob.input || {}),
+        ...(result.input || {}),
+        workloadId: baseJob.workload.id,
+        options: baseJob.input.options || {}
+      },
+      createdAt: baseJob.createdAt,
+      updatedAt: timestamp,
+      statusDetail: mergeStatusDetail(
+        currentJob?.statusDetail,
+        result.statusDetail || {
+          state: result.status || currentJob?.status || "completed",
+          message:
+            result.status === "failed"
+              ? result.error || "Job failed."
+              : result.status === "completed"
+                ? "Job completed."
+                : `Job is ${result.status || "running"}.`
+        },
+        timestamp
+      )
+    });
+  }
 
   async function drain() {
     if (running || queue.length === 0) {
@@ -26,8 +137,14 @@ export function createJobQueue({ processor, outputRoot = getRuntimeSubdir("jobs"
       return;
     }
 
-    job.status = "running";
-    job.updatedAt = new Date().toISOString();
+    updateJob(jobId, {
+      status: "running",
+      statusDetail: {
+        state: "worker_claimed",
+        message: "Worker claimed the job and is preparing execution.",
+        currentStage: null
+      }
+    });
 
     try {
       const result = await processor({
@@ -36,44 +153,35 @@ export function createJobQueue({ processor, outputRoot = getRuntimeSubdir("jobs"
         workloadId: job.workload.id,
         workload: job.workload,
         options: job.input.options || {},
-        jobId
+        jobId,
+        onProgress: async (statusDetail) => {
+          updateJob(jobId, {
+            status: "running",
+            statusDetail
+          });
+        }
       });
 
-      jobs.set(jobId, {
-        ...result,
-        workload: result.workload || job.workload,
-        input: {
-          ...(job.input || {}),
-          ...(result.input || {}),
-          workloadId: job.workload.id,
-          options: job.input.options || {}
-        },
-        createdAt: job.createdAt
-      });
+      finalizeJob(jobId, job, result);
     } catch (error) {
       const snapshot = error?.snapshot || error?.jobSnapshot;
 
       if (snapshot && snapshot.jobId === jobId) {
-        jobs.set(jobId, {
+        finalizeJob(jobId, job, {
           ...snapshot,
-          workload: snapshot.workload || job.workload,
-          input: {
-            ...(job.input || {}),
-            ...(snapshot.input || {}),
-            workloadId: job.workload.id,
-            options: job.input.options || {}
-          },
-          createdAt: job.createdAt,
           updatedAt: snapshot.updatedAt || new Date().toISOString()
         });
         return;
       }
 
-      jobs.set(jobId, {
-        ...job,
+      updateJob(jobId, {
         status: "failed",
         error: error.message,
-        updatedAt: new Date().toISOString()
+        statusDetail: {
+          state: "failed",
+          message: error.message || "Job failed before completion.",
+          currentStage: null
+        }
       });
     } finally {
       running = false;
@@ -100,7 +208,8 @@ export function createJobQueue({ processor, outputRoot = getRuntimeSubdir("jobs"
         },
         artifacts: {},
         createdAt: timestamp,
-        updatedAt: timestamp
+        updatedAt: timestamp,
+        statusDetail: createInitialStatusDetail(timestamp)
       };
 
       jobs.set(jobId, job);

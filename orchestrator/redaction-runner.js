@@ -48,7 +48,9 @@ export async function runRedactionPipeline({
   },
   options = {},
   stageRunner = async ({ run }) => run(),
-  maxStageAttempts = DEFAULT_STAGE_ATTEMPTS
+  maxStageAttempts = DEFAULT_STAGE_ATTEMPTS,
+  onProgress,
+  heartbeatIntervalMs
 }) {
   return runManagedWorkload({
     filePath,
@@ -58,6 +60,8 @@ export async function runRedactionPipeline({
     options,
     stageRunner,
     maxStageAttempts,
+    onProgress,
+    heartbeatIntervalMs,
     buildStagePlan: createPipelineStages
   });
 }

@@ -790,9 +790,11 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
           relativePath: item.relativePath,
           workload: workloadSummary.workload || item.workload,
           status: job?.status || "missing",
+          statusDetail: job?.statusDetail || null,
           error: job?.error || null,
           createdAt: job?.createdAt || batch.createdAt,
           updatedAt: job?.updatedAt || batch.createdAt,
+          stageSummary: job?.stageSummary || null,
           summary: workloadSummary.summary,
           validation: workloadSummary.validation,
           artifacts: buildArtifactLinks(item.jobId, job)

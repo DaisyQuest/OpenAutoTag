@@ -1,4 +1,4 @@
-import { fetchJson, formatTimestamp, sanitizeStatusToken } from "../auth-client.js";
+import { fetchJson, formatDurationSeconds, formatTimestamp, sanitizeStatusToken } from "../auth-client.js";
 import { escapeHtml, formatStatus, renderSummaryCards } from "../report-renderers.js";
 import {
   clearAdminSession,
@@ -74,6 +74,56 @@ function renderLocked(message) {
   `;
 }
 
+function getDisplayStatus(job) {
+  return job?.statusDetail?.state || job?.status || "unknown";
+}
+
+function getCheckInAgeSeconds(statusDetail) {
+  if (!statusDetail?.lastCheckInAt) {
+    return null;
+  }
+
+  const elapsedMs = Date.now() - new Date(statusDetail.lastCheckInAt).getTime();
+  return Number.isFinite(elapsedMs) && elapsedMs >= 0 ? Math.round(elapsedMs / 1000) : null;
+}
+
+function isStatusDetailStale(statusDetail, jobStatus) {
+  if (!statusDetail || jobStatus !== "running") {
+    return false;
+  }
+
+  const ageSeconds = getCheckInAgeSeconds(statusDetail);
+  if (ageSeconds == null) {
+    return false;
+  }
+
+  const heartbeatSeconds = Math.max(1, Math.round(Number(statusDetail.heartbeatIntervalMs || 0) / 1000));
+  return ageSeconds > Math.max(heartbeatSeconds * 3, 20);
+}
+
+function formatHeartbeatNote(job) {
+  const detail = job?.statusDetail;
+  if (!detail) {
+    return "No worker check-ins yet.";
+  }
+
+  const segments = [];
+  if (detail.checkInCount) {
+    segments.push(`${detail.checkInCount} check-in${detail.checkInCount === 1 ? "" : "s"}`);
+  }
+
+  const ageSeconds = getCheckInAgeSeconds(detail);
+  if (ageSeconds != null) {
+    segments.push(`${formatDurationSeconds(ageSeconds)} ago`);
+  }
+
+  if (isStatusDetailStale(detail, job?.status)) {
+    segments.push("quiet beyond heartbeat");
+  }
+
+  return segments.join(" · ") || "Waiting for the first worker check-in.";
+}
+
 function renderActiveJobs(jobs) {
   activeJobsCaption.textContent = `${jobs.length} active job${jobs.length === 1 ? "" : "s"}`;
 
@@ -98,11 +148,19 @@ function renderActiveJobs(jobs) {
           </td>
           <td class="table-secondary">${escapeHtml(job.workload?.label || job.workload?.id || "Unknown")}</td>
           <td>
-            <span class="status-pill status-${escapeHtml(sanitizeStatusToken(job.status))}">
-              ${escapeHtml(formatStatus(job.status))}
-            </span>
+            <div class="table-cell-stack">
+              <span class="status-pill status-${escapeHtml(sanitizeStatusToken(getDisplayStatus(job)))}">
+                ${escapeHtml(formatStatus(getDisplayStatus(job)))}
+              </span>
+              <span class="table-note">${escapeHtml(job.statusDetail?.message || `Job ${formatStatus(job.status)}.`)}</span>
+            </div>
           </td>
-          <td class="table-secondary">${escapeHtml(formatTimestamp(job.updatedAt))}</td>
+          <td class="table-secondary">
+            <div class="table-cell-stack">
+              <span>${escapeHtml(formatTimestamp(job.statusDetail?.lastCheckInAt || job.updatedAt))}</span>
+              <span class="table-note">${escapeHtml(formatHeartbeatNote(job))}</span>
+            </div>
+          </td>
           <td>
             ${
               job.artifactLinks?.validationReport || job.artifactLinks?.redactionReport
@@ -170,6 +228,7 @@ async function loadData() {
   }
 
   const payload = await fetchJson("/admin/queue", { auth: "admin" });
+  const staleJobs = payload.activeJobs.filter((job) => isStatusDetailStale(job.statusDetail, job.status)).length;
   queueSummary.innerHTML = renderSummaryCards([
     {
       label: "Queued",
@@ -179,12 +238,12 @@ async function loadData() {
     {
       label: "Running",
       value: String(payload.queue.running),
-      detail: `${payload.queue.completed} completed`
+      detail: staleJobs ? `${staleJobs} quiet beyond heartbeat` : `${payload.queue.completed} completed`
     },
     {
       label: "Batches",
       value: String(payload.totalBatches),
-      detail: `${payload.recentJobs.length} recent jobs tracked`
+      detail: staleJobs ? `${payload.recentJobs.length} recent jobs tracked` : "All live workers are checking in"
     }
   ]);
 

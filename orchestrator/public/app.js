@@ -10,6 +10,7 @@ import {
   downloadWithAuth,
   fetchJson,
   fetchWithAuth,
+  formatDurationSeconds,
   formatTimestamp,
   getSessionAccess,
   loadAuthConfig,
@@ -233,6 +234,85 @@ function isLiveJobStatus(status) {
   return status === "queued" || status === "running";
 }
 
+function getDisplayStatus(item) {
+  return item?.statusDetail?.state || item?.status || "unknown";
+}
+
+function getCheckInAgeSeconds(statusDetail) {
+  if (!statusDetail?.lastCheckInAt) {
+    return null;
+  }
+
+  const elapsedMs = Date.now() - new Date(statusDetail.lastCheckInAt).getTime();
+  return Number.isFinite(elapsedMs) && elapsedMs >= 0 ? Math.round(elapsedMs / 1000) : null;
+}
+
+function isStatusDetailStale(statusDetail, jobStatus) {
+  if (!statusDetail || jobStatus !== "running") {
+    return false;
+  }
+
+  const ageSeconds = getCheckInAgeSeconds(statusDetail);
+  if (ageSeconds == null) {
+    return false;
+  }
+
+  const heartbeatSeconds = Math.max(1, Math.round(Number(statusDetail.heartbeatIntervalMs || 0) / 1000));
+  return ageSeconds > Math.max(heartbeatSeconds * 3, 20);
+}
+
+function formatWorkerDetail(item) {
+  const detail = item?.statusDetail;
+  if (!detail) {
+    return item?.status === "queued" ? "Waiting for an available worker." : "Waiting for worker progress.";
+  }
+
+  return detail.message || `Job ${formatStatus(item.status)}.`;
+}
+
+function formatCheckInSummary(item) {
+  const detail = item?.statusDetail;
+  if (!detail) {
+    return "No worker check-ins yet.";
+  }
+
+  const segments = [];
+  if (detail.checkInCount) {
+    segments.push(`${detail.checkInCount} check-in${detail.checkInCount === 1 ? "" : "s"}`);
+  }
+
+  const ageSeconds = getCheckInAgeSeconds(detail);
+  if (ageSeconds != null) {
+    segments.push(`${formatDurationSeconds(ageSeconds)} ago`);
+  }
+
+  if (isStatusDetailStale(detail, item?.status)) {
+    segments.push("quiet beyond heartbeat");
+  }
+
+  return segments.join(" · ") || "Waiting for the first worker check-in.";
+}
+
+function formatCurrentStage(detail) {
+  if (!detail?.currentStage) {
+    return "No active stage";
+  }
+
+  const stage = detail.currentStage;
+  return `Stage ${stage.index}/${stage.total}: ${formatStatus(stage.label || stage.key || "unknown")}`;
+}
+
+function formatLastStage(detail) {
+  if (!detail?.lastStage) {
+    return "No completed stage recorded";
+  }
+
+  const stage = detail.lastStage;
+  const attemptDetail =
+    stage.attempt && stage.maxAttempts ? ` · attempt ${stage.attempt}/${stage.maxAttempts}` : stage.attempt ? ` · attempt ${stage.attempt}` : "";
+  return `${formatStatus(stage.status || "unknown")} · ${formatStatus(stage.label || stage.key || "unknown")}${attemptDetail}`;
+}
+
 function buildSingleJobBatch(job) {
   const jobStatus = job?.status || "failed";
 
@@ -257,9 +337,11 @@ function buildSingleJobBatch(job) {
         relativePath: job.relativePath || job.sourceUrl || job.input?.filePath || job.fileName || "Remote PDF",
         workload: job?.workload || getSelectedWorkload(),
         status: jobStatus,
+        statusDetail: job?.statusDetail || null,
         error: job?.error || null,
         createdAt: job?.createdAt,
         updatedAt: job?.updatedAt,
+        stageSummary: job?.stageSummary || null,
         summary: job?.summary || null,
         validation: job?.validation || null,
         artifacts: job?.artifactLinks || {}
@@ -364,6 +446,7 @@ function renderBatchOverview() {
   const finished = totals.completed + totals.failed;
   const progress = totals.total ? Math.round((finished / totals.total) * 100) : 0;
   const workload = state.batch.workload || getSelectedWorkload();
+  const activeItem = state.batch.items?.find((item) => isLiveJobStatus(item.status)) || null;
 
   batchCaption.textContent = `${totals.completed} completed / ${totals.failed} failed / ${totals.total} total`;
   batchOverview.className = "batch-overview";
@@ -378,6 +461,7 @@ function renderBatchOverview() {
       <span class="summary-detail">${escapeHtml(formatStatus(state.batch.status))} · Updated ${escapeHtml(
         formatTimestamp(state.batch.updatedAt)
       )}</span>
+      ${activeItem ? `<span class="summary-detail">${escapeHtml(`${activeItem.fileName}: ${formatWorkerDetail(activeItem)}`)}</span>` : ""}
     </div>
     <div class="overview-stat">
       <span class="summary-label">Total jobs</span>
@@ -415,8 +499,8 @@ function renderOutcomeCell(item) {
   if (!item.summary) {
     return `
       <div class="table-cell-stack">
-        <strong class="table-primary">${escapeHtml(formatStatus(item.status))}</strong>
-        <span class="table-note">Summary will appear after processing.</span>
+        <strong class="table-primary">${escapeHtml(formatStatus(getDisplayStatus(item)))}</strong>
+        <span class="table-note">${escapeHtml(formatWorkerDetail(item))}</span>
       </div>
     `;
   }
@@ -499,13 +583,18 @@ function renderResultsTable() {
             </div>
           </td>
           <td>
-            <span class="status-pill status-${escapeHtml(sanitizeStatusToken(item.status))}">${escapeHtml(
-              formatStatus(item.status)
+            <span class="status-pill status-${escapeHtml(sanitizeStatusToken(getDisplayStatus(item)))}">${escapeHtml(
+              formatStatus(getDisplayStatus(item))
             )}</span>
           </td>
           <td>${renderOutcomeCell(item)}</td>
           <td>${renderSignalCell(item)}</td>
-          <td class="table-secondary">${escapeHtml(formatTimestamp(item.updatedAt))}</td>
+          <td class="table-secondary">
+            <div class="table-cell-stack">
+              <span>${escapeHtml(formatTimestamp(item.statusDetail?.lastCheckInAt || item.updatedAt))}</span>
+              <span class="table-note">${escapeHtml(formatCheckInSummary(item))}</span>
+            </div>
+          </td>
           <td>${renderPrimaryActionCell(item)}</td>
         </tr>
       `;
@@ -561,6 +650,8 @@ function renderDetailPanel() {
   const workload = getWorkloadForItem(item);
   const previewArtifacts = getPreviewArtifactsForItem(item);
   const selectedArtifact = previewArtifacts.length ? getPreviewSelection(item) : null;
+  const workerStatus = getDisplayStatus(item);
+  const checkInAgeSeconds = getCheckInAgeSeconds(item.statusDetail);
 
   if (selectedArtifact) {
     setPreviewSelection(item.jobId, selectedArtifact);
@@ -573,6 +664,16 @@ function renderDetailPanel() {
       value: item.summary?.label || formatStatus(item.status),
       tone: statusToneForSummary(item.summary, item.status),
       detail: item.summary?.detail || item.error || "Waiting for a completed workload summary."
+    },
+    {
+      label: "Worker",
+      value: formatStatus(workerStatus),
+      detail: formatWorkerDetail(item)
+    },
+    {
+      label: "Check-ins",
+      value: String(item.statusDetail?.checkInCount || 0),
+      detail: formatCheckInSummary(item)
     },
     {
       label: "Signals",
@@ -618,14 +719,47 @@ function renderDetailPanel() {
         <h3>${escapeHtml(item.fileName)}</h3>
         <p class="detail-subtitle">${escapeHtml(item.relativePath || item.fileName)}</p>
       </div>
-      <span class="status-pill status-${escapeHtml(sanitizeStatusToken(item.status))}">${escapeHtml(
-        formatStatus(item.status)
+      <span class="status-pill status-${escapeHtml(sanitizeStatusToken(workerStatus))}">${escapeHtml(
+        formatStatus(workerStatus)
       )}</span>
     </div>
 
     <div class="report-summary-grid detail-stat-grid">
       ${renderSummaryCards(cards)}
     </div>
+
+    <section class="detail-section">
+      <div class="section-heading compact-heading">
+        <h4>Worker status</h4>
+        <span>${escapeHtml(formatStatus(workerStatus))}</span>
+      </div>
+      <div class="definition-grid">
+        <article class="definition-card">
+          <span class="definition-label">Current stage</span>
+          <strong>${escapeHtml(formatCurrentStage(item.statusDetail))}</strong>
+        </article>
+        <article class="definition-card">
+          <span class="definition-label">Last stage</span>
+          <strong>${escapeHtml(formatLastStage(item.statusDetail))}</strong>
+        </article>
+        <article class="definition-card">
+          <span class="definition-label">Last check-in</span>
+          <strong>${escapeHtml(formatTimestamp(item.statusDetail?.lastCheckInAt || item.updatedAt))}</strong>
+        </article>
+        <article class="definition-card">
+          <span class="definition-label">State since</span>
+          <strong>${escapeHtml(formatTimestamp(item.statusDetail?.stateSinceAt || item.updatedAt))}</strong>
+        </article>
+      </div>
+      <p class="report-note">${escapeHtml(formatWorkerDetail(item))}</p>
+      ${
+        isStatusDetailStale(item.statusDetail, item.status) && checkInAgeSeconds != null
+          ? `<p class="report-note emphasis-note">No worker check-in has been seen for ${escapeHtml(
+              formatDurationSeconds(checkInAgeSeconds)
+            )}. This job may be stuck.</p>`
+          : ""
+      }
+    </section>
 
     <section class="detail-section">
       <div class="section-heading compact-heading">

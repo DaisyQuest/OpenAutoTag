@@ -14,7 +14,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const repoRoot = path.resolve(__dirname, "..");
 export const DEFAULT_STAGE_ATTEMPTS = 3;
+export const DEFAULT_STATUS_HEARTBEAT_INTERVAL_MS = 5000;
 const STDERR_TAIL_LIMIT = 64 * 1024;
+const noopProgress = async () => {};
 
 function captureStderrTail(buffer, chunk) {
   const next = buffer + chunk.toString("utf8");
@@ -123,6 +125,14 @@ function durationMs(startedAt, endedAt) {
   return Math.max(0, new Date(endedAt).getTime() - new Date(startedAt).getTime());
 }
 
+async function emitProgress(onProgress, update) {
+  if (typeof onProgress !== "function") {
+    return;
+  }
+
+  await onProgress(update);
+}
+
 function createAttemptRecord({ attempt, startedAt, endedAt, status, error }) {
   const record = {
     attempt,
@@ -185,6 +195,77 @@ function createStageRecord({
   return record;
 }
 
+function buildCurrentStageDetail({ stage, stageIndex, stageCount, attempt, maxAttempts, startedAt }) {
+  return {
+    key: stage.key,
+    label: stage.label,
+    index: stageIndex + 1,
+    total: stageCount,
+    attempt,
+    maxAttempts,
+    startedAt
+  };
+}
+
+function buildStatusStageDetail(stage, overrides = {}) {
+  if (!stage) {
+    return null;
+  }
+
+  return {
+    key: stage.key,
+    label: stage.label,
+    status: stage.status,
+    startedAt: stage.startedAt,
+    endedAt: stage.endedAt,
+    durationMs: stage.durationMs,
+    ...overrides
+  };
+}
+
+function findLastExecutedStage(stages) {
+  return [...(stages || [])].reverse().find((stage) => stage.status !== "skipped") || null;
+}
+
+function startStageHeartbeat({
+  onProgress,
+  stage,
+  stageIndex,
+  stageCount,
+  attempt,
+  maxAttempts,
+  startedAt,
+  completedStages,
+  heartbeatIntervalMs
+}) {
+  if (typeof onProgress !== "function" || heartbeatIntervalMs <= 0) {
+    return () => {};
+  }
+
+  const timer = setInterval(() => {
+    void Promise.resolve(
+      onProgress({
+        state: "running_stage",
+        message: `Still running stage ${stageIndex + 1}/${stageCount}: ${stage.label} (attempt ${attempt}/${maxAttempts}).`,
+        totalStages: stageCount,
+        completedStages,
+        heartbeatIntervalMs,
+        currentStage: buildCurrentStageDetail({
+          stage,
+          stageIndex,
+          stageCount,
+          attempt,
+          maxAttempts,
+          startedAt
+        })
+      })
+    ).catch(() => {});
+  }, heartbeatIntervalMs);
+
+  timer.unref?.();
+  return () => clearInterval(timer);
+}
+
 function summarizeStages(stages) {
   return stages.reduce(
     (summary, stage) => {
@@ -206,7 +287,7 @@ function summarizeStages(stages) {
   );
 }
 
-function buildJobSnapshot({ jobId, status, workload, input, artifacts, stages, failureStage, error }) {
+function buildJobSnapshot({ jobId, status, workload, input, artifacts, stages, failureStage, error, statusDetail }) {
   const timestamp = new Date().toISOString();
   const snapshot = {
     jobId,
@@ -228,6 +309,10 @@ function buildJobSnapshot({ jobId, status, workload, input, artifacts, stages, f
     snapshot.error = error;
   }
 
+  if (statusDetail) {
+    snapshot.statusDetail = statusDetail;
+  }
+
   if (!validateJob(snapshot)) {
     throw new Error(`Pipeline job snapshot failed schema validation: ${ajv.errorsText(validateJob.errors)}`);
   }
@@ -235,13 +320,45 @@ function buildJobSnapshot({ jobId, status, workload, input, artifacts, stages, f
   return snapshot;
 }
 
-async function executeStageWithRetries(stage, context, stageRunner, maxAttempts) {
+async function executeStageWithRetries(
+  stage,
+  context,
+  stageRunner,
+  maxAttempts,
+  { stageIndex, stageCount, onProgress, heartbeatIntervalMs }
+) {
   const attempts = [];
   const startedAt = new Date().toISOString();
   let lastError = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const attemptStartedAt = new Date().toISOString();
+    await emitProgress(onProgress, {
+      state: "running_stage",
+      message: `Running stage ${stageIndex + 1}/${stageCount}: ${stage.label} (attempt ${attempt}/${maxAttempts}).`,
+      totalStages: stageCount,
+      completedStages: stageIndex,
+      heartbeatIntervalMs,
+      currentStage: buildCurrentStageDetail({
+        stage,
+        stageIndex,
+        stageCount,
+        attempt,
+        maxAttempts,
+        startedAt: attemptStartedAt
+      })
+    });
+    const stopHeartbeat = startStageHeartbeat({
+      onProgress,
+      stage,
+      stageIndex,
+      stageCount,
+      attempt,
+      maxAttempts,
+      startedAt: attemptStartedAt,
+      completedStages: stageIndex,
+      heartbeatIntervalMs
+    });
 
     try {
       const result = await stageRunner({
@@ -255,20 +372,34 @@ async function executeStageWithRetries(stage, context, stageRunner, maxAttempts)
       attempts.push(createAttemptRecord({ attempt, startedAt: attemptStartedAt, endedAt: attemptEndedAt, status: "completed" }));
 
       const { artifacts = {}, outputPath = stage.outputPath, ...metadata } = result || {};
+      const completedStage = createStageRecord({
+        key: stage.key,
+        label: stage.label,
+        status: "completed",
+        startedAt,
+        endedAt: attemptEndedAt,
+        attempts,
+        artifacts,
+        outputPath,
+        metadata
+      });
+      stopHeartbeat();
+      await emitProgress(onProgress, {
+        state: "stage_completed",
+        message: `Completed stage ${stageIndex + 1}/${stageCount}: ${stage.label}.`,
+        totalStages: stageCount,
+        completedStages: stageIndex + 1,
+        heartbeatIntervalMs,
+        currentStage: null,
+        lastStage: buildStatusStageDetail(completedStage, {
+          attempt,
+          maxAttempts
+        })
+      });
 
       return {
         status: "completed",
-        stage: createStageRecord({
-          key: stage.key,
-          label: stage.label,
-          status: "completed",
-          startedAt,
-          endedAt: attemptEndedAt,
-          attempts,
-          artifacts,
-          outputPath,
-          metadata
-        }),
+        stage: completedStage,
         artifacts
       };
     } catch (error) {
@@ -284,23 +415,56 @@ async function executeStageWithRetries(stage, context, stageRunner, maxAttempts)
         })
       );
       lastError = normalizedError;
+      stopHeartbeat();
 
       if (attempt < maxAttempts && normalizedError.retryable) {
+        await emitProgress(onProgress, {
+          state: "retrying_stage",
+          message: `Retrying stage ${stageIndex + 1}/${stageCount}: ${stage.label} after retryable failure.`,
+          totalStages: stageCount,
+          completedStages: stageIndex,
+          heartbeatIntervalMs,
+          currentStage: null,
+          lastStage: {
+            key: stage.key,
+            label: stage.label,
+            status: "failed",
+            endedAt: attemptEndedAt,
+            attempt,
+            maxAttempts,
+            errorMessage: normalizedError.message
+          }
+        });
         continue;
       }
 
+      const failedStage = createStageRecord({
+        key: stage.key,
+        label: stage.label,
+        status: "failed",
+        startedAt,
+        endedAt: attemptEndedAt,
+        attempts,
+        error: normalizedError,
+        outputPath: stage.outputPath
+      });
+      await emitProgress(onProgress, {
+        state: "failed",
+        message: `Stage ${stageIndex + 1}/${stageCount} failed: ${stage.label}.`,
+        totalStages: stageCount,
+        completedStages: stageIndex,
+        heartbeatIntervalMs,
+        currentStage: null,
+        lastStage: buildStatusStageDetail(failedStage, {
+          attempt,
+          maxAttempts,
+          errorMessage: normalizedError.message
+        })
+      });
+
       return {
         status: "failed",
-        stage: createStageRecord({
-          key: stage.key,
-          label: stage.label,
-          status: "failed",
-          startedAt,
-          endedAt: attemptEndedAt,
-          attempts,
-          error: normalizedError,
-          outputPath: stage.outputPath
-        }),
+        stage: failedStage,
         error: normalizedError
       };
     }
@@ -345,15 +509,41 @@ export async function runManagedWorkload({
   options = {},
   stageRunner = async ({ run }) => run(),
   maxStageAttempts = DEFAULT_STAGE_ATTEMPTS,
+  onProgress = noopProgress,
+  heartbeatIntervalMs = DEFAULT_STATUS_HEARTBEAT_INTERVAL_MS,
   buildStagePlan
 }) {
   const resolvedSourceFilePath = path.resolve(filePath);
   const resolvedOutputDir = path.resolve(outputDir || path.join(getRuntimeSubdir("jobs", { repoRoot }), jobId));
+  await emitProgress(onProgress, {
+    state: "preparing_workspace",
+    message: "Preparing the job workspace.",
+    completedStages: 0,
+    totalStages: null,
+    currentStage: null,
+    heartbeatIntervalMs
+  });
   await mkdir(resolvedOutputDir, { recursive: true });
+  await emitProgress(onProgress, {
+    state: "staging_input",
+    message: "Staging the source PDF into the job workspace.",
+    completedStages: 0,
+    totalStages: null,
+    currentStage: null,
+    heartbeatIntervalMs
+  });
   const stagedFilePath = await stageInputFile(resolvedSourceFilePath, resolvedOutputDir);
 
   const artifacts = {};
   const stages = [];
+  await emitProgress(onProgress, {
+    state: "building_stage_plan",
+    message: "Building the workload stage plan.",
+    completedStages: 0,
+    totalStages: null,
+    currentStage: null,
+    heartbeatIntervalMs
+  });
   const stagePlan = buildStagePlan({
     filePath: stagedFilePath,
     sourceFilePath: resolvedSourceFilePath,
@@ -363,6 +553,7 @@ export async function runManagedWorkload({
     workload,
     jobId
   });
+  const totalStages = stagePlan.length;
   let failureStage = null;
   let failureError = null;
 
@@ -380,13 +571,30 @@ export async function runManagedWorkload({
         workload
       },
       stageRunner,
-      maxStageAttempts
+      maxStageAttempts,
+      {
+        stageIndex: index,
+        stageCount: totalStages,
+        onProgress,
+        heartbeatIntervalMs
+      }
     );
     stages.push(result.stage);
 
     if (result.status === "failed") {
       failureStage = result.stage;
       failureError = result.error;
+      await emitProgress(onProgress, {
+        state: "failed",
+        message: `Stage ${failureStage.key} failed. Remaining stages will be skipped.`,
+        totalStages,
+        completedStages: stages.filter((stageRecord) => stageRecord.status === "completed").length,
+        currentStage: null,
+        heartbeatIntervalMs,
+        lastStage: buildStatusStageDetail(failureStage, {
+          errorMessage: failureError?.message || failureStage.error?.message || "unknown error"
+        })
+      });
       for (const skippedStage of stagePlan.slice(index + 1)) {
         stages.push(createSkippedStage(skippedStage, `Skipped after ${stage.key} failed.`));
       }
@@ -411,9 +619,32 @@ export async function runManagedWorkload({
       artifacts,
       stages,
       failureStage,
-      error: `Stage ${failureStage.key} failed after ${failureStage.attempts?.length || 0} attempt(s): ${failureError?.message || failureStage.error?.message || "unknown error"}`
+      error: `Stage ${failureStage.key} failed after ${failureStage.attempts?.length || 0} attempt(s): ${failureError?.message || failureStage.error?.message || "unknown error"}`,
+      statusDetail: {
+        state: "failed",
+        message: `Stage ${failureStage.key} failed after ${failureStage.attempts?.length || 0} attempt(s).`,
+        totalStages,
+        completedStages: stages.filter((stageRecord) => stageRecord.status === "completed").length,
+        currentStage: null,
+        heartbeatIntervalMs,
+        lastStage: buildStatusStageDetail(failureStage, {
+          errorMessage: failureError?.message || failureStage.error?.message || "unknown error"
+        })
+      }
     });
   }
+
+  await emitProgress(onProgress, {
+    state: "finalizing_job",
+    message: totalStages
+      ? `Finalizing the job snapshot after ${totalStages} completed stage${totalStages === 1 ? "" : "s"}.`
+      : "Finalizing the job snapshot.",
+    totalStages,
+    completedStages: totalStages,
+    currentStage: null,
+    heartbeatIntervalMs,
+    lastStage: buildStatusStageDetail(findLastExecutedStage(stages))
+  });
 
   return buildJobSnapshot({
     jobId,
@@ -427,6 +658,17 @@ export async function runManagedWorkload({
       options
     },
     artifacts,
-    stages
+    stages,
+    statusDetail: {
+      state: "completed",
+      message: totalStages
+        ? `Completed ${totalStages} stage${totalStages === 1 ? "" : "s"}.`
+        : "No stages were scheduled for this workload.",
+      totalStages,
+      completedStages: totalStages,
+      currentStage: null,
+      heartbeatIntervalMs,
+      lastStage: buildStatusStageDetail(findLastExecutedStage(stages))
+    }
   });
 }

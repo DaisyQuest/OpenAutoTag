@@ -1122,18 +1122,27 @@ body {
 }
 
 .status-queued,
-.status-processing {
+.status-processing,
+.status-queued_waiting_for_worker {
   background: rgba(202, 107, 47, 0.14);
   color: #8b4318;
 }
 
-.status-running {
+.status-running,
+.status-worker_claimed,
+.status-preparing_workspace,
+.status-staging_input,
+.status-building_stage_plan,
+.status-running_stage,
+.status-retrying_stage,
+.status-finalizing_job {
   background: rgba(11, 122, 117, 0.14);
   color: var(--signal-deep);
   animation: pulse 1.4s ease infinite;
 }
 
-.status-completed {
+.status-completed,
+.status-stage_completed {
   background: rgba(11, 122, 117, 0.12);
   color: var(--signal-deep);
 }
