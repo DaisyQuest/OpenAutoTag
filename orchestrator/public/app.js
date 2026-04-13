@@ -374,9 +374,7 @@ function renderBatchOverview() {
         <strong>${escapeHtml(workload?.label || "Unknown workload")}</strong>
         <span class="summary-detail">${escapeHtml(workload?.description || "No workload description available.")}</span>
       </div>
-      <div class="progress-meter" aria-hidden="true">
-        <span style="width: ${progress}%"></span>
-      </div>
+      <progress class="progress-meter" max="100" value="${progress}">${progress}%</progress>
       <span class="summary-detail">${escapeHtml(formatStatus(state.batch.status))} · Updated ${escapeHtml(
         formatTimestamp(state.batch.updatedAt)
       )}</span>

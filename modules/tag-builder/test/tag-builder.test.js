@@ -3,7 +3,27 @@ import assert from "node:assert/strict";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { buildTagTree } from "../index.js";
+import { buildTagTree, resolveOrderedNodes } from "../index.js";
+
+test("tag builder resolves ordered node ids without repeated linear scans", () => {
+  const nodes = [
+    { id: "n1", readingOrder: 1 },
+    { id: "n2", readingOrder: 0 }
+  ];
+  nodes.find = () => {
+    throw new Error("resolveOrderedNodes should not call Array.prototype.find");
+  };
+
+  const orderedNodes = resolveOrderedNodes({
+    nodes,
+    orderedNodeIds: ["n2", "n1", "missing"]
+  });
+
+  assert.deepEqual(
+    orderedNodes.map((node) => node?.id || null),
+    ["n2", "n1", null]
+  );
+});
 
 test("tag builder groups content under heading-driven sections", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-test-"));

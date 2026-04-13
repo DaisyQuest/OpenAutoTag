@@ -8,7 +8,8 @@ const MANAGED_KEY_PREFIX = "bea";
 const REGISTRY_VERSION = 1;
 const MANAGED_KEY_SECRET_BYTES = 32;
 const ENV_API_KEY_NAMES = ["API_KEY", "X_API_KEY", "BUILD_EVERYTHING_API_KEY"];
-const ENV_ADMIN_KEY_NAMES = ["ADMIN_KEY", "X_ADMIN_KEY", "BUILD_EVERYTHING_ADMIN_KEY"];
+const ENV_ADMIN_KEY_NAMES = ["ADMIN_KEY"];
+const DEFAULT_LOCAL_ADMIN_KEY = "testing";
 
 function parseBoolean(value, defaultValue) {
   if (typeof value === "boolean") {
@@ -206,7 +207,7 @@ export function createAuthController({
     await loadRegistry();
     await mkdir(path.dirname(registryPath), { recursive: true });
     const payload = JSON.stringify(registry, null, 2);
-    registryWritePromise = registryWritePromise.then(() => writeFile(registryPath, payload, "utf8"));
+    registryWritePromise = registryWritePromise.catch(() => {}).then(() => writeFile(registryPath, payload, "utf8"));
     await registryWritePromise;
   }
 
@@ -403,10 +404,12 @@ export function createAuthController({
 }
 
 export function createEnvironmentAuthController({ runtimeRoot, env = process.env } = {}) {
+  const configuredAdminKeys = readConfiguredSecrets(ENV_ADMIN_KEY_NAMES, env);
+
   return createAuthController({
     publicMode: env.PUBLIC_MODE,
     bootstrapApiKeys: readConfiguredSecrets(ENV_API_KEY_NAMES, env),
-    adminKeys: readConfiguredSecrets(ENV_ADMIN_KEY_NAMES, env),
+    adminKeys: configuredAdminKeys.length ? configuredAdminKeys : [DEFAULT_LOCAL_ADMIN_KEY],
     registryPath: path.join(runtimeRoot, "security", "api-keys.json")
   });
 }

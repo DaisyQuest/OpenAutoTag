@@ -127,11 +127,11 @@ export function getRequestHeaders(mode = "api") {
     return adminKey ? { "X-ADMIN-KEY": adminKey } : {};
   }
 
-  if (apiKey) {
-    return { "X-API-KEY": apiKey };
+  if (adminKey) {
+    return { "X-ADMIN-KEY": adminKey };
   }
 
-  return adminKey ? { "X-ADMIN-KEY": adminKey } : {};
+  return apiKey ? { "X-API-KEY": apiKey } : {};
 }
 
 export async function fetchWithAuth(url, { auth = "api", headers = {}, cache = "no-store", ...options } = {}) {
@@ -192,6 +192,7 @@ export async function verifyAndStoreAccess({ key, admin = false }) {
 
   if (payload?.access?.admin) {
     setStoredKey("admin", candidate);
+    setStoredKey("api", "");
   }
 
   if (payload?.access?.api && !payload?.access?.admin) {

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Job History</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="dashboard">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">BuildEverything</a>
+        <div class="topbar-links">
+          <a class="topbar-link" href="/">Workspace</a>
+          <a class="topbar-link" href="/admin/keys.html">API Keys</a>
+          <a class="topbar-link" href="/admin/system.html">System</a>
+          <a class="topbar-link" href="/admin/queue.html">Queue</a>
+          <a class="topbar-link is-active" href="/admin/history.html">History</a>
+        </div>
+        <div class="topbar-actions">
+          <span id="session-pill" class="session-pill">Loading access</span>
+          <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+        </div>
+      </nav>
+
+      <header class="hero admin-hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Operational Archive</p>
+            <h1>Review recent workload outcomes and jump back into reports.</h1>
+            <p class="lede">
+              The history view is optimized for fast scanning: status, workload, validation summary, and primary next
+              action stay visible in a single table.
+            </p>
+          </div>
+          <aside class="hero-command">
+            <div id="history-summary" class="hero-stat-grid">
+              <article class="summary-card">
+                <span class="summary-label">Jobs</span>
+                <strong>Loading</strong>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </header>
+
+      <section class="panel auth-strip" aria-labelledby="auth-title">
+        <div class="section-heading">
+          <div class="heading-stack">
+            <h2 id="auth-title">Admin access</h2>
+            <p id="auth-copy" class="section-copy">Use an admin key to inspect the job ledger and open archived reports.</p>
+          </div>
+          <span id="auth-caption">Checking mode</span>
+        </div>
+        <form id="auth-form" class="auth-form">
+          <label class="field-stack" for="auth-key">
+            <span class="field-label">Admin key</span>
+            <input
+              id="auth-key"
+              class="url-input auth-input"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste the X-ADMIN-KEY value"
+            />
+          </label>
+          <button id="auth-submit" class="action-button" type="submit">Unlock job history</button>
+        </form>
+        <p id="auth-message" class="message-line" aria-live="polite">Checking access requirements.</p>
+      </section>
+
+      <main id="main-content" class="dashboard admin-dashboard">
+        <section class="panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Recent jobs</h2>
+              <p class="section-copy">Completed, failed, queued, and running jobs are sorted newest first.</p>
+            </div>
+            <span id="history-table-caption">Loading history</span>
+          </div>
+          <div class="table-shell">
+            <table class="dashboard-table" aria-describedby="history-table-caption">
+              <thead>
+                <tr>
+                  <th scope="col">Document</th>
+                  <th scope="col">Workload</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Outcome</th>
+                  <th scope="col">Updated</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <tr>
+                  <td colspan="6" class="empty-row">Unlock admin access to inspect the job ledger.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/admin/history.js"></script>
+  </body>
+</html>

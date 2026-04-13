@@ -936,6 +936,7 @@ export function createAppServer({
         writeJson(response, ok ? 200 : 401, {
           ok,
           publicMode: access.publicMode,
+          ...(ok ? {} : { error: "The provided key was not accepted." }),
           access: {
             api: Boolean(access.apiAuthorized || access.adminAuthorized),
             admin: Boolean(access.adminAuthorized),
