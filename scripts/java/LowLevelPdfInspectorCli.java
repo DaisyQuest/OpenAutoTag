@@ -1,4 +1,6 @@
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -22,6 +24,7 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
@@ -254,6 +257,7 @@ public class LowLevelPdfInspectorCli {
         List<Map<String, Object>> drawSamples = new ArrayList<>();
 
         String currentFont = null;
+        PDFont currentFontObject = null;
         float currentFontSize = 0f;
         int textOperatorCount = 0;
         int markedContentOperatorCount = 0;
@@ -276,13 +280,14 @@ public class LowLevelPdfInspectorCli {
 
             if ("Tf".equals(name) && operands.size() >= 2 && operands.get(0) instanceof COSName && operands.get(1) instanceof COSNumber) {
                 currentFont = ((COSName) operands.get(0)).getName();
+                currentFontObject = page.getResources() == null ? null : page.getResources().getFont((COSName) operands.get(0));
                 currentFontSize = ((COSNumber) operands.get(1)).floatValue();
             }
 
             if ("Tj".equals(name) || "TJ".equals(name) || "'".equals(name) || "\"".equals(name)) {
                 textOperatorCount += 1;
                 if (textSamples.size() < 8) {
-                    String text = extractText(operands, name);
+                    String text = extractText(operands, name, currentFontObject);
                     Map<String, Object> sample = new LinkedHashMap<>();
                     sample.put("operator", name);
                     sample.put("font", currentFont);
@@ -353,11 +358,11 @@ public class LowLevelPdfInspectorCli {
         return String.valueOf(first);
     }
 
-    private static String extractText(List<Object> operands, String operator) {
+    private static String extractText(List<Object> operands, String operator, PDFont font) {
         if ("Tj".equals(operator) || "'".equals(operator)) {
             for (Object operand : operands) {
                 if (operand instanceof COSString) {
-                    return sanitizeText(((COSString) operand).getString());
+                    return sanitizeText(decodeCosString((COSString) operand, font));
                 }
             }
             return "";
@@ -366,7 +371,7 @@ public class LowLevelPdfInspectorCli {
         if ("\"".equals(operator)) {
             for (int index = operands.size() - 1; index >= 0; index -= 1) {
                 if (operands.get(index) instanceof COSString) {
-                    return sanitizeText(((COSString) operands.get(index)).getString());
+                    return sanitizeText(decodeCosString((COSString) operands.get(index), font));
                 }
             }
             return "";
@@ -380,7 +385,7 @@ public class LowLevelPdfInspectorCli {
                     for (int index = 0; index < array.size(); index += 1) {
                         COSBase item = resolve(array.get(index));
                         if (item instanceof COSString) {
-                            builder.append(((COSString) item).getString());
+                            builder.append(decodeCosString((COSString) item, font));
                         }
                     }
                     return sanitizeText(builder.toString());
@@ -389,6 +394,32 @@ public class LowLevelPdfInspectorCli {
         }
 
         return "";
+    }
+
+    private static String decodeCosString(COSString value, PDFont font) {
+        if (font == null) {
+            return value.getString();
+        }
+
+        StringBuilder decoded = new StringBuilder();
+        try (ByteArrayInputStream input = new ByteArrayInputStream(value.getBytes())) {
+            while (input.available() > 0) {
+                int code = font.readCode(input);
+                String unicode = font.toUnicode(code);
+                if (unicode != null) {
+                    decoded.append(unicode);
+                    continue;
+                }
+
+                if (code >= 32 && code <= 126) {
+                    decoded.append((char) code);
+                }
+            }
+        } catch (IOException error) {
+            return value.getString();
+        }
+
+        return decoded.length() > 0 ? decoded.toString() : value.getString();
     }
 
     private static String sanitizeText(String value) {

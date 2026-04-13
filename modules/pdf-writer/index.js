@@ -1,6 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
-import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { access, copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
@@ -21,6 +22,10 @@ const javaSourcePath = path.join(moduleDir, "java", "PdfTagWriterCli.java");
 const javaClassPath = path.join(buildDir, "PdfTagWriterCli.class");
 const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
+const overlayFontCandidates = [
+  process.env.PDF_WRITER_OVERLAY_FONT ? path.resolve(process.env.PDF_WRITER_OVERLAY_FONT) : null,
+  path.join(repoRoot, "node_modules", "pdfjs-dist", "standard_fonts", "LiberationSans-Regular.ttf")
+].filter(Boolean);
 
 function parseArgs(argv) {
   const args = new Map();
@@ -81,6 +86,19 @@ async function ensureJavaHelperCompiled() {
       );
     }
   });
+}
+
+async function resolveOverlayFontPath() {
+  for (const candidatePath of overlayFontCandidates) {
+    try {
+      await access(candidatePath, constants.R_OK);
+      return candidatePath;
+    } catch {}
+  }
+
+  throw new Error(
+    `Unable to locate an embeddable overlay font. Checked: ${overlayFontCandidates.join(", ")}`
+  );
 }
 
 function countTagNodes(node) {
@@ -266,8 +284,16 @@ async function writeSidecarFallback({ pdfPath, taggingDocument, outputPath, mani
   };
 }
 
-async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionInstructionPath, title, language }) {
+async function runJavaWriter({
+  pdfPath,
+  outputPath,
+  instructionPath,
+  redactionInstructionPath,
+  title,
+  language
+}) {
   await ensureJavaHelperCompiled();
+  const overlayFontPath = await resolveOverlayFontPath();
   const args = [
     "-cp",
     `${buildDir}${path.delimiter}${pdfboxJarPath}`,
@@ -281,7 +307,9 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
     "--title",
     title,
     "--language",
-    language
+    language,
+    "--overlay-font",
+    overlayFontPath
   ];
 
   if (redactionInstructionPath) {

@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
@@ -35,6 +36,7 @@ import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructur
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureTreeRoot;
 import org.apache.pdfbox.pdmodel.documentinterchange.taggedpdf.PDTableAttributeObject;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
@@ -91,18 +93,17 @@ public class PdfTagWriterCli {
         String title = options.getOrDefault("--title", "Tagged PDF");
         String language = options.getOrDefault("--language", "en-US");
         String redactionsPath = options.get("--redactions");
+        String overlayFontPath = options.get("--overlay-font");
 
         List<Instruction> instructions = readInstructions(instructionsPath);
         Map<Integer, List<RedactionInstruction>> redactionsByPage =
             redactionsPath == null || redactionsPath.isBlank() ? Map.of() : readRedactions(redactionsPath);
 
         try (PDDocument sourceDocument = Loader.loadPDF(new File(pdfPath)); PDDocument outputDocument = new PDDocument()) {
-            List<PDPage> outputPages = redactionsByPage.isEmpty()
-                ? importPages(sourceDocument, outputDocument)
-                : clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
+            List<PDPage> outputPages = clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
             PDDocumentCatalog catalog = outputDocument.getDocumentCatalog();
             applyMetadata(outputDocument, catalog, title, language);
-            PDFont overlayFont = loadOverlayFont();
+            PDFont overlayFont = loadOverlayFont(outputDocument, overlayFontPath);
 
             PDStructureTreeRoot structureTreeRoot = new PDStructureTreeRoot();
             catalog.setStructureTreeRoot(structureTreeRoot);
@@ -186,7 +187,7 @@ public class PdfTagWriterCli {
                 + ",\"redactionCount\":" + countRedactions(redactionsByPage)
                 + ",\"pageStructParentCount\":" + pageStates.size()
                 + ",\"metadataApplied\":true"
-                + ",\"reconstructedFromArtifactImages\":false"
+                + ",\"reconstructedFromArtifactImages\":true"
                 + "}";
             System.out.println(json);
         }
@@ -303,23 +304,6 @@ public class PdfTagWriterCli {
         }
     }
 
-    private static List<PDPage> importPages(
-        PDDocument sourceDocument,
-        PDDocument outputDocument
-    ) throws Exception {
-        List<PDPage> outputPages = new ArrayList<>();
-
-        for (int pageIndex = 0; pageIndex < sourceDocument.getNumberOfPages(); pageIndex++) {
-            PDPage sourcePage = sourceDocument.getPage(pageIndex);
-            PDPage outputPage = outputDocument.importPage(sourcePage);
-            outputPage.setCropBox(sourcePage.getCropBox());
-            outputPage.setRotation(sourcePage.getRotation());
-            outputPages.add(outputPage);
-        }
-
-        return outputPages;
-    }
-
     private static Map<Integer, List<RedactionInstruction>> readRedactions(String redactionsPath) throws Exception {
         Map<Integer, List<RedactionInstruction>> redactionsByPage = new LinkedHashMap<>();
 
@@ -357,7 +341,16 @@ public class PdfTagWriterCli {
         return value == null || value.isEmpty() ? 0f : Float.parseFloat(value);
     }
 
-    private static PDFont loadOverlayFont() {
+    private static PDFont loadOverlayFont(PDDocument document, String overlayFontPath) throws Exception {
+        if (overlayFontPath != null && !overlayFontPath.isBlank()) {
+            File overlayFontFile = new File(overlayFontPath);
+            if (overlayFontFile.isFile()) {
+                try (FileInputStream overlayFontStream = new FileInputStream(overlayFontFile)) {
+                    return PDType0Font.load(document, overlayFontStream, false);
+                }
+            }
+        }
+
         return new PDType1Font(Standard14Fonts.FontName.HELVETICA);
     }
 
@@ -373,6 +366,7 @@ public class PdfTagWriterCli {
             PDPage sourcePage = sourceDocument.getPage(pageIndex);
             PDPage outputPage = new PDPage(sourcePage.getMediaBox());
             outputPage.setCropBox(sourcePage.getCropBox());
+            outputPage.setRotation(sourcePage.getRotation());
             outputDocument.addPage(outputPage);
             outputPages.add(outputPage);
 
