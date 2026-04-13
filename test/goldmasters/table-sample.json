@@ -1061,7 +1061,7 @@
             "tableSource": "",
             "children": [
               {
-                "type": "TBody",
+                "type": "TR",
                 "label": "",
                 "sourceNodeIds": [],
                 "rowSpan": null,
@@ -1070,109 +1070,98 @@
                 "tableSource": "",
                 "children": [
                   {
-                    "type": "TR",
-                    "label": "",
-                    "sourceNodeIds": [],
+                    "type": "TD",
+                    "label": "Venue",
+                    "sourceNodeIds": [
+                      "n-1-9"
+                    ],
                     "rowSpan": null,
                     "columnSpan": null,
-                    "tableSection": "",
+                    "tableSection": "body",
                     "tableSource": "",
-                    "children": [
-                      {
-                        "type": "TD",
-                        "label": "Venue",
-                        "sourceNodeIds": [
-                          "n-1-9"
-                        ],
-                        "rowSpan": null,
-                        "columnSpan": null,
-                        "tableSection": "body",
-                        "tableSource": "",
-                        "children": []
-                      },
-                      {
-                        "type": "TD",
-                        "label": "City",
-                        "sourceNodeIds": [
-                          "n-1-10"
-                        ],
-                        "rowSpan": null,
-                        "columnSpan": null,
-                        "tableSection": "body",
-                        "tableSource": "",
-                        "children": []
-                      }
-                    ]
+                    "children": []
                   },
                   {
-                    "type": "TR",
-                    "label": "",
-                    "sourceNodeIds": [],
+                    "type": "TD",
+                    "label": "City",
+                    "sourceNodeIds": [
+                      "n-1-10"
+                    ],
                     "rowSpan": null,
                     "columnSpan": null,
-                    "tableSection": "",
+                    "tableSection": "body",
                     "tableSource": "",
-                    "children": [
-                      {
-                        "type": "TD",
-                        "label": "Palace Theatre",
-                        "sourceNodeIds": [
-                          "n-1-11"
-                        ],
-                        "rowSpan": null,
-                        "columnSpan": null,
-                        "tableSection": "body",
-                        "tableSource": "",
-                        "children": []
-                      },
-                      {
-                        "type": "TD",
-                        "label": "Albany",
-                        "sourceNodeIds": [
-                          "n-1-12"
-                        ],
-                        "rowSpan": null,
-                        "columnSpan": null,
-                        "tableSection": "body",
-                        "tableSource": "",
-                        "children": []
-                      }
-                    ]
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "type": "TR",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TD",
+                    "label": "Palace Theatre",
+                    "sourceNodeIds": [
+                      "n-1-11"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "body",
+                    "tableSource": "",
+                    "children": []
                   },
                   {
-                    "type": "TR",
-                    "label": "",
-                    "sourceNodeIds": [],
+                    "type": "TD",
+                    "label": "Albany",
+                    "sourceNodeIds": [
+                      "n-1-12"
+                    ],
                     "rowSpan": null,
                     "columnSpan": null,
-                    "tableSection": "",
+                    "tableSection": "body",
                     "tableSource": "",
-                    "children": [
-                      {
-                        "type": "TD",
-                        "label": "Troy Savings",
-                        "sourceNodeIds": [
-                          "n-1-13"
-                        ],
-                        "rowSpan": null,
-                        "columnSpan": null,
-                        "tableSection": "body",
-                        "tableSource": "",
-                        "children": []
-                      },
-                      {
-                        "type": "TD",
-                        "label": "Troy",
-                        "sourceNodeIds": [
-                          "n-1-14"
-                        ],
-                        "rowSpan": null,
-                        "columnSpan": null,
-                        "tableSection": "body",
-                        "tableSource": "",
-                        "children": []
-                      }
-                    ]
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "type": "TR",
+                "label": "",
+                "sourceNodeIds": [],
+                "rowSpan": null,
+                "columnSpan": null,
+                "tableSection": "",
+                "tableSource": "",
+                "children": [
+                  {
+                    "type": "TD",
+                    "label": "Troy Savings",
+                    "sourceNodeIds": [
+                      "n-1-13"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "body",
+                    "tableSource": "",
+                    "children": []
+                  },
+                  {
+                    "type": "TD",
+                    "label": "Troy",
+                    "sourceNodeIds": [
+                      "n-1-14"
+                    ],
+                    "rowSpan": null,
+                    "columnSpan": null,
+                    "tableSection": "body",
+                    "tableSource": "",
+                    "children": []
                   }
                 ]
               }
@@ -1325,7 +1314,7 @@
   "writer": {
     "status": "completed",
     "nativeTaggingApplied": true,
-    "structureElementCount": 27,
+    "structureElementCount": 26,
     "markedContentCount": 14,
     "tableAttributeCount": 2,
     "metadataApplied": true,
@@ -1343,7 +1332,7 @@
     },
     "tagged": {
       "hasStructTreeRoot": true,
-      "totalTypedNodes": 27,
+      "totalTypedNodes": 26,
       "markedContentOperatorCount": 15,
       "artifactMarkedContentCount": 1,
       "tableAttributeNodeCount": 2
@@ -1353,7 +1342,7 @@
       "metadataAdded": true,
       "markInfoAdded": true,
       "markedFlagEnabled": true,
-      "totalTypedNodesDelta": 27,
+      "totalTypedNodesDelta": 26,
       "markedContentOperatorCountDelta": 15,
       "artifactMarkedContentCountDelta": 1,
       "tableAttributeNodeCountDelta": 2,

@@ -97,9 +97,7 @@ public class PdfTagWriterCli {
             redactionsPath == null || redactionsPath.isBlank() ? Map.of() : readRedactions(redactionsPath);
 
         try (PDDocument sourceDocument = Loader.loadPDF(new File(pdfPath)); PDDocument outputDocument = new PDDocument()) {
-            List<PDPage> outputPages = redactionsByPage.isEmpty()
-                ? importPages(sourceDocument, outputDocument)
-                : clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
+            List<PDPage> outputPages = clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
             PDDocumentCatalog catalog = outputDocument.getDocumentCatalog();
             applyMetadata(outputDocument, catalog, title, language);
             PDFont overlayFont = loadOverlayFont();
@@ -186,7 +184,7 @@ public class PdfTagWriterCli {
                 + ",\"redactionCount\":" + countRedactions(redactionsByPage)
                 + ",\"pageStructParentCount\":" + pageStates.size()
                 + ",\"metadataApplied\":true"
-                + ",\"reconstructedFromArtifactImages\":false"
+                + ",\"reconstructedFromArtifactImages\":true"
                 + "}";
             System.out.println(json);
         }
@@ -303,23 +301,6 @@ public class PdfTagWriterCli {
         }
     }
 
-    private static List<PDPage> importPages(
-        PDDocument sourceDocument,
-        PDDocument outputDocument
-    ) throws Exception {
-        List<PDPage> outputPages = new ArrayList<>();
-
-        for (int pageIndex = 0; pageIndex < sourceDocument.getNumberOfPages(); pageIndex++) {
-            PDPage sourcePage = sourceDocument.getPage(pageIndex);
-            PDPage outputPage = outputDocument.importPage(sourcePage);
-            outputPage.setCropBox(sourcePage.getCropBox());
-            outputPage.setRotation(sourcePage.getRotation());
-            outputPages.add(outputPage);
-        }
-
-        return outputPages;
-    }
-
     private static Map<Integer, List<RedactionInstruction>> readRedactions(String redactionsPath) throws Exception {
         Map<Integer, List<RedactionInstruction>> redactionsByPage = new LinkedHashMap<>();
 
@@ -373,6 +354,8 @@ public class PdfTagWriterCli {
             PDPage sourcePage = sourceDocument.getPage(pageIndex);
             PDPage outputPage = new PDPage(sourcePage.getMediaBox());
             outputPage.setCropBox(sourcePage.getCropBox());
+            outputPage.setRotation(sourcePage.getRotation());
+            outputPage.getCOSObject().setItem(COSName.getPDFName("Tabs"), COSName.S);
             outputDocument.addPage(outputPage);
             outputPages.add(outputPage);
 
@@ -555,6 +538,7 @@ public class PdfTagWriterCli {
         state.pageKey = pageKey;
         state.contentStream = new PDPageContentStream(document, page, AppendMode.APPEND, true, true);
         page.setStructParents(pageKey);
+        page.getCOSObject().setItem(COSName.getPDFName("Tabs"), COSName.S);
         return state;
     }
 
