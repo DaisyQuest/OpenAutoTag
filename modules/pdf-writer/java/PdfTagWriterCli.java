@@ -97,7 +97,9 @@ public class PdfTagWriterCli {
             redactionsPath == null || redactionsPath.isBlank() ? Map.of() : readRedactions(redactionsPath);
 
         try (PDDocument sourceDocument = Loader.loadPDF(new File(pdfPath)); PDDocument outputDocument = new PDDocument()) {
-            List<PDPage> outputPages = clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
+            List<PDPage> outputPages = redactionsByPage.isEmpty()
+                ? importPages(sourceDocument, outputDocument)
+                : clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
             PDDocumentCatalog catalog = outputDocument.getDocumentCatalog();
             applyMetadata(outputDocument, catalog, title, language);
             PDFont overlayFont = loadOverlayFont();
@@ -184,7 +186,7 @@ public class PdfTagWriterCli {
                 + ",\"redactionCount\":" + countRedactions(redactionsByPage)
                 + ",\"pageStructParentCount\":" + pageStates.size()
                 + ",\"metadataApplied\":true"
-                + ",\"reconstructedFromArtifactImages\":true"
+                + ",\"reconstructedFromArtifactImages\":false"
                 + "}";
             System.out.println(json);
         }
@@ -301,29 +303,18 @@ public class PdfTagWriterCli {
         }
     }
 
-    private static List<PDPage> clonePagesAsArtifactImages(
+    private static List<PDPage> importPages(
         PDDocument sourceDocument,
-        PDDocument outputDocument,
-        Map<Integer, List<RedactionInstruction>> redactionsByPage
+        PDDocument outputDocument
     ) throws Exception {
-        PDFRenderer renderer = new PDFRenderer(sourceDocument);
         List<PDPage> outputPages = new ArrayList<>();
 
         for (int pageIndex = 0; pageIndex < sourceDocument.getNumberOfPages(); pageIndex++) {
             PDPage sourcePage = sourceDocument.getPage(pageIndex);
-            PDPage outputPage = new PDPage(sourcePage.getMediaBox());
+            PDPage outputPage = outputDocument.importPage(sourcePage);
             outputPage.setCropBox(sourcePage.getCropBox());
-            outputDocument.addPage(outputPage);
+            outputPage.setRotation(sourcePage.getRotation());
             outputPages.add(outputPage);
-
-            BufferedImage renderedPage = renderer.renderImageWithDPI(pageIndex, 144, ImageType.RGB);
-            applyRedactions(renderedPage, sourcePage, redactionsByPage.getOrDefault(pageIndex + 1, List.of()));
-            PDImageXObject image = LosslessFactory.createFromImage(outputDocument, renderedPage);
-            try (PDPageContentStream stream = new PDPageContentStream(outputDocument, outputPage)) {
-                stream.beginMarkedContent(COSName.ARTIFACT);
-                stream.drawImage(image, 0, 0, outputPage.getMediaBox().getWidth(), outputPage.getMediaBox().getHeight());
-                stream.endMarkedContent();
-            }
         }
 
         return outputPages;
@@ -368,6 +359,34 @@ public class PdfTagWriterCli {
 
     private static PDFont loadOverlayFont() {
         return new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+    }
+
+    private static List<PDPage> clonePagesAsArtifactImages(
+        PDDocument sourceDocument,
+        PDDocument outputDocument,
+        Map<Integer, List<RedactionInstruction>> redactionsByPage
+    ) throws Exception {
+        PDFRenderer renderer = new PDFRenderer(sourceDocument);
+        List<PDPage> outputPages = new ArrayList<>();
+
+        for (int pageIndex = 0; pageIndex < sourceDocument.getNumberOfPages(); pageIndex++) {
+            PDPage sourcePage = sourceDocument.getPage(pageIndex);
+            PDPage outputPage = new PDPage(sourcePage.getMediaBox());
+            outputPage.setCropBox(sourcePage.getCropBox());
+            outputDocument.addPage(outputPage);
+            outputPages.add(outputPage);
+
+            BufferedImage renderedPage = renderer.renderImageWithDPI(pageIndex, 144, ImageType.RGB);
+            applyRedactions(renderedPage, sourcePage, redactionsByPage.getOrDefault(pageIndex + 1, List.of()));
+            PDImageXObject image = LosslessFactory.createFromImage(outputDocument, renderedPage);
+            try (PDPageContentStream stream = new PDPageContentStream(outputDocument, outputPage)) {
+                stream.beginMarkedContent(COSName.ARTIFACT);
+                stream.drawImage(image, 0, 0, outputPage.getMediaBox().getWidth(), outputPage.getMediaBox().getHeight());
+                stream.endMarkedContent();
+            }
+        }
+
+        return outputPages;
     }
 
     private static void applyRedactions(BufferedImage image, PDPage sourcePage, List<RedactionInstruction> redactions) {

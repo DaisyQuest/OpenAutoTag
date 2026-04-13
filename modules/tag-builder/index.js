@@ -879,6 +879,21 @@ function flattenRedundantTableBodySections(rootNode) {
   visit(rootNode);
 }
 
+export function resolveOrderedNodes(semanticDocument) {
+  if (semanticDocument.orderedNodeIds) {
+    const nodesById = new Map();
+    for (const node of semanticDocument.nodes || []) {
+      if (!nodesById.has(node.id)) {
+        nodesById.set(node.id, node);
+      }
+    }
+
+    return semanticDocument.orderedNodeIds.map((id) => nodesById.get(id));
+  }
+
+  return [...semanticDocument.nodes].sort((left, right) => (left.readingOrder || 0) - (right.readingOrder || 0));
+}
+
 export async function buildTagTree(inputPath) {
   const semanticDocument = JSON.parse(await readFile(inputPath, "utf8"));
 
@@ -886,9 +901,7 @@ export async function buildTagTree(inputPath) {
     throw new Error(`Tag builder input failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
   }
 
-  const orderedNodes = semanticDocument.orderedNodeIds
-    ? semanticDocument.orderedNodeIds.map((id) => semanticDocument.nodes.find((node) => node.id === id))
-    : [...semanticDocument.nodes].sort((left, right) => (left.readingOrder || 0) - (right.readingOrder || 0));
+  const orderedNodes = resolveOrderedNodes(semanticDocument);
 
   const root = {
     id: "tag:document",

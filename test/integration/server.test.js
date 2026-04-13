@@ -6,15 +6,16 @@ import os from "node:os";
 import path from "node:path";
 import { createSamplePdf } from "../fixtures/create-sample-pdf.js";
 import { createSsnSamplePdf } from "../fixtures/create-ssn-sample-pdf.js";
+import { createAuthController } from "../../orchestrator/auth-controller.js";
 import { createJobQueue } from "../../orchestrator/job-queue.js";
 import { createAppServer } from "../../orchestrator/server.js";
 import { runWorkload } from "../../orchestrator/workloads/index.js";
 
-async function waitForCompletion(baseUrl, jobId) {
+async function waitForCompletion(baseUrl, jobId, headers = {}) {
   const deadline = Date.now() + 20000;
 
   while (Date.now() < deadline) {
-    const response = await fetch(`${baseUrl}/jobs/${jobId}`);
+    const response = await fetch(`${baseUrl}/jobs/${jobId}`, { headers });
     const job = await response.json();
 
     if (job.status === "completed" || job.status === "failed") {
@@ -27,11 +28,11 @@ async function waitForCompletion(baseUrl, jobId) {
   throw new Error("Timed out waiting for job completion");
 }
 
-async function waitForBatchCompletion(baseUrl, batchId) {
+async function waitForBatchCompletion(baseUrl, batchId, headers = {}) {
   const deadline = Date.now() + 30000;
 
   while (Date.now() < deadline) {
-    const response = await fetch(`${baseUrl}/batches/${batchId}`);
+    const response = await fetch(`${baseUrl}/batches/${batchId}`, { headers });
     const batch = await response.json();
 
     if (batch.status !== "processing") {
@@ -42,6 +43,21 @@ async function waitForBatchCompletion(baseUrl, batchId) {
   }
 
   throw new Error("Timed out waiting for batch completion");
+}
+
+function createPrivateServer(tempDir, { apiKey = "api-secret", adminKey = "admin-secret" } = {}) {
+  const queue = createJobQueue({ processor: runWorkload });
+
+  return createAppServer({
+    queue,
+    uploadRoot: path.join(tempDir, "uploads"),
+    auth: createAuthController({
+      publicMode: false,
+      bootstrapApiKeys: apiKey ? [apiKey] : [],
+      adminKeys: [adminKey],
+      registryPath: path.join(tempDir, "security", "api-keys.json")
+    })
+  });
 }
 
 test("server accepts process-pdf jobs and exposes job status", async () => {
@@ -78,6 +94,152 @@ test("server accepts process-pdf jobs and exposes job status", async () => {
 
     assert.equal(completedJob.status, "completed");
     assert.ok(completedJob.artifacts.validationReport);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("private mode keeps static pages available but blocks protected routes without keys", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-private-auth-test-"));
+  const server = createPrivateServer(tempDir);
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const homeResponse = await fetch(baseUrl);
+    const homeHtml = await homeResponse.text();
+    assert.equal(homeResponse.status, 200);
+    assert.match(homeHtml, /Unlock the workspace/);
+
+    const configResponse = await fetch(`${baseUrl}/auth/config`);
+    const configPayload = await configResponse.json();
+    assert.equal(configResponse.status, 200);
+    assert.equal(configPayload.publicMode, false);
+
+    const workloadsResponse = await fetch(`${baseUrl}/workloads`);
+    const workloadsPayload = await workloadsResponse.json();
+    assert.equal(workloadsResponse.status, 401);
+    assert.match(workloadsPayload.error, /X-API-KEY|X-ADMIN-KEY/i);
+
+    const adminResponse = await fetch(`${baseUrl}/admin/system`);
+    const adminPayload = await adminResponse.json();
+    assert.equal(adminResponse.status, 401);
+    assert.match(adminPayload.error, /X-ADMIN-KEY/i);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("private mode accepts bootstrap keys and keeps admin endpoints admin-only", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-private-bootstrap-test-"));
+  const pdfPath = path.join(tempDir, "sample.pdf");
+
+  await createSamplePdf(pdfPath);
+
+  const server = createPrivateServer(tempDir, {
+    apiKey: "bootstrap-api-key",
+    adminKey: "bootstrap-admin-key"
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const workloadsResponse = await fetch(`${baseUrl}/workloads`, {
+      headers: {
+        "X-API-KEY": "bootstrap-api-key"
+      }
+    });
+    const workloadsPayload = await workloadsResponse.json();
+    assert.equal(workloadsResponse.status, 200);
+    assert.equal(workloadsPayload.workloads.length >= 1, true);
+
+    const forbiddenAdminResponse = await fetch(`${baseUrl}/admin/system`, {
+      headers: {
+        "X-API-KEY": "bootstrap-api-key"
+      }
+    });
+    const forbiddenAdminPayload = await forbiddenAdminResponse.json();
+    assert.equal(forbiddenAdminResponse.status, 403);
+    assert.match(forbiddenAdminPayload.error, /X-ADMIN-KEY/i);
+
+    const adminResponse = await fetch(`${baseUrl}/workloads`, {
+      headers: {
+        "X-ADMIN-KEY": "bootstrap-admin-key"
+      }
+    });
+    assert.equal(adminResponse.status, 200);
+
+    const jobResponse = await fetch(`${baseUrl}/process-pdf`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": "bootstrap-api-key"
+      },
+      body: JSON.stringify({ filePath: pdfPath, outputDir: path.join(tempDir, "output") })
+    });
+    const job = await jobResponse.json();
+
+    assert.equal(jobResponse.status, 202);
+    const completedJob = await waitForCompletion(baseUrl, job.jobId, {
+      "X-API-KEY": "bootstrap-api-key"
+    });
+    assert.equal(completedJob.status, "completed");
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("private mode can mint managed API keys from the admin console endpoint", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-managed-key-test-"));
+  const server = createPrivateServer(tempDir, {
+    apiKey: "",
+    adminKey: "bootstrap-admin-key"
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const createResponse = await fetch(`${baseUrl}/admin/api-keys`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-ADMIN-KEY": "bootstrap-admin-key"
+      },
+      body: JSON.stringify({
+        label: "Queue uploader",
+        description: "Created in integration coverage"
+      })
+    });
+    const created = await createResponse.json();
+
+    assert.equal(createResponse.status, 201);
+    assert.match(created.key, /^bea_/);
+    assert.equal(created.record.label, "Queue uploader");
+
+    const workloadsResponse = await fetch(`${baseUrl}/workloads`, {
+      headers: {
+        "X-API-KEY": created.key
+      }
+    });
+    const workloadsPayload = await workloadsResponse.json();
+    assert.equal(workloadsResponse.status, 200);
+    assert.equal(workloadsPayload.workloads.some((workload) => workload.id === "accessibility-tagging"), true);
+
+    const listResponse = await fetch(`${baseUrl}/admin/api-keys`, {
+      headers: {
+        "X-ADMIN-KEY": "bootstrap-admin-key"
+      }
+    });
+    const listPayload = await listResponse.json();
+    assert.equal(listResponse.status, 200);
+    assert.equal(listPayload.summary.activeManagedKeys, 1);
+    assert.equal(listPayload.managedKeys[0].lastUsedAt !== null, true);
   } finally {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   }

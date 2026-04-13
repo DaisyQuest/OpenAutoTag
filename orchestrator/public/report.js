@@ -5,6 +5,15 @@ import {
   formatStatus,
   renderSummaryCards
 } from "./report-renderers.js";
+import {
+  clearStoredKeys,
+  downloadWithAuth,
+  fetchJson,
+  fetchWithAuth,
+  getSessionAccess,
+  loadAuthConfig,
+  verifyAndStoreAccess
+} from "./auth-client.js";
 
 const reportTitle = document.querySelector("#report-title");
 const reportSubtitle = document.querySelector("#report-subtitle");
@@ -15,13 +24,29 @@ const reportLinks = document.querySelector("#report-links");
 const reportSummary = document.querySelector("#report-summary");
 const reportContent = document.querySelector("#report-content");
 const reportRawJson = document.querySelector("#report-raw-json");
+const sessionPill = document.querySelector("#session-pill");
+const clearSessionButton = document.querySelector("#clear-session");
+const authCaption = document.querySelector("#auth-caption");
+const authCopy = document.querySelector("#auth-copy");
+const authForm = document.querySelector("#auth-form");
+const authKeyInput = document.querySelector("#auth-key");
+const authSubmitButton = document.querySelector("#auth-submit");
+const authMessage = document.querySelector("#auth-message");
 
 const search = new URLSearchParams(window.location.search);
 const jobId = search.get("jobId");
 const requestedArtifact = search.get("artifact");
 
 const fallbackPreviewArtifacts = ["redactionReport", "validationReport", "tagDeltaReport", "writerReport", "tagManifest"];
-const fallbackDownloadArtifacts = ["taggedPdf", "redactedPdf", "redactionReport", "validationReport", "tagDeltaReport", "writerReport", "tagManifest"];
+const fallbackDownloadArtifacts = [
+  "taggedPdf",
+  "redactedPdf",
+  "redactionReport",
+  "validationReport",
+  "tagDeltaReport",
+  "writerReport",
+  "tagManifest"
+];
 const downloadLabels = {
   taggedPdf: "Download tagged PDF",
   redactedPdf: "Download redacted PDF",
@@ -31,6 +56,12 @@ const downloadLabels = {
   tagManifest: "Download tag tree",
   redactionReport: "Download redaction report"
 };
+
+let authConfig = null;
+
+function hasWorkspaceAccess() {
+  return Boolean(authConfig?.publicMode || getSessionAccess().api);
+}
 
 function createQuery(jobIdValue, artifactName) {
   return `/report.html?jobId=${encodeURIComponent(jobIdValue)}&artifact=${encodeURIComponent(artifactName)}`;
@@ -50,6 +81,37 @@ function getDownloadArtifacts(job) {
   return preferred.filter((artifactName) => job.artifacts?.[artifactName]);
 }
 
+function setAuthMessage(message) {
+  authMessage.textContent = message;
+}
+
+function renderSessionChrome() {
+  const access = getSessionAccess();
+  const publicMode = Boolean(authConfig?.publicMode);
+
+  let label = "Locked";
+  let description = "Reports use the same session-scoped workspace key as the dashboard.";
+
+  if (publicMode) {
+    label = "Public mode";
+    description = "This workspace is open. Protected headers are not required.";
+  } else if (access.admin) {
+    label = "Admin session";
+    description = "Admin access is active in this tab and can open protected report artifacts.";
+  } else if (access.api) {
+    label = "API session";
+    description = "API access is active in this tab and can open protected report artifacts.";
+  }
+
+  sessionPill.textContent = label;
+  authCaption.textContent = label;
+  authCopy.textContent = description;
+  authForm.hidden = publicMode;
+  authKeyInput.disabled = publicMode;
+  authSubmitButton.disabled = publicMode;
+  clearSessionButton.disabled = publicMode && !access.api && !access.admin;
+}
+
 function renderArtifactTabs(job, activeArtifact) {
   const availableArtifacts = getPreviewArtifacts(job);
 
@@ -67,20 +129,51 @@ function renderArtifactTabs(job, activeArtifact) {
   const links = [];
 
   for (const artifactName of getDownloadArtifacts(job)) {
-    links.push(
-      `<a class="action-link ${artifactName.endsWith("Pdf") ? "primary" : "subtle"}" href="${createArtifactUrl(job.jobId, artifactName)}" target="_blank" rel="noreferrer">${escapeHtml(
-        downloadLabels[artifactName] || `Download ${artifactName}`
-      )}</a>`
-    );
+    links.push(`
+      <button
+        class="action-link ${artifactName.endsWith("Pdf") ? "primary" : "subtle"} button-link"
+        type="button"
+        data-download-url="${escapeHtml(createArtifactUrl(job.jobId, artifactName))}"
+        data-download-name="${escapeHtml(downloadLabels[artifactName] || artifactName)}"
+      >
+        ${escapeHtml(downloadLabels[artifactName] || `Download ${artifactName}`)}
+      </button>
+    `);
   }
 
   if (job.artifacts?.[activeArtifact]) {
-    links.push(
-      `<a class="action-link subtle" href="${createArtifactUrl(job.jobId, activeArtifact)}" target="_blank" rel="noreferrer">Open raw JSON</a>`
-    );
+    links.push(`
+      <button
+        class="action-link subtle button-link"
+        type="button"
+        data-download-url="${escapeHtml(createArtifactUrl(job.jobId, activeArtifact))}"
+        data-download-name="${escapeHtml(`${artifactLabels[activeArtifact] || activeArtifact}.json`)}"
+      >
+        Download raw JSON
+      </button>
+    `);
   }
 
   reportLinks.innerHTML = links.join("");
+}
+
+function renderLocked(message) {
+  reportTitle.textContent = "Unlock required";
+  reportSubtitle.textContent = message;
+  reportJobStatus.textContent = "Locked";
+  reportSummary.innerHTML = renderSummaryCards([
+    {
+      label: "Access",
+      value: "Required",
+      tone: "danger",
+      detail: message
+    }
+  ]);
+  reportArtifactCount.textContent = "0 available";
+  reportTabs.innerHTML = "";
+  reportLinks.innerHTML = "";
+  reportContent.innerHTML = `<div class="empty-report">${escapeHtml(message)}</div>`;
+  reportRawJson.textContent = "";
 }
 
 function renderError(message) {
@@ -91,7 +184,8 @@ function renderError(message) {
     {
       label: "Status",
       value: "Error",
-      tone: "danger"
+      tone: "danger",
+      detail: message
     }
   ]);
   reportArtifactCount.textContent = "0 available";
@@ -107,13 +201,14 @@ async function loadReport() {
     return;
   }
 
-  const jobResponse = await fetch(`/jobs/${encodeURIComponent(jobId)}`);
-  const job = await jobResponse.json();
+  renderSessionChrome();
 
-  if (!jobResponse.ok) {
-    throw new Error(job.error || "Unable to load the requested job.");
+  if (!hasWorkspaceAccess()) {
+    renderLocked("Enter an API key or admin key to load protected report data.");
+    return;
   }
 
+  const job = await fetchJson(`/jobs/${encodeURIComponent(jobId)}`, { auth: "api" });
   const availableArtifacts = Object.keys(job.artifacts || {});
   const activeArtifact =
     requestedArtifact && availableArtifacts.includes(requestedArtifact)
@@ -133,9 +228,9 @@ async function loadReport() {
   renderArtifactTabs(job, activeArtifact);
 
   const [artifactResponse, tagDeltaResponse] = await Promise.all([
-    fetch(createArtifactUrl(job.jobId, activeArtifact)),
+    fetchWithAuth(createArtifactUrl(job.jobId, activeArtifact), { auth: "api" }),
     activeArtifact !== "tagDeltaReport" && job.artifacts?.tagDeltaReport
-      ? fetch(createArtifactUrl(job.jobId, "tagDeltaReport"))
+      ? fetchWithAuth(createArtifactUrl(job.jobId, "tagDeltaReport"), { auth: "api" })
       : Promise.resolve(null)
   ]);
   const report = await artifactResponse.json();
@@ -158,6 +253,85 @@ async function loadReport() {
   reportRawJson.textContent = JSON.stringify(report, null, 2);
 }
 
-loadReport().catch((error) => {
-  renderError(error.message);
+async function unlockReport(event) {
+  event.preventDefault();
+  authSubmitButton.disabled = true;
+  setAuthMessage("Verifying the supplied key.");
+
+  try {
+    const payload = await verifyAndStoreAccess({
+      key: authKeyInput.value,
+      admin: false
+    });
+
+    authKeyInput.value = "";
+    setAuthMessage(payload.access?.admin ? "Admin access is active in this tab." : "API access is active in this tab.");
+    await loadReport();
+  } catch (error) {
+    renderSessionChrome();
+    renderLocked(error.message);
+    setAuthMessage(error.message);
+  } finally {
+    authSubmitButton.disabled = false;
+  }
+}
+
+reportLinks.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-download-url]");
+  if (!button) {
+    return;
+  }
+
+  const url = button.getAttribute("data-download-url");
+  const filename = button.getAttribute("data-download-name") || undefined;
+  if (!url) {
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    await downloadWithAuth(url, { auth: "api", filename });
+    setAuthMessage("Artifact download started.");
+  } catch (error) {
+    setAuthMessage(error.message);
+  } finally {
+    button.disabled = false;
+  }
 });
+
+authForm.addEventListener("submit", (event) => {
+  void unlockReport(event);
+});
+
+clearSessionButton.addEventListener("click", async () => {
+  clearStoredKeys();
+  setAuthMessage("Session keys cleared from this tab.");
+  renderSessionChrome();
+  renderLocked("Enter an API key or admin key to load protected report data.");
+});
+
+async function initialize() {
+  authConfig = await loadAuthConfig();
+
+  if (authConfig.publicMode) {
+    setAuthMessage("Public mode is enabled. Protected headers are not required in this tab.");
+  } else if (getSessionAccess().admin) {
+    setAuthMessage("Admin access is active in this tab.");
+  } else if (getSessionAccess().api) {
+    setAuthMessage("API access is active in this tab.");
+  } else {
+    setAuthMessage("Enter an API key or admin key to load protected report data.");
+  }
+
+  renderSessionChrome();
+
+  try {
+    await loadReport();
+  } catch (error) {
+    renderSessionChrome();
+    renderError(error.message);
+  }
+}
+
+void initialize();
