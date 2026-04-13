@@ -127,6 +127,16 @@ test("private mode keeps static pages available but blocks protected routes with
     const adminPayload = await adminResponse.json();
     assert.equal(adminResponse.status, 401);
     assert.match(adminPayload.error, /X-ADMIN-KEY/i);
+
+    const artifactsPageResponse = await fetch(`${baseUrl}/admin/artifacts.html`);
+    const artifactsPageHtml = await artifactsPageResponse.text();
+    assert.equal(artifactsPageResponse.status, 200);
+    assert.match(artifactsPageHtml, /Artifact Browser/);
+
+    const artifactInventoryResponse = await fetch(`${baseUrl}/admin/artifacts`);
+    const artifactInventoryPayload = await artifactInventoryResponse.json();
+    assert.equal(artifactInventoryResponse.status, 401);
+    assert.match(artifactInventoryPayload.error, /X-ADMIN-KEY/i);
   } finally {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   }
@@ -240,6 +250,71 @@ test("private mode can mint managed API keys from the admin console endpoint", a
     assert.equal(listResponse.status, 200);
     assert.equal(listPayload.summary.activeManagedKeys, 1);
     assert.equal(listPayload.managedKeys[0].lastUsedAt !== null, true);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("admin artifact inventory lists emitted JSON reports and binary outputs", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-artifact-browser-test-"));
+  const pdfPath = path.join(tempDir, "sample.pdf");
+
+  await createSamplePdf(pdfPath);
+
+  const server = createPrivateServer(tempDir, {
+    apiKey: "bootstrap-api-key",
+    adminKey: "bootstrap-admin-key"
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/process-pdf`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": "bootstrap-api-key"
+      },
+      body: JSON.stringify({ filePath: pdfPath, outputDir: path.join(tempDir, "output") })
+    });
+
+    assert.equal(response.status, 202);
+    const job = await response.json();
+    const completedJob = await waitForCompletion(baseUrl, job.jobId, {
+      "X-API-KEY": "bootstrap-api-key"
+    });
+
+    assert.equal(completedJob.status, "completed");
+
+    const inventoryResponse = await fetch(`${baseUrl}/admin/artifacts`, {
+      headers: {
+        "X-ADMIN-KEY": "bootstrap-admin-key"
+      }
+    });
+    const inventory = await inventoryResponse.json();
+
+    assert.equal(inventoryResponse.status, 200);
+    assert.ok(inventory.summary.totalArtifacts >= 5);
+    assert.ok(inventory.summary.previewableArtifacts >= 1);
+    assert.ok(inventory.summary.totalBytes > 0);
+
+    const layoutArtifact = inventory.artifacts.find((artifact) => artifact.jobId === job.jobId && artifact.name === "layout");
+    const validationArtifact = inventory.artifacts.find((artifact) => artifact.jobId === job.jobId && artifact.name === "validationReport");
+    const taggedPdfArtifact = inventory.artifacts.find((artifact) => artifact.jobId === job.jobId && artifact.name === "taggedPdf");
+
+    assert.ok(layoutArtifact);
+    assert.equal(layoutArtifact.browserPreviewable, true);
+    assert.equal(layoutArtifact.previewMode, "report");
+
+    assert.ok(validationArtifact);
+    assert.equal(validationArtifact.label, "Validation report");
+    assert.match(validationArtifact.reportUrl, /artifact=validationReport/);
+
+    assert.ok(taggedPdfArtifact);
+    assert.equal(taggedPdfArtifact.kind, "pdf");
+    assert.equal(taggedPdfArtifact.browserPreviewable, false);
   } finally {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   }

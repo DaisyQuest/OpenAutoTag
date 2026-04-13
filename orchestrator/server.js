@@ -5,13 +5,14 @@ import http from "node:http";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../scripts/runtime-paths.js";
 import { createEnvironmentAuthController } from "./auth-controller.js";
 import { createJobQueue } from "./job-queue.js";
+import { getArtifactLabel } from "./public/report-renderers.js";
 import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } from "./workloads/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -672,6 +673,56 @@ function buildArtifactLinks(jobId, job) {
   return artifactLinks;
 }
 
+function classifyArtifactKind(contentType) {
+  if (contentType.includes("json")) {
+    return "json";
+  }
+
+  if (contentType.includes("pdf")) {
+    return "pdf";
+  }
+
+  return "binary";
+}
+
+async function buildArtifactDescriptor(jobId, jobResponse, artifactName, artifactPath) {
+  const contentType = getContentType(artifactPath);
+  let fileStats = null;
+
+  try {
+    fileStats = await stat(artifactPath);
+  } catch {
+    fileStats = null;
+  }
+
+  const kind = classifyArtifactKind(contentType);
+
+  return {
+    id: `${jobId}:${artifactName}`,
+    jobId,
+    documentName: jobResponse.fileName,
+    documentPath: jobResponse.relativePath,
+    sourceUrl: jobResponse.sourceUrl,
+    jobStatus: jobResponse.status,
+    jobUpdatedAt: jobResponse.updatedAt,
+    workload: jobResponse.workload || null,
+    summary: jobResponse.summary || null,
+    validation: jobResponse.validation || null,
+    name: artifactName,
+    label: getArtifactLabel(artifactName),
+    artifactFileName: path.basename(artifactPath),
+    url: `/jobs/${jobId}/artifacts/${artifactName}`,
+    reportUrl: `/report.html?jobId=${encodeURIComponent(jobId)}&artifact=${encodeURIComponent(artifactName)}`,
+    contentType,
+    kind,
+    previewMode: kind === "json" ? "report" : "download",
+    browserPreviewable: kind === "json",
+    available: Boolean(fileStats),
+    sizeBytes: fileStats?.size ?? null,
+    updatedAt: fileStats?.mtime ? fileStats.mtime.toISOString() : jobResponse.updatedAt
+  };
+}
+
 function getJobDisplayName(job) {
   return sanitizeSegment(job?.input?.sourceFileName || path.basename(job?.input?.filePath || "document.pdf"), "document.pdf");
 }
@@ -741,6 +792,82 @@ async function buildHistorySnapshot(queue) {
     generatedAt: new Date().toISOString(),
     summary: jobsByStatus,
     jobs
+  };
+}
+
+async function buildArtifactInventorySnapshot(queue) {
+  const jobs = queue.list();
+  const artifacts = (
+    await Promise.all(
+      jobs.map(async (job) => {
+        const jobResponse = await buildJobResponse(job.jobId, job);
+        return Promise.all(
+          Object.entries(job?.artifacts || {})
+            .filter(([, artifactPath]) => Boolean(artifactPath))
+            .map(([artifactName, artifactPath]) => buildArtifactDescriptor(job.jobId, jobResponse, artifactName, artifactPath))
+        );
+      })
+    )
+  )
+    .flat()
+    .sort(
+      (left, right) =>
+        String(right.updatedAt || "").localeCompare(String(left.updatedAt || "")) ||
+        String(right.jobUpdatedAt || "").localeCompare(String(left.jobUpdatedAt || "")) ||
+        left.documentName.localeCompare(right.documentName) ||
+        left.label.localeCompare(right.label)
+    );
+
+  const summary = artifacts.reduce(
+    (current, artifact) => {
+      current.totalArtifacts += 1;
+      current.totalBytes += Number(artifact.sizeBytes || 0);
+      current.jobsWithArtifacts.add(artifact.jobId);
+
+      if (artifact.browserPreviewable) {
+        current.previewableArtifacts += 1;
+      }
+
+      if (artifact.kind === "json") {
+        current.jsonArtifacts += 1;
+      } else if (artifact.kind === "pdf") {
+        current.pdfArtifacts += 1;
+      } else {
+        current.binaryArtifacts += 1;
+      }
+
+      if (!artifact.available) {
+        current.missingArtifacts += 1;
+      }
+
+      return current;
+    },
+    {
+      totalArtifacts: 0,
+      previewableArtifacts: 0,
+      jsonArtifacts: 0,
+      pdfArtifacts: 0,
+      binaryArtifacts: 0,
+      missingArtifacts: 0,
+      totalBytes: 0,
+      jobsWithArtifacts: new Set()
+    }
+  );
+
+  return {
+    generatedAt: new Date().toISOString(),
+    summary: {
+      jobsTracked: jobs.length,
+      jobsWithArtifacts: summary.jobsWithArtifacts.size,
+      totalArtifacts: summary.totalArtifacts,
+      previewableArtifacts: summary.previewableArtifacts,
+      jsonArtifacts: summary.jsonArtifacts,
+      pdfArtifacts: summary.pdfArtifacts,
+      binaryArtifacts: summary.binaryArtifacts,
+      missingArtifacts: summary.missingArtifacts,
+      totalBytes: summary.totalBytes
+    },
+    artifacts
   };
 }
 
@@ -1117,6 +1244,12 @@ export function createAppServer({
       if (request.method === "GET" && url.pathname === "/admin/history") {
         await authenticate(request, { admin: true });
         writeJson(response, 200, await buildHistorySnapshot(queue));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/admin/artifacts") {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, await buildArtifactInventorySnapshot(queue));
         return;
       }
 

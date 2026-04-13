@@ -164,3 +164,28 @@ test("compact redaction renderer keeps masked SSN previews inline", () => {
   assert.match(view.contentHtml, /Tag delta/);
   assert.match(view.contentHtml, /\+24/);
 });
+
+test("generic artifact renderer beautifies arbitrary JSON artifacts", () => {
+  const report = {
+    schemaVersion: "1.0.0",
+    status: "completed",
+    pageCount: 2,
+    detectedTables: 1,
+    pages: [
+      {
+        pageNumber: 1,
+        tableCount: 1
+      }
+    ]
+  };
+
+  const view = buildArtifactView(report, "tableStructureMap", { compact: false });
+
+  assert.equal(view.summaryCards[0].value, "Table structure map");
+  assert.match(view.contentHtml, /Artifact overview/);
+  assert.match(view.contentHtml, /Quick facts/);
+  assert.match(view.contentHtml, /Structured preview/);
+  assert.match(view.contentHtml, /Browser JSON explorer/);
+  assert.match(view.contentHtml, /Schema Version/);
+  assert.doesNotMatch(view.contentHtml, /No specialized renderer exists/);
+});
