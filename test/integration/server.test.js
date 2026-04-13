@@ -133,6 +133,11 @@ test("private mode keeps static pages available but blocks protected routes with
     assert.equal(artifactsPageResponse.status, 200);
     assert.match(artifactsPageHtml, /Artifact Browser/);
 
+    const agentsPageResponse = await fetch(`${baseUrl}/admin/agents.html`);
+    const agentsPageHtml = await agentsPageResponse.text();
+    assert.equal(agentsPageResponse.status, 200);
+    assert.match(agentsPageHtml, /Agent Command Center/);
+
     const artifactInventoryResponse = await fetch(`${baseUrl}/admin/artifacts`);
     const artifactInventoryPayload = await artifactInventoryResponse.json();
     assert.equal(artifactInventoryResponse.status, 401);
