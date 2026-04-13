@@ -16,3 +16,4 @@ modules/validator/vendor/java/
 modules/validator/vendor/verapdf/
 modules/validator/vendor/verapdf-pdfbox-installer.zip
 encyclopaediabri0014vari_a3g1.pdf
+orchestrator/agent-runtime.config.json

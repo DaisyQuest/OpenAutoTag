@@ -1129,10 +1129,15 @@ body {
 }
 
 .status-running,
+.status-busy,
 .status-worker_claimed,
+.status-local_worker_claimed,
+.status-agent_claimed,
 .status-preparing_workspace,
 .status-staging_input,
 .status-building_stage_plan,
+.status-agent_downloading_input,
+.status-agent_uploading_artifacts,
 .status-running_stage,
 .status-retrying_stage,
 .status-finalizing_job {
@@ -1142,12 +1147,14 @@ body {
 }
 
 .status-completed,
+.status-idle,
 .status-stage_completed {
   background: rgba(11, 122, 117, 0.12);
   color: var(--signal-deep);
 }
 
 .status-completed_with_failures,
+.status-stale,
 .status-failed {
   background: rgba(164, 60, 45, 0.14);
   color: var(--danger);
@@ -1731,6 +1738,210 @@ body {
   margin-top: 0;
 }
 
+.agent-command-hero .hero-copy h1 {
+  max-width: 12ch;
+}
+
+.agent-radar {
+  position: relative;
+  min-height: 240px;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(89, 243, 212, 0.18);
+  background:
+    radial-gradient(circle at center, rgba(89, 243, 212, 0.12), rgba(4, 19, 29, 0.82) 58%),
+    linear-gradient(180deg, rgba(4, 19, 29, 0.88), rgba(10, 32, 43, 0.96));
+  box-shadow: 0 24px 64px rgba(8, 28, 39, 0.28);
+}
+
+.agent-radar::before,
+.agent-radar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(89, 243, 212, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(89, 243, 212, 0.08) 1px, transparent 1px);
+  background-size: 2.5rem 2.5rem;
+  opacity: 0.36;
+}
+
+.agent-radar-ring {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  border-radius: 999px;
+  border: 1px solid rgba(89, 243, 212, 0.16);
+  transform: translate(-50%, -50%);
+}
+
+.agent-radar-ring.ring-a {
+  width: 10rem;
+  height: 10rem;
+}
+
+.agent-radar-ring.ring-b {
+  width: 15rem;
+  height: 15rem;
+}
+
+.agent-radar-ring.ring-c {
+  width: 20rem;
+  height: 20rem;
+}
+
+.agent-radar-sweep {
+  position: absolute;
+  inset: -24% -24% auto auto;
+  width: 16rem;
+  height: 16rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(89, 243, 212, 0.24), rgba(89, 243, 212, 0));
+  transform-origin: bottom left;
+  animation: radar-spin 7.2s linear infinite;
+  filter: blur(2px);
+}
+
+.agent-radar-readout {
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 1;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(89, 243, 212, 0.18);
+  background: rgba(4, 19, 29, 0.72);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+}
+
+.agent-radar-readout span,
+.agent-radar-readout small {
+  color: rgba(236, 251, 255, 0.72);
+}
+
+.agent-radar-readout strong {
+  font-size: 1.7rem;
+  color: #ecfbff;
+}
+
+.agent-command-workspace {
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.9fr);
+}
+
+.agent-grid-shell {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.95rem;
+}
+
+.agent-card {
+  appearance: none;
+  display: grid;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(19, 38, 40, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(241, 247, 246, 0.92)),
+    rgba(255, 255, 255, 0.84);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.agent-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(11, 122, 117, 0.28);
+  box-shadow: 0 18px 38px rgba(19, 38, 40, 0.08);
+}
+
+.agent-card.is-active {
+  background:
+    linear-gradient(145deg, rgba(11, 122, 117, 0.12), rgba(255, 255, 255, 0.96)),
+    rgba(255, 255, 255, 0.9);
+  border-color: rgba(11, 122, 117, 0.36);
+  box-shadow:
+    0 22px 44px rgba(19, 38, 40, 0.12),
+    inset 0 0 0 1px rgba(89, 243, 212, 0.12);
+}
+
+.agent-card.empty-agent-card {
+  cursor: default;
+  min-height: 15rem;
+  align-content: center;
+}
+
+.agent-card.empty-agent-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.agent-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.agent-card-note {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.agent-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.agent-card-grid span {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 16px;
+  background: rgba(19, 38, 40, 0.04);
+}
+
+.agent-card-grid small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.agent-card-grid strong {
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.agent-card-message {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.agent-stage-panel {
+  display: grid;
+  gap: 0.8rem;
+}
+
+[data-admin-page="agents"] body,
+body[data-admin-page="agents"] {
+  background:
+    radial-gradient(circle at top left, rgba(11, 122, 117, 0.2), transparent 26rem),
+    radial-gradient(circle at bottom right, rgba(89, 243, 212, 0.14), transparent 22rem),
+    linear-gradient(180deg, #eef4f2 0%, #e4eeea 100%);
+}
+
 .json-preview-group {
   border-radius: var(--radius-lg);
   border: 1px solid var(--line);
@@ -1862,6 +2073,16 @@ body {
   }
 }
 
+@keyframes radar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 960px) {
   .hero-grid,
   .results-workspace,
@@ -1872,7 +2093,8 @@ body {
   }
 
   .hero-step-grid,
-  .hero-stat-grid {
+  .hero-stat-grid,
+  .agent-card-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1884,6 +2106,10 @@ body {
 
   .batch-overview {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .agent-command-workspace {
+    grid-template-columns: 1fr;
   }
 
   .launch-button {

@@ -8,6 +8,7 @@ This repository is a contract-first scaffold for a horizontally scalable PDF acc
 - Every module has an isolated CLI boundary under [`modules/`](C:/Users/tabur/Videos/BuildEverything/modules).
 - The orchestrator runs modules as separate processes, so modules do not import each other.
 - The orchestrator now routes jobs through a workload registry, so new workloads can reuse the same queue, server, batch UI, and retry model without cloning the orchestration layer.
+- The orchestrator now supports remote worker agents that poll the master server, download assigned inputs, emit heartbeats, upload their full job workspaces, and let the primary server absorb overflow when the remote fleet is undersized.
 - Parser, layout analysis, semantic mapping, reading order, and tag tree construction are implemented as a working baseline.
 - The PDF writer and validator expose stable CLIs and produce deterministic artifacts for integration, but native PDF/UA structure injection remains a later swap-in implementation.
 - The pipeline now records stage timelines, retries retryable failures, preserves partial artifacts on failure, and returns structured stage diagnostics in each job snapshot.
@@ -44,6 +45,7 @@ npm run inspect:pdf -- --pdf tmp/run/06-tagged.pdf
 Java 21 is required for the native PDFBox-backed writer and validator modules.
 The validator uses veraPDF for PDF/UA validation. `npm run install:verapdf` now installs it cross-platform, and the validator also accepts `VERAPDF_PATH`, `VALIDATOR_JAVA_HOME`, `VALIDATOR_JAVA_PATH`, `VALIDATOR_JAVAC_PATH`, and `VERAPDF_FLAVOUR` overrides when needed.
 On Azure App Service Linux, runtime uploads, job artifacts, OCR cache, and Java helper build outputs should live under a writable runtime root. Set `PIPELINE_DATA_ROOT` if you need to override the default. `GET /health` now reports the active runtime paths.
+The same deployment package can also run as a worker agent. If `AGENT_MASTER_ENDPOINT` is configured, `npm start` launches the App Service-friendly agent runtime instead of the primary UI server and exposes its own lightweight `/health` endpoint.
 The OCR fallback uses `tesseract.js`, which downloads language data on first use and caches it locally.
 
 Open the local UI:
@@ -87,6 +89,7 @@ GET /jobs/:jobId/artifacts/taggedPdf
 GET /jobs/:jobId/artifacts/redactedPdf
 GET /jobs/:jobId/artifacts/validationReport
 GET /jobs/:jobId/artifacts/redactionReport
+GET /admin/agents
 GET /report.html?jobId=<jobId>&artifact=validationReport
 GET /report.html?jobId=<jobId>&artifact=redactionReport
 ```
@@ -113,6 +116,20 @@ Current workloads:
 - `accessibility-tagging`: the full tagging, writing, and PDF/UA validation pipeline
 - `ssn-redaction`: a focused privacy workload that parses layout, detects likely SSNs, raster-redacts them from the output PDF, and emits a masked redaction report
 - `tag-and-ssn-redact`: a composed workload that keeps the tagging pipeline, masks SSNs from semantic/tag content before writing, applies black-box redactions to the reconstructed page image, and then validates the final tagged output
+
+## Remote agents
+
+Remote agents use a poll / download / heartbeat / upload loop:
+
+- `POST /agents/check-in`: register an agent heartbeat and receive the next assignment when one is available
+- `GET /agents/jobs/:jobId/input`: download the assigned source PDF from the master
+- `POST /agents/jobs/:jobId/heartbeat`: forward in-flight stage telemetry while the job is running
+- `POST /agents/jobs/:jobId/complete`: upload the completed workspace and rewritten job snapshot back to the master
+- `GET /admin/agents`: inspect fleet health, idle capacity, stale leases, and queue coupling from the primary application
+
+If no idle agents are checked in, the primary server keeps processing queued work locally. If a remote lease goes quiet beyond its heartbeat window, the master requeues that job and falls back automatically.
+
+Azure App Service deployment uses the same Node package for both roles. The agent deployment job writes `orchestrator/agent-runtime.config.json` from GitHub Actions secrets before publishing, so the agent App Service can bootstrap from `AGENT_MASTER_ENDPOINT` without a separate build.
 
 ## OCR fallback
 

@@ -10,6 +10,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../scripts/runtime-paths.js";
+import { createAgentRegistry } from "./agent-registry.js";
+import { loadAgentRuntimeConfig } from "./agent-runtime-config.js";
+import { startAgentService } from "./agent-service.js";
 import { createEnvironmentAuthController } from "./auth-controller.js";
 import { createJobQueue } from "./job-queue.js";
 import { getArtifactLabel } from "./public/report-renderers.js";
@@ -661,6 +664,117 @@ async function persistUpload({ file, relativePath, uploadDir }) {
   };
 }
 
+function getRequestOrigin(request) {
+  const forwardedProto = String(request.headers["x-forwarded-proto"] || "")
+    .split(",")[0]
+    .trim();
+  const forwardedHost = String(request.headers["x-forwarded-host"] || "")
+    .split(",")[0]
+    .trim();
+  const protocol = forwardedProto || "http";
+  const host = forwardedHost || String(request.headers.host || "localhost");
+  return `${protocol}://${host}`;
+}
+
+function isPathInside(rootPath, candidatePath) {
+  const relativePath = path.relative(path.resolve(rootPath), path.resolve(candidatePath));
+  return Boolean(relativePath) ? !relativePath.startsWith("..") && !path.isAbsolute(relativePath) : true;
+}
+
+async function persistAgentWorkspaceUploads({ formData, outputDir }) {
+  const files = formData
+    .getAll("files")
+    .filter((value) => typeof value === "object" && typeof value.arrayBuffer === "function");
+  const relativePaths = formData.getAll("relativePaths").map((value) => String(value || ""));
+
+  return Promise.all(
+    files.map((file, index) =>
+      persistUpload({
+        file,
+        relativePath: relativePaths[index] || file.name,
+        uploadDir: outputDir
+      })
+    )
+  );
+}
+
+function rewriteSnapshotPath(value, { sourceOutputDir, targetOutputDir }) {
+  const candidate = String(value || "").trim();
+  if (!candidate || !sourceOutputDir || !targetOutputDir) {
+    return value;
+  }
+
+  const resolvedCandidate = path.resolve(candidate);
+  if (!isPathInside(sourceOutputDir, resolvedCandidate)) {
+    return value;
+  }
+
+  return path.join(targetOutputDir, path.relative(sourceOutputDir, resolvedCandidate));
+}
+
+function rewriteRemoteJobSnapshot(snapshot, job) {
+  const sourceOutputDir = snapshot?.input?.outputDir ? path.resolve(snapshot.input.outputDir) : null;
+  const targetOutputDir = path.resolve(job?.input?.outputDir || path.join(getRuntimeSubdir("jobs", { repoRoot }), job.jobId));
+
+  function visit(value) {
+    if (Array.isArray(value)) {
+      return value.map((item) => visit(item));
+    }
+
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, visit(item)]));
+    }
+
+    if (typeof value === "string") {
+      return rewriteSnapshotPath(value, {
+        sourceOutputDir,
+        targetOutputDir
+      });
+    }
+
+    return value;
+  }
+
+  const rewritten = visit(snapshot);
+  const input = {
+    ...(rewritten?.input || {}),
+    ...(job?.input || {})
+  };
+
+  if (snapshot?.input?.stagedFilePath) {
+    input.stagedFilePath = rewriteSnapshotPath(snapshot.input.stagedFilePath, {
+      sourceOutputDir,
+      targetOutputDir
+    });
+  }
+
+  input.filePath = job?.input?.filePath || input.filePath;
+  input.outputDir = job?.input?.outputDir || input.outputDir;
+  input.workloadId = job?.input?.workloadId || input.workloadId;
+  input.options = job?.input?.options || input.options || {};
+
+  return {
+    ...rewritten,
+    input
+  };
+}
+
+function buildAgentAssignment(request, job, agentId) {
+  const origin = getRequestOrigin(request);
+  return {
+    jobId: job.jobId,
+    workload: job.workload,
+    options: job?.input?.options || {},
+    input: {
+      sourceFileName: job?.input?.sourceFileName || path.basename(job?.input?.filePath || "document.pdf"),
+      sourceUrl: job?.input?.sourceUrl || null
+    },
+    downloadUrl: `${origin}/agents/jobs/${encodeURIComponent(job.jobId)}/input?agentId=${encodeURIComponent(agentId)}`,
+    heartbeatUrl: `${origin}/agents/jobs/${encodeURIComponent(job.jobId)}/heartbeat`,
+    completeUrl: `${origin}/agents/jobs/${encodeURIComponent(job.jobId)}/complete`
+  };
+}
+
 function buildArtifactLinks(jobId, job) {
   const artifactLinks = {};
 
@@ -871,9 +985,24 @@ async function buildArtifactInventorySnapshot(queue) {
   };
 }
 
-async function buildSystemSnapshot({ queue, batches, auth, uploadRoot }) {
+async function buildAgentSnapshot({ queue, agentRegistry }) {
+  return {
+    generatedAt: new Date().toISOString(),
+    summary: {
+      ...agentRegistry.stats(),
+      queue: queue.stats()
+    },
+    agents: agentRegistry.list()
+  };
+}
+
+async function buildSystemSnapshot({ queue, batches, auth, uploadRoot, agentRegistry }) {
   await mkdir(runtimeRoot, { recursive: true });
-  const [authSnapshot, queueSnapshot] = await Promise.all([auth.getManagementSnapshot(), buildQueueSnapshot(queue, batches)]);
+  const [authSnapshot, queueSnapshot, agentSnapshot] = await Promise.all([
+    auth.getManagementSnapshot(),
+    buildQueueSnapshot(queue, batches),
+    buildAgentSnapshot({ queue, agentRegistry })
+  ]);
   const memory = process.memoryUsage();
 
   return {
@@ -898,7 +1027,8 @@ async function buildSystemSnapshot({ queue, batches, auth, uploadRoot }) {
     },
     auth: authSnapshot,
     queue: queueSnapshot.queue,
-    batchCount: queueSnapshot.totalBatches
+    batchCount: queueSnapshot.totalBatches,
+    agents: agentSnapshot.summary
   };
 }
 
@@ -1036,16 +1166,28 @@ export function createAppServer({
   remoteDownloadPolicy = DEFAULT_REMOTE_DOWNLOAD_POLICY,
   auth = createEnvironmentAuthController({ runtimeRoot })
 }) {
+  const agentRegistry = createAgentRegistry();
   const batches = createBatchRegistry({ queue, uploadRoot });
   const remoteDownloadRoot = path.join(uploadRoot, "remote");
+  queue.setRemoteCapacityProvider?.(() => agentRegistry.countIdle());
 
   async function authenticate(request, policy = {}) {
     return auth.requireAccess(request, policy);
   }
 
+  function syncExpiredAgentLeases() {
+    const expiredAssignments = queue.recoverExpiredRemoteClaims?.() || [];
+    if (expiredAssignments.length > 0) {
+      agentRegistry.noteLeaseExpiry(expiredAssignments);
+    }
+
+    return expiredAssignments;
+  }
+
   return http.createServer(async (request, response) => {
     try {
       const url = new URL(request.url, "http://localhost");
+      syncExpiredAgentLeases();
 
       if (request.method === "GET" && url.pathname === "/favicon.ico") {
         response.writeHead(204, buildResponseHeaders({ "Cache-Control": "public, max-age=300" }));
@@ -1178,6 +1320,149 @@ export function createAppServer({
         return;
       }
 
+      if (request.method === "POST" && url.pathname === "/agents/check-in") {
+        await authenticate(request, { api: true });
+        const body = await readJsonBody(request);
+        const agent = agentRegistry.checkIn(body);
+        let assignment = null;
+
+        if (!agent.currentJobId) {
+          const claimedJob = queue.claimNextRemoteJob({
+            agent: {
+              agentId: agent.agentId,
+              label: agent.label,
+              hostname: agent.hostname,
+              version: agent.version
+            },
+            heartbeatIntervalMs: body.heartbeatIntervalMs
+          });
+
+          if (claimedJob) {
+            agentRegistry.noteClaim(agent.agentId, {
+              jobId: claimedJob.jobId,
+              workload: claimedJob.workload,
+              heartbeatIntervalMs: body.heartbeatIntervalMs
+            });
+            assignment = buildAgentAssignment(request, claimedJob, agent.agentId);
+          }
+        }
+
+        queue.requestDrain?.();
+        writeJson(response, 200, {
+          ok: true,
+          now: new Date().toISOString(),
+          agent: agentRegistry.get(agent.agentId),
+          assignment
+        });
+        return;
+      }
+
+      const agentHeartbeatMatch = url.pathname.match(/^\/agents\/jobs\/([^/]+)\/heartbeat$/);
+      if (request.method === "POST" && agentHeartbeatMatch) {
+        await authenticate(request, { api: true });
+        const body = await readJsonBody(request);
+        const [, jobId] = agentHeartbeatMatch;
+        const updatedJob = queue.heartbeatRemoteJob({
+          jobId,
+          agentId: body.agentId,
+          statusDetail: body.statusDetail || {}
+        });
+
+        if (!updatedJob) {
+          writeJson(response, 409, { error: "This job is no longer assigned to the reported agent." });
+          return;
+        }
+
+        agentRegistry.noteHeartbeat(body.agentId, {
+          jobId,
+          statusDetail: body.statusDetail || {}
+        });
+        writeJson(response, 200, {
+          ok: true,
+          job: await buildJobResponse(jobId, updatedJob)
+        });
+        return;
+      }
+
+      const agentInputMatch = url.pathname.match(/^\/agents\/jobs\/([^/]+)\/input$/);
+      if (request.method === "GET" && agentInputMatch) {
+        await authenticate(request, { api: true });
+        const [, jobId] = agentInputMatch;
+        const agentId = String(url.searchParams.get("agentId") || "").trim();
+
+        if (!queue.isJobAssignedToAgent?.(jobId, agentId)) {
+          writeJson(response, 404, { error: "Assigned job input not found for this agent." });
+          return;
+        }
+
+        const job = queue.get(jobId);
+        if (!job) {
+          writeJson(response, 404, { error: "Job not found" });
+          return;
+        }
+
+        const body = await readFile(job.input.filePath);
+        response.writeHead(
+          200,
+          buildResponseHeaders({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename="${path.basename(job.input.filePath)}"`,
+            "Cache-Control": "no-store"
+          })
+        );
+        response.end(body);
+        return;
+      }
+
+      const agentCompleteMatch = url.pathname.match(/^\/agents\/jobs\/([^/]+)\/complete$/);
+      if (request.method === "POST" && agentCompleteMatch) {
+        await authenticate(request, { api: true });
+        const [, jobId] = agentCompleteMatch;
+        const formData = await readFormData(request);
+        const agentId = String(formData.get("agentId") || "").trim();
+        const snapshotJson = String(formData.get("snapshot") || "").trim();
+
+        if (!snapshotJson) {
+          writeJson(response, 400, { error: "snapshot is required" });
+          return;
+        }
+
+        if (!queue.isJobAssignedToAgent?.(jobId, agentId)) {
+          writeJson(response, 409, { error: "This job is no longer assigned to the reported agent." });
+          return;
+        }
+
+        const job = queue.get(jobId);
+        if (!job) {
+          writeJson(response, 404, { error: "Job not found" });
+          return;
+        }
+
+        const persistedFiles = await persistAgentWorkspaceUploads({
+          formData,
+          outputDir: job.input.outputDir
+        });
+        const snapshot = rewriteRemoteJobSnapshot(JSON.parse(snapshotJson), job, persistedFiles);
+        const completedJob = queue.completeRemoteJob({
+          jobId,
+          agentId,
+          result: snapshot
+        });
+
+        if (!completedJob) {
+          writeJson(response, 409, { error: "This job is no longer assigned to the reported agent." });
+          return;
+        }
+
+        agentRegistry.noteCompletion(agentId, {
+          jobId,
+          status: completedJob.status,
+          error: completedJob.error || snapshot.error || null
+        });
+        writeJson(response, 200, await buildJobResponse(jobId, completedJob));
+        return;
+      }
+
       const artifactMatch = url.pathname.match(/^\/jobs\/([^/]+)\/artifacts\/([^/]+)$/);
       if (request.method === "GET" && artifactMatch) {
         await authenticate(request, { api: true });
@@ -1231,13 +1516,19 @@ export function createAppServer({
 
       if (request.method === "GET" && url.pathname === "/admin/system") {
         await authenticate(request, { admin: true });
-        writeJson(response, 200, await buildSystemSnapshot({ queue, batches, auth, uploadRoot }));
+        writeJson(response, 200, await buildSystemSnapshot({ queue, batches, auth, uploadRoot, agentRegistry }));
         return;
       }
 
       if (request.method === "GET" && url.pathname === "/admin/queue") {
         await authenticate(request, { admin: true });
         writeJson(response, 200, await buildQueueSnapshot(queue, batches));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/admin/agents") {
+        await authenticate(request, { admin: true });
+        writeJson(response, 200, await buildAgentSnapshot({ queue, agentRegistry }));
         return;
       }
 
@@ -1295,6 +1586,13 @@ export function createAppServer({
 }
 
 async function main() {
+  const agentRuntimeConfig = await loadAgentRuntimeConfig();
+  if (agentRuntimeConfig?.masterEndpoint) {
+    await startAgentService(agentRuntimeConfig);
+    process.stdout.write(`Agent service connected to ${agentRuntimeConfig.masterEndpoint}\n`);
+    return;
+  }
+
   const port = Number(process.env.PORT || 3000);
   const jobsRoot = getRuntimeSubdir("jobs", { repoRoot });
   const queue = createJobQueue({
