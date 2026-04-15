@@ -445,15 +445,32 @@ public class PdfTagWriterCli {
 
     /**
      * Reopen a saved PDF and strip /CIDSet from every subsetted CID-font
-     * FontDescriptor, then save back. Called after the primary save so that
-     * PDFBox's subsetter (which runs inside save()) cannot re-introduce
-     * /CIDSet after we clean it.
+     * FontDescriptor using an INCREMENTAL save so only the changed
+     * FontDescriptor objects are appended — the existing FontFile2 font
+     * program bytes are left completely untouched. A full save-reopen-save
+     * cycle corrupts FontFile2 streams on some PDFs (PDFBox's stream
+     * filter chain confusion on re-serialize), which is why we use
+     * saveIncremental here instead.
      */
     private static int sanitizeCidSetsInFile(String pdfPath) throws IOException {
-        try (PDDocument reopened = Loader.loadPDF(new File(pdfPath))) {
+        File target = new File(pdfPath);
+        try (PDDocument reopened = Loader.loadPDF(target)) {
             int removed = sanitizeCidSets(reopened);
             if (removed > 0) {
-                reopened.save(pdfPath);
+                // saveIncremental writes a delta section at the end of the
+                // file, leaving all unchanged objects byte-identical. Must
+                // write to a new file then atomically replace.
+                File incremental = new File(pdfPath + ".cidset-clean");
+                try (java.io.OutputStream os = new java.io.FileOutputStream(incremental)) {
+                    reopened.saveIncremental(os);
+                }
+                // Replace the original atomically.
+                java.nio.file.Files.move(
+                    incremental.toPath(),
+                    target.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE
+                );
             }
             return removed;
         }
