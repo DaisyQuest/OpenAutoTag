@@ -264,9 +264,33 @@ function sanitizeCode(value) {
 
 function parseVeraPdfReport(stdout) {
   const parsed = JSON.parse(stdout.trim());
-  const validationResult = parsed.report?.jobs?.[0]?.validationResult?.[0];
+  const job = parsed.report?.jobs?.[0];
+  const validationResult = job?.validationResult?.[0];
 
+  // veraPDF occasionally bombs inside its PDFBox validator on perfectly valid
+  // PDFs (e.g. "Index 21 out of bounds for length 0"). When that happens the
+  // job carries a taskException but no validationResult. Surface the exception
+  // as a structured finding so the orchestrator can treat it as a visible
+  // defect rather than a missing artifact.
   if (!validationResult) {
+    if (job?.taskException) {
+      const message = job.taskException.exceptionMessage || job.taskException.exception || "veraPDF task exception";
+      return {
+        raw: parsed,
+        validationResult: {
+          profileName: null,
+          statement: `veraPDF threw during validation: ${message}`,
+          details: { passedRules: 0, failedRules: 0, passedChecks: 0, failedChecks: 0, ruleSummaries: [] }
+        },
+        details: { passedRules: 0, failedRules: 0, passedChecks: 0, failedChecks: 0, ruleSummaries: [] },
+        buildInformation: parsed.report?.buildInformation || {},
+        taskException: {
+          message,
+          type: job.taskException.type || "VALIDATE",
+          duration: job.taskException.duration || null
+        }
+      };
+    }
     throw new Error("veraPDF did not return a validation result.");
   }
 
@@ -296,7 +320,13 @@ async function runVeraPdf(pdfPath) {
       veraPdfPath,
       ["--format", "json", "--flavour", flavour, "--loglevel", "0", pdfPath],
       {
-        allowExitCodes: [0, 1, 2],
+        // veraPDF exit codes we accept as "ran and produced a report":
+        //   0  valid
+        //   1  validation failures detected
+        //   2  file-parse issues with a report
+        //   7  CLI abort with partial JSON
+        //   9  per-job exception (taskException in stdout JSON, still parseable)
+        allowExitCodes: [0, 1, 2, 7, 9],
         env: await buildJavaExecEnv()
       }
     ));
@@ -418,10 +448,26 @@ function buildManifestFindings(manifest) {
 }
 
 function buildVeraPdfFindings(report) {
+  const findings = [];
+
+  // Per-job taskException: veraPDF crashed internally on this PDF. Surface as
+  // a single actionable finding so the job isn't reported as silently passing.
+  if (report.taskException) {
+    findings.push({
+      severity: "error",
+      code: "VERAPDF_TASK_EXCEPTION",
+      description: report.taskException.message,
+      clause: null,
+      specification: null,
+      source: "verapdf",
+      test: report.taskException.type || "VALIDATE"
+    });
+  }
+
   const summaries = report.details.ruleSummaries || [];
-  return summaries
-    .filter((summary) => summary.status === "failed" || summary.ruleStatus === "FAILED")
-    .map((summary) => ({
+  for (const summary of summaries) {
+    if (summary.status !== "failed" && summary.ruleStatus !== "FAILED") continue;
+    findings.push({
       severity: "error",
       code: `VERAPDF_${sanitizeCode(summary.clause)}_${summary.testNumber ?? "RULE"}`,
       clause: summary.clause,
@@ -436,7 +482,9 @@ function buildVeraPdfFindings(report) {
         context: check.context,
         errorArguments: check.errorArguments || []
       }))
-    }));
+    });
+  }
+  return findings;
 }
 
 function extractEngineVersion(buildInformation) {
