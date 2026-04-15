@@ -25,16 +25,27 @@ const defaultVeraPdfPaths =
 const buildDir = getRuntimeBuildDir("modules-validator", { repoRoot });
 const metadataProbeSourcePath = path.join(moduleDir, "java", "MetadataProbeCli.java");
 const metadataProbeClassPath = path.join(buildDir, "MetadataProbeCli.class");
+const fontAuditSourcePath = path.join(moduleDir, "java", "FontAuditCli.java");
+const fontAuditClassPath = path.join(buildDir, "FontAuditCli.class");
 const veraPdfJarPath = path.join(vendorDir, "verapdf", "app", "bin", "pdfbox-apps-1.28.2.jar");
+const fontAuditPdfboxJarPath = path.join(vendorDir, "pdfbox-app-3.0.7.jar");
 
 function parseArgs(argv) {
   const args = new Map();
-  for (let index = 0; index < argv.length; index += 2) {
-    args.set(argv[index], argv[index + 1]);
+  const flags = new Set();
+  for (let index = 0; index < argv.length; index += 1) {
+    const token = argv[index];
+    if (token === "--skip-font-audit") {
+      flags.add("skipFontAudit");
+      continue;
+    }
+    args.set(token, argv[index + 1]);
+    index += 1;
   }
   return {
     pdfPath: args.get("--pdf"),
-    manifestPath: args.get("--manifest")
+    manifestPath: args.get("--manifest"),
+    skipFontAudit: flags.has("skipFontAudit")
   };
 }
 
@@ -209,6 +220,37 @@ async function ensureMetadataProbeCompiled() {
   });
 }
 
+async function ensureFontAuditCompiled() {
+  await ensureJavaBuildArtifact({
+    buildDir,
+    isCurrent: async () => !(await needsJavaCompilation(fontAuditSourcePath, fontAuditClassPath)),
+    compile: async () => {
+      const javacCommand = await resolveJavaTool("javac", "VALIDATOR_JAVAC_PATH");
+      try {
+        await execCommand(
+          javacCommand,
+          [
+            "-encoding",
+            "UTF-8",
+            "-cp",
+            fontAuditPdfboxJarPath,
+            "-d",
+            buildDir,
+            fontAuditSourcePath
+          ],
+          {
+            env: await buildJavaExecEnv()
+          }
+        );
+      } catch (error) {
+        throw new Error(
+          `Unable to compile validator font audit. Install a JDK, set VALIDATOR_JAVAC_PATH, or bundle Java under ${bundledJavaHome}. ${error.message}`
+        );
+      }
+    }
+  });
+}
+
 function sanitizeCode(value) {
   return String(value || "UNKNOWN")
     .toUpperCase()
@@ -252,6 +294,36 @@ async function runVeraPdf(pdfPath) {
   }
 
   return parseVeraPdfReport(stdout);
+}
+
+export async function runFontAuditCli(pdfPath) {
+  return runFontAudit(pdfPath);
+}
+
+async function runFontAudit(pdfPath) {
+  await ensureFontAuditCompiled();
+  const javaCommand = await resolveJavaTool("java", "VALIDATOR_JAVA_PATH");
+  let stdout;
+  try {
+    ({ stdout } = await execCommand(
+      javaCommand,
+      [
+        "-cp",
+        `${buildDir}${path.delimiter}${fontAuditPdfboxJarPath}`,
+        "FontAuditCli",
+        "--pdf",
+        pdfPath
+      ],
+      {
+        env: await buildJavaExecEnv()
+      }
+    ));
+  } catch (error) {
+    throw new Error(
+      `Unable to run validator font audit. Set VALIDATOR_JAVA_PATH, JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${error.message}`
+    );
+  }
+  return JSON.parse(stdout.trim());
 }
 
 async function runMetadataProbe(pdfPath) {
@@ -408,9 +480,55 @@ function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
   };
 }
 
-export async function validateTaggedArtifacts({ pdfPath, manifestPath }) {
+/**
+ * Validation report shape (additive extensions for the font audit pre-pass).
+ *
+ * Existing top-level fields (unchanged): status, isCompliant, statement, rawStatement,
+ *   profileName, findings, summary, rawSummary, metadataDiagnostics, engine.
+ *
+ * NEW top-level fields produced by the font audit:
+ *
+ *   fonts: Array<{
+ *     fontKey: string,            // stable per-document identifier (subset-prefixed name + dict hash)
+ *     name: string,
+ *     subtype: string,            // "TrueType", "Type1", "Type0:CIDFontType2", "Type3", ...
+ *     embedded: boolean,          // FontFile/FontFile2/FontFile3 present in /FontDescriptor
+ *     hasToUnicode: boolean,
+ *     toUnicodeCoverage: number,  // fraction in [0, 1] of *used* glyph codes that map to a Unicode string
+ *     encoding: string,           // e.g. "WinAnsiEncoding", "Identity-H", "Custom+Differences"
+ *     isSymbolic: boolean,
+ *     standard14: boolean,        // true => unembedded Standard 14 (PDF/UA blocker)
+ *     cidSystemInfoValid: boolean,
+ *     usedGlyphCount: number,
+ *     mappedGlyphCount: number,
+ *     locations: string[]         // sorted: "page:N" entries plus optional "acroform:dr"
+ *   }>
+ *
+ *   fontAudit: {
+ *     status: "ok" | "skipped" | "failed",
+ *     errorCount: number,         // count of severity=error findings from the audit
+ *     warningCount: number,
+ *     blockingPreVeraPdf: boolean // true if audit alone would force overall.status = "fail"
+ *   }
+ *
+ * Findings appended by the font audit each carry `source: "font-audit"` and use these codes:
+ *   FONT_NOT_EMBEDDED            (error)
+ *   FONT_STANDARD_14             (error)  -- unembedded Standard 14, forbidden by PDF/UA
+ *   TO_UNICODE_MISSING           (error)
+ *   TO_UNICODE_INCOMPLETE        (error if coverage < 0.95, warning if 0.95 <= coverage < 0.99)
+ *   SYMBOLIC_WITHOUT_DIFFERENCES (error)
+ *   INVALID_CID_SYSTEM_INFO      (error)
+ *   DA_FONT_NOT_IN_DR            (error)  -- form field /DA references a font absent from /AcroForm/DR/Font
+ *   LICENSE_RESTRICTED           (warning, never promoted to error)
+ *
+ * Schema integration note (advisory; integration owner updates contracts/):
+ *   contracts/ does not currently define a validation-report schema. When one is added it should
+ *   include the optional `fonts[]` array and `fontAudit` summary above as additive properties so
+ *   existing consumers continue to read the report without changes.
+ */
+export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontAudit = false }) {
   if (!pdfPath || !manifestPath) {
-    throw new Error("Usage: node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json>");
+    throw new Error("Usage: node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json> [--skip-font-audit]");
   }
 
   await access(pdfPath, constants.R_OK);
@@ -418,6 +536,22 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath }) {
 
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   const manifestFindings = buildManifestFindings(manifest);
+
+  let fontAudit = null;
+  let fontAuditFindings = [];
+  let fontAuditError = null;
+  if (!skipFontAudit) {
+    try {
+      fontAudit = await runFontAudit(pdfPath);
+      fontAuditFindings = (fontAudit.findings || []).map((finding) => ({
+        ...finding,
+        source: "font-audit"
+      }));
+    } catch (error) {
+      fontAuditError = error.message;
+    }
+  }
+
   const veraPdf = await runVeraPdf(pdfPath);
   const rawVeraPdfFindings = buildVeraPdfFindings(veraPdf);
   const metadataProbe = hasMetadataMismatchSignals(rawVeraPdfFindings) ? await runMetadataProbe(pdfPath) : null;
@@ -425,7 +559,7 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath }) {
     rawVeraPdfFindings,
     metadataProbe
   );
-  const findings = [...manifestFindings, ...veraPdfFindings];
+  const findings = [...manifestFindings, ...veraPdfFindings, ...fontAuditFindings];
   const rawSummary = {
     passedRules: veraPdf.details.passedRules || 0,
     failedRules: veraPdf.details.failedRules || 0,
@@ -433,11 +567,18 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath }) {
     failedChecks: veraPdf.details.failedChecks || 0
   };
   const summary = adjustSummary(rawSummary, suppressedFindings);
+
+  const fontAuditErrorCount = fontAuditFindings.filter((f) => f.severity === "error").length;
+  const fontAuditWarningCount = fontAuditFindings.filter((f) => f.severity === "warning").length;
+  const fontAuditBlockingPreVeraPdf = fontAuditErrorCount > 0;
+
   const isCompliant = findings.length === 0;
+  const overallStatus = !isCompliant || fontAuditBlockingPreVeraPdf ? "fail" : "pass";
 
   return {
     status: "completed",
     isCompliant,
+    overall: { status: overallStatus },
     statement:
       isCompliant && suppressedFindings.length > 0
         ? "PDF file passed validation after correcting known veraPDF PDFBox metadata false positives."
@@ -448,6 +589,14 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath }) {
     summary,
     rawSummary,
     metadataDiagnostics: buildMetadataDiagnostics(rawVeraPdfFindings, metadataProbe, suppressedFindings),
+    fonts: fontAudit?.fonts || [],
+    fontAudit: {
+      status: skipFontAudit ? "skipped" : fontAuditError ? "failed" : "ok",
+      errorCount: fontAuditErrorCount,
+      warningCount: fontAuditWarningCount,
+      blockingPreVeraPdf: fontAuditBlockingPreVeraPdf,
+      ...(fontAuditError ? { error: fontAuditError } : {})
+    },
     engine: {
       name: "veraPDF",
       version: extractEngineVersion(veraPdf.buildInformation)
@@ -459,6 +608,9 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   const result = await validateTaggedArtifacts(options);
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  if (result.overall?.status === "fail") {
+    process.exitCode = 0; // remain advisory; orchestrator decides hard-fail policy
+  }
 }
 
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
