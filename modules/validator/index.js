@@ -61,7 +61,11 @@ function execCommand(command, args, { allowExitCodes = [], env } = {}) {
       },
       (error, stdout, stderr) => {
         if (error && !allowExitCodes.includes(error.code)) {
-          reject(new Error(stderr || stdout || error.message));
+          const wrapped = new Error(stderr || stdout || error.message);
+          wrapped.stderr = stderr || "";
+          wrapped.stdout = stdout || "";
+          wrapped.exitCode = error.code;
+          reject(wrapped);
           return;
         }
 
@@ -278,18 +282,49 @@ async function runVeraPdf(pdfPath) {
   const veraPdfPath = await resolveVeraPdfPath();
   const flavour = process.env.VERAPDF_FLAVOUR || "ua1";
   let stdout;
+  let stderr = "";
   try {
-    ({ stdout } = await execCommand(
+    // veraPDF documented exit codes:
+    //   0 - valid
+    //   1 - validation failures were detected (still a successful run)
+    //   2 - file parsing problem but veraPDF produced a report
+    //   7 - crash / JVM error
+    // We accept 0, 1, 2 as "ran successfully" and try to parse stdout.
+    // Anything else (or unparseable stdout) is surfaced as a runtime error
+    // that the caller converts to VALIDATOR_EXECUTION_FAILED.
+    ({ stdout, stderr = "" } = await execCommand(
       veraPdfPath,
       ["--format", "json", "--flavour", flavour, "--loglevel", "0", pdfPath],
       {
-        allowExitCodes: [1],
+        allowExitCodes: [0, 1, 2],
         env: await buildJavaExecEnv()
       }
     ));
   } catch (error) {
+    // Filter PDFBox's non-fatal FlateFilter warnings from the diagnostic
+    // so the root cause (Java/JVM/unreadable PDF) stays visible.
+    const filteredStderr = (error.stderr || "")
+      .split(/\r?\n/)
+      .filter((line) => !/FlateFilter:decode:\d+ - FlateFilter: stop reading corrupt stream/.test(line))
+      .join("\n")
+      .trim();
+    const detail = [error.message, filteredStderr].filter(Boolean).join(" | ");
     throw new Error(
-      `veraPDF failed to execute. Install Java, set VALIDATOR_JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${error.message}`
+      `veraPDF failed to execute. Install Java, set VALIDATOR_JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${detail}`
+    );
+  }
+
+  // If veraPDF emitted no usable JSON (e.g. it printed only errors before
+  // crashing), treat that as an execution failure so the caller can surface
+  // VALIDATOR_EXECUTION_FAILED rather than a confusing parse error.
+  if (!stdout || !stdout.trim().startsWith("{")) {
+    const filteredStderr = stderr
+      .split(/\r?\n/)
+      .filter((line) => !/FlateFilter:decode:\d+ - FlateFilter: stop reading corrupt stream/.test(line))
+      .join("\n")
+      .trim();
+    throw new Error(
+      `veraPDF produced no parseable JSON report${filteredStderr ? `: ${filteredStderr}` : "."}`
     );
   }
 
@@ -552,19 +587,44 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
     }
   }
 
-  const veraPdf = await runVeraPdf(pdfPath);
-  const rawVeraPdfFindings = buildVeraPdfFindings(veraPdf);
-  const metadataProbe = hasMetadataMismatchSignals(rawVeraPdfFindings) ? await runMetadataProbe(pdfPath) : null;
-  const { findings: veraPdfFindings, suppressedFindings } = suppressMetadataFalsePositives(
-    rawVeraPdfFindings,
-    metadataProbe
-  );
-  const findings = [...manifestFindings, ...veraPdfFindings, ...fontAuditFindings];
+  // veraPDF can crash on severely malformed input (FlateFilter
+  // DataFormatException, JVM OOM, missing Java, unsupported PDF feature).
+  // Treat that as a per-document validator error rather than a pipeline-
+  // stage abort: emit a VALIDATOR_EXECUTION_FAILED finding, retain all the
+  // evidence we DID collect (manifest findings, font audit), and let the
+  // job finish with a diagnostic artifact for manual review.
+  let veraPdf = null;
+  let veraPdfError = null;
+  try {
+    veraPdf = await runVeraPdf(pdfPath);
+  } catch (error) {
+    veraPdfError = error.message || String(error);
+  }
+
+  const rawVeraPdfFindings = veraPdf ? buildVeraPdfFindings(veraPdf) : [];
+  const metadataProbe =
+    veraPdf && hasMetadataMismatchSignals(rawVeraPdfFindings) ? await runMetadataProbe(pdfPath) : null;
+  const { findings: veraPdfFindings, suppressedFindings } = veraPdf
+    ? suppressMetadataFalsePositives(rawVeraPdfFindings, metadataProbe)
+    : { findings: [], suppressedFindings: [] };
+
+  const executionFindings = veraPdfError
+    ? [
+        {
+          severity: "error",
+          code: "VALIDATOR_EXECUTION_FAILED",
+          message: veraPdfError,
+          source: "validator"
+        }
+      ]
+    : [];
+
+  const findings = [...manifestFindings, ...veraPdfFindings, ...fontAuditFindings, ...executionFindings];
   const rawSummary = {
-    passedRules: veraPdf.details.passedRules || 0,
-    failedRules: veraPdf.details.failedRules || 0,
-    passedChecks: veraPdf.details.passedChecks || 0,
-    failedChecks: veraPdf.details.failedChecks || 0
+    passedRules: veraPdf?.details?.passedRules || 0,
+    failedRules: veraPdf?.details?.failedRules || 0,
+    passedChecks: veraPdf?.details?.passedChecks || 0,
+    failedChecks: veraPdf?.details?.failedChecks || 0
   };
   const summary = adjustSummary(rawSummary, suppressedFindings);
 
@@ -572,23 +632,28 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
   const fontAuditWarningCount = fontAuditFindings.filter((f) => f.severity === "warning").length;
   const fontAuditBlockingPreVeraPdf = fontAuditErrorCount > 0;
 
-  const isCompliant = findings.length === 0;
-  const overallStatus = !isCompliant || fontAuditBlockingPreVeraPdf ? "fail" : "pass";
+  const isCompliant = !veraPdfError && findings.length === 0;
+  const overallStatus = veraPdfError
+    ? "error"
+    : !isCompliant || fontAuditBlockingPreVeraPdf
+      ? "fail"
+      : "pass";
 
   return {
     status: "completed",
     isCompliant,
     overall: { status: overallStatus },
-    statement:
-      isCompliant && suppressedFindings.length > 0
+    statement: veraPdfError
+      ? `veraPDF could not be executed: ${veraPdfError}`
+      : isCompliant && suppressedFindings.length > 0
         ? "PDF file passed validation after correcting known veraPDF PDFBox metadata false positives."
         : veraPdf.validationResult.statement,
-    rawStatement: veraPdf.validationResult.statement,
-    profileName: veraPdf.validationResult.profileName,
+    rawStatement: veraPdf?.validationResult?.statement ?? null,
+    profileName: veraPdf?.validationResult?.profileName ?? null,
     findings,
     summary,
     rawSummary,
-    metadataDiagnostics: buildMetadataDiagnostics(rawVeraPdfFindings, metadataProbe, suppressedFindings),
+    metadataDiagnostics: veraPdf ? buildMetadataDiagnostics(rawVeraPdfFindings, metadataProbe, suppressedFindings) : null,
     fonts: fontAudit?.fonts || [],
     fontAudit: {
       status: skipFontAudit ? "skipped" : fontAuditError ? "failed" : "ok",
@@ -599,7 +664,8 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
     },
     engine: {
       name: "veraPDF",
-      version: extractEngineVersion(veraPdf.buildInformation)
+      version: veraPdf ? extractEngineVersion(veraPdf.buildInformation) : null,
+      executionError: veraPdfError
     }
   };
 }
