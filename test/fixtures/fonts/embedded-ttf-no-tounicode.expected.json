@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixture": "embedded-ttf-no-tounicode",
+  "description": "Embedded TrueType subset that omits /ToUnicode. Embedder must repair from the cmap table.",
+  "inventory": {
+    "fonts": [
+      {
+        "baseFont": "AAAAAA+CustomSubset",
+        "subtype": "TrueType",
+        "embedded": true,
+        "standard14": false,
+        "toUnicode": {
+          "present": false,
+          "repairStrategy": "from-cmap-table"
+        },
+        "plan": {
+          "action": "inject-to-unicode"
+        }
+      }
+    ],
+    "summary": {
+      "blockers": [
+        {
+          "blocker": "missing-to-unicode",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "validator": {
+    "fontCategoryErrors": 0
+  }
+}

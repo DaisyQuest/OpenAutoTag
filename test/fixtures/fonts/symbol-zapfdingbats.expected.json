@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixture": "symbol-zapfdingbats",
+  "description": "Symbol + ZapfDingbats. Writer substitutes STIX / Noto with Differences preserving glyph semantics.",
+  "inventory": {
+    "fonts": [
+      {
+        "baseFont": "Symbol",
+        "subtype": "Type1",
+        "embedded": false,
+        "standard14": true,
+        "encoding": {
+          "name": "Symbolic",
+          "isSymbolic": true
+        },
+        "plan": {
+          "action": "substitute-fallback",
+          "fallbackKey": "stix-two-math-regular"
+        }
+      },
+      {
+        "baseFont": "ZapfDingbats",
+        "subtype": "Type1",
+        "embedded": false,
+        "standard14": true,
+        "encoding": {
+          "name": "Symbolic",
+          "isSymbolic": true
+        },
+        "plan": {
+          "action": "substitute-fallback",
+          "fallbackKey": "noto-sans-symbols2-regular"
+        }
+      }
+    ],
+    "summary": {
+      "blockers": [
+        {
+          "blocker": "standard-14",
+          "severity": "error"
+        },
+        {
+          "blocker": "standard-14",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "validator": {
+    "fontCategoryErrors": 0
+  }
+}
