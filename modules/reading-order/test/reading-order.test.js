@@ -29,6 +29,40 @@ test("reading-order respects columns before right-column content", async () => {
   assert.equal(ordered.nodes.find((node) => node.id === "b").readingOrder, 2);
 });
 
+test("reading-order keeps blocks on the same visual line in left-to-right order even when their top-y differs by sub-pixel jitter", async () => {
+  // Regression: blocks that belong to the same visual line sometimes have
+  // top-y values that differ by 1-2 pixels because of font metrics or
+  // stylized glyphs (superscripts, '&' in a different face). Without a
+  // line-grouping epsilon, strict ascending-by-top sort flips them into
+  // right-to-left reading order. Mirrors a real LRB corpus case where
+  // "PAUL RUGGIERO" / "DECISION ORDER" / "&" sat at y=141/142/141 and
+  // the '&' (at x=419) sorted before "DECISION ORDER" (at x=358).
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "order-line-group-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:line-group",
+      source: { layoutDocumentId: "layout:line-group" },
+      nodes: [
+        { id: "paul", pageNumber: 2, sourceBlockId: "b1", role: "P", text: "PAUL RUGGIERO, Candidate-Aggrieved,", bbox: [70, 141, 210, 11], confidence: 0.9 },
+        { id: "amp",  pageNumber: 2, sourceBlockId: "b2", role: "P", text: "&",                                      bbox: [419, 141, 9, 11],  confidence: 0.9 },
+        { id: "dec",  pageNumber: 2, sourceBlockId: "b3", role: "P", text: "DECISION ORDER",                          bbox: [358, 142, 112, 11], confidence: 0.9 }
+      ]
+    }, null, 2)
+  );
+
+  const ordered = await assignReadingOrder(inputPath);
+
+  assert.deepEqual(
+    ordered.orderedNodeIds,
+    ["paul", "dec", "amp"],
+    "left-to-right within the visual line: PAUL (x=70) -> DECISION (x=358) -> & (x=419)"
+  );
+});
+
 test("reading-order keeps headers first, tables row-major, and footers last", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "order-advanced-test-"));
   const inputPath = path.join(tempDir, "semantic.json");
