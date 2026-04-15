@@ -6,6 +6,7 @@
   "description": "Contract-first scaffold for a parallel PDF accessibility tagging pipeline.",
   "scripts": {
     "install:verapdf": "node scripts/install-verapdf.js",
+    "install:fonts": "node scripts/install-fonts.js",
     "test:ci": "node scripts/run-ci-tests.js",
     "test": "node --test",
     "test:integration": "node --test test/integration",
