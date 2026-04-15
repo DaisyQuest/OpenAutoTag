@@ -20,8 +20,10 @@ import java.util.TreeMap;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -178,6 +180,12 @@ public class PdfTagWriterCli {
 
             outputDocument.save(outputPath);
 
+            // PDFBox's subsetter runs inside save() and writes /CIDSet on the
+            // subsetted CID-font descriptors it emits (overlay font + any
+            // embedded fallbacks). We must strip /CIDSet AFTER the subsetter
+            // has serialized — reopen the saved file, clean, and rewrite.
+            int cidSetsCleaned = sanitizeCidSetsInFile(outputPath);
+
             String json = "{"
                 + "\"nativeTaggingApplied\":" + (markedContentCount > 0)
                 + ",\"structureElementCount\":" + structureElementCount
@@ -187,6 +195,7 @@ public class PdfTagWriterCli {
                 + ",\"pageStructParentCount\":" + pageStates.size()
                 + ",\"metadataApplied\":true"
                 + ",\"reconstructedFromArtifactImages\":true"
+                + ",\"cidSetsCleaned\":" + cidSetsCleaned
                 + "}";
             System.out.println(json);
         }
@@ -365,6 +374,115 @@ public class PdfTagWriterCli {
             + "Tried: " + String.join(", ", candidates)
             + ". Run `npm run install:fonts` or set OVERLAY_FONT_PATH."
         );
+    }
+
+    /**
+     * PDF/UA-1 clause 7.21.4.2 (ISO 14289-1:2014): if a subsetted CID font's
+     * FontDescriptor carries a /CIDSet stream, it must enumerate every CID
+     * actually present in the embedded font program (not just used CIDs).
+     * PDFBox's subsetter writes only the used-CID set, which fails veraPDF
+     * rule VERAPDF_7_21_4_2_2.
+     *
+     * <p>Since /CIDSet is <em>optional</em> in PDF/UA-1 (it is only required
+     * by PDF/A-1), the simplest deterministic fix is to remove the key from
+     * every subsetted CID-font FontDescriptor we emit. The rule only fires
+     * when /CIDSet is present; removing it satisfies the check without
+     * losing any information PDF/UA-1 consumers require.</p>
+     *
+     * <p>This walks every font resource reachable from the catalog: all
+     * pages, the AcroForm default-resources dictionary, and any XObject
+     * resource dictionaries that directly reference fonts. We iterate at
+     * the COS layer to avoid triggering PDFBox's higher-level font loaders
+     * on already-written resources.</p>
+     *
+     * @return number of CIDSet entries removed (for the writer report).
+     */
+    private static int sanitizeCidSets(PDDocument document) {
+        int removed = 0;
+        java.util.Set<COSDictionary> visitedFonts = new java.util.HashSet<>();
+        java.util.ArrayDeque<COSDictionary> resourcesQueue = new java.util.ArrayDeque<>();
+
+        PDDocumentCatalog catalog = document.getDocumentCatalog();
+        for (PDPage page : document.getPages()) {
+            if (page.getResources() != null) {
+                resourcesQueue.add(page.getResources().getCOSObject());
+            }
+        }
+        if (catalog.getAcroForm() != null && catalog.getAcroForm().getDefaultResources() != null) {
+            resourcesQueue.add(catalog.getAcroForm().getDefaultResources().getCOSObject());
+        }
+
+        java.util.Set<COSDictionary> visitedResources = new java.util.HashSet<>();
+        while (!resourcesQueue.isEmpty()) {
+            COSDictionary res = resourcesQueue.pop();
+            if (!visitedResources.add(res)) continue;
+
+            COSBase fontDictBase = res.getDictionaryObject(COSName.FONT);
+            if (fontDictBase instanceof COSDictionary fontDict) {
+                for (COSName fontKey : fontDict.keySet()) {
+                    COSBase fontBase = fontDict.getDictionaryObject(fontKey);
+                    if (fontBase instanceof COSDictionary fontObj && visitedFonts.add(fontObj)) {
+                        removed += stripCidSetFromFont(fontObj);
+                    }
+                }
+            }
+
+            COSBase xObjectDictBase = res.getDictionaryObject(COSName.XOBJECT);
+            if (xObjectDictBase instanceof COSDictionary xDict) {
+                for (COSName xKey : xDict.keySet()) {
+                    COSBase xBase = xDict.getDictionaryObject(xKey);
+                    if (xBase instanceof COSStream xs) {
+                        COSBase nested = xs.getDictionaryObject(COSName.RESOURCES);
+                        if (nested instanceof COSDictionary nestedRes) {
+                            resourcesQueue.add(nestedRes);
+                        }
+                    }
+                }
+            }
+        }
+        return removed;
+    }
+
+    /**
+     * Reopen a saved PDF and strip /CIDSet from every subsetted CID-font
+     * FontDescriptor, then save back. Called after the primary save so that
+     * PDFBox's subsetter (which runs inside save()) cannot re-introduce
+     * /CIDSet after we clean it.
+     */
+    private static int sanitizeCidSetsInFile(String pdfPath) throws IOException {
+        try (PDDocument reopened = Loader.loadPDF(new File(pdfPath))) {
+            int removed = sanitizeCidSets(reopened);
+            if (removed > 0) {
+                reopened.save(pdfPath);
+            }
+            return removed;
+        }
+    }
+
+    /**
+     * Strip /CIDSet from a Type0 font's descendant CIDFont FontDescriptor,
+     * if present. No-op for non-Type0 fonts.
+     */
+    private static int stripCidSetFromFont(COSDictionary font) {
+        COSBase subtype = font.getDictionaryObject(COSName.SUBTYPE);
+        if (!COSName.TYPE0.equals(subtype)) {
+            return 0;
+        }
+        COSBase descendants = font.getDictionaryObject(COSName.DESCENDANT_FONTS);
+        if (!(descendants instanceof COSArray descArray) || descArray.size() == 0) {
+            return 0;
+        }
+        int removed = 0;
+        for (int i = 0; i < descArray.size(); i++) {
+            COSBase entry = descArray.getObject(i);
+            if (!(entry instanceof COSDictionary cidFont)) continue;
+            COSBase fd = cidFont.getDictionaryObject(COSName.FONT_DESC);
+            if (fd instanceof COSDictionary descriptor && descriptor.containsKey(COSName.CID_SET)) {
+                descriptor.removeItem(COSName.CID_SET);
+                removed++;
+            }
+        }
+        return removed;
     }
 
     private static String findRepoRoot() {
