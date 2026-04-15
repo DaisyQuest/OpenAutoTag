@@ -6,18 +6,18 @@
     "fonts": [
       {
         "baseFont": "Helvetica",
-        "subtype": "Type1",
+        "subtype": "Unknown",
         "embedded": false,
         "standard14": true,
         "toUnicode": {
           "present": false
         },
-        "usage": {
-          "inFormDA": true
+        "encoding": {
+          "name": "Unknown"
         },
         "plan": {
           "action": "substitute-fallback",
-          "fallbackKey": "noto-sans-regular"
+          "fallbackKey": "NotoSans-Regular"
         }
       }
     ],

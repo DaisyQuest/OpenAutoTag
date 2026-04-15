@@ -10,11 +10,15 @@
         "embedded": false,
         "standard14": true,
         "toUnicode": {
-          "present": false
+          "present": false,
+          "repairStrategy": "synthesized"
+        },
+        "encoding": {
+          "name": "Unknown"
         },
         "plan": {
           "action": "substitute-fallback",
-          "fallbackKey": "noto-sans-regular"
+          "fallbackKey": "NotoSans-Regular"
         }
       }
     ],
