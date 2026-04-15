@@ -1,5 +1,5 @@
 PDF Accessibility Engine
-Version: bootstrap-v1
+Version: bootstrap-v2
 
 0. Purpose
 
@@ -34,8 +34,9 @@ Pipeline order:
 3. `semantic-engine`
 4. `reading-order`
 5. `tag-builder`
-6. `pdf-writer`
-7. `validator`
+6. `font-embedder`
+7. `pdf-writer`
+8. `validator`
 
 The orchestrator invokes each stage as a separate Node process and stores intermediate JSON artifacts in the job output directory.
 
@@ -81,10 +82,30 @@ Command:
 Output:
 `contracts/tagging.schema.json`
 
-3.6 PDF writer
+3.6 Font embedder
 
 Command:
-`node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> > writer-report.json`
+`node modules/font-embedder/index.js --pdf <input.pdf> --tags <tagging.json> --output <fonts.json>`
+
+Output:
+`contracts/font-inventory.schema.json`
+
+Analyzes every font resource in the source PDF, detects embedding status,
+Standard-14 references, ToUnicode coverage, encoding, and CID system info.
+Reconstructs missing ToUnicode maps from TTF cmap tables, Type1 Differences
+arrays, Adobe Glyph List, or CID Registry/Ordering/Supplement. Reads OS/2
+fsType for a warning-only license flag. Emits a per-font remediation plan
+(embed-as-is, inject-to-unicode, substitute-fallback, subset-and-embed,
+rewrite-encoding, re-embed-from-cache, synthesize-type0-wrapper) consumed
+by the pdf-writer.
+
+Licensing is advisory only: fsType bits are surfaced in license.flag but
+never block embedding. See FLAG in README for future policy work.
+
+3.7 PDF writer
+
+Command:
+`node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> [--fonts <fonts.json>] [--font-cache <dir>] > writer-report.json`
 
 Output:
 Writer report JSON plus output artifacts at the provided path.
@@ -92,7 +113,14 @@ Writer report JSON plus output artifacts at the provided path.
 Bootstrap note:
 The current implementation uses Apache PDFBox to add a native structure tree, marked-content overlays, document metadata, and a sidecar manifest. Full content-level MCID tagging of the original source operators remains a later hardening step.
 
-3.7 Validator
+Bootstrap note:
+The overlay font is loaded from a bundled SIL-OFL TrueType (Noto Sans) via
+PDType0Font.load with embedSubset=true. Standard 14 fonts are never used in
+the output (forbidden by PDF/UA). When --fonts is provided, the writer
+executes each plan.action from the inventory and emits a fonts[] array in
+the writer report with the actual post-write state of every font.
+
+3.8 Validator
 
 Command:
 `node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json> > validation-report.json`
@@ -111,7 +139,12 @@ Contracts live under `contracts/`.
   Deterministic semantic roles and reading-order annotations.
 
 - `tagging.schema.json`
-  Hierarchical logical structure to drive PDF writing.
+  Hierarchical logical structure to drive PDF writing. Optional
+  `fontInventoryRef` field points pdf-writer at a font-inventory document.
+
+- `font-inventory.schema.json`
+  Per-document font inventory with per-font remediation plan, produced by
+  font-embedder and consumed by pdf-writer.
 
 - `pipeline-job.schema.json`
   Queue and API contract for orchestrator job status.

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixture": "acroform-da-unembedded",
+  "description": "AcroForm /DA references /Helv but /AcroForm/DR/Font is empty. Writer must add embedded Noto to DR and rewrite DA.",
+  "inventory": {
+    "fonts": [
+      {
+        "baseFont": "Helvetica",
+        "subtype": "Unknown",
+        "embedded": false,
+        "standard14": true,
+        "toUnicode": {
+          "present": false
+        },
+        "encoding": {
+          "name": "Unknown"
+        },
+        "plan": {
+          "action": "substitute-fallback",
+          "fallbackKey": "NotoSans-Regular"
+        }
+      }
+    ],
+    "summary": {
+      "blockers": [
+        {
+          "blocker": "standard-14",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "validator": {
+    "fontCategoryErrors": 0
+  }
+}

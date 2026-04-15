@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/font-inventory.schema.json",
+  "title": "FontInventory",
+  "description": "Per-document font embedding inventory produced by the font-embedder module and consumed by pdf-writer and validator. Drives PDF/UA-compliant embedding decisions.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "documentId",
+    "source",
+    "fonts",
+    "summary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "documentId": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "required": ["pdfPath"],
+      "properties": {
+        "pdfPath": { "type": "string" },
+        "tagsPath": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "fonts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fontEntry" }
+    },
+    "fallbacks": {
+      "type": "object",
+      "description": "Mapping from source font family/style to the vendored embedded fallback that pdf-writer should substitute.",
+      "additionalProperties": { "$ref": "#/$defs/fallbackDescriptor" }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["totalFonts", "embeddedFonts", "remediated", "blockers"],
+      "properties": {
+        "totalFonts": { "type": "integer", "minimum": 0 },
+        "embeddedFonts": { "type": "integer", "minimum": 0 },
+        "remediated": { "type": "integer", "minimum": 0, "description": "Count of fonts the embedder repaired or substituted." },
+        "blockers": {
+          "type": "array",
+          "description": "Known PDF/UA blockers detected pre-write. Writer must resolve or fail.",
+          "items": {
+            "type": "object",
+            "required": ["fontKey", "blocker", "severity"],
+            "properties": {
+              "fontKey": { "type": "string" },
+              "blocker": { "type": "string", "enum": ["not-embedded", "missing-to-unicode", "invalid-encoding", "standard-14", "missing-cid-system-info", "broken-to-unicode", "symbolic-without-differences"] },
+              "severity": { "type": "string", "enum": ["error", "warning"] },
+              "detail": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "fontEntry": {
+      "type": "object",
+      "required": [
+        "fontKey",
+        "baseFont",
+        "subtype",
+        "embedded",
+        "toUnicode",
+        "encoding",
+        "usage",
+        "plan"
+      ],
+      "properties": {
+        "fontKey": {
+          "type": "string",
+          "description": "Stable identifier: sha256(baseFont + subtype + encoding + pageRefSet) truncated to 16 hex chars."
+        },
+        "baseFont": { "type": "string", "minLength": 1 },
+        "subsetPrefix": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{6}\\+?$",
+          "description": "Six-capital-letter subset prefix (without trailing +) when the font is subsetted, else null."
+        },
+        "subtype": {
+          "type": "string",
+          "enum": ["Type0", "Type1", "Type3", "TrueType", "CIDFontType0", "CIDFontType2", "MMType1", "Unknown"]
+        },
+        "embedded": {
+          "type": "boolean",
+          "description": "True if the source font has a FontFile/FontFile2/FontFile3 stream."
+        },
+        "standard14": {
+          "type": "boolean",
+          "description": "True if the source references one of the Standard 14 fonts (forbidden by PDF/UA)."
+        },
+        "toUnicode": {
+          "type": "object",
+          "required": ["present", "coverage"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "coverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fraction of glyph codes displayed on-page that resolve to a valid, non-PUA Unicode code point."
+            },
+            "missingGlyphs": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0 },
+              "description": "Glyph codes/CIDs used on-page that lack a ToUnicode mapping."
+            },
+            "repairStrategy": {
+              "type": ["string", "null"],
+              "enum": [null, "from-cmap-table", "from-differences", "from-agl", "from-cid-ros", "synthesized", "impossible"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "encoding": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "enum": ["WinAnsiEncoding", "MacRomanEncoding", "MacExpertEncoding", "StandardEncoding", "Identity-H", "Identity-V", "Custom", "Symbolic", "Unknown"]
+            },
+            "hasDifferences": { "type": "boolean" },
+            "isSymbolic": { "type": "boolean" }
+          },
+          "additionalProperties": true
+        },
+        "cidSystemInfo": {
+          "type": ["object", "null"],
+          "properties": {
+            "registry": { "type": "string" },
+            "ordering": { "type": "string" },
+            "supplement": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "usage": {
+          "type": "object",
+          "required": ["pages", "glyphCount"],
+          "properties": {
+            "pages": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0 }
+            },
+            "glyphCount": { "type": "integer", "minimum": 0 },
+            "sampleText": {
+              "type": "string",
+              "description": "Up to 120 characters of sampled on-page text using this font, for diagnostics."
+            },
+            "inFormDA": {
+              "type": "boolean",
+              "description": "True if referenced by an AcroForm /DA default appearance string."
+            }
+          },
+          "additionalProperties": false
+        },
+        "license": {
+          "type": "object",
+          "description": "License hints read from OS/2 fsType bits. Warning-only: never blocks embedding.",
+          "properties": {
+            "fsType": { "type": "integer", "minimum": 0 },
+            "flag": {
+              "type": "string",
+              "enum": ["installable", "restricted", "preview-print", "editable", "no-subsetting", "bitmap-only", "unknown"]
+            },
+            "source": { "type": "string", "enum": ["os2-table", "font-descriptor", "unknown"] }
+          },
+          "additionalProperties": true
+        },
+        "plan": {
+          "type": "object",
+          "description": "Instruction to pdf-writer on how to realize this font in the output PDF.",
+          "required": ["action"],
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "embed-as-is",
+                "re-embed-from-cache",
+                "substitute-fallback",
+                "inject-to-unicode",
+                "rewrite-encoding",
+                "subset-and-embed",
+                "synthesize-type0-wrapper"
+              ]
+            },
+            "fallbackKey": {
+              "type": ["string", "null"],
+              "description": "Key into the fallbacks map when action=substitute-fallback."
+            },
+            "glyphsToSubset": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0 }
+            },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "fallbackDescriptor": {
+      "type": "object",
+      "required": ["family", "style", "path", "license"],
+      "properties": {
+        "family": { "type": "string" },
+        "style": { "type": "string", "enum": ["Regular", "Bold", "Italic", "BoldItalic", "Mono", "MonoBold"] },
+        "path": { "type": "string", "description": "Path relative to repo root (e.g. modules/font-embedder/vendor/fonts/NotoSans-Regular.ttf)." },
+        "license": { "type": "string", "description": "SPDX identifier, e.g. OFL-1.1." },
+        "script": { "type": "string", "enum": ["Latin", "Cyrillic", "Greek", "CJK", "Symbol", "Dingbats", "Universal"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}

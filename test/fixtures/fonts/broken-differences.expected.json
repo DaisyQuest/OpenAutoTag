@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixture": "broken-differences",
+  "description": "Type1 with a malformed /Differences array. Writer / embedder must rewrite-encoding and synthesize accurate ToUnicode.",
+  "inventory": {
+    "fonts": [
+      {
+        "baseFont": "AAAAAA+BrokenDiff",
+        "subtype": "Type1",
+        "embedded": false,
+        "standard14": false,
+        "toUnicode": {
+          "present": false,
+          "repairStrategy": "synthesized"
+        },
+        "encoding": {
+          "name": "Unknown"
+        },
+        "plan": {
+          "action": "subset-and-embed"
+        }
+      }
+    ],
+    "summary": {
+      "blockers": [
+        {
+          "blocker": "not-embedded",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "validator": {
+    "fontCategoryErrors": 0
+  }
+}

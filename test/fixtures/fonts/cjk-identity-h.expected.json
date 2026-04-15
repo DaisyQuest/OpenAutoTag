@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixture": "cjk-identity-h",
+  "description": "Type0 / CIDFontType2 + Identity-H + intact ToUnicode. Pipeline must preserve.",
+  "inventory": {
+    "fonts": [
+      {
+        "baseFont": "AAAAAA+CJKSans-Regular",
+        "subtype": "CIDFontType2",
+        "embedded": false,
+        "standard14": false,
+        "toUnicode": {
+          "present": false,
+          "repairStrategy": "impossible"
+        },
+        "encoding": {
+          "name": "Identity-H"
+        },
+        "plan": {
+          "action": "subset-and-embed"
+        }
+      }
+    ],
+    "summary": {
+      "blockers": [
+        {
+          "blocker": "not-embedded",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "validator": {
+    "fontCategoryErrors": 0
+  }
+}

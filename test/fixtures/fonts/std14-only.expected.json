@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixture": "std14-only",
+  "description": "Helvetica only, unembedded (Standard 14 forbidden by PDF/UA).",
+  "inventory": {
+    "fonts": [
+      {
+        "baseFont": "Helvetica",
+        "subtype": "Type1",
+        "embedded": false,
+        "standard14": true,
+        "toUnicode": {
+          "present": false,
+          "repairStrategy": "synthesized"
+        },
+        "encoding": {
+          "name": "Unknown"
+        },
+        "plan": {
+          "action": "substitute-fallback",
+          "fallbackKey": "NotoSans-Regular"
+        }
+      }
+    ],
+    "summary": {
+      "blockers": [
+        {
+          "blocker": "standard-14",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "validator": {
+    "fontCategoryErrors": 0
+  }
+}

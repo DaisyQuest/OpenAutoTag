@@ -1,10 +1,28 @@
 import { spawn } from "node:child_process";
-import { readdir } from "node:fs/promises";
+import { access, readdir } from "node:fs/promises";
+import { constants } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const excludedFiles = new Set([path.join(repoRoot, "test", "integration", "goldmaster.test.js")]);
+
+// The font-embedding corpus runner sweeps FONT_CORPUS_DIR (default C:\LRBTest).
+// In CI environments that do not host the corpus we exclude the file entirely
+// to keep the run lean; the test itself also self-skips when the directory is
+// absent, so this is purely a startup-time optimization.
+const fontCorpusDir = process.env.FONT_CORPUS_DIR || "C:\\LRBTest";
+async function pathExists(target) {
+  try {
+    await access(target, constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+if (!(await pathExists(fontCorpusDir))) {
+  excludedFiles.add(path.join(repoRoot, "test", "integration", "font-embedding.test.js"));
+}
 
 async function listTestFiles(directoryPath) {
   try {

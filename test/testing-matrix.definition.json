@@ -314,6 +314,93 @@
       ]
     },
     {
+      "id": "font-embedding",
+      "title": "Font Embedding Hardening",
+      "rows": [
+        {
+          "id": "font-stress-fixtures",
+          "capability": "Font-stress fixture corpus (Standard 14, embedded TTF without ToUnicode, CJK Identity-H, AcroForm /DA, Symbol/ZapfDingbats, malformed Differences)",
+          "module": "font-embedder / pdf-writer / validator",
+          "statuses": {
+            "unit": "covered",
+            "integration": "partial",
+            "goldmaster": "na",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Fixture builder",
+              "path": "test/fixtures/fonts/build-fonts-fixtures.js"
+            },
+            {
+              "label": "Per-fixture unit suite",
+              "path": "test/unit/font-fixtures.test.js"
+            },
+            {
+              "label": "Expected-inventory siblings",
+              "path": "test/fixtures/fonts/"
+            }
+          ],
+          "notes": "Six deterministic, < 50KB hand-rolled PDF fixtures lock the embedder/writer/validator triad's expected behavior on every known font-failure shape. Each PDF has an *.expected.json describing the inventory findings and validator outcome the combined pipeline must produce."
+        },
+        {
+          "id": "font-corpus-acceptance",
+          "capability": "Real-world LRBTest corpus acceptance gate (14+ PDFs sweep)",
+          "module": "orchestrator / font-embedder / pdf-writer / validator",
+          "statuses": {
+            "unit": "na",
+            "integration": "covered",
+            "goldmaster": "partial",
+            "runtime": "covered",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Corpus runner",
+              "path": "test/integration/font-embedding.test.js"
+            },
+            {
+              "label": "Run summary (per-PDF)",
+              "path": "test/integration/lrbtest-run-summary.json"
+            },
+            {
+              "label": "Pre-rework baseline against 06-tagged.pdf",
+              "path": "test/integration/baseline-06-tagged.json"
+            },
+            {
+              "label": "npm script",
+              "path": "package.json#scripts.test:fonts:corpus"
+            }
+          ],
+          "notes": "Runs the full pipeline against every PDF in FONT_CORPUS_DIR (default C:\\LRBTest), asserting zero veraPDF font-category errors, 100% embedded fonts, and ToUnicode coverage >= 0.99. 06-tagged.pdf is treated as a baseline reference, not a source. Skips gracefully when the corpus directory is unavailable. Strict-failure mode is gated by FONT_CORPUS_STRICT=1 so sibling agents can iterate before flipping the gate."
+        },
+        {
+          "id": "font-findings-report",
+          "capability": "Surface font-embedding findings in /report.html",
+          "module": "orchestrator/public",
+          "statuses": {
+            "unit": "na",
+            "integration": "gap",
+            "goldmaster": "na",
+            "runtime": "partial",
+            "ui": "partial"
+          },
+          "evidence": [
+            {
+              "label": "Validator findings render path",
+              "path": "orchestrator/public"
+            }
+          ],
+          "notes": "Validator findings already flow into the report viewer; a dedicated font-findings panel will render once the validator-audit module emits the FONT_* finding codes the embedder track is adding.",
+          "gap": {
+            "priority": "medium",
+            "summary": "Add a Font Embedding section to /report.html sourced from validator findings whose code matches FONT_*."
+          }
+        }
+      ]
+    },
+    {
       "id": "writer-validator",
       "title": "Writer, Validation, and Diagnostics",
       "rows": [

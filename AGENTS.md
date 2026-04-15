@@ -16,6 +16,7 @@
 - `modules/semantic-engine/**` belongs to the semantic worker
 - `modules/reading-order/**` belongs to the reading-order worker
 - `modules/tag-builder/**` belongs to the tag-builder worker
+- `modules/font-embedder/**` belongs to the font-embedder worker
 - `modules/pdf-writer/**` belongs to the PDF writer worker
 - `modules/validator/**` belongs to the validator worker
 - `orchestrator/**` belongs to the orchestrator worker

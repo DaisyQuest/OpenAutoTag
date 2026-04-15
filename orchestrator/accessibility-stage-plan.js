@@ -195,6 +195,42 @@ export function createTaggingOutputStages({
       })
     },
     {
+      key: "fontEmbedder",
+      label: "font-embedder",
+      outputPath: path.join(resolvedOutputDir, "05b-font-inventory.json"),
+      run: async () => {
+        const fontsPath = path.join(resolvedOutputDir, "05b-font-inventory.json");
+        try {
+          const outputPath = await runJsonStage(
+            "modules/font-embedder/index.js",
+            ["--pdf", filePath, "--tags", artifacts.tagging, "--output", fontsPath],
+            fontsPath
+          );
+          return {
+            outputPath,
+            artifacts: { fontInventory: outputPath }
+          };
+        } catch (error) {
+          const fallback = {
+            schemaVersion: "1.0.0",
+            documentId: path.basename(filePath),
+            source: { pdfPath: path.resolve(filePath), tagsPath: artifacts.tagging },
+            fonts: [],
+            summary: { totalFonts: 0, embeddedFonts: 0, remediated: 0, blockers: [] },
+            diagnosticUnavailable: true,
+            diagnosticError: error.message
+          };
+          await writeFile(fontsPath, `${JSON.stringify(fallback, null, 2)}\n`);
+          return {
+            outputPath: path.resolve(fontsPath),
+            artifacts: { fontInventory: path.resolve(fontsPath) },
+            diagnosticUnavailable: true,
+            diagnosticError: error.message
+          };
+        }
+      }
+    },
+    {
       key: "pdfWriter",
       label: "pdf-writer",
       outputPath: path.join(resolvedOutputDir, taggedPdfFileName),
@@ -202,9 +238,10 @@ export function createTaggingOutputStages({
         const taggedPdf = path.join(resolvedOutputDir, taggedPdfFileName);
         const writerReportPath = path.join(resolvedOutputDir, "06-writer-report.json");
         const extraArgs = writerArgs({ artifacts, resolvedOutputDir }) || [];
+        const fontsArgs = artifacts.fontInventory ? ["--fonts", artifacts.fontInventory] : [];
         const writerReport = await runJsonStage(
           "modules/pdf-writer/index.js",
-          ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...extraArgs],
+          ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...fontsArgs, ...extraArgs],
           writerReportPath
         );
         return {

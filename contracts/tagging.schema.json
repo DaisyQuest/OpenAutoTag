@@ -35,6 +35,10 @@
     },
     "root": {
       "$ref": "#/$defs/tagNode"
+    },
+    "fontInventoryRef": {
+      "type": "string",
+      "description": "Optional path (relative to job workspace) to a font-inventory.schema.json document produced by the font-embedder stage. When present, pdf-writer MUST honor its plan[] entries."
     }
   },
   "$defs": {
