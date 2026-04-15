@@ -18,7 +18,9 @@ const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
 const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfTagWriterCli.java");
+const javaFontPlanSourcePath = path.join(moduleDir, "java", "FontPlanExecutor.java");
 const javaClassPath = path.join(buildDir, "PdfTagWriterCli.class");
+const javaFontPlanClassPath = path.join(buildDir, "FontPlanExecutor.class");
 const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
@@ -32,7 +34,9 @@ function parseArgs(argv) {
     tagsPath: args.get("--tags"),
     semanticPath: args.get("--semantic"),
     redactionsPath: args.get("--redactions"),
-    outputPath: args.get("--output")
+    outputPath: args.get("--output"),
+    fontsPath: args.get("--fonts"),
+    fontCacheDir: args.get("--font-cache")
   };
 }
 
@@ -51,8 +55,19 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, classStats] = await Promise.all([stat(javaSourcePath), stat(javaClassPath)]);
-    return sourceStats.mtimeMs > classStats.mtimeMs;
+    const [sourceStats, classStats, fontSourceStats, fontClassStats] = await Promise.all([
+      stat(javaSourcePath),
+      stat(javaClassPath),
+      stat(javaFontPlanSourcePath),
+      stat(javaFontPlanClassPath)
+    ]);
+    if (sourceStats.mtimeMs > classStats.mtimeMs) {
+      return true;
+    }
+    if (fontSourceStats.mtimeMs > fontClassStats.mtimeMs) {
+      return true;
+    }
+    return false;
   } catch {
     return true;
   }
@@ -73,7 +88,8 @@ async function ensureJavaHelperCompiled() {
           pdfboxJarPath,
           "-d",
           buildDir,
-          javaSourcePath
+          javaSourcePath,
+          javaFontPlanSourcePath
         ],
         {
           env: await buildJavaExecEnv({ bundledJavaHome })
@@ -266,7 +282,16 @@ async function writeSidecarFallback({ pdfPath, taggingDocument, outputPath, mani
   };
 }
 
-async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionInstructionPath, title, language }) {
+async function runJavaWriter({
+  pdfPath,
+  outputPath,
+  instructionPath,
+  redactionInstructionPath,
+  title,
+  language,
+  fontsPath,
+  fontCacheDir
+}) {
   await ensureJavaHelperCompiled();
   const args = [
     "-cp",
@@ -288,6 +313,14 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
     args.push("--redactions", redactionInstructionPath);
   }
 
+  if (fontsPath) {
+    args.push("--fonts", fontsPath);
+  }
+
+  if (fontCacheDir) {
+    args.push("--font-cache", fontCacheDir);
+  }
+
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
   const stdout = await execCommand(javaCommand, args, {
     env: await buildJavaExecEnv({ bundledJavaHome })
@@ -296,10 +329,39 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
   return JSON.parse(stdout);
 }
 
-export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, redactionsPath, outputPath }) {
+function resolveFontsPath({ fontsPath, taggingDocument, tagsPath }) {
+  if (fontsPath) {
+    return path.resolve(fontsPath);
+  }
+
+  // Fallback: tagging.json may carry an inline reference (`fontInventoryRef`)
+  // pointing at a font-inventory file. The reference is documented in
+  // contracts/tagging.schema.json as relative to the job workspace; we
+  // interpret that relative to the directory of the tagging document.
+  const inlineRef = taggingDocument && typeof taggingDocument.fontInventoryRef === "string"
+    ? taggingDocument.fontInventoryRef.trim()
+    : "";
+
+  if (!inlineRef) {
+    return null;
+  }
+
+  const tagsDir = tagsPath ? path.dirname(path.resolve(tagsPath)) : process.cwd();
+  return path.isAbsolute(inlineRef) ? inlineRef : path.resolve(tagsDir, inlineRef);
+}
+
+export async function writeTaggedArtifacts({
+  pdfPath,
+  tagsPath,
+  semanticPath,
+  redactionsPath,
+  outputPath,
+  fontsPath,
+  fontCacheDir
+}) {
   if (!pdfPath || !tagsPath || !outputPath) {
     throw new Error(
-      "Usage: node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> [--semantic <semantic.ordered.json>] [--redactions <redaction-plan.json>] --output <tagged.pdf>"
+      "Usage: node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> [--semantic <semantic.ordered.json>] [--redactions <redaction-plan.json>] [--fonts <fonts.json>] [--font-cache <dir>] --output <tagged.pdf>"
     );
   }
 
@@ -323,6 +385,7 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
 
   const title = deriveTitle(taggingDocument, semanticDocument, pdfPath);
   const language = deriveDocumentLanguage(semanticDocument);
+  const resolvedFontsPath = resolveFontsPath({ fontsPath, taggingDocument, tagsPath });
   const { instructionPath, records } = await buildInstructionFile({ outputPath, taggingDocument, semanticDocument });
   const redactions = redactionsPath
     ? await buildRedactionInstructionFile({ outputPath, redactionsPath })
@@ -333,7 +396,9 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
     instructionPath: path.resolve(instructionPath),
     redactionInstructionPath: redactions?.instructionPath ? path.resolve(redactions.instructionPath) : null,
     title,
-    language
+    language,
+    fontsPath: resolvedFontsPath,
+    fontCacheDir: fontCacheDir ? path.resolve(fontCacheDir) : null
   });
 
   const manifest = {
@@ -354,8 +419,11 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
       tableAttributeCount: javaReport.tableAttributeCount || 0,
       redactionCount: javaReport.redactionCount || 0,
       accessibilityTreeRedacted: Boolean(redactions?.redactionPlan?.matches?.length),
-      language
-    }
+      language,
+      fontInventoryApplied: Boolean(resolvedFontsPath),
+      fontInventoryPath: resolvedFontsPath || null
+    },
+    fonts: Array.isArray(javaReport.fonts) ? javaReport.fonts : []
   };
 
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
@@ -372,7 +440,9 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
     tableAttributeCount: javaReport.tableAttributeCount || 0,
     redactionCount: javaReport.redactionCount || 0,
     metadataApplied: javaReport.metadataApplied,
-    title
+    title,
+    fonts: Array.isArray(javaReport.fonts) ? javaReport.fonts : [],
+    fontInventoryApplied: Boolean(resolvedFontsPath)
   };
 }
 
@@ -381,6 +451,9 @@ async function main() {
   const result = await writeTaggedArtifacts(options);
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
+
+// Exported for unit tests that want to drive arg parsing in isolation.
+export { parseArgs, resolveFontsPath };
 
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
