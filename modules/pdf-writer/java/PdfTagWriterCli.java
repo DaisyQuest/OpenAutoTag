@@ -1,7 +1,10 @@
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.time.Instant;
@@ -35,8 +38,7 @@ import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructur
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureTreeRoot;
 import org.apache.pdfbox.pdmodel.documentinterchange.taggedpdf.PDTableAttributeObject;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
@@ -100,7 +102,7 @@ public class PdfTagWriterCli {
             List<PDPage> outputPages = clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
             PDDocumentCatalog catalog = outputDocument.getDocumentCatalog();
             applyMetadata(outputDocument, catalog, title, language);
-            PDFont overlayFont = loadOverlayFont();
+            PDFont overlayFont = loadOverlayFont(outputDocument);
 
             PDStructureTreeRoot structureTreeRoot = new PDStructureTreeRoot();
             catalog.setStructureTreeRoot(structureTreeRoot);
@@ -338,8 +340,43 @@ public class PdfTagWriterCli {
         return value == null || value.isEmpty() ? 0f : Float.parseFloat(value);
     }
 
-    private static PDFont loadOverlayFont() {
-        return new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+    private static PDFont loadOverlayFont(PDDocument document) throws IOException {
+        String override = System.getenv("OVERLAY_FONT_PATH");
+        List<String> candidates = new ArrayList<>();
+        if (override != null && !override.isBlank()) {
+            candidates.add(override);
+        }
+        String repoRoot = findRepoRoot();
+        if (repoRoot != null) {
+            candidates.add(repoRoot + "/modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf");
+        }
+        candidates.add("modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf");
+
+        for (String path : candidates) {
+            File ttf = new File(path);
+            if (ttf.isFile()) {
+                try (InputStream in = new FileInputStream(ttf)) {
+                    return PDType0Font.load(document, in, true);
+                }
+            }
+        }
+        throw new IOException(
+            "Overlay font not found. PDF/UA forbids Standard 14 fonts; an embeddable TTF is required. "
+            + "Tried: " + String.join(", ", candidates)
+            + ". Run `npm run install:fonts` or set OVERLAY_FONT_PATH."
+        );
+    }
+
+    private static String findRepoRoot() {
+        File cursor = new File(".").getAbsoluteFile();
+        for (int i = 0; i < 8 && cursor != null; i++) {
+            File contracts = new File(cursor, "contracts/font-inventory.schema.json");
+            if (contracts.isFile()) {
+                return cursor.getAbsolutePath();
+            }
+            cursor = cursor.getParentFile();
+        }
+        return null;
     }
 
     private static List<PDPage> clonePagesAsArtifactImages(
