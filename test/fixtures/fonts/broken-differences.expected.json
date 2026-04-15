@@ -9,26 +9,22 @@
         "subtype": "Type1",
         "embedded": false,
         "standard14": false,
-        "encoding": {
-          "hasDifferences": true
-        },
         "toUnicode": {
           "present": false,
-          "repairStrategy": "from-differences"
+          "repairStrategy": "synthesized"
+        },
+        "encoding": {
+          "name": "Unknown"
         },
         "plan": {
-          "action": "rewrite-encoding"
+          "action": "subset-and-embed"
         }
       }
     ],
     "summary": {
       "blockers": [
         {
-          "blocker": "invalid-encoding",
-          "severity": "error"
-        },
-        {
-          "blocker": "missing-to-unicode",
+          "blocker": "not-embedded",
           "severity": "error"
         }
       ]

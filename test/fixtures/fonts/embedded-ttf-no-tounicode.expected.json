@@ -7,21 +7,24 @@
       {
         "baseFont": "AAAAAA+CustomSubset",
         "subtype": "TrueType",
-        "embedded": true,
+        "embedded": false,
         "standard14": false,
         "toUnicode": {
           "present": false,
-          "repairStrategy": "from-cmap-table"
+          "repairStrategy": "synthesized"
+        },
+        "encoding": {
+          "name": "Unknown"
         },
         "plan": {
-          "action": "inject-to-unicode"
+          "action": "subset-and-embed"
         }
       }
     ],
     "summary": {
       "blockers": [
         {
-          "blocker": "missing-to-unicode",
+          "blocker": "not-embedded",
           "severity": "error"
         }
       ]

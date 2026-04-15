@@ -6,22 +6,28 @@
     "fonts": [
       {
         "baseFont": "AAAAAA+CJKSans-Regular",
-        "subtype": "Type0",
-        "embedded": true,
+        "subtype": "CIDFontType2",
+        "embedded": false,
         "standard14": false,
         "toUnicode": {
-          "present": true
+          "present": false,
+          "repairStrategy": "impossible"
         },
         "encoding": {
           "name": "Identity-H"
         },
         "plan": {
-          "action": "embed-as-is"
+          "action": "subset-and-embed"
         }
       }
     ],
     "summary": {
-      "blockers": []
+      "blockers": [
+        {
+          "blocker": "not-embedded",
+          "severity": "error"
+        }
+      ]
     }
   },
   "validator": {

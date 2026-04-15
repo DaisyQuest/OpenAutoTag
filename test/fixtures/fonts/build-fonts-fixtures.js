@@ -16,7 +16,7 @@
 // Each generated PDF is < 50 KB and byte-deterministic (no PDF /CreationDate,
 // no embedded XMP timestamps), so they can be committed to the repo.
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -336,7 +336,7 @@ export const FIXTURES = [
             embedded: false,
             standard14: true,
             toUnicode: { present: false },
-            plan: { action: "substitute-fallback", fallbackKey: "noto-sans-regular" }
+            plan: { action: "substitute-fallback", fallbackKey: "NotoSans-Regular" }
           }
         ],
         summary: {
@@ -407,7 +407,7 @@ export const FIXTURES = [
             standard14: true,
             toUnicode: { present: false },
             usage: { inFormDA: true },
-            plan: { action: "substitute-fallback", fallbackKey: "noto-sans-regular" }
+            plan: { action: "substitute-fallback", fallbackKey: "NotoSans-Regular" }
           }
         ],
         summary: {
@@ -431,7 +431,7 @@ export const FIXTURES = [
             embedded: false,
             standard14: true,
             encoding: { name: "Symbolic", isSymbolic: true },
-            plan: { action: "substitute-fallback", fallbackKey: "stix-two-math-regular" }
+            plan: { action: "substitute-fallback", fallbackKey: "NotoSansSymbols-Regular" }
           },
           {
             baseFont: "ZapfDingbats",
@@ -439,7 +439,7 @@ export const FIXTURES = [
             embedded: false,
             standard14: true,
             encoding: { name: "Symbolic", isSymbolic: true },
-            plan: { action: "substitute-fallback", fallbackKey: "noto-sans-symbols2-regular" }
+            plan: { action: "substitute-fallback", fallbackKey: "NotoSansSymbols2-Regular" }
           }
         ],
         summary: {
@@ -490,13 +490,24 @@ export async function buildAllFixtures(targetDir = here) {
     const expectedPath = path.join(targetDir, `${fixture.name}.expected.json`);
     const bytes = fixture.build();
     await writeFile(pdfPath, bytes);
-    const expectedDocument = {
-      schemaVersion: "1.0.0",
-      fixture: fixture.name,
-      description: fixture.description,
-      ...fixture.expected
-    };
-    await writeFile(expectedPath, `${JSON.stringify(expectedDocument, null, 2)}\n`);
+    // Only write the default expected file if one isn't already present.
+    // Manually-curated snapshots (captured from actual font-embedder output)
+    // take precedence so regressions are detectable.
+    let expectedExists = true;
+    try {
+      await access(expectedPath);
+    } catch {
+      expectedExists = false;
+    }
+    if (!expectedExists) {
+      const expectedDocument = {
+        schemaVersion: "1.0.0",
+        fixture: fixture.name,
+        description: fixture.description,
+        ...fixture.expected
+      };
+      await writeFile(expectedPath, `${JSON.stringify(expectedDocument, null, 2)}\n`);
+    }
     built.push({ name: fixture.name, pdfPath, expectedPath });
   }
   return built;

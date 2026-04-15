@@ -9,13 +9,17 @@
         "subtype": "Type1",
         "embedded": false,
         "standard14": true,
+        "toUnicode": {
+          "present": false,
+          "repairStrategy": "impossible"
+        },
         "encoding": {
-          "name": "Symbolic",
+          "name": "Unknown",
           "isSymbolic": true
         },
         "plan": {
           "action": "substitute-fallback",
-          "fallbackKey": "stix-two-math-regular"
+          "fallbackKey": "NotoSansSymbols-Regular"
         }
       },
       {
@@ -23,13 +27,17 @@
         "subtype": "Type1",
         "embedded": false,
         "standard14": true,
+        "toUnicode": {
+          "present": false,
+          "repairStrategy": "synthesized"
+        },
         "encoding": {
-          "name": "Symbolic",
+          "name": "Unknown",
           "isSymbolic": true
         },
         "plan": {
           "action": "substitute-fallback",
-          "fallbackKey": "noto-sans-symbols2-regular"
+          "fallbackKey": "NotoSansSymbols2-Regular"
         }
       }
     ],
