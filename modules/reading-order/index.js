@@ -136,12 +136,34 @@ function assignColumnIndex(unit, bands) {
   return bestIndex;
 }
 
+// When two blocks' `top` values differ by less than LINE_GROUP_EPSILON,
+// treat them as belonging to the same visual line and sort by `left`
+// (left-to-right). Strict ascending-by-top sorting without this epsilon
+// produces right-to-left reading order on lines where text runs have
+// sub-pixel y jitter from font metrics (e.g. a superscript or a narrow
+// stylized glyph like '&' rendered 1-2 px above adjacent text).
+//
+// The value is a compromise: too small and real line breaks get merged,
+// too large and distinct lines collapse. 6pt is smaller than any common
+// single-spaced line height and larger than the y-jitter we've observed
+// (~1-2pt) on adjacent text runs that belong to the same visual line.
+const LINE_GROUP_EPSILON = 6;
+
 function compareUnits(left, right) {
-  return (
+  const pageOrPhaseOrColumn =
     compareNumbers(left.pageNumber, right.pageNumber) ||
     compareNumbers(left.phase, right.phase) ||
-    compareNumbers(left.columnIndex, right.columnIndex) ||
-    compareNumbers(left.top, right.top) ||
+    compareNumbers(left.columnIndex, right.columnIndex);
+  if (pageOrPhaseOrColumn !== 0) return pageOrPhaseOrColumn;
+
+  const leftTop = Number.isFinite(left.top) ? left.top : 0;
+  const rightTop = Number.isFinite(right.top) ? right.top : 0;
+  const sameLine = Math.abs(leftTop - rightTop) < LINE_GROUP_EPSILON;
+  if (!sameLine) {
+    return leftTop - rightTop;
+  }
+
+  return (
     compareNumbers(left.left, right.left) ||
     compareNumbers(left.priority, right.priority) ||
     left.sortKey.localeCompare(right.sortKey)
