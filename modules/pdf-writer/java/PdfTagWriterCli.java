@@ -454,26 +454,31 @@ public class PdfTagWriterCli {
      */
     private static int sanitizeCidSetsInFile(String pdfPath) throws IOException {
         File target = new File(pdfPath);
+        File incremental = new File(pdfPath + ".cidset-clean");
+        int removed = 0;
+        boolean wrote = false;
+        // Close the reopened document BEFORE moving — Windows file locks
+        // reject overwriting a target that still has an open handle.
         try (PDDocument reopened = Loader.loadPDF(target)) {
-            int removed = sanitizeCidSets(reopened);
+            removed = sanitizeCidSets(reopened);
             if (removed > 0) {
-                // saveIncremental writes a delta section at the end of the
-                // file, leaving all unchanged objects byte-identical. Must
-                // write to a new file then atomically replace.
-                File incremental = new File(pdfPath + ".cidset-clean");
                 try (java.io.OutputStream os = new java.io.FileOutputStream(incremental)) {
                     reopened.saveIncremental(os);
                 }
-                // Replace the original atomically.
-                java.nio.file.Files.move(
-                    incremental.toPath(),
-                    target.toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
-                    java.nio.file.StandardCopyOption.ATOMIC_MOVE
-                );
+                wrote = true;
             }
-            return removed;
         }
+        if (wrote) {
+            // saveIncremental appends a delta section at the end of the
+            // file, leaving every unchanged object (including the large
+            // FontFile2 font program streams) byte-identical.
+            java.nio.file.Files.move(
+                incremental.toPath(),
+                target.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
+        }
+        return removed;
     }
 
     /**
