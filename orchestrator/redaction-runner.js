@@ -1,15 +1,17 @@
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createProfileContext, injectProfileEnv } from "./profile-runtime.js";
 import { DEFAULT_STAGE_ATTEMPTS, repoRoot, runJsonStage, runManagedWorkload } from "./workload-runner.js";
 
-function createPipelineStages({ filePath, resolvedOutputDir, artifacts }) {
+function createPipelineStages({ filePath, resolvedOutputDir, artifacts, profileContext }) {
+  const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
   return [
     {
       key: "layout",
       label: "parser",
       outputPath: path.join(resolvedOutputDir, "01-layout.json"),
       run: async () => ({
-        outputPath: await runJsonStage("modules/parser/index.js", [filePath], path.join(resolvedOutputDir, "01-layout.json")),
+        outputPath: await runJsonStage("modules/parser/index.js", [filePath], path.join(resolvedOutputDir, "01-layout.json"), { env: profileEnv }),
         artifacts: { layout: path.join(resolvedOutputDir, "01-layout.json") }
       })
     },
@@ -52,12 +54,18 @@ export async function runRedactionPipeline({
   onProgress,
   heartbeatIntervalMs
 }) {
+  const profileContext = await createProfileContext(
+    options.profileId || "default",
+    options.profileOverrides || {}
+  );
+
   return runManagedWorkload({
     filePath,
     outputDir,
     jobId,
     workload,
     options,
+    profileContext,
     stageRunner,
     maxStageAttempts,
     onProgress,

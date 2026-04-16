@@ -45,7 +45,9 @@ const state = {
   batch: null,
   selectedJobId: null,
   selectedWorkloadId: "accessibility-tagging",
+  selectedProfileId: "default",
   workloads: [...fallbackWorkloads],
+  profiles: [],
   previewSelectionByJob: Object.create(null),
   previewCache: new Map(),
   pollHandle: null,
@@ -79,6 +81,12 @@ const batchCaption = document.querySelector("#batch-caption");
 const batchOverview = document.querySelector("#batch-overview");
 const resultsBody = document.querySelector("#results-body");
 const detailPanel = document.querySelector("#detail-panel");
+const profileSelect = document.querySelector("#profile-select");
+const profileCaption = document.querySelector("#profile-caption");
+const profileDescription = document.querySelector("#profile-description");
+const profileAdvancedToggle = document.querySelector("#profile-advanced-toggle");
+const profileAdvancedPanel = document.querySelector("#profile-advanced-panel");
+const profileOverridesTextarea = document.querySelector("#profile-overrides");
 
 function hasWorkspaceAccess() {
   return Boolean(state.authConfig?.publicMode || getSessionAccess().api);
@@ -1084,6 +1092,10 @@ async function startBatch() {
   try {
     const formData = new FormData();
     formData.append("workloadId", state.selectedWorkloadId);
+    formData.append("profileId", state.selectedProfileId || "default");
+    if (profileOverridesTextarea && profileOverridesTextarea.value.trim()) {
+      formData.append("profileOverrides", profileOverridesTextarea.value.trim());
+    }
 
     for (const item of state.selections) {
       formData.append("files", item.file);
@@ -1141,7 +1153,11 @@ async function startUrlJob() {
       },
       body: JSON.stringify({
         fileUrl,
-        workloadId: state.selectedWorkloadId
+        workloadId: state.selectedWorkloadId,
+        profileId: state.selectedProfileId || "default",
+        ...(profileOverridesTextarea && profileOverridesTextarea.value.trim()
+          ? { profileOverrides: JSON.parse(profileOverridesTextarea.value.trim()) }
+          : {})
       })
     });
     const job = await response.json();
@@ -1191,13 +1207,60 @@ async function loadWorkloads() {
   render();
 }
 
+function renderProfileDropdown() {
+  if (!profileSelect) return;
+
+  profileSelect.innerHTML = "";
+  for (const profile of state.profiles) {
+    const option = document.createElement("option");
+    option.value = profile.profileId;
+    option.textContent = profile.label;
+    if (profile.profileId === state.selectedProfileId) {
+      option.selected = true;
+    }
+    profileSelect.appendChild(option);
+  }
+
+  const selected = state.profiles.find((p) => p.profileId === state.selectedProfileId);
+  if (profileDescription) {
+    profileDescription.textContent = selected?.description || "";
+  }
+  if (profileCaption) {
+    profileCaption.textContent = state.profiles.length
+      ? `${state.profiles.length} profile${state.profiles.length === 1 ? "" : "s"} available`
+      : "No profiles loaded";
+  }
+}
+
+async function loadProfiles() {
+  if (!hasWorkspaceAccess()) {
+    state.profiles = [];
+    renderProfileDropdown();
+    return;
+  }
+
+  try {
+    const payload = await fetchJson("/profiles", { auth: "api" });
+    if (Array.isArray(payload.profiles) && payload.profiles.length) {
+      state.profiles = payload.profiles;
+      if (!state.profiles.some((p) => p.profileId === state.selectedProfileId)) {
+        state.selectedProfileId = state.profiles[0]?.profileId || "default";
+      }
+    }
+  } catch {
+    state.profiles = [];
+  }
+
+  renderProfileDropdown();
+}
+
 async function initializeAccess() {
   state.authConfig = await loadAuthConfig();
 
   if (state.authConfig.publicMode) {
     setAuthMessage("Public mode is enabled. Protected headers are not required in this tab.");
     render();
-    await loadWorkloads();
+    await Promise.all([loadWorkloads(), loadProfiles()]);
     return;
   }
 
@@ -1213,7 +1276,7 @@ async function initializeAccess() {
   render();
 
   if (hasWorkspaceAccess()) {
-    await loadWorkloads();
+    await Promise.all([loadWorkloads(), loadProfiles()]);
   }
 }
 
@@ -1232,7 +1295,7 @@ async function unlockWorkspace(event) {
     authKeyInput.value = "";
     setAuthMessage(payload.access?.admin ? "Admin access is active in this tab." : "API access is active in this tab.");
     render();
-    await loadWorkloads();
+    await Promise.all([loadWorkloads(), loadProfiles()]);
   } catch (error) {
     setAuthMessage(error.message);
     render();
@@ -1331,7 +1394,7 @@ clearSessionButton.addEventListener("click", async () => {
   state.previewCache.clear();
   setAuthMessage("Session keys cleared from this tab.");
   render();
-  await loadWorkloads();
+  await Promise.all([loadWorkloads(), loadProfiles()]);
 });
 
 dropzone.addEventListener("click", () => {
@@ -1406,6 +1469,24 @@ urlInput.addEventListener("keydown", (event) => {
     void startUrlJob();
   }
 });
+
+if (profileSelect) {
+  profileSelect.addEventListener("change", () => {
+    state.selectedProfileId = profileSelect.value;
+    const selected = state.profiles.find((p) => p.profileId === state.selectedProfileId);
+    if (profileDescription) {
+      profileDescription.textContent = selected?.description || "";
+    }
+  });
+}
+
+if (profileAdvancedToggle && profileAdvancedPanel) {
+  profileAdvancedToggle.addEventListener("click", () => {
+    const isHidden = profileAdvancedPanel.hidden;
+    profileAdvancedPanel.hidden = !isHidden;
+    profileAdvancedToggle.textContent = isHidden ? "Hide Advanced" : "Advanced";
+  });
+}
 
 updateSelectionState();
 void initializeAccess();

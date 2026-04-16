@@ -125,6 +125,30 @@
                 <div id="workload-list" class="workload-list"></div>
               </section>
 
+              <section class="profile-surface" aria-labelledby="profile-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="profile-title">Profile</h4>
+                  <span id="profile-caption">Loading profiles</span>
+                </div>
+                <select id="profile-select" class="url-input" aria-label="Select a profile">
+                  <option value="default">Default</option>
+                </select>
+                <p id="profile-description" class="section-copy">Balanced general-purpose profile suitable for most document types.</p>
+                <button id="profile-advanced-toggle" class="ghost-button compact-button" type="button">Advanced</button>
+                <div id="profile-advanced-panel" hidden>
+                  <label class="field-stack" for="profile-overrides">
+                    <span class="field-label">Profile overrides (JSON)</span>
+                    <textarea
+                      id="profile-overrides"
+                      class="url-input"
+                      rows="4"
+                      placeholder='{"parser": {"ocrMode": "force"}}'
+                      aria-label="Profile overrides JSON"
+                    ></textarea>
+                  </label>
+                </div>
+              </section>
+
               <div
                 id="dropzone"
                 class="dropzone"
