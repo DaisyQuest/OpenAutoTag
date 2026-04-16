@@ -694,7 +694,7 @@ public class FontRepairCli {
                     if (simpleFont.hasGlyph(glyphName)) continue;
                     // Check via code
                     try {
-                        if (simpleFont.hasGlyph(code)) continue;
+                        if (simpleFont.hasGlyph(String.valueOf(code))) continue;
                     } catch (Exception ignored) {}
                     mismatches++;
                     if (mismatchExamples.size() < 5) {
