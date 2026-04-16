@@ -16,7 +16,9 @@ export const artifactLabels = {
   tagManifest: "Tag tree",
   redactionReport: "Redaction report",
   semanticMerged: "Merged paragraphs",
-  paragraphMergeReport: "Paragraph merge report"
+  paragraphMergeReport: "Paragraph merge report",
+  repairedPdf: "Repaired PDF",
+  repairReport: "Repair report"
 };
 
 const JSON_PREVIEW_ITEM_LIMIT = 8;
