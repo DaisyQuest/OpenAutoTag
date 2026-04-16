@@ -1,0 +1,294 @@
+import Ajv2020 from "ajv/dist/2020.js";
+import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
+
+const ajv = new Ajv2020({ allErrors: true });
+const validateSemantic = ajv.compile(semanticSchema);
+
+const DEFAULT_CONFIG = {
+  enabled: true,
+  gapMultiplier: 1.8,
+  xAlignmentTolerance: 12,
+  heightVarianceTolerance: 0.3,
+  minConfidence: 0.5,
+  sentenceBoundaryPenalty: 0.3,
+  reportUnmerged: true
+};
+
+function getNodeBottom(node) {
+  return (node.bbox?.[1] ?? 0) + (node.bbox?.[3] ?? 0);
+}
+
+function getNodeTop(node) {
+  return node.bbox?.[1] ?? 0;
+}
+
+function getNodeLeft(node) {
+  return node.bbox?.[0] ?? 0;
+}
+
+function getNodeHeight(node) {
+  return node.bbox?.[3] ?? 0;
+}
+
+function getNodeWidth(node) {
+  return node.bbox?.[2] ?? 0;
+}
+
+function endsSentence(text) {
+  const trimmed = (text || "").trimEnd();
+  return /[.!?:;]["'\u201D\u2019)]*$/.test(trimmed);
+}
+
+function startsCapital(text) {
+  const trimmed = (text || "").trimStart();
+  return /^[A-Z\u00C0-\u00D6]/.test(trimmed);
+}
+
+function computeMergeConfidence(prev, curr, config) {
+  const reasons = [];
+  let confidence = 1.0;
+
+  const prevH = getNodeHeight(prev);
+  const currH = getNodeHeight(curr);
+  const lineHeight = Math.max(prevH, currH, 1);
+
+  const gap = getNodeTop(curr) - getNodeBottom(prev);
+  const maxGap = lineHeight * config.gapMultiplier;
+
+  if (gap > maxGap) {
+    const excess = (gap - maxGap) / maxGap;
+    const penalty = Math.min(0.8, excess * 0.6);
+    confidence -= penalty;
+    reasons.push(`gap=${gap.toFixed(1)}px exceeds ${maxGap.toFixed(1)}px (${lineHeight.toFixed(0)}×${config.gapMultiplier})`);
+  }
+
+  if (gap < 0) {
+    confidence -= 0.4;
+    reasons.push(`negative gap=${gap.toFixed(1)}px (overlapping blocks)`);
+  }
+
+  const xShift = Math.abs(getNodeLeft(curr) - getNodeLeft(prev));
+  if (xShift > config.xAlignmentTolerance) {
+    const penalty = Math.min(0.4, (xShift - config.xAlignmentTolerance) / 60);
+    confidence -= penalty;
+    reasons.push(`x-shift=${xShift.toFixed(1)}px exceeds tolerance=${config.xAlignmentTolerance}px`);
+  }
+
+  if (prevH > 0 && currH > 0) {
+    const variance = Math.abs(prevH - currH) / Math.max(prevH, currH);
+    if (variance > config.heightVarianceTolerance) {
+      confidence -= 0.3;
+      reasons.push(`height variance=${(variance * 100).toFixed(0)}% exceeds ${(config.heightVarianceTolerance * 100).toFixed(0)}%`);
+    }
+  }
+
+  if (endsSentence(prev.text) && startsCapital(curr.text)) {
+    confidence -= config.sentenceBoundaryPenalty;
+    reasons.push(`sentence boundary: prev ends with terminal punctuation, next starts capital`);
+  }
+
+  confidence = Math.max(0, Math.min(1, confidence));
+
+  return {
+    confidence,
+    merge: confidence >= config.minConfidence,
+    reasons: reasons.length > 0 ? reasons : ["all signals consistent"]
+  };
+}
+
+function mergeTwoNodes(prev, curr) {
+  const left = Math.min(getNodeLeft(prev), getNodeLeft(curr));
+  const top = Math.min(getNodeTop(prev), getNodeTop(curr));
+  const right = Math.max(
+    getNodeLeft(prev) + getNodeWidth(prev),
+    getNodeLeft(curr) + getNodeWidth(curr)
+  );
+  const bottom = Math.max(getNodeBottom(prev), getNodeBottom(curr));
+
+  return {
+    ...prev,
+    text: `${prev.text} ${curr.text}`.trim(),
+    bbox: [left, top, right - left, bottom - top],
+    _mergedFrom: [...(prev._mergedFrom || [prev.id]), curr.id],
+    _mergeConfidence: undefined
+  };
+}
+
+function mergePageParagraphs(pageNodes, config) {
+  const pNodes = [];
+  const nonPNodes = [];
+
+  for (const node of pageNodes) {
+    if (node.role === "P") {
+      pNodes.push(node);
+    } else {
+      nonPNodes.push(node);
+    }
+  }
+
+  if (pNodes.length < 2) {
+    return { nodes: pageNodes, merges: [], skips: [] };
+  }
+
+  const sorted = [...pNodes].sort((a, b) => getNodeTop(a) - getNodeTop(b) || getNodeLeft(a) - getNodeLeft(b));
+  const merges = [];
+  const skips = [];
+  const result = [];
+  let current = sorted[0];
+  let paragraphGroupId = `pg-${current.pageNumber}-0`;
+  let groupIndex = 0;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const next = sorted[i];
+    const decision = computeMergeConfidence(current, next, config);
+
+    if (decision.merge) {
+      merges.push({
+        from: [current.id, next.id],
+        confidence: decision.confidence,
+        reasons: decision.reasons
+      });
+      current = mergeTwoNodes(current, next);
+      current.paragraphGroupId = paragraphGroupId;
+    } else {
+      current.paragraphGroupId = paragraphGroupId;
+      result.push(current);
+
+      if (config.reportUnmerged) {
+        skips.push({
+          between: [current.id, next.id],
+          gap: getNodeTop(next) - getNodeBottom(current),
+          confidence: decision.confidence,
+          reasons: decision.reasons
+        });
+      }
+
+      groupIndex++;
+      paragraphGroupId = `pg-${next.pageNumber}-${groupIndex}`;
+      current = next;
+    }
+  }
+
+  current.paragraphGroupId = paragraphGroupId;
+  result.push(current);
+
+  return { nodes: [...result, ...nonPNodes], merges, skips };
+}
+
+export function mergeParagraphs(semanticDocument, config = {}) {
+  const cfg = { ...DEFAULT_CONFIG, ...config };
+
+  if (!cfg.enabled) {
+    return {
+      document: semanticDocument,
+      report: { enabled: false, pages: [], summary: { totalMerges: 0, totalSkips: 0, totalLinesIn: 0, totalNodesOut: 0 } }
+    };
+  }
+
+  const pageGroups = new Map();
+  for (const node of semanticDocument.nodes) {
+    const pg = node.pageNumber;
+    const nodes = pageGroups.get(pg) || [];
+    nodes.push(node);
+    pageGroups.set(pg, nodes);
+  }
+
+  const allNodes = [];
+  const pageReports = [];
+  let totalMerges = 0;
+  let totalSkips = 0;
+
+  for (const pageNumber of [...pageGroups.keys()].sort((a, b) => a - b)) {
+    const { nodes, merges, skips } = mergePageParagraphs(pageGroups.get(pageNumber), cfg);
+    allNodes.push(...nodes);
+    totalMerges += merges.length;
+    totalSkips += skips.length;
+
+    pageReports.push({
+      pageNumber,
+      linesIn: pageGroups.get(pageNumber).length,
+      nodesOut: nodes.length,
+      merges,
+      skips
+    });
+  }
+
+  const output = {
+    ...semanticDocument,
+    nodes: allNodes
+  };
+
+  const report = {
+    enabled: true,
+    config: cfg,
+    pages: pageReports,
+    summary: {
+      totalMerges,
+      totalSkips,
+      totalLinesIn: semanticDocument.nodes.length,
+      totalNodesOut: allNodes.length,
+      reductionPercent: semanticDocument.nodes.length > 0
+        ? ((1 - allNodes.length / semanticDocument.nodes.length) * 100).toFixed(1)
+        : "0.0"
+    }
+  };
+
+  return { document: output, report };
+}
+
+export async function run(inputPath, outputPath, reportPath, config = {}) {
+  const semanticDocument = JSON.parse(await readFile(inputPath, "utf8"));
+
+  if (!validateSemantic(semanticDocument)) {
+    throw new Error(`Paragraph-merger input failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
+  }
+
+  const { document, report } = mergeParagraphs(semanticDocument, config);
+
+  if (!validateSemantic(document)) {
+    throw new Error(`Paragraph-merger output failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
+  }
+
+  if (outputPath) {
+    await writeFile(outputPath, `${JSON.stringify(document, null, 2)}\n`);
+  }
+
+  if (reportPath) {
+    await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+  }
+
+  return { document, report };
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const inputPath = args[0];
+  const outputPath = args[1] || null;
+  const reportPath = args[2] || null;
+
+  if (!inputPath) {
+    throw new Error("Usage: node modules/paragraph-merger/index.js <semantic.json> [output.json] [report.json]");
+  }
+
+  const { document, report } = await run(inputPath, outputPath, reportPath);
+
+  if (!outputPath) {
+    process.stdout.write(`${JSON.stringify(document, null, 2)}\n`);
+  }
+
+  process.stderr.write(
+    `[paragraph-merger] ${report.summary.totalLinesIn} lines → ${report.summary.totalNodesOut} nodes ` +
+    `(${report.summary.reductionPercent}% reduction, ${report.summary.totalMerges} merges, ${report.summary.totalSkips} low-confidence skips)\n`
+  );
+}
+
+const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isCli) {
+  main().catch((error) => {
+    process.stderr.write(`${error.message}\n`);
+    process.exitCode = 1;
+  });
+}
