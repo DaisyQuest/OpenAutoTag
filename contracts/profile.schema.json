@@ -274,6 +274,12 @@
       "type": "object",
       "description": "Controls how consecutive text lines are merged into logical paragraphs.",
       "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["text-structure", "pairwise", "disabled"],
+          "default": "text-structure",
+          "description": "Merge strategy. 'text-structure' detects page margin and median spacing for 80%+ reduction. 'pairwise' uses the original confidence-based pair merging. 'disabled' passes through unchanged."
+        },
         "enabled": {
           "type": "boolean",
           "default": true,

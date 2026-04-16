@@ -53,6 +53,9 @@
     "skipFontAudit": false,
     "skipVeraPdf": false
   },
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
   "redactor": {
     "bboxPaddingX": 2,
     "bboxPaddingY": 1

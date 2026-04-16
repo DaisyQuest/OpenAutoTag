@@ -21,6 +21,9 @@
       { "name": "gray-600", "dpi": 600, "colorMode": "gray" }
     ]
   },
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
   "readingOrder": {
     "lineGroupEpsilon": 8
   },
