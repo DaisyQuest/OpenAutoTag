@@ -91,8 +91,22 @@ body {
   color: var(--ink);
   text-decoration: none;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 150ms ease;
+}
+
+.brand-mark:hover {
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+.brand-icon {
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .topbar-links,
@@ -221,8 +235,39 @@ body {
 
 .hero-link-row {
   display: flex;
-  gap: 0.8rem;
-  margin-top: 1.2rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.hero-reports-row {
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+
+.hero-link-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.report-link {
+  font-size: 0.82rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(11, 122, 117, 0.08);
+  border: 1px solid rgba(11, 122, 117, 0.15);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.report-link:hover {
+  background: rgba(11, 122, 117, 0.15);
+  border-color: rgba(11, 122, 117, 0.3);
+  text-decoration: none;
 }
 
 .hero-step-grid {
@@ -794,20 +839,26 @@ body {
 }
 
 .result-row {
+  cursor: pointer;
   transition:
-    background 160ms ease,
-    box-shadow 160ms ease;
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .result-row:hover {
   background: rgba(11, 122, 117, 0.04);
 }
 
+.result-row:active {
+  transform: scale(0.998);
+}
+
 .result-row.is-active {
   background:
-    linear-gradient(90deg, rgba(11, 122, 117, 0.08), rgba(255, 255, 255, 0.94)),
+    linear-gradient(90deg, rgba(11, 122, 117, 0.10), rgba(255, 255, 255, 0.94)),
     rgba(255, 255, 255, 0.92);
-  box-shadow: inset 3px 0 0 rgba(11, 122, 117, 0.65);
+  box-shadow: inset 4px 0 0 var(--signal);
 }
 
 .empty-row {
