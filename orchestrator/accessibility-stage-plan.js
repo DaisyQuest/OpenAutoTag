@@ -1,4 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { copyFile, readFile, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { injectProfileEnv } from "./profile-runtime.js";
 import { runJsonStage } from "./workload-runner.js";
@@ -148,20 +149,66 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
       })
     },
     {
+      key: "paragraphMerger",
+      label: "paragraph-merger",
+      outputPath: path.join(resolvedOutputDir, "03b-semantic-merged.json"),
+      run: async () => {
+        const mergedPath = path.join(resolvedOutputDir, "03b-semantic-merged.json");
+        const reportPath = path.join(resolvedOutputDir, "03c-paragraph-merge-report.json");
+
+        const mergerConfig = profileContext ? profileContext.get("paragraphMerger") : {};
+        const enabled = mergerConfig.enabled !== false;
+
+        if (!enabled) {
+          await copyFile(artifacts.semantic, mergedPath);
+          return {
+            outputPath: mergedPath,
+            artifacts: { semanticMerged: mergedPath }
+          };
+        }
+
+        try {
+          const configPath = path.join(os.tmpdir(), `paragraph-merger-config-${process.pid}-${Date.now()}.json`);
+          await writeFile(configPath, JSON.stringify(mergerConfig));
+
+          await runJsonStage(
+            "modules/paragraph-merger/index.js",
+            [artifacts.semantic, mergedPath, reportPath, "--config", configPath],
+            mergedPath
+          );
+
+          return {
+            outputPath: mergedPath,
+            artifacts: { semanticMerged: mergedPath, paragraphMergeReport: reportPath }
+          };
+        } catch (error) {
+          process.stderr.write(`[paragraph-merger] stage failed, falling back to unmerged semantic: ${error.message}\n`);
+          await copyFile(artifacts.semantic, mergedPath);
+          return {
+            outputPath: mergedPath,
+            artifacts: { semanticMerged: mergedPath },
+            fallbackUsed: true,
+            fallbackReason: error.message
+          };
+        }
+      }
+    },
+    {
       key: "readingOrder",
       label: "reading-order",
       outputPath: path.join(resolvedOutputDir, "04-semantic-ordered.json"),
       run: async () => {
         const outputPath = path.join(resolvedOutputDir, "04-semantic-ordered.json");
+        const inputPath = artifacts.semanticMerged || artifacts.semantic;
 
         try {
-          const stageOutputPath = await runJsonStage("modules/reading-order/index.js", [artifacts.semantic], outputPath);
+          const stageOutputPath = await runJsonStage("modules/reading-order/index.js", [inputPath], outputPath);
           return {
             outputPath: stageOutputPath,
             artifacts: { semanticOrdered: stageOutputPath }
           };
         } catch (error) {
-          const fallback = await fallbackReadingOrder(artifacts.semantic, outputPath, error.message);
+          const fallback = await fallbackReadingOrder(inputPath, outputPath, error.message);
           return {
             outputPath: fallback.outputPath,
             artifacts: { semanticOrdered: fallback.outputPath },

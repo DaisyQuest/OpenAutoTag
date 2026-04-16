@@ -109,7 +109,7 @@ export async function evaluateDocument(docId, semanticDocument, versions) {
   for (const version of versions) {
     const { document: merged, report: mergeReport } = mergeParagraphs(
       semanticDocument,
-      version.config
+      { ...version.config, heuristics: version.heuristics }
     );
     const scores = scoreMergeResult(semanticDocument, merged, mergeReport);
     versionResults.push({

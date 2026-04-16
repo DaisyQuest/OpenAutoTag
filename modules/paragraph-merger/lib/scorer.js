@@ -18,10 +18,37 @@ export function scoreMergeResult(original, merged, report) {
     ? coherentCount / mergedPNodes.length
     : 1;
 
+  // Detect multi-column layout: check if any page has nodes whose x-ranges
+  // suggest two or more columns (significant horizontal gap between groups).
+  const pageWidths = new Map();
+  const pageCols = new Map();
+  for (const node of original.nodes) {
+    if (!node.bbox || node.bbox.length < 4) continue;
+    const page = node.pageNumber ?? node.page ?? 0;
+    const right = node.bbox[0] + node.bbox[2];
+    const curMax = pageWidths.get(page) || 0;
+    if (right > curMax) pageWidths.set(page, right);
+  }
+  // Simple heuristic: page is multi-column if >3 nodes exist whose x-centers
+  // cluster into 2+ groups separated by >20% page width.
+  for (const [page, pw] of pageWidths) {
+    const centers = original.nodes
+      .filter((n) => (n.pageNumber ?? n.page ?? 0) === page && n.bbox)
+      .map((n) => n.bbox[0] + n.bbox[2] / 2)
+      .sort((a, b) => a - b);
+    let gapFound = false;
+    for (let i = 1; i < centers.length; i++) {
+      if (centers[i] - centers[i - 1] > pw * 0.2) { gapFound = true; break; }
+    }
+    pageCols.set(page, gapFound);
+  }
+
   let overMergeSignals = 0;
   for (const node of mergedPNodes) {
     if (!node._mergedFrom || node._mergedFrom.length < 2) continue;
     const text = node.text || "";
+
+    // Original checks
     if (/\n\s*\n/.test(text)) overMergeSignals++;
     const heights = new Set();
     for (const origId of node._mergedFrom) {
@@ -29,6 +56,32 @@ export function scoreMergeResult(original, merged, report) {
       if (orig?.bbox?.[3]) heights.add(Math.round(orig.bbox[3]));
     }
     if (heights.size > 2) overMergeSignals++;
+
+    // NEW: unusually long paragraph (>800 chars) likely over-merged
+    if (text.length > 800) overMergeSignals++;
+
+    // NEW: crossed column boundary — merged bbox width > 90% page width in multi-column doc
+    if (node.bbox && node.bbox.length >= 3) {
+      const page = node.pageNumber ?? node.page ?? 0;
+      const pw = pageWidths.get(page) || 0;
+      if (pw > 0 && pageCols.get(page) && node.bbox[2] > pw * 0.9) {
+        overMergeSignals++;
+      }
+    }
+
+    // NEW: heading pattern mid-paragraph — ALL CAPS line (>3 words) appearing mid-text
+    const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+    if (lines.length > 2) {
+      // Check inner lines (not first or last) for ALL CAPS heading pattern
+      for (let li = 1; li < lines.length - 1; li++) {
+        const line = lines[li];
+        const words = line.split(/\s+/);
+        if (words.length > 3 && line === line.toUpperCase() && /[A-Z]/.test(line)) {
+          overMergeSignals++;
+          break; // count at most once per node
+        }
+      }
+    }
   }
   const mergedMultiLine = mergedPNodes.filter((n) => n._mergedFrom && n._mergedFrom.length > 1);
   scores.overMergeRate = mergedMultiLine.length > 0
@@ -72,11 +125,11 @@ export function scoreMergeResult(original, merged, report) {
   }
 
   scores.aggregate = (
-    scores.nodeReduction * 0.2 +
-    scores.paragraphCoherence * 0.3 +
-    (1 - scores.overMergeRate) * 0.25 +
+    scores.nodeReduction * 0.15 +
+    scores.paragraphCoherence * 0.25 +
+    (1 - scores.overMergeRate) * 0.35 +
     (1 - scores.underMergeRate) * 0.15 +
-    scores.skipExplainability * 0.1
+    scores.skipExplainability * 0.10
   );
 
   return scores;

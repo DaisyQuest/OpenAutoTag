@@ -137,13 +137,88 @@ export async function ocrScore(layoutPath) {
 }
 
 /**
+ * Computes paragraph quality from a semantic-ordered JSON document.
+ * Evaluates:
+ * - meanParagraphLength: very short (<20) or very long (>2000) chars penalized
+ * - paragraphCountPerPage: very high (>30/page) suggests under-merging
+ * - consistencyScore: lower variance in paragraph length = better
+ *
+ * @param {string} semanticPath - Path to semantic-ordered JSON
+ * @returns {Promise<number|null>} 0-1 score, or null if unavailable
+ */
+export async function paragraphQualityScore(semanticPath) {
+  const doc = await readJsonSafe(semanticPath);
+  if (!doc || !Array.isArray(doc.nodes) || doc.nodes.length === 0) return null;
+
+  const paragraphs = doc.nodes.filter(
+    (n) => (n.role === "P" || n.type === "P") && n.text
+  );
+  if (paragraphs.length === 0) return null;
+
+  const lengths = paragraphs.map((p) => (p.text || "").length);
+  const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+
+  // --- meanParagraphLength score (0-1) ---
+  // Ideal range: 20-2000 chars. Outside that, penalise linearly.
+  let lengthScore;
+  if (mean >= 20 && mean <= 2000) {
+    // Sweet spot: 80-500 gets 1.0, outside that tapers
+    if (mean >= 80 && mean <= 500) {
+      lengthScore = 1.0;
+    } else if (mean < 80) {
+      lengthScore = 0.5 + 0.5 * ((mean - 20) / 60);
+    } else {
+      lengthScore = 0.5 + 0.5 * ((2000 - mean) / 1500);
+    }
+  } else if (mean < 20) {
+    lengthScore = Math.max(0, mean / 20 * 0.3);
+  } else {
+    lengthScore = Math.max(0, 0.5 * (1 - (mean - 2000) / 2000));
+  }
+
+  // --- paragraphCountPerPage score (0-1) ---
+  const pages = new Set();
+  for (const p of paragraphs) {
+    pages.add(p.pageNumber ?? p.page ?? 0);
+  }
+  const perPage = paragraphs.length / Math.max(pages.size, 1);
+  let perPageScore;
+  if (perPage <= 30) {
+    perPageScore = 1.0;
+  } else {
+    // Linearly penalise above 30, hitting 0 at 100+
+    perPageScore = Math.max(0, 1 - (perPage - 30) / 70);
+  }
+
+  // --- consistencyScore (0-1) based on coefficient of variation ---
+  let consistencyScore = 1.0;
+  if (mean > 0 && lengths.length > 1) {
+    const variance =
+      lengths.reduce((sum, l) => sum + (l - mean) ** 2, 0) / lengths.length;
+    const stddev = Math.sqrt(variance);
+    const cv = stddev / mean; // coefficient of variation
+    // cv=0 is perfect, cv>=2 is very inconsistent
+    consistencyScore = Math.max(0, 1 - cv / 2);
+  }
+
+  // Weighted combination
+  const score =
+    lengthScore * 0.45 +
+    perPageScore * 0.35 +
+    consistencyScore * 0.2;
+
+  return Math.max(0, Math.min(1, score));
+}
+
+/**
  * Default scoring weights matching the profile schema defaults.
  */
 const DEFAULT_WEIGHTS = {
   veraPdfFindings: 0.4,
   fontEmbedCoverage: 0.2,
-  readingOrderInversions: 0.25,
-  ocrConfidence: 0.15
+  readingOrderInversions: 0.15,
+  ocrConfidence: 0.15,
+  paragraphQuality: 0.1
 };
 
 /**
@@ -161,7 +236,8 @@ export function computeAggregateScore(metrics, weights = DEFAULT_WEIGHTS) {
     veraPdfFindings: (v) => 1 / (1 + v),
     fontEmbedCoverage: (v) => v,
     readingOrderInversions: (v) => 1 / (1 + v),
-    ocrConfidence: (v) => v / 100
+    ocrConfidence: (v) => v / 100,
+    paragraphQuality: (v) => v
   };
 
   let totalWeight = 0;
