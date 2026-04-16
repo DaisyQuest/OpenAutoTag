@@ -234,6 +234,21 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
   ];
 }
 
+function buildWriterModeArgs(profileContext) {
+  const args = [];
+  if (!profileContext) {
+    return args;
+  }
+  const writerConfig = profileContext.get("pdfWriter");
+  if (writerConfig.mode) {
+    args.push("--mode", writerConfig.mode);
+  }
+  if (writerConfig.nativeMatchThreshold != null) {
+    args.push("--native-match-threshold", String(writerConfig.nativeMatchThreshold));
+  }
+  return args;
+}
+
 export function createTaggingOutputStages({
   filePath,
   resolvedOutputDir,
@@ -246,6 +261,7 @@ export function createTaggingOutputStages({
   writerArgs = () => []
 }) {
   const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+  const modeArgs = buildWriterModeArgs(profileContext);
 
   const stages = [
     {
@@ -272,7 +288,7 @@ export function createTaggingOutputStages({
         const extraArgs = writerArgs({ artifacts, resolvedOutputDir }) || [];
         const writerReport = await runJsonStage(
           "modules/pdf-writer/index.js",
-          ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...extraArgs],
+          ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...modeArgs, ...extraArgs],
           writerReportPath,
           { env: profileEnv }
         );
