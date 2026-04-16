@@ -1189,39 +1189,88 @@ body {
   font-size: 0.78rem;
 }
 
+@keyframes native-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes native-glow {
+  0%, 100% { box-shadow: 0 2px 8px rgba(13, 110, 63, 0.3); }
+  50% { box-shadow: 0 2px 16px rgba(22, 163, 74, 0.5), 0 0 24px rgba(22, 163, 74, 0.15); }
+}
+
 .native-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.7rem;
-  border-radius: 4px;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: help;
-  margin-bottom: 0.4rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.native-badge:hover {
+  transform: translateY(-1px);
+}
+
+.native-badge-icon {
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 .native-retained {
-  background: linear-gradient(135deg, #0d6e3f 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+  background-size: 200% auto;
   color: #fff;
-  box-shadow: 0 1px 3px rgba(13, 110, 63, 0.3);
+  box-shadow: 0 2px 8px rgba(13, 110, 63, 0.3);
+  animation: native-glow 3s ease-in-out infinite;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.native-retained:hover {
+  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.45);
+}
+
+.native-retained-prominent {
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #047857 0%, #059669 30%, #10b981 60%, #34d399 100%);
+  background-size: 300% auto;
+  animation: native-shimmer 4s linear infinite, native-glow 3s ease-in-out infinite;
 }
 
 .native-partial {
-  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
   color: #fff;
-  box-shadow: 0 1px 3px rgba(180, 83, 9, 0.3);
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .native-raster {
-  background: rgba(100, 116, 139, 0.12);
-  color: #64748b;
-  border: 1px solid rgba(100, 116, 139, 0.2);
+  background: rgba(100, 116, 139, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.15);
+  font-weight: 600;
 }
 
 .native-badge-section {
   margin-bottom: 0.6rem;
+}
+
+.native-badge-row {
+  margin-top: 0.35rem;
+}
+
+.native-match-detail {
+  font-size: 0.65rem;
+  opacity: 0.85;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .result-actions {

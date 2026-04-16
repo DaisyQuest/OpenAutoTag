@@ -521,25 +521,27 @@ function renderOutcomeCell(item) {
   `;
 }
 
-function renderNativeBadge(item) {
+function renderNativeBadge(item, { prominent = false } = {}) {
   const writerMode = item.summary?.writerMode || item.writerReport?.writerMode;
   if (!writerMode) return "";
+  const cls = prominent ? "native-retained-prominent" : "";
+
   if (writerMode === "native") {
     const matchRate = item.summary?.operatorMatchRate ?? item.writerReport?.matchRate;
-    const rateText = matchRate != null ? ` (${Math.round(matchRate * 100)}% match)` : "";
-    return `<span class="native-badge native-retained" title="Original vector text, fonts, and links preserved. No rasterization.${rateText}">NATIVE PDF RETAINED</span>`;
+    const matchDetail = matchRate != null ? `<span class="native-match-detail">${Math.round(matchRate * 100)}% fidelity</span>` : "";
+    return `<span class="native-badge native-retained ${cls}" title="Original vector text, fonts, and links preserved. No rasterization. Text stays sharp at any zoom."><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED ${matchDetail}</span>`;
   }
   if (writerMode === "raster") {
-    return `<span class="native-badge native-raster" title="Pages rasterized to images with invisible text overlay.">RASTER MODE</span>`;
+    return `<span class="native-badge native-raster" title="Pages rasterized to images with invisible text overlay.">RASTER</span>`;
   }
   if (writerMode === "auto") {
     const pagesNative = item.summary?.pagesNative ?? item.writerReport?.pagesNative ?? 0;
     const pagesRaster = item.summary?.pagesRaster ?? item.writerReport?.pagesRaster ?? 0;
     if (pagesNative > 0 && pagesRaster === 0) {
-      return `<span class="native-badge native-retained" title="All ${pagesNative} pages preserved natively.">NATIVE PDF RETAINED</span>`;
+      return `<span class="native-badge native-retained ${cls}" title="All ${pagesNative} pages preserved natively. Vector text, fonts, and links intact."><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED</span>`;
     }
     if (pagesNative > 0) {
-      return `<span class="native-badge native-partial" title="${pagesNative} pages native, ${pagesRaster} pages rasterized.">${pagesNative}/${pagesNative + pagesRaster} NATIVE</span>`;
+      return `<span class="native-badge native-partial" title="${pagesNative} pages native, ${pagesRaster} pages rasterized."><span class="native-badge-icon">\u{26A0}\uFE0F</span> ${pagesNative}/${pagesNative + pagesRaster} NATIVE</span>`;
     }
     return `<span class="native-badge native-raster" title="Auto mode fell back to raster on all pages.">RASTER FALLBACK</span>`;
   }
@@ -608,6 +610,7 @@ function renderResultsTable() {
             <button class="row-select" type="button" data-job-id="${escapeHtml(item.jobId)}">
               <strong class="table-primary">${escapeHtml(item.fileName)}</strong>
               <span class="table-note">${escapeHtml(item.relativePath || item.fileName)}</span>
+              ${renderNativeBadge(item, { prominent: true }) ? `<div class="native-badge-row">${renderNativeBadge(item, { prominent: true })}</div>` : ""}
             </button>
           </td>
           <td>

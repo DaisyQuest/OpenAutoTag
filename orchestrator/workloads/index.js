@@ -115,15 +115,27 @@ const workloadDefinitions = {
         return null;
       }
 
-      const [report, tagDeltaReport] = await Promise.all([
+      const [report, tagDeltaReport, writerReport] = await Promise.all([
         readFile(job.artifacts.validationReport, "utf8").then((content) => JSON.parse(content)),
         job?.artifacts?.tagDeltaReport
           ? readFile(job.artifacts.tagDeltaReport, "utf8").then((content) => JSON.parse(content))
+          : Promise.resolve(null),
+        job?.artifacts?.writerReport
+          ? readFile(job.artifacts.writerReport, "utf8").then((content) => JSON.parse(content)).catch(() => null)
           : Promise.resolve(null)
       ]);
 
+      const writerMode = writerReport?.writerMode || "raster";
+      const pagesNative = writerReport?.pagesNative ?? writerReport?.pagesRewritten ?? 0;
+      const pagesRaster = writerReport?.pagesRaster ?? 0;
+      const matchRate = writerReport?.matchRate ?? writerReport?.operatorMatchRate ?? null;
+
       return {
         summary: getAccessibilitySummary(report, tagDeltaReport),
+        writerMode,
+        pagesNative,
+        pagesRaster,
+        operatorMatchRate: matchRate,
         validation: {
           isCompliant: Boolean(report.isCompliant),
           failedRules: report.summary?.failedRules ?? 0,
