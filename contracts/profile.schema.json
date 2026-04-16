@@ -375,6 +375,19 @@
       "type": "object",
       "description": "Controls PDF output generation.",
       "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["native", "raster", "auto"],
+          "default": "auto",
+          "description": "Writer mode. 'native' preserves original vector text by injecting BDC/MCID/EMC into content streams. 'raster' rasterizes pages to images with invisible text overlay (current default, always works). 'auto' tries native per-page, falls back to raster when operator matching confidence is below threshold."
+        },
+        "nativeMatchThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.8,
+          "description": "Minimum operator match confidence per page for native mode. Pages below this threshold fall back to raster in auto mode."
+        },
         "fontCacheDir": {
           "type": ["string", "null"],
           "description": "Directory for re-embeddable font program cache. Null = no cache."
