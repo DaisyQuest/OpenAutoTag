@@ -1,0 +1,20 @@
+{
+  "versionId": "v7-refined",
+  "label": "Refined (balanced quality + good reduction)",
+  "description": "Refines v6-hybrid by tightening gap tolerance and raising the confidence floor. All four heuristics remain active. Targets the sweet spot: >55% reduction with <10% over-merge rate, based on tournament analysis showing v6's over-merging stems from gapMultiplier=2.0 being too lenient for dense layouts.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 1.9,
+    "xAlignmentTolerance": 16,
+    "heightVarianceTolerance": 0.3,
+    "minConfidence": 0.42,
+    "sentenceBoundaryPenalty": 0.25,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": true,
+    "artifactPreFilter": true,
+    "continuationLineDetection": true,
+    "legalCitationAwareness": true
+  }
+}
