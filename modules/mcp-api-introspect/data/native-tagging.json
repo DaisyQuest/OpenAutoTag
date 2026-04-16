@@ -1,0 +1,30 @@
+{
+  "status": "phase-1-proof-of-concept",
+  "components": {
+    "operatorParser": { "status": "implemented", "file": "NativeContentStreamParser.java" },
+    "tagMatcher": { "status": "in-progress", "file": "NativeTagMatcher.java" },
+    "streamRewriter": { "status": "planned", "file": "NativeContentStreamRewriter.java" },
+    "verification": { "status": "in-progress", "module": "modules/native-verify/" }
+  },
+  "writerModes": ["native", "raster", "auto"],
+  "profileField": "pdfWriter.mode",
+  "advantages": [
+    "Preserves vector text (sharp at any zoom)",
+    "30-50x smaller file size (no raster images)",
+    "Original fonts retained",
+    "Links and form fields preserved",
+    "Copy/paste returns original text"
+  ],
+  "limitations": [
+    "Requires operator-level matching (may fail on complex layouts)",
+    "XObject forms not yet supported",
+    "Falls back to raster on unmatched pages"
+  ],
+  "proofMetrics": [
+    "contentPreservationScore",
+    "operatorMatchRate",
+    "fileSizeRatio",
+    "structureFidelity",
+    "veraPdfFindingsDelta"
+  ]
+}

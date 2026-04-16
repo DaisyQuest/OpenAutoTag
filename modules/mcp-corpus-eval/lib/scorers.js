@@ -211,6 +211,83 @@ export async function paragraphQualityScore(semanticPath) {
 }
 
 /**
+ * Computes a native-tagging quality score from operator parser JSON output.
+ * Evaluates: operatorCount, operatorsPerPage, fontDiversity, textCoverage.
+ * Returns 0-1 where higher = more native-tagging-friendly.
+ *
+ * @param {string} operatorJsonPath - Path to operator parser output JSON
+ * @returns {Promise<number|null>} 0-1 score, or null if unavailable
+ */
+export async function nativeQualityScore(operatorJsonPath) {
+  const data = await readJsonSafe(operatorJsonPath);
+  if (!data) return null;
+
+  const operators = data.operators || [];
+  const pageCount = data.pageCount || data.pages?.length || 1;
+
+  if (operators.length === 0) return null;
+
+  const operatorCount = operators.length;
+  const operatorsPerPage = operatorCount / pageCount;
+
+  // Font diversity: count unique font names referenced in text-showing operators
+  const fontNames = new Set();
+  for (const op of operators) {
+    if (op.font || op.fontName) {
+      fontNames.add(op.font || op.fontName);
+    }
+  }
+  const fontDiversity = fontNames.size;
+
+  // Text coverage: fraction of operators that are text-showing
+  const textOps = operators.filter(
+    (op) => op.type === "text" || op.category === "text" || /^(Tj|TJ|'|")$/.test(op.operator || "")
+  );
+  const textCoverage = textOps.length / operatorCount;
+
+  // --- Scoring components ---
+
+  // operatorsPerPage score: ideal 50-500, less than 10 is suspicious, >2000 is complex
+  let opsPerPageScore;
+  if (operatorsPerPage >= 50 && operatorsPerPage <= 500) {
+    opsPerPageScore = 1.0;
+  } else if (operatorsPerPage < 50) {
+    opsPerPageScore = Math.max(0, operatorsPerPage / 50);
+  } else {
+    opsPerPageScore = Math.max(0, 1 - (operatorsPerPage - 500) / 1500);
+  }
+
+  // fontDiversity score: 1-10 fonts is ideal, 0 is bad, >20 is complex
+  let fontScore;
+  if (fontDiversity >= 1 && fontDiversity <= 10) {
+    fontScore = 1.0;
+  } else if (fontDiversity === 0) {
+    fontScore = 0.2;
+  } else {
+    fontScore = Math.max(0.3, 1 - (fontDiversity - 10) / 30);
+  }
+
+  // textCoverage score: higher text fraction = more native-friendly
+  // Ideal: 0.2-0.8 (documents with some graphics and text)
+  let textScore;
+  if (textCoverage >= 0.15 && textCoverage <= 0.85) {
+    textScore = 1.0;
+  } else if (textCoverage < 0.15) {
+    textScore = Math.max(0, textCoverage / 0.15);
+  } else {
+    textScore = 0.8; // mostly text is still good
+  }
+
+  // Weighted combination
+  const score =
+    opsPerPageScore * 0.35 +
+    fontScore * 0.25 +
+    textScore * 0.40;
+
+  return Math.max(0, Math.min(1, score));
+}
+
+/**
  * Default scoring weights matching the profile schema defaults.
  */
 const DEFAULT_WEIGHTS = {

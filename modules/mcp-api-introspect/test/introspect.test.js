@@ -165,10 +165,44 @@ describe("contracts directory", () => {
   }
 });
 
+// ─── native-tagging.json ───
+
+describe("native-tagging.json", () => {
+  let data;
+  before(async () => {
+    data = JSON.parse(await readFile(path.join(dataDir, "native-tagging.json"), "utf8"));
+  });
+
+  it("has expected top-level fields", () => {
+    assert.ok(data.status, "missing status");
+    assert.ok(data.components, "missing components");
+    assert.ok(Array.isArray(data.writerModes), "writerModes should be array");
+    assert.ok(data.profileField, "missing profileField");
+    assert.ok(Array.isArray(data.advantages), "advantages should be array");
+    assert.ok(Array.isArray(data.limitations), "limitations should be array");
+    assert.ok(Array.isArray(data.proofMetrics), "proofMetrics should be array");
+  });
+
+  it("writerModes contains native, raster, auto", () => {
+    assert.deepStrictEqual(data.writerModes.sort(), ["auto", "native", "raster"]);
+  });
+
+  it("components have status and file/module fields", () => {
+    for (const [key, comp] of Object.entries(data.components)) {
+      assert.ok(comp.status, `component ${key} missing status`);
+      assert.ok(comp.file || comp.module, `component ${key} missing file or module`);
+    }
+  });
+
+  it("profileField points to pdfWriter.mode", () => {
+    assert.equal(data.profileField, "pdfWriter.mode");
+  });
+});
+
 // ─── MCP server tool handler tests (unit-style, no transport) ───
 
 describe("MCP tool handlers", () => {
-  let loadStages, loadEnvKnobs, loadFindingCodes;
+  let loadStages, loadEnvKnobs, loadFindingCodes, loadNativeTagging;
 
   before(async () => {
     // Import the loader functions directly rather than starting the server
@@ -177,6 +211,7 @@ describe("MCP tool handlers", () => {
     loadStages = mod.loadStages;
     loadEnvKnobs = mod.loadEnvKnobs;
     loadFindingCodes = mod.loadFindingCodes;
+    loadNativeTagging = mod.loadNativeTagging;
   });
 
   it("loadStages returns 7 pipeline stages", async () => {
@@ -200,6 +235,23 @@ describe("MCP tool handlers", () => {
     const missing = data.findingCodes.find((f) => f.code === "MISSING_DOCUMENT_ROOT");
     assert.ok(missing, "Expected MISSING_DOCUMENT_ROOT finding");
     assert.equal(missing.severity, "error");
+  });
+
+  it("loadNativeTagging returns expected shape", async () => {
+    const data = await loadNativeTagging();
+    assert.equal(data.status, "phase-1-proof-of-concept");
+    assert.ok(data.components.operatorParser, "missing operatorParser component");
+    assert.equal(data.components.operatorParser.status, "implemented");
+    assert.equal(data.components.operatorParser.file, "NativeContentStreamParser.java");
+    assert.ok(data.components.tagMatcher, "missing tagMatcher component");
+    assert.ok(data.components.streamRewriter, "missing streamRewriter component");
+    assert.ok(data.components.verification, "missing verification component");
+    assert.deepStrictEqual(data.writerModes.sort(), ["auto", "native", "raster"]);
+    assert.equal(data.profileField, "pdfWriter.mode");
+    assert.ok(data.advantages.length >= 3, "expected at least 3 advantages");
+    assert.ok(data.limitations.length >= 2, "expected at least 2 limitations");
+    assert.ok(data.proofMetrics.length >= 3, "expected at least 3 proof metrics");
+    assert.ok(data.proofMetrics.includes("operatorMatchRate"), "expected operatorMatchRate metric");
   });
 });
 

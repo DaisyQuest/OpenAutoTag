@@ -51,7 +51,8 @@
     "cli": "node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> > writer-report.json",
     "inputContract": "tagging.schema.json",
     "outputContract": null,
-    "description": "Produces the tagged PDF with native structure tree, marked-content overlays, document metadata, and sidecar manifest."
+    "description": "Produces the tagged PDF with native structure tree, marked-content overlays, document metadata, and sidecar manifest.",
+    "notes": "Supports two writer modes: 'raster' (current default — renders overlay images) and 'native' (new — rewrites content stream operators in-place, preserving vector text). Mode is controlled by the profile field pdfWriter.mode which accepts 'native', 'raster', or 'auto'."
   },
   {
     "order": 7,
