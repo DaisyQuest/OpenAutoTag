@@ -593,6 +593,183 @@ server.tool(
   }
 );
 
+// 12. explain_pdf_concept
+let _pdfSpec = null;
+async function loadPdfSpec() {
+  if (!_pdfSpec) {
+    _pdfSpec = JSON.parse(await readFile(path.join(dataDir, "pdf-specification.json"), "utf8"));
+  }
+  return _pdfSpec;
+}
+export { loadPdfSpec };
+
+server.tool(
+  "explain_pdf_concept",
+  "Explains a PDF specification concept in plain language with examples. Covers file structure, content streams, operators, fonts, tagged PDF, PDF/UA accessibility, and coordinate systems. Use this when you need to understand how PDFs work internally.",
+  {
+    concept: z.string().describe("What to explain. Examples: 'content streams', 'Tj operator', 'ToUnicode', 'font types', 'tagged PDF', 'structure tree', 'MCID', 'xref table', 'coordinate system', 'PDF/UA requirements', 'Type0 font', 'BDC operator', 'artifacts', 'table structure', 'font embedding', 'CIDSet'.")
+  },
+  async ({ concept }) => {
+    const spec = await loadPdfSpec();
+    const lower = concept.toLowerCase();
+    const results = [];
+
+    const searchSections = [
+      { key: "fileStructure", data: spec.fileStructure },
+      { key: "documentStructure", data: spec.documentStructure },
+      { key: "contentStreams", data: spec.contentStreams },
+      { key: "fontSystem", data: spec.fontSystem },
+      { key: "taggedPdf", data: spec.taggedPdf },
+      { key: "pdfUA", data: spec.pdfUA },
+      { key: "coordinateSystems", data: spec.coordinateSystems }
+    ];
+
+    for (const section of searchSections) {
+      const json = JSON.stringify(section.data).toLowerCase();
+      if (json.includes(lower)) {
+        results.push({ section: section.key, title: section.data.title, content: section.data });
+      }
+    }
+
+    if (spec.glossary[concept] || spec.glossary[concept.toUpperCase()]) {
+      results.push({
+        section: "glossary",
+        title: "Glossary",
+        definition: spec.glossary[concept] || spec.glossary[concept.toUpperCase()]
+      });
+    }
+
+    for (const [term, def] of Object.entries(spec.glossary)) {
+      if (term.toLowerCase().includes(lower) || def.toLowerCase().includes(lower)) {
+        results.push({ section: "glossary", term, definition: def });
+      }
+    }
+
+    const operators = spec.contentStreams?.textOperators || {};
+    const markedOps = spec.contentStreams?.markedContentOperators || {};
+    for (const [op, info] of [...Object.entries(operators), ...Object.entries(markedOps)]) {
+      if (op.toLowerCase() === lower || (typeof info === "object" && info.description?.toLowerCase().includes(lower))) {
+        results.push({ section: "operator", operator: op, ...info });
+      }
+    }
+
+    if (results.length === 0) {
+      return textResult({
+        concept,
+        found: false,
+        suggestion: "Try one of: 'content streams', 'Tj', 'ToUnicode', 'font types', 'tagged PDF', 'structure tree', 'MCID', 'xref', 'coordinate system', 'PDF/UA', 'artifacts', 'table', 'font embedding', 'CIDSet', 'BDC'.",
+        availableSections: searchSections.map(s => s.key),
+        glossaryTerms: Object.keys(spec.glossary)
+      });
+    }
+
+    const unique = [];
+    const seen = new Set();
+    for (const r of results) {
+      const key = r.section + (r.term || r.operator || "");
+      if (!seen.has(key)) { seen.add(key); unique.push(r); }
+    }
+
+    return textResult({ concept, found: true, results: unique.slice(0, 8) });
+  }
+);
+
+// 13. explain_pdf_operator
+server.tool(
+  "explain_pdf_operator",
+  "Detailed explanation of a specific PDF content stream operator. Returns operands, description, usage context, and how our pipeline handles it.",
+  { operator: z.string().describe("The operator name: Tj, TJ, Tf, Td, Tm, BT, ET, BDC, BMC, EMC, q, Q, cm, re, m, l, S, f, etc.") },
+  async ({ operator }) => {
+    const spec = await loadPdfSpec();
+    const allOps = {
+      ...spec.contentStreams.textOperators,
+      ...spec.contentStreams.graphicsStateOperators,
+      ...spec.contentStreams.pathOperators,
+      ...spec.contentStreams.markedContentOperators
+    };
+
+    const info = allOps[operator];
+    if (!info) {
+      return textResult({
+        operator,
+        found: false,
+        available: Object.keys(allOps),
+        hint: "Operator names are case-sensitive. Common text operators: BT, ET, Tf, Td, Tm, Tj, TJ. Marked content: BDC, BMC, EMC."
+      });
+    }
+
+    const category =
+      spec.contentStreams.textOperators[operator] ? "text" :
+      spec.contentStreams.graphicsStateOperators[operator] ? "graphicsState" :
+      spec.contentStreams.pathOperators[operator] ? "path" :
+      "markedContent";
+
+    const pipelineUsage =
+      category === "text" ? "NativeContentStreamParser intercepts this operator to extract text content and position. NativeTagMatcher uses its position to link to semantic nodes." :
+      category === "markedContent" ? "NativeContentStreamRewriter injects these operators around text content to create the structure tree linkage. BDC carries the MCID that connects to a structure element." :
+      category === "graphicsState" ? "Preserved verbatim during native tagging. Not modified by the pipeline." :
+      "Used by the table-structure-map extractor to detect ruled table gridlines.";
+
+    return textResult({
+      operator,
+      found: true,
+      category,
+      ...(typeof info === "string" ? { description: info } : info),
+      pipelineUsage,
+      relatedOperators: category === "text" ? ["BT", "ET", "Tf", "Td", "Tm", "Tj", "TJ", "T*"] :
+        category === "markedContent" ? ["BDC", "BMC", "EMC"] :
+        category === "graphicsState" ? ["q", "Q", "cm", "gs"] :
+        ["m", "l", "c", "re", "S", "f", "n"]
+    });
+  }
+);
+
+// 14. explain_font_architecture
+server.tool(
+  "explain_font_architecture",
+  "Deep dive into PDF font architecture: types, encoding, embedding, ToUnicode, subsetting, and how our pipeline handles each font scenario.",
+  { topic: z.string().optional().describe("Specific topic: 'types', 'encoding', 'embedding', 'toUnicode', 'subsetting', 'standard14', 'cidFonts', 'type3'. Omit for full overview.") },
+  async ({ topic }) => {
+    const spec = await loadPdfSpec();
+    const font = spec.fontSystem;
+
+    if (topic) {
+      const topicMap = {
+        types: { title: "Font Types", content: font.fontTypes },
+        encoding: { title: "Font Encoding", content: { overview: "PDF fonts use encodings to map byte values to glyphs. Each font type has its own encoding model.", type1: "WinAnsiEncoding or Differences array. Each byte → glyph name → outline.", trueType: "Platform-specific cmap table inside the TTF. Byte → glyph ID → outline.", type0: "CMap (usually Identity-H) maps 2-byte codes to CIDs. CIDToGIDMap then maps CIDs to glyph IDs in the embedded TrueType.", toUnicode: font.toUnicode } },
+        embedding: { title: "Font Embedding", content: { descriptor: font.fontDescriptor, requirement: "PDF/UA requires ALL fonts to be embedded. No exceptions.", ourApproach: "font-embedder module analyzes every font, plans remediation (embed, substitute, inject-toUnicode), pdf-writer executes the plan." } },
+        toUnicode: { title: "ToUnicode CMap", content: font.toUnicode },
+        tounicode: { title: "ToUnicode CMap", content: font.toUnicode },
+        subsetting: { title: "Font Subsetting", content: font.subsetting },
+        standard14: { title: "Standard 14 Fonts", content: font.fontTypes.Type1 },
+        cidFonts: { title: "CID Fonts (Type0)", content: font.fontTypes.Type0 },
+        cidfonts: { title: "CID Fonts (Type0)", content: font.fontTypes.Type0 },
+        type3: { title: "Type3 Fonts", content: font.fontTypes.Type3 }
+      };
+
+      const match = topicMap[topic.toLowerCase()];
+      if (match) return textResult(match);
+      return textResult({ error: `Unknown topic '${topic}'. Available: ${Object.keys(topicMap).join(", ")}` });
+    }
+
+    return textResult({
+      title: font.title,
+      overview: font.overview,
+      fontTypes: Object.keys(font.fontTypes),
+      toUnicode: font.toUnicode,
+      subsetting: font.subsetting,
+      descriptor: font.fontDescriptor,
+      ourPipeline: {
+        fontEmbedder: "Analyzes all fonts, reconstructs missing ToUnicode, plans remediation actions",
+        fontAudit: "24-check pre-veraPDF audit with actionable findings",
+        fontRepair: "Corruption repairer scans for damaged font programs, missing descriptors, broken CIDToGIDMap",
+        cidSetFix: "Removes /CIDSet from subsetted Type0 fonts (clause 7.21.4.2)",
+        fallbackFonts: "Noto Sans/Serif/Mono/Symbols vendored as SIL-OFL replacements for Standard 14"
+      }
+    });
+  }
+);
+
 // --- helpers ---
 function pathToFileUrl(p) {
   return new URL(`file:///${p.replace(/\\/g, "/")}`).href;
