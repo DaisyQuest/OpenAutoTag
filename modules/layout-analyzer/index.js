@@ -457,6 +457,202 @@ function detectVectorTables(page, blocks, tableStructurePage, baselineFontSize) 
   };
 }
 
+function buildBorderlessRows(page, blocks, baselineFontSize) {
+  const candidateBlocks = blocks
+    .map((block) => ({
+      block,
+      text: normalizeText(block.text),
+      xCenter: blockCenterX(block),
+      yCenter: blockCenterY(block)
+    }))
+    .filter(
+      ({ block, text }) =>
+        text.length > 0 &&
+        text.length <= 64 &&
+        block.blockType === "paragraph" &&
+        blockHeight(block) <= Math.max(24, baselineFontSize * 2.4)
+    );
+
+  const rowTolerance = Math.max(6, baselineFontSize * 0.9);
+
+  return clusterByProximity(candidateBlocks, (item) => item.yCenter, rowTolerance)
+    .map((row, index) => {
+      const items = [...row.items].sort((left, right) => blockLeft(left.block) - blockLeft(right.block));
+      const gaps = items.slice(1).map((item, itemIndex) => blockLeft(item.block) - blockRight(items[itemIndex].block));
+      const horizontalSpan = blockRight(items.at(-1).block) - blockLeft(items[0].block);
+      const numericRatio = items.filter((item) => looksNumericish(item.text)).length / items.length;
+      const headerishRatio = items.filter((item) => looksHeaderish(item.text)).length / items.length;
+      const boldRatio = items.filter((item) => /bold/i.test(item.block.fontName || "")).length / items.length;
+
+      return {
+        id: `brow:${index}`,
+        items,
+        gaps,
+        top: Math.min(...items.map((item) => blockTop(item.block))),
+        bottom: Math.max(...items.map((item) => blockBottom(item.block))),
+        left: blockLeft(items[0].block),
+        right: blockRight(items.at(-1).block),
+        horizontalSpan,
+        xAnchors: items.map((item) => blockLeft(item.block)),
+        numericRatio,
+        headerishRatio,
+        boldRatio,
+        meanFontSize: mean(items.map((item) => item.block.fontSize))
+      };
+    });
+}
+
+function detectBorderlessTables(page, blocks, baselineFontSize) {
+  const allRows = buildBorderlessRows(page, blocks, baselineFontSize);
+  const xTolerance = Math.max(12, page.width * 0.03, baselineFontSize * 1.2);
+
+  // Separate multi-item rows and single-item rows
+  const multiItemRows = allRows.filter((row) => row.items.length >= 2);
+
+  if (multiItemRows.length < 2) {
+    return { tableMetaById: new Map(), tables: [] };
+  }
+
+  // Build candidate bands of consecutive multi-item rows that share column anchors
+  const candidateBands = [];
+  let currentBand = [];
+
+  for (const row of multiItemRows) {
+    if (currentBand.length === 0) {
+      currentBand = [row];
+      continue;
+    }
+
+    const lastRow = currentBand.at(-1);
+    const verticalGap = row.top - lastRow.bottom;
+    const matches = countMatches(lastRow.xAnchors, row.xAnchors, xTolerance);
+
+    if (verticalGap <= Math.max(22, baselineFontSize * 3.2) && matches >= 2) {
+      currentBand.push(row);
+      continue;
+    }
+
+    if (currentBand.length >= 2) {
+      candidateBands.push(currentBand);
+    }
+    currentBand = [row];
+  }
+
+  if (currentBand.length >= 2) {
+    candidateBands.push(currentBand);
+  }
+
+  // Also check for single-row + header pattern: find single multi-item rows
+  // that have a header-like row directly above them
+  for (const row of multiItemRows) {
+    const alreadyInBand = candidateBands.some((band) => band.some((bandRow) => bandRow.id === row.id));
+    if (alreadyInBand) {
+      continue;
+    }
+
+    // Look for a header row above this row among all rows (multi or single item)
+    const potentialHeaders = allRows.filter((candidate) => {
+      if (candidate.id === row.id || candidate.items.length < 2) {
+        return false;
+      }
+      const verticalGap = row.top - candidate.bottom;
+      const matches = countMatches(candidate.xAnchors, row.xAnchors, xTolerance);
+      return verticalGap >= 0 && verticalGap <= Math.max(22, baselineFontSize * 3.2) && matches >= 2;
+    });
+
+    if (potentialHeaders.length > 0) {
+      const header = potentialHeaders.at(-1);
+      const headerAlreadyInBand = candidateBands.some((band) => band.some((bandRow) => bandRow.id === header.id));
+      if (!headerAlreadyInBand) {
+        candidateBands.push([header, row]);
+      }
+    }
+  }
+
+  // Also try to include single-item rows adjacent to bands (merged cells)
+  for (const band of candidateBands) {
+    const bandTop = Math.min(...band.map((row) => row.top));
+    const bandBottom = Math.max(...band.map((row) => row.bottom));
+
+    for (const singleRow of allRows.filter((row) => row.items.length === 1)) {
+      const alreadyInBand = band.some((bandRow) => bandRow.id === singleRow.id);
+      if (alreadyInBand) {
+        continue;
+      }
+
+      const isAdjacent =
+        (singleRow.top >= bandTop - baselineFontSize && singleRow.bottom <= bandBottom + baselineFontSize) ||
+        (Math.abs(singleRow.bottom - bandTop) <= Math.max(22, baselineFontSize * 3.2)) ||
+        (Math.abs(singleRow.top - bandBottom) <= Math.max(22, baselineFontSize * 3.2));
+
+      // Single item must span multiple column anchors to be a merged cell
+      if (isAdjacent && singleRow.horizontalSpan >= page.width * 0.14) {
+        band.push(singleRow);
+        band.sort((left, right) => left.top - right.top);
+      }
+    }
+  }
+
+  const tableMetaById = new Map();
+  const tables = [];
+  let tableSequence = 0;
+
+  for (const bandRows of candidateBands) {
+    const summary = summarizeTableBand(bandRows, page, baselineFontSize);
+
+    // Borderless tables: relaxed requirements
+    // Need >= 2 columns and >= 60% stable coverage
+    // Reject 2x2 tables without a header (likely label-value pairs)
+    const isValidBorderless =
+      summary.columnCount >= 2 &&
+      summary.rowCount >= 2 &&
+      summary.assignedCellCount >= 4 &&
+      summary.stableCoverage >= 0.6 &&
+      summary.horizontalSpan >= Math.max(page.width * 0.14, 64) &&
+      !(summary.rowCount === 2 && summary.columnCount === 2 && !summary.hasHeaderRow);
+
+    if (!isValidBorderless) {
+      continue;
+    }
+
+    tableSequence += 1;
+    const tableId = `table:${page.pageNumber}:borderless:${tableSequence}`;
+    const headerRowId = summary.hasHeaderRow ? summary.stableRows[0]?.id : null;
+    const confidence = Number(
+      Math.min(0.95, 0.72 + summary.rowCount * 0.03 + summary.columnCount * 0.01 + (summary.stableCoverage - 0.6) * 0.1).toFixed(2)
+    );
+
+    summary.stableRows.forEach((row, rowIndex) => {
+      const isHeaderRow = row.id === headerRowId;
+
+      row.assignments.forEach(({ item, columnIndex }) => {
+        tableMetaById.set(item.block.id, {
+          blockType: "table-cell",
+          tableId,
+          tableRole: isHeaderRow ? "header" : "cell",
+          tableSection: isHeaderRow ? "head" : "body",
+          tableRowIndex: rowIndex,
+          tableColumnIndex: columnIndex,
+          tableCellConfidence: confidence,
+          tableDetectionMethod: "borderless-alignment"
+        });
+      });
+    });
+
+    tables.push({
+      id: tableId,
+      source: "borderless-alignment",
+      rowCount: summary.rowCount,
+      columnCount: summary.columnCount,
+      headerRowCount: headerRowId ? 1 : 0,
+      mergeSignalCount: 0,
+      confidence
+    });
+  }
+
+  return { tableMetaById, tables };
+}
+
 function detectTextGridTables(page, blocks, baselineFontSize) {
   const rows = buildCandidateRows(page, blocks, baselineFontSize);
 
@@ -548,10 +744,16 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
     ...classifyBlock(block, baselineFontSize)
   }));
   const vectorTableAnalysis = detectVectorTables(page, preclassifiedBlocks, tableStructurePage, baselineFontSize);
-  const remainingBlocks = preclassifiedBlocks.filter((block) => !vectorTableAnalysis.tableMetaById.has(block.id));
-  const textGridTableAnalysis = detectTextGridTables(page, remainingBlocks, baselineFontSize);
-  const tableMetaById = new Map([...textGridTableAnalysis.tableMetaById.entries(), ...vectorTableAnalysis.tableMetaById.entries()]);
-  const tables = [...vectorTableAnalysis.tables, ...textGridTableAnalysis.tables];
+  const remainingAfterVector = preclassifiedBlocks.filter((block) => !vectorTableAnalysis.tableMetaById.has(block.id));
+  const textGridTableAnalysis = detectTextGridTables(page, remainingAfterVector, baselineFontSize);
+  const remainingAfterGrid = remainingAfterVector.filter((block) => !textGridTableAnalysis.tableMetaById.has(block.id));
+  const borderlessTableAnalysis = detectBorderlessTables(page, remainingAfterGrid, baselineFontSize);
+  const tableMetaById = new Map([
+    ...borderlessTableAnalysis.tableMetaById.entries(),
+    ...textGridTableAnalysis.tableMetaById.entries(),
+    ...vectorTableAnalysis.tableMetaById.entries()
+  ]);
+  const tables = [...vectorTableAnalysis.tables, ...textGridTableAnalysis.tables, ...borderlessTableAnalysis.tables];
   const columns = detectColumns({ ...page, textBlocks: preclassifiedBlocks }, new Set(tableMetaById.keys()));
   const largestTable = [...tables].sort(
     (left, right) => right.rowCount * right.columnCount - left.rowCount * left.columnCount
@@ -582,6 +784,7 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
       tableCount: tables.length,
       vectorTableCount: vectorTableAnalysis.tables.length,
       textGridTableCount: textGridTableAnalysis.tables.length,
+      borderlessTableCount: borderlessTableAnalysis.tables.length,
       tableRowCount: largestTable?.rowCount || 0,
       tableColumnCount: largestTable?.columnCount || 0,
       tableHeaderRowCount: tables.reduce((total, table) => total + table.headerRowCount, 0),
