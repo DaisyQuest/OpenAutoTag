@@ -129,11 +129,16 @@ export async function evaluateCorpus(semanticPaths, outputDir) {
   const versions = await loadVersions();
   await mkdir(outputDir, { recursive: true });
 
+  const MAX_NODES = 50000;
   const documents = [];
   for (const semPath of semanticPaths) {
     const docId = path.basename(path.dirname(semPath));
     try {
       const doc = JSON.parse(await readFile(semPath, "utf8"));
+      if (doc.nodes && doc.nodes.length > MAX_NODES) {
+        process.stderr.write(`[evaluator] skip ${docId}: ${doc.nodes.length} nodes exceeds ${MAX_NODES} cap (run separately with --no-cap)\n`);
+        continue;
+      }
       documents.push({ docId, doc, path: semPath });
     } catch {
       process.stderr.write(`[evaluator] skip ${semPath}: unreadable\n`);
