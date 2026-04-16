@@ -329,20 +329,22 @@ async function main() {
   const positional = [];
   let configPath = null;
   let strategyFlag = null;
+  let reportFlag = null;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--config" && i + 1 < args.length) {
       configPath = args[++i];
     } else if (args[i] === "--strategy" && i + 1 < args.length) {
       strategyFlag = args[++i];
+    } else if (args[i] === "--report" && i + 1 < args.length) {
+      reportFlag = args[++i];
     } else {
       positional.push(args[i]);
     }
   }
 
   const inputPath = positional[0];
-  const outputPath = positional[1] || null;
-  const reportPath = positional[2] || null;
+  const reportPath = reportFlag || positional[2] || null;
 
   if (!inputPath) {
     throw new Error("Usage: node modules/paragraph-merger/index.js <semantic.json> [output.json] [report.json] [--config <path>] [--strategy <name>]");
@@ -358,11 +360,13 @@ async function main() {
     config.strategy = strategyFlag;
   }
 
-  const { document, report } = await run(inputPath, outputPath, reportPath, config);
+  const { document, report } = await run(inputPath, null, reportPath, config);
 
-  if (!outputPath) {
-    process.stdout.write(`${JSON.stringify(document, null, 2)}\n`);
-  }
+  // IMPORTANT: always write document to stdout. The orchestrator's
+  // execNodeToFile pipes stdout to the output file. Writing to a file
+  // arg AND stdout causes execNodeToFile to overwrite the file with
+  // empty stdout. Match the convention used by every other pipeline module.
+  process.stdout.write(`${JSON.stringify(document, null, 2)}\n`);
 
   const strategy = report.strategy || config.strategy || "unknown";
   const reduction = report.summary.reductionPercent ?? report.summary.overallReductionPercent ?? "0.0";
