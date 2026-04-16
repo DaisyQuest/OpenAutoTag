@@ -163,19 +163,121 @@ function inferTableScope(node, sourceNode, rowSpan, columnSpan) {
     return "";
   }
 
-  if (Number(columnSpan || 1) > 1 && Number(rowSpan || 1) > 1) {
+  const rs = Number(rowSpan || 1);
+  const cs = Number(columnSpan || 1);
+
+  if (cs > 1 && rs > 1) {
     return "Both";
   }
 
-  if ((node.tableSection || sourceNode?.tableSection) === "head" || sourceNode?.tableRowIndex === 0) {
+  const section = node.tableSection || sourceNode?.tableSection || "";
+  const rowIdx = sourceNode?.tableRowIndex ?? -1;
+  const colIdx = sourceNode?.tableColumnIndex ?? -1;
+
+  if (section === "head" || rowIdx === 0) {
     return "Column";
   }
 
-  if (sourceNode?.tableColumnIndex === 0) {
+  if (colIdx === 0) {
     return "Row";
   }
 
-  return "";
+  if (cs > 1) {
+    return "Column";
+  }
+
+  if (rs > 1) {
+    return "Row";
+  }
+
+  // PDF/UA requires every TH to have a Scope. Default to Column
+  // for headers that can't be classified — this satisfies Adobe's
+  // accessibility checker which flags TH cells without Scope.
+  return "Column";
+}
+
+function collectTableHeaderIds(tagTree) {
+  const headerMap = new Map();
+
+  function walk(node, currentTableId) {
+    if (node.type === "Table") {
+      currentTableId = node.id;
+    }
+    if (node.type === "TH" && currentTableId) {
+      const headers = headerMap.get(currentTableId) || [];
+      headers.push({
+        id: node.id,
+        rowIndex: node.sourceNodeIds?.[0] ? undefined : 0,
+        colIndex: node.sourceNodeIds?.[0] ? undefined : 0,
+        section: node.tableSection || ""
+      });
+      headerMap.set(currentTableId, headers);
+    }
+    for (const child of node.children || []) {
+      walk(child, currentTableId);
+    }
+  }
+
+  walk(tagTree, null);
+  return headerMap;
+}
+
+function inferHeaders(node, sourceNode, tagTree, semanticById) {
+  if (node.type !== "TD") return "";
+
+  const tableParent = findAncestorOfType(node, "Table", tagTree);
+  if (!tableParent) return "";
+
+  const headerMap = collectTableHeaderIds(tagTree);
+  const tableHeaders = headerMap.get(tableParent.id) || [];
+  if (tableHeaders.length === 0) return "";
+
+  const rowIdx = sourceNode?.tableRowIndex ?? -1;
+  const colIdx = sourceNode?.tableColumnIndex ?? -1;
+  const refs = [];
+
+  for (const th of tableHeaders) {
+    const thSource = semanticById?.get(th.id);
+    if (!thSource) {
+      refs.push(th.id);
+      continue;
+    }
+    const thRow = thSource.tableRowIndex ?? -1;
+    const thCol = thSource.tableColumnIndex ?? -1;
+    const thSection = th.section || thSource.tableSection || "";
+
+    if (thSection === "head" && thCol === colIdx) {
+      refs.push(th.id);
+    } else if (thCol === 0 && thRow === rowIdx) {
+      refs.push(th.id);
+    }
+  }
+
+  return refs.join(" ");
+}
+
+function findAncestorOfType(node, type, root) {
+  function search(current, target) {
+    if (current === target) return null;
+    for (const child of current.children || []) {
+      if (child === target) return current.type === type ? current : null;
+      if (child.type === type) {
+        const found = searchBelow(child, target);
+        if (found) return child;
+      }
+      const result = search(child, target);
+      if (result) return result;
+    }
+    return null;
+  }
+  function searchBelow(current, target) {
+    if (current === target) return true;
+    for (const child of current.children || []) {
+      if (searchBelow(child, target)) return true;
+    }
+    return false;
+  }
+  return search(root, node);
 }
 
 function findFirstHeadingNode(node) {
