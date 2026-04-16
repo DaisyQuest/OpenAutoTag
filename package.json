@@ -21,7 +21,8 @@
     "start": "node orchestrator/server.js",
     "eval:score": "node modules/mcp-corpus-eval/cli.js score",
     "paragraph:evaluate": "node modules/paragraph-merger/evaluator.js",
-    "paragraph:report": "node modules/paragraph-merger/render-report.js"
+    "paragraph:report": "node modules/paragraph-merger/render-report.js",
+    "native:verify": "node modules/native-verify/verify-corpus.js"
   },
   "engines": {
     "node": "22.x"

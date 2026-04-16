@@ -9,6 +9,7 @@ import {
   veraPdfScore,
   ocrScore,
   paragraphQualityScore,
+  nativeQualityScore,
   computeAggregateScore
 } from "../lib/scorers.js";
 import { sampleCorpus, scoreJob, diffRuns } from "../lib/tools.js";
@@ -264,6 +265,67 @@ describe("paragraphQualityScore", () => {
     await writeFile(tmpFile, JSON.stringify({ nodes: [] }));
     try {
       const score = await paragraphQualityScore(tmpFile);
+      assert.equal(score, null);
+    } finally {
+      await rm(tmpFile, { force: true });
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// nativeQualityScore
+// ---------------------------------------------------------------------------
+describe("nativeQualityScore", () => {
+  it("scores high for a well-structured operator JSON", async () => {
+    const tmpFile = path.join(fixturesDir, "_tmp_good_operators.json");
+    const operators = [];
+    // 3 pages, ~100 operators per page, mix of text and graphics
+    for (let p = 0; p < 3; p++) {
+      for (let i = 0; i < 80; i++) {
+        operators.push({ operator: "Tj", type: "text", font: i % 3 === 0 ? "Arial" : "Times", page: p + 1 });
+      }
+      for (let i = 0; i < 20; i++) {
+        operators.push({ operator: "re", type: "graphics", page: p + 1 });
+      }
+    }
+    await writeFile(tmpFile, JSON.stringify({ pageCount: 3, operators }));
+    try {
+      const score = await nativeQualityScore(tmpFile);
+      assert.ok(score !== null, "score should not be null");
+      assert.ok(score > 0.7, `expected >0.7 for well-structured PDF, got ${score}`);
+    } finally {
+      await rm(tmpFile, { force: true });
+    }
+  });
+
+  it("scores lower for very few operators", async () => {
+    const tmpFile = path.join(fixturesDir, "_tmp_sparse_operators.json");
+    await writeFile(tmpFile, JSON.stringify({
+      pageCount: 5,
+      operators: [
+        { operator: "Tj", type: "text", font: "Arial" },
+        { operator: "re", type: "graphics" }
+      ]
+    }));
+    try {
+      const score = await nativeQualityScore(tmpFile);
+      assert.ok(score !== null, "score should not be null");
+      assert.ok(score < 0.8, `expected <0.8 for sparse operators, got ${score}`);
+    } finally {
+      await rm(tmpFile, { force: true });
+    }
+  });
+
+  it("returns null for nonexistent file", async () => {
+    const score = await nativeQualityScore("/does/not/exist.json");
+    assert.equal(score, null);
+  });
+
+  it("returns null for empty operators array", async () => {
+    const tmpFile = path.join(fixturesDir, "_tmp_empty_operators.json");
+    await writeFile(tmpFile, JSON.stringify({ pageCount: 1, operators: [] }));
+    try {
+      const score = await nativeQualityScore(tmpFile);
       assert.equal(score, null);
     } finally {
       await rm(tmpFile, { force: true });

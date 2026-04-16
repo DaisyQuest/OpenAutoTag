@@ -7,6 +7,7 @@ import {
   veraPdfScore,
   ocrScore,
   paragraphQualityScore,
+  nativeQualityScore,
   computeAggregateScore
 } from "./scorers.js";
 
@@ -162,14 +163,16 @@ export async function scoreJob({ jobDir }) {
   const validationReportPath = find(/validation-report\.json$/i);
   const semanticOrderedPath = find(/semantic-ordered\.json$/i);
   const layoutPath = find(/^01-layout\.json$/i);
+  const operatorJsonPath = find(/operator[s-]?.*\.json$/i);
 
-  const [veraPdfFindingCount, fontEmbedCoverage, readingOrderInversions, ocrConfidenceVal, paragraphQualityVal] =
+  const [veraPdfFindingCount, fontEmbedCoverage, readingOrderInversions, ocrConfidenceVal, paragraphQualityVal, nativeQualityVal] =
     await Promise.all([
       validationReportPath ? veraPdfScore(validationReportPath) : null,
       writerReportPath ? fontEmbedScore(writerReportPath) : null,
       semanticOrderedPath ? readingOrderInversionCount(semanticOrderedPath) : null,
       layoutPath ? ocrScore(layoutPath) : null,
-      semanticOrderedPath ? paragraphQualityScore(semanticOrderedPath) : null
+      semanticOrderedPath ? paragraphQualityScore(semanticOrderedPath) : null,
+      operatorJsonPath ? nativeQualityScore(operatorJsonPath) : null
     ]);
 
   // Attempt to read profile scoring weights from the job
@@ -189,7 +192,8 @@ export async function scoreJob({ jobDir }) {
     fontEmbedCoverage: fontEmbedCoverage ?? null,
     readingOrderInversions: readingOrderInversions ?? null,
     ocrConfidence: ocrConfidenceVal ?? null,
-    paragraphQuality: paragraphQualityVal ?? null
+    paragraphQuality: paragraphQualityVal ?? null,
+    nativeQuality: nativeQualityVal ?? null
   };
 
   const aggregateScore = computeAggregateScore(

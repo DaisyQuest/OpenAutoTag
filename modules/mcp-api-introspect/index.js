@@ -1,9 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+
+const execFileAsync = promisify(execFile);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(moduleDir, "data");
@@ -34,6 +38,14 @@ export async function loadFindingCodes() {
     _findingCodes = JSON.parse(await readFile(path.join(dataDir, "finding-codes.json"), "utf8"));
   }
   return _findingCodes;
+}
+
+let _nativeTagging = null;
+export async function loadNativeTagging() {
+  if (!_nativeTagging) {
+    _nativeTagging = JSON.parse(await readFile(path.join(dataDir, "native-tagging.json"), "utf8"));
+  }
+  return _nativeTagging;
 }
 
 // --- helpers ---
@@ -217,6 +229,86 @@ server.tool(
       }
     }
     return textResult({ findingCodes: codes });
+  }
+);
+
+// 7. describe_native_tagging
+server.tool(
+  "describe_native_tagging",
+  "Returns a structured description of the native PDF tagging capability, including component status, writer modes, advantages, limitations, and proof metrics.",
+  {},
+  async () => {
+    const data = await loadNativeTagging();
+    return textResult(data);
+  }
+);
+
+// 8. compare_writer_modes
+server.tool(
+  "compare_writer_modes",
+  "Quick estimation comparing native vs raster writer modes for a given PDF. Runs NativeContentStreamParser to count operators and estimates output sizes.",
+  { pdfPath: z.string().describe("Absolute path to the source PDF file.") },
+  async ({ pdfPath }) => {
+    // Get original file size
+    let originalFileSize;
+    try {
+      const s = await stat(pdfPath);
+      originalFileSize = s.size;
+    } catch (err) {
+      return textResult({ error: `Cannot read PDF: ${err.message}` });
+    }
+
+    // Run NativeContentStreamParser via Java subprocess
+    const javaHome = process.env.VALIDATOR_JAVA_HOME || process.env.JAVA_HOME || "";
+    const javaCmd = javaHome ? path.join(javaHome, "bin", "java") : "java";
+    const parserClass = "NativeContentStreamParser";
+    const classPath = path.join(repoRoot, "modules", "native-verify", "build");
+
+    let operatorCount = 0;
+    try {
+      const { stdout } = await execFileAsync(javaCmd, ["-cp", classPath, parserClass, pdfPath], {
+        timeout: 30000,
+      });
+      // Parser outputs JSON with operatorCount field, or one operator per line
+      try {
+        const parsed = JSON.parse(stdout);
+        operatorCount = parsed.operatorCount ?? (Array.isArray(parsed.operators) ? parsed.operators.length : 0);
+      } catch {
+        // Fallback: count non-empty lines
+        operatorCount = stdout.split("\n").filter((l) => l.trim().length > 0).length;
+      }
+    } catch (err) {
+      // If Java is unavailable, return a partial result
+      return textResult({
+        pdfPath,
+        originalFileSize,
+        estimatedNativeSize: null,
+        estimatedRasterSize: null,
+        operatorCount: null,
+        nativeViable: null,
+        recommendation: "unknown",
+        error: `Could not run operator parser: ${err.message}`,
+      });
+    }
+
+    // Estimation heuristics
+    // Native mode: ~overhead per operator for tag insertion (~20 bytes each) on top of original
+    const estimatedNativeSize = Math.round(originalFileSize * 1.05 + operatorCount * 20);
+    // Raster mode: ~150 DPI full-page images, roughly 5-50x the original
+    const estimatedRasterSize = Math.round(originalFileSize * 8.5);
+
+    const nativeViable = operatorCount > 0;
+    const recommendation = nativeViable ? "native" : "raster";
+
+    return textResult({
+      pdfPath,
+      originalFileSize,
+      estimatedNativeSize,
+      estimatedRasterSize,
+      operatorCount,
+      nativeViable,
+      recommendation,
+    });
   }
 );
 
