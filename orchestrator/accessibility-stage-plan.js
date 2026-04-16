@@ -169,11 +169,20 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
 
         try {
           const configPath = path.join(os.tmpdir(), `paragraph-merger-config-${process.pid}-${Date.now()}.json`);
-          await writeFile(configPath, JSON.stringify(mergerConfig));
+          const configWithStrategy = { ...mergerConfig };
+          if (mergerConfig.strategy) {
+            configWithStrategy.strategy = mergerConfig.strategy;
+          }
+          await writeFile(configPath, JSON.stringify(configWithStrategy));
+
+          const cliArgs = [artifacts.semantic, mergedPath, reportPath, "--config", configPath];
+          if (mergerConfig.strategy) {
+            cliArgs.push("--strategy", mergerConfig.strategy);
+          }
 
           await runJsonStage(
             "modules/paragraph-merger/index.js",
-            [artifacts.semantic, mergedPath, reportPath, "--config", configPath],
+            cliArgs,
             mergedPath
           );
 
