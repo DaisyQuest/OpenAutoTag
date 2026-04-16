@@ -1,0 +1,20 @@
+{
+  "versionId": "v6-hybrid",
+  "label": "Hybrid (aggressive gaps + heuristic guards)",
+  "description": "Combines v3-aggressive's relaxed gap tolerance with v4-legal-tuned's heuristic guards. Target: ~60% reduction with <5% over-merge.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 2.0,
+    "xAlignmentTolerance": 18,
+    "heightVarianceTolerance": 0.35,
+    "minConfidence": 0.35,
+    "sentenceBoundaryPenalty": 0.2,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": true,
+    "artifactPreFilter": true,
+    "continuationLineDetection": true,
+    "legalCitationAwareness": true
+  }
+}

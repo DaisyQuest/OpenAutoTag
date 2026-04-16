@@ -3,6 +3,12 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
+import {
+  preFilterArtifacts,
+  detectHangingIndent,
+  isContinuationLine,
+  isLegalCitation
+} from "./lib/heuristics.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateSemantic = ajv.compile(semanticSchema);
@@ -50,6 +56,7 @@ function startsCapital(text) {
 function computeMergeConfidence(prev, curr, config) {
   const reasons = [];
   let confidence = 1.0;
+  const heuristics = config.heuristics || {};
 
   const prevH = getNodeHeight(prev);
   const currH = getNodeHeight(curr);
@@ -72,7 +79,11 @@ function computeMergeConfidence(prev, curr, config) {
 
   const xShift = Math.abs(getNodeLeft(curr) - getNodeLeft(prev));
   if (xShift > config.xAlignmentTolerance) {
-    const penalty = Math.min(0.4, (xShift - config.xAlignmentTolerance) / 60);
+    let penalty = Math.min(0.4, (xShift - config.xAlignmentTolerance) / 60);
+    if (heuristics.hangingIndentDetection && detectHangingIndent(prev, curr)) {
+      penalty *= 0.4;
+      reasons.push(`hanging indent detected: x-alignment penalty reduced by 60%`);
+    }
     confidence -= penalty;
     reasons.push(`x-shift=${xShift.toFixed(1)}px exceeds tolerance=${config.xAlignmentTolerance}px`);
   }
@@ -86,8 +97,18 @@ function computeMergeConfidence(prev, curr, config) {
   }
 
   if (endsSentence(prev.text) && startsCapital(curr.text)) {
-    confidence -= config.sentenceBoundaryPenalty;
+    let sentencePenalty = config.sentenceBoundaryPenalty;
+    if (heuristics.legalCitationAwareness && isLegalCitation(prev.text)) {
+      sentencePenalty *= 0.2;
+      reasons.push(`legal citation detected: sentence-boundary penalty reduced by 80%`);
+    }
+    confidence -= sentencePenalty;
     reasons.push(`sentence boundary: prev ends with terminal punctuation, next starts capital`);
+  }
+
+  if (heuristics.continuationLineDetection && isContinuationLine(prev, curr)) {
+    confidence += 0.15;
+    reasons.push(`continuation line detected: confidence boosted by 0.15`);
   }
 
   confidence = Math.max(0, Math.min(1, confidence));
@@ -118,10 +139,15 @@ function mergeTwoNodes(prev, curr) {
 }
 
 function mergePageParagraphs(pageNodes, config) {
+  const heuristics = config.heuristics || {};
+  const filteredNodes = heuristics.artifactPreFilter
+    ? preFilterArtifacts(pageNodes)
+    : pageNodes;
+
   const pNodes = [];
   const nonPNodes = [];
 
-  for (const node of pageNodes) {
+  for (const node of filteredNodes) {
     if (node.role === "P") {
       pNodes.push(node);
     } else {
@@ -265,15 +291,31 @@ export async function run(inputPath, outputPath, reportPath, config = {}) {
 
 async function main() {
   const args = process.argv.slice(2);
-  const inputPath = args[0];
-  const outputPath = args[1] || null;
-  const reportPath = args[2] || null;
+  const positional = [];
+  let configPath = null;
 
-  if (!inputPath) {
-    throw new Error("Usage: node modules/paragraph-merger/index.js <semantic.json> [output.json] [report.json]");
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--config" && i + 1 < args.length) {
+      configPath = args[++i];
+    } else {
+      positional.push(args[i]);
+    }
   }
 
-  const { document, report } = await run(inputPath, outputPath, reportPath);
+  const inputPath = positional[0];
+  const outputPath = positional[1] || null;
+  const reportPath = positional[2] || null;
+
+  if (!inputPath) {
+    throw new Error("Usage: node modules/paragraph-merger/index.js <semantic.json> [output.json] [report.json] [--config <path>]");
+  }
+
+  let config = {};
+  if (configPath) {
+    config = JSON.parse(await readFile(configPath, "utf8"));
+  }
+
+  const { document, report } = await run(inputPath, outputPath, reportPath, config);
 
   if (!outputPath) {
     process.stdout.write(`${JSON.stringify(document, null, 2)}\n`);

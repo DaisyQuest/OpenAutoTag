@@ -8,6 +8,7 @@ import {
   fontEmbedScore,
   veraPdfScore,
   ocrScore,
+  paragraphQualityScore,
   computeAggregateScore
 } from "../lib/scorers.js";
 import { sampleCorpus, scoreJob, diffRuns } from "../lib/tools.js";
@@ -204,6 +205,65 @@ describe("fontEmbedScore", () => {
     await writeFile(tmpFile, JSON.stringify({ status: "completed" }));
     try {
       const score = await fontEmbedScore(tmpFile);
+      assert.equal(score, null);
+    } finally {
+      await rm(tmpFile, { force: true });
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// paragraphQualityScore
+// ---------------------------------------------------------------------------
+describe("paragraphQualityScore", () => {
+  it("scores >0.8 for 5 paragraphs of ~200 chars each", async () => {
+    const tmpFile = path.join(fixturesDir, "_tmp_good_paras.json");
+    const nodes = Array.from({ length: 5 }, (_, i) => ({
+      id: `p${i}`,
+      pageNumber: 1,
+      bbox: [50, 50 + i * 60, 300, 14],
+      type: "P",
+      text: "A".repeat(200)
+    }));
+    await writeFile(tmpFile, JSON.stringify({ schemaVersion: "1.0.0", nodes }));
+    try {
+      const score = await paragraphQualityScore(tmpFile);
+      assert.ok(score !== null, "score should not be null");
+      assert.ok(score > 0.8, `expected >0.8, got ${score}`);
+    } finally {
+      await rm(tmpFile, { force: true });
+    }
+  });
+
+  it("scores <0.5 for 50 one-line paragraphs", async () => {
+    const tmpFile = path.join(fixturesDir, "_tmp_bad_paras.json");
+    const nodes = Array.from({ length: 50 }, (_, i) => ({
+      id: `p${i}`,
+      pageNumber: 1,
+      bbox: [50, 50 + i * 12, 300, 10],
+      type: "P",
+      text: "Short."
+    }));
+    await writeFile(tmpFile, JSON.stringify({ schemaVersion: "1.0.0", nodes }));
+    try {
+      const score = await paragraphQualityScore(tmpFile);
+      assert.ok(score !== null, "score should not be null");
+      assert.ok(score < 0.5, `expected <0.5, got ${score}`);
+    } finally {
+      await rm(tmpFile, { force: true });
+    }
+  });
+
+  it("returns null for nonexistent file", async () => {
+    const score = await paragraphQualityScore("/does/not/exist.json");
+    assert.equal(score, null);
+  });
+
+  it("returns null for empty nodes", async () => {
+    const tmpFile = path.join(fixturesDir, "_tmp_empty_para_nodes.json");
+    await writeFile(tmpFile, JSON.stringify({ nodes: [] }));
+    try {
+      const score = await paragraphQualityScore(tmpFile);
       assert.equal(score, null);
     } finally {
       await rm(tmpFile, { force: true });
