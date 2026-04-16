@@ -1,6 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
-import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, stat, writeFile, access as fsAccess } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
@@ -22,19 +23,36 @@ const javaClassPath = path.join(buildDir, "PdfTagWriterCli.class");
 const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
+const nativeJavaDir = path.join(moduleDir, "java");
+const nativeParserSource = path.join(nativeJavaDir, "NativeContentStreamParser.java");
+const nativeMatcherSource = path.join(nativeJavaDir, "NativeTagMatcher.java");
+const nativeRewriterSource = path.join(nativeJavaDir, "NativeContentStreamRewriter.java");
+
+const VALID_MODES = new Set(["native", "raster", "auto"]);
+const DEFAULT_MODE = "raster";
+const DEFAULT_NATIVE_MATCH_THRESHOLD = 0.8;
+
 function parseArgs(argv) {
   const args = new Map();
   for (let index = 0; index < argv.length; index += 2) {
     args.set(argv[index], argv[index + 1]);
   }
+  const rawMode = args.get("--mode") || DEFAULT_MODE;
+  const mode = VALID_MODES.has(rawMode) ? rawMode : DEFAULT_MODE;
   return {
     pdfPath: args.get("--pdf"),
     tagsPath: args.get("--tags"),
     semanticPath: args.get("--semantic"),
     redactionsPath: args.get("--redactions"),
-    outputPath: args.get("--output")
+    outputPath: args.get("--output"),
+    mode,
+    nativeMatchThreshold: args.has("--native-match-threshold")
+      ? Number(args.get("--native-match-threshold"))
+      : DEFAULT_NATIVE_MATCH_THRESHOLD
   };
 }
+
+export { parseArgs, VALID_MODES, DEFAULT_MODE, DEFAULT_NATIVE_MATCH_THRESHOLD };
 
 function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
@@ -58,12 +76,27 @@ async function needsCompilation() {
   }
 }
 
+function collectNativeJavaSources() {
+  const sources = [];
+  if (existsSync(nativeParserSource)) {
+    sources.push(nativeParserSource);
+  }
+  if (existsSync(nativeMatcherSource)) {
+    sources.push(nativeMatcherSource);
+  }
+  if (existsSync(nativeRewriterSource)) {
+    sources.push(nativeRewriterSource);
+  }
+  return sources;
+}
+
 async function ensureJavaHelperCompiled() {
   await ensureJavaBuildArtifact({
     buildDir,
     isCurrent: async () => !(await needsCompilation()),
     compile: async () => {
       const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      const nativeSources = collectNativeJavaSources();
       await execCommand(
         javacCommand,
         [
@@ -73,7 +106,8 @@ async function ensureJavaHelperCompiled() {
           pdfboxJarPath,
           "-d",
           buildDir,
-          javaSourcePath
+          javaSourcePath,
+          ...nativeSources
         ],
         {
           env: await buildJavaExecEnv({ bundledJavaHome })
@@ -296,7 +330,174 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
   return JSON.parse(stdout);
 }
 
-export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, redactionsPath, outputPath }) {
+async function runNativeParser({ pdfPath, operatorsPath }) {
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "NativeContentStreamParser",
+      "--pdf",
+      pdfPath,
+      "--output",
+      operatorsPath
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+  return stdout;
+}
+
+async function runNativeMatcher({ operatorsPath, semanticPath, tagsPath, tagPlanPath }) {
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "NativeTagMatcher",
+      "--operators",
+      operatorsPath,
+      "--semantic",
+      semanticPath,
+      "--tags",
+      tagsPath,
+      "--output",
+      tagPlanPath
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+  return stdout;
+}
+
+async function runNativeRewriter({ pdfPath, tagPlanPath, outputPath }) {
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "NativeContentStreamRewriter",
+      "--pdf",
+      pdfPath,
+      "--tag-plan",
+      tagPlanPath,
+      "--output",
+      outputPath
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+  return stdout;
+}
+
+function isNativeRewriterAvailable() {
+  return existsSync(nativeRewriterSource);
+}
+
+async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath }) {
+  await ensureJavaHelperCompiled();
+
+  const tempBase = `${outputPath}.native`;
+  const operatorsPath = `${tempBase}-operators.json`;
+  const tagPlanPath = `${tempBase}-tag-plan.json`;
+
+  await runNativeParser({ pdfPath: path.resolve(pdfPath), operatorsPath });
+  await runNativeMatcher({
+    operatorsPath,
+    semanticPath: path.resolve(semanticPath),
+    tagsPath: path.resolve(tagsPath),
+    tagPlanPath
+  });
+
+  const tagPlan = JSON.parse(await readFile(tagPlanPath, "utf8"));
+
+  const rewriterStdout = await runNativeRewriter({
+    pdfPath: path.resolve(pdfPath),
+    tagPlanPath,
+    outputPath: path.resolve(outputPath)
+  });
+
+  let rewriterReport;
+  try {
+    rewriterReport = JSON.parse(rewriterStdout);
+  } catch {
+    rewriterReport = {};
+  }
+
+  const overall = tagPlan.overall || {};
+  const operatorCount = overall.operatorCount || 0;
+  const matchedOperators = overall.matchedOperators || 0;
+  const matchRate = operatorCount > 0 ? matchedOperators / operatorCount : 0;
+
+  return {
+    writerMode: "native",
+    operatorCount,
+    matchedOperators,
+    matchRate: Math.round(matchRate * 1000) / 1000,
+    nativeViable: true,
+    pagesNative: rewriterReport.pagesNative || overall.pageCount || 0,
+    pagesRaster: 0,
+    structureElementCount: rewriterReport.structureElementCount || 0,
+    markedContentCount: rewriterReport.markedContentCount || 0,
+    tagPlan
+  };
+}
+
+async function resolveWriterMode({ mode, nativeMatchThreshold, pdfPath, tagsPath, semanticPath, outputPath }) {
+  if (mode === "raster") {
+    return { effectiveMode: "raster" };
+  }
+
+  if (mode === "native") {
+    if (!isNativeRewriterAvailable()) {
+      throw new Error("Native mode requested but NativeContentStreamRewriter.java is not available.");
+    }
+    return { effectiveMode: "native" };
+  }
+
+  // auto mode: probe match rate, decide
+  if (!isNativeRewriterAvailable()) {
+    return { effectiveMode: "raster", autoFallbackReason: "NativeContentStreamRewriter.java not available" };
+  }
+
+  await ensureJavaHelperCompiled();
+
+  const tempBase = `${outputPath}.auto-probe`;
+  const operatorsPath = `${tempBase}-operators.json`;
+  const tagPlanPath = `${tempBase}-tag-plan.json`;
+
+  try {
+    await runNativeParser({ pdfPath: path.resolve(pdfPath), operatorsPath });
+    await runNativeMatcher({
+      operatorsPath,
+      semanticPath: path.resolve(semanticPath),
+      tagsPath: path.resolve(tagsPath),
+      tagPlanPath
+    });
+
+    const tagPlan = JSON.parse(await readFile(tagPlanPath, "utf8"));
+    const overall = tagPlan.overall || {};
+    const operatorCount = overall.operatorCount || 0;
+    const matchedOperators = overall.matchedOperators || 0;
+    const meanMatchRate = operatorCount > 0 ? matchedOperators / operatorCount : 0;
+
+    if (meanMatchRate >= nativeMatchThreshold) {
+      return { effectiveMode: "native", probeMatchRate: meanMatchRate, probePlan: tagPlan };
+    }
+    return {
+      effectiveMode: "raster",
+      autoFallbackReason: `Match rate ${meanMatchRate.toFixed(3)} below threshold ${nativeMatchThreshold}`,
+      probeMatchRate: meanMatchRate
+    };
+  } catch (error) {
+    return {
+      effectiveMode: "raster",
+      autoFallbackReason: `Native probe failed: ${error.message}`
+    };
+  }
+}
+
+export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, redactionsPath, outputPath, mode = DEFAULT_MODE, nativeMatchThreshold = DEFAULT_NATIVE_MATCH_THRESHOLD }) {
   if (!pdfPath || !tagsPath || !outputPath) {
     throw new Error(
       "Usage: node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> [--semantic <semantic.ordered.json>] [--redactions <redaction-plan.json>] --output <tagged.pdf>"
@@ -323,6 +524,69 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
 
   const title = deriveTitle(taggingDocument, semanticDocument, pdfPath);
   const language = deriveDocumentLanguage(semanticDocument);
+
+  // --- Mode resolution ---
+  const modeDecision = await resolveWriterMode({
+    mode,
+    nativeMatchThreshold,
+    pdfPath,
+    tagsPath,
+    semanticPath,
+    outputPath
+  });
+
+  // --- Native flow ---
+  if (modeDecision.effectiveMode === "native") {
+    const nativeReport = await runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath });
+
+    const manifest = {
+      schemaVersion: "1.0.0",
+      writerMode: "native",
+      nativeTaggingApplied: true,
+      sourcePdf: path.resolve(pdfPath),
+      outputPdf: path.resolve(outputPath),
+      tagging: taggingDocument,
+      semanticSource: path.resolve(semanticPath),
+      summary: {
+        writerMode: "native",
+        operatorCount: nativeReport.operatorCount,
+        matchedOperators: nativeReport.matchedOperators,
+        matchRate: nativeReport.matchRate,
+        nativeViable: nativeReport.nativeViable,
+        pagesNative: nativeReport.pagesNative,
+        pagesRaster: nativeReport.pagesRaster,
+        structureElementCount: nativeReport.structureElementCount,
+        markedContentCount: nativeReport.markedContentCount,
+        language,
+        autoFallbackReason: modeDecision.autoFallbackReason || null,
+        requestedMode: mode
+      }
+    };
+
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+    return {
+      status: "completed",
+      writerMode: "native",
+      outputPath: path.resolve(outputPath),
+      manifestPath: path.resolve(manifestPath),
+      nativeTaggingApplied: true,
+      language,
+      tagNodeCount: countTagNodes(taggingDocument.root),
+      operatorCount: nativeReport.operatorCount,
+      matchedOperators: nativeReport.matchedOperators,
+      matchRate: nativeReport.matchRate,
+      nativeViable: nativeReport.nativeViable,
+      pagesNative: nativeReport.pagesNative,
+      pagesRaster: nativeReport.pagesRaster,
+      structureElementCount: nativeReport.structureElementCount,
+      markedContentCount: nativeReport.markedContentCount,
+      title,
+      requestedMode: mode
+    };
+  }
+
+  // --- Raster flow (default / fallback) ---
   const { instructionPath, records } = await buildInstructionFile({ outputPath, taggingDocument, semanticDocument });
   const redactions = redactionsPath
     ? await buildRedactionInstructionFile({ outputPath, redactionsPath })
@@ -347,6 +611,7 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
     tagging: taggingDocument,
     semanticSource: path.resolve(semanticPath),
     summary: {
+      writerMode: "raster",
       instructionRecordCount: records.length,
       structureElementCount: javaReport.structureElementCount,
       markedContentCount: javaReport.markedContentCount,
@@ -354,7 +619,9 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
       tableAttributeCount: javaReport.tableAttributeCount || 0,
       redactionCount: javaReport.redactionCount || 0,
       accessibilityTreeRedacted: Boolean(redactions?.redactionPlan?.matches?.length),
-      language
+      language,
+      autoFallbackReason: modeDecision.autoFallbackReason || null,
+      requestedMode: mode
     }
   };
 
@@ -362,6 +629,7 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
 
   return {
     status: "completed",
+    writerMode: "raster",
     outputPath: path.resolve(outputPath),
     manifestPath: path.resolve(manifestPath),
     nativeTaggingApplied: javaReport.nativeTaggingApplied,
@@ -372,7 +640,9 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
     tableAttributeCount: javaReport.tableAttributeCount || 0,
     redactionCount: javaReport.redactionCount || 0,
     metadataApplied: javaReport.metadataApplied,
-    title
+    title,
+    requestedMode: mode,
+    autoFallbackReason: modeDecision.autoFallbackReason || null
   };
 }
 
