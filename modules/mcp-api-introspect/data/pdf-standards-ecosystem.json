@@ -1,0 +1,253 @@
+{
+  "title": "PDF Standards Ecosystem Reference",
+  "purpose": "Complete map of PDF-related ISO standards, their relationships, version history, requirements, and how they relate to accessibility engineering.",
+
+  "coreSpecification": {
+    "title": "PDF Core Specification (ISO 32000)",
+    "overview": "The base PDF specification defines the file format, object model, content streams, fonts, graphics, and all foundational features. All other PDF standards (PDF/A, PDF/UA, PDF/X) are subsets or profiles built on top of this.",
+    "versions": {
+      "pdf14": {
+        "iso": "Part of ISO 32000-1 lineage",
+        "year": 2001,
+        "label": "PDF 1.4",
+        "keyFeatures": ["Transparency model", "Metadata streams (XMP)", "Tagged PDF basics"],
+        "significance": "Foundation for PDF/A-1. First version with robust tagged PDF support."
+      },
+      "pdf15": {
+        "iso": "Part of ISO 32000-1 lineage",
+        "year": 2003,
+        "label": "PDF 1.5",
+        "keyFeatures": ["Object streams (compressed xref)", "JPEG 2000 support", "Improved structure tree"],
+        "significance": "Cross-reference streams enable smaller tagged PDFs. Object streams compress the many small objects that tagged PDF generates."
+      },
+      "pdf16": {
+        "iso": "Part of ISO 32000-1 lineage",
+        "year": 2004,
+        "label": "PDF 1.6",
+        "keyFeatures": ["AES encryption", "3D content", "OpenType font embedding"],
+        "significance": "Native OpenType support improves font handling for accessibility."
+      },
+      "pdf17": {
+        "iso": "ISO 32000-1:2008",
+        "year": 2008,
+        "label": "PDF 1.7",
+        "keyFeatures": ["Full ISO standardization", "Improved XMP metadata", "Enhanced security"],
+        "significance": "First fully ISO-standardized PDF. Foundation for PDF/UA-1 and PDF/A-2/3. This is the version most of our pipeline targets.",
+        "ourUsage": "Our pipeline produces PDF 1.7 output. PdfTagWriterCli sets /Version to 1.7. veraPDF validates against PDF/UA-1 which is based on this."
+      },
+      "pdf20": {
+        "iso": "ISO 32000-2:2020",
+        "year": "2017 (initial), 2020 (revision)",
+        "label": "PDF 2.0",
+        "keyFeatures": [
+          "No more Standard 14 fonts (all fonts must be embedded)",
+          "Improved tagged PDF with new structure elements (Aside, DocumentFragment, Sub, etc.)",
+          "Associated files for embedding related content",
+          "Page-level output intents",
+          "Improved digital signatures",
+          "Deprecation of several legacy features"
+        ],
+        "significance": "Major evolution. PDF/UA-2 and PDF/A-4 are built on this. The 'no Standard 14 fonts' rule aligns with what our font-embedder already enforces.",
+        "breakingChanges": [
+          "Standard 14 fonts officially removed (we already substitute with Noto)",
+          "Some encryption algorithms deprecated",
+          "XMP metadata handling updated",
+          "Structure element types expanded"
+        ],
+        "newStructureElements": ["DocumentFragment", "Aside", "Title", "FENote (footnote/endnote)", "Sub (subscript)", "Em (emphasis)", "Strong"],
+        "ourReadiness": "Our pipeline enforces font embedding (PDF 2.0 compatible) but structure elements are currently limited to the PDF 1.7 set. Expanding to PDF 2.0 structure elements is a future enhancement."
+      }
+    }
+  },
+
+  "accessibilityStandards": {
+    "title": "PDF/UA — Universal Accessibility (ISO 14289)",
+    "overview": "PDF/UA defines how tagged PDF should be used to create accessible documents. It requires proper structure, reading order, font embedding, and alternative text.",
+
+    "pdfUA1": {
+      "iso": "ISO 14289-1:2014",
+      "basedOn": "PDF 1.7 (ISO 32000-1)",
+      "year": 2014,
+      "status": "Current — still valid alongside PDF/UA-2",
+      "label": "PDF/UA-1",
+      "purpose": "Universal Accessibility requirements for PDF 1.7 documents.",
+      "keyRequirements": [
+        { "clause": "7.1", "requirement": "Document metadata: /Lang required, XMP dc:title required, PDF/UA identification in XMP", "ourStatus": "Implemented — writer sets /Lang and title" },
+        { "clause": "7.2", "requirement": "All content must be tagged or marked as Artifact", "ourStatus": "Implemented — raster mode wraps pages as Artifact + overlay; native mode tags all operators" },
+        { "clause": "7.3", "requirement": "Structure types must be semantically appropriate (P for paragraphs, H1-H6 for headings, etc.)", "ourStatus": "Implemented — semantic engine assigns correct roles" },
+        { "clause": "7.4", "requirement": "Logical reading order must be deterministic and match visual order", "ourStatus": "Implemented — reading-order module with line-group epsilon" },
+        { "clause": "7.5", "requirement": "Table structure: TH cells must have Scope attribute", "ourStatus": "Implemented — inferTableScope guarantees Scope on every TH" },
+        { "clause": "7.8", "requirement": "Complex tables should use Headers attribute on TD cells", "ourStatus": "Infrastructure built (inferHeaders), serialization pending" },
+        { "clause": "7.18", "requirement": "Form fields must be accessible (names, tooltips)", "ourStatus": "Partially implemented — /DA font embedding works, field naming is basic" },
+        { "clause": "7.21", "requirement": "All fonts must be embedded with valid encoding", "ourStatus": "Fully implemented — font-embedder + CIDSet fix + ToUnicode reconstruction" },
+        { "clause": "7.21.4.2", "requirement": "CIDSet must enumerate all CIDs in the font program", "ourStatus": "Implemented — CIDSet removed from subsetted Type0 fonts via saveIncremental" }
+      ],
+      "validator": "veraPDF with --flavour ua1",
+      "ourFlavourSetting": "profiles set validator.veraPdfFlavour = 'ua1'"
+    },
+
+    "pdfUA2": {
+      "iso": "ISO 14289-2:2024",
+      "basedOn": "PDF 2.0 (ISO 32000-2)",
+      "year": 2024,
+      "status": "Published March 2024 — newest standard",
+      "label": "PDF/UA-2",
+      "purpose": "Universal Accessibility requirements for PDF 2.0 documents. Completely rewritten, NOT backward compatible with PDF/UA-1.",
+      "keyDifferences": [
+        "Based on PDF 2.0 (not PDF 1.7)",
+        "New structure elements: Aside, FENote, DocumentFragment, Sub, Em, Strong",
+        "Comprehensive requirements for structure element attributes (not just Scope on TH)",
+        "Comprehensive requirements for annotations (links, form fields, etc.)",
+        "Namespace-based structure types (can define custom namespaces)",
+        "Pronunciation support via /Phoneme and /PhoneticAlphabet",
+        "MathML support for mathematical expressions",
+        "Ruby and Warichu support for CJK annotations"
+      ],
+      "breakingChanges": [
+        "Not backward compatible with PDF/UA-1",
+        "Requires PDF 2.0 base (ISO 32000-2)",
+        "Standard 14 fonts no longer exist in PDF 2.0",
+        "Structure element naming follows PDF 2.0 conventions"
+      ],
+      "coexistence": "PDF/UA-1 and PDF/UA-2 coexist. PDF/UA-1 is for PDF 1.7 documents, PDF/UA-2 is for PDF 2.0 documents. Validators check conformance to one or the other, not both.",
+      "ourReadiness": "Our pipeline currently targets PDF/UA-1. Migrating to PDF/UA-2 requires: (1) output PDF 2.0, (2) expand structure element types, (3) update XMP identification, (4) update veraPDF flavour to ua2.",
+      "migrationPath": [
+        "1. Update pdf-writer to output PDF 2.0 header (%PDF-2.0)",
+        "2. Add new structure element types (Aside, FENote, Em, Strong) to tag-builder",
+        "3. Update XMP metadata to declare PDF/UA-2 conformance",
+        "4. Add pdfua:part=2 identification",
+        "5. Set veraPDF flavour to ua2 (when veraPDF supports it)",
+        "6. Test with PDF/UA-2 validators"
+      ]
+    }
+  },
+
+  "archivalStandards": {
+    "title": "PDF/A — Archival (ISO 19005)",
+    "overview": "PDF/A defines subsets of PDF suitable for long-term preservation. Key restrictions: all fonts embedded, no encryption, no external dependencies, XMP metadata required.",
+
+    "pdfA1": {
+      "iso": "ISO 19005-1:2005",
+      "basedOn": "PDF 1.4",
+      "label": "PDF/A-1",
+      "conformanceLevels": {
+        "a": "Full tagged structure required (accessibility-level). Includes logical structure and Unicode mapping.",
+        "b": "Visual reproduction only. No structure or Unicode required. 'Basic' level."
+      },
+      "keyRestrictions": [
+        "All fonts must be embedded (including CIDSet for CID fonts)",
+        "No encryption",
+        "No JavaScript",
+        "No audio/video",
+        "No external references",
+        "XMP metadata required",
+        "No transparency (this is the big limitation)",
+        "No JPEG 2000",
+        "No embedded files"
+      ],
+      "ourRelevance": "PDF/A-1a requires CIDSet (which our pipeline removes for PDF/UA). These standards can conflict — a document cannot easily conform to both PDF/A-1a and PDF/UA-1 on CIDSet handling."
+    },
+
+    "pdfA2": {
+      "iso": "ISO 19005-2:2011",
+      "basedOn": "PDF 1.7",
+      "label": "PDF/A-2",
+      "conformanceLevels": {
+        "a": "Full structure + Unicode (like PDF/A-1a but allows transparency)",
+        "b": "Visual reproduction",
+        "u": "Unicode text guaranteed (new level — text can be reliably extracted)"
+      },
+      "improvements": [
+        "Transparency support (huge for modern documents)",
+        "JPEG 2000 and JBIG2 compression",
+        "Layers (optional content groups)",
+        "PDF/A attachments allowed",
+        "Object-level metadata"
+      ]
+    },
+
+    "pdfA3": {
+      "iso": "ISO 19005-3:2012",
+      "basedOn": "PDF 1.7",
+      "label": "PDF/A-3",
+      "keyDifference": "Identical to PDF/A-2 but allows ANY file type as attachment (not just PDF/A). Used for ZUGFeRD invoices (PDF with embedded XML)."
+    },
+
+    "pdfA4": {
+      "iso": "ISO 19005-4:2020",
+      "basedOn": "PDF 2.0",
+      "label": "PDF/A-4",
+      "keyChanges": [
+        "Based on PDF 2.0",
+        "Eliminates the confusing a/b/u conformance levels — just PDF/A-4 (optionally with tags)",
+        "PDF/A-4f allows embedded files of any format",
+        "PDF/A-4e allows 3D content, rich media, embedded files (engineering focus)",
+        "Simplified XMP requirements"
+      ]
+    },
+
+    "ourArchivalSupport": "Our pipeline does not currently target PDF/A compliance. Adding PDF/A support would require: ensuring no JavaScript/encryption, validating all fonts embedded (already done), adding PDF/A XMP identification, and running veraPDF with --flavour a2b or similar."
+  },
+
+  "printStandards": {
+    "title": "PDF/X — Print Production (ISO 15930)",
+    "overview": "PDF/X ensures reliable print reproduction. Requires color management, embedded fonts, and no transparency (in older versions).",
+    "versions": {
+      "pdfX1a": { "iso": "ISO 15930-1:2001", "basedOn": "PDF 1.3", "label": "PDF/X-1a", "keyRequirement": "CMYK/spot colors only, no transparency, all fonts embedded" },
+      "pdfX3": { "iso": "ISO 15930-3:2002", "basedOn": "PDF 1.3", "label": "PDF/X-3", "keyRequirement": "Like X-1a but allows device-independent color (ICC profiles)" },
+      "pdfX4": { "iso": "ISO 15930-7:2010", "basedOn": "PDF 1.6", "label": "PDF/X-4", "keyRequirement": "Allows transparency and layers. OpenType fonts supported." },
+      "pdfX6": { "iso": "ISO 15930-9:2020", "basedOn": "PDF 2.0", "label": "PDF/X-6", "keyRequirement": "PDF 2.0 based. Latest print production standard." }
+    },
+    "ourRelevance": "Not directly relevant to our accessibility pipeline, but understanding PDF/X helps when processing documents originally created for print that need accessibility tagging."
+  },
+
+  "otherStandards": {
+    "pdfE": {
+      "iso": "ISO 24517",
+      "label": "PDF/E",
+      "purpose": "Engineering documents. Supports 3D content, geospatial data."
+    },
+    "pdfVT": {
+      "iso": "ISO 16612",
+      "label": "PDF/VT",
+      "purpose": "Variable data and transactional printing. Extends PDF/X for high-volume personalized output."
+    },
+    "pdfR": {
+      "label": "PDF/raster",
+      "purpose": "Subset for raster-only content. Ironically, our raster mode output is closest to this — pages as images."
+    }
+  },
+
+  "standardRelationships": {
+    "title": "How Standards Relate",
+    "hierarchy": "ISO 32000 (PDF core) → PDF/UA (accessibility) + PDF/A (archival) + PDF/X (print). Each is a SUBSET — it restricts what PDF features can be used.",
+    "versionAlignment": {
+      "pdf17": { "pdfUA": "PDF/UA-1", "pdfA": "PDF/A-2, PDF/A-3", "pdfX": "PDF/X-4" },
+      "pdf20": { "pdfUA": "PDF/UA-2", "pdfA": "PDF/A-4", "pdfX": "PDF/X-6" }
+    },
+    "conflicts": [
+      "PDF/A-1a requires CIDSet on subsetted CID fonts; PDF/UA-1 says if CIDSet exists it must be complete. Our fix (remove CIDSet) satisfies PDF/UA but may violate PDF/A-1a.",
+      "PDF/A prohibits encryption; some organizations need both archival and encrypted PDFs.",
+      "PDF/X requires specific color profiles; PDF/UA doesn't care about color management but requires contrast for accessibility."
+    ],
+    "dualConformance": {
+      "pdfUA1_pdfA2a": "Possible but requires careful CIDSet handling, complete structure tree, and all PDF/A-2a restrictions.",
+      "pdfUA2_pdfA4": "Both based on PDF 2.0 — dual conformance is more natural. The PDF Association published guidance on this.",
+      "recommendation": "For our pipeline: target PDF/UA-1 first (current), add PDF/A-2u as an optional output flavour (font embedding already satisfied, need XMP and restriction checks)."
+    }
+  },
+
+  "versionHistory": {
+    "title": "PDF Version Timeline",
+    "timeline": [
+      { "year": 1993, "event": "PDF 1.0 released by Adobe" },
+      { "year": 2001, "event": "PDF 1.4 — transparency, XMP. PDF/X-1a published." },
+      { "year": 2005, "event": "PDF/A-1 (ISO 19005-1) — first archival standard" },
+      { "year": 2008, "event": "PDF 1.7 (ISO 32000-1) — PDF becomes an open ISO standard" },
+      { "year": 2012, "event": "PDF/UA-1 (ISO 14289-1) — first accessibility standard" },
+      { "year": 2017, "event": "PDF 2.0 (ISO 32000-2) — major revision, no more Standard 14 fonts" },
+      { "year": 2020, "event": "PDF 2.0 revision + PDF/A-4 + PDF/X-6 published" },
+      { "year": 2024, "event": "PDF/UA-2 (ISO 14289-2) — accessibility for PDF 2.0" }
+    ]
+  }
+}

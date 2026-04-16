@@ -593,7 +593,77 @@ server.tool(
   }
 );
 
-// 12. explain_pdf_concept
+// 12. explain_pdf_standards
+let _pdfStandards = null;
+async function loadPdfStandards() {
+  if (!_pdfStandards) {
+    _pdfStandards = JSON.parse(await readFile(path.join(dataDir, "pdf-standards-ecosystem.json"), "utf8"));
+  }
+  return _pdfStandards;
+}
+export { loadPdfStandards };
+
+server.tool(
+  "explain_pdf_standards",
+  "Comprehensive reference for all PDF-related ISO standards: PDF 1.7/2.0, PDF/UA-1/UA-2, PDF/A-1/2/3/4, PDF/X, and their relationships. Returns version history, key requirements, our compliance status, and migration guidance.",
+  {
+    standard: z.string().optional().describe("Specific standard: 'pdf17', 'pdf20', 'pdfua1', 'pdfua2', 'pdfa1', 'pdfa2', 'pdfa3', 'pdfa4', 'pdfx', 'all', 'timeline', 'conflicts', 'dual-conformance'. Omit for overview.")
+  },
+  async ({ standard }) => {
+    const data = await loadPdfStandards();
+    const s = (standard || "").toLowerCase().replace(/[-_/\s]/g, "");
+
+    if (!s || s === "all" || s === "overview") {
+      return textResult({
+        title: data.title,
+        coreVersions: Object.keys(data.coreSpecification.versions).map(k => ({
+          key: k,
+          label: data.coreSpecification.versions[k].label,
+          year: data.coreSpecification.versions[k].year,
+          iso: data.coreSpecification.versions[k].iso
+        })),
+        accessibilityStandards: ["PDF/UA-1 (ISO 14289-1:2014, for PDF 1.7)", "PDF/UA-2 (ISO 14289-2:2024, for PDF 2.0)"],
+        archivalStandards: ["PDF/A-1 (ISO 19005-1:2005)", "PDF/A-2 (ISO 19005-2:2011)", "PDF/A-3 (ISO 19005-3:2012)", "PDF/A-4 (ISO 19005-4:2020)"],
+        printStandards: ["PDF/X-1a", "PDF/X-3", "PDF/X-4", "PDF/X-6"],
+        versionAlignment: data.standardRelationships.versionAlignment,
+        ourTarget: "PDF 1.7 + PDF/UA-1. PDF 2.0 + PDF/UA-2 migration path documented.",
+        queryHint: "Pass standard='pdfua1', 'pdfua2', 'pdfa2', 'pdf20', 'timeline', 'conflicts', or 'dual-conformance' for details."
+      });
+    }
+
+    if (s === "timeline") return textResult(data.versionHistory);
+    if (s === "conflicts") return textResult({ conflicts: data.standardRelationships.conflicts, dualConformance: data.standardRelationships.dualConformance });
+    if (s === "dualconformance") return textResult(data.standardRelationships.dualConformance);
+    if (s === "relationships") return textResult(data.standardRelationships);
+
+    const map = {
+      pdf14: data.coreSpecification.versions.pdf14,
+      pdf15: data.coreSpecification.versions.pdf15,
+      pdf16: data.coreSpecification.versions.pdf16,
+      pdf17: data.coreSpecification.versions.pdf17,
+      pdf20: data.coreSpecification.versions.pdf20,
+      pdfua1: data.accessibilityStandards.pdfUA1,
+      pdfua2: data.accessibilityStandards.pdfUA2,
+      pdfa1: data.archivalStandards.pdfA1,
+      pdfa2: data.archivalStandards.pdfA2,
+      pdfa3: data.archivalStandards.pdfA3,
+      pdfa4: data.archivalStandards.pdfA4,
+      pdfx: data.printStandards,
+      pdfe: data.otherStandards.pdfE,
+      pdfvt: data.otherStandards.pdfVT
+    };
+
+    const match = map[s];
+    if (match) return textResult({ standard: s, ...match });
+
+    return textResult({
+      error: `Unknown standard '${standard}'.`,
+      available: Object.keys(map)
+    });
+  }
+);
+
+// 13. explain_pdf_concept
 let _pdfSpec = null;
 async function loadPdfSpec() {
   if (!_pdfSpec) {
