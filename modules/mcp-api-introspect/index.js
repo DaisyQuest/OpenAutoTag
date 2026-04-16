@@ -593,7 +593,70 @@ server.tool(
   }
 );
 
-// 12. explain_pdf_standards
+// 12. explore_pdf_tooling
+let _pdfTooling = null;
+async function loadPdfTooling() {
+  if (!_pdfTooling) {
+    _pdfTooling = JSON.parse(await readFile(path.join(dataDir, "pdf-tooling-catalog.json"), "utf8"));
+  }
+  return _pdfTooling;
+}
+export { loadPdfTooling };
+
+server.tool(
+  "explore_pdf_tooling",
+  "Catalog of PDF libraries, SDKs, and tools with licensing, pricing, features, and accessibility support. Compare open-source and commercial options. Research timestamped April 2026.",
+  {
+    query: z.string().optional().describe("Library name (e.g. 'PDFBox', 'iText', 'Apryse'), category ('open_source', 'commercial'), or 'compare' for the feature matrix. Omit for full catalog overview.")
+  },
+  async ({ query }) => {
+    const catalog = await loadPdfTooling();
+    const q = (query || "").toLowerCase();
+
+    if (!q || q === "overview" || q === "all") {
+      const openSource = catalog.libraries.open_source.map(l => ({ name: l.name, language: l.language, license: l.license, cost: l.cost }));
+      const commercial = catalog.libraries.commercial.map(l => ({ name: l.name, language: l.language, license: l.license, cost: l.cost }));
+      return textResult({
+        title: catalog.title,
+        lastUpdated: catalog.lastUpdated,
+        openSource,
+        commercial,
+        ourAdvantage: catalog.ourAdvantage,
+        queryHint: "Pass a library name for details, 'compare' for feature matrix, 'open_source' or 'commercial' for filtered list."
+      });
+    }
+
+    if (q === "compare" || q === "matrix") {
+      return textResult(catalog.comparisonMatrix);
+    }
+
+    if (q === "open_source" || q === "opensource" || q === "free") {
+      return textResult({ category: "Open Source", libraries: catalog.libraries.open_source });
+    }
+
+    if (q === "commercial" || q === "paid") {
+      return textResult({ category: "Commercial", libraries: catalog.libraries.commercial });
+    }
+
+    if (q === "advantage" || q === "us" || q === "our" || q === "ourpipeline") {
+      return textResult(catalog.ourAdvantage);
+    }
+
+    const allLibs = [...catalog.libraries.open_source, ...catalog.libraries.commercial];
+    const match = allLibs.find(l => l.name.toLowerCase().includes(q) || (l.website || "").toLowerCase().includes(q));
+    if (match) {
+      return textResult({ library: match });
+    }
+
+    return textResult({
+      error: `No library matching '${query}'.`,
+      available: allLibs.map(l => l.name),
+      hint: "Try 'PDFBox', 'iText', 'Apryse', 'Aspose', 'Foxit', 'Adobe', 'veraPDF', 'pdf-lib', 'MuPDF', 'qpdf', 'compare', 'open_source', or 'commercial'."
+    });
+  }
+);
+
+// 13. explain_pdf_standards
 let _pdfStandards = null;
 async function loadPdfStandards() {
   if (!_pdfStandards) {
