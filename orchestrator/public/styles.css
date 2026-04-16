@@ -1189,6 +1189,41 @@ body {
   font-size: 0.78rem;
 }
 
+.native-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: help;
+  margin-bottom: 0.4rem;
+}
+
+.native-retained {
+  background: linear-gradient(135deg, #0d6e3f 0%, #16a34a 100%);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(13, 110, 63, 0.3);
+}
+
+.native-partial {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(180, 83, 9, 0.3);
+}
+
+.native-raster {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.native-badge-section {
+  margin-bottom: 0.6rem;
+}
+
 .result-actions {
   display: flex;
   flex-wrap: wrap;
