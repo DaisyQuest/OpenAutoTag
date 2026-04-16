@@ -39,6 +39,7 @@
     "fontEmbedder": { "$ref": "#/$defs/fontEmbedderConfig" },
     "pdfWriter": { "$ref": "#/$defs/pdfWriterConfig" },
     "validator": { "$ref": "#/$defs/validatorConfig" },
+    "paragraphMerger": { "$ref": "#/$defs/paragraphMergerConfig" },
     "redactor": { "$ref": "#/$defs/redactorConfig" },
     "orchestrator": { "$ref": "#/$defs/orchestratorConfig" },
     "evaluation": { "$ref": "#/$defs/evaluationConfig" }
@@ -265,6 +266,57 @@
           "minimum": 0,
           "default": 64,
           "description": "Minimum absolute pixel gap between column bands."
+        }
+      },
+      "additionalProperties": true
+    },
+    "paragraphMergerConfig": {
+      "type": "object",
+      "description": "Controls how consecutive text lines are merged into logical paragraphs.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable paragraph merging. When false, the stage passes through unchanged."
+        },
+        "gapMultiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 1.8,
+          "description": "Lines merge when vertical gap ≤ lineHeight × this multiplier. Lower = stricter merging."
+        },
+        "xAlignmentTolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 12,
+          "description": "Maximum horizontal offset (pixels) between consecutive lines to still consider them aligned."
+        },
+        "heightVarianceTolerance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.3,
+          "description": "Maximum relative difference in line height (fraction) to consider lines same-font."
+        },
+        "minConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5,
+          "description": "Minimum merge confidence to actually combine blocks. Below this, blocks stay separate with a report entry explaining why."
+        },
+        "sentenceBoundaryPenalty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.3,
+          "description": "Confidence penalty when the preceding line ends at a sentence boundary (period/colon followed by capital on next line)."
+        },
+        "reportUnmerged": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include detailed reasoning for lines that were NOT merged in the paragraph-merge report."
         }
       },
       "additionalProperties": true
