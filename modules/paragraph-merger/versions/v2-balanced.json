@@ -1,0 +1,20 @@
+{
+  "versionId": "v2-balanced",
+  "label": "Balanced (current default)",
+  "description": "The default configuration. Moderate thresholds that work well on typical single-column and two-column documents. Matches the current profile.schema.json defaults.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 1.8,
+    "xAlignmentTolerance": 12,
+    "heightVarianceTolerance": 0.3,
+    "minConfidence": 0.5,
+    "sentenceBoundaryPenalty": 0.3,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": false,
+    "artifactPreFilter": false,
+    "continuationLineDetection": false,
+    "legalCitationAwareness": false
+  }
+}

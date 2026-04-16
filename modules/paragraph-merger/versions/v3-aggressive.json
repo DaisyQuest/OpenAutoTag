@@ -1,0 +1,20 @@
+{
+  "versionId": "v3-aggressive",
+  "label": "Aggressive",
+  "description": "Low confidence threshold, wide alignment tolerance, lenient sentence-boundary penalty. Maximizes merges at the cost of occasional over-merging. Good for clean single-column documents.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 2.2,
+    "xAlignmentTolerance": 20,
+    "heightVarianceTolerance": 0.4,
+    "minConfidence": 0.3,
+    "sentenceBoundaryPenalty": 0.15,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": false,
+    "artifactPreFilter": false,
+    "continuationLineDetection": false,
+    "legalCitationAwareness": false
+  }
+}

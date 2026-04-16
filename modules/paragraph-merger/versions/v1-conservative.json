@@ -1,0 +1,20 @@
+{
+  "versionId": "v1-conservative",
+  "label": "Conservative (baseline)",
+  "description": "High confidence threshold, strict alignment, no special heuristics. Only merges when all signals agree. Good for unknown document types where false merges are costly.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 1.5,
+    "xAlignmentTolerance": 8,
+    "heightVarianceTolerance": 0.2,
+    "minConfidence": 0.7,
+    "sentenceBoundaryPenalty": 0.4,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": false,
+    "artifactPreFilter": false,
+    "continuationLineDetection": false,
+    "legalCitationAwareness": false
+  }
+}

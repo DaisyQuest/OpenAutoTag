@@ -19,7 +19,8 @@
     "inspect:pdf": "node scripts/inspect-pdf-low-level.js",
     "serve": "node orchestrator/server.js",
     "start": "node orchestrator/server.js",
-    "eval:score": "node modules/mcp-corpus-eval/cli.js score"
+    "eval:score": "node modules/mcp-corpus-eval/cli.js score",
+    "paragraph:evaluate": "node modules/paragraph-merger/evaluator.js"
   },
   "engines": {
     "node": "22.x"
