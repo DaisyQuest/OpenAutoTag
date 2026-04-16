@@ -1,0 +1,133 @@
+{
+  "groups": [
+    {
+      "module": "parser",
+      "vars": [
+        {
+          "name": "PARSER_OCR_MODE",
+          "type": "string",
+          "values": ["auto", "off", "force", "required"],
+          "default": "auto",
+          "description": "Controls when OCR is triggered. auto: only for sparse pages. off: never. force: always. required: fail if OCR fails."
+        },
+        {
+          "name": "PARSER_OCR_LANGS",
+          "type": "string",
+          "default": "",
+          "description": "Tesseract language codes (e.g. 'eng', 'spa+eng'). Empty means auto-detect."
+        },
+        {
+          "name": "PARSER_OCR_MAX_ATTEMPTS",
+          "type": "integer",
+          "default": "2",
+          "description": "Maximum OCR retry attempts per page before accepting the best candidate."
+        },
+        {
+          "name": "PARSER_OCR_TEMP_ROOT",
+          "type": "path",
+          "default": null,
+          "description": "Directory for temporary OCR render images. Uses system temp if unset."
+        }
+      ]
+    },
+    {
+      "module": "validator",
+      "vars": [
+        {
+          "name": "VERAPDF_FLAVOUR",
+          "type": "string",
+          "values": ["ua1", "a1a", "a2b"],
+          "default": "ua1",
+          "description": "veraPDF validation flavour. ua1 = PDF/UA-1, a1a = PDF/A-1a, etc."
+        },
+        {
+          "name": "VALIDATOR_JAVA_HOME",
+          "type": "path",
+          "default": null,
+          "description": "Path to Java installation for the validator. Falls back to JAVA_HOME, then bundled Java."
+        },
+        {
+          "name": "VALIDATOR_JAVA_PATH",
+          "type": "path",
+          "default": null,
+          "description": "Explicit path to the java executable used by the validator."
+        },
+        {
+          "name": "VALIDATOR_JAVAC_PATH",
+          "type": "path",
+          "default": null,
+          "description": "Explicit path to the javac executable for compiling validator Java helpers."
+        },
+        {
+          "name": "VERAPDF_PATH",
+          "type": "path",
+          "default": null,
+          "description": "Explicit path to the veraPDF CLI executable. Auto-discovered under vendor/ if unset."
+        }
+      ]
+    },
+    {
+      "module": "orchestrator",
+      "vars": [
+        {
+          "name": "PIPELINE_DATA_ROOT",
+          "type": "path",
+          "default": null,
+          "description": "Root directory for pipeline job data and intermediate artifacts."
+        },
+        {
+          "name": "APP_RUNTIME_ROOT",
+          "type": "path",
+          "default": null,
+          "description": "Root directory for runtime build artifacts (compiled Java classes, caches)."
+        }
+      ]
+    },
+    {
+      "module": "agent",
+      "vars": [
+        {
+          "name": "AGENT_MASTER_ENDPOINT",
+          "type": "url",
+          "default": null,
+          "description": "URL of the master orchestrator endpoint for remote agent polling."
+        },
+        {
+          "name": "AGENT_POLL_INTERVAL_MS",
+          "type": "integer",
+          "default": "5000",
+          "description": "How often (ms) the remote agent polls the master for new jobs."
+        },
+        {
+          "name": "AGENT_HEARTBEAT_INTERVAL_MS",
+          "type": "integer",
+          "default": "5000",
+          "description": "How often (ms) the remote agent sends heartbeat signals."
+        },
+        {
+          "name": "AGENT_CHECKIN_INTERVAL_MS",
+          "type": "integer",
+          "default": "5000",
+          "description": "How often (ms) the agent checks in with the master for configuration updates."
+        }
+      ]
+    },
+    {
+      "module": "pdf-writer",
+      "vars": [
+        {
+          "name": "PIPELINE_JAVAC_PATH",
+          "type": "path",
+          "default": null,
+          "description": "Explicit path to javac for compiling PDF writer Java helpers."
+        },
+        {
+          "name": "OVERLAY_FONT_PATH",
+          "type": "path",
+          "default": null,
+          "description": "Path to a TTF/OTF font file for overlay text. Uses bundled Noto Sans if unset."
+        }
+      ]
+    }
+  ]
+}

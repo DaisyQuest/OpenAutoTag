@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "pipeline-introspect": {
+      "command": "node",
+      "args": [
+        "modules/mcp-api-introspect/index.js"
+      ]
+    }
+  }
+}

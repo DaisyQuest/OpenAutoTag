@@ -1,0 +1,89 @@
+{
+  "findingCodes": [
+    {
+      "code": "INVALID_TAGGING_MANIFEST",
+      "severity": "error",
+      "source": "manifest-check",
+      "description": "The tagging manifest JSON does not validate against tagging.schema.json.",
+      "remediation": "Re-run tag-builder to produce a valid tagging.json, then re-run pdf-writer. Check that the tagging contract has not drifted from the schema."
+    },
+    {
+      "code": "MISSING_DOCUMENT_ROOT",
+      "severity": "error",
+      "source": "manifest-check",
+      "description": "The tagging tree root element is not of type 'Document'. PDF/UA requires a Document root.",
+      "remediation": "Ensure tag-builder emits a root node with type 'Document'. Inspect tagging.json to verify root.type === 'Document'."
+    },
+    {
+      "code": "NATIVE_TAGGING_NOT_APPLIED",
+      "severity": "warning",
+      "source": "manifest-check",
+      "description": "The writer manifest does not claim native tagging was applied. The PDF may only have a sidecar manifest without embedded structure.",
+      "remediation": "Run pdf-writer with the PDFBox backend to inject native structure tree and marked-content operators into the output PDF."
+    },
+    {
+      "code": "VERAPDF_5_1",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "5.1",
+      "description": "PDF metadata stream (XMP) and document information dictionary are inconsistent.",
+      "remediation": "Ensure pdf-writer synchronizes XMP metadata with the Info dictionary. This finding may be auto-suppressed if the validator's metadata probe confirms consistency (known veraPDF false positive with PDFBox output)."
+    },
+    {
+      "code": "VERAPDF_7_1_9",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.1.9",
+      "description": "PDF/UA identification not properly set in XMP metadata.",
+      "remediation": "Ensure pdf-writer sets pdfuaid:part in the XMP metadata. This finding may be auto-suppressed if the validator's metadata probe confirms the identification is present."
+    },
+    {
+      "code": "VERAPDF_7_1_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.1",
+      "description": "General PDF/UA structure requirement violation (clause 7.1).",
+      "remediation": "Inspect the veraPDF report details for the specific check context. Common causes: missing StructTreeRoot, incorrect role mapping, or missing /MarkInfo."
+    },
+    {
+      "code": "VERAPDF_7_2_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.2",
+      "description": "Content not properly tagged or artifacts not marked. All real content must be in the structure tree; all decorative content must be marked as Artifact.",
+      "remediation": "Ensure all text blocks are tagged by tag-builder and pdf-writer marks decorative elements as Artifact in the structure tree."
+    },
+    {
+      "code": "VERAPDF_7_4_4_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.4.4",
+      "description": "Figure element missing alternative text (/Alt).",
+      "remediation": "Add alt text to figure nodes in semantic-engine or tag-builder. Every <Figure> in the structure tree must have an /Alt entry."
+    },
+    {
+      "code": "VERAPDF_7_5_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.5",
+      "description": "Table structure violation. Tables must use TH/TD within TR within Table.",
+      "remediation": "Ensure layout-analyzer correctly identifies table cells and tag-builder produces proper Table > TR > TH/TD hierarchy."
+    },
+    {
+      "code": "VERAPDF_7_18_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.18",
+      "description": "Missing or incorrect natural language specification. All content must declare its language.",
+      "remediation": "Ensure pdf-writer sets /Lang on the document catalog and on structure elements when the language changes. Use semantic-engine languageHint or auto-detection."
+    },
+    {
+      "code": "VERAPDF_7_21_4_2_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.21.4.2",
+      "description": "Font not properly embedded or CIDSet descriptor present for subsetted CID font.",
+      "remediation": "Enable stripCidSet in the pdfWriter profile config. Ensure all fonts are fully embedded. Check OVERLAY_FONT_PATH for a valid embeddable font."
+    }
+  ]
+}

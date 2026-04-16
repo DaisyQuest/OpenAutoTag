@@ -1,11 +1,12 @@
 import { pathToFileURL } from "node:url";
 import { createAccessibilityPreparationStages, createTaggingOutputStages } from "./accessibility-stage-plan.js";
+import { createProfileContext } from "./profile-runtime.js";
 import { DEFAULT_STAGE_ATTEMPTS, runManagedWorkload } from "./workload-runner.js";
 
-function createPipelineStages({ filePath, resolvedOutputDir, artifacts }) {
+function createPipelineStages({ filePath, resolvedOutputDir, artifacts, profileContext }) {
   return [
-    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts }),
-    ...createTaggingOutputStages({ filePath, resolvedOutputDir, artifacts })
+    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext }),
+    ...createTaggingOutputStages({ filePath, resolvedOutputDir, artifacts, profileContext })
   ];
 }
 
@@ -23,12 +24,18 @@ export async function runPipeline({
   onProgress,
   heartbeatIntervalMs
 }) {
+  const profileContext = await createProfileContext(
+    options.profileId || "default",
+    options.profileOverrides || {}
+  );
+
   return runManagedWorkload({
     filePath,
     outputDir,
     jobId,
     workload,
     options,
+    profileContext,
     stageRunner,
     maxStageAttempts,
     onProgress,

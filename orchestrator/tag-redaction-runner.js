@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import redactionReportSchema from "../contracts/redaction-report.schema.json" with { type: "json" };
 import { finalizeRedactionReport } from "../modules/redactor/shared.js";
 import { createAccessibilityPreparationStages, createTaggingOutputStages } from "./accessibility-stage-plan.js";
+import { createProfileContext, injectProfileEnv } from "./profile-runtime.js";
 import { DEFAULT_STAGE_ATTEMPTS, repoRoot, runJsonStage, runManagedWorkload } from "./workload-runner.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -29,9 +30,11 @@ async function materializeRedactionReport({ artifacts, outputPath, workloadId })
   return path.resolve(outputPath);
 }
 
-function createTagAndRedactStages({ filePath, resolvedOutputDir, artifacts, workload }) {
+function createTagAndRedactStages({ filePath, resolvedOutputDir, artifacts, workload, profileContext }) {
+  const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+
   return [
-    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts }),
+    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext }),
     {
       key: "semanticRedaction",
       label: "semantic-redactor",
@@ -67,6 +70,7 @@ function createTagAndRedactStages({ filePath, resolvedOutputDir, artifacts, work
       filePath,
       resolvedOutputDir,
       artifacts,
+      profileContext,
       semanticArtifactKey: "semanticRedacted",
       taggedPdfFileName: "06-tagged-redacted.pdf",
       includeValidator: false,
@@ -97,7 +101,8 @@ function createTagAndRedactStages({ filePath, resolvedOutputDir, artifacts, work
         outputPath: await runJsonStage(
           "modules/validator/index.js",
           ["--pdf", artifacts.taggedPdf, "--manifest", artifacts.tagManifest],
-          path.join(resolvedOutputDir, "07-validation-report.json")
+          path.join(resolvedOutputDir, "07-validation-report.json"),
+          { env: profileEnv }
         ),
         artifacts: { validationReport: path.join(resolvedOutputDir, "07-validation-report.json") }
       })
@@ -122,12 +127,18 @@ export async function runTagAndRedactPipeline({
   const resolvedOutputDir = path.resolve(outputDir || path.join(repoRoot, "tmp", jobId));
   await mkdir(resolvedOutputDir, { recursive: true });
 
+  const profileContext = await createProfileContext(
+    options.profileId || "default",
+    options.profileOverrides || {}
+  );
+
   return runManagedWorkload({
     filePath,
     outputDir: resolvedOutputDir,
     jobId,
     workload,
     options,
+    profileContext,
     stageRunner,
     maxStageAttempts,
     onProgress,

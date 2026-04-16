@@ -27,7 +27,7 @@ function resolveScriptPath(scriptPath) {
   return path.isAbsolute(scriptPath) ? scriptPath : path.join(repoRoot, scriptPath);
 }
 
-async function execNodeToFile(scriptPath, args, outputPath) {
+async function execNodeToFile(scriptPath, args, outputPath, { env: extraEnv } = {}) {
   const resolvedScriptPath = resolveScriptPath(scriptPath);
   const resolvedOutputPath = path.resolve(outputPath);
   const tempOutputPath = path.join(
@@ -37,10 +37,15 @@ async function execNodeToFile(scriptPath, args, outputPath) {
 
   await mkdir(path.dirname(resolvedOutputPath), { recursive: true });
 
+  const spawnEnv = extraEnv && Object.keys(extraEnv).length > 0
+    ? { ...process.env, ...extraEnv }
+    : undefined;
+
   const child = spawn("node", [resolvedScriptPath, ...args], {
     cwd: repoRoot,
     stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true
+    windowsHide: true,
+    ...(spawnEnv ? { env: spawnEnv } : {})
   });
 
   let stderrTail = "";
@@ -75,8 +80,8 @@ async function execNodeToFile(scriptPath, args, outputPath) {
   }
 }
 
-export async function runJsonStage(scriptRelativePath, args, outputPath) {
-  return execNodeToFile(scriptRelativePath, args, outputPath);
+export async function runJsonStage(scriptRelativePath, args, outputPath, { env } = {}) {
+  return execNodeToFile(scriptRelativePath, args, outputPath, { env });
 }
 
 async function stageInputFile(filePath, outputDir) {
@@ -507,6 +512,7 @@ export async function runManagedWorkload({
   jobId,
   workload,
   options = {},
+  profileContext = null,
   stageRunner = async ({ run }) => run(),
   maxStageAttempts = DEFAULT_STAGE_ATTEMPTS,
   onProgress = noopProgress,
@@ -551,7 +557,8 @@ export async function runManagedWorkload({
     artifacts,
     options,
     workload,
-    jobId
+    jobId,
+    profileContext
   });
   const totalStages = stagePlan.length;
   let failureStage = null;
@@ -614,7 +621,8 @@ export async function runManagedWorkload({
         stagedFilePath,
         outputDir: resolvedOutputDir,
         workloadId: workload.id,
-        options
+        options,
+        ...(profileContext ? { profileId: profileContext.profileId, profileOverrides: profileContext.resolved._overridesApplied ? options.profileOverrides : undefined, resolvedProfile: profileContext.resolved } : {})
       },
       artifacts,
       stages,
@@ -655,7 +663,8 @@ export async function runManagedWorkload({
       stagedFilePath,
       outputDir: resolvedOutputDir,
       workloadId: workload.id,
-      options
+      options,
+      ...(profileContext ? { profileId: profileContext.profileId, profileOverrides: profileContext.resolved._overridesApplied ? options.profileOverrides : undefined, resolvedProfile: profileContext.resolved } : {})
     },
     artifacts,
     stages,

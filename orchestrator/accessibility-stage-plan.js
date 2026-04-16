@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { injectProfileEnv } from "./profile-runtime.js";
 import { runJsonStage } from "./workload-runner.js";
 
 function sortSemanticNodesForReadingOrder(semanticDocument) {
@@ -34,14 +35,16 @@ async function fallbackReadingOrder(inputPath, outputPath, reason) {
   };
 }
 
-export function createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts }) {
+export function createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext }) {
+  const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+
   return [
     {
       key: "layout",
       label: "parser",
       outputPath: path.join(resolvedOutputDir, "01-layout.json"),
       run: async () => ({
-        outputPath: await runJsonStage("modules/parser/index.js", [filePath], path.join(resolvedOutputDir, "01-layout.json")),
+        outputPath: await runJsonStage("modules/parser/index.js", [filePath], path.join(resolvedOutputDir, "01-layout.json"), { env: profileEnv }),
         artifacts: { layout: path.join(resolvedOutputDir, "01-layout.json") }
       })
     },
@@ -129,7 +132,8 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
         outputPath: await runJsonStage(
           "modules/layout-analyzer/index.js",
           [artifacts.layout, "--table-structure", artifacts.tableStructureMap],
-          path.join(resolvedOutputDir, "02-layout-enriched.json")
+          path.join(resolvedOutputDir, "02-layout-enriched.json"),
+          { env: profileEnv }
         ),
         artifacts: { layoutEnriched: path.join(resolvedOutputDir, "02-layout-enriched.json") }
       })
@@ -139,7 +143,7 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
       label: "semantic-engine",
       outputPath: path.join(resolvedOutputDir, "03-semantic.json"),
       run: async () => ({
-        outputPath: await runJsonStage("modules/semantic-engine/index.js", [artifacts.layoutEnriched], path.join(resolvedOutputDir, "03-semantic.json")),
+        outputPath: await runJsonStage("modules/semantic-engine/index.js", [artifacts.layoutEnriched], path.join(resolvedOutputDir, "03-semantic.json"), { env: profileEnv }),
         artifacts: { semantic: path.join(resolvedOutputDir, "03-semantic.json") }
       })
     },
@@ -174,12 +178,15 @@ export function createTaggingOutputStages({
   filePath,
   resolvedOutputDir,
   artifacts,
+  profileContext,
   semanticArtifactKey = "semanticOrdered",
   taggedPdfFileName = "06-tagged.pdf",
   validationReportFileName = "07-validation-report.json",
   includeValidator = true,
   writerArgs = () => []
 }) {
+  const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+
   const stages = [
     {
       key: "tagBuilder",
@@ -189,7 +196,8 @@ export function createTaggingOutputStages({
         outputPath: await runJsonStage(
           "modules/tag-builder/index.js",
           [artifacts[semanticArtifactKey]],
-          path.join(resolvedOutputDir, "05-tagging.json")
+          path.join(resolvedOutputDir, "05-tagging.json"),
+          { env: profileEnv }
         ),
         artifacts: { tagging: path.join(resolvedOutputDir, "05-tagging.json") }
       })
@@ -205,7 +213,8 @@ export function createTaggingOutputStages({
         const writerReport = await runJsonStage(
           "modules/pdf-writer/index.js",
           ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...extraArgs],
-          writerReportPath
+          writerReportPath,
+          { env: profileEnv }
         );
         return {
           outputPath: taggedPdf,
@@ -244,7 +253,8 @@ export function createTaggingOutputStages({
         outputPath: await runJsonStage(
           "modules/validator/index.js",
           ["--pdf", artifacts.taggedPdf, "--manifest", artifacts.tagManifest],
-          path.join(resolvedOutputDir, validationReportFileName)
+          path.join(resolvedOutputDir, validationReportFileName),
+          { env: profileEnv }
         ),
         artifacts: { validationReport: path.join(resolvedOutputDir, validationReportFileName) }
       })
