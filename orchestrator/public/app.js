@@ -521,13 +521,39 @@ function renderOutcomeCell(item) {
   `;
 }
 
+function renderNativeBadge(item) {
+  const writerMode = item.summary?.writerMode || item.writerReport?.writerMode;
+  if (!writerMode) return "";
+  if (writerMode === "native") {
+    const matchRate = item.summary?.operatorMatchRate ?? item.writerReport?.matchRate;
+    const rateText = matchRate != null ? ` (${Math.round(matchRate * 100)}% match)` : "";
+    return `<span class="native-badge native-retained" title="Original vector text, fonts, and links preserved. No rasterization.${rateText}">NATIVE PDF RETAINED</span>`;
+  }
+  if (writerMode === "raster") {
+    return `<span class="native-badge native-raster" title="Pages rasterized to images with invisible text overlay.">RASTER MODE</span>`;
+  }
+  if (writerMode === "auto") {
+    const pagesNative = item.summary?.pagesNative ?? item.writerReport?.pagesNative ?? 0;
+    const pagesRaster = item.summary?.pagesRaster ?? item.writerReport?.pagesRaster ?? 0;
+    if (pagesNative > 0 && pagesRaster === 0) {
+      return `<span class="native-badge native-retained" title="All ${pagesNative} pages preserved natively.">NATIVE PDF RETAINED</span>`;
+    }
+    if (pagesNative > 0) {
+      return `<span class="native-badge native-partial" title="${pagesNative} pages native, ${pagesRaster} pages rasterized.">${pagesNative}/${pagesNative + pagesRaster} NATIVE</span>`;
+    }
+    return `<span class="native-badge native-raster" title="Auto mode fell back to raster on all pages.">RASTER FALLBACK</span>`;
+  }
+  return "";
+}
+
 function renderSignalCell(item) {
   const signals = normalizeSignalList(item.summary);
-  if (!signals.length) {
+  const badge = renderNativeBadge(item);
+  if (!signals.length && !badge) {
     return `<span class="table-note">No signals yet.</span>`;
   }
 
-  return `<div class="finding-list compact-list">${signals
+  return `${badge}<div class="finding-list compact-list">${signals
     .map((signal) => `<span class="finding-chip">${escapeHtml(signal)}</span>`)
     .join("")}</div>`;
 }
@@ -666,6 +692,7 @@ function renderDetailPanel() {
   }
 
   const signals = normalizeSignalList(item.summary);
+  const nativeBadge = renderNativeBadge(item);
   const cards = [
     {
       label: "Outcome",
@@ -774,6 +801,7 @@ function renderDetailPanel() {
         <h4>Signals</h4>
         <span>${escapeHtml(String(signals.length))} visible</span>
       </div>
+      ${nativeBadge ? `<div class="native-badge-section">${nativeBadge}</div>` : ""}
       ${
         signals.length
           ? `<div class="finding-list">${signals.map((signal) => `<span class="finding-chip">${escapeHtml(signal)}</span>`).join("")}</div>`
