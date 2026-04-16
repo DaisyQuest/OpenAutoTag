@@ -175,7 +175,11 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
           }
           await writeFile(configPath, JSON.stringify(configWithStrategy));
 
-          const cliArgs = [artifacts.semantic, mergedPath, reportPath, "--config", configPath];
+          // Don't pass mergedPath as positional arg — execNodeToFile captures
+          // stdout to the output file. Passing it as a positional would cause the
+          // CLI to write the file AND execNodeToFile to overwrite it with stdout.
+          // Report path is the only file the CLI writes directly.
+          const cliArgs = [artifacts.semantic, "--config", configPath, "--report", reportPath];
           if (mergerConfig.strategy) {
             cliArgs.push("--strategy", mergerConfig.strategy);
           }
