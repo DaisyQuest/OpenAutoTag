@@ -11,6 +11,8 @@ const repoRoot = path.resolve(moduleDir, "..", "..");
 const buildDir = getRuntimeBuildDir("modules-corruption-repairer", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfRepairCli.java");
 const javaClassPath = path.join(buildDir, "PdfRepairCli.class");
+const fontJavaSourcePath = path.join(moduleDir, "java", "FontRepairCli.java");
+const fontJavaClassPath = path.join(buildDir, "FontRepairCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
@@ -37,19 +39,19 @@ function execCommand(command, args, { env } = {}) {
   });
 }
 
-async function needsCompilation() {
+async function needsCompilation(sourcePath, classPath) {
   try {
-    const [sourceStats, classStats] = await Promise.all([stat(javaSourcePath), stat(javaClassPath)]);
+    const [sourceStats, classStats] = await Promise.all([stat(sourcePath), stat(classPath)]);
     return sourceStats.mtimeMs > classStats.mtimeMs;
   } catch {
     return true;
   }
 }
 
-async function ensureJavaHelperCompiled() {
+async function ensureJavaCompiled(sourcePath, classPath) {
   await ensureJavaBuildArtifact({
     buildDir,
-    isCurrent: async () => !(await needsCompilation()),
+    isCurrent: async () => !(await needsCompilation(sourcePath, classPath)),
     compile: async () => {
       const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
       await execCommand(
@@ -61,7 +63,7 @@ async function ensureJavaHelperCompiled() {
           pdfboxJarPath,
           "-d",
           buildDir,
-          javaSourcePath,
+          sourcePath,
         ],
         {
           env: await buildJavaExecEnv({ bundledJavaHome }),
@@ -71,14 +73,15 @@ async function ensureJavaHelperCompiled() {
   });
 }
 
-export async function repairPdf({ pdfPath, outputPath }) {
-  if (!pdfPath || !outputPath) {
-    throw new Error(
-      "Usage: node modules/corruption-repairer/index.js --pdf <input.pdf> --output <repaired.pdf>"
-    );
-  }
+async function ensureJavaHelperCompiled() {
+  await ensureJavaCompiled(javaSourcePath, javaClassPath);
+}
 
-  await mkdir(path.dirname(outputPath), { recursive: true });
+async function ensureFontHelperCompiled() {
+  await ensureJavaCompiled(fontJavaSourcePath, fontJavaClassPath);
+}
+
+async function runStructuralRepair({ pdfPath, outputPath }) {
   await ensureJavaHelperCompiled();
 
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
@@ -96,17 +99,100 @@ export async function repairPdf({ pdfPath, outputPath }) {
     env: await buildJavaExecEnv({ bundledJavaHome }),
   });
 
-  const rawReport = JSON.parse(stdout);
-  const classifiedReport = classifyRepairReport(rawReport);
+  return classifyRepairReport(JSON.parse(stdout));
+}
+
+export async function repairFonts({ pdfPath, outputPath }) {
+  if (!pdfPath || !outputPath) {
+    throw new Error(
+      "Usage: repairFonts({ pdfPath, outputPath })"
+    );
+  }
+
+  await mkdir(path.dirname(outputPath), { recursive: true });
+  await ensureFontHelperCompiled();
+
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const args = [
+    "-cp",
+    `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+    "FontRepairCli",
+    "--pdf",
+    path.resolve(pdfPath),
+    "--output",
+    path.resolve(outputPath),
+  ];
+
+  const stdout = await execCommand(javaCommand, args, {
+    env: await buildJavaExecEnv({ bundledJavaHome }),
+  });
+
+  const fontReport = JSON.parse(stdout);
+  const fontReportPath = `${outputPath}.font-report.json`;
+  await writeFile(fontReportPath, JSON.stringify(fontReport, null, 2));
+
+  return {
+    status: "completed",
+    fontReportPath: path.resolve(fontReportPath),
+    ...fontReport,
+  };
+}
+
+export async function repairPdf({ pdfPath, outputPath }) {
+  if (!pdfPath || !outputPath) {
+    throw new Error(
+      "Usage: node modules/corruption-repairer/index.js --pdf <input.pdf> --output <repaired.pdf>"
+    );
+  }
+
+  await mkdir(path.dirname(outputPath), { recursive: true });
+
+  // Stage 1: structural repair
+  const structuralReport = await runStructuralRepair({ pdfPath, outputPath });
 
   const reportPath = `${outputPath}.repair-report.json`;
-  await writeFile(reportPath, JSON.stringify(classifiedReport, null, 2));
+  await writeFile(reportPath, JSON.stringify(structuralReport, null, 2));
+
+  // Stage 2: font health analysis (runs on repaired PDF)
+  let fontHealth = null;
+  let fontReportPath = null;
+  try {
+    await ensureFontHelperCompiled();
+
+    const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+    const fontArgs = [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "FontRepairCli",
+      "--pdf",
+      path.resolve(outputPath),
+      "--output",
+      path.resolve(outputPath),
+    ];
+
+    const fontStdout = await execCommand(javaCommand, fontArgs, {
+      env: await buildJavaExecEnv({ bundledJavaHome }),
+    });
+
+    fontHealth = JSON.parse(fontStdout);
+    fontReportPath = `${outputPath}.font-report.json`;
+    await writeFile(fontReportPath, JSON.stringify(fontHealth, null, 2));
+  } catch {
+    // Font analysis is best-effort; structural repair still succeeds
+    fontHealth = null;
+  }
+
+  const combinedReport = {
+    structuralRepairs: structuralReport,
+    fontHealth,
+  };
 
   return {
     status: "completed",
     outputPath: path.resolve(outputPath),
     reportPath: path.resolve(reportPath),
-    ...classifiedReport,
+    fontReportPath: fontReportPath ? path.resolve(fontReportPath) : null,
+    ...combinedReport,
   };
 }
 

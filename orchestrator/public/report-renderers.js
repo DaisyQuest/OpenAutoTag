@@ -18,7 +18,8 @@ export const artifactLabels = {
   semanticMerged: "Merged paragraphs",
   paragraphMergeReport: "Paragraph merge report",
   repairedPdf: "Repaired PDF",
-  repairReport: "Repair report"
+  repairReport: "Repair report",
+  fontReport: "Font Health Report"
 };
 
 const JSON_PREVIEW_ITEM_LIMIT = 8;
