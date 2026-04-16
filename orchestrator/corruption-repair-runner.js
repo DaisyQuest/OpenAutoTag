@@ -28,6 +28,28 @@ function createPipelineStages({ filePath, resolvedOutputDir, artifacts, profileC
           }
         };
       }
+    },
+    {
+      key: "fontRepair",
+      label: "font-health-check",
+      outputPath: path.join(resolvedOutputDir, "02-font-report.json"),
+      run: async () => {
+        const repairedPdf = artifacts.repairedPdf || path.join(resolvedOutputDir, "01-repaired.pdf");
+        const fontReport = path.join(resolvedOutputDir, "02-font-report.json");
+        await runJsonStage(
+          "modules/corruption-repairer/index.js",
+          ["--pdf", repairedPdf, "--output", repairedPdf, "--mode", "font"],
+          fontReport,
+          { env: profileEnv }
+        );
+
+        return {
+          outputPath: repairedPdf,
+          artifacts: {
+            fontReport
+          }
+        };
+      }
     }
   ];
 }

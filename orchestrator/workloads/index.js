@@ -199,9 +199,9 @@ const workloadDefinitions = {
     id: "corruption-repair",
     label: "PDF Corruption Repair",
     shortLabel: "Repair",
-    description: "Scans for 8 types of PDF corruption (broken xref, damaged streams, missing fonts, truncation, etc.), applies surgical repairs, and produces a clean PDF with a detailed repair report.",
+    description: "Scans for 8 types of PDF corruption (broken xref, damaged streams, missing fonts, truncation, etc.), applies surgical repairs, runs 24 font health checks, and produces a clean PDF with detailed repair and font reports.",
     primaryArtifact: "repairedPdf",
-    previewArtifacts: ["repairReport"],
+    previewArtifacts: ["repairReport", "fontReport"],
     downloadArtifacts: ["repairedPdf"],
     processor: runCorruptionRepairPipeline,
     async summarize(job) {
@@ -209,10 +209,31 @@ const workloadDefinitions = {
         return null;
       }
 
-      const report = JSON.parse(await readFile(job.artifacts.repairReport, "utf8"));
+      const [report, fontReport] = await Promise.all([
+        readFile(job.artifacts.repairReport, "utf8").then((content) => JSON.parse(content)),
+        job?.artifacts?.fontReport
+          ? readFile(job.artifacts.fontReport, "utf8").then((content) => JSON.parse(content))
+          : Promise.resolve(null)
+      ]);
+
+      const summary = getCorruptionRepairSummary(report);
+
+      if (fontReport) {
+        const fontGrade = fontReport.grade || fontReport.fontGrade || null;
+        const fontIssueCount = fontReport.issues?.length ?? fontReport.findings?.length ?? 0;
+
+        if (fontGrade) {
+          summary.signals.push(`Font grade: ${fontGrade}`);
+        }
+        if (fontIssueCount > 0) {
+          summary.signals.push(`${fontIssueCount} font issue${fontIssueCount === 1 ? "" : "s"}`);
+        }
+      }
+
       return {
-        summary: getCorruptionRepairSummary(report),
-        validation: null
+        summary,
+        validation: null,
+        fontHealth: fontReport
       };
     }
   }

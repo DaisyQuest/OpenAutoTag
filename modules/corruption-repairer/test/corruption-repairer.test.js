@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { classifyRepairReport, buildRepairTimeline, compareBeforeAfter } from "../lib/report-model.js";
+import { artifactLabels } from "../../../orchestrator/public/report-renderers.js";
 
 test("classifyRepairReport with clean report returns healthScore=1 and riskLevel=clean", () => {
   const report = { issues: [] };
@@ -75,4 +76,49 @@ test("compareBeforeAfter produces inputSize, outputSize, and delta", async () =>
   assert.equal(result.outputSize, 1200);
   assert.equal(result.delta, 200);
   assert.equal(result.deltaPercent, 20);
+});
+
+test("combined report has both structuralRepairs and fontHealth sections", () => {
+  const structuralReport = classifyRepairReport({
+    issues: [
+      { type: "xref", severity: "error", message: "Broken xref table", repaired: true }
+    ]
+  });
+
+  const fontHealth = {
+    grade: "B",
+    findings: [
+      { code: "TOUNICODE_MISSING", severity: "warning", fontName: "Arial" }
+    ]
+  };
+
+  const combinedReport = {
+    structuralRepairs: structuralReport,
+    fontHealth,
+  };
+
+  assert.ok(combinedReport.structuralRepairs, "combined report should have structuralRepairs");
+  assert.ok(combinedReport.fontHealth, "combined report should have fontHealth");
+  assert.ok(typeof combinedReport.structuralRepairs.healthScore === "number", "structuralRepairs should have a numeric healthScore");
+  assert.ok(typeof combinedReport.structuralRepairs.riskLevel === "string", "structuralRepairs should have a riskLevel");
+  assert.equal(combinedReport.fontHealth.grade, "B");
+  assert.equal(combinedReport.fontHealth.findings.length, 1);
+  assert.equal(combinedReport.fontHealth.findings[0].code, "TOUNICODE_MISSING");
+});
+
+test("combined report with null fontHealth still has structuralRepairs", () => {
+  const structuralReport = classifyRepairReport({ issues: [] });
+
+  const combinedReport = {
+    structuralRepairs: structuralReport,
+    fontHealth: null,
+  };
+
+  assert.ok(combinedReport.structuralRepairs, "structuralRepairs should be present");
+  assert.equal(combinedReport.fontHealth, null, "fontHealth should be null when font analysis unavailable");
+  assert.equal(combinedReport.structuralRepairs.riskLevel, "clean");
+});
+
+test("fontReport artifact label exists in report-renderers", () => {
+  assert.equal(artifactLabels.fontReport, "Font Health Report");
 });
