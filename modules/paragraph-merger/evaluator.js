@@ -1,8 +1,9 @@
 import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { mergeParagraphs } from "./index.js";
+import { mergeParagraphs, mergeWithStrategy } from "./index.js";
 import { scoreMergeResult } from "./lib/scorer.js";
+import { runAllValidators } from "./lib/validators.js";
 import { autoSelectVersion } from "./lib/auto-selector.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
@@ -41,6 +42,8 @@ function buildImprovementReport(docId, original, versionResults, autoSelection) 
       skipCount: vr.mergeReport.summary.totalSkips,
       reductionPercent: vr.mergeReport.summary.reductionPercent,
       scores: vr.scores,
+      validationErrors: vr.validationResult?.summary?.errorCount ?? 0,
+      validationWarnings: vr.validationResult?.summary?.warningCount ?? 0,
       interestingMerges: [],
       interestingSkips: []
     };
@@ -96,7 +99,9 @@ function buildImprovementReport(docId, original, versionResults, autoSelection) 
       overMerge: (curr.scores.overMergeRate * 100).toFixed(1) + "%",
       underMerge: (curr.scores.underMergeRate * 100).toFixed(1) + "%",
       riskyMerges: curr.interestingMerges.length,
-      borderlineSkips: curr.interestingSkips.length
+      borderlineSkips: curr.interestingSkips.length,
+      validationErrors: curr.validationErrors,
+      validationWarnings: curr.validationWarnings
     };
     report.comparison.push(comparison);
   }
@@ -123,16 +128,43 @@ export async function evaluateDocument(docId, semanticDocument, versions) {
   const versionResults = [];
 
   for (const version of versions) {
-    const { document: merged, report: mergeReport } = mergeParagraphs(
-      semanticDocument,
-      { ...version.config, heuristics: version.heuristics }
-    );
-    const scores = scoreMergeResult(semanticDocument, merged, mergeReport);
+    const cfg = { ...version.config, heuristics: version.heuristics };
+    let merged, mergeReport;
+
+    if (version.config.strategy === "text-structure") {
+      ({ document: merged, report: mergeReport } = mergeWithStrategy(semanticDocument, cfg));
+      // Normalise text-structure report shape so downstream code can treat it uniformly
+      if (mergeReport.summary.totalMerges == null) {
+        mergeReport.summary.totalMerges = mergeReport.summary.totalAbsorbed ?? 0;
+        mergeReport.summary.totalSkips = mergeReport.summary.totalBreaks ?? 0;
+        mergeReport.summary.reductionPercent =
+          mergeReport.summary.reductionPercent ?? mergeReport.summary.overallReductionPercent ?? "0.0";
+      }
+      // Normalise page-level arrays: text-structure uses breaks[], not merges[]/skips[]
+      for (const page of mergeReport.pages || []) {
+        if (!page.merges) page.merges = [];
+        if (!page.skips) {
+          page.skips = (page.breaks || []).map((b) => ({
+            between: b.between,
+            gap: 0,
+            confidence: 0,
+            reasons: b.reasons
+          }));
+        }
+      }
+    } else {
+      ({ document: merged, report: mergeReport } = mergeParagraphs(semanticDocument, cfg));
+    }
+
+    const validationResult = runAllValidators(merged, semanticDocument);
+    const scores = scoreMergeResult(semanticDocument, merged, mergeReport, validationResult);
+
     versionResults.push({
       versionId: version.versionId,
       label: version.label,
       merged,
       mergeReport,
+      validationResult,
       scores
     });
   }
@@ -193,7 +225,9 @@ export async function evaluateCorpus(semanticPaths, outputDir) {
       meanOverMerge: mean(entries.map((e) => e.scores.overMergeRate)),
       meanUnderMerge: mean(entries.map((e) => e.scores.underMergeRate)),
       totalRiskyMerges: entries.reduce((s, e) => s + e.interestingMerges.length, 0),
-      totalBorderlineSkips: entries.reduce((s, e) => s + e.interestingSkips.length, 0)
+      totalBorderlineSkips: entries.reduce((s, e) => s + e.interestingSkips.length, 0),
+      meanValidationErrors: mean(entries.map((e) => e.validationErrors)),
+      meanValidationWarnings: mean(entries.map((e) => e.validationWarnings))
     };
   }
 
