@@ -56,7 +56,35 @@ function inferArtifactPlacement(block) {
   return null;
 }
 
-function inferTableMetadata(block, pageNumber, index, state) {
+function columnAnchorsMatch(activeTable, newPageCells, tolerance) {
+  if (!activeTable || !activeTable.columnAnchors || activeTable.columnAnchors.length === 0) {
+    return false;
+  }
+  let matchCount = 0;
+  for (const anchor of activeTable.columnAnchors) {
+    for (const x of newPageCells) {
+      if (Math.abs(anchor - x) <= tolerance) {
+        matchCount++;
+        break;
+      }
+    }
+  }
+  return matchCount >= 2;
+}
+
+function isRepeatedHeaderRow(activeTable, rowCellTexts) {
+  if (!activeTable || !activeTable.headerTexts || activeTable.headerTexts.length === 0) {
+    return false;
+  }
+  if (rowCellTexts.length !== activeTable.headerTexts.length) {
+    return false;
+  }
+  return rowCellTexts.every((t, i) => t === activeTable.headerTexts[i]);
+}
+
+function inferTableMetadata(block, pageNumber, index, state, options) {
+  const tableContinuationAcrossPages = options?.tableContinuationAcrossPages !== false;
+
   if (!isTableCandidate(block)) {
     state.activeTable = null;
     return null;
@@ -69,31 +97,120 @@ function inferTableMetadata(block, pageNumber, index, state) {
   const currentY = Array.isArray(block.bbox) ? block.bbox[1] : 0;
   const currentX = Array.isArray(block.bbox) ? block.bbox[0] : 0;
   const explicitTableId = block.tableId || block.tableGroupId;
-  const continuation =
+
+  const pageWidth = options?.pageWidth || 612;
+  const anchorTolerance = Math.max(15, pageWidth * 0.05);
+
+  // Same-page continuation (original logic)
+  const samePageContinuation =
     state.activeTable &&
+    state.activeTable.lastPage === pageNumber &&
     (!Number.isFinite(state.activeTable.lastY) || Math.abs(currentY - state.activeTable.lastY) <= 48) &&
     (!Number.isFinite(state.activeTable.lastX) || Math.abs(currentX - state.activeTable.lastX) <= 160);
 
+  // Same-page column-anchor continuation: if the active table has column anchors
+  // (from explicit tableId or cross-page continuation), allow cells whose X matches
+  // a known anchor to continue the table even if the X-distance threshold fails.
+  const samePageAnchorContinuation =
+    !samePageContinuation &&
+    state.activeTable &&
+    state.activeTable.lastPage === pageNumber &&
+    state.activeTable.columnAnchors &&
+    state.activeTable.columnAnchors.length >= 2 &&
+    (!Number.isFinite(state.activeTable.lastY) || Math.abs(currentY - state.activeTable.lastY) <= 48) &&
+    state.activeTable.columnAnchors.some((anchor) => Math.abs(anchor - currentX) <= anchorTolerance);
+
+  // Cross-page continuation via column anchor matching
+  let crossPageContinuation = false;
+  let repeatedHeader = false;
+  if (
+    !samePageContinuation &&
+    !samePageAnchorContinuation &&
+    tableContinuationAcrossPages &&
+    state.activeTable &&
+    state.activeTable.lastPage === pageNumber - 1
+  ) {
+    const newPageXPositions = state.pendingNewPageXPositions || [];
+    if (!newPageXPositions.includes(currentX)) {
+      newPageXPositions.push(currentX);
+    }
+    crossPageContinuation = columnAnchorsMatch(state.activeTable, newPageXPositions, anchorTolerance);
+  }
+
+  const continuation = samePageContinuation || samePageAnchorContinuation || crossPageContinuation;
+
   if (explicitTableId) {
-    state.activeTable = {
-      tableId: String(explicitTableId),
-      lastY: currentY,
-      lastX: currentX
-    };
+    if (!state.activeTable || state.activeTable.tableId !== String(explicitTableId)) {
+      state.activeTable = {
+        tableId: String(explicitTableId),
+        lastY: currentY,
+        lastX: currentX,
+        lastPage: pageNumber,
+        columnAnchors: [currentX],
+        headerTexts: [],
+        maxRowIndex: 0,
+        rowCount: 0
+      };
+    } else {
+      state.activeTable.lastY = currentY;
+      state.activeTable.lastX = currentX;
+      state.activeTable.lastPage = pageNumber;
+      if (!state.activeTable.columnAnchors.includes(currentX)) {
+        state.activeTable.columnAnchors.push(currentX);
+      }
+    }
   } else if (!continuation) {
     state.tableSequence += 1;
     state.activeTable = {
       tableId: `table:${pageNumber}:${state.tableSequence}`,
       lastY: currentY,
-      lastX: currentX
+      lastX: currentX,
+      lastPage: pageNumber,
+      columnAnchors: [currentX],
+      headerTexts: [],
+      maxRowIndex: 0,
+      rowCount: 0
     };
   } else {
     state.activeTable.lastY = currentY;
     state.activeTable.lastX = currentX;
+    state.activeTable.lastPage = pageNumber;
+    if (!state.activeTable.columnAnchors.includes(currentX)) {
+      state.activeTable.columnAnchors.push(currentX);
+    }
+  }
+
+  // Track header texts for repeated-header detection
+  const tableRole = block.tableRole || block.cellRole || (block.blockType === "table" ? "table" : "cell");
+  const isHeader = String(tableRole).toLowerCase() === "header";
+  if (isHeader && state.activeTable.headerTexts.length < 20) {
+    state.activeTable.headerTexts.push(String(block.text || "").trim());
+  }
+
+  // Track row indices for cross-page row continuation
+  if (Number.isInteger(rowIndex)) {
+    state.activeTable.maxRowIndex = Math.max(state.activeTable.maxRowIndex, rowIndex);
+  }
+  state.activeTable.rowCount = (state.activeTable.rowCount || 0);
+
+  // Track when a cross-page continuation starts on this page
+  if (crossPageContinuation) {
+    state.activeTable.crossPageStartedOnPage = pageNumber;
+  }
+
+  // Detect repeated header on new page (applies to the cross-page cell itself
+  // and to subsequent cells on the same page that are part of the same header row)
+  const onCrossPageRow =
+    crossPageContinuation ||
+    (samePageAnchorContinuation && state.activeTable.crossPageStartedOnPage === pageNumber);
+  if (onCrossPageRow && isHeader) {
+    const cellText = String(block.text || "").trim();
+    if (state.activeTable.headerTexts.includes(cellText)) {
+      repeatedHeader = true;
+    }
   }
 
   const tableId = String(state.activeTable.tableId);
-  const tableRole = block.tableRole || block.cellRole || (block.blockType === "table" ? "table" : "cell");
 
   return {
     tableId,
@@ -103,8 +220,9 @@ function inferTableMetadata(block, pageNumber, index, state) {
     rowSpan: Number.isInteger(block.tableRowSpan) ? block.tableRowSpan : Number.isInteger(block.rowSpan) ? block.rowSpan : 1,
     columnSpan:
       Number.isInteger(block.tableColumnSpan) ? block.tableColumnSpan : Number.isInteger(block.columnSpan) ? block.columnSpan : 1,
-    tableSection: block.tableSection || block.tableBand || null,
-    tableSource: block.tableSource || null
+    tableSection: repeatedHeader ? "THead" : (block.tableSection || block.tableBand || null),
+    tableSource: block.tableSource || null,
+    ...(repeatedHeader ? { repeatedHeader: true } : {})
   };
 }
 
@@ -222,9 +340,9 @@ function inferConfidence(block, role, artifactPlacement, tableMetadata) {
   return block.blockType === "unknown" ? 0.4 : 0.88;
 }
 
-function buildSemanticNode(block, pageNumber, index, state) {
+function buildSemanticNode(block, pageNumber, index, state, options) {
   const artifactPlacement = inferArtifactPlacement(block);
-  const tableMetadata = inferTableMetadata(block, pageNumber, index, state);
+  const tableMetadata = inferTableMetadata(block, pageNumber, index, state, options);
   const listMetadata = inferListMetadata(block, pageNumber, index, state);
   const role = inferRole(block, artifactPlacement, tableMetadata);
 
@@ -250,7 +368,8 @@ function buildSemanticNode(block, pageNumber, index, state) {
           tableRowSpan: tableMetadata.rowSpan,
           tableColumnSpan: tableMetadata.columnSpan,
           tableSection: tableMetadata.tableSection,
-          tableSource: tableMetadata.tableSource
+          tableSource: tableMetadata.tableSource,
+          ...(tableMetadata.repeatedHeader ? { repeatedHeader: true } : {})
         }
       : {}),
     ...(listMetadata
@@ -264,19 +383,51 @@ function buildSemanticNode(block, pageNumber, index, state) {
   };
 }
 
-function buildNodesForPage(page) {
-  const state = { activeList: null, activeTable: null, tableSequence: 0 };
-  return page.textBlocks.map((block, index) => buildSemanticNode(block, page.pageNumber, index, state));
+function collectLeadingTableXPositions(page) {
+  const xPositions = [];
+  for (const block of page.textBlocks) {
+    if (!isTableCandidate(block)) break;
+    const x = Array.isArray(block.bbox) ? block.bbox[0] : 0;
+    if (!xPositions.includes(x)) {
+      xPositions.push(x);
+    }
+  }
+  return xPositions;
 }
 
-export async function buildSemanticDocument(inputPath) {
+function buildNodesForPage(page, state, options) {
+  if (!state) {
+    state = { activeList: null, activeTable: null, tableSequence: 0 };
+  }
+  const pageOptions = { ...options, pageWidth: page.width || 612 };
+  return page.textBlocks.map((block, index) => buildSemanticNode(block, page.pageNumber, index, state, pageOptions));
+}
+
+export async function buildSemanticDocument(inputPath, options) {
   const layoutDocument = JSON.parse(await readFile(inputPath, "utf8"));
 
   if (!validateLayout(layoutDocument)) {
     throw new Error(`Semantic engine input failed schema validation: ${ajv.errorsText(validateLayout.errors)}`);
   }
 
-  const nodes = layoutDocument.pages.flatMap((page) => buildNodesForPage(page));
+  const effectiveOptions = { tableContinuationAcrossPages: true, ...options };
+  const state = { activeList: null, activeTable: null, tableSequence: 0 };
+
+  const nodes = [];
+  for (let i = 0; i < layoutDocument.pages.length; i++) {
+    const page = layoutDocument.pages[i];
+
+    // Pre-collect x-positions of this page's leading table cells
+    // so cross-page column anchor matching works on the first cell of a new page
+    if (effectiveOptions.tableContinuationAcrossPages) {
+      state.pendingNewPageXPositions = collectLeadingTableXPositions(page);
+    } else {
+      state.pendingNewPageXPositions = [];
+    }
+
+    const pageNodes = buildNodesForPage(page, state, effectiveOptions);
+    nodes.push(...pageNodes);
+  }
 
   const semanticDocument = {
     schemaVersion: "1.0.0",
