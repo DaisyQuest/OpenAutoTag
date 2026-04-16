@@ -134,81 +134,72 @@ describe("CLI --strategy flag", () => {
   it("--strategy text-structure flag works", async () => {
     const tmpDir = await mkdtemp(path.join(os.tmpdir(), "pm-test-"));
     const inputPath = path.join(tmpDir, "input.json");
-    const outputPath = path.join(tmpDir, "output.json");
 
     const doc = makeMultiLineDoc(20);
     await writeFile(inputPath, JSON.stringify(doc));
 
     try {
-      await execFileAsync("node", [cliPath, inputPath, outputPath, "--strategy", "text-structure"]);
-      const output = JSON.parse(await readFile(outputPath, "utf8"));
+      const { stdout } = await execFileAsync("node", [cliPath, inputPath, "--strategy", "text-structure"]);
+      const output = JSON.parse(stdout);
       const pLinesAfter = output.nodes.filter((n) => n.role === "P").length;
       const pLinesBefore = doc.nodes.filter((n) => n.role === "P").length;
       const reduction = ((pLinesBefore - pLinesAfter) / pLinesBefore) * 100;
       assert.ok(reduction > 70, `CLI text-structure should get >70% reduction, got ${reduction.toFixed(1)}%`);
     } finally {
       await unlink(inputPath).catch(() => {});
-      await unlink(outputPath).catch(() => {});
     }
   });
 
   it("--strategy disabled passes through", async () => {
     const tmpDir = await mkdtemp(path.join(os.tmpdir(), "pm-test-"));
     const inputPath = path.join(tmpDir, "input.json");
-    const outputPath = path.join(tmpDir, "output.json");
 
     const doc = makeMultiLineDoc(10);
     await writeFile(inputPath, JSON.stringify(doc));
 
     try {
-      await execFileAsync("node", [cliPath, inputPath, outputPath, "--strategy", "disabled"]);
-      const output = JSON.parse(await readFile(outputPath, "utf8"));
+      const { stdout } = await execFileAsync("node", [cliPath, inputPath, "--strategy", "disabled"]);
+      const output = JSON.parse(stdout);
       assert.equal(output.nodes.length, doc.nodes.length, "disabled strategy should passthrough");
     } finally {
       await unlink(inputPath).catch(() => {});
-      await unlink(outputPath).catch(() => {});
     }
   });
 
   it("default (no --strategy flag) uses text-structure", async () => {
     const tmpDir = await mkdtemp(path.join(os.tmpdir(), "pm-test-"));
     const inputPath = path.join(tmpDir, "input.json");
-    const outputPath = path.join(tmpDir, "output.json");
 
     const doc = makeMultiLineDoc(20);
     await writeFile(inputPath, JSON.stringify(doc));
 
     try {
-      await execFileAsync("node", [cliPath, inputPath, outputPath]);
-      const output = JSON.parse(await readFile(outputPath, "utf8"));
+      const { stdout } = await execFileAsync("node", [cliPath, inputPath]);
+      const output = JSON.parse(stdout);
       const pLinesAfter = output.nodes.filter((n) => n.role === "P").length;
       const pLinesBefore = doc.nodes.filter((n) => n.role === "P").length;
       const reduction = ((pLinesBefore - pLinesAfter) / pLinesBefore) * 100;
       assert.ok(reduction > 70, `Default should use text-structure (>70% reduction), got ${reduction.toFixed(1)}%`);
     } finally {
       await unlink(inputPath).catch(() => {});
-      await unlink(outputPath).catch(() => {});
     }
   });
 
   it("--strategy flag overrides config file strategy", async () => {
     const tmpDir = await mkdtemp(path.join(os.tmpdir(), "pm-test-"));
     const inputPath = path.join(tmpDir, "input.json");
-    const outputPath = path.join(tmpDir, "output.json");
     const configPath = path.join(tmpDir, "config.json");
 
     const doc = makeMultiLineDoc(10);
     await writeFile(inputPath, JSON.stringify(doc));
-    // Config says pairwise, but CLI flag says disabled
     await writeFile(configPath, JSON.stringify({ strategy: "pairwise" }));
 
     try {
-      await execFileAsync("node", [cliPath, inputPath, outputPath, "--config", configPath, "--strategy", "disabled"]);
-      const output = JSON.parse(await readFile(outputPath, "utf8"));
+      const { stdout } = await execFileAsync("node", [cliPath, inputPath, "--config", configPath, "--strategy", "disabled"]);
+      const output = JSON.parse(stdout);
       assert.equal(output.nodes.length, doc.nodes.length, "--strategy flag should override config file");
     } finally {
       await unlink(inputPath).catch(() => {});
-      await unlink(outputPath).catch(() => {});
       await unlink(configPath).catch(() => {});
     }
   });

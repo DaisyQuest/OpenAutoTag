@@ -2,11 +2,11 @@
   "job": {
     "status": "completed",
     "stageSummary": {
-      "total": 10,
-      "completedStages": 10,
+      "total": 11,
+      "completedStages": 11,
       "failedStages": 0,
       "skippedStages": 0,
-      "totalAttempts": 10,
+      "totalAttempts": 11,
       "retryableFailures": 0
     },
     "stages": [
@@ -40,6 +40,13 @@
       },
       {
         "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "paragraphMerger",
         "status": "completed",
         "attempts": 1,
         "fallbackUsed": false,
@@ -1355,7 +1362,8 @@
     "profileName": "PDF/UA-1 validation profile",
     "engine": {
       "name": "veraPDF",
-      "version": "1.28.2"
+      "version": "1.28.2",
+      "executionError": null
     },
     "findingCodes": [],
     "metadataDiagnostics": {

@@ -2,11 +2,11 @@
   "job": {
     "status": "completed",
     "stageSummary": {
-      "total": 10,
-      "completedStages": 10,
+      "total": 11,
+      "completedStages": 11,
       "failedStages": 0,
       "skippedStages": 0,
-      "totalAttempts": 10,
+      "totalAttempts": 11,
       "retryableFailures": 0
     },
     "stages": [
@@ -40,6 +40,13 @@
       },
       {
         "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "paragraphMerger",
         "status": "completed",
         "attempts": 1,
         "fallbackUsed": false,
@@ -288,6 +295,29 @@
     },
     "nodes": [
       {
+        "id": "n-1-2",
+        "role": "P",
+        "text": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol Donde estan los datos y como se validan?",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          100,
+          381.396,
+          40
+        ],
+        "readingOrder": 1,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
         "id": "n-1-1",
         "role": "H1",
         "text": "Informe de accesibilidad",
@@ -311,52 +341,6 @@
         "tableColumnSpan": null
       },
       {
-        "id": "n-1-2",
-        "role": "P",
-        "text": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
-        "pageNumber": 1,
-        "bbox": [
-          72,
-          100,
-          381.396,
-          12
-        ],
-        "readingOrder": 1,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-1-3",
-        "role": "P",
-        "text": "Donde estan los datos y como se validan?",
-        "pageNumber": 1,
-        "bbox": [
-          72,
-          128,
-          225.444,
-          12
-        ],
-        "readingOrder": 2,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
         "id": "n-1-4",
         "role": "LI",
         "text": "- Primer elemento de verificacion",
@@ -367,7 +351,7 @@
           175.38,
           12
         ],
-        "readingOrder": 3,
+        "readingOrder": 2,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -390,7 +374,7 @@
           188.088,
           12
         ],
-        "readingOrder": 4,
+        "readingOrder": 3,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -436,21 +420,9 @@
           },
           {
             "type": "P",
-            "label": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol",
+            "label": "Este parrafo explica la salida del informe con detalle.Nota lateral en espanol Donde estan los datos y como se validan?",
             "sourceNodeIds": [
               "n-1-2"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Donde estan los datos y como se validan?",
-            "sourceNodeIds": [
-              "n-1-3"
             ],
             "rowSpan": null,
             "columnSpan": null,
@@ -568,8 +540,8 @@
   "writer": {
     "status": "completed",
     "nativeTaggingApplied": true,
-    "structureElementCount": 8,
-    "markedContentCount": 5,
+    "structureElementCount": 7,
+    "markedContentCount": 4,
     "tableAttributeCount": 0,
     "metadataApplied": true,
     "language": "es-ES",
@@ -586,8 +558,8 @@
     },
     "tagged": {
       "hasStructTreeRoot": true,
-      "totalTypedNodes": 8,
-      "markedContentOperatorCount": 6,
+      "totalTypedNodes": 7,
+      "markedContentOperatorCount": 5,
       "artifactMarkedContentCount": 1,
       "tableAttributeNodeCount": 0
     },
@@ -596,8 +568,8 @@
       "metadataAdded": true,
       "markInfoAdded": true,
       "markedFlagEnabled": true,
-      "totalTypedNodesDelta": 8,
-      "markedContentOperatorCountDelta": 6,
+      "totalTypedNodesDelta": 7,
+      "markedContentOperatorCountDelta": 5,
       "artifactMarkedContentCountDelta": 1,
       "tableAttributeNodeCountDelta": 0,
       "imageXObjectCountDelta": 1
@@ -609,7 +581,8 @@
     "profileName": "PDF/UA-1 validation profile",
     "engine": {
       "name": "veraPDF",
-      "version": "1.28.2"
+      "version": "1.28.2",
+      "executionError": null
     },
     "findingCodes": [],
     "metadataDiagnostics": {

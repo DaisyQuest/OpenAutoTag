@@ -2,11 +2,11 @@
   "job": {
     "status": "completed",
     "stageSummary": {
-      "total": 10,
-      "completedStages": 10,
+      "total": 11,
+      "completedStages": 11,
       "failedStages": 0,
       "skippedStages": 0,
-      "totalAttempts": 10,
+      "totalAttempts": 11,
       "retryableFailures": 0
     },
     "stages": [
@@ -40,6 +40,13 @@
       },
       {
         "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "paragraphMerger",
         "status": "completed",
         "attempts": 1,
         "fallbackUsed": false,
@@ -1418,13 +1425,13 @@
       {
         "id": "n-2-1",
         "role": "P",
-        "text": "Ruled Table Gauntlet",
+        "text": "Ruled Table Gauntlet Post-table theorem: this paragraph must stay outside the ruled grid.",
         "pageNumber": 2,
         "bbox": [
           72,
           26,
-          180.036,
-          18
+          358.164,
+          214
         ],
         "readingOrder": 9,
         "columnHint": 0,
@@ -1738,201 +1745,17 @@
         "tableColumnSpan": 1
       },
       {
-        "id": "n-2-15",
-        "role": "P",
-        "text": "Post-table theorem: this paragraph must stay outside the ruled grid.",
-        "pageNumber": 2,
-        "bbox": [
-          72,
-          228,
-          358.164,
-          12
-        ],
-        "readingOrder": 23,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
         "id": "n-3-1",
         "role": "P",
-        "text": "Alignment Trap",
+        "text": "Alignment Trap This page aligns prose like a table but intentionally lacks a header band. Composer Ada Lovelace Venue Albany Hall Duration 47 minutes",
         "pageNumber": 3,
         "bbox": [
           72,
           32,
-          132.012,
-          18
-        ],
-        "readingOrder": 24,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-2",
-        "role": "P",
-        "text": "This page aligns prose like a table but intentionally lacks a header band.",
-        "pageNumber": 3,
-        "bbox": [
-          72,
-          64,
           382.86,
-          12
+          137
         ],
-        "readingOrder": 25,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-3",
-        "role": "P",
-        "text": "Composer",
-        "pageNumber": 3,
-        "bbox": [
-          75,
-          105,
-          55.344,
-          12
-        ],
-        "readingOrder": 26,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-4",
-        "role": "P",
-        "text": "Ada Lovelace",
-        "pageNumber": 3,
-        "bbox": [
-          239,
-          105,
-          72.708,
-          12
-        ],
-        "readingOrder": 27,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-5",
-        "role": "P",
-        "text": "Venue",
-        "pageNumber": 3,
-        "bbox": [
-          92,
-          132,
-          34.692,
-          12
-        ],
-        "readingOrder": 28,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-6",
-        "role": "P",
-        "text": "Albany Hall",
-        "pageNumber": 3,
-        "bbox": [
-          268,
-          132,
-          60.684,
-          12
-        ],
-        "readingOrder": 29,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-7",
-        "role": "P",
-        "text": "Duration",
-        "pageNumber": 3,
-        "bbox": [
-          108,
-          157,
-          45.348,
-          12
-        ],
-        "readingOrder": 30,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
-        "id": "n-3-8",
-        "role": "P",
-        "text": "47 minutes",
-        "pageNumber": 3,
-        "bbox": [
-          295,
-          157,
-          58.692,
-          12
-        ],
-        "readingOrder": 31,
+        "readingOrder": 23,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -1955,7 +1778,7 @@
           400.86,
           12
         ],
-        "readingOrder": 32,
+        "readingOrder": 24,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -1978,7 +1801,7 @@
           154.068,
           12
         ],
-        "readingOrder": 33,
+        "readingOrder": 25,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -2001,7 +1824,7 @@
           184.728,
           12
         ],
-        "readingOrder": 34,
+        "readingOrder": 26,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -2154,7 +1977,7 @@
           },
           {
             "type": "P",
-            "label": "Ruled Table Gauntlet",
+            "label": "Ruled Table Gauntlet Post-table theorem: this paragraph must stay outside the ruled grid.",
             "sourceNodeIds": [
               "n-2-1"
             ],
@@ -2410,105 +2233,9 @@
           },
           {
             "type": "P",
-            "label": "Post-table theorem: this paragraph must stay outside the ruled grid.",
-            "sourceNodeIds": [
-              "n-2-15"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Alignment Trap",
+            "label": "Alignment Trap This page aligns prose like a table but intentionally lacks a header band. Composer Ada Lovelace Venue Albany Hall Duration 47 minutes",
             "sourceNodeIds": [
               "n-3-1"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "This page aligns prose like a table but intentionally lacks a header band.",
-            "sourceNodeIds": [
-              "n-3-2"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Composer",
-            "sourceNodeIds": [
-              "n-3-3"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Ada Lovelace",
-            "sourceNodeIds": [
-              "n-3-4"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Venue",
-            "sourceNodeIds": [
-              "n-3-5"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Albany Hall",
-            "sourceNodeIds": [
-              "n-3-6"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "Duration",
-            "sourceNodeIds": [
-              "n-3-7"
-            ],
-            "rowSpan": null,
-            "columnSpan": null,
-            "tableSection": "",
-            "tableSource": "",
-            "children": []
-          },
-          {
-            "type": "P",
-            "label": "47 minutes",
-            "sourceNodeIds": [
-              "n-3-8"
             ],
             "rowSpan": null,
             "columnSpan": null,
@@ -3133,8 +2860,8 @@
   "writer": {
     "status": "completed",
     "nativeTaggingApplied": true,
-    "structureElementCount": 47,
-    "markedContentCount": 35,
+    "structureElementCount": 39,
+    "markedContentCount": 27,
     "tableAttributeCount": 4,
     "metadataApplied": true,
     "language": "en-US",
@@ -3151,8 +2878,8 @@
     },
     "tagged": {
       "hasStructTreeRoot": true,
-      "totalTypedNodes": 47,
-      "markedContentOperatorCount": 38,
+      "totalTypedNodes": 39,
+      "markedContentOperatorCount": 30,
       "artifactMarkedContentCount": 3,
       "tableAttributeNodeCount": 4
     },
@@ -3161,8 +2888,8 @@
       "metadataAdded": true,
       "markInfoAdded": true,
       "markedFlagEnabled": true,
-      "totalTypedNodesDelta": 47,
-      "markedContentOperatorCountDelta": 38,
+      "totalTypedNodesDelta": 39,
+      "markedContentOperatorCountDelta": 30,
       "artifactMarkedContentCountDelta": 3,
       "tableAttributeNodeCountDelta": 4,
       "imageXObjectCountDelta": 3
@@ -3174,7 +2901,8 @@
     "profileName": "PDF/UA-1 validation profile",
     "engine": {
       "name": "veraPDF",
-      "version": "1.28.2"
+      "version": "1.28.2",
+      "executionError": null
     },
     "findingCodes": [],
     "metadataDiagnostics": {

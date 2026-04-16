@@ -2,11 +2,11 @@
   "job": {
     "status": "completed",
     "stageSummary": {
-      "total": 10,
-      "completedStages": 10,
+      "total": 11,
+      "completedStages": 11,
       "failedStages": 0,
       "skippedStages": 0,
-      "totalAttempts": 10,
+      "totalAttempts": 11,
       "retryableFailures": 0
     },
     "stages": [
@@ -40,6 +40,13 @@
       },
       {
         "key": "semantic",
+        "status": "completed",
+        "attempts": 1,
+        "fallbackUsed": false,
+        "diagnosticUnavailable": false
+      },
+      {
+        "key": "paragraphMerger",
         "status": "completed",
         "attempts": 1,
         "fallbackUsed": false,
@@ -287,29 +294,6 @@
     },
     "nodes": [
       {
-        "id": "n-1-1",
-        "role": "H1",
-        "text": "Accessibility Report",
-        "pageNumber": 1,
-        "bbox": [
-          72,
-          48,
-          230.736,
-          24
-        ],
-        "readingOrder": 0,
-        "columnHint": 0,
-        "listId": "",
-        "tableId": "",
-        "tableRole": "",
-        "tableSection": "",
-        "tableSource": "",
-        "tableRow": null,
-        "tableColumn": null,
-        "tableRowSpan": null,
-        "tableColumnSpan": null
-      },
-      {
         "id": "n-1-2",
         "role": "P",
         "text": "This paragraph explains the report output.",
@@ -344,6 +328,29 @@
           12
         ],
         "readingOrder": 2,
+        "columnHint": 0,
+        "listId": "",
+        "tableId": "",
+        "tableRole": "",
+        "tableSection": "",
+        "tableSource": "",
+        "tableRow": null,
+        "tableColumn": null,
+        "tableRowSpan": null,
+        "tableColumnSpan": null
+      },
+      {
+        "id": "n-1-1",
+        "role": "H1",
+        "text": "Accessibility Report",
+        "pageNumber": 1,
+        "bbox": [
+          72,
+          48,
+          230.736,
+          24
+        ],
+        "readingOrder": 0,
         "columnHint": 0,
         "listId": "",
         "tableId": "",
@@ -608,7 +615,8 @@
     "profileName": "PDF/UA-1 validation profile",
     "engine": {
       "name": "veraPDF",
-      "version": "1.28.2"
+      "version": "1.28.2",
+      "executionError": null
     },
     "findingCodes": [],
     "metadataDiagnostics": {
