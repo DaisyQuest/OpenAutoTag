@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "scanned-low-quality",
+  "label": "Scanned / Low-Quality",
+  "description": "For scanned documents, fax copies, and photocopies with degraded text. Forces OCR on every page, increases retry attempts, lowers acceptance thresholds, and adds a high-DPI render variant for better recognition.",
+  "extends": "default",
+  "tags": ["scanned", "ocr-heavy", "low-quality"],
+  "parser": {
+    "ocrMode": "force",
+    "ocrMaxAttempts": 4,
+    "minAcceptedOcrScore": 0.25,
+    "minCharacterGain": 8,
+    "characterGainMultiplier": 1.2,
+    "sparseTextBlockThreshold": 999,
+    "sparseCharacterThreshold": 999,
+    "sparseCoverageThreshold": 1,
+    "renderVariants": [
+      { "name": "gray-300", "dpi": 300, "colorMode": "gray" },
+      { "name": "binary-300", "dpi": 300, "colorMode": "binary" },
+      { "name": "gray-450", "dpi": 450, "colorMode": "gray" },
+      { "name": "gray-600", "dpi": 600, "colorMode": "gray" }
+    ]
+  },
+  "readingOrder": {
+    "lineGroupEpsilon": 8
+  },
+  "evaluation": {
+    "scoringWeights": {
+      "veraPdfFindings": 0.2,
+      "fontEmbedCoverage": 0.1,
+      "readingOrderInversions": 0.2,
+      "ocrConfidence": 0.5
+    }
+  }
+}

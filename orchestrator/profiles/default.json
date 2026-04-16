@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "default",
+  "label": "Default",
+  "description": "Balanced general-purpose profile suitable for most document types. Auto-detects OCR need, uses standard column detection thresholds, and validates against PDF/UA-1.",
+  "extends": null,
+  "tags": ["general"],
+  "parser": {
+    "ocrMode": "auto",
+    "ocrLanguages": "",
+    "ocrMaxAttempts": 2,
+    "sparseTextBlockThreshold": 1,
+    "sparseCharacterThreshold": 24,
+    "sparseCoverageThreshold": 0.002,
+    "minAcceptedOcrScore": 0.4,
+    "minCharacterGain": 24,
+    "characterGainMultiplier": 1.5
+  },
+  "layoutAnalyzer": {
+    "columnGapThresholdPercent": 0.16,
+    "columnGapMinPixels": 48,
+    "headingScoreThreshold": 1.55,
+    "headingBoldScoreThreshold": 1.3,
+    "headingH1Threshold": 1.9,
+    "headingH2Threshold": 1.55,
+    "rowTolerancePixels": 6,
+    "tableRowMinItems": 2
+  },
+  "semanticEngine": {
+    "tableContinuationDistanceY": 48,
+    "tableContinuationDistanceX": 160,
+    "listGapThreshold": 28,
+    "languageHint": null
+  },
+  "readingOrder": {
+    "lineGroupEpsilon": 6,
+    "columnBandThresholdPercent": 0.18,
+    "columnBandMinPixels": 64
+  },
+  "tagBuilder": {
+    "headingLevelClampMin": 1,
+    "headingLevelClampMax": 3
+  },
+  "fontEmbedder": {
+    "fallbackStrategy": "substitute-when-missing",
+    "licenseFlagPolicy": "warn"
+  },
+  "pdfWriter": {
+    "stripCidSet": true
+  },
+  "validator": {
+    "veraPdfFlavour": "ua1",
+    "skipFontAudit": false,
+    "skipVeraPdf": false
+  },
+  "redactor": {
+    "bboxPaddingX": 2,
+    "bboxPaddingY": 1
+  },
+  "orchestrator": {
+    "maxStageAttempts": 1
+  },
+  "evaluation": {
+    "scoringWeights": {
+      "veraPdfFindings": 0.4,
+      "fontEmbedCoverage": 0.2,
+      "readingOrderInversions": 0.25,
+      "ocrConfidence": 0.15
+    }
+  }
+}

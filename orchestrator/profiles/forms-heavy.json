@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "forms-heavy",
+  "label": "Forms & AcroFields",
+  "description": "For PDFs with interactive form fields, text boxes, checkboxes, and signature regions. Prioritizes /AcroForm/DR font embedding and /DA default appearance validation.",
+  "extends": "default",
+  "tags": ["forms", "acroform", "interactive"],
+  "fontEmbedder": {
+    "fallbackStrategy": "substitute-always"
+  },
+  "validator": {
+    "skipFontAudit": false
+  }
+}
