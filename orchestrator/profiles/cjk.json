@@ -10,6 +10,9 @@
     "ocrMaxAttempts": 3,
     "minAcceptedOcrScore": 0.3
   },
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
   "semanticEngine": {
     "languageHint": "ja"
   }

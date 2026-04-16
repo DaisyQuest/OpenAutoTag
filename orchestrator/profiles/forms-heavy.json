@@ -5,6 +5,9 @@
   "description": "For PDFs with interactive form fields, text boxes, checkboxes, and signature regions. Prioritizes /AcroForm/DR font embedding and /DA default appearance validation.",
   "extends": "default",
   "tags": ["forms", "acroform", "interactive"],
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
   "fontEmbedder": {
     "fallbackStrategy": "substitute-always"
   },

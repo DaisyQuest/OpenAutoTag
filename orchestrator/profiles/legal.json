@@ -22,6 +22,9 @@
     "columnBandThresholdPercent": 0.14,
     "columnBandMinPixels": 48
   },
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
   "evaluation": {
     "scoringWeights": {
       "veraPdfFindings": 0.35,

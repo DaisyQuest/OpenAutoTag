@@ -16,6 +16,9 @@
     "columnBandThresholdPercent": 0.12,
     "columnBandMinPixels": 40
   },
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
   "tagBuilder": {
     "headingLevelClampMax": 4
   }
