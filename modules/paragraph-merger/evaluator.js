@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { mergeParagraphs } from "./index.js";
 import { scoreMergeResult } from "./lib/scorer.js";
+import { autoSelectVersion } from "./lib/auto-selector.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const VERSIONS_DIR = path.join(moduleDir, "versions");
@@ -17,7 +18,7 @@ export async function loadVersions() {
   return versions.sort((a, b) => a.versionId.localeCompare(b.versionId));
 }
 
-function buildImprovementReport(docId, original, versionResults) {
+function buildImprovementReport(docId, original, versionResults, autoSelection) {
   const report = {
     documentId: docId,
     originalNodeCount: original.nodes.length,
@@ -100,6 +101,21 @@ function buildImprovementReport(docId, original, versionResults) {
     report.comparison.push(comparison);
   }
 
+  if (autoSelection) {
+    const autoResult = versionResults.find(vr => vr.versionId === autoSelection.selectedVersionId);
+    report.autoSelector = {
+      selectedVersionId: autoSelection.selectedVersionId,
+      confidence: autoSelection.confidence,
+      reasoning: autoSelection.reasoning,
+      features: autoSelection.features,
+      selectedScore: autoResult?.scores.aggregate ?? null,
+      oracleVersionId: report.bestVersion.versionId,
+      oracleScore: report.bestVersion.aggregateScore,
+      matchesOracle: autoSelection.selectedVersionId === report.bestVersion.versionId,
+      regretVsOracle: report.bestVersion.aggregateScore - (autoResult?.scores.aggregate ?? 0)
+    };
+  }
+
   return report;
 }
 
@@ -121,7 +137,8 @@ export async function evaluateDocument(docId, semanticDocument, versions) {
     });
   }
 
-  const improvementReport = buildImprovementReport(docId, semanticDocument, versionResults);
+  const autoSelection = autoSelectVersion(semanticDocument, versions.map(v => v.versionId));
+  const improvementReport = buildImprovementReport(docId, semanticDocument, versionResults, autoSelection);
   return { versionResults, improvementReport };
 }
 
@@ -180,11 +197,38 @@ export async function evaluateCorpus(semanticPaths, outputDir) {
     };
   }
 
+  // --- Auto-selector aggregate stats ---
+  const autoReports = allReports.filter(r => r.autoSelector);
+  const autoMatchCount = autoReports.filter(r => r.autoSelector.matchesOracle).length;
+  const autoRegrets = autoReports.map(r => r.autoSelector.regretVsOracle);
+  const selectionDistribution = {};
+  const reasoningCounts = {};
+  for (const r of autoReports) {
+    const vid = r.autoSelector.selectedVersionId;
+    selectionDistribution[vid] = (selectionDistribution[vid] || 0) + 1;
+    for (const reason of r.autoSelector.reasoning) {
+      reasoningCounts[reason] = (reasoningCounts[reason] || 0) + 1;
+    }
+  }
+  const topReasons = Object.entries(reasoningCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([reason, count]) => ({ reason, count }));
+
+  const autoSelectorStats = {
+    oracleMatchRate: autoReports.length > 0 ? autoMatchCount / autoReports.length : 0,
+    meanRegret: autoRegrets.length > 0 ? autoRegrets.reduce((s, v) => s + v, 0) / autoRegrets.length : 0,
+    maxRegret: autoRegrets.length > 0 ? Math.max(...autoRegrets) : 0,
+    selectionDistribution,
+    reasoning: topReasons
+  };
+
   const corpusSummary = {
     documentsEvaluated: documents.length,
     versionsCompared: versions.length,
     versionWins,
     versionAggregates,
+    autoSelector: autoSelectorStats,
     perDocument: allReports.map((r) => ({
       documentId: r.documentId,
       bestVersion: r.bestVersion.versionId,
@@ -242,6 +286,18 @@ async function main() {
   for (const [vid, wins] of Object.entries(summary.versionWins).sort((a, b) => b[1] - a[1])) {
     const agg = summary.versionAggregates[vid];
     console.log(`  ${vid.padEnd(22)} ${String(wins).padStart(3)} wins  avg=${agg.meanAggregate.toFixed(3)}  reduction=${(agg.meanReduction * 100).toFixed(1)}%  coherence=${(agg.meanCoherence * 100).toFixed(1)}%  overMerge=${(agg.meanOverMerge * 100).toFixed(1)}%`);
+  }
+
+  if (summary.autoSelector) {
+    console.log("\nAUTO-SELECTOR PERFORMANCE:");
+    console.log(`  Oracle match rate: ${(summary.autoSelector.oracleMatchRate * 100).toFixed(1)}%`);
+    console.log(`  Mean regret: ${summary.autoSelector.meanRegret.toFixed(3)}`);
+    console.log(`  Max regret: ${summary.autoSelector.maxRegret.toFixed(3)}`);
+    const dist = Object.entries(summary.autoSelector.selectionDistribution)
+      .sort((a, b) => b[1] - a[1])
+      .map(([vid, count]) => `${vid}: ${count}`)
+      .join(", ");
+    console.log(`  Selection distribution: ${dist}`);
   }
 
   console.log("\nPER-DOCUMENT BEST:");
