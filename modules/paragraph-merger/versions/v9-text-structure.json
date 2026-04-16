@@ -1,0 +1,13 @@
+{
+  "versionId": "v9-text-structure",
+  "label": "Text-Structure Merge",
+  "description": "Margin-based optimistic merge with 82% reduction. Detects page body margin and median line spacing, merges all consecutive P-lines by default, breaks only on gap/indent/column signals.",
+  "config": {
+    "enabled": true,
+    "strategy": "text-structure",
+    "breakGapMultiplier": 2.2,
+    "marginTolerance": 8,
+    "indentMinPixels": 20
+  },
+  "heuristics": {}
+}

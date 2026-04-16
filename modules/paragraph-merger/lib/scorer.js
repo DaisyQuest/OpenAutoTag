@@ -1,4 +1,4 @@
-export function scoreMergeResult(original, merged, report) {
+export function scoreMergeResult(original, merged, report, validationResult) {
   const scores = {};
 
   scores.nodeReduction = original.nodes.length > 0
@@ -124,13 +124,24 @@ export function scoreMergeResult(original, merged, report) {
     scores.skipExplainability = explained / report.summary.totalSkips;
   }
 
-  scores.aggregate = (
+  // Validation-aware scoring
+  scores.validationErrors = 0;
+  scores.validationWarnings = 0;
+  let validationPenalty = 0;
+
+  if (validationResult && validationResult.summary) {
+    scores.validationErrors = validationResult.summary.errorCount;
+    scores.validationWarnings = validationResult.summary.warningCount;
+    validationPenalty = scores.validationErrors * 0.05 + scores.validationWarnings * 0.01;
+  }
+
+  scores.aggregate = Math.max(0, (
     scores.nodeReduction * 0.15 +
     scores.paragraphCoherence * 0.25 +
     (1 - scores.overMergeRate) * 0.35 +
     (1 - scores.underMergeRate) * 0.15 +
     scores.skipExplainability * 0.10
-  );
+  ) - validationPenalty);
 
   return scores;
 }
