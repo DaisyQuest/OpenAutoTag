@@ -64,12 +64,12 @@
     "description": "Validates the tagged PDF against PDF/UA rules using veraPDF, checks contract completeness, native structure markers, and metadata."
   },
   {
-    "stage": "corruption-repair",
-    "module": "modules/corruption-repairer",
-    "cliCommand": "node modules/corruption-repairer/index.js --pdf <input.pdf> --output <repaired.pdf>",
+    "order": 8,
+    "name": "corruption-repair",
+    "module": "modules/corruption-repairer/index.js",
+    "cli": "node modules/corruption-repairer/index.js --pdf <input.pdf> --output <repaired.pdf>",
     "inputContract": "raw PDF file",
-    "outputContract": "repaired PDF + repair-report.json",
-    "envVars": [],
-    "notes": "Standalone workload (not part of the accessibility pipeline). Scans for 8 corruption types and applies surgical repairs."
+    "outputContract": "repaired PDF + repair-report.json + font-report.json",
+    "description": "Standalone workload (not part of the accessibility pipeline). Scans for 8 structural + 24 font corruption types and applies surgical repairs."
   }
 ]
