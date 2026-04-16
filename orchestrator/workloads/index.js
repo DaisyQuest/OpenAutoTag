@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { runPipeline } from "../pipeline-runner.js";
 import { runRedactionPipeline } from "../redaction-runner.js";
 import { runTagAndRedactPipeline } from "../tag-redaction-runner.js";
+import { runCorruptionRepairPipeline } from "../corruption-repair-runner.js";
 
 function buildTagDeltaSignals(tagDeltaReport) {
   if (!tagDeltaReport?.delta) {
@@ -51,6 +52,24 @@ function getRedactionSummary(report) {
     label: redactedMatches > 0 ? `${redactedMatches} SSN${redactedMatches === 1 ? "" : "s"} redacted` : "No SSNs found",
     detail: redactedMatches > 0 ? `${pagesRedacted} page${pagesRedacted === 1 ? "" : "s"} modified.` : "Output copied without redactions.",
     signals: (report.matches || []).slice(0, 4).map((match) => `Page ${match.pageNumber}: ${match.maskedText}`)
+  };
+}
+
+function getCorruptionRepairSummary(report) {
+  const issuesRepaired = report.issuesRepaired ?? report.repairs?.length ?? 0;
+  const riskLevel = report.riskLevel ?? "low";
+  const tone = riskLevel === "high" ? "danger" : riskLevel === "medium" ? "warning" : "success";
+
+  return {
+    kind: "corruption-repair",
+    tone,
+    label: issuesRepaired > 0
+      ? `${issuesRepaired} issue${issuesRepaired === 1 ? "" : "s"} repaired`
+      : "No issues found",
+    detail: issuesRepaired > 0
+      ? `Repaired ${issuesRepaired} corruption${issuesRepaired === 1 ? "" : "s"}; risk level: ${riskLevel}.`
+      : "PDF appears structurally sound.",
+    signals: (report.repairs || []).slice(0, 3).map((repair) => repair.description || repair.type || "unknown repair")
   };
 }
 
@@ -173,6 +192,27 @@ const workloadDefinitions = {
               tagDelta: tagDeltaReport?.delta || null
             }
           : null
+      };
+    }
+  },
+  "corruption-repair": {
+    id: "corruption-repair",
+    label: "PDF Corruption Repair",
+    shortLabel: "Repair",
+    description: "Scans for 8 types of PDF corruption (broken xref, damaged streams, missing fonts, truncation, etc.), applies surgical repairs, and produces a clean PDF with a detailed repair report.",
+    primaryArtifact: "repairedPdf",
+    previewArtifacts: ["repairReport"],
+    downloadArtifacts: ["repairedPdf"],
+    processor: runCorruptionRepairPipeline,
+    async summarize(job) {
+      if (!job?.artifacts?.repairReport) {
+        return null;
+      }
+
+      const report = JSON.parse(await readFile(job.artifacts.repairReport, "utf8"));
+      return {
+        summary: getCorruptionRepairSummary(report),
+        validation: null
       };
     }
   }

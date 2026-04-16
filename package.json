@@ -22,7 +22,8 @@
     "eval:score": "node modules/mcp-corpus-eval/cli.js score",
     "paragraph:evaluate": "node modules/paragraph-merger/evaluator.js",
     "paragraph:report": "node modules/paragraph-merger/render-report.js",
-    "native:verify": "node modules/native-verify/verify-corpus.js"
+    "native:verify": "node modules/native-verify/verify-corpus.js",
+    "repair:pdf": "node modules/corruption-repairer/index.js"
   },
   "engines": {
     "node": "22.x"

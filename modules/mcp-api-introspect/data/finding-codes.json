@@ -84,6 +84,15 @@
       "clause": "7.21.4.2",
       "description": "Font not properly embedded or CIDSet descriptor present for subsetted CID font.",
       "remediation": "Enable stripCidSet in the pdfWriter profile config. Ensure all fonts are fully embedded. Check OVERLAY_FONT_PATH for a valid embeddable font."
-    }
+    },
+    { "code": "XREF_TABLE_BROKEN", "severity": "error", "source": "corruption-repairer", "description": "Cross-reference table is damaged or missing", "remediation": "Automatically rebuilt from discovered objects" },
+    { "code": "STREAM_LENGTH_MISMATCH", "severity": "warning", "source": "corruption-repairer", "description": "Declared stream length doesn't match actual data", "remediation": "Length entry corrected to match actual stream" },
+    { "code": "FLATE_STREAM_CORRUPT", "severity": "error", "source": "corruption-repairer", "description": "FlateFilter compressed stream contains invalid data", "remediation": "Partial recovery attempted; truncated at corruption point" },
+    { "code": "FONT_DAMAGED", "severity": "warning", "source": "corruption-repairer", "description": "Font program is unreadable or missing required tables", "remediation": "Noted for font-embedder substitution" },
+    { "code": "FONT_MISSING_TOUNICODE", "severity": "info", "source": "corruption-repairer", "description": "Font lacks ToUnicode CMap for text extraction", "remediation": "Repairable by font-embedder stage" },
+    { "code": "DANGLING_REFERENCE", "severity": "warning", "source": "corruption-repairer", "description": "Object reference points to non-existent object", "remediation": "Reference nullified" },
+    { "code": "HEADER_DAMAGED", "severity": "error", "source": "corruption-repairer", "description": "PDF header or trailer is missing or malformed", "remediation": "Header/trailer reconstructed" },
+    { "code": "FILE_TRUNCATED", "severity": "error", "source": "corruption-repairer", "description": "PDF file appears truncated (missing %%EOF or incomplete objects)", "remediation": "Salvageable content extracted" },
+    { "code": "INCREMENTAL_GARBAGE", "severity": "info", "source": "corruption-repairer", "description": "Multiple incremental saves left orphaned data", "remediation": "Consolidated to single clean revision" }
   ]
 }

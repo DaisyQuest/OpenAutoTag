@@ -42,7 +42,8 @@
     "paragraphMerger": { "$ref": "#/$defs/paragraphMergerConfig" },
     "redactor": { "$ref": "#/$defs/redactorConfig" },
     "orchestrator": { "$ref": "#/$defs/orchestratorConfig" },
-    "evaluation": { "$ref": "#/$defs/evaluationConfig" }
+    "evaluation": { "$ref": "#/$defs/evaluationConfig" },
+    "corruptionRepairer": { "$ref": "#/$defs/corruptionRepairerConfig" }
   },
   "additionalProperties": true,
   "$defs": {
@@ -472,6 +473,19 @@
           "default": 5000,
           "description": "Remote agent heartbeat interval in milliseconds."
         }
+      },
+      "additionalProperties": true
+    },
+    "corruptionRepairerConfig": {
+      "type": "object",
+      "description": "Controls PDF corruption scanning and repair behavior.",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "repairFlateStreams": { "type": "boolean", "default": true, "description": "Attempt to recover corrupted FlateFilter streams." },
+        "rebuildXref": { "type": "boolean", "default": true, "description": "Rebuild cross-reference table if damaged." },
+        "consolidateIncrementalUpdates": { "type": "boolean", "default": true, "description": "Merge multiple incremental saves into one clean revision." },
+        "repairFonts": { "type": "boolean", "default": true, "description": "Scan and report damaged or incomplete fonts." },
+        "maxFileSizeMB": { "type": "integer", "default": 100, "description": "Skip repair for files larger than this." }
       },
       "additionalProperties": true
     },
