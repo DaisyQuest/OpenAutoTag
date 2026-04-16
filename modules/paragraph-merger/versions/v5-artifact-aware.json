@@ -1,0 +1,20 @@
+{
+  "versionId": "v5-artifact-aware",
+  "label": "Artifact-Aware",
+  "description": "Same thresholds as balanced, but pre-filters artifact nodes (headers, footers, watermarks) before attempting P-to-P merging. Reduces false negative-gap skips on documents with overlapping stamps.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 1.8,
+    "xAlignmentTolerance": 12,
+    "heightVarianceTolerance": 0.3,
+    "minConfidence": 0.5,
+    "sentenceBoundaryPenalty": 0.3,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": false,
+    "artifactPreFilter": true,
+    "continuationLineDetection": false,
+    "legalCitationAwareness": false
+  }
+}
