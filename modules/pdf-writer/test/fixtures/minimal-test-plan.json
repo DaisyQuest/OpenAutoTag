@@ -1,0 +1,39 @@
+{
+  "pages": [
+    {
+      "pageNumber": 1,
+      "assignments": [
+        {
+          "tagNodeId": "h1",
+          "tagType": "H1",
+          "mcid": 0,
+          "operators": [{"seq": 0}],
+          "matchConfidence": 1.0
+        },
+        {
+          "tagNodeId": "p1",
+          "tagType": "P",
+          "mcid": 1,
+          "operators": [{"seq": 1}, {"seq": 2}],
+          "matchConfidence": 0.95
+        },
+        {
+          "tagNodeId": "p2",
+          "tagType": "P",
+          "mcid": 2,
+          "operators": [{"seq": 3}],
+          "matchConfidence": 0.90
+        }
+      ],
+      "unmatchedOperators": [
+        {"seq": 4, "text": "footer", "x": 50, "y": 20}
+      ]
+    }
+  ],
+  "overall": {
+    "totalPages": 1,
+    "meanMatchRate": 0.80,
+    "pagesAboveThreshold": 1,
+    "nativeViable": true
+  }
+}
