@@ -24,7 +24,9 @@
             "insertedPlaceholderCellCount": 1,
             "insertedSyntheticRowCount": 0,
             "shiftedCellCount": 0
-          }
+          },
+          "tableStructureRepairs": 0,
+          "repeatedHeaderRows": 0
         },
         "root": {
           "id": "tag:document",
@@ -203,7 +205,9 @@
             "insertedPlaceholderCellCount": 1,
             "insertedSyntheticRowCount": 0,
             "shiftedCellCount": 0
-          }
+          },
+          "tableStructureRepairs": 0,
+          "repeatedHeaderRows": 0
         },
         "root": {
           "id": "tag:document",
@@ -363,7 +367,9 @@
             "insertedPlaceholderCellCount": 0,
             "insertedSyntheticRowCount": 0,
             "shiftedCellCount": 0
-          }
+          },
+          "tableStructureRepairs": 0,
+          "repeatedHeaderRows": 0
         },
         "root": {
           "id": "tag:document",
@@ -460,7 +466,9 @@
             "insertedPlaceholderCellCount": 1,
             "insertedSyntheticRowCount": 1,
             "shiftedCellCount": 0
-          }
+          },
+          "tableStructureRepairs": 0,
+          "repeatedHeaderRows": 0
         },
         "root": {
           "id": "tag:document",
