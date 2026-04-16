@@ -1,0 +1,20 @@
+{
+  "versionId": "v8-precision",
+  "label": "Precision (minimal over-merge)",
+  "description": "Precision-first strategy that prioritizes avoiding false merges over maximizing reduction. Uses moderate gap tolerance with high confidence floor. All heuristics active as safety guards. Suitable for documents where incorrect paragraph boundaries would cause downstream harm (e.g., legal citations, regulatory filings).",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 1.7,
+    "xAlignmentTolerance": 14,
+    "heightVarianceTolerance": 0.25,
+    "minConfidence": 0.55,
+    "sentenceBoundaryPenalty": 0.35,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": true,
+    "artifactPreFilter": true,
+    "continuationLineDetection": true,
+    "legalCitationAwareness": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0.0",
+  "nodes": [
+    {
+      "id": "n1",
+      "pageNumber": 1,
+      "bbox": [200, 100, 300, 20],
+      "type": "P",
+      "text": "Second column text",
+      "readingOrder": 0
+    },
+    {
+      "id": "n2",
+      "pageNumber": 1,
+      "bbox": [50, 100, 150, 20],
+      "type": "P",
+      "text": "First column text",
+      "readingOrder": 1
+    },
+    {
+      "id": "n3",
+      "pageNumber": 1,
+      "bbox": [50, 200, 300, 20],
+      "type": "P",
+      "text": "Next line - no inversion",
+      "readingOrder": 2
+    },
+    {
+      "id": "n4",
+      "pageNumber": 2,
+      "bbox": [300, 50, 400, 20],
+      "type": "P",
+      "text": "Page 2 right",
+      "readingOrder": 3
+    },
+    {
+      "id": "n5",
+      "pageNumber": 2,
+      "bbox": [50, 50, 150, 20],
+      "type": "P",
+      "text": "Page 2 left",
+      "readingOrder": 4
+    }
+  ],
+  "orderedNodeIds": ["n1", "n2", "n3", "n4", "n5"]
+}

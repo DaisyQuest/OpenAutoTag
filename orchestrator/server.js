@@ -16,6 +16,7 @@ import { startAgentService } from "./agent-service.js";
 import { createEnvironmentAuthController } from "./auth-controller.js";
 import { createJobQueue } from "./job-queue.js";
 import { getArtifactLabel } from "./public/report-renderers.js";
+import { listProfiles } from "./profile-registry.js";
 import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } from "./workloads/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1107,7 +1108,7 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
   }
 
   return {
-    async enqueueUploads(files, workloadId) {
+    async enqueueUploads(files, workloadId, { profileId = "default", profileOverrides = {} } = {}) {
       const batchId = crypto.randomUUID();
       const createdAt = new Date().toISOString();
       const batchRoot = path.join(uploadRoot, batchId);
@@ -1128,7 +1129,7 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
           filePath: persisted.absolutePath,
           outputDir: path.join(outputDir, makeOutputDirectoryName(persisted.relativePath, index)),
           workload,
-          options: {}
+          options: { profileId, profileOverrides }
         });
 
         items.push({
@@ -1241,6 +1242,13 @@ export function createAppServer({
         return;
       }
 
+      if (request.method === "GET" && url.pathname === "/profiles") {
+        await authenticate(request, { api: true });
+        const profiles = await listProfiles();
+        writeJson(response, 200, { profiles });
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/process-pdf") {
         await authenticate(request, { api: true });
         const body = await readJsonBody(request);
@@ -1249,12 +1257,15 @@ export function createAppServer({
           return;
         }
 
+        const profileId = String(body.profileId || "default");
+        const profileOverrides = body.profileOverrides || {};
+
         const workload = getPublicWorkload(body.workloadId);
         const job = queue.enqueue({
           filePath: body.filePath,
           outputDir: body.outputDir,
           workload,
-          options: body.options || {},
+          options: { ...(body.options || {}), profileId, profileOverrides },
           inputMetadata: {
             inputMode: "path"
           }
@@ -1272,6 +1283,9 @@ export function createAppServer({
           return;
         }
 
+        const profileId = String(body.profileId || "default");
+        const profileOverrides = body.profileOverrides || {};
+
         const workload = getPublicWorkload(body.workloadId);
         const remotePdf = await downloadRemotePdf({
           fileUrl: body.fileUrl,
@@ -1282,7 +1296,7 @@ export function createAppServer({
           filePath: remotePdf.absolutePath,
           outputDir: body.outputDir,
           workload,
-          options: body.options || {},
+          options: { ...(body.options || {}), profileId, profileOverrides },
           inputMetadata: {
             inputMode: "url",
             sourceUrl: remotePdf.sourceUrl,
@@ -1303,6 +1317,17 @@ export function createAppServer({
           .filter((value) => typeof value === "object" && typeof value.arrayBuffer === "function");
         const relativePaths = formData.getAll("relativePaths").map((value) => String(value || ""));
         const workloadId = String(formData.get("workloadId") || "accessibility-tagging");
+        const profileId = String(formData.get("profileId") || "default");
+        const profileOverridesRaw = formData.get("profileOverrides");
+        let profileOverrides = {};
+        if (profileOverridesRaw) {
+          try {
+            profileOverrides = JSON.parse(String(profileOverridesRaw));
+          } catch {
+            writeJson(response, 400, { error: "profileOverrides must be valid JSON." });
+            return;
+          }
+        }
         const pdfFiles = files
           .map((file, index) => ({
             file,
@@ -1315,7 +1340,7 @@ export function createAppServer({
           return;
         }
 
-        const batch = await batches.enqueueUploads(pdfFiles, workloadId);
+        const batch = await batches.enqueueUploads(pdfFiles, workloadId, { profileId, profileOverrides });
         writeJson(response, 202, batch);
         return;
       }

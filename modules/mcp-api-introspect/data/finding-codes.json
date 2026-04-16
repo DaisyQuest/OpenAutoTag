@@ -1,0 +1,123 @@
+{
+  "findingCodes": [
+    {
+      "code": "INVALID_TAGGING_MANIFEST",
+      "severity": "error",
+      "source": "manifest-check",
+      "description": "The tagging manifest JSON does not validate against tagging.schema.json.",
+      "remediation": "Re-run tag-builder to produce a valid tagging.json, then re-run pdf-writer. Check that the tagging contract has not drifted from the schema."
+    },
+    {
+      "code": "MISSING_DOCUMENT_ROOT",
+      "severity": "error",
+      "source": "manifest-check",
+      "description": "The tagging tree root element is not of type 'Document'. PDF/UA requires a Document root.",
+      "remediation": "Ensure tag-builder emits a root node with type 'Document'. Inspect tagging.json to verify root.type === 'Document'."
+    },
+    {
+      "code": "NATIVE_TAGGING_NOT_APPLIED",
+      "severity": "warning",
+      "source": "manifest-check",
+      "description": "The writer manifest does not claim native tagging was applied. The PDF may only have a sidecar manifest without embedded structure.",
+      "remediation": "Run pdf-writer with the PDFBox backend to inject native structure tree and marked-content operators into the output PDF."
+    },
+    {
+      "code": "VERAPDF_5_1",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "5.1",
+      "description": "PDF metadata stream (XMP) and document information dictionary are inconsistent.",
+      "remediation": "Ensure pdf-writer synchronizes XMP metadata with the Info dictionary. This finding may be auto-suppressed if the validator's metadata probe confirms consistency (known veraPDF false positive with PDFBox output)."
+    },
+    {
+      "code": "VERAPDF_7_1_9",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.1.9",
+      "description": "PDF/UA identification not properly set in XMP metadata.",
+      "remediation": "Ensure pdf-writer sets pdfuaid:part in the XMP metadata. This finding may be auto-suppressed if the validator's metadata probe confirms the identification is present."
+    },
+    {
+      "code": "VERAPDF_7_1_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.1",
+      "description": "General PDF/UA structure requirement violation (clause 7.1).",
+      "remediation": "Inspect the veraPDF report details for the specific check context. Common causes: missing StructTreeRoot, incorrect role mapping, or missing /MarkInfo."
+    },
+    {
+      "code": "VERAPDF_7_2_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.2",
+      "description": "Content not properly tagged or artifacts not marked. All real content must be in the structure tree; all decorative content must be marked as Artifact.",
+      "remediation": "Ensure all text blocks are tagged by tag-builder and pdf-writer marks decorative elements as Artifact in the structure tree."
+    },
+    {
+      "code": "VERAPDF_7_4_4_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.4.4",
+      "description": "Figure element missing alternative text (/Alt).",
+      "remediation": "Add alt text to figure nodes in semantic-engine or tag-builder. Every <Figure> in the structure tree must have an /Alt entry."
+    },
+    {
+      "code": "VERAPDF_7_5_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.5",
+      "description": "Table structure violation. Tables must use TH/TD within TR within Table.",
+      "remediation": "Ensure layout-analyzer correctly identifies table cells and tag-builder produces proper Table > TR > TH/TD hierarchy."
+    },
+    {
+      "code": "VERAPDF_7_18_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.18",
+      "description": "Missing or incorrect natural language specification. All content must declare its language.",
+      "remediation": "Ensure pdf-writer sets /Lang on the document catalog and on structure elements when the language changes. Use semantic-engine languageHint or auto-detection."
+    },
+    {
+      "code": "VERAPDF_7_21_4_2_RULE",
+      "severity": "error",
+      "source": "verapdf",
+      "clause": "7.21.4.2",
+      "description": "Font not properly embedded or CIDSet descriptor present for subsetted CID font.",
+      "remediation": "Enable stripCidSet in the pdfWriter profile config. Ensure all fonts are fully embedded. Check OVERLAY_FONT_PATH for a valid embeddable font."
+    },
+    { "code": "XREF_TABLE_BROKEN", "severity": "error", "source": "corruption-repairer", "description": "Cross-reference table is damaged or missing", "remediation": "Automatically rebuilt from discovered objects" },
+    { "code": "STREAM_LENGTH_MISMATCH", "severity": "warning", "source": "corruption-repairer", "description": "Declared stream length doesn't match actual data", "remediation": "Length entry corrected to match actual stream" },
+    { "code": "FLATE_STREAM_CORRUPT", "severity": "error", "source": "corruption-repairer", "description": "FlateFilter compressed stream contains invalid data", "remediation": "Partial recovery attempted; truncated at corruption point" },
+    { "code": "FONT_DAMAGED", "severity": "warning", "source": "corruption-repairer", "description": "Font program is unreadable or missing required tables", "remediation": "Noted for font-embedder substitution" },
+    { "code": "FONT_MISSING_TOUNICODE", "severity": "info", "source": "corruption-repairer", "description": "Font lacks ToUnicode CMap for text extraction", "remediation": "Repairable by font-embedder stage" },
+    { "code": "DANGLING_REFERENCE", "severity": "warning", "source": "corruption-repairer", "description": "Object reference points to non-existent object", "remediation": "Reference nullified" },
+    { "code": "HEADER_DAMAGED", "severity": "error", "source": "corruption-repairer", "description": "PDF header or trailer is missing or malformed", "remediation": "Header/trailer reconstructed" },
+    { "code": "FILE_TRUNCATED", "severity": "error", "source": "corruption-repairer", "description": "PDF file appears truncated (missing %%EOF or incomplete objects)", "remediation": "Salvageable content extracted" },
+    { "code": "INCREMENTAL_GARBAGE", "severity": "info", "source": "corruption-repairer", "description": "Multiple incremental saves left orphaned data", "remediation": "Consolidated to single clean revision" },
+
+    { "code": "FONT_NOT_EMBEDDED", "severity": "error", "source": "font-repair", "description": "Font is referenced but its program is not embedded in the PDF", "remediation": "Embed the full font program or substitute with an embeddable equivalent" },
+    { "code": "FONT_PROGRAM_CORRUPT", "severity": "error", "source": "font-repair", "description": "Embedded font program contains invalid or unreadable data", "remediation": "Re-embed the font from the original source or substitute with a known-good copy" },
+    { "code": "FONT_PROGRAM_TRUNCATED", "severity": "error", "source": "font-repair", "description": "Embedded font program is truncated and missing required tables", "remediation": "Re-embed the complete font program; verify stream length matches actual data" },
+    { "code": "STANDARD_14_RELIANCE", "severity": "warning", "source": "font-repair", "description": "PDF relies on a Standard 14 font without embedding, which may render differently across viewers", "remediation": "Embed the font explicitly to guarantee consistent rendering" },
+    { "code": "MISSING_FONT_DESCRIPTOR", "severity": "error", "source": "font-repair", "description": "Font dictionary lacks a required FontDescriptor entry", "remediation": "Add a FontDescriptor with at least FontName, Flags, FontBBox, ItalicAngle, Ascent, Descent, and CapHeight" },
+    { "code": "TOUNICODE_MISSING", "severity": "warning", "source": "font-repair", "description": "Font lacks a ToUnicode CMap, preventing reliable text extraction and search", "remediation": "Generate and attach a ToUnicode CMap that maps glyph codes to Unicode values" },
+    { "code": "TOUNICODE_CORRUPT", "severity": "error", "source": "font-repair", "description": "ToUnicode CMap is present but contains invalid mappings or syntax errors", "remediation": "Regenerate the ToUnicode CMap from the font's cmap table or glyph names" },
+    { "code": "IDENTITY_H_NO_TOUNICODE", "severity": "error", "source": "font-repair", "description": "Font uses Identity-H encoding without a ToUnicode CMap, making text extraction impossible", "remediation": "Attach a ToUnicode CMap; Identity-H encoded fonts require explicit Unicode mappings" },
+    { "code": "SYMBOLIC_NO_DIFFERENCES", "severity": "warning", "source": "font-repair", "description": "Symbolic font has no Differences array in its Encoding, making glyph mapping ambiguous", "remediation": "Add an Encoding dictionary with a Differences array mapping character codes to glyph names" },
+    { "code": "ENCODING_MISMATCH", "severity": "warning", "source": "font-repair", "description": "Font encoding declared in the PDF conflicts with the encoding in the embedded font program", "remediation": "Reconcile the PDF Encoding dictionary with the embedded font's cmap and post tables" },
+    { "code": "PUA_WITHOUT_TOUNICODE", "severity": "warning", "source": "font-repair", "description": "Font maps glyphs to Unicode Private Use Area codepoints without a ToUnicode CMap for proper semantics", "remediation": "Add a ToUnicode CMap that maps PUA codepoints to their actual Unicode equivalents" },
+    { "code": "WIDTH_TABLE_MISMATCH", "severity": "warning", "source": "font-repair", "description": "Glyph widths declared in the PDF font dictionary do not match the embedded font program metrics", "remediation": "Regenerate the Widths array from the embedded font program's hmtx table" },
+    { "code": "MISSING_REQUIRED_GLYPHS", "severity": "error", "source": "font-repair", "description": "Font is missing glyphs required for the document content, causing .notdef rendering", "remediation": "Embed a font that contains all required glyphs or substitute with a superset font" },
+    { "code": "FONTBBOX_INVALID", "severity": "warning", "source": "font-repair", "description": "FontBBox in the FontDescriptor is zero, negative, or otherwise invalid", "remediation": "Recalculate FontBBox from the embedded font program's head table" },
+    { "code": "METRICS_INVALID", "severity": "warning", "source": "font-repair", "description": "Font metrics (Ascent, Descent, CapHeight) are missing or inconsistent with the font program", "remediation": "Recalculate metrics from the embedded font program's OS/2 and hhea tables" },
+    { "code": "CID_SYSTEM_INFO_MISSING", "severity": "error", "source": "font-repair", "description": "CIDFont is missing required CIDSystemInfo dictionary (Registry, Ordering, Supplement)", "remediation": "Add CIDSystemInfo with appropriate Registry/Ordering/Supplement values for the font's character collection" },
+    { "code": "DESCENDANT_FONTS_INVALID", "severity": "error", "source": "font-repair", "description": "Type 0 composite font has missing or invalid DescendantFonts array", "remediation": "Ensure DescendantFonts contains exactly one CIDFont dictionary" },
+    { "code": "CID_TO_GID_MAP_BROKEN", "severity": "error", "source": "font-repair", "description": "CIDToGIDMap stream is corrupt or maps CIDs to invalid glyph indices", "remediation": "Regenerate CIDToGIDMap from the embedded font program's cmap table" },
+    { "code": "SUBSET_PREFIX_MISMATCH", "severity": "warning", "source": "font-repair", "description": "Font subset tag prefix does not follow the six-uppercase-letter+plus convention or is inconsistent", "remediation": "Regenerate the subset prefix to match the AAAAAA+ convention required by PDF/A and PDF/UA" },
+    { "code": "CIDSET_INCOMPLETE", "severity": "warning", "source": "font-repair", "description": "CIDSet stream does not account for all CIDs used in the document content", "remediation": "Regenerate CIDSet to include all referenced CIDs, or remove CIDSet for PDF 2.0 compliance" },
+    { "code": "DA_FONT_NOT_IN_DR", "severity": "error", "source": "font-repair", "description": "Default appearance string references a font not present in the default resources (DR) dictionary", "remediation": "Add the referenced font to the AcroForm DR dictionary or correct the DA string" },
+    { "code": "FONT_NOT_IN_RESOURCES", "severity": "error", "source": "font-repair", "description": "Content stream references a font name not declared in the page or form Resources dictionary", "remediation": "Add the font to the appropriate Resources/Font dictionary" },
+    { "code": "TYPE3_FONT_FOUND", "severity": "info", "source": "font-repair", "description": "Type 3 user-defined font detected; these fonts have limited accessibility and portability", "remediation": "Consider replacing Type 3 fonts with Type 1 or TrueType equivalents for better compatibility" },
+    { "code": "FONT_LANGUAGE_MISMATCH", "severity": "warning", "source": "font-repair", "description": "Font's OS/2 code page or Unicode range does not cover the language declared in the document", "remediation": "Substitute with a font that supports the declared document language's character repertoire" }
+  ]
+}

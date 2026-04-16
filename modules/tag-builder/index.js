@@ -431,9 +431,50 @@ function getSubstantiveTableCells(rowNode) {
   });
 }
 
-function isHeaderLikeTableRow(rowNode) {
+function isAllUppercaseText(rowNode) {
   const cells = getSubstantiveTableCells(rowNode);
-  return cells.length > 0 && cells.every((cell) => cell.type === "TH");
+  if (cells.length === 0) {
+    return false;
+  }
+
+  const textContent = cells.map((cell) => String(cell.label || "").trim()).join(" ");
+  if (!textContent) {
+    return false;
+  }
+
+  const letters = textContent.replace(/[^a-zA-Z]/g, "");
+  return letters.length > 0 && letters === letters.toUpperCase();
+}
+
+function getThFraction(rowNode) {
+  const cells = getSubstantiveTableCells(rowNode);
+  if (cells.length === 0) {
+    return 0;
+  }
+
+  const thCount = cells.filter((cell) => cell.type === "TH").length;
+  return thCount / cells.length;
+}
+
+function isHeaderLikeTableRow(rowNode, rowIndex = null) {
+  const cells = getSubstantiveTableCells(rowNode);
+  if (cells.length === 0) {
+    return false;
+  }
+
+  if (cells.every((cell) => cell.type === "TH")) {
+    return true;
+  }
+
+  if (rowIndex != null && rowIndex < 2 && getThFraction(rowNode) >= 0.75) {
+    return true;
+  }
+
+  if (rowIndex === 0 && isAllUppercaseText(rowNode)) {
+    return true;
+  }
+
+  return false;
 }
 
 function isBodyLikeTableRow(rowNode) {
@@ -518,6 +559,23 @@ function buildTableSectionChildren(tableNode, sectionKey, rowEntries) {
   };
 }
 
+function isRowHeaderPattern(rowEntries) {
+  if (rowEntries.length < 2) {
+    return false;
+  }
+
+  return rowEntries.every((entry) => {
+    const cells = (entry.rowNode.children || []).filter(isTableCellNode);
+    if (cells.length < 2) {
+      return false;
+    }
+
+    const firstCell = cells[0];
+    const restCells = cells.slice(1);
+    return firstCell.type === "TH" && restCells.every((cell) => cell.type === "TD");
+  });
+}
+
 function normalizeTableSections(rootNode) {
   const visit = (node) => {
     if (!node) {
@@ -534,12 +592,13 @@ function normalizeTableSections(rootNode) {
 
     const rowEntries = collectOrderedTableRows(node).map((entry) => {
       const currentSectionKey = entry.sectionNode ? getSectionKeyFromNode(entry.sectionNode) : "body";
+      const headerLike = isHeaderLikeTableRow(entry.rowNode, entry.rowIndex);
       return {
         ...entry,
         currentSectionKey,
         assignedSectionKey: getExplicitRowSectionKey(entry.rowNode, currentSectionKey),
-        headerLike: isHeaderLikeTableRow(entry.rowNode),
-        bodyLike: isBodyLikeTableRow(entry.rowNode)
+        headerLike,
+        bodyLike: headerLike ? false : isBodyLikeTableRow(entry.rowNode)
       };
     });
 
@@ -547,8 +606,10 @@ function normalizeTableSections(rootNode) {
       return;
     }
 
+    const rowHeaderOnly = isRowHeaderPattern(rowEntries);
+
     const firstBodyLikeIndex = rowEntries.findIndex((entry) => entry.bodyLike);
-    if (firstBodyLikeIndex > 0) {
+    if (firstBodyLikeIndex > 0 && !rowHeaderOnly) {
       for (let index = 0; index < firstBodyLikeIndex; index += 1) {
         const entry = rowEntries[index];
         if (entry.assignedSectionKey === "foot") {
@@ -850,6 +911,131 @@ function normalizeTableRegularity(rootNode) {
   return summary;
 }
 
+function validateTableSections(rootNode) {
+  let tableStructureRepairs = 0;
+
+  const visit = (node) => {
+    if (!node) {
+      return;
+    }
+
+    for (const child of node.children || []) {
+      visit(child);
+    }
+
+    if (node.type !== "Table") {
+      return;
+    }
+
+    for (const section of node.children || []) {
+      if (section.type !== "THead") {
+        continue;
+      }
+
+      for (const row of section.children || []) {
+        if (row.type !== "TR") {
+          continue;
+        }
+
+        for (const cell of row.children || []) {
+          if (cell.type === "TD") {
+            cell.type = "TH";
+            cell.promotedFromTD = true;
+            tableStructureRepairs += 1;
+          }
+        }
+      }
+    }
+  };
+
+  visit(rootNode);
+  return tableStructureRepairs;
+}
+
+function getRowCellSignature(rowNode) {
+  const cells = (rowNode?.children || []).filter(isTableCellNode);
+  return cells.map((cell) => {
+    const span = Math.max(1, Number(cell.columnSpan || 1));
+    return `${cell.type}:${span}`;
+  }).join("|");
+}
+
+function detectRepeatedHeaders(rootNode) {
+  let repeatedHeaderRows = 0;
+
+  const visit = (node) => {
+    if (!node) {
+      return;
+    }
+
+    for (const child of node.children || []) {
+      visit(child);
+    }
+
+    if (node.type !== "Table") {
+      return;
+    }
+
+    let headSection = null;
+    let bodySection = null;
+
+    for (const section of node.children || []) {
+      if (section.type === "THead" && !headSection) {
+        headSection = section;
+      }
+
+      if (section.type === "TBody" && !bodySection) {
+        bodySection = section;
+      }
+    }
+
+    if (!headSection || !bodySection) {
+      return;
+    }
+
+    const headRows = (headSection.children || []).filter((row) => row.type === "TR");
+    const bodyRows = (bodySection.children || []).filter((row) => row.type === "TR");
+    if (headRows.length === 0 || bodyRows.length < headRows.length) {
+      return;
+    }
+
+    const headSignatures = headRows.map(getRowCellSignature);
+
+    for (let offset = 0; offset <= bodyRows.length - headRows.length; offset += 1) {
+      const candidateSignatures = bodyRows
+        .slice(offset, offset + headRows.length)
+        .map(getRowCellSignature);
+
+      const isMatch = headSignatures.every((sig, index) => sig === candidateSignatures[index]);
+      if (!isMatch) {
+        continue;
+      }
+
+      const headLabels = headRows.flatMap((row) =>
+        (row.children || []).filter(isTableCellNode).map((cell) => String(cell.label || "").trim())
+      );
+      const candidateLabels = bodyRows
+        .slice(offset, offset + headRows.length)
+        .flatMap((row) =>
+          (row.children || []).filter(isTableCellNode).map((cell) => String(cell.label || "").trim())
+        );
+
+      const labelsMatch = headLabels.length === candidateLabels.length &&
+        headLabels.every((label, index) => label === candidateLabels[index]);
+
+      if (labelsMatch) {
+        for (let rowIndex = offset; rowIndex < offset + headRows.length; rowIndex += 1) {
+          bodyRows[rowIndex].repeatedHeader = true;
+          repeatedHeaderRows += 1;
+        }
+      }
+    }
+  };
+
+  visit(rootNode);
+  return repeatedHeaderRows;
+}
+
 function flattenRedundantTableBodySections(rootNode) {
   const visit = (node) => {
     if (!node) {
@@ -1005,6 +1191,8 @@ export async function buildTagTree(inputPath) {
   normalizeTableSections(root);
   const tableRegularityCorrection = normalizeTableRegularity(root);
   normalizeTableSections(root);
+  const tableStructureRepairs = validateTableSections(root);
+  const repeatedHeaderRows = detectRepeatedHeaders(root);
   flattenRedundantTableBodySections(root);
   const taggingDocument = {
     schemaVersion: "1.0.0",
@@ -1013,7 +1201,9 @@ export async function buildTagTree(inputPath) {
       semanticDocumentId: semanticDocument.documentId,
       ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
       headingNormalization: headingNormalization.summary,
-      tableRegularityCorrection
+      tableRegularityCorrection,
+      tableStructureRepairs,
+      repeatedHeaderRows
     },
     root
   };

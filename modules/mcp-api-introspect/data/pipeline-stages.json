@@ -1,0 +1,75 @@
+[
+  {
+    "order": 1,
+    "name": "parser",
+    "module": "modules/parser/index.js",
+    "cli": "node modules/parser/index.js <input.pdf> > layout.json",
+    "inputContract": null,
+    "outputContract": "layout.schema.json",
+    "description": "Extracts raw text blocks and bounding boxes from the source PDF. Falls back to OCR for scanned or sparse pages."
+  },
+  {
+    "order": 2,
+    "name": "layout-analyzer",
+    "module": "modules/layout-analyzer/index.js",
+    "cli": "node modules/layout-analyzer/index.js <layout.json> > layout.enriched.json",
+    "inputContract": "layout.schema.json",
+    "outputContract": "layout.schema.json",
+    "description": "Enriches raw layout with column detection, heading classification, and table inference."
+  },
+  {
+    "order": 3,
+    "name": "semantic-engine",
+    "module": "modules/semantic-engine/index.js",
+    "cli": "node modules/semantic-engine/index.js <layout.enriched.json> > semantic.json",
+    "inputContract": "layout.schema.json",
+    "outputContract": "semantic.schema.json",
+    "description": "Assigns deterministic semantic roles (heading, paragraph, list, table, artifact) and confidence scores."
+  },
+  {
+    "order": 4,
+    "name": "reading-order",
+    "module": "modules/reading-order/index.js",
+    "cli": "node modules/reading-order/index.js <semantic.json> > semantic.ordered.json",
+    "inputContract": "semantic.schema.json",
+    "outputContract": "semantic.schema.json",
+    "description": "Sorts semantic nodes into logical reading order using column-band and line-grouping heuristics."
+  },
+  {
+    "order": 5,
+    "name": "tag-builder",
+    "module": "modules/tag-builder/index.js",
+    "cli": "node modules/tag-builder/index.js <semantic.ordered.json> > tagging.json",
+    "inputContract": "semantic.schema.json",
+    "outputContract": "tagging.schema.json",
+    "description": "Constructs a hierarchical logical structure tree (Document root) from ordered semantic nodes."
+  },
+  {
+    "order": 6,
+    "name": "pdf-writer",
+    "module": "modules/pdf-writer/index.js",
+    "cli": "node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> > writer-report.json",
+    "inputContract": "tagging.schema.json",
+    "outputContract": null,
+    "description": "Produces the tagged PDF with native structure tree, marked-content overlays, document metadata, and sidecar manifest.",
+    "notes": "Supports two writer modes: 'raster' (current default — renders overlay images) and 'native' (new — rewrites content stream operators in-place, preserving vector text). Mode is controlled by the profile field pdfWriter.mode which accepts 'native', 'raster', or 'auto'."
+  },
+  {
+    "order": 7,
+    "name": "validator",
+    "module": "modules/validator/index.js",
+    "cli": "node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json> > validation-report.json",
+    "inputContract": null,
+    "outputContract": null,
+    "description": "Validates the tagged PDF against PDF/UA rules using veraPDF, checks contract completeness, native structure markers, and metadata."
+  },
+  {
+    "order": 8,
+    "name": "corruption-repair",
+    "module": "modules/corruption-repairer/index.js",
+    "cli": "node modules/corruption-repairer/index.js --pdf <input.pdf> --output <repaired.pdf>",
+    "inputContract": "raw PDF file",
+    "outputContract": "repaired PDF + repair-report.json + font-report.json",
+    "description": "Standalone workload (not part of the accessibility pipeline). Scans for 8 structural + 24 font corruption types and applies surgical repairs."
+  }
+]

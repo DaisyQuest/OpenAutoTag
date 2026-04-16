@@ -1,0 +1,514 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/profile.schema.json",
+  "title": "PipelineProfile",
+  "description": "A composable configuration profile that controls how the accessibility tagging pipeline processes a document. Profiles bundle per-stage knobs so operators can select a named preset (e.g. 'legal', 'scientific', 'scanned-low-quality') and optionally override individual fields. Stages read from the resolved profile at runtime, falling back to defaults when a field is absent.",
+  "type": "object",
+  "required": ["schemaVersion", "profileId", "label"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "profileId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Stable machine identifier. Used in API calls and file names."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable name shown in the dashboard and API responses."
+    },
+    "description": {
+      "type": "string",
+      "description": "One-paragraph explanation of when to use this profile, shown in the dashboard profile picker."
+    },
+    "extends": {
+      "type": ["string", "null"],
+      "description": "profileId of a base profile whose fields are inherited. Overrides in this profile take precedence. Null or absent means no base (all fields are explicit or defaulted)."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Searchable labels for filtering profiles (e.g. 'legal', 'ocr-heavy', 'cjk', 'forms')."
+    },
+    "parser": { "$ref": "#/$defs/parserConfig" },
+    "layoutAnalyzer": { "$ref": "#/$defs/layoutAnalyzerConfig" },
+    "semanticEngine": { "$ref": "#/$defs/semanticEngineConfig" },
+    "readingOrder": { "$ref": "#/$defs/readingOrderConfig" },
+    "tagBuilder": { "$ref": "#/$defs/tagBuilderConfig" },
+    "fontEmbedder": { "$ref": "#/$defs/fontEmbedderConfig" },
+    "pdfWriter": { "$ref": "#/$defs/pdfWriterConfig" },
+    "validator": { "$ref": "#/$defs/validatorConfig" },
+    "paragraphMerger": { "$ref": "#/$defs/paragraphMergerConfig" },
+    "redactor": { "$ref": "#/$defs/redactorConfig" },
+    "orchestrator": { "$ref": "#/$defs/orchestratorConfig" },
+    "evaluation": { "$ref": "#/$defs/evaluationConfig" },
+    "corruptionRepairer": { "$ref": "#/$defs/corruptionRepairerConfig" }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "parserConfig": {
+      "type": "object",
+      "description": "Controls PDF text extraction and OCR fallback behavior.",
+      "properties": {
+        "ocrMode": {
+          "type": "string",
+          "enum": ["auto", "off", "force", "required"],
+          "default": "auto",
+          "description": "auto: OCR only when pages look empty/sparse. off: never OCR. force: OCR every page. required: fail if OCR fails."
+        },
+        "ocrLanguages": {
+          "type": "string",
+          "default": "",
+          "description": "Tesseract language codes (e.g. 'eng', 'spa+eng', 'jpn'). Empty = auto-detect from extracted text."
+        },
+        "ocrMaxAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 2,
+          "description": "Retry limit for failed OCR profiles before accepting the best candidate."
+        },
+        "sparseTextBlockThreshold": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1,
+          "description": "Pages with this many text blocks or fewer trigger OCR (when ocrMode=auto)."
+        },
+        "sparseCharacterThreshold": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 24,
+          "description": "Pages with this many extracted characters or fewer trigger OCR."
+        },
+        "sparseCoverageThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.002,
+          "description": "Coverage ratio (text area / page area) below which OCR triggers."
+        },
+        "minAcceptedOcrScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.4,
+          "description": "Minimum OCR confidence to accept a candidate over native text."
+        },
+        "minCharacterGain": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 24,
+          "description": "OCR must yield at least this many more characters than native to replace."
+        },
+        "characterGainMultiplier": {
+          "type": "number",
+          "minimum": 1,
+          "default": 1.5,
+          "description": "Multiplier applied to minCharacterGain for final acceptance threshold."
+        },
+        "renderVariants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "dpi": { "type": "integer", "minimum": 72, "maximum": 1200 },
+              "colorMode": { "type": "string", "enum": ["gray", "binary", "color"] }
+            },
+            "required": ["name", "dpi", "colorMode"]
+          },
+          "description": "Rendering profiles for OCR page images. More variants = better accuracy, slower."
+        },
+        "recognitionProfiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "pageSegMode": { "type": "integer", "minimum": 0, "maximum": 13 }
+            },
+            "required": ["name", "pageSegMode"]
+          },
+          "description": "Tesseract page segmentation mode profiles. Multiple profiles enable consensus scoring."
+        }
+      },
+      "additionalProperties": true
+    },
+    "layoutAnalyzerConfig": {
+      "type": "object",
+      "description": "Controls column detection, heading classification, and table inference.",
+      "properties": {
+        "columnGapThresholdPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.16,
+          "description": "Fraction of page width used as the base column-gap threshold."
+        },
+        "columnGapMinPixels": {
+          "type": "number",
+          "minimum": 0,
+          "default": 48,
+          "description": "Minimum absolute pixel gap to consider a column boundary."
+        },
+        "columnConfidenceDivisorPercent": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1,
+          "default": 0.32,
+          "description": "Fraction of page width used as divisor in column confidence formula."
+        },
+        "headingScoreThreshold": {
+          "type": "number",
+          "minimum": 1,
+          "default": 1.55,
+          "description": "Font size ratio (vs. baseline) to classify as heading."
+        },
+        "headingBoldScoreThreshold": {
+          "type": "number",
+          "minimum": 1,
+          "default": 1.3,
+          "description": "Font size ratio for heading classification when text is bold."
+        },
+        "headingH1Threshold": {
+          "type": "number",
+          "minimum": 1,
+          "default": 1.9,
+          "description": "Ratio at or above which heading is classified as H1."
+        },
+        "headingH2Threshold": {
+          "type": "number",
+          "minimum": 1,
+          "default": 1.55,
+          "description": "Ratio at or above which heading is classified as H2 (below H1)."
+        },
+        "rowTolerancePixels": {
+          "type": "number",
+          "minimum": 0,
+          "default": 6,
+          "description": "Vertical proximity (pixels) for grouping blocks into candidate table rows."
+        },
+        "tableRowMinItems": {
+          "type": "integer",
+          "minimum": 2,
+          "default": 2,
+          "description": "Minimum columns per candidate table row."
+        },
+        "tableRowMinSpanPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.16,
+          "description": "Minimum row width as fraction of page width to qualify as table."
+        },
+        "tableRowMinGapPixels": {
+          "type": "number",
+          "minimum": 0,
+          "default": 14,
+          "description": "Minimum inter-column gap in a candidate table row."
+        }
+      },
+      "additionalProperties": true
+    },
+    "semanticEngineConfig": {
+      "type": "object",
+      "description": "Controls role classification, confidence assignment, and structural grouping.",
+      "properties": {
+        "confidenceDefaults": {
+          "type": "object",
+          "description": "Default confidence scores by role. Keys are role names (Artifact, Table, TH, TD, LI, H1, P, etc.).",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "tableContinuationDistanceY": {
+          "type": "number",
+          "minimum": 0,
+          "default": 48,
+          "description": "Max vertical gap (pixels) to continue a table across blocks."
+        },
+        "tableContinuationDistanceX": {
+          "type": "number",
+          "minimum": 0,
+          "default": 160,
+          "description": "Max horizontal gap (pixels) to continue a table across blocks."
+        },
+        "listGapThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "default": 28,
+          "description": "Max vertical gap (pixels) to continue a list group."
+        },
+        "languageHint": {
+          "type": ["string", "null"],
+          "description": "BCP-47 language tag hint (e.g. 'en', 'es', 'ja'). Null = auto-detect."
+        }
+      },
+      "additionalProperties": true
+    },
+    "readingOrderConfig": {
+      "type": "object",
+      "description": "Controls how extracted blocks are sorted into logical reading order.",
+      "properties": {
+        "lineGroupEpsilon": {
+          "type": "number",
+          "minimum": 0,
+          "default": 6,
+          "description": "Vertical tolerance (points) for grouping blocks into the same visual line. Blocks within this distance sort left-to-right instead of top-to-bottom."
+        },
+        "columnBandThresholdPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.18,
+          "description": "Fraction of horizontal span used as the column-band detection threshold."
+        },
+        "columnBandMinPixels": {
+          "type": "number",
+          "minimum": 0,
+          "default": 64,
+          "description": "Minimum absolute pixel gap between column bands."
+        }
+      },
+      "additionalProperties": true
+    },
+    "paragraphMergerConfig": {
+      "type": "object",
+      "description": "Controls how consecutive text lines are merged into logical paragraphs.",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["text-structure", "pairwise", "disabled"],
+          "default": "text-structure",
+          "description": "Merge strategy. 'text-structure' detects page margin and median spacing for 80%+ reduction. 'pairwise' uses the original confidence-based pair merging. 'disabled' passes through unchanged."
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable paragraph merging. When false, the stage passes through unchanged."
+        },
+        "gapMultiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 1.8,
+          "description": "Lines merge when vertical gap ≤ lineHeight × this multiplier. Lower = stricter merging."
+        },
+        "xAlignmentTolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 12,
+          "description": "Maximum horizontal offset (pixels) between consecutive lines to still consider them aligned."
+        },
+        "heightVarianceTolerance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.3,
+          "description": "Maximum relative difference in line height (fraction) to consider lines same-font."
+        },
+        "minConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5,
+          "description": "Minimum merge confidence to actually combine blocks. Below this, blocks stay separate with a report entry explaining why."
+        },
+        "sentenceBoundaryPenalty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.3,
+          "description": "Confidence penalty when the preceding line ends at a sentence boundary (period/colon followed by capital on next line)."
+        },
+        "reportUnmerged": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include detailed reasoning for lines that were NOT merged in the paragraph-merge report."
+        }
+      },
+      "additionalProperties": true
+    },
+    "tagBuilderConfig": {
+      "type": "object",
+      "description": "Controls logical structure tree construction.",
+      "properties": {
+        "headingLevelClampMin": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 1,
+          "description": "Minimum heading level (H1=1). Headings above this are clamped."
+        },
+        "headingLevelClampMax": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 3,
+          "description": "Maximum heading level (H3=3). Headings below this are clamped."
+        }
+      },
+      "additionalProperties": true
+    },
+    "fontEmbedderConfig": {
+      "type": "object",
+      "description": "Controls font analysis and embedding remediation (font-embedding-hardening branch).",
+      "properties": {
+        "fallbackStrategy": {
+          "type": "string",
+          "enum": ["substitute-always", "substitute-when-missing", "fail-on-missing"],
+          "default": "substitute-when-missing",
+          "description": "How to handle fonts that can't be embedded from the source."
+        },
+        "licenseFlagPolicy": {
+          "type": "string",
+          "enum": ["ignore", "warn", "block"],
+          "default": "warn",
+          "description": "What to do when fsType indicates restricted embedding."
+        },
+        "overlayFontPath": {
+          "type": ["string", "null"],
+          "description": "Path to a TTF/OTF to use as the overlay font. Null = use bundled Noto Sans."
+        }
+      },
+      "additionalProperties": true
+    },
+    "pdfWriterConfig": {
+      "type": "object",
+      "description": "Controls PDF output generation.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["native", "raster", "auto"],
+          "default": "auto",
+          "description": "Writer mode. 'native' preserves original vector text by injecting BDC/MCID/EMC into content streams. 'raster' rasterizes pages to images with invisible text overlay (current default, always works). 'auto' tries native per-page, falls back to raster when operator matching confidence is below threshold."
+        },
+        "nativeMatchThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.8,
+          "description": "Minimum operator match confidence per page for native mode. Pages below this threshold fall back to raster in auto mode."
+        },
+        "fontCacheDir": {
+          "type": ["string", "null"],
+          "description": "Directory for re-embeddable font program cache. Null = no cache."
+        },
+        "stripCidSet": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remove /CIDSet from subsetted Type0 fonts to satisfy PDF/UA 7.21.4.2."
+        }
+      },
+      "additionalProperties": true
+    },
+    "validatorConfig": {
+      "type": "object",
+      "description": "Controls PDF/UA validation behavior.",
+      "properties": {
+        "veraPdfFlavour": {
+          "type": "string",
+          "default": "ua1",
+          "description": "veraPDF validation flavour (ua1, a1a, a2b, etc.)."
+        },
+        "skipFontAudit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip the pre-veraPDF font audit pass."
+        },
+        "skipVeraPdf": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip veraPDF entirely (useful when Java/veraPDF isn't installed)."
+        }
+      },
+      "additionalProperties": true
+    },
+    "redactorConfig": {
+      "type": "object",
+      "description": "Controls SSN redaction and similar PII masking.",
+      "properties": {
+        "ssnPattern": {
+          "type": "string",
+          "description": "Regex pattern for detecting SSNs. Default: standard XXX-XX-XXXX."
+        },
+        "ssnMaskFormat": {
+          "type": "string",
+          "default": "***-**-{last4}",
+          "description": "Output format for masked SSNs. {last4} is replaced with the last 4 digits."
+        },
+        "bboxPaddingX": {
+          "type": "number",
+          "minimum": 0,
+          "default": 2,
+          "description": "Horizontal padding (pixels) around redaction bounding boxes."
+        },
+        "bboxPaddingY": {
+          "type": "number",
+          "minimum": 0,
+          "default": 1,
+          "description": "Vertical padding (pixels) around redaction bounding boxes."
+        }
+      },
+      "additionalProperties": true
+    },
+    "orchestratorConfig": {
+      "type": "object",
+      "description": "Controls orchestrator-level behavior (retries, agents, timeouts).",
+      "properties": {
+        "maxStageAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Default retry limit per stage (can be overridden per-stage)."
+        },
+        "agentPollIntervalMs": {
+          "type": "integer",
+          "minimum": 1000,
+          "default": 5000,
+          "description": "Remote agent polling interval in milliseconds."
+        },
+        "agentHeartbeatIntervalMs": {
+          "type": "integer",
+          "minimum": 1000,
+          "default": 5000,
+          "description": "Remote agent heartbeat interval in milliseconds."
+        }
+      },
+      "additionalProperties": true
+    },
+    "corruptionRepairerConfig": {
+      "type": "object",
+      "description": "Controls PDF corruption scanning and repair behavior.",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "repairFlateStreams": { "type": "boolean", "default": true, "description": "Attempt to recover corrupted FlateFilter streams." },
+        "rebuildXref": { "type": "boolean", "default": true, "description": "Rebuild cross-reference table if damaged." },
+        "consolidateIncrementalUpdates": { "type": "boolean", "default": true, "description": "Merge multiple incremental saves into one clean revision." },
+        "repairFonts": { "type": "boolean", "default": true, "description": "Scan and report damaged or incomplete fonts." },
+        "maxFileSizeMB": { "type": "integer", "default": 100, "description": "Skip repair for files larger than this." }
+      },
+      "additionalProperties": true
+    },
+    "evaluationConfig": {
+      "type": "object",
+      "description": "Ground-truth and scoring metadata for the evaluation harness.",
+      "properties": {
+        "groundTruthRef": {
+          "type": ["string", "null"],
+          "description": "Path or URL to a ground-truth corpus for this profile. Null = heuristic scoring only."
+        },
+        "scoringWeights": {
+          "type": "object",
+          "description": "Relative importance of each metric in the aggregate score. Keys: veraPdfFindings, fontEmbedCoverage, readingOrderInversions, ocrConfidence.",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "acceptanceThresholds": {
+          "type": "object",
+          "description": "Per-metric thresholds below which a run is considered failing.",
+          "additionalProperties": { "type": "number" }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "versionId": "v4-legal-tuned",
+  "label": "Legal-Tuned",
+  "description": "Optimized for court filings and legal briefs. Pre-filters artifacts, detects hanging indents (common in legal paragraph numbering), reduces sentence-boundary penalty for statute citations, and uses continuation-line detection for long run-on legal paragraphs.",
+  "config": {
+    "enabled": true,
+    "gapMultiplier": 1.8,
+    "xAlignmentTolerance": 16,
+    "heightVarianceTolerance": 0.25,
+    "minConfidence": 0.45,
+    "sentenceBoundaryPenalty": 0.15,
+    "reportUnmerged": true
+  },
+  "heuristics": {
+    "hangingIndentDetection": true,
+    "artifactPreFilter": true,
+    "continuationLineDetection": true,
+    "legalCitationAwareness": true
+  }
+}

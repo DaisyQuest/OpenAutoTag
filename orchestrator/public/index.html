@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PDF Workload Engine</title>
+    <title>PDF Accessibility Engine</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body data-view="dashboard">
@@ -13,7 +13,10 @@
       <div class="orb orb-b"></div>
 
       <nav class="topbar" aria-label="Primary">
-        <a class="brand-mark" href="/">BuildEverything</a>
+        <a class="brand-mark" href="/">
+          <span class="brand-icon">&#x1F6E1;&#xFE0F;</span>
+          <span>PDF Accessibility Engine</span>
+        </a>
         <div class="topbar-links">
           <a class="topbar-link is-active" href="/">Workspace</a>
           <a class="topbar-link" href="/admin/keys.html">API Keys</a>
@@ -31,19 +34,24 @@
       <header class="hero hero-dashboard">
         <div class="hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow">Local PDF Workloads</p>
-            <h1>Run tagging, validation, and redaction from one control surface.</h1>
+            <p class="eyebrow">PDF Accessibility Engine</p>
+            <h1>Tag, validate, repair, and preserve PDFs from one control surface.</h1>
             <p class="lede">
               Drop a folder, queue local PDFs, or point the server at a remote PDF URL. The dashboard keeps
               workload selection, live batch state, report signals, and artifact access in one tabular workspace.
             </p>
             <div class="hero-link-row">
-              <a class="ghost-link" href="/admin/keys.html">Manage API keys</a>
-              <a class="ghost-link" href="/admin/system.html">System monitor</a>
-              <a class="ghost-link" href="/admin/queue.html">Queue monitor</a>
-              <a class="ghost-link" href="/admin/history.html">Job history</a>
-              <a class="ghost-link" href="/admin/artifacts.html">Artifact browser</a>
+              <a class="ghost-link" href="/admin/system.html">System</a>
+              <a class="ghost-link" href="/admin/queue.html">Queue</a>
+              <a class="ghost-link" href="/admin/history.html">History</a>
               <a class="ghost-link" href="/testing-matrix.html">Testing Matrix</a>
+            </div>
+            <div class="hero-link-row hero-reports-row">
+              <span class="hero-link-label">Reports:</span>
+              <a class="ghost-link report-link" href="/nativity-report.html">Native Tagging</a>
+              <a class="ghost-link report-link" href="/font-report.html">Font Health</a>
+              <a class="ghost-link report-link" href="/repair-report.html">Corruption Repair</a>
+              <a class="ghost-link report-link" href="/paragraph-report.html">Paragraph Merge</a>
             </div>
             <div class="hero-step-grid" aria-label="Dashboard workflow">
               <article class="hero-step">
@@ -123,6 +131,30 @@
                   <span id="workload-caption">Loading workloads</span>
                 </div>
                 <div id="workload-list" class="workload-list"></div>
+              </section>
+
+              <section class="profile-surface" aria-labelledby="profile-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="profile-title">Profile</h4>
+                  <span id="profile-caption">Loading profiles</span>
+                </div>
+                <select id="profile-select" class="url-input" aria-label="Select a profile">
+                  <option value="default">Default</option>
+                </select>
+                <p id="profile-description" class="section-copy">Balanced general-purpose profile suitable for most document types.</p>
+                <button id="profile-advanced-toggle" class="ghost-button compact-button" type="button">Advanced</button>
+                <div id="profile-advanced-panel" hidden>
+                  <label class="field-stack" for="profile-overrides">
+                    <span class="field-label">Profile overrides (JSON)</span>
+                    <textarea
+                      id="profile-overrides"
+                      class="url-input"
+                      rows="4"
+                      placeholder='{"parser": {"ocrMode": "force"}}'
+                      aria-label="Profile overrides JSON"
+                    ></textarea>
+                  </label>
+                </div>
               </section>
 
               <div

@@ -1,0 +1,10 @@
+{
+  "status": "completed",
+  "isCompliant": false,
+  "findings": [
+    { "severity": "error", "code": "VERAPDF_7_1_T01", "description": "Missing tag" },
+    { "severity": "error", "code": "VERAPDF_7_2_T01", "description": "Bad structure" },
+    { "severity": "warning", "code": "NATIVE_TAGGING_NOT_APPLIED", "message": "Not tagged natively" }
+  ],
+  "summary": { "passedRules": 10, "failedRules": 2, "passedChecks": 50, "failedChecks": 3 }
+}

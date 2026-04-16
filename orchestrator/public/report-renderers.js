@@ -14,7 +14,12 @@ export const artifactLabels = {
   tagDeltaReport: "Tag delta",
   writerReport: "Writer report",
   tagManifest: "Tag tree",
-  redactionReport: "Redaction report"
+  redactionReport: "Redaction report",
+  semanticMerged: "Merged paragraphs",
+  paragraphMergeReport: "Paragraph merge report",
+  repairedPdf: "Repaired PDF",
+  repairReport: "Repair report",
+  fontReport: "Font Health Report"
 };
 
 const JSON_PREVIEW_ITEM_LIMIT = 8;

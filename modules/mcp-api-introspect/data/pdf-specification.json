@@ -1,0 +1,261 @@
+{
+  "title": "PDF Specification Reference for Accessibility Engineering",
+  "version": "ISO 32000-2:2020 (PDF 2.0) + ISO 14289-1:2014 (PDF/UA-1)",
+  "purpose": "Structured knowledge base enabling agents to understand PDF internals for accessibility tagging, font handling, and native content preservation.",
+
+  "fileStructure": {
+    "title": "PDF File Structure",
+    "overview": "A PDF file is a sequence of 8-bit bytes organized into four sections: header, body, cross-reference table, and trailer. The body contains numbered objects that reference each other by ID.",
+    "sections": {
+      "header": {
+        "description": "First line: %PDF-1.7 (or %PDF-2.0). Declares the PDF version. Followed by a binary comment line (bytes > 127) so transfer programs treat the file as binary.",
+        "example": "%PDF-1.7\n%\u00e2\u00e3\u00cf\u00d3"
+      },
+      "body": {
+        "description": "Contains indirect objects (numbered N 0 obj ... endobj). Each object has a unique ID (object number + generation number). Objects can be: dictionaries, arrays, streams, numbers, strings, names, booleans, or null.",
+        "objectTypes": {
+          "dictionary": "Key-value pairs in << /Key Value >>. The fundamental building block — page dicts, font dicts, catalog.",
+          "stream": "A dictionary followed by binary data between 'stream' and 'endstream'. Content streams, font programs, images all use this.",
+          "array": "Ordered list in [ item1 item2 ... ]. Used for page kids, color values, bbox coordinates.",
+          "name": "Starts with /. Used as dictionary keys and enum values: /Type, /Font, /Page.",
+          "string": "Text in (parentheses) or hex in <hexbytes>. Used for text content, dates, metadata.",
+          "reference": "Points to another object: 5 0 R means 'object 5, generation 0'."
+        }
+      },
+      "xrefTable": {
+        "description": "Maps object numbers to byte offsets in the file. Enables random access without scanning the whole file. Located near the end, pointed to by 'startxref' value.",
+        "corruption": "When the xref table is damaged, PDF readers must scan the entire file for 'N 0 obj' patterns to rebuild it. Our corruption-repairer does exactly this.",
+        "crossReferenceStreams": "PDF 1.5+ can use compressed xref streams (/Type /XRef) instead of plain-text tables. More compact but harder to repair manually."
+      },
+      "trailer": {
+        "description": "Contains /Root (catalog reference), /Size (total objects), /Info (document info dict), and /ID (file identifiers). The trailer is the entry point for reading the entire document.",
+        "example": "trailer\n<< /Root 1 0 R /Size 42 /Info 2 0 R >>\nstartxref\n12345\n%%EOF"
+      }
+    }
+  },
+
+  "documentStructure": {
+    "title": "Document Object Hierarchy",
+    "overview": "The catalog (/Root) points to the pages tree, metadata, structure tree, AcroForm, and other document-level dictionaries.",
+    "hierarchy": {
+      "catalog": {
+        "type": "/Type /Catalog",
+        "description": "Root of the document. Required entries: /Pages. Optional: /StructTreeRoot (tagged PDF), /MarkInfo, /AcroForm, /Metadata, /ViewerPreferences, /Lang.",
+        "accessibilityKeys": {
+          "/StructTreeRoot": "Root of the logical structure tree (tagged PDF). Required for PDF/UA.",
+          "/MarkInfo": "Dictionary with /Marked true — declares this is a tagged PDF.",
+          "/Lang": "Document language as BCP-47 tag (e.g., 'en-US'). Required for PDF/UA.",
+          "/ViewerPreferences": "Should include /DisplayDocTitle true for PDF/UA."
+        }
+      },
+      "pagesTree": {
+        "description": "A balanced tree of /Type /Pages nodes. Leaf nodes are /Type /Page. Each page has /MediaBox (page dimensions), /Resources (fonts, images), and /Contents (content stream references).",
+        "coordinateSystem": "PDF origin is at the BOTTOM-LEFT of the page. Y increases upward. This is the opposite of screen coordinates where Y increases downward. Our pipeline must flip Y when matching operators to semantic nodes."
+      },
+      "resources": {
+        "description": "Each page (or XObject form) has a /Resources dictionary containing sub-dictionaries for /Font, /XObject, /ExtGState, /ColorSpace, /Pattern, /Shading, /Properties.",
+        "fontResources": "The /Font subdictionary maps symbolic names (like /F1, /TT0) to font dictionaries. Content stream operators reference these names via Tf."
+      }
+    }
+  },
+
+  "contentStreams": {
+    "title": "Content Stream Operators",
+    "overview": "Content streams are sequences of operators that draw text, graphics, and images on a page. Operators are postfix: operands come before the operator name. The graphics state is a stack managed by q (save) and Q (restore).",
+    "textOperators": {
+      "BT": { "operands": "none", "description": "Begin Text object. Initializes the text matrix and text line matrix to identity." },
+      "ET": { "operands": "none", "description": "End Text object. Text operators are only valid between BT and ET." },
+      "Tf": { "operands": "font size", "description": "Set text font and size. 'font' is a name from the page's /Resources/Font dictionary. '/F1 12 Tf' means use font F1 at 12pt." },
+      "Td": { "operands": "tx ty", "description": "Move to the start of the next line, offset by (tx, ty) from the start of the current line." },
+      "Tm": { "operands": "a b c d e f", "description": "Set the text matrix directly. [a b c d e f] is a 3x3 transformation matrix. e,f are the translation (position)." },
+      "Tj": { "operands": "string", "description": "Show a text string. The string bytes are decoded through the font's encoding to produce glyph indices." },
+      "TJ": { "operands": "array", "description": "Show text with individual glyph positioning. Array alternates strings and numeric adjustments: [(Hello) -250 (World)] shifts 'World' left by 250/1000 of a unit." },
+      "'": { "operands": "string", "description": "Move to next line and show text. Equivalent to T* then Tj." },
+      "\"": { "operands": "aw ac string", "description": "Set word and character spacing, move to next line, show text." },
+      "T*": { "operands": "none", "description": "Move to the start of the next line (uses the current leading value)." }
+    },
+    "graphicsStateOperators": {
+      "q": "Save the current graphics state (push onto stack)",
+      "Q": "Restore the most recently saved graphics state (pop from stack)",
+      "cm": "Concatenate matrix: a b c d e f cm — modifies the current transformation matrix",
+      "w": "Set line width",
+      "J": "Set line cap style",
+      "j": "Set line join style",
+      "d": "Set dash pattern",
+      "gs": "Set graphics state parameters from an ExtGState dictionary"
+    },
+    "pathOperators": {
+      "m": "Move to point (start new subpath): x y m",
+      "l": "Line to point: x y l",
+      "c": "Cubic Bezier curve: x1 y1 x2 y2 x3 y3 c",
+      "re": "Rectangle: x y width height re",
+      "S": "Stroke the path",
+      "f": "Fill the path (non-zero winding rule)",
+      "B": "Fill and stroke the path",
+      "n": "End path without filling or stroking (used for clipping)"
+    },
+    "markedContentOperators": {
+      "BMC": { "operands": "tag", "description": "Begin marked-content sequence. Tag is a name like /Artifact, /Span, /P." },
+      "BDC": { "operands": "tag properties", "description": "Begin marked-content sequence with properties. '/P <</MCID 0>> BDC' starts a paragraph with marked-content ID 0." },
+      "EMC": { "operands": "none", "description": "End marked-content sequence. Every BMC/BDC must have a matching EMC." },
+      "nativeTaggingUsage": "For native PDF tagging, we inject BDC/EMC around existing text operators. Each BDC carries an MCID that links the content to a structure tree element. This is how we tag without rasterizing."
+    },
+    "renderingModes": {
+      "0": "Fill text (normal visible text)",
+      "1": "Stroke text (outline only)",
+      "2": "Fill then stroke",
+      "3": "Neither fill nor stroke (INVISIBLE — used for our text overlay in raster mode)",
+      "4-7": "Same as 0-3 but also add to clipping path"
+    }
+  },
+
+  "fontSystem": {
+    "title": "PDF Font Architecture",
+    "overview": "PDF supports multiple font technologies. Each font has a dictionary in the page's /Resources/Font, a FontDescriptor with metrics, and optionally an embedded font program.",
+    "fontTypes": {
+      "Type1": {
+        "description": "Adobe's original outline font format. Uses PostScript-style outlines. Being phased out in favor of OpenType.",
+        "encoding": "WinAnsiEncoding, MacRomanEncoding, or custom Differences array. Each byte maps to a glyph name.",
+        "embedding": "Font program stored in /FontFile stream (PFB format).",
+        "standard14": "14 fonts (Helvetica, Times, Courier, Symbol, ZapfDingbats + variants) that viewers are supposed to have built-in. PDF/UA FORBIDS relying on these — they must be embedded."
+      },
+      "TrueType": {
+        "description": "Apple/Microsoft outline format. Uses quadratic Bezier curves. Most common web/system font format.",
+        "encoding": "WinAnsiEncoding or Symbolic. 'cmap' table inside the font maps character codes to glyph IDs.",
+        "embedding": "Font program stored in /FontFile2 stream (TTF binary)."
+      },
+      "Type0": {
+        "description": "Composite font for CID-keyed fonts (CJK, large character sets). A Type0 font references a DescendantFont (CIDFont).",
+        "encoding": "Typically Identity-H (horizontal) or Identity-V (vertical). Maps character codes directly to CID values.",
+        "descendantFont": "Either CIDFontType0 (CFF outlines) or CIDFontType2 (TrueType outlines). Has its own FontDescriptor.",
+        "cidSystemInfo": "Registry (e.g., 'Adobe'), Ordering (e.g., 'Identity'), Supplement (version number). Required for CID fonts.",
+        "embedding": "Font program in descendant's /FontFile2 (TTF) or /FontFile3 (CFF)."
+      },
+      "Type3": {
+        "description": "Fonts defined by PDF content streams (each glyph is a small drawing). Not searchable or accessible. Flagged by our font health checker.",
+        "accessibilityImpact": "Type3 fonts have no standard encoding — text extraction and accessibility are severely impacted."
+      }
+    },
+    "fontDescriptor": {
+      "description": "Required metadata about the font: /FontName, /Flags (serif, symbolic, italic, etc.), /FontBBox, /ItalicAngle, /Ascent, /Descent, /CapHeight, /StemV.",
+      "fontFiles": {
+        "/FontFile": "Type1 font program (PFB format)",
+        "/FontFile2": "TrueType font program (TTF binary)",
+        "/FontFile3": "Type1C (CFF) or OpenType/CFF font program"
+      },
+      "/CIDSet": "Bit-string enumerating which CIDs are present in a subsetted CID font. If present, must be complete (PDF/UA 7.21.4.2). Our writer removes it to avoid incomplete CIDSet failures."
+    },
+    "toUnicode": {
+      "description": "A CMap stream that maps character codes to Unicode values. CRITICAL for text extraction and accessibility. Without it, copy-paste produces gibberish.",
+      "requirement": "PDF/UA requires every font to have a valid ToUnicode CMap OR a well-defined encoding that maps to Unicode.",
+      "reconstruction": "Our font-embedder reconstructs missing ToUnicode from: TTF cmap table → Type1 Differences + Adobe Glyph List → CID Registry/Ordering → last-resort synthesis."
+    },
+    "subsetting": {
+      "description": "Embedding only the glyphs actually used in the document (not the full font). Reduces file size. Subset fonts have a 6-letter prefix: 'AAAAAA+FontName'.",
+      "pdfuaImplication": "Subset fonts must still have valid ToUnicode for all used glyphs. The /CIDSet (if present) must enumerate all CIDs in the subset program, not just the used ones."
+    }
+  },
+
+  "taggedPdf": {
+    "title": "Tagged PDF (Logical Structure)",
+    "overview": "Tagged PDF adds a logical structure tree to the document, enabling accessibility tools to understand the document's semantic content independently of its visual layout.",
+    "structureTree": {
+      "description": "A tree of structure elements rooted at /StructTreeRoot in the catalog. Each element has a /Type (like /P, /H1, /Table, /TD) and references marked content in content streams via MCIDs.",
+      "structureElement": {
+        "/S": "Structure type name: Document, Part, Sect, H1-H6, P, L, LI, Table, TR, TH, TD, Figure, Formula, Span, Link, etc.",
+        "/P": "Parent structure element reference",
+        "/K": "Kids: array of MCIDs (integers), other structure elements, or marked-content references",
+        "/Pg": "Page reference for this element's content",
+        "/A": "Attribute objects (like table Scope, RowSpan, ColSpan)"
+      }
+    },
+    "markedContent": {
+      "description": "Content stream operators wrapped in BDC/EMC pairs with an MCID property link the visual content to structure elements.",
+      "example": "/P <</MCID 0>> BDC\n  BT /F1 12 Tf 72 700 Td (Hello World) Tj ET\nEMC",
+      "howItWorks": "The MCID (Marked Content ID) is an integer unique within a page. The structure element's /K array contains this MCID, linking the logical structure to the physical content."
+    },
+    "parentTree": {
+      "description": "A number tree (/ParentTree) in the structure tree root that maps each page's MCID values to their parent structure elements. Enables fast lookup: given an MCID on page N, find the structure element.",
+      "requirement": "Every marked-content sequence with an MCID must have a corresponding entry in the ParentTree."
+    },
+    "tableStructure": {
+      "requiredElements": "Table → TR → TH|TD. THead/TBody/TFoot are optional but recommended grouping elements.",
+      "attributes": {
+        "Scope": "On TH cells: 'Row', 'Column', or 'Both'. Declares which data cells this header applies to.",
+        "Headers": "On TD cells in complex tables: space-separated list of TH element IDs that define this cell.",
+        "RowSpan": "Number of rows this cell spans (default 1).",
+        "ColSpan": "Number of columns this cell spans (default 1)."
+      },
+      "pdfuaRequirement": "Every TH cell must have a Scope attribute. Complex tables (multiple header rows/columns) should also use Headers on TD cells."
+    },
+    "artifacts": {
+      "description": "Content that is not part of the logical document (headers, footers, page numbers, watermarks, decorative graphics). Wrapped in /Artifact BMC ... EMC.",
+      "subtypes": "Pagination (header, footer, page number), Layout (decorative rules, backgrounds), Page (page-level artifacts)"
+    }
+  },
+
+  "pdfUA": {
+    "title": "PDF/UA (ISO 14289) — Universal Accessibility",
+    "overview": "PDF/UA specifies requirements for accessible PDF documents. It mandates tagged structure, proper reading order, alternative text for images, and font embedding.",
+    "keyRequirements": [
+      "All content must be tagged (no untagged content outside Artifact)",
+      "Logical reading order must match visual reading order",
+      "All fonts must be embedded with valid ToUnicode",
+      "Standard 14 fonts must not be used without embedding",
+      "Images must have /Alt text or be marked as Artifact",
+      "Table structure must use TH with Scope",
+      "Document must have /Lang, dc:title in XMP, and PDF/UA identification",
+      "Form fields must have accessible names",
+      "No content that relies solely on color for meaning"
+    ],
+    "ourCompliance": {
+      "fontsEmbedded": "Our font-embedder ensures every font has an embedded program and valid ToUnicode. Standard 14 fonts are replaced with embedded Noto Sans/Serif/Mono/Symbols.",
+      "structureTree": "Tag builder creates a complete structure tree with Document root, Sect, H1-H3, P, Table/TR/TH/TD, L/LI.",
+      "nativeTagging": "Native mode preserves original content while injecting BDC/MCID/EMC. Raster mode creates invisible text overlay.",
+      "cidSetFix": "We remove /CIDSet from subsetted Type0 fonts to satisfy clause 7.21.4.2 (CIDSet completeness).",
+      "tableScope": "Every TH cell is guaranteed a Scope attribute (Column, Row, or Both)."
+    }
+  },
+
+  "coordinateSystems": {
+    "title": "Coordinate System Reference",
+    "pdfDefault": {
+      "origin": "Bottom-left corner of the page",
+      "yDirection": "Increases UPWARD",
+      "units": "1/72 inch (1 point = 1/72 inch)",
+      "letterPage": "612 x 792 points (8.5 x 11 inches)"
+    },
+    "screenCoordinates": {
+      "origin": "Top-left corner",
+      "yDirection": "Increases DOWNWARD",
+      "conversion": "screenY = pageHeight - pdfY"
+    },
+    "ourPipeline": {
+      "parserOutput": "Uses screen coordinates (Y from top, like pdfjs-dist)",
+      "nativeParser": "Uses PDF coordinates (Y from bottom, like PDFBox)",
+      "tagMatcher": "Must convert between the two: operatorScreenY = pageHeight - operatorPdfY"
+    }
+  },
+
+  "glossary": {
+    "MCID": "Marked Content Identifier — integer linking content stream marked-content to structure elements",
+    "BDC": "Begin Marked-Content sequence with properties (Dictionary form)",
+    "BMC": "Begin Marked-Content sequence (simple form, no properties)",
+    "EMC": "End Marked-Content sequence",
+    "CID": "Character Identifier — numeric code in CIDFonts (large character sets like CJK)",
+    "CMap": "Character Map — mapping from character codes to CIDs or Unicode",
+    "ToUnicode": "CMap specifically for mapping character codes to Unicode values (text extraction)",
+    "FontDescriptor": "Dictionary containing font metrics (ascent, descent, bbox, stemV, etc.)",
+    "FontFile": "Embedded Type1 font program stream",
+    "FontFile2": "Embedded TrueType font program stream",
+    "FontFile3": "Embedded CFF (Type1C/OpenType) font program stream",
+    "xref": "Cross-reference table — maps object numbers to byte offsets",
+    "StructTreeRoot": "Root of the logical structure tree in a tagged PDF",
+    "ParentTree": "Number tree mapping MCIDs to parent structure elements",
+    "Artifact": "Content not part of the logical document (headers, footers, decorative elements)",
+    "PDF/UA": "ISO 14289 — Universal Accessibility standard for PDF",
+    "PDF/A": "ISO 19005 — Archival standard for long-term preservation of PDF",
+    "veraPDF": "Open-source PDF/UA and PDF/A validator",
+    "PDFBox": "Apache's Java library for PDF creation and manipulation (used by our writer)"
+  }
+}

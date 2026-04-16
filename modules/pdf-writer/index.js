@@ -1,6 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
-import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, stat, writeFile, access as fsAccess } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
@@ -18,27 +19,40 @@ const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
 const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfTagWriterCli.java");
-const javaFontPlanSourcePath = path.join(moduleDir, "java", "FontPlanExecutor.java");
 const javaClassPath = path.join(buildDir, "PdfTagWriterCli.class");
-const javaFontPlanClassPath = path.join(buildDir, "FontPlanExecutor.class");
 const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
+
+const nativeJavaDir = path.join(moduleDir, "java");
+const nativeParserSource = path.join(nativeJavaDir, "NativeContentStreamParser.java");
+const nativeMatcherSource = path.join(nativeJavaDir, "NativeTagMatcher.java");
+const nativeRewriterSource = path.join(nativeJavaDir, "NativeContentStreamRewriter.java");
+
+const VALID_MODES = new Set(["native", "raster", "auto"]);
+const DEFAULT_MODE = "raster";
+const DEFAULT_NATIVE_MATCH_THRESHOLD = 0.8;
 
 function parseArgs(argv) {
   const args = new Map();
   for (let index = 0; index < argv.length; index += 2) {
     args.set(argv[index], argv[index + 1]);
   }
+  const rawMode = args.get("--mode") || DEFAULT_MODE;
+  const mode = VALID_MODES.has(rawMode) ? rawMode : DEFAULT_MODE;
   return {
     pdfPath: args.get("--pdf"),
     tagsPath: args.get("--tags"),
     semanticPath: args.get("--semantic"),
     redactionsPath: args.get("--redactions"),
     outputPath: args.get("--output"),
-    fontsPath: args.get("--fonts"),
-    fontCacheDir: args.get("--font-cache")
+    mode,
+    nativeMatchThreshold: args.has("--native-match-threshold")
+      ? Number(args.get("--native-match-threshold"))
+      : DEFAULT_NATIVE_MATCH_THRESHOLD
   };
 }
+
+export { parseArgs, VALID_MODES, DEFAULT_MODE, DEFAULT_NATIVE_MATCH_THRESHOLD };
 
 function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
@@ -55,22 +69,25 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, classStats, fontSourceStats, fontClassStats] = await Promise.all([
-      stat(javaSourcePath),
-      stat(javaClassPath),
-      stat(javaFontPlanSourcePath),
-      stat(javaFontPlanClassPath)
-    ]);
-    if (sourceStats.mtimeMs > classStats.mtimeMs) {
-      return true;
-    }
-    if (fontSourceStats.mtimeMs > fontClassStats.mtimeMs) {
-      return true;
-    }
-    return false;
+    const [sourceStats, classStats] = await Promise.all([stat(javaSourcePath), stat(javaClassPath)]);
+    return sourceStats.mtimeMs > classStats.mtimeMs;
   } catch {
     return true;
   }
+}
+
+function collectNativeJavaSources() {
+  const sources = [];
+  if (existsSync(nativeParserSource)) {
+    sources.push(nativeParserSource);
+  }
+  if (existsSync(nativeMatcherSource)) {
+    sources.push(nativeMatcherSource);
+  }
+  if (existsSync(nativeRewriterSource)) {
+    sources.push(nativeRewriterSource);
+  }
+  return sources;
 }
 
 async function ensureJavaHelperCompiled() {
@@ -79,6 +96,7 @@ async function ensureJavaHelperCompiled() {
     isCurrent: async () => !(await needsCompilation()),
     compile: async () => {
       const javacCommand = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
+      const nativeSources = collectNativeJavaSources();
       await execCommand(
         javacCommand,
         [
@@ -89,7 +107,7 @@ async function ensureJavaHelperCompiled() {
           "-d",
           buildDir,
           javaSourcePath,
-          javaFontPlanSourcePath
+          ...nativeSources
         ],
         {
           env: await buildJavaExecEnv({ bundledJavaHome })
@@ -145,19 +163,121 @@ function inferTableScope(node, sourceNode, rowSpan, columnSpan) {
     return "";
   }
 
-  if (Number(columnSpan || 1) > 1 && Number(rowSpan || 1) > 1) {
+  const rs = Number(rowSpan || 1);
+  const cs = Number(columnSpan || 1);
+
+  if (cs > 1 && rs > 1) {
     return "Both";
   }
 
-  if ((node.tableSection || sourceNode?.tableSection) === "head" || sourceNode?.tableRowIndex === 0) {
+  const section = node.tableSection || sourceNode?.tableSection || "";
+  const rowIdx = sourceNode?.tableRowIndex ?? -1;
+  const colIdx = sourceNode?.tableColumnIndex ?? -1;
+
+  if (section === "head" || rowIdx === 0) {
     return "Column";
   }
 
-  if (sourceNode?.tableColumnIndex === 0) {
+  if (colIdx === 0) {
     return "Row";
   }
 
-  return "";
+  if (cs > 1) {
+    return "Column";
+  }
+
+  if (rs > 1) {
+    return "Row";
+  }
+
+  // PDF/UA requires every TH to have a Scope. Default to Column
+  // for headers that can't be classified — this satisfies Adobe's
+  // accessibility checker which flags TH cells without Scope.
+  return "Column";
+}
+
+function collectTableHeaderIds(tagTree) {
+  const headerMap = new Map();
+
+  function walk(node, currentTableId) {
+    if (node.type === "Table") {
+      currentTableId = node.id;
+    }
+    if (node.type === "TH" && currentTableId) {
+      const headers = headerMap.get(currentTableId) || [];
+      headers.push({
+        id: node.id,
+        rowIndex: node.sourceNodeIds?.[0] ? undefined : 0,
+        colIndex: node.sourceNodeIds?.[0] ? undefined : 0,
+        section: node.tableSection || ""
+      });
+      headerMap.set(currentTableId, headers);
+    }
+    for (const child of node.children || []) {
+      walk(child, currentTableId);
+    }
+  }
+
+  walk(tagTree, null);
+  return headerMap;
+}
+
+function inferHeaders(node, sourceNode, tagTree, semanticById) {
+  if (node.type !== "TD") return "";
+
+  const tableParent = findAncestorOfType(node, "Table", tagTree);
+  if (!tableParent) return "";
+
+  const headerMap = collectTableHeaderIds(tagTree);
+  const tableHeaders = headerMap.get(tableParent.id) || [];
+  if (tableHeaders.length === 0) return "";
+
+  const rowIdx = sourceNode?.tableRowIndex ?? -1;
+  const colIdx = sourceNode?.tableColumnIndex ?? -1;
+  const refs = [];
+
+  for (const th of tableHeaders) {
+    const thSource = semanticById?.get(th.id);
+    if (!thSource) {
+      refs.push(th.id);
+      continue;
+    }
+    const thRow = thSource.tableRowIndex ?? -1;
+    const thCol = thSource.tableColumnIndex ?? -1;
+    const thSection = th.section || thSource.tableSection || "";
+
+    if (thSection === "head" && thCol === colIdx) {
+      refs.push(th.id);
+    } else if (thCol === 0 && thRow === rowIdx) {
+      refs.push(th.id);
+    }
+  }
+
+  return refs.join(" ");
+}
+
+function findAncestorOfType(node, type, root) {
+  function search(current, target) {
+    if (current === target) return null;
+    for (const child of current.children || []) {
+      if (child === target) return current.type === type ? current : null;
+      if (child.type === type) {
+        const found = searchBelow(child, target);
+        if (found) return child;
+      }
+      const result = search(child, target);
+      if (result) return result;
+    }
+    return null;
+  }
+  function searchBelow(current, target) {
+    if (current === target) return true;
+    for (const child of current.children || []) {
+      if (searchBelow(child, target)) return true;
+    }
+    return false;
+  }
+  return search(root, node);
 }
 
 function findFirstHeadingNode(node) {
@@ -282,16 +402,7 @@ async function writeSidecarFallback({ pdfPath, taggingDocument, outputPath, mani
   };
 }
 
-async function runJavaWriter({
-  pdfPath,
-  outputPath,
-  instructionPath,
-  redactionInstructionPath,
-  title,
-  language,
-  fontsPath,
-  fontCacheDir
-}) {
+async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionInstructionPath, title, language }) {
   await ensureJavaHelperCompiled();
   const args = [
     "-cp",
@@ -313,14 +424,6 @@ async function runJavaWriter({
     args.push("--redactions", redactionInstructionPath);
   }
 
-  if (fontsPath) {
-    args.push("--fonts", fontsPath);
-  }
-
-  if (fontCacheDir) {
-    args.push("--font-cache", fontCacheDir);
-  }
-
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
   const stdout = await execCommand(javaCommand, args, {
     env: await buildJavaExecEnv({ bundledJavaHome })
@@ -329,39 +432,177 @@ async function runJavaWriter({
   return JSON.parse(stdout);
 }
 
-function resolveFontsPath({ fontsPath, taggingDocument, tagsPath }) {
-  if (fontsPath) {
-    return path.resolve(fontsPath);
-  }
-
-  // Fallback: tagging.json may carry an inline reference (`fontInventoryRef`)
-  // pointing at a font-inventory file. The reference is documented in
-  // contracts/tagging.schema.json as relative to the job workspace; we
-  // interpret that relative to the directory of the tagging document.
-  const inlineRef = taggingDocument && typeof taggingDocument.fontInventoryRef === "string"
-    ? taggingDocument.fontInventoryRef.trim()
-    : "";
-
-  if (!inlineRef) {
-    return null;
-  }
-
-  const tagsDir = tagsPath ? path.dirname(path.resolve(tagsPath)) : process.cwd();
-  return path.isAbsolute(inlineRef) ? inlineRef : path.resolve(tagsDir, inlineRef);
+async function runNativeParser({ pdfPath, operatorsPath }) {
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "NativeContentStreamParser",
+      "--pdf",
+      pdfPath,
+      "--output",
+      operatorsPath
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+  return stdout;
 }
 
-export async function writeTaggedArtifacts({
-  pdfPath,
-  tagsPath,
-  semanticPath,
-  redactionsPath,
-  outputPath,
-  fontsPath,
-  fontCacheDir
-}) {
+async function runNativeMatcher({ operatorsPath, semanticPath, tagsPath, tagPlanPath }) {
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "NativeTagMatcher",
+      "--operators",
+      operatorsPath,
+      "--semantic",
+      semanticPath,
+      "--tags",
+      tagsPath,
+      "--output",
+      tagPlanPath
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+  return stdout;
+}
+
+async function runNativeRewriter({ pdfPath, tagPlanPath, outputPath }) {
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp",
+      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "NativeContentStreamRewriter",
+      "--pdf",
+      pdfPath,
+      "--tag-plan",
+      tagPlanPath,
+      "--output",
+      outputPath
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+  return stdout;
+}
+
+function isNativeRewriterAvailable() {
+  return existsSync(nativeRewriterSource);
+}
+
+async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath }) {
+  await ensureJavaHelperCompiled();
+
+  const tempBase = `${outputPath}.native`;
+  const operatorsPath = `${tempBase}-operators.json`;
+  const tagPlanPath = `${tempBase}-tag-plan.json`;
+
+  await runNativeParser({ pdfPath: path.resolve(pdfPath), operatorsPath });
+  await runNativeMatcher({
+    operatorsPath,
+    semanticPath: path.resolve(semanticPath),
+    tagsPath: path.resolve(tagsPath),
+    tagPlanPath
+  });
+
+  const tagPlan = JSON.parse(await readFile(tagPlanPath, "utf8"));
+
+  const rewriterStdout = await runNativeRewriter({
+    pdfPath: path.resolve(pdfPath),
+    tagPlanPath,
+    outputPath: path.resolve(outputPath)
+  });
+
+  let rewriterReport;
+  try {
+    rewriterReport = JSON.parse(rewriterStdout);
+  } catch {
+    rewriterReport = {};
+  }
+
+  const overall = tagPlan.overall || {};
+  const operatorCount = overall.operatorCount || 0;
+  const matchedOperators = overall.matchedOperators || 0;
+  const matchRate = operatorCount > 0 ? matchedOperators / operatorCount : 0;
+
+  return {
+    writerMode: "native",
+    operatorCount,
+    matchedOperators,
+    matchRate: Math.round(matchRate * 1000) / 1000,
+    nativeViable: true,
+    pagesNative: rewriterReport.pagesNative || overall.pageCount || 0,
+    pagesRaster: 0,
+    structureElementCount: rewriterReport.structureElementCount || 0,
+    markedContentCount: rewriterReport.markedContentCount || 0,
+    tagPlan
+  };
+}
+
+async function resolveWriterMode({ mode, nativeMatchThreshold, pdfPath, tagsPath, semanticPath, outputPath }) {
+  if (mode === "raster") {
+    return { effectiveMode: "raster" };
+  }
+
+  if (mode === "native") {
+    if (!isNativeRewriterAvailable()) {
+      throw new Error("Native mode requested but NativeContentStreamRewriter.java is not available.");
+    }
+    return { effectiveMode: "native" };
+  }
+
+  // auto mode: probe match rate, decide
+  if (!isNativeRewriterAvailable()) {
+    return { effectiveMode: "raster", autoFallbackReason: "NativeContentStreamRewriter.java not available" };
+  }
+
+  await ensureJavaHelperCompiled();
+
+  const tempBase = `${outputPath}.auto-probe`;
+  const operatorsPath = `${tempBase}-operators.json`;
+  const tagPlanPath = `${tempBase}-tag-plan.json`;
+
+  try {
+    await runNativeParser({ pdfPath: path.resolve(pdfPath), operatorsPath });
+    await runNativeMatcher({
+      operatorsPath,
+      semanticPath: path.resolve(semanticPath),
+      tagsPath: path.resolve(tagsPath),
+      tagPlanPath
+    });
+
+    const tagPlan = JSON.parse(await readFile(tagPlanPath, "utf8"));
+    const overall = tagPlan.overall || {};
+    const operatorCount = overall.operatorCount || 0;
+    const matchedOperators = overall.matchedOperators || 0;
+    const meanMatchRate = operatorCount > 0 ? matchedOperators / operatorCount : 0;
+
+    if (meanMatchRate >= nativeMatchThreshold) {
+      return { effectiveMode: "native", probeMatchRate: meanMatchRate, probePlan: tagPlan };
+    }
+    return {
+      effectiveMode: "raster",
+      autoFallbackReason: `Match rate ${meanMatchRate.toFixed(3)} below threshold ${nativeMatchThreshold}`,
+      probeMatchRate: meanMatchRate
+    };
+  } catch (error) {
+    return {
+      effectiveMode: "raster",
+      autoFallbackReason: `Native probe failed: ${error.message}`
+    };
+  }
+}
+
+export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, redactionsPath, outputPath, mode = DEFAULT_MODE, nativeMatchThreshold = DEFAULT_NATIVE_MATCH_THRESHOLD }) {
   if (!pdfPath || !tagsPath || !outputPath) {
     throw new Error(
-      "Usage: node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> [--semantic <semantic.ordered.json>] [--redactions <redaction-plan.json>] [--fonts <fonts.json>] [--font-cache <dir>] --output <tagged.pdf>"
+      "Usage: node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> [--semantic <semantic.ordered.json>] [--redactions <redaction-plan.json>] --output <tagged.pdf>"
     );
   }
 
@@ -385,7 +626,69 @@ export async function writeTaggedArtifacts({
 
   const title = deriveTitle(taggingDocument, semanticDocument, pdfPath);
   const language = deriveDocumentLanguage(semanticDocument);
-  const resolvedFontsPath = resolveFontsPath({ fontsPath, taggingDocument, tagsPath });
+
+  // --- Mode resolution ---
+  const modeDecision = await resolveWriterMode({
+    mode,
+    nativeMatchThreshold,
+    pdfPath,
+    tagsPath,
+    semanticPath,
+    outputPath
+  });
+
+  // --- Native flow ---
+  if (modeDecision.effectiveMode === "native") {
+    const nativeReport = await runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath });
+
+    const manifest = {
+      schemaVersion: "1.0.0",
+      writerMode: "native",
+      nativeTaggingApplied: true,
+      sourcePdf: path.resolve(pdfPath),
+      outputPdf: path.resolve(outputPath),
+      tagging: taggingDocument,
+      semanticSource: path.resolve(semanticPath),
+      summary: {
+        writerMode: "native",
+        operatorCount: nativeReport.operatorCount,
+        matchedOperators: nativeReport.matchedOperators,
+        matchRate: nativeReport.matchRate,
+        nativeViable: nativeReport.nativeViable,
+        pagesNative: nativeReport.pagesNative,
+        pagesRaster: nativeReport.pagesRaster,
+        structureElementCount: nativeReport.structureElementCount,
+        markedContentCount: nativeReport.markedContentCount,
+        language,
+        autoFallbackReason: modeDecision.autoFallbackReason || null,
+        requestedMode: mode
+      }
+    };
+
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+    return {
+      status: "completed",
+      writerMode: "native",
+      outputPath: path.resolve(outputPath),
+      manifestPath: path.resolve(manifestPath),
+      nativeTaggingApplied: true,
+      language,
+      tagNodeCount: countTagNodes(taggingDocument.root),
+      operatorCount: nativeReport.operatorCount,
+      matchedOperators: nativeReport.matchedOperators,
+      matchRate: nativeReport.matchRate,
+      nativeViable: nativeReport.nativeViable,
+      pagesNative: nativeReport.pagesNative,
+      pagesRaster: nativeReport.pagesRaster,
+      structureElementCount: nativeReport.structureElementCount,
+      markedContentCount: nativeReport.markedContentCount,
+      title,
+      requestedMode: mode
+    };
+  }
+
+  // --- Raster flow (default / fallback) ---
   const { instructionPath, records } = await buildInstructionFile({ outputPath, taggingDocument, semanticDocument });
   const redactions = redactionsPath
     ? await buildRedactionInstructionFile({ outputPath, redactionsPath })
@@ -396,9 +699,7 @@ export async function writeTaggedArtifacts({
     instructionPath: path.resolve(instructionPath),
     redactionInstructionPath: redactions?.instructionPath ? path.resolve(redactions.instructionPath) : null,
     title,
-    language,
-    fontsPath: resolvedFontsPath,
-    fontCacheDir: fontCacheDir ? path.resolve(fontCacheDir) : null
+    language
   });
 
   const manifest = {
@@ -412,6 +713,7 @@ export async function writeTaggedArtifacts({
     tagging: taggingDocument,
     semanticSource: path.resolve(semanticPath),
     summary: {
+      writerMode: "raster",
       instructionRecordCount: records.length,
       structureElementCount: javaReport.structureElementCount,
       markedContentCount: javaReport.markedContentCount,
@@ -420,16 +722,16 @@ export async function writeTaggedArtifacts({
       redactionCount: javaReport.redactionCount || 0,
       accessibilityTreeRedacted: Boolean(redactions?.redactionPlan?.matches?.length),
       language,
-      fontInventoryApplied: Boolean(resolvedFontsPath),
-      fontInventoryPath: resolvedFontsPath || null
-    },
-    fonts: Array.isArray(javaReport.fonts) ? javaReport.fonts : []
+      autoFallbackReason: modeDecision.autoFallbackReason || null,
+      requestedMode: mode
+    }
   };
 
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
   return {
     status: "completed",
+    writerMode: "raster",
     outputPath: path.resolve(outputPath),
     manifestPath: path.resolve(manifestPath),
     nativeTaggingApplied: javaReport.nativeTaggingApplied,
@@ -441,8 +743,8 @@ export async function writeTaggedArtifacts({
     redactionCount: javaReport.redactionCount || 0,
     metadataApplied: javaReport.metadataApplied,
     title,
-    fonts: Array.isArray(javaReport.fonts) ? javaReport.fonts : [],
-    fontInventoryApplied: Boolean(resolvedFontsPath)
+    requestedMode: mode,
+    autoFallbackReason: modeDecision.autoFallbackReason || null
   };
 }
 
@@ -451,9 +753,6 @@ async function main() {
   const result = await writeTaggedArtifacts(options);
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
-
-// Exported for unit tests that want to drive arg parsing in isolation.
-export { parseArgs, resolveFontsPath };
 
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 

@@ -108,6 +108,12 @@
         "semanticRedacted": {
           "type": "string"
         },
+        "semanticMerged": {
+          "type": "string"
+        },
+        "paragraphMergeReport": {
+          "type": "string"
+        },
         "semanticOrdered": {
           "type": "string"
         },

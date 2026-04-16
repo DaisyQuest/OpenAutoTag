@@ -45,7 +45,9 @@ const state = {
   batch: null,
   selectedJobId: null,
   selectedWorkloadId: "accessibility-tagging",
+  selectedProfileId: "default",
   workloads: [...fallbackWorkloads],
+  profiles: [],
   previewSelectionByJob: Object.create(null),
   previewCache: new Map(),
   pollHandle: null,
@@ -79,6 +81,12 @@ const batchCaption = document.querySelector("#batch-caption");
 const batchOverview = document.querySelector("#batch-overview");
 const resultsBody = document.querySelector("#results-body");
 const detailPanel = document.querySelector("#detail-panel");
+const profileSelect = document.querySelector("#profile-select");
+const profileCaption = document.querySelector("#profile-caption");
+const profileDescription = document.querySelector("#profile-description");
+const profileAdvancedToggle = document.querySelector("#profile-advanced-toggle");
+const profileAdvancedPanel = document.querySelector("#profile-advanced-panel");
+const profileOverridesTextarea = document.querySelector("#profile-overrides");
 
 function hasWorkspaceAccess() {
   return Boolean(state.authConfig?.publicMode || getSessionAccess().api);
@@ -513,13 +521,41 @@ function renderOutcomeCell(item) {
   `;
 }
 
+function renderNativeBadge(item, { prominent = false } = {}) {
+  const writerMode = item.summary?.writerMode || item.writerReport?.writerMode;
+  if (!writerMode) return "";
+  const cls = prominent ? "native-retained-prominent" : "";
+
+  if (writerMode === "native") {
+    const matchRate = item.summary?.operatorMatchRate ?? item.writerReport?.matchRate;
+    const matchDetail = matchRate != null ? `<span class="native-match-detail">${Math.round(matchRate * 100)}% fidelity</span>` : "";
+    return `<span class="native-badge native-retained ${cls}" title="Original vector text, fonts, and links preserved. No rasterization. Text stays sharp at any zoom."><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED ${matchDetail}</span>`;
+  }
+  if (writerMode === "raster") {
+    return `<span class="native-badge native-raster" title="Pages rasterized to images with invisible text overlay.">RASTER</span>`;
+  }
+  if (writerMode === "auto") {
+    const pagesNative = item.summary?.pagesNative ?? item.writerReport?.pagesNative ?? 0;
+    const pagesRaster = item.summary?.pagesRaster ?? item.writerReport?.pagesRaster ?? 0;
+    if (pagesNative > 0 && pagesRaster === 0) {
+      return `<span class="native-badge native-retained ${cls}" title="All ${pagesNative} pages preserved natively. Vector text, fonts, and links intact."><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED</span>`;
+    }
+    if (pagesNative > 0) {
+      return `<span class="native-badge native-partial" title="${pagesNative} pages native, ${pagesRaster} pages rasterized."><span class="native-badge-icon">\u{26A0}\uFE0F</span> ${pagesNative}/${pagesNative + pagesRaster} NATIVE</span>`;
+    }
+    return `<span class="native-badge native-raster" title="Auto mode fell back to raster on all pages.">RASTER FALLBACK</span>`;
+  }
+  return "";
+}
+
 function renderSignalCell(item) {
   const signals = normalizeSignalList(item.summary);
-  if (!signals.length) {
+  const badge = renderNativeBadge(item);
+  if (!signals.length && !badge) {
     return `<span class="table-note">No signals yet.</span>`;
   }
 
-  return `<div class="finding-list compact-list">${signals
+  return `${badge}<div class="finding-list compact-list">${signals
     .map((signal) => `<span class="finding-chip">${escapeHtml(signal)}</span>`)
     .join("")}</div>`;
 }
@@ -574,6 +610,7 @@ function renderResultsTable() {
             <button class="row-select" type="button" data-job-id="${escapeHtml(item.jobId)}">
               <strong class="table-primary">${escapeHtml(item.fileName)}</strong>
               <span class="table-note">${escapeHtml(item.relativePath || item.fileName)}</span>
+              ${renderNativeBadge(item, { prominent: true }) ? `<div class="native-badge-row">${renderNativeBadge(item, { prominent: true })}</div>` : ""}
             </button>
           </td>
           <td>
@@ -658,6 +695,7 @@ function renderDetailPanel() {
   }
 
   const signals = normalizeSignalList(item.summary);
+  const nativeBadge = renderNativeBadge(item);
   const cards = [
     {
       label: "Outcome",
@@ -766,6 +804,7 @@ function renderDetailPanel() {
         <h4>Signals</h4>
         <span>${escapeHtml(String(signals.length))} visible</span>
       </div>
+      ${nativeBadge ? `<div class="native-badge-section">${nativeBadge}</div>` : ""}
       ${
         signals.length
           ? `<div class="finding-list">${signals.map((signal) => `<span class="finding-chip">${escapeHtml(signal)}</span>`).join("")}</div>`
@@ -1084,6 +1123,10 @@ async function startBatch() {
   try {
     const formData = new FormData();
     formData.append("workloadId", state.selectedWorkloadId);
+    formData.append("profileId", state.selectedProfileId || "default");
+    if (profileOverridesTextarea && profileOverridesTextarea.value.trim()) {
+      formData.append("profileOverrides", profileOverridesTextarea.value.trim());
+    }
 
     for (const item of state.selections) {
       formData.append("files", item.file);
@@ -1141,7 +1184,11 @@ async function startUrlJob() {
       },
       body: JSON.stringify({
         fileUrl,
-        workloadId: state.selectedWorkloadId
+        workloadId: state.selectedWorkloadId,
+        profileId: state.selectedProfileId || "default",
+        ...(profileOverridesTextarea && profileOverridesTextarea.value.trim()
+          ? { profileOverrides: JSON.parse(profileOverridesTextarea.value.trim()) }
+          : {})
       })
     });
     const job = await response.json();
@@ -1191,13 +1238,60 @@ async function loadWorkloads() {
   render();
 }
 
+function renderProfileDropdown() {
+  if (!profileSelect) return;
+
+  profileSelect.innerHTML = "";
+  for (const profile of state.profiles) {
+    const option = document.createElement("option");
+    option.value = profile.profileId;
+    option.textContent = profile.label;
+    if (profile.profileId === state.selectedProfileId) {
+      option.selected = true;
+    }
+    profileSelect.appendChild(option);
+  }
+
+  const selected = state.profiles.find((p) => p.profileId === state.selectedProfileId);
+  if (profileDescription) {
+    profileDescription.textContent = selected?.description || "";
+  }
+  if (profileCaption) {
+    profileCaption.textContent = state.profiles.length
+      ? `${state.profiles.length} profile${state.profiles.length === 1 ? "" : "s"} available`
+      : "No profiles loaded";
+  }
+}
+
+async function loadProfiles() {
+  if (!hasWorkspaceAccess()) {
+    state.profiles = [];
+    renderProfileDropdown();
+    return;
+  }
+
+  try {
+    const payload = await fetchJson("/profiles", { auth: "api" });
+    if (Array.isArray(payload.profiles) && payload.profiles.length) {
+      state.profiles = payload.profiles;
+      if (!state.profiles.some((p) => p.profileId === state.selectedProfileId)) {
+        state.selectedProfileId = state.profiles[0]?.profileId || "default";
+      }
+    }
+  } catch {
+    state.profiles = [];
+  }
+
+  renderProfileDropdown();
+}
+
 async function initializeAccess() {
   state.authConfig = await loadAuthConfig();
 
   if (state.authConfig.publicMode) {
     setAuthMessage("Public mode is enabled. Protected headers are not required in this tab.");
     render();
-    await loadWorkloads();
+    await Promise.all([loadWorkloads(), loadProfiles()]);
     return;
   }
 
@@ -1213,7 +1307,7 @@ async function initializeAccess() {
   render();
 
   if (hasWorkspaceAccess()) {
-    await loadWorkloads();
+    await Promise.all([loadWorkloads(), loadProfiles()]);
   }
 }
 
@@ -1232,7 +1326,7 @@ async function unlockWorkspace(event) {
     authKeyInput.value = "";
     setAuthMessage(payload.access?.admin ? "Admin access is active in this tab." : "API access is active in this tab.");
     render();
-    await loadWorkloads();
+    await Promise.all([loadWorkloads(), loadProfiles()]);
   } catch (error) {
     setAuthMessage(error.message);
     render();
@@ -1331,7 +1425,7 @@ clearSessionButton.addEventListener("click", async () => {
   state.previewCache.clear();
   setAuthMessage("Session keys cleared from this tab.");
   render();
-  await loadWorkloads();
+  await Promise.all([loadWorkloads(), loadProfiles()]);
 });
 
 dropzone.addEventListener("click", () => {
@@ -1406,6 +1500,24 @@ urlInput.addEventListener("keydown", (event) => {
     void startUrlJob();
   }
 });
+
+if (profileSelect) {
+  profileSelect.addEventListener("change", () => {
+    state.selectedProfileId = profileSelect.value;
+    const selected = state.profiles.find((p) => p.profileId === state.selectedProfileId);
+    if (profileDescription) {
+      profileDescription.textContent = selected?.description || "";
+    }
+  });
+}
+
+if (profileAdvancedToggle && profileAdvancedPanel) {
+  profileAdvancedToggle.addEventListener("click", () => {
+    const isHidden = profileAdvancedPanel.hidden;
+    profileAdvancedPanel.hidden = !isHidden;
+    profileAdvancedToggle.textContent = isHidden ? "Hide Advanced" : "Advanced";
+  });
+}
 
 updateSelectionState();
 void initializeAccess();

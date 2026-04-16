@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "scientific",
+  "label": "Scientific Papers",
+  "description": "For academic papers with two-column layouts, equations, theorem blocks, and reference sections. Wider column gap detection to handle narrow gutters in journal formats. Extended heading hierarchy (H1-H4) for section/subsection depth.",
+  "extends": "default",
+  "tags": ["scientific", "academic", "two-column"],
+  "layoutAnalyzer": {
+    "columnGapThresholdPercent": 0.10,
+    "columnGapMinPixels": 32,
+    "headingScoreThreshold": 1.4,
+    "headingH1Threshold": 1.8,
+    "headingH2Threshold": 1.4
+  },
+  "readingOrder": {
+    "columnBandThresholdPercent": 0.12,
+    "columnBandMinPixels": 40
+  },
+  "paragraphMerger": {
+    "strategy": "text-structure"
+  },
+  "tagBuilder": {
+    "headingLevelClampMax": 4
+  }
+}

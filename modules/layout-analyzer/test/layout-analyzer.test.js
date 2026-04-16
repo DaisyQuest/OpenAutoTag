@@ -330,3 +330,144 @@ test("layout analyzer records ordered list metadata", async () => {
   assert.equal(paragraph.blockType, "paragraph");
   assert.equal(output.pages[0].structureSignals.orderedListItemCount, 2);
 });
+
+test("borderless table detection: 3 rows of 3 aligned columns with tight spacing detected via borderless path", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-borderless-test-"));
+  const inputPath = path.join(tempDir, "layout-borderless.json");
+
+  // Use tight column spacing (gaps < 14px) so text-grid buildCandidateRows rejects
+  // these rows (its gap filter requires gap >= max(14, fontSize*0.8) = 14).
+  // Borderless detector has no such gap filter.
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:borderless-sample",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [
+        {
+          pageNumber: 1,
+          width: 612,
+          height: 792,
+          textBlocks: [
+            { id: "r1c1", text: "Name", bbox: [72, 100, 115, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "r1c2", text: "Department", bbox: [192, 100, 115, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "r1c3", text: "Salary", bbox: [312, 100, 80, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "r2c1", text: "Alice", bbox: [72, 120, 115, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "r2c2", text: "Engineering", bbox: [192, 120, 115, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "r2c3", text: "$95,000", bbox: [312, 120, 80, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "r3c1", text: "Bob", bbox: [72, 140, 115, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "r3c2", text: "Marketing", bbox: [192, 140, 115, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "r3c3", text: "$78,000", bbox: [312, 140, 80, 12], fontSize: 12, fontName: "Helvetica" }
+          ]
+        }
+      ]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+
+  assert.equal(page.structureSignals.tableDetected, true);
+  assert.equal(page.structureSignals.borderlessTableCount >= 1, true, `Expected borderless table count >= 1, got ${page.structureSignals.borderlessTableCount}`);
+
+  const tableCells = page.textBlocks.filter((block) => block.blockType === "table-cell");
+  assert.equal(tableCells.length >= 6, true, `Expected at least 6 table cells, got ${tableCells.length}`);
+
+  // Verify detection method is borderless-alignment
+  const borderlessCells = tableCells.filter((block) => block.tableDetectionMethod === "borderless-alignment");
+  assert.equal(borderlessCells.length >= 6, true, `Expected borderless-alignment cells, got ${borderlessCells.length}`);
+});
+
+test("borderless table detection: correct tableRowIndex and tableColumnIndex assignment for 2 rows x 3 columns", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-borderless-idx-test-"));
+  const inputPath = path.join(tempDir, "layout-borderless-idx.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:borderless-idx-sample",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [
+        {
+          pageNumber: 1,
+          width: 612,
+          height: 792,
+          textBlocks: [
+            { id: "h1", text: "Item", bbox: [72, 100, 80, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "h2", text: "Quantity", bbox: [200, 100, 70, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "h3", text: "Price", bbox: [350, 100, 50, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "d1", text: "Widget", bbox: [72, 120, 70, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "d2", text: "50", bbox: [200, 120, 30, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "d3", text: "$12.99", bbox: [350, 120, 55, 12], fontSize: 12, fontName: "Helvetica" }
+          ]
+        }
+      ]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((block) => [block.id, block]));
+
+  // Header row
+  assert.equal(blockById.get("h1").tableRowIndex, 0);
+  assert.equal(blockById.get("h1").tableColumnIndex, 0);
+  assert.equal(blockById.get("h2").tableRowIndex, 0);
+  assert.equal(blockById.get("h2").tableColumnIndex, 1);
+  assert.equal(blockById.get("h3").tableRowIndex, 0);
+  assert.equal(blockById.get("h3").tableColumnIndex, 2);
+
+  // Data row
+  assert.equal(blockById.get("d1").tableRowIndex, 1);
+  assert.equal(blockById.get("d1").tableColumnIndex, 0);
+  assert.equal(blockById.get("d2").tableRowIndex, 1);
+  assert.equal(blockById.get("d2").tableColumnIndex, 1);
+  assert.equal(blockById.get("d3").tableRowIndex, 1);
+  assert.equal(blockById.get("d3").tableColumnIndex, 2);
+});
+
+test("borderless table detection: single data row with header above is detected as 2-row table", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-borderless-header-test-"));
+  const inputPath = path.join(tempDir, "layout-borderless-header.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:borderless-header-sample",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [
+        {
+          pageNumber: 1,
+          width: 612,
+          height: 792,
+          textBlocks: [
+            { id: "h1", text: "Category", bbox: [72, 80, 80, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "h2", text: "Value", bbox: [250, 80, 50, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "h3", text: "Status", bbox: [400, 80, 50, 12], fontSize: 12, fontName: "Helvetica-Bold" },
+            { id: "d1", text: "Revenue", bbox: [72, 100, 70, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "d2", text: "$1.2M", bbox: [250, 100, 50, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "d3", text: "Active", bbox: [400, 100, 50, 12], fontSize: 12, fontName: "Helvetica" }
+          ]
+        }
+      ]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+
+  assert.equal(page.structureSignals.tableDetected, true);
+
+  const tableCells = page.textBlocks.filter((block) => block.blockType === "table-cell");
+  assert.equal(tableCells.length, 6, `Expected 6 table cells (header + 1 data row), got ${tableCells.length}`);
+
+  const blockById = new Map(page.textBlocks.map((block) => [block.id, block]));
+  assert.equal(blockById.get("h1").tableRole, "header");
+  assert.equal(blockById.get("h1").tableSection, "head");
+  assert.equal(blockById.get("d1").tableRole, "cell");
+  assert.equal(blockById.get("d1").tableSection, "body");
+  assert.equal(blockById.get("d1").tableRowIndex, 1);
+});

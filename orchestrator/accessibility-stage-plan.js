@@ -1,5 +1,7 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { copyFile, readFile, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
+import { injectProfileEnv } from "./profile-runtime.js";
 import { runJsonStage } from "./workload-runner.js";
 
 function sortSemanticNodesForReadingOrder(semanticDocument) {
@@ -34,14 +36,16 @@ async function fallbackReadingOrder(inputPath, outputPath, reason) {
   };
 }
 
-export function createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts }) {
+export function createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext }) {
+  const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+
   return [
     {
       key: "layout",
       label: "parser",
       outputPath: path.join(resolvedOutputDir, "01-layout.json"),
       run: async () => ({
-        outputPath: await runJsonStage("modules/parser/index.js", [filePath], path.join(resolvedOutputDir, "01-layout.json")),
+        outputPath: await runJsonStage("modules/parser/index.js", [filePath], path.join(resolvedOutputDir, "01-layout.json"), { env: profileEnv }),
         artifacts: { layout: path.join(resolvedOutputDir, "01-layout.json") }
       })
     },
@@ -129,7 +133,8 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
         outputPath: await runJsonStage(
           "modules/layout-analyzer/index.js",
           [artifacts.layout, "--table-structure", artifacts.tableStructureMap],
-          path.join(resolvedOutputDir, "02-layout-enriched.json")
+          path.join(resolvedOutputDir, "02-layout-enriched.json"),
+          { env: profileEnv }
         ),
         artifacts: { layoutEnriched: path.join(resolvedOutputDir, "02-layout-enriched.json") }
       })
@@ -139,9 +144,67 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
       label: "semantic-engine",
       outputPath: path.join(resolvedOutputDir, "03-semantic.json"),
       run: async () => ({
-        outputPath: await runJsonStage("modules/semantic-engine/index.js", [artifacts.layoutEnriched], path.join(resolvedOutputDir, "03-semantic.json")),
+        outputPath: await runJsonStage("modules/semantic-engine/index.js", [artifacts.layoutEnriched], path.join(resolvedOutputDir, "03-semantic.json"), { env: profileEnv }),
         artifacts: { semantic: path.join(resolvedOutputDir, "03-semantic.json") }
       })
+    },
+    {
+      key: "paragraphMerger",
+      label: "paragraph-merger",
+      outputPath: path.join(resolvedOutputDir, "03b-semantic-merged.json"),
+      run: async () => {
+        const mergedPath = path.join(resolvedOutputDir, "03b-semantic-merged.json");
+        const reportPath = path.join(resolvedOutputDir, "03c-paragraph-merge-report.json");
+
+        const mergerConfig = profileContext ? profileContext.get("paragraphMerger") : {};
+        const enabled = mergerConfig.enabled !== false;
+
+        if (!enabled) {
+          await copyFile(artifacts.semantic, mergedPath);
+          return {
+            outputPath: mergedPath,
+            artifacts: { semanticMerged: mergedPath }
+          };
+        }
+
+        try {
+          const configPath = path.join(os.tmpdir(), `paragraph-merger-config-${process.pid}-${Date.now()}.json`);
+          const configWithStrategy = { ...mergerConfig };
+          if (mergerConfig.strategy) {
+            configWithStrategy.strategy = mergerConfig.strategy;
+          }
+          await writeFile(configPath, JSON.stringify(configWithStrategy));
+
+          // Don't pass mergedPath as positional arg — execNodeToFile captures
+          // stdout to the output file. Passing it as a positional would cause the
+          // CLI to write the file AND execNodeToFile to overwrite it with stdout.
+          // Report path is the only file the CLI writes directly.
+          const cliArgs = [artifacts.semantic, "--config", configPath, "--report", reportPath];
+          if (mergerConfig.strategy) {
+            cliArgs.push("--strategy", mergerConfig.strategy);
+          }
+
+          await runJsonStage(
+            "modules/paragraph-merger/index.js",
+            cliArgs,
+            mergedPath
+          );
+
+          return {
+            outputPath: mergedPath,
+            artifacts: { semanticMerged: mergedPath, paragraphMergeReport: reportPath }
+          };
+        } catch (error) {
+          process.stderr.write(`[paragraph-merger] stage failed, falling back to unmerged semantic: ${error.message}\n`);
+          await copyFile(artifacts.semantic, mergedPath);
+          return {
+            outputPath: mergedPath,
+            artifacts: { semanticMerged: mergedPath },
+            fallbackUsed: true,
+            fallbackReason: error.message
+          };
+        }
+      }
     },
     {
       key: "readingOrder",
@@ -149,15 +212,16 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
       outputPath: path.join(resolvedOutputDir, "04-semantic-ordered.json"),
       run: async () => {
         const outputPath = path.join(resolvedOutputDir, "04-semantic-ordered.json");
+        const inputPath = artifacts.semanticMerged || artifacts.semantic;
 
         try {
-          const stageOutputPath = await runJsonStage("modules/reading-order/index.js", [artifacts.semantic], outputPath);
+          const stageOutputPath = await runJsonStage("modules/reading-order/index.js", [inputPath], outputPath);
           return {
             outputPath: stageOutputPath,
             artifacts: { semanticOrdered: stageOutputPath }
           };
         } catch (error) {
-          const fallback = await fallbackReadingOrder(artifacts.semantic, outputPath, error.message);
+          const fallback = await fallbackReadingOrder(inputPath, outputPath, error.message);
           return {
             outputPath: fallback.outputPath,
             artifacts: { semanticOrdered: fallback.outputPath },
@@ -170,16 +234,35 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
   ];
 }
 
+function buildWriterModeArgs(profileContext) {
+  const args = [];
+  if (!profileContext) {
+    return args;
+  }
+  const writerConfig = profileContext.get("pdfWriter");
+  if (writerConfig.mode) {
+    args.push("--mode", writerConfig.mode);
+  }
+  if (writerConfig.nativeMatchThreshold != null) {
+    args.push("--native-match-threshold", String(writerConfig.nativeMatchThreshold));
+  }
+  return args;
+}
+
 export function createTaggingOutputStages({
   filePath,
   resolvedOutputDir,
   artifacts,
+  profileContext,
   semanticArtifactKey = "semanticOrdered",
   taggedPdfFileName = "06-tagged.pdf",
   validationReportFileName = "07-validation-report.json",
   includeValidator = true,
   writerArgs = () => []
 }) {
+  const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+  const modeArgs = buildWriterModeArgs(profileContext);
+
   const stages = [
     {
       key: "tagBuilder",
@@ -189,46 +272,11 @@ export function createTaggingOutputStages({
         outputPath: await runJsonStage(
           "modules/tag-builder/index.js",
           [artifacts[semanticArtifactKey]],
-          path.join(resolvedOutputDir, "05-tagging.json")
+          path.join(resolvedOutputDir, "05-tagging.json"),
+          { env: profileEnv }
         ),
         artifacts: { tagging: path.join(resolvedOutputDir, "05-tagging.json") }
       })
-    },
-    {
-      key: "fontEmbedder",
-      label: "font-embedder",
-      outputPath: path.join(resolvedOutputDir, "05b-font-inventory.json"),
-      run: async () => {
-        const fontsPath = path.join(resolvedOutputDir, "05b-font-inventory.json");
-        try {
-          const outputPath = await runJsonStage(
-            "modules/font-embedder/index.js",
-            ["--pdf", filePath, "--tags", artifacts.tagging, "--output", fontsPath],
-            fontsPath
-          );
-          return {
-            outputPath,
-            artifacts: { fontInventory: outputPath }
-          };
-        } catch (error) {
-          const fallback = {
-            schemaVersion: "1.0.0",
-            documentId: path.basename(filePath),
-            source: { pdfPath: path.resolve(filePath), tagsPath: artifacts.tagging },
-            fonts: [],
-            summary: { totalFonts: 0, embeddedFonts: 0, remediated: 0, blockers: [] },
-            diagnosticUnavailable: true,
-            diagnosticError: error.message
-          };
-          await writeFile(fontsPath, `${JSON.stringify(fallback, null, 2)}\n`);
-          return {
-            outputPath: path.resolve(fontsPath),
-            artifacts: { fontInventory: path.resolve(fontsPath) },
-            diagnosticUnavailable: true,
-            diagnosticError: error.message
-          };
-        }
-      }
     },
     {
       key: "pdfWriter",
@@ -238,11 +286,11 @@ export function createTaggingOutputStages({
         const taggedPdf = path.join(resolvedOutputDir, taggedPdfFileName);
         const writerReportPath = path.join(resolvedOutputDir, "06-writer-report.json");
         const extraArgs = writerArgs({ artifacts, resolvedOutputDir }) || [];
-        const fontsArgs = artifacts.fontInventory ? ["--fonts", artifacts.fontInventory] : [];
         const writerReport = await runJsonStage(
           "modules/pdf-writer/index.js",
-          ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...fontsArgs, ...extraArgs],
-          writerReportPath
+          ["--pdf", filePath, "--tags", artifacts.tagging, "--semantic", artifacts[semanticArtifactKey], "--output", taggedPdf, ...modeArgs, ...extraArgs],
+          writerReportPath,
+          { env: profileEnv }
         );
         return {
           outputPath: taggedPdf,
@@ -281,7 +329,8 @@ export function createTaggingOutputStages({
         outputPath: await runJsonStage(
           "modules/validator/index.js",
           ["--pdf", artifacts.taggedPdf, "--manifest", artifacts.tagManifest],
-          path.join(resolvedOutputDir, validationReportFileName)
+          path.join(resolvedOutputDir, validationReportFileName),
+          { env: profileEnv }
         ),
         artifacts: { validationReport: path.join(resolvedOutputDir, validationReportFileName) }
       })

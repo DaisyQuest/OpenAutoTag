@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Accessibility Engine — Installer Builder</title>
+  <link rel="stylesheet" href="wizard.css">
+</head>
+<body class="wiz-body">
+  <div class="wiz-container">
+
+    <!-- ═══════════════════ Step Indicator ═══════════════════ -->
+    <nav class="wiz-steps" aria-label="Wizard steps">
+      <div class="wiz-step-item active">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">1</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Welcome</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">2</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Platforms</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">3</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Components</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">4</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Java</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">5</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Branding</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">6</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Advanced</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">7</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Review</span>
+        </div>
+      </div>
+      <div class="wiz-step-line"></div>
+      <div class="wiz-step-item">
+        <div class="wiz-step-circle">
+          <span class="wiz-step-num">8</span>
+          <span class="wiz-check">&#10003;</span>
+          <span class="wiz-step-label">Build</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══════════════════ Step Panels ═══════════════════ -->
+    <div class="wiz-body-area">
+
+      <!-- ─── Step 1: Welcome ─── -->
+      <section class="wiz-step-panel visible" id="wizStep1">
+        <div class="wiz-hero">
+          <h1>Let's build your installer</h1>
+          <p>Configure every detail of your PDF Accessibility Engine installer in a few steps.</p>
+        </div>
+
+        <div class="wiz-field">
+          <label for="wizProductName">Product Name</label>
+          <input type="text" id="wizProductName" class="wiz-input" value="PDF Accessibility Engine">
+          <div class="wiz-error-msg"></div>
+        </div>
+
+        <div class="wiz-row">
+          <div class="wiz-field">
+            <label for="wizVersion">Version</label>
+            <input type="text" id="wizVersion" class="wiz-input" value="0.1.0" readonly>
+            <span id="wizVersionValue" style="display:none">0.1.0</span>
+            <div class="wiz-hint">Read from package.json</div>
+          </div>
+          <div class="wiz-field">
+            <!-- spacer for layout -->
+          </div>
+        </div>
+
+        <div class="wiz-field">
+          <label for="wizDescription">Description</label>
+          <textarea id="wizDescription" class="wiz-textarea" rows="3">Contract-first scaffold for a parallel PDF accessibility tagging pipeline.</textarea>
+          <div class="wiz-error-msg"></div>
+        </div>
+      </section>
+
+      <!-- ─── Step 2: Platforms ─── -->
+      <section class="wiz-step-panel" id="wizStep2">
+        <h2 class="wiz-section-title">Target Platforms</h2>
+        <p class="wiz-section-desc">Select one or more platforms and architectures for your installer.</p>
+
+        <div class="wiz-check-group" style="margin-bottom:1.5rem">
+          <label class="wiz-card-option selected">
+            <input type="checkbox" class="wiz-platform-cb" id="wizPlatWindows" checked>
+            <span class="wiz-option-icon">&#128187;</span>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Windows</div>
+              <div class="wiz-option-desc">NSIS installer (.exe)</div>
+            </div>
+            <span class="wiz-option-size">~85 MB</span>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="checkbox" class="wiz-platform-cb" id="wizPlatMacos">
+            <span class="wiz-option-icon">&#127822;</span>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">macOS</div>
+              <div class="wiz-option-desc">Disk image (.dmg)</div>
+            </div>
+            <span class="wiz-option-size">~92 MB</span>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="checkbox" class="wiz-platform-cb" id="wizPlatLinux">
+            <span class="wiz-option-icon">&#128039;</span>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Linux</div>
+              <div class="wiz-option-desc">AppImage &amp; .deb package</div>
+            </div>
+            <span class="wiz-option-size">~78 MB</span>
+          </label>
+        </div>
+        <div class="wiz-error-msg" id="wizPlatformError">Please select at least one platform.</div>
+
+        <h2 class="wiz-section-title">Architecture</h2>
+        <div class="wiz-check-group">
+          <label class="wiz-card-option selected">
+            <input type="checkbox" class="wiz-arch-cb" id="wizArchX64" checked>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">x64 (Intel / AMD)</div>
+              <div class="wiz-option-desc">Standard 64-bit architecture</div>
+            </div>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="checkbox" class="wiz-arch-cb" id="wizArchArm64">
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">arm64 (Apple Silicon / ARM)</div>
+              <div class="wiz-option-desc">ARM-based processors (M1/M2/M3, Snapdragon)</div>
+            </div>
+          </label>
+        </div>
+        <div class="wiz-error-msg" id="wizArchError">Please select at least one architecture.</div>
+      </section>
+
+      <!-- ─── Step 3: Components ─── -->
+      <section class="wiz-step-panel" id="wizStep3">
+        <h2 class="wiz-section-title">Workload Components</h2>
+        <p class="wiz-section-desc">Choose which processing capabilities to include in the installer.</p>
+
+        <div class="wiz-check-group">
+          <label class="wiz-card-option selected disabled">
+            <input type="checkbox" id="wizCompTagging" checked disabled>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Accessibility Tagging <span class="wiz-tag">Core</span></div>
+              <div class="wiz-option-desc">PDF/UA structure tagging, heading detection, reading order, alt-text support</div>
+            </div>
+            <span class="wiz-option-size">+0 MB (included)</span>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="checkbox" id="wizCompSsn">
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">SSN Redaction</div>
+              <div class="wiz-option-desc">Detect and redact Social Security Numbers with pattern matching</div>
+            </div>
+            <span class="wiz-option-size">+2.1 MB</span>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="checkbox" id="wizCompRepair">
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">PDF Corruption Repair</div>
+              <div class="wiz-option-desc">Detect and fix broken cross-references, stream errors, and structural issues</div>
+            </div>
+            <span class="wiz-option-size">+4.8 MB</span>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="checkbox" id="wizCompFont">
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Font Health Analysis</div>
+              <div class="wiz-option-desc">Validate embedded fonts, detect encoding issues, check glyph coverage</div>
+            </div>
+            <span class="wiz-option-size">+3.4 MB</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ─── Step 4: Java Runtime ─── -->
+      <section class="wiz-step-panel" id="wizStep4">
+        <h2 class="wiz-section-title">Java Runtime</h2>
+
+        <div class="wiz-info-box">
+          <span class="wiz-info-icon">&#9432;</span>
+          <div>Java 21 is required for PDF processing (PDFBox, font repair, validation). Bundling a JRE ensures the engine works out-of-the-box on any machine.</div>
+        </div>
+
+        <div class="wiz-check-group" style="margin-bottom:1.25rem">
+          <label class="wiz-card-option selected">
+            <input type="radio" name="wizJavaBundle" value="bundle" checked>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Bundle JRE 21</div>
+              <div class="wiz-option-desc">Include a private Java runtime — no user setup needed</div>
+            </div>
+            <span class="wiz-option-size">~120 MB</span>
+          </label>
+
+          <label class="wiz-card-option">
+            <input type="radio" name="wizJavaBundle" value="system">
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Require System Java</div>
+              <div class="wiz-option-desc">Users must install Java 21+ themselves — smaller installer</div>
+            </div>
+            <span class="wiz-option-size">+0 MB</span>
+          </label>
+        </div>
+
+        <div id="wizJavaSourceGroup">
+          <h3 style="font-size:.95rem; font-weight:600; margin-bottom:.75rem;">JRE Source</h3>
+          <div class="wiz-check-group" style="margin-bottom:1rem">
+            <label class="wiz-card-option selected">
+              <input type="radio" name="wizJavaSource" value="auto" checked>
+              <div class="wiz-option-body">
+                <div class="wiz-option-title">Auto-download</div>
+                <div class="wiz-option-desc">Download Adoptium JRE 21 during build (requires internet)</div>
+              </div>
+            </label>
+
+            <label class="wiz-card-option">
+              <input type="radio" name="wizJavaSource" value="local">
+              <div class="wiz-option-body">
+                <div class="wiz-option-title">Local JRE directory</div>
+                <div class="wiz-option-desc">Point to an already-downloaded JRE on disk</div>
+              </div>
+            </label>
+          </div>
+
+          <div id="wizJavaLocalGroup" style="display:none">
+            <div class="wiz-field">
+              <label for="wizJavaLocalPath">JRE Path</label>
+              <input type="text" id="wizJavaLocalPath" class="wiz-input" placeholder="/path/to/jre-21">
+              <div class="wiz-error-msg"></div>
+              <div class="wiz-hint">Directory containing bin/java (or bin\java.exe on Windows)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Step 5: Branding ─── -->
+      <section class="wiz-step-panel" id="wizStep5">
+        <h2 class="wiz-section-title">Branding</h2>
+        <p class="wiz-section-desc">Customize the look and feel of your installer.</p>
+
+        <div class="wiz-field">
+          <label>App Icon</label>
+          <div class="wiz-upload-area" id="wizIconUpload">
+            <div class="wiz-upload-icon">&#128193;</div>
+            <div class="wiz-upload-text">Click or drag an icon file here (.png, .ico, .icns)</div>
+            <input type="file" id="wizIconFile" accept=".png,.ico,.icns,.svg" style="display:none">
+          </div>
+          <img id="wizIconPreview" class="wiz-icon-preview" style="display:none" alt="Icon preview">
+        </div>
+
+        <div class="wiz-field">
+          <label for="wizSplashText">Splash Screen Text</label>
+          <input type="text" id="wizSplashText" class="wiz-input" value="Loading PDF Accessibility Engine...">
+        </div>
+
+        <div class="wiz-row">
+          <div class="wiz-field">
+            <label for="wizCompanyName">Company Name</label>
+            <input type="text" id="wizCompanyName" class="wiz-input" placeholder="Acme Corp">
+          </div>
+          <div class="wiz-field">
+            <label for="wizCopyright">Copyright</label>
+            <input type="text" id="wizCopyright" class="wiz-input" placeholder="Copyright 2026 Acme Corp">
+          </div>
+        </div>
+
+        <div class="wiz-field">
+          <label for="wizLicense">License Agreement (optional)</label>
+          <textarea id="wizLicense" class="wiz-textarea" rows="4" placeholder="Paste your EULA or license text here..."></textarea>
+        </div>
+
+        <div class="wiz-field">
+          <label>Installer Color Theme</label>
+          <div class="wiz-color-picker" id="wizColorPicker"></div>
+        </div>
+      </section>
+
+      <!-- ─── Step 6: Advanced ─── -->
+      <section class="wiz-step-panel" id="wizStep6">
+        <h2 class="wiz-section-title">Advanced Options</h2>
+
+        <div class="wiz-field">
+          <label for="wizAutoUpdateUrl">Auto-Update Server URL (optional)</label>
+          <input type="text" id="wizAutoUpdateUrl" class="wiz-input" placeholder="https://updates.example.com/releases">
+          <div class="wiz-hint">If set, the app will check this URL for updates on launch.</div>
+        </div>
+
+        <div class="wiz-field">
+          <label for="wizInstallPath">Default Install Path (optional)</label>
+          <input type="text" id="wizInstallPath" class="wiz-input" placeholder="C:\Program Files\PDF Accessibility Engine">
+          <div class="wiz-hint">Leave blank for platform default.</div>
+        </div>
+
+        <h3 style="font-size:.95rem; font-weight:600; margin:1.25rem 0 .75rem">Installer Behavior</h3>
+
+        <div class="wiz-check-group">
+          <label class="wiz-card-option selected">
+            <input type="checkbox" id="wizFileAssocPdf" checked>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Associate with .pdf files</div>
+              <div class="wiz-option-desc">Register as a handler for PDF documents</div>
+            </div>
+          </label>
+
+          <label class="wiz-card-option selected">
+            <input type="checkbox" id="wizDesktopShortcut" checked>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Create desktop shortcut</div>
+            </div>
+          </label>
+
+          <label class="wiz-card-option selected">
+            <input type="checkbox" id="wizStartMenu" checked>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Create Start Menu / Applications entry</div>
+            </div>
+          </label>
+
+          <label class="wiz-card-option selected">
+            <input type="checkbox" id="wizRunAfter" checked>
+            <div class="wiz-option-body">
+              <div class="wiz-option-title">Run application after install</div>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- ─── Step 7: Review ─── -->
+      <section class="wiz-step-panel" id="wizStep7">
+        <h2 class="wiz-section-title">Review Configuration</h2>
+        <p class="wiz-section-desc">Verify your settings before building. Click "Edit" on any card to go back.</p>
+
+        <div class="wiz-review-grid">
+          <div class="wiz-review-card">
+            <h3>Product <button class="wiz-edit-btn" onclick="InstallerWizard.goToStep(0)">Edit</button></h3>
+            <ul id="wizRevProduct"></ul>
+          </div>
+
+          <div class="wiz-review-card">
+            <h3>Platforms <button class="wiz-edit-btn" onclick="InstallerWizard.goToStep(1)">Edit</button></h3>
+            <ul id="wizRevPlatforms"></ul>
+          </div>
+
+          <div class="wiz-review-card">
+            <h3>Components <button class="wiz-edit-btn" onclick="InstallerWizard.goToStep(2)">Edit</button></h3>
+            <ul id="wizRevComponents"></ul>
+          </div>
+
+          <div class="wiz-review-card">
+            <h3>Java Runtime <button class="wiz-edit-btn" onclick="InstallerWizard.goToStep(3)">Edit</button></h3>
+            <ul id="wizRevJava"></ul>
+          </div>
+
+          <div class="wiz-review-card">
+            <h3>Branding <button class="wiz-edit-btn" onclick="InstallerWizard.goToStep(4)">Edit</button></h3>
+            <ul id="wizRevBranding"></ul>
+          </div>
+
+          <div class="wiz-review-card">
+            <h3>Advanced <button class="wiz-edit-btn" onclick="InstallerWizard.goToStep(5)">Edit</button></h3>
+            <ul id="wizRevAdvanced"></ul>
+          </div>
+        </div>
+
+        <div class="wiz-code-label">electron-builder.yml</div>
+        <div class="wiz-code-block" id="wizYamlPreview"></div>
+
+        <div class="wiz-code-label">build-config.json</div>
+        <div class="wiz-code-block" id="wizJsonPreview"></div>
+      </section>
+
+      <!-- ─── Step 8: Build ─── -->
+      <section class="wiz-step-panel" id="wizStep8">
+        <div class="wiz-build-hero">
+          <h2 class="wiz-section-title">Build Installer</h2>
+          <p class="wiz-section-desc">Everything is configured. Click below to start the build process.</p>
+
+          <button class="wiz-btn-build" id="wizBuildBtn" onclick="InstallerWizard.startBuild()">
+            Build Installer
+          </button>
+        </div>
+
+        <div class="wiz-progress-bar">
+          <div class="wiz-progress-fill" id="wizProgressFill"></div>
+        </div>
+
+        <div class="wiz-log-output" id="wizBuildLog"></div>
+
+        <div style="text-align:center">
+          <div class="wiz-status" id="wizBuildStatus" style="display:none"></div>
+          <br>
+          <a href="#" class="wiz-download-link" id="wizDownloadLink" style="display:none">Download</a>
+        </div>
+      </section>
+
+    </div><!-- .wiz-body-area -->
+
+    <!-- ═══════════════════ Navigation ═══════════════════ -->
+    <footer class="wiz-nav">
+      <button class="wiz-btn wiz-btn-secondary" id="wizPrev" style="visibility:hidden">Previous</button>
+      <button class="wiz-btn wiz-btn-primary" id="wizNext">Next</button>
+    </footer>
+
+  </div><!-- .wiz-container -->
+
+  <script src="wizard.js"></script>
+</body>
+</html>
