@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "legal",
+  "label": "Legal Documents",
+  "description": "Optimized for court filings, legal briefs, and case law. Tighter column detection for multi-column legal layouts, increased OCR retries for scanned filings, and stricter reading-order epsilon for dense caption/header lines typical in NY court system documents.",
+  "extends": "default",
+  "tags": ["legal", "court", "lrb"],
+  "parser": {
+    "ocrMaxAttempts": 3,
+    "minAcceptedOcrScore": 0.35,
+    "sparseCharacterThreshold": 16
+  },
+  "layoutAnalyzer": {
+    "columnGapThresholdPercent": 0.12,
+    "columnGapMinPixels": 36,
+    "headingScoreThreshold": 1.45,
+    "headingBoldScoreThreshold": 1.2,
+    "rowTolerancePixels": 5
+  },
+  "readingOrder": {
+    "lineGroupEpsilon": 4,
+    "columnBandThresholdPercent": 0.14,
+    "columnBandMinPixels": 48
+  },
+  "evaluation": {
+    "scoringWeights": {
+      "veraPdfFindings": 0.35,
+      "fontEmbedCoverage": 0.15,
+      "readingOrderInversions": 0.35,
+      "ocrConfidence": 0.15
+    }
+  }
+}

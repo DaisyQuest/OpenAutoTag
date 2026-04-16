@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "cjk",
+  "label": "CJK Documents",
+  "description": "For documents primarily in Chinese, Japanese, or Korean. Configures OCR for CJK languages, uses Identity-H encoding, and references the Noto Sans CJK fallback font (requires npm run install:fonts).",
+  "extends": "default",
+  "tags": ["cjk", "japanese", "chinese", "korean"],
+  "parser": {
+    "ocrLanguages": "jpn+chi_sim+chi_tra+kor+eng",
+    "ocrMaxAttempts": 3,
+    "minAcceptedOcrScore": 0.3
+  },
+  "semanticEngine": {
+    "languageHint": "ja"
+  }
+}
