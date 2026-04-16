@@ -5,6 +5,12 @@
       "args": [
         "modules/mcp-api-introspect/index.js"
       ]
+    },
+    "corpus-eval": {
+      "command": "node",
+      "args": [
+        "modules/mcp-corpus-eval/index.js"
+      ]
     }
   }
 }

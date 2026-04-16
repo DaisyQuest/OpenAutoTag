@@ -18,7 +18,8 @@
     "map:table-structure": "node scripts/build-table-structure-map.js",
     "inspect:pdf": "node scripts/inspect-pdf-low-level.js",
     "serve": "node orchestrator/server.js",
-    "start": "node orchestrator/server.js"
+    "start": "node orchestrator/server.js",
+    "eval:score": "node modules/mcp-corpus-eval/cli.js score"
   },
   "engines": {
     "node": "22.x"
@@ -28,5 +29,8 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
   }
 }
