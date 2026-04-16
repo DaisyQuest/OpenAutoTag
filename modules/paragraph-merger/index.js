@@ -9,6 +9,8 @@ import {
   isContinuationLine,
   isLegalCitation
 } from "./lib/heuristics.js";
+import { textStructureMerge } from "./lib/text-structure-merge.js";
+// TODO: import { runAllValidators } from "./lib/validators.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateSemantic = ajv.compile(semanticSchema);
@@ -265,6 +267,39 @@ export function mergeParagraphs(semanticDocument, config = {}) {
   return { document: output, report };
 }
 
+export function mergeWithStrategy(semanticDocument, config = {}) {
+  const enabled = config.enabled !== false;
+  if (!enabled || config.strategy === "disabled") {
+    return {
+      document: semanticDocument,
+      report: {
+        strategy: "disabled",
+        enabled: false,
+        pages: [],
+        summary: {
+          totalMerges: 0,
+          totalSkips: 0,
+          totalLinesIn: semanticDocument.nodes.length,
+          totalNodesOut: semanticDocument.nodes.length,
+          reductionPercent: "0.0"
+        }
+      }
+    };
+  }
+
+  const strategy = config.strategy || "text-structure";
+
+  if (strategy === "text-structure") {
+    return textStructureMerge(semanticDocument, config);
+  }
+
+  if (strategy === "pairwise") {
+    return mergeParagraphs(semanticDocument, config);
+  }
+
+  throw new Error(`Unknown paragraph-merger strategy: ${strategy}`);
+}
+
 export async function run(inputPath, outputPath, reportPath, config = {}) {
   const semanticDocument = JSON.parse(await readFile(inputPath, "utf8"));
 
@@ -272,7 +307,7 @@ export async function run(inputPath, outputPath, reportPath, config = {}) {
     throw new Error(`Paragraph-merger input failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
   }
 
-  const { document, report } = mergeParagraphs(semanticDocument, config);
+  const { document, report } = mergeWithStrategy(semanticDocument, config);
 
   if (!validateSemantic(document)) {
     throw new Error(`Paragraph-merger output failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
@@ -293,10 +328,13 @@ async function main() {
   const args = process.argv.slice(2);
   const positional = [];
   let configPath = null;
+  let strategyFlag = null;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--config" && i + 1 < args.length) {
       configPath = args[++i];
+    } else if (args[i] === "--strategy" && i + 1 < args.length) {
+      strategyFlag = args[++i];
     } else {
       positional.push(args[i]);
     }
@@ -307,12 +345,17 @@ async function main() {
   const reportPath = positional[2] || null;
 
   if (!inputPath) {
-    throw new Error("Usage: node modules/paragraph-merger/index.js <semantic.json> [output.json] [report.json] [--config <path>]");
+    throw new Error("Usage: node modules/paragraph-merger/index.js <semantic.json> [output.json] [report.json] [--config <path>] [--strategy <name>]");
   }
 
   let config = {};
   if (configPath) {
     config = JSON.parse(await readFile(configPath, "utf8"));
+  }
+
+  // CLI --strategy flag takes precedence over config file
+  if (strategyFlag) {
+    config.strategy = strategyFlag;
   }
 
   const { document, report } = await run(inputPath, outputPath, reportPath, config);
@@ -321,9 +364,11 @@ async function main() {
     process.stdout.write(`${JSON.stringify(document, null, 2)}\n`);
   }
 
+  const strategy = report.strategy || config.strategy || "unknown";
+  const reduction = report.summary.reductionPercent ?? report.summary.overallReductionPercent ?? "0.0";
   process.stderr.write(
-    `[paragraph-merger] ${report.summary.totalLinesIn} lines → ${report.summary.totalNodesOut} nodes ` +
-    `(${report.summary.reductionPercent}% reduction, ${report.summary.totalMerges} merges, ${report.summary.totalSkips} low-confidence skips)\n`
+    `[paragraph-merger] strategy=${strategy} ${report.summary.totalLinesIn} lines → ${report.summary.totalNodesOut} nodes ` +
+    `(${reduction}% reduction)\n`
   );
 }
 
