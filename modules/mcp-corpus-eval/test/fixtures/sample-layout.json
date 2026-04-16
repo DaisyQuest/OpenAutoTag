@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "width": 612,
+      "height": 792,
+      "textBlocks": [
+        { "id": "b1", "text": "Hello", "bbox": [72, 700, 200, 16], "fontSize": 12, "fontName": "ocr", "textSource": "ocr", "ocrConfidence": 92 },
+        { "id": "b2", "text": "World", "bbox": [72, 680, 200, 16], "fontSize": 12, "fontName": "ocr", "textSource": "ocr", "ocrConfidence": 88 }
+      ]
+    },
+    {
+      "pageNumber": 2,
+      "width": 612,
+      "height": 792,
+      "textBlocks": [
+        { "id": "b3", "text": "No OCR", "bbox": [72, 700, 200, 16], "fontSize": 12, "fontName": "Arial" }
+      ]
+    }
+  ]
+}
