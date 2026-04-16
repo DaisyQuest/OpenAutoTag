@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="shield-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="50%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="doc-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ecfdf5"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#047857" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Shield body -->
+  <path d="M256 28 L462 108 C462 108 472 310 256 484 C40 310 50 108 50 108 Z"
+        fill="url(#shield-fill)" filter="url(#shadow)" stroke="#047857" stroke-width="4"/>
+
+  <!-- Inner highlight -->
+  <path d="M256 52 L438 122 C438 122 447 300 256 458 C65 300 74 122 74 122 Z"
+        fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+
+  <!-- Document shape -->
+  <rect x="176" y="130" width="160" height="200" rx="10" ry="10"
+        fill="url(#doc-fill)" stroke="#d1fae5" stroke-width="2"/>
+
+  <!-- Document fold corner -->
+  <path d="M296 130 L336 170 L296 170 Z" fill="#d1fae5"/>
+  <path d="M296 130 L336 170" fill="none" stroke="#a7f3d0" stroke-width="1.5"/>
+
+  <!-- Document lines (text representation) -->
+  <rect x="200" y="185" width="90" height="8" rx="4" fill="#059669" opacity="0.5"/>
+  <rect x="200" y="205" width="112" height="8" rx="4" fill="#059669" opacity="0.35"/>
+  <rect x="200" y="225" width="75" height="8" rx="4" fill="#059669" opacity="0.35"/>
+  <rect x="200" y="245" width="100" height="8" rx="4" fill="#059669" opacity="0.25"/>
+
+  <!-- Accessibility symbol (universal access icon - simplified) -->
+  <!-- Circle head -->
+  <circle cx="256" y="285" cy="290" r="14" fill="#059669"/>
+  <!-- Body -->
+  <line x1="256" y1="304" x2="256" y2="342" stroke="#059669" stroke-width="6" stroke-linecap="round"/>
+  <!-- Arms -->
+  <line x1="232" y1="318" x2="280" y2="318" stroke="#059669" stroke-width="5" stroke-linecap="round"/>
+  <!-- Legs -->
+  <line x1="256" y1="342" x2="238" y2="370" stroke="#059669" stroke-width="5" stroke-linecap="round"/>
+  <line x1="256" y1="342" x2="274" y2="370" stroke="#059669" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Small "PDF" label at top of document -->
+  <text x="206" y="168" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#059669">PDF</text>
+
+  <!-- Bottom arc for accessibility -->
+  <path d="M196 410 A60 60 0 0 0 316 410" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+</svg>

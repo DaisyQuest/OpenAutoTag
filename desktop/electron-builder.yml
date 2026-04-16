@@ -1,0 +1,29 @@
+appId: com.pdfaccessibility.engine
+productName: PDF Accessibility Engine
+directories:
+  output: dist
+files:
+  - "main.js"
+  - "preload.js"
+  - "splash.html"
+  - "icons/**"
+  - "../orchestrator/**"
+  - "../modules/**"
+  - "../contracts/**"
+  - "../scripts/**"
+  - "../package.json"
+  - "../node_modules/**"
+win:
+  target: nsis
+  icon: icons/icon.ico
+mac:
+  target: dmg
+  icon: icons/icon.icns
+linux:
+  target: [AppImage, deb]
+  icon: icons/icon.png
+nsis:
+  oneClick: true
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

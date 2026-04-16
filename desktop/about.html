@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>About — PDF Accessibility Engine</title>
+  <style>
+    /* ------------------------------------------------------------------ */
+    /* Theme tokens                                                       */
+    /* ------------------------------------------------------------------ */
+    :root {
+      --paper: #f6f1e8;
+      --paper-deep: #e9dfd0;
+      --ink: #132628;
+      --muted: #587072;
+      --line: rgba(19, 38, 40, 0.14);
+      --signal: #0b7a75;
+      --signal-deep: #064f4c;
+      --emerald: #059669;
+      --emerald-deep: #047857;
+      --emerald-light: #10b981;
+      --emerald-pale: #d1fae5;
+      --warm: #ca6b2f;
+      --danger: #a43c2d;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 8px;
+      --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --font-body: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+      --font-mono: "Cascadia Code", "Fira Code", "SF Mono", Consolas, monospace;
+      --shadow: 0 28px 80px rgba(19, 38, 40, 0.14);
+      --card-bg: rgba(255, 255, 255, 0.72);
+      --card-border: rgba(19, 38, 40, 0.08);
+    }
+
+    /* ---- dark theme (system) ---- */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #0f1a1c;
+        --paper-deep: #162224;
+        --ink: #e8f0f0;
+        --muted: #8ba3a5;
+        --line: rgba(232, 240, 240, 0.12);
+        --card-bg: rgba(22, 34, 36, 0.85);
+        --card-border: rgba(232, 240, 240, 0.08);
+        --emerald-pale: #064e3b;
+      }
+    }
+
+    /* ---- forced theme via data attribute ---- */
+    [data-theme="dark"] {
+      --paper: #0f1a1c;
+      --paper-deep: #162224;
+      --ink: #e8f0f0;
+      --muted: #8ba3a5;
+      --line: rgba(232, 240, 240, 0.12);
+      --card-bg: rgba(22, 34, 36, 0.85);
+      --card-border: rgba(232, 240, 240, 0.08);
+      --emerald-pale: #064e3b;
+    }
+
+    [data-theme="light"] {
+      --paper: #f6f1e8;
+      --paper-deep: #e9dfd0;
+      --ink: #132628;
+      --muted: #587072;
+      --line: rgba(19, 38, 40, 0.14);
+      --card-bg: rgba(255, 255, 255, 0.72);
+      --card-border: rgba(19, 38, 40, 0.08);
+      --emerald-pale: #d1fae5;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Reset & base                                                       */
+    /* ------------------------------------------------------------------ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(5, 150, 105, 0.12), transparent 32rem),
+        radial-gradient(circle at 80% 100%, rgba(202, 107, 47, 0.08), transparent 24rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--signal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    :focus-visible { outline: 3px solid rgba(11, 122, 117, 0.42); outline-offset: 3px; }
+
+    /* ------------------------------------------------------------------ */
+    /* Layout                                                             */
+    /* ------------------------------------------------------------------ */
+    .about-shell {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 3rem;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Theme toggle                                                       */
+    /* ------------------------------------------------------------------ */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: var(--font-body);
+      backdrop-filter: blur(12px);
+      transition: background 0.2s, color 0.2s;
+    }
+    .theme-toggle:hover { color: var(--ink); }
+
+    /* ------------------------------------------------------------------ */
+    /* Header                                                             */
+    /* ------------------------------------------------------------------ */
+    .about-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .app-icon {
+      width: 96px;
+      height: 96px;
+      margin-bottom: 1.25rem;
+      filter: drop-shadow(0 4px 16px rgba(5, 150, 105, 0.25));
+    }
+
+    .app-name {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .app-version {
+      display: inline-block;
+      background: var(--emerald-pale);
+      color: var(--emerald-deep);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+      font-family: var(--font-mono);
+    }
+
+    .app-description {
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Cards                                                              */
+    /* ------------------------------------------------------------------ */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 1.4rem 1.5rem;
+      margin-bottom: 1.25rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Feature list                                                       */
+    /* ------------------------------------------------------------------ */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius-sm);
+      background: rgba(5, 150, 105, 0.06);
+      border: 1px solid rgba(5, 150, 105, 0.1);
+      transition: background 0.15s;
+    }
+
+    .feature-item:hover {
+      background: rgba(5, 150, 105, 0.12);
+    }
+
+    .feature-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Native badge showcase                                              */
+    /* ------------------------------------------------------------------ */
+    .badge-showcase {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 0;
+    }
+
+    .native-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #047857 0%, #059669 30%, #10b981 60%, #34d399 100%);
+      background-size: 300% auto;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(5, 150, 105, 0.35);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      animation: native-shimmer 4s linear infinite;
+    }
+
+    .native-badge-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    @keyframes native-shimmer {
+      0%   { background-position: 100% 50%; }
+      100% { background-position: -100% 50%; }
+    }
+
+    .badge-explain {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 420px;
+      line-height: 1.5;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Credits                                                            */
+    /* ------------------------------------------------------------------ */
+    .credits-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .credit-tag {
+      display: inline-block;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(19, 38, 40, 0.06);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Links                                                              */
+    /* ------------------------------------------------------------------ */
+    .link-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .about-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--signal);
+      background: rgba(11, 122, 117, 0.06);
+      border: 1px solid rgba(11, 122, 117, 0.15);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .about-link:hover {
+      background: rgba(11, 122, 117, 0.12);
+      border-color: rgba(11, 122, 117, 0.3);
+      text-decoration: none;
+    }
+
+    .about-link svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Footer                                                             */
+    /* ------------------------------------------------------------------ */
+    .about-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .about-footer a { color: var(--muted); }
+    .about-footer a:hover { color: var(--signal); }
+
+    /* ------------------------------------------------------------------ */
+    /* Responsive                                                         */
+    /* ------------------------------------------------------------------ */
+    @media (max-width: 480px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark/light theme">
+    <span id="theme-icon">&#9790;</span> Theme
+  </button>
+
+  <div class="about-shell">
+    <!-- Header -->
+    <header class="about-header">
+      <img class="app-icon" src="icons/icon.svg" alt="PDF Accessibility Engine icon" draggable="false"/>
+      <h1 class="app-name">PDF Accessibility Engine</h1>
+      <span class="app-version" id="app-version">v0.1.0</span>
+      <p class="app-description">
+        A local-first pipeline that adds PDF/UA accessibility tags, validates structure,
+        repairs corruption, audits font health, and redacts sensitive data &mdash; all while
+        preserving the original native PDF content. No cloud upload required.
+      </p>
+    </header>
+
+    <!-- Features -->
+    <section class="card">
+      <h2 class="card-title">Capabilities</h2>
+      <ul class="feature-grid">
+        <li class="feature-item">
+          <span class="feature-icon" aria-hidden="true">A</span>
+          Accessibility Tagging
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon" aria-hidden="true">N</span>
+          Native PDF Preservation
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon" aria-hidden="true">F</span>
+          Font Health Audit
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon" aria-hidden="true">R</span>
+          Corruption Repair
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon" aria-hidden="true">S</span>
+          SSN Redaction
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon" aria-hidden="true">V</span>
+          PDF/UA Validation
+        </li>
+      </ul>
+    </section>
+
+    <!-- Native badge showcase -->
+    <section class="card">
+      <h2 class="card-title">Native PDF Retained</h2>
+      <div class="badge-showcase">
+        <span class="native-badge">
+          <span class="native-badge-icon">&#x1F6E1;&#xFE0F;</span>
+          NATIVE PDF RETAINED
+        </span>
+        <p class="badge-explain">
+          When this badge appears, the original vector text, fonts, links, and form fields
+          have been preserved exactly. No rasterization. Text stays sharp at any zoom level,
+          and screen readers can access the real content.
+        </p>
+      </div>
+    </section>
+
+    <!-- Credits -->
+    <section class="card">
+      <h2 class="card-title">Built with</h2>
+      <ul class="credits-list">
+        <li class="credit-tag">PDFBox</li>
+        <li class="credit-tag">pdfjs-dist</li>
+        <li class="credit-tag">tesseract.js</li>
+        <li class="credit-tag">Electron</li>
+        <li class="credit-tag">pdf-lib</li>
+        <li class="credit-tag">Node.js</li>
+      </ul>
+    </section>
+
+    <!-- Links -->
+    <section class="card">
+      <h2 class="card-title">Links</h2>
+      <div class="link-row">
+        <a class="about-link" href="https://github.com/nicktaburke/OpenAutoTag" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a class="about-link" href="https://github.com/nicktaburke/OpenAutoTag#readme" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 01.75 1h4.253c1.227 0 2.317.59 3 1.501A3.744 3.744 0 0111.006 1h4.245a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-4.507a2.25 2.25 0 00-1.591.659l-.622.621a.75.75 0 01-1.06 0l-.622-.621A2.25 2.25 0 005.258 13H.75a.75.75 0 01-.75-.75zm7.251 10.324l.004-5.073-.002-2.253A2.25 2.25 0 005.003 2.5H1.5v9h3.757a3.75 3.75 0 011.994.574zM8.755 4.75l-.004 7.322a3.752 3.752 0 011.992-.572H14.5v-9h-3.495a2.25 2.25 0 00-2.25 2.25z"/></svg>
+          Documentation
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="about-footer">
+      <p>
+        <a href="https://github.com/nicktaburke/OpenAutoTag/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </p>
+      <p>&copy; 2025&ndash;2026 PDF Accessibility Engine contributors</p>
+    </footer>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------
+    // Version injection — Electron preload or fallback
+    // -------------------------------------------------------------------
+    (function injectVersion() {
+      var el = document.getElementById("app-version");
+      // Electron exposes version via contextBridge in preload.js
+      if (window.electronAPI && window.electronAPI.appVersion) {
+        el.textContent = "v" + window.electronAPI.appVersion;
+      } else if (typeof process !== "undefined" && process.env && process.env.npm_package_version) {
+        el.textContent = "v" + process.env.npm_package_version;
+      }
+      // otherwise keeps the fallback from the HTML
+    })();
+
+    // -------------------------------------------------------------------
+    // Theme toggle
+    // -------------------------------------------------------------------
+    (function initTheme() {
+      var btn = document.getElementById("theme-toggle");
+      var icon = document.getElementById("theme-icon");
+      var root = document.documentElement;
+
+      function setTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        icon.textContent = theme === "dark" ? "\u2600" : "\u263E";
+        try { localStorage.setItem("about-theme", theme); } catch (e) {}
+      }
+
+      // Restore saved preference
+      var saved;
+      try { saved = localStorage.getItem("about-theme"); } catch (e) {}
+      if (saved === "dark" || saved === "light") {
+        setTheme(saved);
+      }
+
+      btn.addEventListener("click", function () {
+        var current = root.getAttribute("data-theme")
+          || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        setTheme(current === "dark" ? "light" : "dark");
+      });
+    })();
+
+    // -------------------------------------------------------------------
+    // Open links in external browser when running inside Electron
+    // -------------------------------------------------------------------
+    document.addEventListener("click", function (e) {
+      var anchor = e.target.closest("a[target='_blank']");
+      if (!anchor) return;
+      if (window.electronAPI && window.electronAPI.openExternal) {
+        e.preventDefault();
+        window.electronAPI.openExternal(anchor.href);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "pdf-accessibility-engine",
+  "version": "1.0.0",
+  "description": "PDF Accessibility Engine - Desktop Edition",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  }
+}

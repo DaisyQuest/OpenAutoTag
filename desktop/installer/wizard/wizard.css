@@ -1,0 +1,715 @@
+/* ============================================================
+   Installer Wizard — Stylesheet
+   Zero-dependency, dark/light theme, responsive.
+   ============================================================ */
+
+/* ---------- CSS custom properties (light theme default) ----- */
+:root {
+  --wiz-bg:            #f5f7fa;
+  --wiz-surface:       #ffffff;
+  --wiz-surface-alt:   #f0f2f5;
+  --wiz-text:          #1a1a2e;
+  --wiz-text-muted:    #6b7280;
+  --wiz-border:        #e0e3e8;
+  --wiz-primary:       #2563eb;
+  --wiz-primary-hover: #1d4ed8;
+  --wiz-primary-text:  #ffffff;
+  --wiz-success:       #16a34a;
+  --wiz-success-light: #dcfce7;
+  --wiz-danger:        #dc2626;
+  --wiz-danger-light:  #fee2e2;
+  --wiz-warning:       #d97706;
+  --wiz-warning-light: #fef3c7;
+  --wiz-shadow:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --wiz-shadow-lg:     0 4px 12px rgba(0,0,0,.1);
+  --wiz-radius:        8px;
+  --wiz-radius-lg:     12px;
+  --wiz-transition:    .25s cubic-bezier(.4,0,.2,1);
+  --wiz-font:          system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --wiz-mono:          "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+}
+
+/* ---------- Dark theme ------------------------------------ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --wiz-bg:          #0f172a;
+    --wiz-surface:     #1e293b;
+    --wiz-surface-alt: #162033;
+    --wiz-text:        #e2e8f0;
+    --wiz-text-muted:  #94a3b8;
+    --wiz-border:      #334155;
+    --wiz-shadow:      0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+    --wiz-shadow-lg:   0 4px 12px rgba(0,0,0,.4);
+  }
+}
+
+/* ---------- Reset & base ---------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.wiz-body {
+  font-family: var(--wiz-font);
+  background: var(--wiz-bg);
+  color: var(--wiz-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+}
+
+/* ---------- Wizard container ------------------------------ */
+.wiz-container {
+  width: 100%;
+  max-width: 820px;
+  background: var(--wiz-surface);
+  border-radius: var(--wiz-radius-lg);
+  box-shadow: var(--wiz-shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Step indicator -------------------------------- */
+.wiz-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  background: var(--wiz-surface-alt);
+  border-bottom: 1px solid var(--wiz-border);
+  gap: 0;
+  flex-wrap: wrap;
+  overflow-x: auto;
+}
+
+.wiz-step-item {
+  display: flex;
+  align-items: center;
+}
+
+.wiz-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+  border: 2px solid var(--wiz-border);
+  background: var(--wiz-surface);
+  color: var(--wiz-text-muted);
+  transition: all var(--wiz-transition);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.wiz-step-circle .wiz-check {
+  display: none;
+}
+
+.wiz-step-item.active .wiz-step-circle {
+  border-color: var(--wiz-primary);
+  background: var(--wiz-primary);
+  color: var(--wiz-primary-text);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.25);
+}
+
+.wiz-step-item.done .wiz-step-circle {
+  border-color: var(--wiz-success);
+  background: var(--wiz-success);
+  color: #fff;
+}
+
+.wiz-step-item.done .wiz-step-circle .wiz-step-num { display: none; }
+.wiz-step-item.done .wiz-step-circle .wiz-check    { display: inline; }
+
+.wiz-step-line {
+  width: 28px;
+  height: 2px;
+  background: var(--wiz-border);
+  transition: background var(--wiz-transition);
+  flex-shrink: 0;
+}
+
+.wiz-step-item.done + .wiz-step-item .wiz-step-line,
+.wiz-step-item.done .wiz-step-line {
+  /* handled via JS class on connector */
+}
+
+.wiz-step-line.done-line {
+  background: var(--wiz-success);
+}
+
+.wiz-step-label {
+  display: none; /* shown on wider screens */
+}
+
+@media (min-width: 700px) {
+  .wiz-step-label {
+    display: block;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--wiz-text-muted);
+    position: absolute;
+    top: 36px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .wiz-step-item.active .wiz-step-label { color: var(--wiz-primary); font-weight: 600; }
+  .wiz-step-item.done   .wiz-step-label { color: var(--wiz-success); }
+  .wiz-step-circle { position: relative; }
+  .wiz-steps { padding-bottom: 2.8rem; }
+}
+
+/* ---------- Step content area ----------------------------- */
+.wiz-body-area {
+  position: relative;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.wiz-step-panel {
+  display: none;
+  padding: 2rem;
+  animation: wizFadeIn var(--wiz-transition) ease;
+}
+
+.wiz-step-panel.visible {
+  display: block;
+}
+
+@keyframes wizFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Hero (step 1) --------------------------------- */
+.wiz-hero {
+  text-align: center;
+  padding: 1rem 0 1.5rem;
+}
+
+.wiz-hero h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: .5rem;
+  background: linear-gradient(135deg, var(--wiz-primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.wiz-hero p {
+  color: var(--wiz-text-muted);
+  font-size: 1.05rem;
+}
+
+/* ---------- Section headings ------------------------------ */
+.wiz-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  padding-bottom: .5rem;
+  border-bottom: 2px solid var(--wiz-primary);
+  display: inline-block;
+}
+
+.wiz-section-desc {
+  color: var(--wiz-text-muted);
+  font-size: .9rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- Form elements --------------------------------- */
+.wiz-field {
+  margin-bottom: 1.25rem;
+}
+
+.wiz-field label {
+  display: block;
+  font-size: .85rem;
+  font-weight: 600;
+  margin-bottom: .35rem;
+}
+
+.wiz-field .wiz-hint {
+  font-size: .78rem;
+  color: var(--wiz-text-muted);
+  margin-top: .25rem;
+}
+
+.wiz-input,
+.wiz-textarea,
+.wiz-select {
+  width: 100%;
+  padding: .6rem .8rem;
+  font-size: .92rem;
+  font-family: var(--wiz-font);
+  border: 1px solid var(--wiz-border);
+  border-radius: var(--wiz-radius);
+  background: var(--wiz-surface);
+  color: var(--wiz-text);
+  transition: border-color var(--wiz-transition), box-shadow var(--wiz-transition);
+}
+
+.wiz-input:focus,
+.wiz-textarea:focus,
+.wiz-select:focus {
+  outline: none;
+  border-color: var(--wiz-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+
+.wiz-input.invalid,
+.wiz-textarea.invalid {
+  border-color: var(--wiz-danger);
+  box-shadow: 0 0 0 3px rgba(220,38,38,.12);
+}
+
+.wiz-textarea { resize: vertical; min-height: 80px; }
+
+.wiz-input[readonly] {
+  background: var(--wiz-surface-alt);
+  cursor: default;
+}
+
+/* ---------- Checkboxes & radios (custom) ------------------- */
+.wiz-check-group {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.wiz-card-option {
+  display: flex;
+  align-items: flex-start;
+  gap: .8rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--wiz-border);
+  border-radius: var(--wiz-radius);
+  cursor: pointer;
+  transition: border-color var(--wiz-transition), background var(--wiz-transition);
+}
+
+.wiz-card-option:hover {
+  border-color: var(--wiz-primary);
+  background: var(--wiz-surface-alt);
+}
+
+.wiz-card-option.selected {
+  border-color: var(--wiz-primary);
+  background: rgba(37,99,235,.06);
+}
+
+.wiz-card-option.disabled {
+  opacity: .65;
+  cursor: default;
+}
+
+.wiz-card-option input[type="checkbox"],
+.wiz-card-option input[type="radio"] {
+  margin-top: .15rem;
+  accent-color: var(--wiz-primary);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.wiz-card-option .wiz-option-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.wiz-card-option .wiz-option-body {
+  flex: 1;
+}
+
+.wiz-card-option .wiz-option-title {
+  font-weight: 600;
+  font-size: .95rem;
+}
+
+.wiz-card-option .wiz-option-desc {
+  font-size: .8rem;
+  color: var(--wiz-text-muted);
+}
+
+.wiz-card-option .wiz-option-size {
+  font-size: .75rem;
+  color: var(--wiz-text-muted);
+  font-weight: 500;
+  margin-left: auto;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ---------- File upload area ------------------------------ */
+.wiz-upload-area {
+  border: 2px dashed var(--wiz-border);
+  border-radius: var(--wiz-radius);
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--wiz-transition), background var(--wiz-transition);
+}
+
+.wiz-upload-area:hover {
+  border-color: var(--wiz-primary);
+  background: var(--wiz-surface-alt);
+}
+
+.wiz-upload-area .wiz-upload-icon {
+  font-size: 2rem;
+  margin-bottom: .5rem;
+}
+
+.wiz-upload-area .wiz-upload-text {
+  font-size: .85rem;
+  color: var(--wiz-text-muted);
+}
+
+.wiz-icon-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--wiz-radius);
+  object-fit: contain;
+  border: 1px solid var(--wiz-border);
+  margin-top: .75rem;
+}
+
+/* ---------- Color swatches -------------------------------- */
+.wiz-color-picker {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-top: .5rem;
+}
+
+.wiz-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--wiz-transition), transform var(--wiz-transition);
+}
+
+.wiz-swatch:hover { transform: scale(1.15); }
+
+.wiz-swatch.selected {
+  border-color: var(--wiz-text);
+  box-shadow: 0 0 0 2px var(--wiz-surface), 0 0 0 4px var(--wiz-text);
+}
+
+/* ---------- Review cards ---------------------------------- */
+.wiz-review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .wiz-review-grid { grid-template-columns: 1fr; }
+}
+
+.wiz-review-card {
+  background: var(--wiz-surface-alt);
+  border: 1px solid var(--wiz-border);
+  border-radius: var(--wiz-radius);
+  padding: 1rem;
+  position: relative;
+}
+
+.wiz-review-card h3 {
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--wiz-text-muted);
+  margin-bottom: .5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wiz-review-card .wiz-edit-btn {
+  font-size: .72rem;
+  color: var(--wiz-primary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--wiz-font);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.wiz-review-card .wiz-edit-btn:hover {
+  color: var(--wiz-primary-hover);
+}
+
+.wiz-review-card ul {
+  list-style: none;
+  font-size: .88rem;
+}
+
+.wiz-review-card li {
+  padding: .2rem 0;
+}
+
+.wiz-review-card li::before {
+  content: "\2022";
+  color: var(--wiz-primary);
+  margin-right: .5rem;
+}
+
+/* ---------- Code preview ---------------------------------- */
+.wiz-code-block {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: var(--wiz-radius);
+  padding: 1rem;
+  font-family: var(--wiz-mono);
+  font-size: .8rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  max-height: 320px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.wiz-code-block .hl-key   { color: #89b4fa; }
+.wiz-code-block .hl-str   { color: #a6e3a1; }
+.wiz-code-block .hl-num   { color: #fab387; }
+.wiz-code-block .hl-bool  { color: #f38ba8; }
+.wiz-code-block .hl-comment { color: #6c7086; font-style: italic; }
+
+.wiz-code-label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--wiz-text-muted);
+  margin-bottom: .35rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+/* ---------- Build step ------------------------------------ */
+.wiz-build-hero {
+  text-align: center;
+  padding: 1rem 0 1.5rem;
+}
+
+.wiz-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--wiz-surface-alt);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.wiz-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--wiz-primary), #7c3aed);
+  border-radius: 4px;
+  transition: width .4s ease;
+}
+
+.wiz-log-output {
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: var(--wiz-mono);
+  font-size: .78rem;
+  line-height: 1.5;
+  padding: 1rem;
+  border-radius: var(--wiz-radius);
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 1rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.wiz-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border-radius: var(--wiz-radius);
+  font-size: .9rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.wiz-status.success {
+  background: var(--wiz-success-light);
+  color: var(--wiz-success);
+}
+
+.wiz-status.failure {
+  background: var(--wiz-danger-light);
+  color: var(--wiz-danger);
+}
+
+/* ---------- Navigation footer ----------------------------- */
+.wiz-nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem 1.5rem;
+  border-top: 1px solid var(--wiz-border);
+}
+
+.wiz-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .6rem 1.5rem;
+  font-size: .9rem;
+  font-weight: 600;
+  font-family: var(--wiz-font);
+  border: none;
+  border-radius: var(--wiz-radius);
+  cursor: pointer;
+  transition: background var(--wiz-transition), transform .1s, box-shadow var(--wiz-transition);
+}
+
+.wiz-btn:active { transform: scale(.97); }
+
+.wiz-btn-primary {
+  background: var(--wiz-primary);
+  color: var(--wiz-primary-text);
+}
+
+.wiz-btn-primary:hover { background: var(--wiz-primary-hover); }
+
+.wiz-btn-secondary {
+  background: var(--wiz-surface-alt);
+  color: var(--wiz-text);
+  border: 1px solid var(--wiz-border);
+}
+
+.wiz-btn-secondary:hover { background: var(--wiz-border); }
+
+.wiz-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wiz-btn-build {
+  padding: .85rem 2.5rem;
+  font-size: 1.05rem;
+  background: linear-gradient(135deg, var(--wiz-primary), #7c3aed);
+  color: #fff;
+  border: none;
+  border-radius: var(--wiz-radius);
+  cursor: pointer;
+  font-weight: 700;
+  font-family: var(--wiz-font);
+  transition: transform .15s, box-shadow var(--wiz-transition);
+  box-shadow: var(--wiz-shadow-lg);
+}
+
+.wiz-btn-build:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37,99,235,.3);
+}
+
+.wiz-btn-build:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Validation error message ---------------------- */
+.wiz-error-msg {
+  color: var(--wiz-danger);
+  font-size: .78rem;
+  margin-top: .25rem;
+  display: none;
+}
+
+.wiz-error-msg.show { display: block; }
+
+/* ---------- Info callout ---------------------------------- */
+.wiz-info-box {
+  display: flex;
+  gap: .75rem;
+  background: rgba(37,99,235,.06);
+  border: 1px solid rgba(37,99,235,.2);
+  border-radius: var(--wiz-radius);
+  padding: .85rem 1rem;
+  font-size: .85rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.wiz-info-box .wiz-info-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ---------- Two-column row -------------------------------- */
+.wiz-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.wiz-row > * { flex: 1; }
+
+@media (max-width: 550px) {
+  .wiz-row { flex-direction: column; }
+}
+
+/* ---------- Inline tag ------------------------------------ */
+.wiz-tag {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .15rem .5rem;
+  border-radius: 99px;
+  background: rgba(37,99,235,.1);
+  color: var(--wiz-primary);
+}
+
+/* ---------- Download link --------------------------------- */
+.wiz-download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--wiz-primary);
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: .75rem;
+}
+
+.wiz-download-link:hover { text-decoration: underline; }
+
+/* ---------- Scrollbar (dark code blocks) ------------------ */
+.wiz-code-block::-webkit-scrollbar,
+.wiz-log-output::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.wiz-code-block::-webkit-scrollbar-thumb,
+.wiz-log-output::-webkit-scrollbar-thumb {
+  background: #44475a;
+  border-radius: 3px;
+}
+
+/* ---------- Responsive tweaks ----------------------------- */
+@media (max-width: 550px) {
+  .wiz-step-panel { padding: 1.25rem; }
+  .wiz-nav { padding: .75rem 1.25rem 1rem; }
+  .wiz-hero h1 { font-size: 1.35rem; }
+  .wiz-review-grid { grid-template-columns: 1fr; }
+}
