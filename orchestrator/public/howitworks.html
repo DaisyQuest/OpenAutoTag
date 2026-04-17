@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How It Works — PDF Accessibility Engine</title>
+  <style>
+    /* ── Color Tokens ──────────────────────────────────────────── */
+    :root {
+      --bg:         #f6f1e8;
+      --bg-deep:    #e9dfd0;
+      --fg:         #132628;
+      --muted:      #587072;
+      --line:       rgba(19,38,40,0.14);
+      --signal:     #0b7a75;
+      --signal-deep:#064f4c;
+      --warm:       #ca6b2f;
+      --danger:     #a43c2d;
+      --green:      #16a34a;
+      --green-bg:   #ecfdf5;
+      --green-border:#a7f3d0;
+      --blue:       #2563eb;
+      --blue-bg:    #eff6ff;
+      --code-bg:    #fdfcf9;
+      --card-bg:    #fff;
+      --card-shadow:0 1px 4px rgba(19,38,40,0.10);
+      --toc-bg:     rgba(246,241,232,0.96);
+      --font-display: "Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+      --font-body:  "Trebuchet MS","Segoe UI",Tahoma,sans-serif;
+      --font-mono:  "Cascadia Code","Fira Code","Source Code Pro",Consolas,monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:         #0f172a;
+        --bg-deep:    #1e293b;
+        --fg:         #e2e8f0;
+        --muted:      #94a3b8;
+        --line:       rgba(226,232,240,0.12);
+        --signal:     #5eead4;
+        --signal-deep:#2dd4bf;
+        --warm:       #fb923c;
+        --danger:     #f87171;
+        --green:      #4ade80;
+        --green-bg:   #052e16;
+        --green-border:#166534;
+        --blue:       #60a5fa;
+        --blue-bg:    #1e3a5f;
+        --code-bg:    #1e293b;
+        --card-bg:    #1e293b;
+        --card-shadow:0 1px 4px rgba(0,0,0,0.30);
+        --toc-bg:     rgba(15,23,42,0.96);
+      }
+    }
+
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 2rem; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.72;
+      font-size: 16px;
+    }
+    a { color: var(--signal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .page-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 2.5rem;
+      padding: 2rem 2rem 4rem;
+    }
+    @media (max-width: 860px) {
+      .page-grid { grid-template-columns: 1fr; padding: 1rem; }
+      .toc-sidebar { display: none; }
+    }
+
+    /* ── Table of Contents Sidebar ─────────────────────────────── */
+    .toc-sidebar {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      max-height: calc(100vh - 3rem);
+      overflow-y: auto;
+      background: var(--toc-bg);
+      border-right: 1px solid var(--line);
+      padding: 1.5rem 1rem 2rem 0;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+    .toc-sidebar h3 {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .toc-sidebar ol {
+      list-style: none;
+      padding: 0;
+    }
+    .toc-sidebar > ol > li { margin-bottom: 0.5rem; }
+    .toc-sidebar ol ol { padding-left: 1rem; margin-top: 0.25rem; }
+    .toc-sidebar a {
+      color: var(--fg);
+      display: block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .toc-sidebar a:hover { background: var(--bg-deep); text-decoration: none; }
+    .toc-sidebar a.active { color: var(--signal); font-weight: 600; }
+
+    /* ── Article Body ──────────────────────────────────────────── */
+    .article {
+      min-width: 0;
+    }
+    .article-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 1.5rem;
+    }
+    .article-header .eyebrow {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--signal);
+      margin-bottom: 0.3rem;
+    }
+    .article-header h1 {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .article-header .abstract {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 640px;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--line);
+    }
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      margin: 2rem 0 0.6rem;
+      color: var(--fg);
+    }
+    h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 1.2rem 0 0.4rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    p { margin-bottom: 0.9rem; max-width: 70ch; }
+    ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+
+    /* ── Inline code & code blocks ─────────────────────────────── */
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: var(--code-bg);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.2rem 1.4rem;
+      overflow-x: auto;
+      margin: 0.8rem 0 1.2rem;
+      line-height: 1.55;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+    }
+    .kw  { color: var(--signal-deep); font-weight: 600; }
+    .cmt { color: var(--muted); font-style: italic; }
+    .num { color: var(--warm); }
+    .str { color: var(--green); }
+
+    @media (prefers-color-scheme: dark) {
+      .kw  { color: var(--signal); }
+      .num { color: var(--warm); }
+      .str { color: var(--green); }
+    }
+
+    /* ── Metric callout boxes ──────────────────────────────────── */
+    .metric-box {
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      margin: 0.8rem 0 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .metric-item {
+      text-align: center;
+      min-width: 100px;
+    }
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      color: var(--green);
+      display: block;
+    }
+    .metric-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    /* ── Info callout ──────────────────────────────────────────── */
+    .callout {
+      background: var(--blue-bg);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 0.9rem 1.2rem;
+      margin: 0.8rem 0 1.2rem;
+      font-size: 0.92rem;
+    }
+
+    /* ── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.3rem 1.5rem;
+      margin: 0.8rem 0 1.2rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    /* ── Pipeline Diagram ──────────────────────────────────────── */
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0;
+      margin: 1.5rem 0 2rem;
+      padding: 1.2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      overflow-x: auto;
+    }
+    .pipe-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0.6rem 0.7rem;
+      background: var(--bg-deep);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-width: 90px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.3;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .pipe-stage:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(19,38,40,0.12);
+    }
+    .pipe-stage .stage-num {
+      font-size: 0.65rem;
+      color: var(--signal);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+    }
+    .pipe-arrow {
+      font-size: 1.2rem;
+      color: var(--muted);
+      padding: 0 0.15rem;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    @media (max-width: 700px) {
+      .pipeline { flex-direction: column; align-items: stretch; }
+      .pipe-arrow { transform: rotate(90deg); align-self: center; }
+    }
+
+    /* ── Tables ────────────────────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.8rem 0 1.2rem;
+      font-size: 0.88rem;
+    }
+    .data-table th, .data-table td {
+      text-align: left;
+      padding: 0.45rem 0.8rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .data-table th {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      background: var(--bg-deep);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    .page-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .page-footer a { color: var(--signal); }
+
+    /* ── Back-to-top link ──────────────────────────────────────── */
+    .section-top {
+      font-size: 0.78rem;
+      color: var(--muted);
+      float: right;
+      margin-top: -2rem;
+    }
+
+    /* ── Scroll-spy highlight (JS) ─────────────────────────────── */
+    .toc-sidebar a.active {
+      background: var(--bg-deep);
+      color: var(--signal);
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-grid">
+
+  <!-- ════════════════ Table of Contents ════════════════ -->
+  <nav class="toc-sidebar" aria-label="Table of contents">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#overview">1. Overview</a></li>
+      <li>
+        <a href="#stages">2. Stage-by-Stage Algorithm Detail</a>
+        <ol>
+          <li><a href="#parser">2.1 Parser</a></li>
+          <li><a href="#layout">2.2 Layout Analyzer</a></li>
+          <li><a href="#semantic">2.3 Semantic Engine</a></li>
+          <li><a href="#merger">2.4 Paragraph Merger</a></li>
+          <li><a href="#reading-order">2.5 Reading Order</a></li>
+          <li><a href="#tag-builder">2.6 Tag Builder</a></li>
+          <li><a href="#font-embedder">2.7 Font Embedder</a></li>
+          <li><a href="#pdf-writer">2.8 PDF Writer</a></li>
+          <li><a href="#validator">2.9 Validator</a></li>
+        </ol>
+      </li>
+      <li><a href="#profiles">3. Profile System</a></li>
+      <li><a href="#native">4. Native PDF Preservation</a></li>
+      <li><a href="#repair">5. Corruption Repair</a></li>
+    </ol>
+  </nav>
+
+  <!-- ════════════════ Article Body ════════════════ -->
+  <article class="article">
+
+    <header class="article-header">
+      <p class="eyebrow">Technical Reference</p>
+      <h1>How It Works</h1>
+      <p class="abstract">
+        A complete algorithmic disclosure of the PDF Accessibility Engine: every stage, every threshold,
+        every confidence model. Open source, free, no vendor lock-in.
+      </p>
+    </header>
+
+    <!-- ─────────── 1. Overview ─────────── -->
+    <section id="overview">
+      <h2>1. Overview</h2>
+      <p>
+        The PDF Accessibility Engine is an open-source pipeline that ingests arbitrary PDF documents
+        and produces fully tagged, PDF/UA-1 compliant outputs with embedded fonts, structural
+        semantics, and machine-verified accessibility. It operates as a nine-stage sequential
+        pipeline: each stage reads the output of its predecessor, applies deterministic algorithms
+        with tunable parameters, and emits a confidence-scored intermediate result. No cloud
+        services, no proprietary models, no vendor lock-in.
+      </p>
+
+      <div class="pipeline" role="img" aria-label="Nine-stage processing pipeline from Parser to Validator">
+        <div class="pipe-stage"><span class="stage-num">Stage 1</span>Parser</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 2</span>Layout Analyzer</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 3</span>Semantic Engine</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 4</span>Paragraph Merger</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 5</span>Reading Order</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 6</span>Tag Builder</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 7</span>Font Embedder</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 8</span>PDF Writer</div>
+        <span class="pipe-arrow" aria-hidden="true">&#x2192;</span>
+        <div class="pipe-stage"><span class="stage-num">Stage 9</span>Validator</div>
+      </div>
+
+      <div class="callout">
+        <strong>Open source.</strong> The entire engine is released under the Apache 2.0 license.
+        Fallback fonts ship under the SIL Open Font License. There are no proprietary components,
+        no usage-based pricing, and no external API calls during processing.
+      </div>
+    </section>
+
+    <!-- ─────────── 2. Stage-by-Stage ─────────── -->
+    <section id="stages">
+      <h2>2. Stage-by-Stage Algorithm Detail</h2>
+      <p>
+        Each subsection below describes one pipeline stage: what it does, the algorithm it
+        implements, the specific parameter values drawn from the codebase, the confidence model
+        that quantifies output quality, and the edge cases the stage is designed to handle.
+      </p>
+
+      <!-- 2.1 Parser -->
+      <section id="parser">
+        <h3>2.1 Parser <span style="font-weight:400;color:var(--muted);font-size:0.85em;">(pdfjs-dist)</span></h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Extract every text span, its bounding box, font metadata, and page geometry from the
+          source PDF. When native text is absent or degraded, fall back to multi-pass OCR with
+          consensus scoring.
+        </p>
+
+        <h4>Algorithm</h4>
+        <pre><code><span class="kw">for each</span> page <span class="kw">in</span> document:
+    items = page.getTextContent()          <span class="cmt">// PDF.js text extraction</span>
+    blocks = groupByGeometricProximity(items)
+
+    <span class="kw">if</span> blocks.length &le; <span class="num">1</span>
+       <span class="kw">OR</span> totalChars &le; <span class="num">24</span>
+       <span class="kw">OR</span> textCoverage &le; <span class="num">0.2%</span>:
+        blocks = runMultiPassOCR(page)      <span class="cmt">// OCR fallback triggered</span>
+</code></pre>
+
+        <h4>Multi-Pass OCR</h4>
+        <p>
+          The OCR subsystem generates <strong>3 render variants</strong> of each page, then
+          processes each variant with <strong>3 recognition profiles</strong>, yielding up to
+          9 candidate transcriptions per page.
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Render Variant</th><th>DPI</th><th>Mode</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>gray-300</td><td>300</td><td>Grayscale</td></tr>
+            <tr><td>binary-300</td><td>300</td><td>Binary (Otsu threshold)</td></tr>
+            <tr><td>gray-450</td><td>450</td><td>Grayscale, higher resolution</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          Consensus scoring selects the transcription with the highest character-level agreement
+          across candidates. Language detection auto-switches between <code>eng</code> and
+          <code>spa</code> based on trigram frequency analysis.
+        </p>
+
+        <h4>Confidence Model</h4>
+        <p>
+          Native extraction: confidence <code>1.0</code> (deterministic).
+          OCR: confidence equals the consensus ratio among the 9 candidates, typically 0.82&ndash;0.97
+          for clean scans, 0.55&ndash;0.75 for degraded originals.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Invisible-text PDFs (pre-OCR'd): native extraction succeeds, OCR skipped</li>
+          <li>Mixed pages (some text native, some scanned): coverage threshold triggers OCR for the full page</li>
+          <li>Rotated text: PDF.js transform matrix decomposed to recover correct bounding boxes</li>
+        </ul>
+      </section>
+
+      <!-- 2.2 Layout Analyzer -->
+      <section id="layout">
+        <h3>2.2 Layout Analyzer</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Determine the spatial structure of each page: columns, headings, tables, and artifacts
+          (headers, footers, page numbers).
+        </p>
+
+        <h4>Column Detection</h4>
+        <pre><code>gapThreshold = <span class="kw">max</span>(<span class="num">0.16</span> &times; pageWidth, <span class="num">48</span>px)
+
+<span class="kw">for each</span> horizontalGap <span class="kw">between</span> adjacent text blocks:
+    <span class="kw">if</span> gap.width &ge; gapThreshold:
+        markColumnBoundary(gap.x)
+</code></pre>
+
+        <div class="metric-box">
+          <div class="metric-item"><span class="metric-value">16%</span><span class="metric-label">Gap threshold (% page width)</span></div>
+          <div class="metric-item"><span class="metric-value">48px</span><span class="metric-label">Minimum gap (absolute)</span></div>
+        </div>
+
+        <h4>Heading Classification</h4>
+        <p>
+          A text block is classified as a heading when its font size exceeds the dominant body
+          font size by a configurable ratio:
+        </p>
+        <ul>
+          <li><strong>Standard rule:</strong> font-size ratio &ge; <code>1.55</code></li>
+          <li><strong>Bold variant:</strong> font-size ratio &ge; <code>1.3</code> when the block is bold</li>
+        </ul>
+        <p>Heading levels (H1, H2, H3) are assigned by rank-ordering the distinct heading font sizes within the document.</p>
+
+        <h4>Table Detection (3 Methods)</h4>
+        <p>The analyzer runs three independent table detectors and merges their results:</p>
+        <ol>
+          <li><strong>Vector gridlines:</strong> detects explicit horizontal and vertical rules drawn by the PDF content stream.</li>
+          <li><strong>Text-grid alignment:</strong> identifies text spans arranged in a regular grid pattern (cell alignment within tolerance).</li>
+          <li><strong>Borderless column alignment:</strong> finds columns of text that share vertical anchors without any visible rules.</li>
+        </ol>
+
+        <h4>Table Confidence Formula</h4>
+        <pre><code>confidence = <span class="kw">min</span>(<span class="num">0.88</span> + <span class="num">0.02</span> &times; rows + <span class="num">0.01</span> &times; cols, <span class="num">0.98</span>)</code></pre>
+
+        <div class="metric-box">
+          <div class="metric-item"><span class="metric-value">0.88</span><span class="metric-label">Base confidence</span></div>
+          <div class="metric-item"><span class="metric-value">+0.02</span><span class="metric-label">Per row</span></div>
+          <div class="metric-item"><span class="metric-value">+0.01</span><span class="metric-label">Per column</span></div>
+          <div class="metric-item"><span class="metric-value">0.98</span><span class="metric-label">Ceiling</span></div>
+        </div>
+
+        <h4>Borderless Table Detection</h4>
+        <p>
+          A region qualifies as a borderless table when <strong>&ge; 60%</strong> of candidate rows
+          share at least <strong>2 column anchors</strong> (vertical x-coordinates within 3px tolerance).
+        </p>
+
+        <h4>Confidence Model</h4>
+        <p>
+          Column boundaries: validated by requiring &ge; 3 blocks on each side of a gap.
+          Heading classification: cross-checked against font-size histogram; isolated outliers
+          are demoted to body text.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Single-column legal filings with indented block quotes (not misdetected as columns)</li>
+          <li>Three-column newsletter layouts</li>
+          <li>Tables that span the full page width without any column gaps</li>
+        </ul>
+      </section>
+
+      <!-- 2.3 Semantic Engine -->
+      <section id="semantic">
+        <h3>2.3 Semantic Engine</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Assign a structural role to every block: P, H1&ndash;H3, TH, TD, LI, or Artifact.
+          Group related blocks into composite structures (tables, lists) that may span multiple
+          pages.
+        </p>
+
+        <h4>Role Assignment</h4>
+        <p>Each block receives the highest-priority role whose conditions are satisfied:</p>
+        <table class="data-table">
+          <thead>
+            <tr><th>Role</th><th>Confidence</th><th>Condition</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Artifact</td><td><code>0.99</code></td><td>Header/footer zone, page number pattern, watermark</td></tr>
+            <tr><td>TH</td><td><code>0.96</code></td><td>Inside detected table, first row or bold-first-column</td></tr>
+            <tr><td>TD</td><td><code>0.90</code></td><td>Inside detected table, non-header cell</td></tr>
+            <tr><td>Table (composite)</td><td><code>0.96</code></td><td>Region matched by any table detector</td></tr>
+            <tr><td>LI</td><td><code>0.94</code></td><td>Bullet/number prefix + vertical gap &le; 28px to siblings</td></tr>
+            <tr><td>H1&ndash;H3</td><td><code>0.93</code></td><td>Heading classification from layout analyzer</td></tr>
+            <tr><td>P</td><td><code>0.88</code></td><td>Default: body text not matched by any other rule</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Table Continuation</h4>
+        <p>Tables frequently span page breaks. The engine uses two heuristics:</p>
+        <ul>
+          <li><strong>Same-page continuation:</strong> a new table region is merged with the preceding table if
+            the vertical gap (Y) is &le; <code>48px</code> or the horizontal offset (X) is &le; <code>160px</code>.</li>
+          <li><strong>Cross-page continuation:</strong> column anchor positions from the previous page are matched
+            against the new page; if anchors align within tolerance, the table spans the page break.</li>
+        </ul>
+
+        <h4>List Grouping</h4>
+        <p>
+          Consecutive list-item blocks are grouped into a single <code>&lt;L&gt;</code> structure
+          when the vertical gap between items is &le; <code>28px</code>.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Nested lists (indentation-based level detection)</li>
+          <li>Tables inside list items</li>
+          <li>Page headers repeated on every page (artifact deduplication)</li>
+        </ul>
+      </section>
+
+      <!-- 2.4 Paragraph Merger -->
+      <section id="merger">
+        <h3>2.4 Paragraph Merger</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          PDF extractors typically emit one text block per visual line. The paragraph merger
+          reconstitutes logical paragraphs by analyzing spatial signals, reducing the number of
+          <code>&lt;P&gt;</code> tags by an order of magnitude while preserving semantic boundaries.
+        </p>
+
+        <h4>Algorithm: Text-Structure Strategy</h4>
+        <pre><code><span class="cmt">// Phase 1: learn document metrics</span>
+bodyMargin  = detectDominantLeftMargin(blocks)
+medianSpace = computeMedianLineSpacing(blocks)
+
+<span class="cmt">// Phase 2: scan for break signals</span>
+<span class="kw">for each</span> consecutive pair (blockA, blockB):
+    gap = blockB.top - blockA.bottom
+
+    <span class="kw">if</span> gap &gt; <span class="num">2.2</span> &times; medianSpace:       <span class="cmt">// vertical gap break</span>
+        insertParagraphBreak()
+    <span class="kw">else if</span> blockB.left - bodyMargin &gt; <span class="num">20</span>px: <span class="cmt">// first-line indent</span>
+        insertParagraphBreak()
+    <span class="kw">else if</span> columnChanged(blockA, blockB):  <span class="cmt">// column boundary</span>
+        insertParagraphBreak()
+    <span class="kw">else</span>:
+        mergeIntoParagraph()
+</code></pre>
+
+        <h4>Validation</h4>
+        <p>Five post-merge validators catch errors before output:</p>
+        <ol>
+          <li><strong>Cross-column validator:</strong> rejects merges that span column boundaries</li>
+          <li><strong>Length validator:</strong> flags implausibly long merged paragraphs (&gt; 80 lines)</li>
+          <li><strong>Embedded heading validator:</strong> splits paragraphs that contain a heading-sized line in the middle</li>
+          <li><strong>Reading order validator:</strong> ensures merged paragraph text follows left-to-right, top-to-bottom order</li>
+          <li><strong>Spacing consistency validator:</strong> rejects merges where internal line spacing varies by &gt; 40%</li>
+        </ol>
+
+        <div class="metric-box">
+          <div class="metric-item"><span class="metric-value">82%</span><span class="metric-label">P-line reduction</span></div>
+          <div class="metric-item"><span class="metric-value">11,797 &rarr; 2,095</span><span class="metric-label">Legal corpus paragraphs</span></div>
+          <div class="metric-item"><span class="metric-value">0.06%</span><span class="metric-label">Error rate</span></div>
+          <div class="metric-item"><span class="metric-value">1 / 1,658</span><span class="metric-label">Errors in merged paragraphs</span></div>
+        </div>
+
+        <h4>Confidence Model</h4>
+        <p>
+          Each merged paragraph inherits the minimum confidence of its constituent blocks.
+          Merges flagged by any validator are split and individually re-evaluated.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Legal documents with numbered paragraphs (number treated as paragraph start, not list item)</li>
+          <li>Footnotes with smaller font size (excluded from merge with body text)</li>
+          <li>Block quotes with altered left margin (indent threshold adapts per-column)</li>
+        </ul>
+      </section>
+
+      <!-- 2.5 Reading Order -->
+      <section id="reading-order">
+        <h3>2.5 Reading Order</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Establish a single linear sequence for all tagged content that matches the order a
+          sighted reader would follow. This sequence determines the screen reader navigation
+          order.
+        </p>
+
+        <h4>Algorithm</h4>
+        <pre><code><span class="kw">sort</span> blocks <span class="kw">by</span>:
+    <span class="num">1.</span> page number                       <span class="cmt">// ascending</span>
+    <span class="num">2.</span> phase: header &gt; content &gt; footer  <span class="cmt">// semantic zone</span>
+    <span class="num">3.</span> column band index                 <span class="cmt">// left to right</span>
+    <span class="num">4.</span> vertical position (top)            <span class="cmt">// top to bottom</span>
+    <span class="num">5.</span> horizontal position (left)         <span class="cmt">// left to right tie-break</span>
+</code></pre>
+
+        <h4>Key Parameters</h4>
+        <table class="data-table">
+          <thead>
+            <tr><th>Parameter</th><th>Value</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Line-group epsilon</td><td><code>6pt</code></td><td>Blocks within 6pt vertical tolerance are treated as the same line and sorted left-to-right</td></tr>
+            <tr><td>Column band threshold</td><td><code>max(18% horizontal span, 64px)</code></td><td>Minimum gap width to establish a column boundary for reading order purposes</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Sub-Pixel Jitter Fix</h4>
+        <p>
+          Font metric rounding can shift block baselines by fractions of a point, causing
+          left-column text to sort after right-column text when sorted naively by Y then X.
+          The 6pt line-group epsilon absorbs this jitter, ensuring correct left-to-right reading
+          within a visual line.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Floating sidebars (assigned to nearest column band)</li>
+          <li>Full-width headings above multi-column body text</li>
+          <li>Footnote regions at page bottom (sorted after body content, before footer artifacts)</li>
+        </ul>
+      </section>
+
+      <!-- 2.6 Tag Builder -->
+      <section id="tag-builder">
+        <h3>2.6 Tag Builder</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Construct the PDF structure tree: a hierarchical tag tree that maps every content element
+          to its semantic role per the PDF/UA-1 specification.
+        </p>
+
+        <h4>Structure Tree</h4>
+        <pre><code>Document
+  &boxvr;&boxh; Sect
+  &boxv;   &boxvr;&boxh; H1, H2, H3       <span class="cmt">// headings</span>
+  &boxv;   &boxvr;&boxh; P                 <span class="cmt">// paragraphs</span>
+  &boxv;   &boxvr;&boxh; L                 <span class="cmt">// list</span>
+  &boxv;   &boxv;   &boxur;&boxh; LI              <span class="cmt">// list items</span>
+  &boxv;   &boxur;&boxh; Table
+  &boxv;       &boxvr;&boxh; THead
+  &boxv;       &boxv;   &boxur;&boxh; TR &rarr; TH, TH, TH
+  &boxv;       &boxur;&boxh; TBody
+  &boxv;           &boxur;&boxh; TR &rarr; TD, TD, TD
+  &boxur;&boxh; Sect ...</code></pre>
+
+        <h4>Table Normalization</h4>
+        <p>
+          Raw table data is normalized into a standards-compliant structure with explicit
+          <code>THead</code>, <code>TBody</code>, and <code>TFoot</code> sections. Irregular
+          tables (rows with varying cell counts) receive placeholder cells to form a rectangular
+          grid.
+        </p>
+
+        <h4>Header Row Detection</h4>
+        <p>A row is promoted to <code>THead</code> when any of these conditions hold:</p>
+        <ul>
+          <li>All cells in the row are tagged <code>TH</code></li>
+          <li>&ge; 75% of cells in the first 2 rows are <code>TH</code></li>
+          <li>The entire first row is ALL CAPS text</li>
+        </ul>
+
+        <h4>Row Header Pattern</h4>
+        <p>
+          When column 0 of a table contains cells tagged <code>TH</code>, those cells are
+          preserved as <code>TH</code> within <code>TBody</code> rows (row headers), and receive
+          a <code>Scope="Row"</code> attribute.
+        </p>
+
+        <h4>Heading Clamping</h4>
+        <p>
+          Heading levels are clamped to H1&ndash;H3 by default. This is configurable via the
+          profile system; the maximum level can be raised to H6 if needed.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Tables with merged cells (colspan/rowspan inferred from geometry)</li>
+          <li>Deeply nested structures (Sect within Sect, up to 4 levels)</li>
+          <li>Empty table cells (tagged as TD with empty content, not omitted)</li>
+        </ul>
+      </section>
+
+      <!-- 2.7 Font Embedder -->
+      <section id="font-embedder">
+        <h3>2.7 Font Embedder</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Ensure every font used in the output PDF is fully embedded with a valid ToUnicode
+          mapping, as required by PDF/UA-1. Repair or substitute fonts that are missing,
+          partially embedded, or lack character-to-Unicode mappings.
+        </p>
+
+        <h4>24-Check Font Analysis</h4>
+        <p>
+          Each font in the source PDF is evaluated across <strong>5 categories</strong> with
+          a total of <strong>24 individual checks</strong>:
+        </p>
+        <table class="data-table">
+          <thead>
+            <tr><th>Category</th><th>Checks</th><th>Examples</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Embedding</td><td>5</td><td>Font program present, subset valid, encoding declared</td></tr>
+            <tr><td>ToUnicode</td><td>6</td><td>CMap present, ranges parseable, coverage &ge; 95%</td></tr>
+            <tr><td>Metrics</td><td>4</td><td>Widths array matches glyph count, no zero-width visible glyphs</td></tr>
+            <tr><td>Identity</td><td>5</td><td>BaseFont name resolvable, type declared, flags consistent</td></tr>
+            <tr><td>License</td><td>4</td><td>fsType readable, embedding bits permissive</td></tr>
+          </tbody>
+        </table>
+
+        <h4>ToUnicode Reconstruction</h4>
+        <p>When a font lacks a ToUnicode CMap, the embedder attempts reconstruction in priority order:</p>
+        <ol>
+          <li><strong>TTF cmap table:</strong> parse the TrueType <code>cmap</code> table directly from the embedded font program</li>
+          <li><strong>Type1 Differences + AGL:</strong> map character codes via the Differences array and the Adobe Glyph List</li>
+          <li><strong>CID ROS:</strong> for CIDFont dictionaries, use the Registry-Ordering-Supplement to locate a standard CMap</li>
+          <li><strong>Synthesis:</strong> last resort &mdash; build a mapping from observed character codes to the most likely Unicode code points based on glyph shapes and positional context</li>
+        </ol>
+
+        <h4>Plan Emission</h4>
+        <p>After analysis, each font receives one of these plans:</p>
+        <ul>
+          <li><code>embed-as-is</code> &mdash; font is healthy, no changes needed</li>
+          <li><code>inject-to-unicode</code> &mdash; embed a reconstructed ToUnicode CMap</li>
+          <li><code>re-embed-subset</code> &mdash; re-subset the font program to fix structural issues</li>
+          <li><code>substitute-fallback</code> &mdash; replace with a Noto fallback font</li>
+        </ul>
+
+        <h4>Fallback Fonts</h4>
+        <table class="data-table">
+          <thead>
+            <tr><th>Fallback</th><th>Coverage</th><th>License</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Noto Sans</td><td>Latin, Cyrillic, Greek</td><td>SIL OFL 1.1</td></tr>
+            <tr><td>Noto Serif</td><td>Latin, Cyrillic, Greek</td><td>SIL OFL 1.1</td></tr>
+            <tr><td>Noto Sans Mono</td><td>Latin, Cyrillic, Greek</td><td>SIL OFL 1.1</td></tr>
+            <tr><td>Noto Sans Symbols</td><td>Symbols, Dingbats, Math</td><td>SIL OFL 1.1</td></tr>
+          </tbody>
+        </table>
+
+        <h4>License Handling</h4>
+        <p>
+          The <code>fsType</code> field from the OS/2 table is read for every embedded font. If the
+          field indicates restricted embedding, the engine emits a <strong>warning</strong> but
+          <strong>never blocks processing</strong>. The warning is surfaced in the font health report
+          for human review.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Fonts with Identity-H encoding but no embedded CMap (common in CJK PDFs)</li>
+          <li>Type3 bitmap fonts (always substituted with Noto fallback)</li>
+          <li>Subset fonts with non-standard glyph names (AGL fallback + heuristic mapping)</li>
+        </ul>
+      </section>
+
+      <!-- 2.8 PDF Writer -->
+      <section id="pdf-writer">
+        <h3>2.8 PDF Writer</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Produce the final tagged PDF output. The writer supports two modes: <strong>native</strong>
+          (preserving the original vector text) and <strong>raster</strong> (rendering pages as
+          images with an invisible text overlay).
+        </p>
+
+        <h4>Native Mode</h4>
+        <p>
+          Native mode preserves the original PDF content stream, injecting only the tag structure.
+          This is a three-step process:
+        </p>
+        <ol>
+          <li><strong>Operator-level parser:</strong> decomposes each content stream into individual PDF operators (Tj, TJ, Td, Tm, etc.)</li>
+          <li><strong>Tag matcher:</strong> correlates parsed text operators with semantic blocks from the pipeline, achieving a <strong>94% match rate</strong></li>
+          <li><strong>BDC/MCID/EMC injection:</strong> wraps matched operators in marked-content sequences that reference the structure tree</li>
+        </ol>
+
+        <div class="metric-box">
+          <div class="metric-item"><span class="metric-value">94%</span><span class="metric-label">Tag match rate (native)</span></div>
+          <div class="metric-item"><span class="metric-value">~1.05&times;</span><span class="metric-label">File size (native vs. original)</span></div>
+          <div class="metric-item"><span class="metric-value">~10&times;</span><span class="metric-label">File size (raster vs. original)</span></div>
+        </div>
+
+        <h4>Raster Mode</h4>
+        <p>
+          When native tagging is not feasible (complex content streams, encrypted layers, or
+          operator parsing failures), the writer falls back to raster mode:
+        </p>
+        <ul>
+          <li>Each page is rendered at <strong>144 DPI</strong> as a raster image</li>
+          <li>An invisible text overlay is positioned over the image using the extracted text coordinates</li>
+          <li>The overlay text is tagged with the full structure tree</li>
+        </ul>
+
+        <h4>CIDSet Cleanup</h4>
+        <p>
+          The writer performs CIDSet cleanup via incremental save, ensuring the CIDSet stream
+          accurately reflects the glyphs present in the output. This prevents false positives
+          from veraPDF's font validation.
+        </p>
+
+        <h4>Table Scope Attributes</h4>
+        <p>
+          Every <code>TH</code> cell is guaranteed a <code>Scope</code> attribute (<code>Column</code>,
+          <code>Row</code>, or <code>Both</code>) as required by PDF/UA-1.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>Content streams with inline images interleaved with text operators</li>
+          <li>Pages with multiple content streams (concatenated before parsing)</li>
+          <li>Incremental-update PDFs with conflicting object versions</li>
+        </ul>
+      </section>
+
+      <!-- 2.9 Validator -->
+      <section id="validator">
+        <h3>2.9 Validator</h3>
+        <a class="section-top" href="#overview">Back to top</a>
+
+        <h4>Purpose</h4>
+        <p>
+          Verify the output PDF against the PDF/UA-1 specification. The validator runs in two
+          phases: a fast internal font audit, followed by a full veraPDF compliance check.
+        </p>
+
+        <h4>Phase 1: Pre-veraPDF Font Audit</h4>
+        <p>
+          The internal font audit runs 8 targeted checks that catch approximately <strong>90%</strong>
+          of font-related PDF/UA failures before the more expensive veraPDF process starts:
+        </p>
+        <table class="data-table">
+          <thead>
+            <tr><th>Finding Code</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>FONT_NOT_EMBEDDED</code></td><td>Font program missing entirely</td></tr>
+            <tr><td><code>TO_UNICODE_MISSING</code></td><td>No ToUnicode CMap and no reconstructable mapping</td></tr>
+            <tr><td><code>TO_UNICODE_INCOMPLETE</code></td><td>ToUnicode CMap covers &lt; 95% of used glyphs</td></tr>
+            <tr><td><code>ENCODING_MISSING</code></td><td>No declared encoding for a simple font</td></tr>
+            <tr><td><code>WIDTHS_MISMATCH</code></td><td>Widths array does not match glyph count</td></tr>
+            <tr><td><code>SUBSET_INVALID</code></td><td>Subset prefix present but font program not subsetted</td></tr>
+            <tr><td><code>CIDSET_MISSING</code></td><td>CIDFont lacks required CIDSet stream</td></tr>
+            <tr><td><code>TYPE3_DETECTED</code></td><td>Type3 font cannot be embedded per PDF/UA-1</td></tr>
+          </tbody>
+        </table>
+
+        <div class="metric-box">
+          <div class="metric-item"><span class="metric-value">~90%</span><span class="metric-label">Font failures caught pre-veraPDF</span></div>
+          <div class="metric-item"><span class="metric-value">8</span><span class="metric-label">Finding codes</span></div>
+        </div>
+
+        <h4>Phase 2: veraPDF Validation</h4>
+        <p>
+          The output PDF is submitted to veraPDF for full PDF/UA-1 compliance checking. The
+          validator parses the veraPDF XML report and maps findings to human-readable diagnostics.
+        </p>
+
+        <h4>Resilience</h4>
+        <p>
+          If veraPDF crashes or times out (which can occur with very large or structurally
+          unusual PDFs), the validator emits a <code>VALIDATOR_EXECUTION_FAILED</code> finding
+          and the job <strong>completes successfully</strong> with a warning. The tagged PDF is
+          still produced; only the compliance verification is degraded.
+        </p>
+
+        <h4>Edge Cases</h4>
+        <ul>
+          <li>PDFs with thousands of fonts (batched font audit to limit memory)</li>
+          <li>veraPDF Java heap exhaustion (caught and reported, not propagated)</li>
+          <li>Encrypted PDFs that decrypt successfully but contain damaged font streams</li>
+        </ul>
+      </section>
+
+    </section><!-- /stages -->
+
+    <!-- ─────────── 3. Profile System ─────────── -->
+    <section id="profiles">
+      <h2>3. Profile System</h2>
+      <a class="section-top" href="#overview">Back to top</a>
+
+      <p>
+        Every parameter described above is tunable through the profile system. Profiles are
+        JSON objects that override default values at any stage of the pipeline.
+      </p>
+
+      <h4>6 Presets</h4>
+      <table class="data-table">
+        <thead>
+          <tr><th>Profile</th><th>Description</th><th>Key Overrides</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>default</code></td><td>Balanced general-purpose</td><td>All defaults</td></tr>
+          <tr><td><code>legal</code></td><td>Dense legal filings, numbered paragraphs</td><td>Tighter merge thresholds, heading ratio 1.4</td></tr>
+          <tr><td><code>scientific</code></td><td>Two-column papers with equations</td><td>Column gap 12%, table confidence base 0.85</td></tr>
+          <tr><td><code>scanned-low-quality</code></td><td>Poor-quality scans, faded text</td><td>OCR forced, gray-450 prioritized, confidence floor 0.40</td></tr>
+          <tr><td><code>forms-heavy</code></td><td>Government/tax forms with field labels</td><td>Table detection sensitivity raised, borderless threshold 50%</td></tr>
+          <tr><td><code>cjk</code></td><td>Chinese/Japanese/Korean documents</td><td>Noto CJK fallbacks, vertical text handling, wider column gap</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Composable Inheritance</h4>
+      <pre><code>{
+  <span class="str">"name"</span>: <span class="str">"legal-ocr"</span>,
+  <span class="str">"extends"</span>: <span class="str">"legal"</span>,
+  <span class="str">"parser"</span>: { <span class="str">"ocrMode"</span>: <span class="str">"force"</span> },
+  <span class="str">"merger"</span>: { <span class="str">"gapMultiplier"</span>: <span class="num">2.5</span> }
+}</code></pre>
+      <p>
+        Profiles use an <code>extends</code> field to inherit from a parent preset and override
+        only the parameters that differ. This enables composable configuration without
+        duplicating entire parameter sets.
+      </p>
+
+      <div class="metric-box">
+        <div class="metric-item"><span class="metric-value">6</span><span class="metric-label">Presets</span></div>
+        <div class="metric-item"><span class="metric-value">50+</span><span class="metric-label">Tunable parameters</span></div>
+        <div class="metric-item"><span class="metric-value">9</span><span class="metric-label">Pipeline stages</span></div>
+      </div>
+    </section>
+
+    <!-- ─────────── 4. Native PDF Preservation ─────────── -->
+    <section id="native">
+      <h2>4. Native PDF Preservation</h2>
+      <a class="section-top" href="#overview">Back to top</a>
+
+      <h4>What "Native PDF Retained" Means</h4>
+      <p>
+        When the engine reports <em>Native PDF Retained</em>, it means the original PDF content
+        streams &mdash; vector text, embedded fonts, graphics, form fields &mdash; are preserved
+        byte-for-byte. The only additions are the structure tree (tags), marked-content operators,
+        and any font repairs. The result is a tagged PDF that is visually identical to the original
+        and carries no rasterization artifacts.
+      </p>
+
+      <h4>3-Component Architecture</h4>
+      <div class="card">
+        <ol>
+          <li>
+            <strong>Operator Parser:</strong> decomposes each page's content stream into an ordered
+            sequence of PDF operators. Handles compressed streams (FlateDecode), inline images,
+            and nested form XObjects.
+          </li>
+          <li>
+            <strong>Tag Matcher:</strong> correlates text-drawing operators (Tj, TJ, ', ") with
+            the semantic blocks produced by the pipeline. Uses a combination of text content
+            matching and positional alignment. Achieves a 94% match rate across a diverse corpus.
+          </li>
+          <li>
+            <strong>Content Stream Rewriter:</strong> injects <code>/Tag BMC</code>,
+            <code>/MCID BDC</code>, and <code>EMC</code> operators around matched text runs.
+            Unmatched operators are wrapped in <code>/Artifact BMC ... EMC</code> to satisfy
+            PDF/UA's requirement that all content be tagged.
+          </li>
+        </ol>
+      </div>
+
+      <h4>File Size Comparison</h4>
+      <div class="metric-box">
+        <div class="metric-item"><span class="metric-value">604 KB</span><span class="metric-label">Native tagged output</span></div>
+        <div class="metric-item"><span class="metric-value">6,440 KB</span><span class="metric-label">Raster tagged output</span></div>
+        <div class="metric-item"><span class="metric-value">10.7&times;</span><span class="metric-label">Size ratio (same legal filing)</span></div>
+      </div>
+
+      <h4>Auto Mode</h4>
+      <p>
+        The default <code>auto</code> mode attempts native tagging first. If the operator parser
+        or tag matcher fails on a given page (match rate below threshold or content stream
+        unparseable), that individual page falls back to raster mode. The final output may
+        contain a mix of natively tagged and rasterized pages, optimizing for both fidelity
+        and file size.
+      </p>
+    </section>
+
+    <!-- ─────────── 5. Corruption Repair ─────────── -->
+    <section id="repair">
+      <h2>5. Corruption Repair</h2>
+      <a class="section-top" href="#overview">Back to top</a>
+
+      <p>
+        Before tagging, the engine performs a comprehensive health assessment of the source PDF.
+        This catches structural and font-level corruption that would cause downstream failures
+        or PDF/UA non-compliance.
+      </p>
+
+      <h4>8 Structural Checks</h4>
+      <ul>
+        <li>Cross-reference table integrity</li>
+        <li>Object stream decompression</li>
+        <li>Page tree consistency</li>
+        <li>Content stream parsing (all pages)</li>
+        <li>Resource dictionary completeness</li>
+        <li>Font reference resolution</li>
+        <li>Image stream integrity</li>
+        <li>Annotation and form field validity</li>
+      </ul>
+
+      <h4>24 Font Health Checks</h4>
+      <p>
+        The same 24-check analysis from the Font Embedder (Section 2.7) is applied as a
+        pre-flight diagnostic. Results are aggregated into a per-font and overall health grade.
+      </p>
+
+      <h4>Health Scoring: A&ndash;F Grades</h4>
+      <table class="data-table">
+        <thead>
+          <tr><th>Grade</th><th>Score Range</th><th>Interpretation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>A</strong></td><td>24/24 checks pass</td><td>Fully healthy, no intervention needed</td></tr>
+          <tr><td><strong>B</strong></td><td>21&ndash;23 checks pass</td><td>Minor issues, auto-repaired</td></tr>
+          <tr><td><strong>C</strong></td><td>17&ndash;20 checks pass</td><td>Moderate issues, repair attempted with warnings</td></tr>
+          <tr><td><strong>D</strong></td><td>12&ndash;16 checks pass</td><td>Significant issues, fallback fonts likely needed</td></tr>
+          <tr><td><strong>F</strong></td><td>&lt; 12 checks pass</td><td>Severe corruption, full font substitution</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Grades are computed per font and then aggregated to an overall document grade (the lowest
+        individual font grade). The health report is accessible from the dashboard and is included
+        in the job's diagnostic output.
+      </p>
+    </section>
+
+    <!-- ─────────── Footer ─────────── -->
+    <footer class="page-footer">
+      <p>
+        <strong>PDF Accessibility Engine</strong> &mdash; Open Source (Apache 2.0 + SIL OFL)
+      </p>
+      <p>
+        <a href="https://github.com/nickvmarleon/OpenAutoTag">GitHub Repository</a>
+      </p>
+      <p>
+        Built with Apache PDFBox, pdfjs-dist, tesseract.js, veraPDF
+      </p>
+    </footer>
+
+  </article>
+</div>
+
+<!-- ── Scroll-spy script ───────────────────────────────── -->
+<script>
+(function () {
+  const links = document.querySelectorAll('.toc-sidebar a');
+  const ids = Array.from(links).map(a => a.getAttribute('href').slice(1));
+  const sections = ids.map(id => document.getElementById(id)).filter(Boolean);
+
+  function update() {
+    let current = '';
+    for (const sec of sections) {
+      if (sec.getBoundingClientRect().top <= 80) current = sec.id;
+    }
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+</script>
+
+</body>
+</html>
