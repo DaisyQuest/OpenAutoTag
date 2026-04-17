@@ -81,6 +81,23 @@ body.wiz-body {
   gap: 0;
   flex-wrap: wrap;
   overflow-x: auto;
+  position: relative;
+}
+
+/* Mobile compact step indicator */
+.wiz-steps-mobile {
+  display: none;
+  text-align: center;
+  padding: .75rem 1rem;
+  background: var(--wiz-surface-alt);
+  border-bottom: 1px solid var(--wiz-border);
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--wiz-text-muted);
+}
+
+.wiz-steps-mobile .wiz-mobile-current {
+  color: var(--wiz-primary);
 }
 
 .wiz-step-item {
@@ -114,6 +131,12 @@ body.wiz-body {
   background: var(--wiz-primary);
   color: var(--wiz-primary-text);
   box-shadow: 0 0 0 3px rgba(37,99,235,.25);
+  animation: wizPulse 2s ease-in-out infinite;
+}
+
+@keyframes wizPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(37,99,235,.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(37,99,235,.12); }
 }
 
 .wiz-step-item.done .wiz-step-circle {
@@ -125,21 +148,30 @@ body.wiz-body {
 .wiz-step-item.done .wiz-step-circle .wiz-step-num { display: none; }
 .wiz-step-item.done .wiz-step-circle .wiz-check    { display: inline; }
 
+/* Progress bar fill between step circles */
 .wiz-step-line {
   width: 28px;
   height: 2px;
   background: var(--wiz-border);
-  transition: background var(--wiz-transition);
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: none;
 }
 
-.wiz-step-item.done + .wiz-step-item .wiz-step-line,
-.wiz-step-item.done .wiz-step-line {
-  /* handled via JS class on connector */
-}
-
-.wiz-step-line.done-line {
+.wiz-step-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
   background: var(--wiz-success);
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+
+.wiz-step-line.done-line::after {
+  width: 100%;
 }
 
 .wiz-step-label {
@@ -157,6 +189,7 @@ body.wiz-body {
     top: 36px;
     white-space: nowrap;
     pointer-events: none;
+    transition: color var(--wiz-transition), font-weight var(--wiz-transition);
   }
   .wiz-step-item.active .wiz-step-label { color: var(--wiz-primary); font-weight: 600; }
   .wiz-step-item.done   .wiz-step-label { color: var(--wiz-success); }
@@ -174,16 +207,44 @@ body.wiz-body {
 .wiz-step-panel {
   display: none;
   padding: 2rem;
-  animation: wizFadeIn var(--wiz-transition) ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity .35s cubic-bezier(.4,0,.2,1), transform .35s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
 }
 
 .wiz-step-panel.visible {
   display: block;
+  position: relative;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
-@keyframes wizFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Slide-in-from-left (going back) */
+.wiz-step-panel.slide-from-left {
+  transform: translateX(-60px);
+}
+
+/* Leaving animations */
+.wiz-step-panel.slide-out-left {
+  display: block;
+  position: absolute;
+  opacity: 0;
+  transform: translateX(-60px);
+  pointer-events: none;
+}
+
+.wiz-step-panel.slide-out-right {
+  display: block;
+  position: absolute;
+  opacity: 0;
+  transform: translateX(60px);
+  pointer-events: none;
 }
 
 /* ---------- Hero (step 1) --------------------------------- */
@@ -226,6 +287,7 @@ body.wiz-body {
 /* ---------- Form elements --------------------------------- */
 .wiz-field {
   margin-bottom: 1.25rem;
+  position: relative;
 }
 
 .wiz-field label {
@@ -263,10 +325,44 @@ body.wiz-body {
   box-shadow: 0 0 0 3px rgba(37,99,235,.15);
 }
 
+/* Valid field styling */
+.wiz-input.valid,
+.wiz-textarea.valid {
+  border-color: var(--wiz-success);
+  box-shadow: 0 0 0 2px rgba(22,163,74,.1);
+}
+
+/* Checkmark for valid fields */
+.wiz-field .wiz-valid-mark {
+  position: absolute;
+  right: 10px;
+  top: 34px;
+  color: var(--wiz-success);
+  font-size: 1rem;
+  opacity: 0;
+  transition: opacity var(--wiz-transition);
+  pointer-events: none;
+}
+
+.wiz-field .wiz-valid-mark.show {
+  opacity: 1;
+}
+
+/* Invalid field styling */
 .wiz-input.invalid,
 .wiz-textarea.invalid {
   border-color: var(--wiz-danger);
   box-shadow: 0 0 0 3px rgba(220,38,38,.12);
+  animation: wizShake .4s ease;
+}
+
+@keyframes wizShake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-6px); }
+  30%      { transform: translateX(5px); }
+  45%      { transform: translateX(-4px); }
+  60%      { transform: translateX(3px); }
+  75%      { transform: translateX(-2px); }
 }
 
 .wiz-textarea { resize: vertical; min-height: 80px; }
@@ -414,10 +510,6 @@ body.wiz-body {
   margin-bottom: 1.5rem;
 }
 
-@media (max-width: 600px) {
-  .wiz-review-grid { grid-template-columns: 1fr; }
-}
-
 .wiz-review-card {
   background: var(--wiz-surface-alt);
   border: 1px solid var(--wiz-border);
@@ -490,6 +582,8 @@ body.wiz-body {
 .wiz-code-block .hl-num   { color: #fab387; }
 .wiz-code-block .hl-bool  { color: #f38ba8; }
 .wiz-code-block .hl-comment { color: #6c7086; font-style: italic; }
+.wiz-code-block .hl-punct  { color: #a6adc8; }
+.wiz-code-block .hl-null   { color: #f38ba8; font-style: italic; }
 
 .wiz-code-label {
   font-size: .78rem;
@@ -559,6 +653,41 @@ body.wiz-body {
   color: var(--wiz-danger);
 }
 
+/* ---------- Build button (extra prominent) --------------- */
+.wiz-btn-build {
+  padding: 1rem 3rem;
+  font-size: 1.15rem;
+  background: linear-gradient(135deg, var(--wiz-primary), #7c3aed, #db2777);
+  background-size: 200% 200%;
+  color: #fff;
+  border: none;
+  border-radius: var(--wiz-radius-lg);
+  cursor: pointer;
+  font-weight: 700;
+  font-family: var(--wiz-font);
+  transition: transform .15s, box-shadow var(--wiz-transition), background-position .6s ease;
+  box-shadow: 0 6px 24px rgba(37,99,235,.35), 0 2px 8px rgba(124,58,237,.2);
+  letter-spacing: .02em;
+  animation: wizBuildGradient 4s ease-in-out infinite;
+}
+
+@keyframes wizBuildGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+.wiz-btn-build:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(37,99,235,.4), 0 4px 12px rgba(124,58,237,.25);
+}
+
+.wiz-btn-build:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+  animation: none;
+}
+
 /* ---------- Navigation footer ----------------------------- */
 .wiz-nav {
   display: flex;
@@ -578,7 +707,7 @@ body.wiz-body {
   border: none;
   border-radius: var(--wiz-radius);
   cursor: pointer;
-  transition: background var(--wiz-transition), transform .1s, box-shadow var(--wiz-transition);
+  transition: background var(--wiz-transition), transform .1s, box-shadow var(--wiz-transition), opacity var(--wiz-transition);
 }
 
 .wiz-btn:active { transform: scale(.97); }
@@ -588,7 +717,7 @@ body.wiz-body {
   color: var(--wiz-primary-text);
 }
 
-.wiz-btn-primary:hover { background: var(--wiz-primary-hover); }
+.wiz-btn-primary:hover:not(:disabled) { background: var(--wiz-primary-hover); }
 
 .wiz-btn-secondary {
   background: var(--wiz-surface-alt);
@@ -600,31 +729,6 @@ body.wiz-body {
 
 .wiz-btn:disabled {
   opacity: .45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.wiz-btn-build {
-  padding: .85rem 2.5rem;
-  font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--wiz-primary), #7c3aed);
-  color: #fff;
-  border: none;
-  border-radius: var(--wiz-radius);
-  cursor: pointer;
-  font-weight: 700;
-  font-family: var(--wiz-font);
-  transition: transform .15s, box-shadow var(--wiz-transition);
-  box-shadow: var(--wiz-shadow-lg);
-}
-
-.wiz-btn-build:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37,99,235,.3);
-}
-
-.wiz-btn-build:disabled {
-  opacity: .5;
   cursor: not-allowed;
   transform: none;
 }
@@ -665,10 +769,6 @@ body.wiz-body {
 
 .wiz-row > * { flex: 1; }
 
-@media (max-width: 550px) {
-  .wiz-row { flex-direction: column; }
-}
-
 /* ---------- Inline tag ------------------------------------ */
 .wiz-tag {
   display: inline-block;
@@ -706,10 +806,50 @@ body.wiz-body {
   border-radius: 3px;
 }
 
-/* ---------- Responsive tweaks ----------------------------- */
-@media (max-width: 550px) {
+/* ---------- Mobile responsiveness ------------------------- */
+
+/* Tablets and below */
+@media (max-width: 768px) {
+  .wiz-steps {
+    display: none;
+  }
+
+  .wiz-steps-mobile {
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .wiz-row { flex-direction: column; }
+
+  /* Platform checkboxes: stack vertically (already column, but ensure card options don't go horizontal) */
+  .wiz-check-group {
+    flex-direction: column;
+  }
+
   .wiz-step-panel { padding: 1.25rem; }
   .wiz-nav { padding: .75rem 1.25rem 1rem; }
   .wiz-hero h1 { font-size: 1.35rem; }
   .wiz-review-grid { grid-template-columns: 1fr; }
+
+  /* Full-width buttons on mobile */
+  .wiz-nav {
+    flex-direction: column-reverse;
+    gap: .5rem;
+  }
+
+  .wiz-btn {
+    width: 100%;
+    justify-content: center;
+    padding: .75rem 1rem;
+  }
+
+  .wiz-btn-build {
+    width: 100%;
+    padding: .85rem 1.5rem;
+  }
+}
+
+@media (max-width: 550px) {
+  .wiz-row { flex-direction: column; }
 }

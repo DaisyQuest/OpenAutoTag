@@ -20,6 +20,11 @@
       overflow: hidden;
       -webkit-app-region: drag;
       user-select: none;
+      transition: opacity .5s ease;
+    }
+
+    body.fade-out {
+      opacity: 0;
     }
 
     .logo {
@@ -50,13 +55,32 @@
       border-top-color: #60a5fa;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    /* Subtle progress bar below spinner */
+    .splash-progress {
+      width: 180px;
+      height: 3px;
+      background: rgba(148, 163, 184, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
       margin-bottom: 20px;
+    }
+
+    .splash-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      border-radius: 2px;
+      transition: width .6s ease;
     }
 
     .status {
       font-size: 13px;
       color: #64748b;
       transition: opacity 0.3s ease;
+      min-height: 1.2em;
     }
 
     .version {
@@ -81,28 +105,88 @@
   <div class="logo">PDF Accessibility Engine</div>
   <div class="subtitle">Open Auto Tag</div>
   <div class="spinner"></div>
-  <div class="status" id="status">Initializing...</div>
-  <div class="version" id="version">v1.0.0</div>
+  <div class="splash-progress">
+    <div class="splash-progress-fill" id="progressFill"></div>
+  </div>
+  <div class="status" id="status">Starting server...</div>
+  <div class="version" id="version">v0.1.0</div>
 
   <script>
-    // Listen for status updates from the main process
-    if (window.electronAPI) {
-      window.electronAPI.onSplashStatus((message) => {
-        const el = document.getElementById("status");
-        if (el) {
-          el.style.opacity = "0";
-          setTimeout(() => {
-            el.textContent = message;
-            el.style.opacity = "1";
-          }, 150);
-        }
-      });
+    // Animated dots for the status text
+    (function () {
+      var statusEl = document.getElementById("status");
+      var baseText = "Starting server";
+      var dotCount = 0;
+      var dotInterval = null;
+      var currentBase = baseText;
 
-      window.electronAPI.getAppVersion().then((v) => {
-        const el = document.getElementById("version");
-        if (el && v) el.textContent = "v" + v;
-      });
-    }
+      function startDotAnimation(text) {
+        currentBase = text || baseText;
+        dotCount = 0;
+        if (dotInterval) clearInterval(dotInterval);
+        dotInterval = setInterval(function () {
+          dotCount = (dotCount % 3) + 1;
+          var dots = "";
+          for (var i = 0; i < dotCount; i++) dots += ".";
+          // Pad to 3 to prevent text reflow
+          for (var j = dotCount; j < 3; j++) dots += "\u00A0";
+          if (statusEl) statusEl.textContent = currentBase + dots;
+        }, 500);
+      }
+
+      // Start the default animation
+      startDotAnimation(baseText);
+
+      // Simulated progress bar advancement
+      var progressEl = document.getElementById("progressFill");
+      var progress = 0;
+      var progressInterval = setInterval(function () {
+        // Advance slowly, never reaching 100% until ready
+        if (progress < 85) {
+          progress += Math.random() * 8 + 2;
+          if (progress > 85) progress = 85;
+          if (progressEl) progressEl.style.width = progress + "%";
+        }
+      }, 800);
+
+      // Fade-out function for when main window is ready
+      function fadeOutSplash() {
+        // Complete the progress bar
+        if (progressEl) progressEl.style.width = "100%";
+        if (dotInterval) clearInterval(dotInterval);
+        if (progressInterval) clearInterval(progressInterval);
+        if (statusEl) statusEl.textContent = "Ready!";
+        setTimeout(function () {
+          document.body.classList.add("fade-out");
+        }, 300);
+      }
+
+      // Listen for status updates from the main process
+      if (window.electronAPI) {
+        window.electronAPI.onSplashStatus(function (message) {
+          if (message === "__FADE_OUT__") {
+            fadeOutSplash();
+            return;
+          }
+          // Update status with animated dots
+          if (statusEl) {
+            statusEl.style.opacity = "0";
+            setTimeout(function () {
+              startDotAnimation(message);
+              statusEl.style.opacity = "1";
+            }, 150);
+          }
+        });
+
+        window.electronAPI.getAppVersion().then(function (v) {
+          var el = document.getElementById("version");
+          if (el && v) el.textContent = "v" + v;
+        });
+      }
+
+      // Expose fadeOut for programmatic use
+      window.splashFadeOut = fadeOutSplash;
+    })();
   </script>
 </body>
 </html>

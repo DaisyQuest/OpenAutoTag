@@ -9,6 +9,11 @@
 <body class="wiz-body">
   <div class="wiz-container">
 
+    <!-- ═══════════════════ Mobile Step Indicator ═══════════════════ -->
+    <div class="wiz-steps-mobile" aria-live="polite">
+      Step <span class="wiz-mobile-current" id="wizMobileStep">1</span> of 8 — <span id="wizMobileLabel">Welcome</span>
+    </div>
+
     <!-- ═══════════════════ Step Indicator ═══════════════════ -->
     <nav class="wiz-steps" aria-label="Wizard steps">
       <div class="wiz-step-item active">
@@ -89,6 +94,7 @@
         <div class="wiz-field">
           <label for="wizProductName">Product Name</label>
           <input type="text" id="wizProductName" class="wiz-input" value="PDF Accessibility Engine">
+          <span class="wiz-valid-mark">&#10003;</span>
           <div class="wiz-error-msg"></div>
         </div>
 
@@ -107,6 +113,7 @@
         <div class="wiz-field">
           <label for="wizDescription">Description</label>
           <textarea id="wizDescription" class="wiz-textarea" rows="3">Contract-first scaffold for a parallel PDF accessibility tagging pipeline.</textarea>
+          <span class="wiz-valid-mark">&#10003;</span>
           <div class="wiz-error-msg"></div>
         </div>
       </section>
@@ -267,6 +274,7 @@
             <div class="wiz-field">
               <label for="wizJavaLocalPath">JRE Path</label>
               <input type="text" id="wizJavaLocalPath" class="wiz-input" placeholder="/path/to/jre-21">
+              <span class="wiz-valid-mark">&#10003;</span>
               <div class="wiz-error-msg"></div>
               <div class="wiz-hint">Directory containing bin/java (or bin\java.exe on Windows)</div>
             </div>

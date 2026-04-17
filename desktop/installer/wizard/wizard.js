@@ -12,21 +12,22 @@
   'use strict';
 
   // ── Constants ──────────────────────────────────────────────────
-  const TOTAL_STEPS = 8;
-  const STEP_NAMES  = [
+  var TOTAL_STEPS = 8;
+  var STEP_NAMES  = [
     'Welcome', 'Platforms', 'Components', 'Java',
     'Branding', 'Advanced', 'Review', 'Build',
   ];
 
-  const THEME_COLORS = [
+  var THEME_COLORS = [
     '#2563eb', '#7c3aed', '#0891b2', '#059669',
     '#d97706', '#dc2626', '#db2777', '#4f46e5',
   ];
 
   // ── State ──────────────────────────────────────────────────────
-  let currentStep = 0;
+  var currentStep = 0;
+  var transitionDirection = 'forward'; // 'forward' | 'back'
 
-  const config = {
+  var config = {
     // Step 1
     productName:  'PDF Accessibility Engine',
     version:      '',    // filled from package.json or DOM
@@ -68,7 +69,7 @@
   };
 
   // ── DOM references (populated on init) ─────────────────────────
-  let panels, circles, connectors, prevBtn, nextBtn;
+  var panels, circles, connectors, prevBtn, nextBtn;
 
   // ── Initialization ─────────────────────────────────────────────
 
@@ -80,7 +81,7 @@
     nextBtn    = document.getElementById('wizNext');
 
     // Read version from the hidden span if present
-    const versionEl = document.getElementById('wizVersionValue');
+    var versionEl = document.getElementById('wizVersionValue');
     if (versionEl) config.version = versionEl.textContent.trim();
 
     bindNavigation();
@@ -90,17 +91,72 @@
     bindStep4();
     bindStep5();
     bindStep6();
+    bindKeyboard();
     renderColorSwatches();
-    showStep(0);
+    showStep(0, true);
+    updateNextButtonState();
   }
 
   // ── Step navigation ────────────────────────────────────────────
 
-  function showStep(idx) {
+  function showStep(idx, immediate) {
+    var prevIdx = currentStep;
+    var direction = idx >= prevIdx ? 'forward' : 'back';
     currentStep = idx;
 
     panels.forEach(function (p, i) {
-      p.classList.toggle('visible', i === idx);
+      if (i === idx) {
+        // Entering panel
+        if (!immediate) {
+          // Set starting position based on direction
+          p.style.transition = 'none';
+          p.style.display = 'block';
+          p.style.position = 'relative';
+          p.style.opacity = '0';
+          p.style.transform = direction === 'forward' ? 'translateX(60px)' : 'translateX(-60px)';
+          p.style.pointerEvents = 'none';
+          // Force reflow
+          void p.offsetHeight;
+          // Animate in
+          p.style.transition = '';
+          p.classList.add('visible');
+          p.style.opacity = '';
+          p.style.transform = '';
+          p.style.pointerEvents = '';
+        } else {
+          p.classList.add('visible');
+          p.style.display = '';
+          p.style.position = '';
+          p.style.opacity = '';
+          p.style.transform = '';
+          p.style.pointerEvents = '';
+        }
+      } else if (i === prevIdx && !immediate) {
+        // Leaving panel — animate out
+        p.classList.remove('visible');
+        p.style.display = 'block';
+        p.style.position = 'absolute';
+        p.style.pointerEvents = 'none';
+        p.style.opacity = '0';
+        p.style.transform = direction === 'forward' ? 'translateX(-60px)' : 'translateX(60px)';
+        // Clean up after transition
+        (function (panel) {
+          setTimeout(function () {
+            panel.style.display = '';
+            panel.style.position = '';
+            panel.style.opacity = '';
+            panel.style.transform = '';
+            panel.style.pointerEvents = '';
+          }, 380);
+        })(p);
+      } else {
+        p.classList.remove('visible');
+        p.style.display = '';
+        p.style.position = '';
+        p.style.opacity = '';
+        p.style.transform = '';
+        p.style.pointerEvents = '';
+      }
     });
 
     // Update step indicator
@@ -115,6 +171,12 @@
       c.classList.toggle('done-line', i < idx);
     });
 
+    // Update mobile step indicator
+    var mobileStep = document.getElementById('wizMobileStep');
+    var mobileLabel = document.getElementById('wizMobileLabel');
+    if (mobileStep) mobileStep.textContent = idx + 1;
+    if (mobileLabel) mobileLabel.textContent = STEP_NAMES[idx];
+
     // Nav buttons
     prevBtn.style.visibility = idx === 0 ? 'hidden' : 'visible';
     if (idx === TOTAL_STEPS - 1) {
@@ -126,6 +188,14 @@
 
     // Populate review on step 7 (index 6)
     if (idx === 6) populateReview();
+
+    // Update next button disabled state
+    updateNextButtonState();
+
+    // Focus trap: focus first focusable element in the new step
+    setTimeout(function () {
+      trapFocusInStep(idx);
+    }, 100);
   }
 
   function goNext() {
@@ -152,29 +222,91 @@
     nextBtn.addEventListener('click', goNext);
   }
 
+  // ── Keyboard navigation ───────────────────────────────────────
+
+  function bindKeyboard() {
+    document.addEventListener('keydown', function (e) {
+      // Enter key advances to next step (when valid)
+      if (e.key === 'Enter' && !e.shiftKey) {
+        var tag = (e.target.tagName || '').toLowerCase();
+        // Don't capture Enter in textareas or buttons
+        if (tag === 'textarea' || tag === 'button') return;
+        e.preventDefault();
+        goNext();
+      }
+
+      // Escape key goes back one step
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        goPrev();
+      }
+    });
+  }
+
+  function trapFocusInStep(idx) {
+    var panel = panels[idx];
+    if (!panel) return;
+    var focusable = panel.querySelectorAll(
+      'input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length > 0) {
+      focusable[0].focus();
+    }
+
+    // Set up focus trap
+    panel.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      if (focusable.length === 0) return;
+
+      var first = focusable[0];
+      var last  = focusable[focusable.length - 1];
+
+      // Include nav buttons in the trap
+      var allFocusable = Array.prototype.slice.call(focusable);
+      if (prevBtn && prevBtn.style.visibility !== 'hidden') allFocusable.push(prevBtn);
+      if (nextBtn && nextBtn.style.display !== 'none') allFocusable.push(nextBtn);
+
+      if (allFocusable.length === 0) return;
+
+      var firstEl = allFocusable[0];
+      var lastEl  = allFocusable[allFocusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    });
+  }
+
   // ── Validation ─────────────────────────────────────────────────
 
   function validateStep(idx) {
     clearErrors();
+    var result;
     switch (idx) {
-      case 0: return validateWelcome();
-      case 1: return validatePlatforms();
-      case 2: return true; // accessibility tagging always selected
-      case 3: return validateJava();
-      case 4: return true; // branding is optional
-      case 5: return true; // advanced is optional
-      case 6: return true; // review
-      case 7: return true; // build
+      case 0: result = validateWelcome(); break;
+      case 1: result = validatePlatforms(); break;
+      case 2: result = true; break; // accessibility tagging always selected
+      case 3: result = validateJava(); break;
+      case 4: result = true; break; // branding is optional
+      case 5: result = true; break; // advanced is optional
+      case 6: result = true; break; // review
+      case 7: result = true; break; // build
+      default: result = true;
     }
-    return true;
+    return result;
   }
 
   function validateWelcome() {
     var name = document.getElementById('wizProductName');
     if (!name.value.trim()) {
-      showError(name, 'Product name is required');
+      showError(name, 'Product name is required.');
       return false;
     }
+    markValid(name);
     return true;
   }
 
@@ -198,15 +330,21 @@
     if (config.javaBundle === 'bundle' && config.javaBundleSource === 'local') {
       var pathInput = document.getElementById('wizJavaLocalPath');
       if (pathInput && !pathInput.value.trim()) {
-        showError(pathInput, 'Please provide the path to a local JRE');
+        showError(pathInput, 'Please provide the path to a local JRE.');
         return false;
       }
+      markValid(pathInput);
     }
     return true;
   }
 
   function showError(inputEl, msg) {
+    inputEl.classList.remove('valid');
     inputEl.classList.add('invalid');
+    // Hide valid mark
+    var validMark = inputEl.parentElement.querySelector('.wiz-valid-mark');
+    if (validMark) validMark.classList.remove('show');
+    // Show error message
     var errEl = inputEl.parentElement.querySelector('.wiz-error-msg');
     if (errEl) {
       errEl.textContent = msg;
@@ -214,9 +352,57 @@
     }
   }
 
+  function markValid(inputEl) {
+    inputEl.classList.remove('invalid');
+    inputEl.classList.add('valid');
+    var validMark = inputEl.parentElement.querySelector('.wiz-valid-mark');
+    if (validMark) validMark.classList.add('show');
+    var errEl = inputEl.parentElement.querySelector('.wiz-error-msg');
+    if (errEl) errEl.classList.remove('show');
+  }
+
+  function clearFieldValidation(inputEl) {
+    inputEl.classList.remove('invalid', 'valid');
+    var validMark = inputEl.parentElement.querySelector('.wiz-valid-mark');
+    if (validMark) validMark.classList.remove('show');
+    var errEl = inputEl.parentElement.querySelector('.wiz-error-msg');
+    if (errEl) errEl.classList.remove('show');
+  }
+
   function clearErrors() {
     document.querySelectorAll('.invalid').forEach(function (el) { el.classList.remove('invalid'); });
     document.querySelectorAll('.wiz-error-msg.show').forEach(function (el) { el.classList.remove('show'); });
+  }
+
+  // ── Next-button disabled state ────────────────────────────────
+
+  function updateNextButtonState() {
+    if (!nextBtn) return;
+    var valid = isCurrentStepValid();
+    nextBtn.disabled = !valid;
+  }
+
+  function isCurrentStepValid() {
+    switch (currentStep) {
+      case 0: {
+        var name = document.getElementById('wizProductName');
+        return name && name.value.trim().length > 0;
+      }
+      case 1: {
+        var platChecks = document.querySelectorAll('.wiz-platform-cb:checked');
+        var archChecks = document.querySelectorAll('.wiz-arch-cb:checked');
+        return platChecks.length > 0 && archChecks.length > 0;
+      }
+      case 3: {
+        if (config.javaBundle === 'bundle' && config.javaBundleSource === 'local') {
+          var pathInput = document.getElementById('wizJavaLocalPath');
+          return pathInput && pathInput.value.trim().length > 0;
+        }
+        return true;
+      }
+      default:
+        return true;
+    }
   }
 
   // ── Data collection ────────────────────────────────────────────
@@ -280,7 +466,20 @@
   // ── Step-specific bindings ─────────────────────────────────────
 
   function bindStep1() {
-    // No special bindings; fields are standard inputs.
+    // Live validation on product name
+    var nameInput = document.getElementById('wizProductName');
+    if (nameInput) {
+      nameInput.addEventListener('input', function () {
+        if (nameInput.value.trim()) {
+          markValid(nameInput);
+        } else {
+          clearFieldValidation(nameInput);
+        }
+        updateNextButtonState();
+      });
+      // Mark valid on init if has value
+      if (nameInput.value.trim()) markValid(nameInput);
+    }
   }
 
   function bindStep2() {
@@ -290,6 +489,12 @@
       if (!input) return;
       input.addEventListener('change', function () {
         card.classList.toggle('selected', input.checked);
+        // Clear any platform/arch errors on change
+        var platErr = document.getElementById('wizPlatformError');
+        if (platErr) platErr.classList.remove('show');
+        var archErr = document.getElementById('wizArchError');
+        if (archErr) archErr.classList.remove('show');
+        updateNextButtonState();
       });
       // Init state
       if (input.checked) card.classList.add('selected');
@@ -316,6 +521,16 @@
         if (sourceGroup) {
           sourceGroup.style.display = r.value === 'bundle' && r.checked ? '' : 'none';
         }
+        // Update card selection
+        var card = r.closest('.wiz-card-option');
+        if (card) {
+          document.querySelectorAll('input[name="wizJavaBundle"]').forEach(function (rb) {
+            var c = rb.closest('.wiz-card-option');
+            if (c) c.classList.toggle('selected', rb.checked);
+          });
+        }
+        collectJava();
+        updateNextButtonState();
       });
     });
 
@@ -327,8 +542,28 @@
         if (localGroup) {
           localGroup.style.display = r.value === 'local' && r.checked ? '' : 'none';
         }
+        // Update card selection
+        document.querySelectorAll('input[name="wizJavaSource"]').forEach(function (rb) {
+          var c = rb.closest('.wiz-card-option');
+          if (c) c.classList.toggle('selected', rb.checked);
+        });
+        collectJava();
+        updateNextButtonState();
       });
     });
+
+    // Live validation on JRE path
+    var pathInput = document.getElementById('wizJavaLocalPath');
+    if (pathInput) {
+      pathInput.addEventListener('input', function () {
+        if (pathInput.value.trim()) {
+          markValid(pathInput);
+        } else {
+          clearFieldValidation(pathInput);
+        }
+        updateNextButtonState();
+      });
+    }
   }
 
   function bindStep5() {
@@ -674,7 +909,8 @@
       .replace(/:\s*"([^"]*)"/g, ': <span class="hl-str">"$1"</span>')
       .replace(/:\s*(true|false)/g, ': <span class="hl-bool">$1</span>')
       .replace(/:\s*(\d+)/g, ': <span class="hl-num">$1</span>')
-      .replace(/:\s*(null)/g, ': <span class="hl-bool">$1</span>');
+      .replace(/:\s*(null)/g, ': <span class="hl-null">$1</span>')
+      .replace(/([[\]{}])/g, '<span class="hl-punct">$1</span>');
   }
 
   // ── Helpers ────────────────────────────────────────────────────
