@@ -1,0 +1,519 @@
+/* --- Diff Tool Styles ---------------------------------------------------- */
+/* Extends the base brand styles from styles.css                              */
+
+/* Layout */
+.difftool-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.8rem;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .difftool-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sidebar */
+.difftool-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.upload-card {
+  background: rgba(255, 252, 247, 0.82);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.upload-card h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.upload-card .card-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.badge-source { background: var(--signal); }
+.badge-competitor { background: var(--warm); }
+.badge-ours { background: var(--signal-deep); }
+
+.upload-dropzone {
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.dragover {
+  border-color: var(--signal);
+  background: rgba(11, 122, 117, 0.04);
+}
+
+.upload-dropzone.has-file {
+  border-color: var(--signal);
+  border-style: solid;
+  background: rgba(11, 122, 117, 0.06);
+  color: var(--ink);
+}
+
+.upload-filename {
+  font-weight: 600;
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+
+/* Mode selector */
+.mode-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mode-selector h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.mode-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mode-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 150ms ease;
+}
+
+.mode-radio-group label:hover {
+  background: rgba(11, 122, 117, 0.05);
+}
+
+.mode-radio-group input[type="radio"] {
+  accent-color: var(--signal);
+}
+
+.mode-radio-group .mode-label-text {
+  font-weight: 600;
+}
+
+.mode-radio-group .mode-label-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* Compare button */
+.compare-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--signal) 0%, var(--signal-deep) 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 200ms ease, transform 120ms ease;
+}
+
+.compare-button:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.compare-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Progress */
+.compare-progress {
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background: rgba(11, 122, 117, 0.06);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+}
+
+.compare-progress.active {
+  display: flex;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--signal), var(--signal-deep));
+  transition: width 400ms ease;
+  width: 0%;
+}
+
+/* Main content */
+.difftool-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* Variant tabs */
+.variant-tabs {
+  display: flex;
+  gap: 0.35rem;
+  background: rgba(255, 252, 247, 0.6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 0.35rem;
+}
+
+.variant-tab {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+  text-align: center;
+}
+
+.variant-tab:hover {
+  background: rgba(11, 122, 117, 0.06);
+  color: var(--ink);
+}
+
+.variant-tab.active {
+  background: var(--signal);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(11, 122, 117, 0.25);
+}
+
+/* Overall winner banner */
+.winner-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(11, 122, 117, 0.1) 0%, rgba(6, 79, 76, 0.08) 100%);
+  border: 1px solid rgba(11, 122, 117, 0.2);
+}
+
+.winner-banner .trophy {
+  font-size: 1.8rem;
+}
+
+.winner-banner .winner-info h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.winner-banner .winner-info p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.winner-score {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--signal-deep);
+}
+
+/* Category cards */
+.categories-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.category-card {
+  background: rgba(255, 252, 247, 0.82);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  transition: box-shadow 200ms ease;
+}
+
+.category-card:hover {
+  box-shadow: 0 4px 16px rgba(19, 38, 40, 0.08);
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.category-icon {
+  font-size: 1.3rem;
+}
+
+.category-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.category-description {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.category-winner-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(11, 122, 117, 0.12);
+  color: var(--signal-deep);
+}
+
+.category-winner-badge.tied {
+  background: rgba(202, 107, 47, 0.12);
+  color: var(--warm);
+}
+
+/* Score bars */
+.score-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.score-entry {
+  display: grid;
+  grid-template-columns: 140px 1fr 52px;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+}
+
+.score-entry-label {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-bar-track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--paper-deep);
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 600ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.score-bar-fill.fill-source { background: var(--signal); }
+.score-bar-fill.fill-competitor { background: var(--warm); }
+.score-bar-fill.fill-ours { background: var(--signal-deep); }
+.score-bar-fill.fill-winner { background: linear-gradient(90deg, var(--signal) 0%, var(--signal-deep) 100%); }
+
+.score-value {
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.score-value.is-winner {
+  color: var(--signal-deep);
+}
+
+/* Metric details */
+.metric-details {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.metric-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.metric-table th {
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+
+.metric-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid rgba(19, 38, 40, 0.06);
+}
+
+.metric-table .metric-pass {
+  color: var(--signal);
+  font-weight: 700;
+}
+
+.metric-table .metric-fail {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.metric-table .metric-na {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Empty state */
+.difftool-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.difftool-empty .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.difftool-empty h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+  color: var(--ink);
+}
+
+.difftool-empty p {
+  font-size: 0.88rem;
+  max-width: 380px;
+}
+
+/* Findings table */
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.findings-column h4 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.findings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.78rem;
+}
+
+.findings-list li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(19, 38, 40, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.finding-code {
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(164, 60, 45, 0.1);
+  color: var(--danger);
+}
+
+/* Status message */
+.status-message {
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.status-message.error {
+  background: rgba(164, 60, 45, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(164, 60, 45, 0.2);
+}
+
+.status-message.info {
+  background: rgba(11, 122, 117, 0.06);
+  color: var(--signal-deep);
+  border: 1px solid rgba(11, 122, 117, 0.15);
+}

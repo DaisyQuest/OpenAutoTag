@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Diff Tool — PDF Accessibility Engine</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/difftool.css" />
+  </head>
+  <body data-view="difftool">
+    <a class="skip-link" href="#difftool-main">Skip to comparison</a>
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">
+          <span class="brand-icon">&#x1F6E1;&#xFE0F;</span>
+          <span>PDF Accessibility Engine</span>
+        </a>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" aria-label="Toggle navigation menu" />
+        <label for="nav-toggle" class="nav-toggle-label" aria-hidden="true">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </label>
+        <div class="topbar-collapsible">
+          <div class="topbar-links">
+            <a class="topbar-link" href="/">Workspace</a>
+            <a class="topbar-link is-active" href="/difftool">Diff Tool</a>
+            <a class="topbar-link" href="/admin/keys.html">API Keys</a>
+            <a class="topbar-link" href="/admin/system.html">System</a>
+          </div>
+          <div class="topbar-actions">
+            <span id="session-pill" class="session-pill">Diff Tool</span>
+          </div>
+        </div>
+      </nav>
+
+      <header class="hero hero-dashboard">
+        <div class="hero-copy" style="max-width: 720px;">
+          <p class="eyebrow">PDF Accessibility Comparison</p>
+          <h1>Compare accessibility quality across PDF documents.</h1>
+          <p class="lede">
+            Upload a source PDF, a competitor document, then generate our autotagged variants.
+            The diff tool scores each document across five accessibility categories and crowns a winner.
+          </p>
+        </div>
+      </header>
+
+      <main id="difftool-main" class="difftool-grid">
+        <!-- ── Sidebar: uploads + controls ── -->
+        <aside class="difftool-sidebar">
+          <div class="upload-card">
+            <h3><span class="card-badge badge-source">1</span> Source Document</h3>
+            <div
+              id="source-dropzone"
+              class="upload-dropzone"
+              role="button"
+              tabindex="0"
+              aria-label="Drop source PDF here"
+              data-target="source"
+            >
+              Drop source PDF here or click to browse
+            </div>
+            <input id="source-file" type="file" accept=".pdf,application/pdf" hidden />
+            <p id="source-filename" class="upload-filename" hidden></p>
+          </div>
+
+          <div class="upload-card">
+            <h3><span class="card-badge badge-competitor">2</span> Competitor Document</h3>
+            <div
+              id="competitor-dropzone"
+              class="upload-dropzone"
+              role="button"
+              tabindex="0"
+              aria-label="Drop competitor PDF here"
+              data-target="competitor"
+            >
+              Drop competitor PDF here or click to browse
+            </div>
+            <input id="competitor-file" type="file" accept=".pdf,application/pdf" hidden />
+            <p id="competitor-filename" class="upload-filename" hidden></p>
+          </div>
+
+          <div class="upload-card mode-selector">
+            <h3>AutoTag Modes</h3>
+            <p style="font-size: 0.82rem; color: var(--muted); margin: 0;">
+              Select which writer mode to display in the comparison.
+            </p>
+            <div class="mode-radio-group" id="mode-radios">
+              <label>
+                <input type="radio" name="writerMode" value="auto" checked />
+                <span>
+                  <span class="mode-label-text">Auto</span><br />
+                  <span class="mode-label-desc">Native-first with raster fallback</span>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="writerMode" value="native" />
+                <span>
+                  <span class="mode-label-text">Native</span><br />
+                  <span class="mode-label-desc">Strict native — fail below threshold</span>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="writerMode" value="raster" />
+                <span>
+                  <span class="mode-label-text">Raster</span><br />
+                  <span class="mode-label-desc">Rasterize every page (legacy)</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <button id="compare-btn" class="compare-button" type="button" disabled>
+            <span>&#x1F50D;</span> Run Comparison
+          </button>
+
+          <div id="compare-progress" class="compare-progress">
+            <span id="progress-text">Preparing comparison…</span>
+            <div class="progress-bar-track">
+              <div id="progress-fill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <div id="status-msg" class="status-message info" hidden></div>
+        </aside>
+
+        <!-- ── Main: results ── -->
+        <section class="difftool-main">
+          <div id="variant-tabs-container" hidden>
+            <div class="variant-tabs" role="tablist" aria-label="AutoTag variant">
+              <button class="variant-tab active" role="tab" data-mode="auto" aria-selected="true">
+                Auto Mode
+              </button>
+              <button class="variant-tab" role="tab" data-mode="native" aria-selected="false">
+                Native Mode
+              </button>
+              <button class="variant-tab" role="tab" data-mode="raster" aria-selected="false">
+                Raster Mode
+              </button>
+            </div>
+          </div>
+
+          <div id="winner-banner" class="winner-banner" hidden>
+            <span class="trophy">🏆</span>
+            <div class="winner-info">
+              <h3 id="winner-label">Overall Winner</h3>
+              <p id="winner-detail">Determined by weighted category scores</p>
+            </div>
+            <span id="winner-score" class="winner-score"></span>
+          </div>
+
+          <div id="categories-container" class="categories-grid"></div>
+
+          <div id="empty-state" class="difftool-empty">
+            <span class="empty-icon">📊</span>
+            <h3>Upload documents to compare</h3>
+            <p>
+              Drop a source PDF and a competitor PDF in the sidebar, then click
+              <strong>Run Comparison</strong> to generate a detailed accessibility
+              quality report.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/difftool.js"></script>
+  </body>
+</html>
