@@ -65,9 +65,15 @@ test("pipeline handles a mathematically generated hell document with exact struc
     const pageOneNodes = semanticOrdered.nodes
       .filter((node) => node.pageNumber === 1)
       .sort((left, right) => left.readingOrder - right.readingOrder);
+    const pageTwoNodes = semanticOrdered.nodes
+      .filter((node) => node.pageNumber === 2)
+      .sort((left, right) => left.readingOrder - right.readingOrder);
     const pageThreeNodes = semanticOrdered.nodes
       .filter((node) => node.pageNumber === 3)
       .sort((left, right) => left.readingOrder - right.readingOrder);
+    const pageTwoBlocks = layoutEnriched.pages[1].textBlocks;
+    const pageTwoTableBlocks = pageTwoBlocks.filter((block) => block.tableId === "vector-table:2:1");
+    const pageTwoHeadingBlock = pageTwoBlocks.find((block) => block.text === "Ruled Table Gauntlet");
     const mergedHeaderNode = semanticOrdered.nodes.find((node) => node.text === "Weighted Revenue Matrix");
     const mergedHeaderBlock = layoutEnriched.pages[1].textBlocks.find((block) => block.text === "Weighted Revenue Matrix");
     const mergedHeaderTag = findTagByLabel(tagging.root, "Weighted Revenue Matrix");
@@ -80,7 +86,7 @@ test("pipeline handles a mathematically generated hell document with exact struc
     assert.equal(layout.pages.length, 3);
     assert.equal(layoutEnriched.pages[0].columns, 2);
     assert.equal(layoutEnriched.pages[1].structureSignals.vectorTableCount, 1);
-    assert.equal(layoutEnriched.pages[1].structureSignals.tableHeaderRowCount, 2);
+    assert.equal(layoutEnriched.pages[1].structureSignals.tableHeaderRowCount, 3);
     assert.equal(layoutEnriched.pages[2].structureSignals.tableCount, 0);
     assert.equal(layoutEnriched.pages[2].structureSignals.orderedListItemCount, 2);
 
@@ -96,6 +102,11 @@ test("pipeline handles a mathematically generated hell document with exact struc
     }
     assert.equal(pageOneNodes.length, 9);
 
+    assert.ok(pageTwoTable, "expected to find page-2 table in tagging tree");
+    assert.ok(mergedHeaderBlock, "expected merged table header block");
+    assert.ok(mergedHeaderNode, "expected merged table header semantic node");
+    assert.ok(mergedHeaderTag, "expected merged table header tag node");
+    assert.ok(pageTwoHeadingBlock, "expected page-2 heading block");
     assert.equal(mergedHeaderBlock.tableId, "vector-table:2:1");
     assert.equal(mergedHeaderBlock.tableRole, "header");
     assert.equal(mergedHeaderBlock.tableSection, "head");
@@ -108,6 +119,20 @@ test("pipeline handles a mathematically generated hell document with exact struc
     assert.deepEqual(pageTwoTable.children.map((child) => child.type), ["THead", "TBody"]);
     assert.equal(pageTwoTable.children[0].children.length, 2);
     assert.equal(pageTwoTable.children[1].children.length, 3);
+    assert.equal(pageTwoHeadingBlock.tableId, undefined);
+    assert.equal(pageTwoHeadingBlock.blockType, "paragraph");
+
+    const pageTwoHeaderRows = [...new Set(pageTwoTableBlocks.filter((block) => block.tableSection === "head").map((block) => block.tableRowIndex))];
+    const pageTwoBodyRows = [...new Set(pageTwoTableBlocks.filter((block) => block.tableSection === "body").map((block) => block.tableRowIndex))];
+    assert.deepEqual(pageTwoHeaderRows, [1, 2]);
+    assert.deepEqual(pageTwoBodyRows, [3, 4, 5]);
+    assert.equal(layoutEnriched.pages[1].structureSignals.tableRowCount, 6);
+    assert.equal(tableStructureMap.pages[1].tables[0].rowCount, 5);
+
+    const pageTwoHeaderNodes = pageTwoNodes.filter((node) => node.role === "TH");
+    const pageTwoBodyNodes = pageTwoNodes.filter((node) => node.role === "TD");
+    assert.equal(pageTwoHeaderNodes.length, 4);
+    assert.equal(pageTwoBodyNodes.length, 9);
 
     assert.equal(tableStructureMap.summary.detectedTables, 1);
     assert.equal(tableStructureMap.summary.totalMergeSignals, 2);
