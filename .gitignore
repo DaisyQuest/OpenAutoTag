@@ -18,3 +18,11 @@ modules/validator/vendor/verapdf-pdfbox-installer.zip
 encyclopaediabri0014vari_a3g1.pdf
 orchestrator/agent-runtime.config.json
 test/integration/lrbtest-run-summary.json
+
+# LRB test fixtures — private court-filing documents, not for publication.
+# Regression tests in modules/pdf-writer/test/pipeline-output-regression.test.js
+# skip gracefully when these paths are absent.
+test/LRBTest/
+modules/pdf-writer/test/fixtures/06-tagged/
+modules/pdf-writer/test/fixtures/2025_*/
+modules/pdf-writer/test/fixtures/2026_*/
