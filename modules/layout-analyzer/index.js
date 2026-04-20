@@ -209,8 +209,10 @@ function looksNumericish(text) {
 
 function looksHeaderish(text) {
   const normalized = normalizeText(text);
-  // Accept single Latin letters and Unicode letters/symbols (e.g. ℃, ℉) as
-  // valid header content in addition to multi-char Latin words.
+  // Require at least one Latin letter or non-ASCII letter/symbol (e.g. ℃, ℉).
+  // Single-character column codes ('A', 'B') and Unicode unit symbols are valid
+  // column headers.  Pure digits and currency are still excluded by the
+  // !looksNumericish guard, so "1" or "$5" cannot pass.
   return normalized.length > 0 && normalized.length <= 48 && /[A-Za-z\u0080-\uFFFF]/.test(normalized) && !looksNumericish(normalized);
 }
 
@@ -356,7 +358,11 @@ function detectHeaderRow(rows) {
   const firstRowFonts = new Set(firstRow.items.map((i) => i.block.fontName).filter(Boolean));
   const restFonts = new Set(restRows.flatMap((r) => r.items.map((i) => i.block.fontName)).filter(Boolean));
 
-  if (firstRowFonts.size > 0 && [...firstRowFonts].some((f) => !restFonts.has(f)) && firstRow.headerishRatio >= 0.5) {
+  let firstRowHasDistinctFont = false;
+  for (const f of firstRowFonts) {
+    if (!restFonts.has(f)) { firstRowHasDistinctFont = true; break; }
+  }
+  if (firstRowHasDistinctFont && firstRow.headerishRatio >= 0.5) {
     return true;
   }
 
