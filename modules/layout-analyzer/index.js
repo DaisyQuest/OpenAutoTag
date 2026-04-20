@@ -816,11 +816,14 @@ function detectTextGridTables(page, blocks, baselineFontSize) {
 //
 // Guard rails that prevent false-positive adoption of prose or caption text:
 //  • block height ≤ max(24, 2.4 × baselineFontSize) – excludes section headings
+//  • block type must not be 'heading' or 'list-item'
 //  • block text must not start with a lower-case letter            – excludes
 //    continuation sentences ("disaggregated by …")
 //  • block text must not contain ". " (period-space)              – excludes
 //    numbered captions ("Table 2. Present-value …")
-//  • block must overlap ≥ 15 % of the table's horizontal width    – excludes
+//  • block must not be purely numeric                             – excludes
+//    page numbers and footnote markers
+//  • block must intersect the table's horizontal extent           – excludes
 //    narrow margin annotations
 function adoptOrphanTableBlocks(tableMetaById, tables, page, allBlocks, baselineFontSize) {
   if (tables.length === 0) return;
