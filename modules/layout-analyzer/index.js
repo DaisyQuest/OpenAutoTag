@@ -209,7 +209,11 @@ function looksNumericish(text) {
 
 function looksHeaderish(text) {
   const normalized = normalizeText(text);
-  return normalized.length > 0 && normalized.length <= 48 && /[A-Za-z]{2}/.test(normalized) && !looksNumericish(normalized);
+  // Require at least one Latin letter or non-ASCII letter/symbol (e.g. ℃, ℉).
+  // Single-character column codes ('A', 'B') and Unicode unit symbols are valid
+  // column headers.  Pure digits and currency are still excluded by the
+  // !looksNumericish guard, so "1" or "$5" cannot pass.
+  return normalized.length > 0 && normalized.length <= 48 && /[A-Za-z\u0080-\uFFFF]/.test(normalized) && !looksNumericish(normalized);
 }
 
 function countMatches(leftValues, rightValues, tolerance) {
@@ -342,11 +346,27 @@ function detectHeaderRow(rows) {
   const restNumericRatio = mean(restRows.map((row) => row.numericRatio));
   const restFontSize = mean(restRows.map((row) => row.meanFontSize));
 
-  return (
-    firstRow.boldRatio >= 0.5 ||
-    (firstRow.headerishRatio >= 0.75 && restNumericRatio >= 0.3) ||
-    (firstRow.headerishRatio >= 0.75 && firstRow.meanFontSize >= restFontSize * 1.08)
-  );
+  if (firstRow.boldRatio >= 0.5) return true;
+  if (firstRow.headerishRatio >= 0.75 && restNumericRatio >= 0.3) return true;
+  // Lowered ratio from 1.08 to 1.03: a consistent 3-5% font-size bump (e.g. 10pt
+  // header over 9.5pt body) is a reliable header signal in technical manuals.
+  if (firstRow.headerishRatio >= 0.75 && firstRow.meanFontSize >= restFontSize * 1.03) return true;
+
+  // Font-name distinctiveness: if the first row uses at least one font name
+  // that does not appear in any data row, it is highly likely to be a header
+  // (technical PDFs often use a separate font for column labels).
+  const firstRowFonts = new Set(firstRow.items.map((i) => i.block.fontName).filter(Boolean));
+  const restFonts = new Set(restRows.flatMap((r) => r.items.map((i) => i.block.fontName)).filter(Boolean));
+
+  let firstRowHasDistinctFont = false;
+  for (const f of firstRowFonts) {
+    if (!restFonts.has(f)) { firstRowHasDistinctFont = true; break; }
+  }
+  if (firstRowHasDistinctFont && firstRow.headerishRatio >= 0.5) {
+    return true;
+  }
+
+  return false;
 }
 
 function summarizeTableBand(rows, page, baselineFontSize) {
@@ -372,6 +392,15 @@ function summarizeTableBand(rows, page, baselineFontSize) {
   const consistentColumnRows = stableRows.filter(
     (row) => row.assignments.length >= Math.max(2, Math.min(anchors.length, anchors.length - 1))
   ).length;
+  // Measure horizontal span as the wider of anchor-centroid spread and the widest
+  // multi-item row's visual extent.  The anchor-centroid measure underestimates span
+  // when the rightmost column has wide cells (its anchor sits at the left edge of those
+  // cells, not their right edge), which causes narrow-but-valid tables to fail the
+  // minimum-span gate in isConfidentTableBand / isValidBorderless.
+  const anchorSpan = anchors.length >= 2 ? anchors.at(-1).x - anchors[0].x : 0;
+  const rowVisualSpan = rows
+    .filter((r) => r.items.length >= 2)
+    .reduce((maxSpan, r) => Math.max(maxSpan, r.right - r.left), 0);
 
   return {
     rows,
@@ -384,7 +413,7 @@ function summarizeTableBand(rows, page, baselineFontSize) {
     stableCoverage: rows.length === 0 ? 0 : stableRows.length / rows.length,
     consistentColumnRows,
     hasHeaderRow: detectHeaderRow(stableRows),
-    horizontalSpan: anchors.length >= 2 ? anchors.at(-1).x - anchors[0].x : 0
+    horizontalSpan: Math.max(anchorSpan, rowVisualSpan)
   };
 }
 
@@ -763,6 +792,257 @@ function detectTextGridTables(page, blocks, baselineFontSize) {
   };
 }
 
+// Post-detection pass that adopts two classes of orphan blocks into already-detected
+// tables:
+//
+//  Pass A – same-row orphans: blocks that sit at the same y-level as an existing
+//    table row (within rowTolerance) but were never assigned to a column anchor
+//    because their x-position fell outside the narrow tolerance used when building
+//    the band.  Typical cause: a leftmost header cell is indented relative to the
+//    data cells in that column (e.g. "Metric" centred in a label column whose data
+//    cells start further left).  We re-try with 4× the normal tolerance.
+//
+//  Pass B – above-table orphans: blocks that sit just above the table's topmost
+//    row (within gapThreshold) and overlap horizontally with the table but were
+//    never brought into the detection band.  Two kinds:
+//      • single-item merged rows whose text.length > 64 or width > 68 % of the
+//        page width caused them to be stripped by buildCandidateRows (e.g. a row
+//        where all 7 column labels were merged into one text block by the parser)
+//      • spanner-header rows whose x-anchors do not align with any individual data
+//        column anchor (the cells span multiple columns and are centred between them)
+//    After adoption, all existing row indices for that table are shifted up by the
+//    number of inserted pre-header rows so that the final numbering is contiguous
+//    and 0-based.
+//
+// Guard rails that prevent false-positive adoption of prose or caption text:
+//  • block height ≤ max(24, 2.4 × baselineFontSize) – excludes section headings
+//  • block type must not be 'heading' or 'list-item'
+//  • block text must not start with a lower-case letter            – excludes
+//    continuation sentences ("disaggregated by …")
+//  • block text must not contain ". " (period-space)              – excludes
+//    numbered captions ("Table 2. Present-value …")
+//  • block must not be purely numeric                             – excludes
+//    page numbers and footnote markers
+//  • block must intersect the table's horizontal extent           – excludes
+//    narrow margin annotations
+function adoptOrphanTableBlocks(tableMetaById, tables, page, allBlocks, baselineFontSize) {
+  if (tables.length === 0) return;
+
+  const rowTolerance = Math.max(readThresholds().rowTolerancePixels, baselineFontSize * 0.9);
+  const gapThreshold = Math.max(22, baselineFontSize * 3.2);
+  const xTolBase = Math.max(12, page.width * 0.03, baselineFontSize * 1.2);
+  const xTolWide = xTolBase * 4;
+
+  for (const table of tables) {
+    // Collect all cells assigned to this table
+    const assignedCells = [];
+    for (const [blockId, meta] of tableMetaById.entries()) {
+      if (meta.tableId !== table.id) continue;
+      const block = allBlocks.find((b) => b.id === blockId);
+      if (block) assignedCells.push({ blockId, meta, block });
+    }
+    if (assignedCells.length === 0) continue;
+
+    // Table bounding box from assigned cells
+    const tableLeft = Math.min(...assignedCells.map((c) => c.block.bbox[0]));
+    const tableRight = Math.max(...assignedCells.map((c) => c.block.bbox[0] + c.block.bbox[2]));
+    const tableTop = Math.min(...assignedCells.map((c) => c.block.bbox[1]));
+
+    // Column anchors: mean x per column index derived from all assigned cells
+    const colXValues = new Map();
+    for (const { block, meta } of assignedCells) {
+      const col = meta.tableColumnIndex;
+      if (!colXValues.has(col)) colXValues.set(col, []);
+      colXValues.get(col).push(block.bbox[0]);
+    }
+    const columnAnchors = [...colXValues.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([col, xValues]) => ({ col, x: mean(xValues) }));
+
+    if (columnAnchors.length === 0) continue;
+
+    // ------------------------------------------------------------------
+    // Pass A: adopt unassigned blocks at the same y-level as an existing row
+    // ------------------------------------------------------------------
+    // Build row y-bands from already-assigned cells
+    const rowBands = new Map(); // rowIndex → { yMin, yMax, isHeader }
+    for (const { block, meta } of assignedCells) {
+      const ri = meta.tableRowIndex;
+      if (!rowBands.has(ri)) rowBands.set(ri, { yMin: Infinity, yMax: -Infinity, isHeader: false });
+      const band = rowBands.get(ri);
+      band.yMin = Math.min(band.yMin, block.bbox[1]);
+      band.yMax = Math.max(band.yMax, block.bbox[1] + block.bbox[3]);
+      if (meta.tableRole === "header") band.isHeader = true;
+    }
+
+    for (const [rowIndex, band] of rowBands.entries()) {
+      const rowYCenter = (band.yMin + band.yMax) / 2;
+      const orphans = allBlocks.filter((b) => {
+        if (tableMetaById.has(b.id)) return false;
+        const bCenter = b.bbox[1] + b.bbox[3] / 2;
+        if (Math.abs(bCenter - rowYCenter) > rowTolerance) return false;
+        const bRight = b.bbox[0] + b.bbox[2];
+        return b.bbox[0] < tableRight + xTolWide && bRight > tableLeft - xTolWide;
+      });
+
+      for (const orphan of orphans) {
+        let bestCol = -1;
+        let bestDist = Infinity;
+        for (const anchor of columnAnchors) {
+          const dist = Math.abs(orphan.bbox[0] - anchor.x);
+          if (dist <= xTolWide && dist < bestDist) {
+            bestCol = anchor.col;
+            bestDist = dist;
+          }
+        }
+        if (bestCol === -1) continue;
+
+        const orphanRight = orphan.bbox[0] + orphan.bbox[2];
+        let colSpan = 1;
+        for (const anchor of columnAnchors) {
+          if (anchor.col > bestCol && anchor.x <= orphanRight + xTolBase) {
+            colSpan = Math.max(colSpan, anchor.col - bestCol + 1);
+          }
+        }
+
+        tableMetaById.set(orphan.id, {
+          blockType: "table-cell",
+          tableId: table.id,
+          tableRole: band.isHeader ? "header" : "cell",
+          tableSection: band.isHeader ? "head" : "body",
+          tableRowIndex: rowIndex,
+          tableColumnIndex: bestCol,
+          tableColumnSpan: colSpan,
+          tableDetectionMethod: "orphan-adoption-same-row"
+        });
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Pass B: adopt blocks ABOVE the table as pre-header rows
+    // ------------------------------------------------------------------
+    const orphanAbove = allBlocks.filter((b) => {
+      if (tableMetaById.has(b.id)) return false;
+      const bBottom = b.bbox[1] + b.bbox[3];
+      // Must sit just above the table top (with 2 px rounding tolerance)
+      if (bBottom > tableTop + 2) return false;
+      if (tableTop - bBottom > gapThreshold) return false;
+      // Must fall within the table's horizontal extent (not a pure margin annotation)
+      const bRight = b.bbox[0] + b.bbox[2];
+      if (b.bbox[0] >= tableRight || bRight <= tableLeft) return false;
+      // Must not be unusually tall (would indicate a section heading)
+      if (b.bbox[3] > Math.max(24, baselineFontSize * 2.4)) return false;
+      // Skip already-classified headings or list items
+      if (b.blockType === "heading" || b.blockType === "list-item") return false;
+      // Skip purely numeric blocks (page numbers, footnote markers)
+      if (looksNumericish(normalizeText(b.text))) return false;
+      // Guard: skip prose-like blocks.  Caption sentences start with a lower-case
+      // word or contain ". " (e.g. "Table 2. Present-value …").
+      const firstChar = b.text.trimStart()[0] ?? "";
+      if (firstChar >= "a" && firstChar <= "z") return false;
+      if (b.text.includes(". ")) return false;
+      return true;
+    });
+
+    if (orphanAbove.length === 0) continue;
+
+    // Group orphan-above blocks into rows by y-proximity, topmost row first
+    const orphanAboveRows = clusterByProximity(
+      orphanAbove.map((b) => ({ b, yCenter: b.bbox[1] + b.bbox[3] / 2 })),
+      (item) => item.yCenter,
+      rowTolerance
+    );
+    orphanAboveRows.sort((a, b) => a.centroid - b.centroid);
+
+    const numPre = orphanAboveRows.length;
+
+    // Shift all existing row indices up by numPre so indices remain contiguous
+    for (const [blockId, meta] of tableMetaById.entries()) {
+      if (meta.tableId !== table.id) continue;
+      meta.tableRowIndex += numPre;
+    }
+    table.headerRowCount += numPre;
+    table.rowCount += numPre;
+
+    // Assign the orphan rows as pre-header rows (indices 0 … numPre-1)
+    for (let ri = 0; ri < orphanAboveRows.length; ri++) {
+      const rowBlocks = orphanAboveRows[ri].items.map((item) => item.b).sort((a, b) => a.bbox[0] - b.bbox[0]);
+
+      for (const block of rowBlocks) {
+        const blockRight = block.bbox[0] + block.bbox[2];
+
+        // Determine which columns the spanner block covers.
+        //
+        // LEFT column: the anchor closest to the block's left edge whose x is
+        //   ≤ block.x + xTolBase (i.e. within or just to the right of the block).
+        //   This avoids picking a distant column on the other side of the table.
+        //   Fall back to the nearest anchor within xTolWide when none satisfies
+        //   the tighter condition (e.g. narrow single-column header labels).
+        //
+        // RIGHT column: the rightmost anchor in [block.x, blockRight + xTolBase].
+        //   Falls back to the left column (span = 1) when nothing is found.
+        let leftCol = -1;
+        let leftDist = Infinity;
+        let rightCol = -1;
+
+        for (const anchor of columnAnchors) {
+          // Candidate for LEFT column: anchor is within xTolBase past the block's left edge
+          if (anchor.x <= block.bbox[0] + xTolBase) {
+            const dist = Math.abs(anchor.x - block.bbox[0]);
+            if (dist < leftDist) {
+              leftCol = anchor.col;
+              leftDist = dist;
+            }
+          }
+          // Candidate for RIGHT column: anchor falls within the block's width.
+          // Use 2×xTolBase on the right so that a spanner label whose right edge sits
+          // slightly left of the rightmost spanned column's anchor is still captured
+          // (e.g. "IFR" at x=324-341 with col4 anchor at x=363: gap = 22 px which
+          // exceeds xTolBase=18 but is well within 2×xTolBase=36).
+          if (anchor.x >= block.bbox[0] && anchor.x <= blockRight + xTolBase * 2) {
+            if (rightCol === -1 || anchor.col > rightCol) {
+              rightCol = anchor.col;
+            }
+          }
+        }
+
+        // Fallback: if no anchor is within xTolBase of the left edge, use the
+        // nearest anchor overall (within xTolWide), which handles columns whose
+        // anchors lie entirely to the right of the label (e.g. single-word labels
+        // whose column's data cells start further left on the same row).
+        if (leftCol === -1) {
+          let nearestDist = Infinity;
+          for (const anchor of columnAnchors) {
+            const dist = Math.abs(anchor.x - block.bbox[0]);
+            if (dist <= xTolWide && dist < nearestDist) {
+              leftCol = anchor.col;
+              nearestDist = dist;
+            }
+          }
+        }
+        if (leftCol === -1) continue; // cannot assign this block
+
+        if (rightCol === -1) rightCol = leftCol;
+        if (leftCol > rightCol) rightCol = leftCol;
+
+        const bestCol = leftCol;
+        const colSpan = rightCol - leftCol + 1;
+
+        tableMetaById.set(block.id, {
+          blockType: "table-cell",
+          tableId: table.id,
+          tableRole: "header",
+          tableSection: "head",
+          tableRowIndex: ri,
+          tableColumnIndex: bestCol,
+          tableColumnSpan: colSpan,
+          tableDetectionMethod: "orphan-header-above"
+        });
+      }
+    }
+  }
+}
+
 function analyzePage(page, baselineFontSize, tableStructurePage = null) {
   const thresholds = readThresholds();
   const preclassifiedBlocks = page.textBlocks.map((block) => ({
@@ -780,6 +1060,7 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
     ...vectorTableAnalysis.tableMetaById.entries()
   ]);
   const tables = [...vectorTableAnalysis.tables, ...textGridTableAnalysis.tables, ...borderlessTableAnalysis.tables];
+  adoptOrphanTableBlocks(tableMetaById, tables, page, preclassifiedBlocks, baselineFontSize);
   const columns = detectColumns({ ...page, textBlocks: preclassifiedBlocks }, new Set(tableMetaById.keys()), thresholds);
   const largestTable = [...tables].sort(
     (left, right) => right.rowCount * right.columnCount - left.rowCount * left.columnCount

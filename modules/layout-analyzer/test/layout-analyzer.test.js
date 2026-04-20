@@ -524,3 +524,368 @@ test("layout analyzer respects LAYOUT_HEADING_SCORE_THRESHOLD env override", asy
     else process.env.LAYOUT_HEADING_SCORE_THRESHOLD = originalHeading;
   }
 });
+
+test("layout analyzer detects header row when header font differs from data font (font-name distinctiveness)", async () => {
+  // Simulates Autonics-style PDFs where headers use an obfuscated font like
+  // g_d0_f1 while data rows use g_d0_f2 / g_d0_f9, with no "Bold" in the name.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-font-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:font-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header row uses font g_d0_f1 (same size as data, no "Bold" in name)
+          { id: "h1", text: "Parameter", bbox: [119, 181, 49, 10], fontSize: 10.0, fontName: "g_d0_f1" },
+          { id: "h2", text: "Description", bbox: [194, 181, 55, 10], fontSize: 10.0, fontName: "g_d0_f1" },
+          // Data rows use different fonts g_d0_f9 and g_d0_f2
+          { id: "d1", text: "RAMU", bbox: [119, 195, 24, 9], fontSize: 9.5, fontName: "g_d0_f9" },
+          { id: "d2", text: "Settings for Ramp-up change rate.", bbox: [194, 195, 145, 9], fontSize: 9.5, fontName: "g_d0_f2" },
+          { id: "d3", text: "RAMD", bbox: [119, 211, 24, 9], fontSize: 9.5, fontName: "g_d0_f9" },
+          { id: "d4", text: "Settings for Ramp-down change rate.", bbox: [194, 211, 157, 9], fontSize: 9.5, fontName: "g_d0_f2" },
+          { id: "d5", text: "rUNT", bbox: [119, 226, 24, 9], fontSize: 9.5, fontName: "g_d0_f9" },
+          { id: "d6", text: "Settings for Ramp time unit.", bbox: [194, 226, 117, 9], fontSize: 9.5, fontName: "g_d0_f2" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+  assert.equal(blockById.get("h1").tableRole, "header", "h1 should be header");
+  assert.equal(blockById.get("h2").tableRole, "header", "h2 should be header");
+  assert.equal(blockById.get("d1").tableRole, "cell", "d1 should be cell");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("layout analyzer detects header row when header is 5% larger (10pt over 9.5pt baseline)", async () => {
+  // Autonics-style PDFs: header rows at 10pt, body rows at 9.5pt, same font family.
+  // Old threshold 1.08 rejected this (10/9.5=1.053 < 1.08); new 1.03 accepts it.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-fontsize-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:fontsize-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header at 10pt
+          { id: "h1", text: "Display", bbox: [105, 393, 49, 10], fontSize: 10.0, fontName: "Helvetica" },
+          { id: "h2", text: "Parameter Description", bbox: [215, 393, 107, 10], fontSize: 10.0, fontName: "Helvetica" },
+          // Data at 9.5pt (same font family — no "Bold", no size jump > 8%)
+          { id: "d1", text: "L-SV", bbox: [105, 407, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d2", text: "Set value low-limit", bbox: [215, 407, 96, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d3", text: "H-SV", bbox: [105, 422, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d4", text: "Set value high-limit", bbox: [215, 422, 99, 9], fontSize: 9.5, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+  assert.equal(blockById.get("h1").tableRole, "header", "h1 should be header");
+  assert.equal(blockById.get("h2").tableRole, "header", "h2 should be header");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("layout analyzer detects header with single-letter and Unicode-symbol column labels", async () => {
+  // Autonics-style multi-column headers that use single Latin letters (e.g. 'A','B')
+  // and Unicode temperature symbols like '(℃)' and '(℉)' as column labels.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-unicode-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:unicode-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header row contains single-char and Unicode-symbol labels
+          { id: "h1", text: "Display", bbox: [105, 181, 60, 10], fontSize: 10.0, fontName: "Helvetica" },
+          { id: "h2", text: "(℃)", bbox: [215, 181, 24, 10], fontSize: 10.0, fontName: "Helvetica" },
+          { id: "h3", text: "(℉)", bbox: [315, 181, 24, 10], fontSize: 10.0, fontName: "Helvetica" },
+          // Data rows at 9.5pt
+          { id: "d1", text: "1", bbox: [105, 195, 10, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d2", text: "-200 to 1350", bbox: [215, 195, 80, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d3", text: "-328 to 2462", bbox: [315, 195, 80, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d4", text: "0.1", bbox: [105, 210, 14, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d5", text: "-199.9 to 999.9", bbox: [215, 210, 90, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d6", text: "-199.9 to 999.9", bbox: [315, 210, 90, 9], fontSize: 9.5, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+  assert.equal(blockById.get("h1").tableRole, "header", "Display should be header");
+  assert.equal(blockById.get("h2").tableRole, "header", "(℃) should be header");
+  assert.equal(blockById.get("h3").tableRole, "header", "(℉) should be header");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("layout analyzer detects narrow 2-column table whose anchor span is smaller than page.width*0.14", async () => {
+  // Reproduces the Autonics page 67 'Parameter | Description' table:
+  // anchors at x=119 and x=194 → anchor-span = 75px, but page.width*0.14 ≈ 83px.
+  // The visual row span (right - left) is 219px, which clears the gate once we
+  // use Math.max(anchor_span, visual_row_span) for horizontalSpan.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-narrow-table-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:narrow-table",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header row: anchor span 194-119=75px < page.width*0.14≈83px
+          // but visual span 194+55-119=130px clears the gate
+          { id: "h1", text: "Parameter", bbox: [119, 181, 49, 10], fontSize: 10.0, fontName: "Helvetica-Bold" },
+          { id: "h2", text: "Description", bbox: [194, 181, 55, 10], fontSize: 10.0, fontName: "Helvetica-Bold" },
+          { id: "d1", text: "RAMU", bbox: [119, 195, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d2", text: "Set the ramp-up rate.", bbox: [194, 195, 90, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d3", text: "RAMD", bbox: [119, 211, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d4", text: "Set the ramp-down rate.", bbox: [194, 211, 100, 9], fontSize: 9.5, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "narrow table should be detected");
+  assert.equal(blockById.get("h1").blockType, "table-cell", "h1 should be table-cell");
+  assert.equal(blockById.get("h1").tableRole, "header", "h1 should be header");
+  assert.equal(blockById.get("d1").blockType, "table-cell", "d1 should be table-cell");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("orphan adoption: wide merged column-header block above table is tagged as spanning header", async () => {
+  // Reproduces the 'irregulartable-badheaders.pdf' pattern where all 7 column
+  // labels were merged by the parser into a single wide text block that exceeds
+  // the text.length and width filters of buildCandidateRows.  The adoption pass
+  // (Pass B) must tag it as a col0/span7 header row prepended before the data.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-orphan-merged-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:orphan-merged-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 612,
+        height: 792,
+        textBlocks: [
+          // Merged column-header row: 7 labels in one wide block (exceeds 64-char / 68%-width filters)
+          { id: "hdr", text: "Year Undiscounted Discounted Undiscounted Discounted Undiscounted Discounted",
+            bbox: [80, 152, 457, 11], fontSize: 12, fontName: "Helvetica" },
+          // Data rows – 7 narrow columns
+          { id: "d1c0", text: "1",        bbox: [92,  168, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c1", text: "$16,949",  bbox: [135, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c2", text: "$15,840",  bbox: [207, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c3", text: "$0",       bbox: [291, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c4", text: "$0",       bbox: [363, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c5", text: "-$16,949", bbox: [421, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c6", text: "-$15,840", bbox: [493, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c0", text: "2",        bbox: [92,  184, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c1", text: "$1,990",   bbox: [135, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c2", text: "$1,738",   bbox: [207, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c3", text: "$16,949",  bbox: [291, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c4", text: "$14,804",  bbox: [363, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c5", text: "$14,959",  bbox: [421, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c6", text: "$13,066",  bbox: [493, 184, 36, 11], fontSize: 12, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+
+  const hdr = blockById.get("hdr");
+  assert.equal(hdr.blockType, "table-cell", "merged header block should become table-cell");
+  assert.equal(hdr.tableRole, "header", "merged header should have role=header");
+  assert.equal(hdr.tableColumnIndex, 0, "merged header should start at column 0");
+  assert.equal(hdr.tableColumnSpan, 7, "merged header should span all 7 columns");
+  assert.equal(hdr.tableRowIndex, 0, "merged header row should be row 0");
+
+  // Data rows must be shifted up by 1 (one pre-header row inserted)
+  assert.equal(blockById.get("d1c0").tableRowIndex, 1, "first data row should be row 1");
+  assert.equal(blockById.get("d2c0").tableRowIndex, 2, "second data row should be row 2");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "should count 1 header row");
+});
+
+test("orphan adoption: spanner header cells above table are tagged with correct column spans", async () => {
+  // Reproduces the 'Status Quo / IFR / Cost Savings' pattern where each spanner
+  // header is centred over 2 data columns but does not left-align with any
+  // individual column anchor so it is rejected by areRowsCompatible.
+  // Pass B must tag: Status Quo → col1/span2, IFR → col3/span2, Cost Savings → col5/span2.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-orphan-spanner-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:orphan-spanner",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 612,
+        height: 792,
+        textBlocks: [
+          // Spanner row (y=137): cells centred over pairs of data columns
+          { id: "sq",  text: "Status Quo",   bbox: [164, 137, 49, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "ifr", text: "IFR",          bbox: [324, 137, 17, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "cs",  text: "Cost Savings", bbox: [448, 137, 58, 11], fontSize: 12, fontName: "Helvetica" },
+          // Data rows (col0=Year, col1-2=SQ, col3-4=IFR, col5-6=CS)
+          { id: "d1c0", text: "1",        bbox: [92,  168, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c1", text: "$16,949",  bbox: [135, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c2", text: "$15,840",  bbox: [207, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c3", text: "$0",       bbox: [291, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c4", text: "$0",       bbox: [363, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c5", text: "-$16,949", bbox: [421, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c6", text: "-$15,840", bbox: [493, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c0", text: "2",        bbox: [92,  184, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c1", text: "$1,990",   bbox: [135, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c2", text: "$1,738",   bbox: [207, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c3", text: "$16,949",  bbox: [291, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c4", text: "$14,804",  bbox: [363, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c5", text: "$14,959",  bbox: [421, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c6", text: "$13,066",  bbox: [493, 184, 36, 11], fontSize: 12, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+
+  const sqBlock = blockById.get("sq");
+  assert.equal(sqBlock.blockType, "table-cell", "Status Quo should be table-cell");
+  assert.equal(sqBlock.tableRole, "header", "Status Quo should be header");
+  assert.equal(sqBlock.tableColumnIndex, 1, "Status Quo should start at column 1");
+  assert.equal(sqBlock.tableColumnSpan, 2, "Status Quo should span 2 columns");
+
+  const ifrBlock = blockById.get("ifr");
+  assert.equal(ifrBlock.blockType, "table-cell", "IFR should be table-cell");
+  assert.equal(ifrBlock.tableRole, "header", "IFR should be header");
+  assert.equal(ifrBlock.tableColumnIndex, 3, "IFR should start at column 3");
+  assert.equal(ifrBlock.tableColumnSpan, 2, "IFR should span 2 columns");
+
+  const csBlock = blockById.get("cs");
+  assert.equal(csBlock.blockType, "table-cell", "Cost Savings should be table-cell");
+  assert.equal(csBlock.tableRole, "header", "Cost Savings should be header");
+  assert.equal(csBlock.tableColumnIndex, 5, "Cost Savings should start at column 5");
+  assert.equal(csBlock.tableColumnSpan, 2, "Cost Savings should span 2 columns");
+
+  // Existing data rows must be shifted by 1 (one spanner row inserted)
+  assert.equal(blockById.get("d1c0").tableRowIndex, 1, "first data row should shift to row 1");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "should count 1 header row");
+});
+
+test("orphan adoption: same-row header cell offset from column anchor is adopted (Pass A)", async () => {
+  // Reproduces the 'Metric' cell pattern: the leftmost column header appears at
+  // x=140 while the data cells in that column start at x=79-95 (anchor ≈ 85).
+  // The gap (55 px) exceeds the normal tolerance (≈41 px), so assignItemsToAnchors
+  // misses it.  Pass A of adoptOrphanTableBlocks must adopt it as col0/header.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-orphan-passA-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:orphan-passA",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 612,
+        height: 792,
+        textBlocks: [
+          // Header row: col0 label is indented 55 px right of the data column anchor
+          { id: "h0", text: "Metric",          bbox: [140, 526, 29, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          { id: "h1", text: "All Entities",    bbox: [263, 526, 50, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          { id: "h2", text: "Small Entities",  bbox: [358, 526, 62, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          { id: "h3", text: "Small Entity Share", bbox: [448, 526, 83, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          // Data rows – col0 data cells left-align at x≈80-95 (anchor ≈ 85)
+          { id: "d1c0", text: "Original 10-year total costs",     bbox: [95, 546, 120, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c1", text: "$24,688 million",                  bbox: [253, 546, 70, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c2", text: "$13,095 million",                  bbox: [354, 546, 70, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c3", text: "53.0%",                            bbox: [448, 546, 28, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c0", text: "10-year PV savings",               bbox: [80, 562, 241, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c1", text: "$1,472 million",                   bbox: [253, 562, 65, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c2", text: "N/A",                              bbox: [354, 562, 28, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c3", text: "53.0%",                            bbox: [448, 562, 28, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c0", text: "Annualized savings",               bbox: [79, 578, 151, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c1", text: "$395 million",                     bbox: [253, 578, 57, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c2", text: "$210 million",                     bbox: [354, 578, 57, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c3", text: "53.0%",                            bbox: [448, 578, 28, 11], fontSize: 12, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+
+  const metricBlock = blockById.get("h0");
+  assert.equal(metricBlock.blockType, "table-cell", "Metric should be table-cell");
+  assert.equal(metricBlock.tableRole, "header", "Metric should be header");
+  assert.equal(metricBlock.tableColumnIndex, 0, "Metric should be in column 0");
+
+  // Other header cells are detected normally
+  assert.equal(blockById.get("h1").tableRole, "header", "All Entities should be header");
+  assert.equal(blockById.get("h1").tableColumnIndex, 1, "All Entities should be column 1");
+
+  // Data rows must not be re-indexed (no above-table orphans; Pass A only adds a missing cell)
+  assert.equal(blockById.get("d1c0").tableRowIndex, 1, "first data row should be row 1");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
