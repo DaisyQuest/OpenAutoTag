@@ -4,152 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evidence of Conformance — PDF Accessibility Engine</title>
-  <style>
-    :root {
-      --bg: #fafbfc; --fg: #1e293b; --muted: #64748b; --border: #e2e8f0;
-      --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
-      --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fde68a;
-      --red: #dc2626; --red-bg: #fef2f2; --red-border: #fecaca;
-      --blue: #2563eb; --blue-bg: #eff6ff; --blue-border: #bfdbfe;
-      --card-bg: #fff; --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      --toc-bg: #f8fafc;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8; --border: #334155;
-        --green-bg: #052e16; --green-border: #166534;
-        --amber-bg: #451a03; --amber-border: #92400e;
-        --red-bg: #450a0a; --red-border: #991b1b;
-        --blue-bg: #1e3a5f; --blue-border: #1e40af;
-        --card-bg: #1e293b; --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        --toc-bg: #1a2332;
-      }
-    }
-    * { box-sizing: border-box; margin: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg); color: var(--fg); line-height: 1.7;
-      padding: 2rem 1rem; max-width: 960px; margin: 0 auto;
-    }
-    a { color: var(--blue); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    /* Header */
-    .page-header { margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1.5rem; }
-    .page-header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; letter-spacing: -0.01em; }
-    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 0.5rem; }
-    .back-link { font-size: 0.85rem; color: var(--muted); }
-    .back-link:hover { color: var(--blue); }
-
-    /* Table of Contents */
-    .toc {
-      background: var(--toc-bg); border: 1px solid var(--border); border-radius: 8px;
-      padding: 1.2rem 1.5rem; margin-bottom: 2rem;
-    }
-    .toc h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.6rem; border: none; }
-    .toc ol { padding-left: 1.3rem; }
-    .toc li { margin-bottom: 0.25rem; font-size: 0.9rem; }
-    .toc li a { color: var(--fg); }
-    .toc li a:hover { color: var(--blue); }
-
-    /* Sections */
-    h2 { font-size: 1.3rem; margin: 2.5rem 0 0.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
-    h3 { font-size: 1.05rem; margin: 1.5rem 0 0.4rem; color: var(--fg); }
-    p { margin-bottom: 0.8rem; }
-    .section-num { color: var(--muted); font-weight: 400; margin-right: 0.3rem; }
-
-    /* Cards */
-    .card {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
-      padding: 1.2rem; margin-bottom: 1rem; box-shadow: var(--card-shadow);
-    }
-
-    /* Metric callout boxes */
-    .metric-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 1rem; margin-bottom: 1rem;
-    }
-    .metric { text-align: center; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); }
-    .metric-value { font-size: 2rem; font-weight: 700; line-height: 1.2; }
-    .metric-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
-    .metric-green { border-color: var(--green-border); background: var(--green-bg); }
-    .metric-green .metric-value { color: var(--green); }
-    .metric-amber { border-color: var(--amber-border); background: var(--amber-bg); }
-    .metric-amber .metric-value { color: var(--amber); }
-    .metric-red { border-color: var(--red-border); background: var(--red-bg); }
-    .metric-red .metric-value { color: var(--red); }
-
-    /* Tables */
-    table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.9rem; }
-    th, td { text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
-    th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--toc-bg); }
-    tbody tr:nth-child(even) { background: rgba(0,0,0,0.02); }
-    @media (prefers-color-scheme: dark) { tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); } }
-    .pass { color: var(--green); font-weight: 600; }
-    .skip { color: var(--amber); font-weight: 600; }
-    .fail { color: var(--red); font-weight: 600; }
-
-    /* Limitation box */
-    .limitation-box {
-      background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 8px;
-      padding: 1rem 1.2rem; margin-bottom: 1rem;
-    }
-    .limitation-box h4 { color: var(--amber); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
-    .limitation-box ul { padding-left: 1.2rem; margin: 0; }
-    .limitation-box li { margin-bottom: 0.3rem; font-size: 0.9rem; }
-
-    /* Conformance claim box */
-    .claim-box {
-      background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 8px;
-      padding: 1rem 1.2rem; margin-bottom: 1rem;
-    }
-    .claim-box p { margin-bottom: 0.4rem; font-size: 0.95rem; }
-    .claim-box strong { color: var(--green); }
-
-    /* Info box */
-    .info-box {
-      background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 8px;
-      padding: 1rem 1.2rem; margin-bottom: 1rem;
-    }
-    .info-box p { margin-bottom: 0.4rem; font-size: 0.9rem; }
-
-    /* Pipeline diagram */
-    .pipeline {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
-      margin: 1rem 0; font-size: 0.85rem;
-    }
-    .pipeline-step {
-      background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 6px;
-      padding: 0.4rem 0.8rem; font-weight: 600; white-space: nowrap;
-    }
-    .pipeline-arrow { color: var(--muted); font-weight: 700; }
-
-    /* Lists */
-    ul.check-list { list-style: none; padding: 0; }
-    ul.check-list li { padding: 0.3rem 0; display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; }
-    ul.check-list li::before { content: "\2713"; color: var(--green); font-weight: bold; flex-shrink: 0; }
-
-    /* References */
-    .ref-list { counter-reset: refcounter; list-style: none; padding: 0; }
-    .ref-list li { counter-increment: refcounter; padding: 0.4rem 0; font-size: 0.9rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem; }
-    .ref-list li::before { content: "[" counter(refcounter) "]"; font-weight: 700; color: var(--muted); min-width: 2rem; flex-shrink: 0; }
-
-    /* Sup references */
-    sup.ref a { font-size: 0.75rem; font-weight: 700; color: var(--blue); }
-
-    /* Code */
-    code { font-family: "SF Mono", "Cascadia Code", Consolas, monospace; font-size: 0.85em; background: var(--toc-bg); padding: 0.15em 0.35em; border-radius: 4px; }
-
-    /* Responsive */
-    @media (max-width: 640px) {
-      body { padding: 1rem 0.75rem; }
-      .metric-grid { grid-template-columns: repeat(2, 1fr); }
-      .pipeline { flex-direction: column; align-items: flex-start; }
-      .pipeline-arrow { transform: rotate(90deg); }
-      table { font-size: 0.8rem; }
-      th, td { padding: 0.4rem 0.5rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="/evidence.css">
 </head>
 <body>
   <nav class="back-link" aria-label="Breadcrumb">
@@ -320,11 +175,11 @@
     <h3>3.1 CI Test Suite</h3>
     <div class="metric-grid">
       <div class="metric metric-green">
-        <div class="metric-value">328</div>
+        <div class="metric-value">312</div>
         <div class="metric-label">Total Tests</div>
       </div>
       <div class="metric metric-green">
-        <div class="metric-value">316</div>
+        <div class="metric-value">299</div>
         <div class="metric-label">Passing</div>
       </div>
       <div class="metric metric-green">
@@ -332,7 +187,7 @@
         <div class="metric-label">Failing</div>
       </div>
       <div class="metric metric-amber">
-        <div class="metric-value">12</div>
+        <div class="metric-value">13</div>
         <div class="metric-label">Skipped</div>
       </div>
     </div>
@@ -347,7 +202,7 @@
           <tr><td>Unit tests</td><td>Individual module correctness (parser, writer, validator, font engine)</td><td>All modules</td></tr>
         </tbody>
       </table>
-      <p style="margin-top:0.6rem;font-size:0.85rem;color:var(--muted)">12 skipped tests are gated on optional dependencies (e.g., Ghostscript, Tesseract) and are not failures.</p>
+      <p class="card-note">13 skipped tests are gated on optional dependencies (e.g., Ghostscript, Tesseract) and are not failures.</p>
     </div>
 
     <!-- 3.2 Font Embedding Quality -->
@@ -414,7 +269,7 @@
           <tr><td>Reading-order inversions</td><td>0</td><td>Output order matches visual reading flow</td></tr>
         </tbody>
       </table>
-      <p style="margin-top:0.6rem;font-size:0.85rem;">A <strong>9-version tournament</strong> with validation-aware scoring confirmed text-structure as the winning strategy, prevailing in <strong>24 of 35 documents</strong> tested.</p>
+      <p class="card-note-plain">A <strong>9-version tournament</strong> with validation-aware scoring confirmed text-structure as the winning strategy, prevailing in <strong>24 of 35 documents</strong> tested.</p>
     </div>
 
     <!-- 3.4 Table Detection -->
@@ -431,7 +286,7 @@
           <tr><td>Borderless column alignment</td><td>Consistent column spacing without drawn lines</td><td>Catches fully borderless tables</td></tr>
         </tbody>
       </table>
-      <ul class="check-list" style="margin-top:0.8rem;">
+      <ul class="check-list mt">
         <li>Multi-page table continuation via column anchor matching</li>
         <li>Every TH cell guaranteed <code>Scope</code> attribute (Column, Row, or Both)</li>
         <li>Header detection heuristics: all-TH rows, &ge;75% TH rows, ALL CAPS first row</li>
@@ -472,7 +327,7 @@
           <tr><td>Paragraph coherence</td><td class="pass">85.3%</td><td>Varies</td></tr>
         </tbody>
       </table>
-      <p style="margin-top:0.6rem;font-size:0.85rem;">Operator-level content stream parsing preserves the original PDF operators. The content stream rewriter injects BDC/EMC marked-content sequences without rasterizing any content. 85.3% paragraph coherence is the highest of any strategy tested.</p>
+      <p class="card-note-plain">Operator-level content stream parsing preserves the original PDF operators. The content stream rewriter injects BDC/EMC marked-content sequences without rasterizing any content. 85.3% paragraph coherence is the highest of any strategy tested.</p>
     </div>
 
     <!-- 3.6 Reading Order -->
@@ -488,7 +343,7 @@
           <tr><td><code>"DECISION ORDER" / "PAUL RUGGIERO" / "&amp;"</code></td><td><code>"PAUL RUGGIERO" / "DECISION ORDER" / "&amp;"</code> &mdash; correct LTR</td></tr>
         </tbody>
       </table>
-      <p style="margin-top:0.6rem;font-size:0.85rem;">Fragments within the epsilon threshold are grouped and sorted left-to-right, eliminating false reading-order inversions in headers, stamps, and multi-line title blocks.</p>
+      <p class="card-note-plain">Fragments within the epsilon threshold are grouped and sorted left-to-right, eliminating false reading-order inversions in headers, stamps, and multi-line title blocks.</p>
     </div>
   </section>
 
@@ -555,76 +410,12 @@
     </ol>
   </section>
 
-  <footer style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:0.8rem;">
+  <footer class="page-footer">
     <p>PDF Accessibility Engine &mdash; Evidence of Conformance</p>
     <p>This document is generated from automated test data and corpus evaluation results.</p>
   </footer>
 
-<script>
-(function() {
-  const REPO = "https://github.com/DaisyQuest/OpenAutoTag/blob/main";
-  const sourceMap = {
-    "conformance-claims": [
-      { label: "Profile schema (PDF/UA fields)",   path: "contracts/profile.schema.json", line: 1 },
-      { label: "Validator (veraPDF integration)",   path: "modules/validator/index.js", line: 305 },
-      { label: "Font audit (8 finding codes)",      path: "modules/validator/java/FontAuditCli.java", line: 1 },
-      { label: "TH Scope guarantee",               path: "modules/pdf-writer/index.js", line: 160 }
-    ],
-    "validation-methodology": [
-      { label: "CI test runner",                    path: "scripts/run-ci-tests.js", line: 1 },
-      { label: "veraPDF invocation + resilience",   path: "modules/validator/index.js", line: 305 },
-      { label: "Font audit pre-pass",              path: "modules/validator/index.js", line: 368 },
-      { label: "Report parsing + task exception",   path: "modules/validator/index.js", line: 265 }
-    ],
-    "corpus-results": [
-      { label: "Font embedder (24-check analysis)", path: "modules/font-embedder/index.js", line: 129 },
-      { label: "Font analysis engine",              path: "modules/font-embedder/lib/analyze.js", line: 140 },
-      { label: "Text-structure merge",              path: "modules/paragraph-merger/lib/text-structure-merge.js", line: 66 },
-      { label: "Post-merge validators (5 checks)",  path: "modules/paragraph-merger/lib/validators.js", line: 41 },
-      { label: "Corpus validation runner",          path: "modules/paragraph-merger/validate-corpus.js", line: 1 },
-      { label: "Borderless table detection",        path: "modules/layout-analyzer/index.js", line: 505 },
-      { label: "Cross-page table continuation",     path: "modules/semantic-engine/index.js", line: 59 },
-      { label: "Native operator parser",            path: "modules/pdf-writer/java/NativeContentStreamParser.java", line: 28 },
-      { label: "Native tag matcher",                path: "modules/pdf-writer/java/NativeTagMatcher.java", line: 20 },
-      { label: "Line-group epsilon (RTL fix)",      path: "modules/reading-order/index.js", line: 150 },
-      { label: "9-version tournament evaluator",    path: "modules/paragraph-merger/evaluator.js", line: 1 }
-    ],
-    "known-limitations": [
-      { label: "Auto-selector decision tree",       path: "modules/paragraph-merger/lib/auto-selector.js", line: 1 },
-      { label: "Native match threshold",            path: "contracts/profile.schema.json", line: 385 }
-    ],
-    "continuous-improvement": [
-      { label: "Profile registry (6 presets)",      path: "orchestrator/profile-registry.js", line: 72 },
-      { label: "MCP introspection (16 tools)",      path: "modules/mcp-api-introspect/index.js", line: 1 },
-      { label: "MCP corpus eval (4 tools)",         path: "modules/mcp-corpus-eval/index.js", line: 1 },
-      { label: "Font health (24 checks)",           path: "modules/corruption-repairer/java/FontRepairCli.java", line: 59 }
-    ]
-  };
-
-  for (const [sectionId, links] of Object.entries(sourceMap)) {
-    const section = document.getElementById(sectionId);
-    if (!section) continue;
-    const container = document.createElement("div");
-    container.className = "source-links";
-    container.innerHTML = '<span class="source-links-label">\u{1F4C2} View Source:</span> ' +
-      links.map(l => `<a href="${REPO}/${l.path}#L${l.line}" target="_blank" rel="noopener" title="${l.path}:${l.line}">${l.label}</a>`).join(" &middot; ");
-    const heading = section.querySelector("h2, h3");
-    if (heading) heading.after(container);
-    else section.prepend(container);
-  }
-})();
-</script>
-
-<style>
-.source-links { margin: 0.5rem 0 1rem; padding: 0.5rem 0.75rem; border-radius: 6px; background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.12); font-size: 0.78rem; line-height: 1.8; }
-.source-links-label { font-weight: 700; color: #0b7a75; }
-.source-links a { color: #2563eb; text-decoration: none; white-space: nowrap; }
-.source-links a:hover { text-decoration: underline; }
-@media (prefers-color-scheme: dark) {
-  .source-links { background: rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.2); }
-  .source-links a { color: #60a5fa; }
-}
-</style>
+<script src="/evidence.js"></script>
 
 </body>
 </html>
