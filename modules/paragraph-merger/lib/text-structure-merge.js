@@ -18,6 +18,16 @@ function getHeight(n) { return n.bbox?.[3] ?? 0; }
 function getBottom(n) { return getTop(n) + getHeight(n); }
 function getWidth(n) { return n.bbox?.[2] ?? 0; }
 
+// Some PDFs emit text blocks on the same visual line with tiny
+// fractional-Y differences (font baseline / descent variance). Strict
+// Y-sort then treats them as distinct rows, so the secondary X-sort
+// never kicks in and left-to-right reading order collapses to
+// content-stream order. Bucket Y with floor so the same-row variance
+// falls into one bucket (Math.round splits on half-bucket boundaries
+// and can still separate same-row blocks).
+const ROW_BUCKET_PX = 6;
+function getRow(n) { return Math.floor(getTop(n) / ROW_BUCKET_PX); }
+
 function detectBodyMargin(pNodes) {
   const leftCounts = new Map();
   for (const n of pNodes) {
@@ -89,7 +99,7 @@ export function textStructureMerge(semanticDocument, config = {}) {
       continue;
     }
 
-    const sorted = [...pNodes].sort((a, b) => getTop(a) - getTop(b) || getLeft(a) - getLeft(b));
+    const sorted = [...pNodes].sort((a, b) => getRow(a) - getRow(b) || getLeft(a) - getLeft(b));
     const bodyMargin = detectBodyMargin(sorted);
     const medianSpacing = computeMedianLineSpacing(sorted);
     const gapThreshold = medianSpacing * cfg.gapBreakMultiplier;
@@ -102,10 +112,17 @@ export function textStructureMerge(semanticDocument, config = {}) {
       const prev = sorted[i - 1];
       const curr = sorted[i];
       const breakReasons = [];
+      // Same-row neighbors (common when a line is split into multiple
+      // positioned blocks — e.g. scanned PDFs with per-word OCR boxes):
+      // skip the gap and indent break checks, which assume we're moving
+      // from one row to the next. Break only on explicit column change.
+      const sameRow = getRow(prev) === getRow(curr);
 
-      const gap = getTop(curr) - getBottom(prev);
-      if (gap > gapThreshold) {
-        breakReasons.push(`gap=${gap.toFixed(0)}px > threshold=${gapThreshold.toFixed(0)}px (${cfg.gapBreakMultiplier}× median=${medianSpacing.toFixed(0)}px)`);
+      if (!sameRow) {
+        const gap = getTop(curr) - getBottom(prev);
+        if (gap > gapThreshold) {
+          breakReasons.push(`gap=${gap.toFixed(0)}px > threshold=${gapThreshold.toFixed(0)}px (${cfg.gapBreakMultiplier}× median=${medianSpacing.toFixed(0)}px)`);
+        }
       }
 
       const prevCol = prev.columnHint ?? -1;
@@ -114,11 +131,13 @@ export function textStructureMerge(semanticDocument, config = {}) {
         breakReasons.push(`column ${prevCol} → ${currCol}`);
       }
 
-      const currIndent = getLeft(curr) - bodyMargin;
-      const prevAtMargin = isAtMargin(prev, bodyMargin, cfg.marginTolerance);
-      if (currIndent > cfg.indentMinPixels && prevAtMargin) {
-        if (!textEndsIncomplete(prev.text)) {
-          breakReasons.push(`indent=${currIndent.toFixed(0)}px from margin=${bodyMargin}, prev line complete`);
+      if (!sameRow) {
+        const currIndent = getLeft(curr) - bodyMargin;
+        const prevAtMargin = isAtMargin(prev, bodyMargin, cfg.marginTolerance);
+        if (currIndent > cfg.indentMinPixels && prevAtMargin) {
+          if (!textEndsIncomplete(prev.text)) {
+            breakReasons.push(`indent=${currIndent.toFixed(0)}px from margin=${bodyMargin}, prev line complete`);
+          }
         }
       }
 

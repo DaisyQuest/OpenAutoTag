@@ -12,7 +12,7 @@ import { pipeline } from "node:stream/promises";
 import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../scripts/runtime-paths.js";
 import { createAgentRegistry } from "./agent-registry.js";
 import { loadAgentRuntimeConfig } from "./agent-runtime-config.js";
-import { startAgentService } from "./agent-service.js";
+import { startAgentSupervisor } from "./agent-supervisor.js";
 import { createEnvironmentAuthController } from "./auth-controller.js";
 import { createJobQueue } from "./job-queue.js";
 import { getArtifactLabel } from "./public/report-renderers.js";
@@ -1613,12 +1613,21 @@ export function createAppServer({
 async function main() {
   const agentRuntimeConfig = await loadAgentRuntimeConfig();
   if (agentRuntimeConfig?.masterEndpoint) {
-    await startAgentService(agentRuntimeConfig);
-    process.stdout.write(`Agent service connected to ${agentRuntimeConfig.masterEndpoint}\n`);
+    const { supervisor } = await startAgentSupervisor({ config: agentRuntimeConfig });
+    process.stdout.write(
+      `Agent supervisor connected to ${agentRuntimeConfig.masterEndpoint} with ${supervisor.concurrency} worker(s)\n`
+    );
+    const shutdown = async (signal) => {
+      process.stdout.write(`\nAgent supervisor received ${signal}; shutting down.\n`);
+      await supervisor.close();
+      process.exit(0);
+    };
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
     return;
   }
 
-  const port = Number(process.env.PORT || 3000);
+  const port = Number(process.env.PORT || 3001);
   const jobsRoot = getRuntimeSubdir("jobs", { repoRoot });
   const queue = createJobQueue({
     processor: runWorkload,

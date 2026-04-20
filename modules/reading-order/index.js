@@ -94,7 +94,8 @@ function buildColumnBands(units) {
   }
 
   const span = xValues[xValues.length - 1] - xValues[0];
-  const threshold = Math.max(64, span * 0.18);
+  const { columnBandThresholdPercent, columnBandMinPixels } = readReadingOrderThresholds();
+  const threshold = Math.max(columnBandMinPixels, span * columnBandThresholdPercent);
   const bands = [{ index: 0, minX: xValues[0], maxX: xValues[0] }];
 
   for (const x of xValues.slice(1)) {
@@ -143,11 +144,20 @@ function assignColumnIndex(unit, bands) {
 // sub-pixel y jitter from font metrics (e.g. a superscript or a narrow
 // stylized glyph like '&' rendered 1-2 px above adjacent text).
 //
-// The value is a compromise: too small and real line breaks get merged,
-// too large and distinct lines collapse. 6pt is smaller than any common
-// single-spaced line height and larger than the y-jitter we've observed
-// (~1-2pt) on adjacent text runs that belong to the same visual line.
-const LINE_GROUP_EPSILON = 6;
+// The 6pt default is a compromise: too small and real line breaks get
+// merged, too large and distinct lines collapse. Profiles for dense
+// layouts (legal briefs with tight caption lines) lower this to 4pt
+// via the readingOrder.lineGroupEpsilon profile field.
+function readReadingOrderThresholds() {
+  const eps = Number(process.env.READING_ORDER_LINE_GROUP_EPSILON);
+  const bandPct = Number(process.env.READING_ORDER_COLUMN_BAND_THRESHOLD_PERCENT);
+  const bandMin = Number(process.env.READING_ORDER_COLUMN_BAND_MIN_PIXELS);
+  return {
+    lineGroupEpsilon: Number.isFinite(eps) ? eps : 6,
+    columnBandThresholdPercent: Number.isFinite(bandPct) ? bandPct : 0.18,
+    columnBandMinPixels: Number.isFinite(bandMin) ? bandMin : 64
+  };
+}
 
 function compareUnits(left, right) {
   const pageOrPhaseOrColumn =
@@ -158,7 +168,7 @@ function compareUnits(left, right) {
 
   const leftTop = Number.isFinite(left.top) ? left.top : 0;
   const rightTop = Number.isFinite(right.top) ? right.top : 0;
-  const sameLine = Math.abs(leftTop - rightTop) < LINE_GROUP_EPSILON;
+  const sameLine = Math.abs(leftTop - rightTop) < readReadingOrderThresholds().lineGroupEpsilon;
   if (!sameLine) {
     return leftTop - rightTop;
   }

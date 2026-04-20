@@ -8,8 +8,51 @@ const ajv = new Ajv2020({ allErrors: true });
 const validateSemantic = ajv.compile(semanticSchema);
 const validateTagging = ajv.compile(taggingSchema);
 
+// Feature flags for WTPDF / PDF/UA-2 additions. Default-off to
+// preserve existing fixture output and keep the rewriter's /Form
+// XObject handling untouched on the corpus. Each flag can be lit
+// via an environment variable so integration tests can opt in
+// without plumbing arguments through every call site.
+function readBooleanEnv(name) {
+  const value = String(process.env[name] || "").trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes" || value === "on";
+}
+
+function resolveTagBuilderOptions(overrides = {}) {
+  return {
+    enableTitleDetection:
+      overrides.enableTitleDetection ?? readBooleanEnv("TAG_BUILDER_ENABLE_TITLE"),
+    enableCaptionDetection:
+      overrides.enableCaptionDetection ?? readBooleanEnv("TAG_BUILDER_ENABLE_CAPTION"),
+    enableSectionPromotion:
+      overrides.enableSectionPromotion ?? readBooleanEnv("TAG_BUILDER_ENABLE_SECTION_PROMOTION"),
+    enableLayoutAttrs:
+      overrides.enableLayoutAttrs ?? readBooleanEnv("TAG_BUILDER_ENABLE_LAYOUT_ATTRS"),
+    enableTableHeaders:
+      overrides.enableTableHeaders ?? readBooleanEnv("TAG_BUILDER_ENABLE_TABLE_HEADERS"),
+    enablePrintFieldAttrs:
+      overrides.enablePrintFieldAttrs ?? readBooleanEnv("TAG_BUILDER_ENABLE_PRINT_FIELD_ATTRS"),
+    captionLookbackParagraphs: Number(overrides.captionLookbackParagraphs ?? 3)
+  };
+}
+
+// Heading level clamp range. PDF/UA allows H1-H6, but many docs
+// don't benefit from deeper hierarchies — the defaults (1-3) keep
+// output conservative for general-purpose profiles. Scientific
+// papers and legal briefs with numbered subsection hierarchies
+// can extend via the tagBuilder.headingLevelClamp* profile fields.
+function readClampRange() {
+  const min = Number(process.env.TAG_BUILDER_HEADING_LEVEL_CLAMP_MIN);
+  const max = Number(process.env.TAG_BUILDER_HEADING_LEVEL_CLAMP_MAX);
+  return {
+    min: Number.isFinite(min) && min >= 1 && min <= 6 ? min : 1,
+    max: Number.isFinite(max) && max >= 1 && max <= 6 ? max : 3
+  };
+}
+
 function clampHeadingLevel(level) {
-  return Math.max(1, Math.min(Number(level) || 1, 3));
+  const { min, max } = readClampRange();
+  return Math.max(min, Math.min(Number(level) || min, max));
 }
 
 function getDetectedHeadingLevel(node) {
@@ -122,6 +165,44 @@ function createLeaf(node, headingNormalization) {
     sourceNodeIds: [node.id],
     children: []
   };
+
+  // Set /ActualText on the innermost MCID-bearing element (Span child
+  // when wrapping, leaf itself otherwise). Adobe's Accessibility Full
+  // Check flags "Nested alternate text" (PDF/UA Matterhorn 19-003)
+  // when /ActualText appears on both parent and child — the outer
+  // one is never read. For wrapping roles (P/H#/Caption/Title/Code),
+  // /ActualText lives on the Span child below; for direct-MCID roles
+  // (TH/TD/LI/Lbl/LBody) it lives on the leaf itself.
+  const hasTextContent = typeof node.text === "string" && node.text.trim().length > 0;
+  const directMcidLeaf = ["TH", "TD", "LI", "Lbl", "LBody"].includes(resolvedRole);
+  if (directMcidLeaf && hasTextContent) {
+    leaf.actualText = node.text;
+  }
+
+  // Block-level structural roles (P, H#, Caption, Title, Code) — wrap
+  // their MCID content in a Span child. Adobe's Tags panel derives the
+  // tag-row preview text from the element's direct marked-content
+  // descendants; when the MCID lives under a /Span intermediary, Adobe
+  // shows the text, while a bare /P with a direct MCID kid can leave
+  // the preview blank (observed on scanned PDFs with invisible-text
+  // layers). Table cells (TH/TD), list items (LI, Lbl, LBody) and
+  // inline roles keep their direct MCID layout — Adobe's table and
+  // list views already render their cell/item text correctly.
+  const wrapInSpan = ["P", "H1", "H2", "H3", "H4", "H5", "H6", "Caption", "Title", "Code"].includes(resolvedRole);
+  if (wrapInSpan) {
+    leaf.sourceNodeIds = [];
+    const spanChild = {
+      id: `tag:${node.id}:span`,
+      type: "Span",
+      label: node.text,
+      sourceNodeIds: [node.id],
+      children: []
+    };
+    if (hasTextContent) {
+      spanChild.actualText = node.text;
+    }
+    leaf.children.push(spanChild);
+  }
 
   if (resolvedRole !== node.role) {
     leaf.detectedType = node.role;
@@ -627,19 +708,30 @@ function normalizeTableSections(rootNode) {
     const headRows = rowEntries.filter((entry) => entry.assignedSectionKey === "head");
     const bodyRows = rowEntries.filter((entry) => entry.assignedSectionKey === "body");
     const footRows = rowEntries.filter((entry) => entry.assignedSectionKey === "foot");
-    const nextChildren = [];
 
+    // PDF/UA § 7.2.14 (Matterhorn 14-003): a Table with /THead kid
+    // must also have /TBody. If we end up with THead but no TBody
+    // (e.g. 1-row table all classified as header), unwrap the THead
+    // and leave TR as a direct Table child instead. Avoids emitting
+    // a structurally invalid Table > THead-only tree.
+    const nextChildren = [];
+    const bodySection = buildTableSectionChildren(node, "body", bodyRows);
+    const footSection = buildTableSectionChildren(node, "foot", footRows);
     const headSection = buildTableSectionChildren(node, "head", headRows);
-    if (headSection) {
+
+    if (headSection && !bodySection) {
+      // No body — unwrap THead's TRs as direct Table children.
+      for (const trNode of headSection.children || []) {
+        nextChildren.push(trNode);
+      }
+    } else if (headSection) {
       nextChildren.push(headSection);
     }
 
-    const bodySection = buildTableSectionChildren(node, "body", bodyRows);
     if (bodySection) {
       nextChildren.push(bodySection);
     }
 
-    const footSection = buildTableSectionChildren(node, "foot", footRows);
     if (footSection) {
       nextChildren.push(footSection);
     }
@@ -1065,6 +1157,523 @@ function flattenRedundantTableBodySections(rootNode) {
   visit(rootNode);
 }
 
+// ---- A5: Title vs first H1 detection -----------------------------------
+// WTPDF / PDF/UA-2 prefer `/Title` for the document title as a struct
+// element distinct from /Info /Title metadata. Heuristic: the first
+// heading candidate, on page 1, whose font-size is the largest among
+// page-1 heading candidates and whose text length is ≤ 12 words, is
+// promoted to Title. All subsequent headings remain H#.
+function countWords(text) {
+  return String(text || "").trim().split(/\s+/).filter((word) => word.length > 0).length;
+}
+
+function getNodeFontSize(node) {
+  if (node == null) return 0;
+  const candidates = [node.fontSize, node.maxFontSize, node.meanFontSize];
+  for (const candidate of candidates) {
+    const value = Number(candidate);
+    if (Number.isFinite(value) && value > 0) {
+      return value;
+    }
+  }
+  // Fall back to bbox height as a proxy for font size — ordering is
+  // what matters for the "largest on page 1" test, and all heading
+  // candidates on the page are compared with the same proxy.
+  const bbox = Array.isArray(node.bbox) ? node.bbox : null;
+  if (bbox && bbox.length >= 4) {
+    const height = Number(bbox[3]);
+    if (Number.isFinite(height) && height > 0) return height;
+  }
+  return 0;
+}
+
+function detectTitleNodeId(orderedNodes) {
+  const page1Candidates = [];
+  for (const node of orderedNodes) {
+    if (!node) continue;
+    if (node.pageNumber !== 1) break;
+    if (!getDetectedHeadingLevel(node)) continue;
+    page1Candidates.push(node);
+  }
+  if (page1Candidates.length === 0) return null;
+
+  const first = page1Candidates[0];
+  const firstSize = getNodeFontSize(first);
+  const maxSize = page1Candidates.reduce((acc, candidate) => {
+    const size = getNodeFontSize(candidate);
+    return size > acc ? size : acc;
+  }, 0);
+  if (firstSize <= 0 || firstSize < maxSize) return null;
+  if (countWords(first.text) > 12) return null;
+  return first.id;
+}
+
+// ---- A6: Caption detection --------------------------------------------
+// Matches "Figure 1: …", "Table 3. …", "Fig. 2 …", "Tab. 4: …", etc.
+const CAPTION_PATTERN = /^(Figure|Table|Fig\.|Tab\.)\s+\d+[\.:]?\s/i;
+
+function isCaptionCandidate(node) {
+  if (!node || node.role !== "P") return false;
+  const text = String(node.text || "").trim();
+  if (!text) return false;
+  return CAPTION_PATTERN.test(text);
+}
+
+// ---- A14: Layout attribute owner --------------------------------------
+function placementForType(type) {
+  if (type === "Span") return "Inline";
+  if (type === "Start") return "Start";
+  if (type === "End") return "End";
+  if (type === "Before") return "Before";
+  return "Block";
+}
+
+function layoutEligibleType(type) {
+  if (!type) return false;
+  if (type === "P" || type === "Caption" || type === "Aside" || type === "BlockQuote") return true;
+  if (/^H[1-6]$/.test(type)) return true;
+  return false;
+}
+
+function computeLayoutAttrs(node, tagType) {
+  if (!node) return null;
+  const bbox = Array.isArray(node.bbox) ? node.bbox : null;
+  if (!bbox || bbox.length < 4) return null;
+  const [x, y, width, height] = bbox.map(Number);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(width) || !Number.isFinite(height)) {
+    return null;
+  }
+  return {
+    O: "Layout",
+    Placement: placementForType(tagType),
+    BBox: [x, y, width, height]
+  };
+}
+
+function applyLayoutAttrsToTree(node, sourceNodesById) {
+  if (!node) return;
+  const children = Array.isArray(node.children) ? node.children : [];
+  for (const child of children) applyLayoutAttrsToTree(child, sourceNodesById);
+  if (!layoutEligibleType(node.type)) return;
+  // Look up the source semantic node either via this node's own
+  // sourceNodeIds OR (if this is a block leaf that wraps its MCID in a
+  // Span child) via the child Span's sourceNodeIds. Layout attrs
+  // (BBox etc.) belong on the outer block element, not the inline
+  // Span.
+  let sourceId = (node.sourceNodeIds || [])[0];
+  if (!sourceId) {
+    for (const child of children) {
+      if (child?.type === "Span" && (child.sourceNodeIds || []).length > 0) {
+        sourceId = child.sourceNodeIds[0];
+        break;
+      }
+    }
+  }
+  const sourceNode = sourceId ? sourceNodesById.get(sourceId) : null;
+  const attrs = computeLayoutAttrs(sourceNode, node.type);
+  if (attrs) node.layoutAttrs = attrs;
+}
+
+// ---- A15: Table /Headers + ColSpan/RowSpan ----------------------------
+function assignHeaderIdsAndTableAttrs(rootNode) {
+  const decorateTable = (tableNode) => {
+    // Step 1: walk the table subtree, marking which TH/TD cells
+    // live inside a THead ancestor — they act as column headers.
+    const thCells = [];
+    const annotate = (n, inHead) => {
+      if (!n) return;
+      const nextInHead = inHead || n.type === "THead";
+      if (n.type === "TH" || n.type === "TD") {
+        n._inTHead = nextInHead;
+        if (n.type === "TH") thCells.push(n);
+      }
+      for (const kid of n.children || []) annotate(kid, nextInHead);
+    };
+    annotate(tableNode, false);
+
+    // Step 2: assign stable IDs to TH cells.
+    let thFallback = 0;
+    for (const th of thCells) {
+      const rowIndex = Number.isInteger(th.tableRowIndex) ? th.tableRowIndex : thFallback;
+      const columnIndex = Number.isInteger(th.tableColumnIndex) ? th.tableColumnIndex : thFallback;
+      th.headerId = `H_r${rowIndex}c${columnIndex}`;
+      thFallback += 1;
+    }
+
+    // Step 3: build column/row header lookups. Column headers come
+    // from TH-in-THead; row headers come from TH in other contexts.
+    const headersByColumn = new Map();
+    const rowHeaderByRowIndex = new Map();
+    for (const th of thCells) {
+      const rowIndex = Number.isInteger(th.tableRowIndex) ? th.tableRowIndex : 0;
+      const columnIndex = Number.isInteger(th.tableColumnIndex) ? th.tableColumnIndex : 0;
+      const columnSpan = Math.max(1, Number(th.columnSpan || 1));
+      const rowSpan = Math.max(1, Number(th.rowSpan || 1));
+      if (th._inTHead) {
+        for (let col = columnIndex; col < columnIndex + columnSpan; col += 1) {
+          if (!headersByColumn.has(col)) headersByColumn.set(col, []);
+          headersByColumn.get(col).push(th.headerId);
+        }
+      } else {
+        for (let row = rowIndex; row < rowIndex + rowSpan; row += 1) {
+          if (!rowHeaderByRowIndex.has(row)) rowHeaderByRowIndex.set(row, []);
+          rowHeaderByRowIndex.get(row).push(th.headerId);
+        }
+      }
+    }
+
+    // Step 4: attach /Table attrs with ColSpan/RowSpan and /Headers
+    // arrays on TD/TH cells that need them.
+    const decorate = (n) => {
+      if (!n) return;
+      if (n.type === "TD" || n.type === "TH") {
+        const cs = Math.max(1, Number(n.columnSpan || 1));
+        const rs = Math.max(1, Number(n.rowSpan || 1));
+        const attrs = { O: "Table" };
+        let meaningful = false;
+        if (cs > 1) { attrs.ColSpan = cs; meaningful = true; }
+        if (rs > 1) { attrs.RowSpan = rs; meaningful = true; }
+        if (n.type === "TD") {
+          const colIdx = Number.isInteger(n.tableColumnIndex) ? n.tableColumnIndex : null;
+          const rowIdx = Number.isInteger(n.tableRowIndex) ? n.tableRowIndex : null;
+          const colHeaders = colIdx != null ? (headersByColumn.get(colIdx) || []) : [];
+          const rowHeaders = rowIdx != null ? (rowHeaderByRowIndex.get(rowIdx) || []) : [];
+          const headerIds = [...new Set([...colHeaders, ...rowHeaders])];
+          if (headerIds.length > 0) {
+            attrs.Headers = headerIds;
+            meaningful = true;
+          }
+        }
+        if (meaningful) n.tableAttrs = attrs;
+      }
+      for (const kid of n.children || []) decorate(kid);
+    };
+    decorate(tableNode);
+
+    // Step 5: clean up the temporary marker so the flag doesn't
+    // leak into the emitted tree.
+    const cleanup = (n) => {
+      if (!n) return;
+      delete n._inTHead;
+      for (const kid of n.children || []) cleanup(kid);
+    };
+    cleanup(tableNode);
+  };
+
+  const visit = (node) => {
+    if (!node) return;
+    if (node.type === "Table") decorateTable(node);
+    for (const child of node.children || []) visit(child);
+  };
+  visit(rootNode);
+}
+
+// ---- #16: Section promotion for flat-P-under-Document -----------------
+/**
+ * Heuristic pass to undo false-positive Table classification from
+ * the layout extractor. Typical culprits: scan OCR of cover pages
+ * where spatial alignment looked tabular but the "cells" are really
+ * fragments of a rubber-stamp date, a letterhead, or a judge's
+ * signature line. Leaving these as Table/TR/TD produces:
+ *   - "Blank tag" preview for Table/TR containers in Adobe's
+ *     Tags panel (container tags have no direct text by design).
+ *   - Screen readers announcing "table with N columns" for what is
+ *     really running prose.
+ *
+ * Demotion criteria (ALL must hold):
+ *   - ≤ 2 rows
+ *   - Every cell text < 30 chars
+ *   - No cell text contains a strong tabular signal (multi-digit
+ *     numbers, currency, units, percent, colon-separated key:value).
+ *   - No explicit Scope or header attribute pinned to cells.
+ *
+ * When these hold, the Table is replaced by a single P containing
+ * the concatenation of cell texts in reading order. sourceNodeIds
+ * are merged so downstream rewriter / validator still sees the same
+ * operators. Returns count of tables demoted.
+ */
+function demoteSpuriousTables(rootNode) {
+  let demoted = 0;
+
+  function cellTexts(cellNode) {
+    const out = [];
+    const stack = [cellNode];
+    while (stack.length > 0) {
+      const n = stack.pop();
+      if (!n) continue;
+      if (typeof n.label === "string" && n.label.trim()) out.push(n.label.trim());
+      if (typeof n.text === "string" && n.text.trim()) out.push(n.text.trim());
+      for (const c of n.children || []) stack.push(c);
+    }
+    return out.join(" ").replace(/\s+/g, " ").trim();
+  }
+
+  function sourceIds(node) {
+    const out = [];
+    const stack = [node];
+    while (stack.length > 0) {
+      const n = stack.pop();
+      if (!n) continue;
+      for (const id of n.sourceNodeIds || []) out.push(id);
+      for (const c of n.children || []) stack.push(c);
+    }
+    return out;
+  }
+
+  // Strong tabular signals — if ANY cell matches, keep it as a table.
+  const TABULAR_PATTERNS = [
+    /\b\d{2,}\b/,               // multi-digit number
+    /\$\s*\d/,                  // currency
+    /\b\d+(?:\.\d+)?\s?%/,       // percent
+    /\b\d+\s*(?:kg|lb|oz|mm|cm|in|ft|m|km|hr|min|sec|USD|EUR|GBP)\b/i,
+    /\b\w+:\s*\S/,               // key:value
+    /\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/ // formal date MM/DD/YYYY
+  ];
+
+  function shouldDemote(tableNode) {
+    if (!tableNode || tableNode.type !== "Table") return false;
+    // Gather rows (TR children), skipping THead/TBody wrappers.
+    const rows = [];
+    const rowStack = [...(tableNode.children || [])];
+    while (rowStack.length > 0) {
+      const n = rowStack.shift();
+      if (!n) continue;
+      if (n.type === "TR") rows.push(n);
+      else if (n.type === "THead" || n.type === "TBody" || n.type === "TFoot") {
+        for (const c of n.children || []) rowStack.push(c);
+      }
+    }
+    if (rows.length === 0 || rows.length > 4) return false;
+    const cellsPerRow = [];
+    const allCells = [];
+    for (const row of rows) {
+      const cells = (row.children || []).filter(c => c.type === "TH" || c.type === "TD");
+      cellsPerRow.push(cells.length);
+      for (const cell of cells) allCells.push(cell);
+    }
+    if (allCells.length === 0) return false;
+    if (allCells.length > 16) return false;
+    // Any TH cells means this is intentional header tagging — keep as table.
+    if (allCells.some(c => c.type === "TH")) return false;
+    for (const cell of allCells) {
+      const text = cellTexts(cell);
+      if (text.length >= 30) return false;
+      for (const re of TABULAR_PATTERNS) {
+        if (re.test(text)) return false;
+      }
+      if (cell.scope || cell.tableAttrs) return false;
+    }
+    // Strong scan-artifact signal: inconsistent column counts across
+    // rows (e.g. 3/4/2). Real tables keep the same column count
+    // across rows. If the column count varies, it's almost certainly
+    // OCR-layout misclassification.
+    if (rows.length >= 2) {
+      const minCells = Math.min(...cellsPerRow);
+      const maxCells = Math.max(...cellsPerRow);
+      if (maxCells - minCells >= 1) return true;
+    }
+    // Default (single-row or consistent-column small table): demote
+    // since cells are all short + no tabular signals.
+    return true;
+  }
+
+  function flattenToP(tableNode) {
+    // Collect all cell texts in reading order.
+    const rows = [];
+    const rowStack = [...(tableNode.children || [])];
+    while (rowStack.length > 0) {
+      const n = rowStack.shift();
+      if (!n) continue;
+      if (n.type === "TR") rows.push(n);
+      else if (n.type === "THead" || n.type === "TBody" || n.type === "TFoot") {
+        for (const c of n.children || []) rowStack.push(c);
+      }
+    }
+    const parts = [];
+    for (const row of rows) {
+      for (const cell of row.children || []) {
+        const text = cellTexts(cell);
+        if (text) parts.push(text);
+      }
+    }
+    return {
+      id: tableNode.id,
+      type: "P",
+      label: parts.join(" "),
+      sourceNodeIds: sourceIds(tableNode),
+      children: collectLeavesForDemotedTable(tableNode)
+    };
+  }
+
+  // Collect all leaf-cells of the table so their MCIDs are retained
+  // as children of the flattened P. Each TD's children (usually
+  // inline leaves with mcRef/sourceNodeIds) become direct children
+  // of the new P.
+  function collectLeavesForDemotedTable(tableNode) {
+    const out = [];
+    const stack = [...(tableNode.children || [])];
+    while (stack.length > 0) {
+      const n = stack.shift();
+      if (!n) continue;
+      if (n.type === "TR" || n.type === "THead" || n.type === "TBody" || n.type === "TFoot") {
+        for (const c of n.children || []) stack.push(c);
+        continue;
+      }
+      if (n.type === "TD" || n.type === "TH") {
+        // Move TD/TH's leaves up as children of the new P.
+        for (const c of n.children || []) out.push(c);
+        continue;
+      }
+      out.push(n);
+    }
+    return out;
+  }
+
+  function walk(container) {
+    if (!container || !Array.isArray(container.children)) return;
+    for (let i = 0; i < container.children.length; i++) {
+      const child = container.children[i];
+      if (!child) continue;
+      if (child.type === "Table" && shouldDemote(child)) {
+        container.children[i] = flattenToP(child);
+        demoted++;
+      } else {
+        walk(child);
+      }
+    }
+  }
+
+  walk(rootNode);
+  return { applied: demoted > 0, demoted };
+}
+
+export function promoteFlatHeadingsIntoSections(rootNode) {
+  if (!rootNode || !Array.isArray(rootNode.children)) return { applied: false, sectionsInserted: 0 };
+  const children = rootNode.children;
+  if (children.length === 0) return { applied: false, sectionsInserted: 0 };
+  // Only promote when Document's direct children are flat text-level:
+  // no existing Sect and at least one H#.
+  const hasExistingSect = children.some((child) => child?.type === "Sect");
+  if (hasExistingSect) return { applied: false, sectionsInserted: 0 };
+  const hasHeading = children.some((child) => /^H[1-6]$/.test(String(child?.type || "")));
+  if (!hasHeading) return { applied: false, sectionsInserted: 0 };
+  // Check children are text-level: P/Figure/H#/Caption/L/Table only.
+  const textLevel = new Set(["P", "Figure", "Caption", "L", "Table", "Aside", "BlockQuote", "Title"]);
+  const allTextLevel = children.every((child) => {
+    if (!child) return false;
+    return textLevel.has(child.type) || /^H[1-6]$/.test(String(child.type || ""));
+  });
+  if (!allTextLevel) return { applied: false, sectionsInserted: 0 };
+
+  const nextChildren = [];
+  let currentSection = null;
+  let currentLevel = null;
+  let sectionsInserted = 0;
+  let sectionCounter = 0;
+  for (const child of children) {
+    const headingMatch = /^H([1-6])$/.exec(String(child?.type || ""));
+    if (headingMatch) {
+      const level = Number(headingMatch[1]);
+      // Close any currently-open section of equal-or-greater level
+      if (currentLevel != null && level <= currentLevel && currentSection) {
+        nextChildren.push(currentSection);
+        currentSection = null;
+        currentLevel = null;
+      }
+      if (currentSection == null) {
+        sectionCounter += 1;
+        currentSection = {
+          id: `tag:document:sect:${sectionCounter}`,
+          type: "Sect",
+          children: [],
+          syntheticSection: true
+        };
+        currentLevel = level;
+        sectionsInserted += 1;
+      }
+      currentSection.children.push(child);
+      continue;
+    }
+    if (currentSection) {
+      currentSection.children.push(child);
+    } else {
+      nextChildren.push(child);
+    }
+  }
+  if (currentSection) nextChildren.push(currentSection);
+  rootNode.children = nextChildren;
+  return { applied: sectionsInserted > 0, sectionsInserted };
+}
+
+// ---- A6: Caption association with Figure/Table ------------------------
+// Walks the tree in order, identifies Caption nodes, and associates
+// them with the nearest preceding Figure/Table within a configurable
+// paragraph lookback. Association = move the Caption to be the first
+// or last child of the semantic parent. Per the PDF Association cheat
+// sheet, Caption MUST be first or last child of its semantic parent.
+function associateCaptionsWithFiguresOrTables(rootNode, opts) {
+  const lookback = Math.max(1, Number(opts?.captionLookbackParagraphs ?? 3));
+  let associated = 0;
+  let detected = 0;
+
+  const visit = (parent) => {
+    if (!parent || !Array.isArray(parent.children)) return;
+    for (const child of parent.children) visit(child);
+    const newChildren = [];
+    for (let index = 0; index < parent.children.length; index += 1) {
+      const child = parent.children[index];
+      if (child?.type !== "Caption") {
+        newChildren.push(child);
+        continue;
+      }
+      detected += 1;
+      // Look back through already-placed siblings for the nearest
+      // Figure or Table, within the lookback window (counted over P
+      // and other text-level nodes).
+      let steps = 0;
+      let target = null;
+      for (let i = newChildren.length - 1; i >= 0 && steps < lookback; i -= 1) {
+        const prior = newChildren[i];
+        if (prior?.type === "Figure" || prior?.type === "Table") {
+          target = prior;
+          break;
+        }
+        if (prior?.type === "P") steps += 1;
+      }
+      if (!target) {
+        newChildren.push(child);
+        continue;
+      }
+      // Attach as last child of the semantic parent.
+      target.children = Array.isArray(target.children) ? target.children : [];
+      target.children.push(child);
+      associated += 1;
+    }
+    parent.children = newChildren;
+  };
+  visit(rootNode);
+  return { detected, associated };
+}
+
+// ---- A16: PrintField attribute owner for widgets ----------------------
+export function buildPrintFieldAttrs(widget) {
+  if (!widget) return null;
+  const subtype = String(widget.widgetSubtype || widget.subtype || "").toLowerCase();
+  let role = "TV";
+  if (subtype.includes("radio")) role = "RB";
+  else if (subtype.includes("check")) role = "CB";
+  else if (subtype.includes("push") || subtype === "btn" || subtype === "button") role = "PB";
+  else if (subtype.includes("text")) role = "TV";
+  const desc =
+    (typeof widget.tooltip === "string" && widget.tooltip) ||
+    (typeof widget.TU === "string" && widget.TU) ||
+    (typeof widget.alternateName === "string" && widget.alternateName) ||
+    (typeof widget.fieldName === "string" && widget.fieldName) ||
+    (typeof widget.name === "string" && widget.name) ||
+    "Form field";
+  return { O: "PrintField", Role: role, Desc: desc };
+}
+
 export function resolveOrderedNodes(semanticDocument) {
   if (semanticDocument.orderedNodeIds) {
     const nodesById = new Map();
@@ -1080,13 +1689,14 @@ export function resolveOrderedNodes(semanticDocument) {
   return [...semanticDocument.nodes].sort((left, right) => (left.readingOrder || 0) - (right.readingOrder || 0));
 }
 
-export async function buildTagTree(inputPath) {
+export async function buildTagTree(inputPath, overrides = {}) {
   const semanticDocument = JSON.parse(await readFile(inputPath, "utf8"));
 
   if (!validateSemantic(semanticDocument)) {
     throw new Error(`Tag builder input failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
   }
 
+  const options = resolveTagBuilderOptions(overrides);
   const orderedNodes = resolveOrderedNodes(semanticDocument);
 
   const root = {
@@ -1099,6 +1709,11 @@ export async function buildTagTree(inputPath) {
   let activeList = null;
   let activeTable = null;
   let listIndex = 0;
+
+  // A5: identify which heading should be emitted as Title (if any).
+  const titleNodeId = options.enableTitleDetection ? detectTitleNodeId(orderedNodes) : null;
+  let titleEmitted = false;
+  let captionCandidatesDetected = 0;
 
   const currentContainer = () => sectionStack.at(-1)?.node || root;
 
@@ -1115,6 +1730,24 @@ export async function buildTagTree(inputPath) {
 
     const headingLevel = getHeadingLevel(node);
     if (headingLevel) {
+      // A5: promote detected title heading to a Title struct element.
+      if (options.enableTitleDetection && !titleEmitted && node.id === titleNodeId) {
+        const titleLeaf = {
+          id: `tag:${node.id}`,
+          type: "Title",
+          label: node.text,
+          sourceNodeIds: [node.id],
+          children: []
+        };
+        // Emit Title as a direct child of Document — do not open a
+        // Sect for it. Subsequent Sects will follow.
+        root.children.push(titleLeaf);
+        titleEmitted = true;
+        activeList = null;
+        activeTable = null;
+        continue;
+      }
+
       const normalizedHeadingLevel = headingNormalization.levelsByNodeId.get(node.id) || headingLevel;
 
       while (sectionStack.length > 0 && sectionStack.at(-1).level >= normalizedHeadingLevel) {
@@ -1185,7 +1818,14 @@ export async function buildTagTree(inputPath) {
     }
 
     activeTable = null;
-    currentContainer().children.push(createLeaf(node, headingNormalization));
+    const leaf = createLeaf(node, headingNormalization);
+    // A6: promote Figure/Table caption-like paragraphs to /Caption.
+    if (options.enableCaptionDetection && isCaptionCandidate(node)) {
+      captionCandidatesDetected += 1;
+      leaf.type = "Caption";
+      leaf.detectedType = leaf.detectedType || "P";
+    }
+    currentContainer().children.push(leaf);
   }
 
   normalizeTableSections(root);
@@ -1194,6 +1834,51 @@ export async function buildTagTree(inputPath) {
   const tableStructureRepairs = validateTableSections(root);
   const repeatedHeaderRows = detectRepeatedHeaders(root);
   flattenRedundantTableBodySections(root);
+
+  // A6: associate captions with nearest preceding Figure/Table.
+  let captionAssociation = { detected: captionCandidatesDetected, associated: 0 };
+  if (options.enableCaptionDetection) {
+    const association = associateCaptionsWithFiguresOrTables(root, options);
+    captionAssociation = {
+      detected: Math.max(captionCandidatesDetected, association.detected),
+      associated: association.associated
+    };
+  }
+
+  // Demote spurious tables before further post-processing. Scanned
+  // cover pages and rubber-stamp overlays produce TDs whose "rows"
+  // are fragments with no columnar structure (date stamps, letter-
+  // heads, judge signatures). Adobe's Tags panel shows the Table+TR
+  // containers with empty text preview ("blank tags"), and screen
+  // readers announce them as tables when they're really prose.
+  // Heuristic: a Table with ≤2 rows, ≤4 cells per row, cell text
+  // length <30 chars each, and no numeric/unit/currency patterns in
+  // any cell → flatten into a single P containing the concatenated
+  // text. Always-on — never demotes real tables because real tables
+  // have multiple rows OR numeric/unit cells OR long cell text.
+  const tableDemotion = demoteSpuriousTables(root);
+
+  // #16: promote flat H# children under Document into Sect wrappers.
+  const sectionPromotion = options.enableSectionPromotion
+    ? promoteFlatHeadingsIntoSections(root)
+    : { applied: false, sectionsInserted: 0 };
+
+  // A15: attach /Table attrs (ColSpan/RowSpan/Headers) to cells.
+  if (options.enableTableHeaders) {
+    assignHeaderIdsAndTableAttrs(root);
+  }
+
+  // A14: attach /Layout attrs to positional elements.
+  if (options.enableLayoutAttrs) {
+    const sourceNodesById = new Map();
+    for (const semanticNode of semanticDocument.nodes || []) {
+      if (!sourceNodesById.has(semanticNode.id)) {
+        sourceNodesById.set(semanticNode.id, semanticNode);
+      }
+    }
+    applyLayoutAttrsToTree(root, sourceNodesById);
+  }
+
   const taggingDocument = {
     schemaVersion: "1.0.0",
     documentId: `${semanticDocument.documentId}:tagging`,
@@ -1203,7 +1888,13 @@ export async function buildTagTree(inputPath) {
       headingNormalization: headingNormalization.summary,
       tableRegularityCorrection,
       tableStructureRepairs,
-      repeatedHeaderRows
+      repeatedHeaderRows,
+      ...(options.enableTitleDetection ? { titleDetection: { applied: titleEmitted, nodeId: titleEmitted ? titleNodeId : null } } : {}),
+      ...(options.enableCaptionDetection ? { captionAssociation } : {}),
+      ...(options.enableSectionPromotion ? { sectionPromotion } : {}),
+      ...(options.enableLayoutAttrs ? { layoutAttrs: { applied: true } } : {}),
+      ...(options.enableTableHeaders ? { tableHeadersAttrs: { applied: true } } : {}),
+      ...(options.enablePrintFieldAttrs ? { printFieldAttrs: { applied: true } } : {})
     },
     root
   };

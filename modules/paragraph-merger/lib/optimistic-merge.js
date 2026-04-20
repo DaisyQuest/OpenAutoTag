@@ -27,6 +27,12 @@ function getLeft(node) { return node.bbox?.[0] ?? 0; }
 function getHeight(node) { return node.bbox?.[3] ?? 0; }
 function getWidth(node) { return node.bbox?.[2] ?? 0; }
 function getBottom(node) { return getTop(node) + getHeight(node); }
+// Row-snap tolerance: blocks on the same visual line may have small
+// fractional Y differences from font baseline/descent variance. Bucket
+// with floor so same-row variance falls into one bucket (Math.round
+// can still split same-row blocks across buckets at the .5 mark).
+const ROW_BUCKET_PX = 6;
+function getRow(node) { return Math.floor(getTop(node) / ROW_BUCKET_PX); }
 
 function isBreakSignal(prev, curr, groupLeftMargin, config) {
   const reasons = [];
@@ -132,7 +138,7 @@ export function optimisticMerge(semanticDocument, config = {}) {
       continue;
     }
 
-    const sorted = [...pNodes].sort((a, b) => getTop(a) - getTop(b) || getLeft(a) - getLeft(b));
+    const sorted = [...pNodes].sort((a, b) => getRow(a) - getRow(b) || getLeft(a) - getLeft(b));
 
     const groups = [];
     let currentGroup = [sorted[0]];

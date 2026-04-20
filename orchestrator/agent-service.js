@@ -292,7 +292,8 @@ export async function createAgentService({
   runtimeRoot = getRuntimeRoot({ repoRoot, appName: "openautotag-agent" }),
   workRoot = path.join(getRuntimeRoot({ repoRoot, appName: "openautotag-agent" }), "jobs"),
   runJob = runWorkload,
-  env = process.env
+  env = process.env,
+  enableHttpServer = true
 } = {}) {
   const resolvedRuntimeRoot = path.resolve(runtimeRoot);
   const resolvedWorkRoot = path.resolve(workRoot);
@@ -512,48 +513,52 @@ export async function createAgentService({
     }
   }
 
-  const server = http.createServer(async (request, response) => {
-    const url = new URL(request.url, "http://localhost");
+  const server = enableHttpServer
+    ? http.createServer(async (request, response) => {
+        const url = new URL(request.url, "http://localhost");
 
-    if (request.method === "GET" && url.pathname === "/health") {
-      response.writeHead(200, {
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "no-store"
-      });
-      response.end(
-        `${JSON.stringify(
-          {
-            ok: true,
-            ...state
-          },
-          null,
-          2
-        )}\n`
-      );
-      return;
-    }
+        if (request.method === "GET" && url.pathname === "/health") {
+          response.writeHead(200, {
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "no-store"
+          });
+          response.end(
+            `${JSON.stringify(
+              {
+                ok: true,
+                ...state
+              },
+              null,
+              2
+            )}\n`
+          );
+          return;
+        }
 
-    if (request.method === "GET" && url.pathname === "/") {
-      response.writeHead(200, {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store"
-      });
-      response.end(buildRootPage(state));
-      return;
-    }
+        if (request.method === "GET" && url.pathname === "/") {
+          response.writeHead(200, {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "no-store"
+          });
+          response.end(buildRootPage(state));
+          return;
+        }
 
-    response.writeHead(404, {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store"
-    });
-    response.end(`${JSON.stringify({ error: "Not found" }, null, 2)}\n`);
-  });
+        response.writeHead(404, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store"
+        });
+        response.end(`${JSON.stringify({ error: "Not found" }, null, 2)}\n`);
+      })
+    : null;
 
   return {
     state,
     server,
     async start({ port = Number(env.PORT || 3000) } = {}) {
-      await new Promise((resolve) => server.listen(port, resolve));
+      if (server) {
+        await new Promise((resolve) => server.listen(port, resolve));
+      }
       state.status = "idle";
       state.currentMessage = "Agent runtime is online.";
       loopPromise = pollLoop();
@@ -561,13 +566,15 @@ export async function createAgentService({
     },
     async close() {
       shuttingDown = true;
-      if (!serverClosePromise) {
+      if (server && !serverClosePromise) {
         serverClosePromise = new Promise((resolve, reject) => {
           server.close((error) => (error ? reject(error) : resolve()));
         });
       }
 
-      await serverClosePromise;
+      if (serverClosePromise) {
+        await serverClosePromise;
+      }
       await loopPromise?.catch(() => {});
     }
   };

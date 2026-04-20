@@ -50,8 +50,11 @@
                           "id": "tag:n1",
                           "type": "TH",
                           "label": "Item",
-                          "sourceNodeIds": ["n1"],
+                          "sourceNodeIds": [
+                            "n1"
+                          ],
                           "children": [],
+                          "actualText": "Item",
                           "tableSection": "head",
                           "tableRowIndex": 0,
                           "tableColumnIndex": 0
@@ -60,8 +63,11 @@
                           "id": "tag:n2",
                           "type": "TH",
                           "label": "Qty",
-                          "sourceNodeIds": ["n2"],
+                          "sourceNodeIds": [
+                            "n2"
+                          ],
                           "children": [],
+                          "actualText": "Qty",
                           "tableSection": "head",
                           "tableRowIndex": 0,
                           "tableColumnIndex": 1
@@ -70,8 +76,11 @@
                           "id": "tag:n3",
                           "type": "TH",
                           "label": "Total",
-                          "sourceNodeIds": ["n3"],
+                          "sourceNodeIds": [
+                            "n3"
+                          ],
                           "children": [],
+                          "actualText": "Total",
                           "tableSection": "head",
                           "tableRowIndex": 0,
                           "tableColumnIndex": 2
@@ -94,8 +103,11 @@
                           "id": "tag:n4",
                           "type": "TD",
                           "label": "Bolts",
-                          "sourceNodeIds": ["n4"],
+                          "sourceNodeIds": [
+                            "n4"
+                          ],
                           "children": [],
+                          "actualText": "Bolts",
                           "tableSection": "body",
                           "tableRowIndex": 1,
                           "tableColumnIndex": 0
@@ -104,8 +116,11 @@
                           "id": "tag:n5",
                           "type": "TD",
                           "label": "10",
-                          "sourceNodeIds": ["n5"],
+                          "sourceNodeIds": [
+                            "n5"
+                          ],
                           "children": [],
+                          "actualText": "10",
                           "tableSection": "body",
                           "tableRowIndex": 1,
                           "tableColumnIndex": 1
@@ -114,8 +129,11 @@
                           "id": "tag:n6",
                           "type": "TD",
                           "label": "$5",
-                          "sourceNodeIds": ["n6"],
+                          "sourceNodeIds": [
+                            "n6"
+                          ],
                           "children": [],
+                          "actualText": "$5",
                           "tableSection": "body",
                           "tableRowIndex": 1,
                           "tableColumnIndex": 2
@@ -132,8 +150,11 @@
                           "id": "tag:n7",
                           "type": "TD",
                           "label": "Nuts",
-                          "sourceNodeIds": ["n7"],
+                          "sourceNodeIds": [
+                            "n7"
+                          ],
                           "children": [],
+                          "actualText": "Nuts",
                           "tableSection": "body",
                           "tableRowIndex": 2,
                           "tableColumnIndex": 0
@@ -154,8 +175,11 @@
                           "id": "tag:n8",
                           "type": "TD",
                           "label": "$3",
-                          "sourceNodeIds": ["n8"],
+                          "sourceNodeIds": [
+                            "n8"
+                          ],
                           "children": [],
+                          "actualText": "$3",
                           "tableSection": "body",
                           "tableRowIndex": 2,
                           "tableColumnIndex": 2
@@ -231,8 +255,11 @@
                           "id": "tag:n1",
                           "type": "TH",
                           "label": "Sales Overview",
-                          "sourceNodeIds": ["n1"],
+                          "sourceNodeIds": [
+                            "n1"
+                          ],
                           "children": [],
+                          "actualText": "Sales Overview",
                           "columnSpan": 3,
                           "tableSection": "head",
                           "tableRowIndex": 0,
@@ -262,8 +289,11 @@
                           "id": "tag:n2",
                           "type": "TH",
                           "label": "Region",
-                          "sourceNodeIds": ["n2"],
+                          "sourceNodeIds": [
+                            "n2"
+                          ],
                           "children": [],
+                          "actualText": "Region",
                           "tableSection": "head",
                           "tableRowIndex": 1,
                           "tableColumnIndex": 1
@@ -272,8 +302,11 @@
                           "id": "tag:n3",
                           "type": "TH",
                           "label": "Revenue",
-                          "sourceNodeIds": ["n3"],
+                          "sourceNodeIds": [
+                            "n3"
+                          ],
                           "children": [],
+                          "actualText": "Revenue",
                           "tableSection": "head",
                           "tableRowIndex": 1,
                           "tableColumnIndex": 2
@@ -297,8 +330,11 @@
                           "id": "tag:n4",
                           "type": "TD",
                           "label": "East",
-                          "sourceNodeIds": ["n4"],
+                          "sourceNodeIds": [
+                            "n4"
+                          ],
                           "children": [],
+                          "actualText": "East",
                           "tableSection": "body",
                           "tableRowIndex": 2,
                           "tableColumnIndex": 0
@@ -307,8 +343,11 @@
                           "id": "tag:n5",
                           "type": "TD",
                           "label": "$9M",
-                          "sourceNodeIds": ["n5"],
+                          "sourceNodeIds": [
+                            "n5"
+                          ],
                           "children": [],
+                          "actualText": "$9M",
                           "tableSection": "body",
                           "tableRowIndex": 2,
                           "tableColumnIndex": 1
@@ -317,8 +356,11 @@
                           "id": "tag:n6",
                           "type": "TD",
                           "label": "North",
-                          "sourceNodeIds": ["n6"],
+                          "sourceNodeIds": [
+                            "n6"
+                          ],
                           "children": [],
+                          "actualText": "North",
                           "tableSection": "body",
                           "tableRowIndex": 2,
                           "tableColumnIndex": 2
@@ -389,8 +431,11 @@
                       "id": "tag:n1",
                       "type": "TH",
                       "label": "Region",
-                      "sourceNodeIds": ["n1"],
+                      "sourceNodeIds": [
+                        "n1"
+                      ],
                       "children": [],
+                      "actualText": "Region",
                       "rowSpan": 2,
                       "tableSection": "body",
                       "tableRowIndex": 0,
@@ -400,8 +445,11 @@
                       "id": "tag:n2",
                       "type": "TD",
                       "label": "Q1",
-                      "sourceNodeIds": ["n2"],
+                      "sourceNodeIds": [
+                        "n2"
+                      ],
                       "children": [],
+                      "actualText": "Q1",
                       "tableSection": "body",
                       "tableRowIndex": 0,
                       "tableColumnIndex": 1
@@ -418,8 +466,11 @@
                       "id": "tag:n3",
                       "type": "TD",
                       "label": "Q2",
-                      "sourceNodeIds": ["n3"],
+                      "sourceNodeIds": [
+                        "n3"
+                      ],
                       "children": [],
+                      "actualText": "Q2",
                       "tableSection": "body",
                       "tableRowIndex": 1,
                       "tableColumnIndex": 1
@@ -488,8 +539,11 @@
                       "id": "tag:n1",
                       "type": "TH",
                       "label": "Region",
-                      "sourceNodeIds": ["n1"],
+                      "sourceNodeIds": [
+                        "n1"
+                      ],
                       "children": [],
+                      "actualText": "Region",
                       "rowSpan": 2,
                       "tableSection": "body",
                       "tableRowIndex": 0,
@@ -499,8 +553,11 @@
                       "id": "tag:n2",
                       "type": "TD",
                       "label": "Q1",
-                      "sourceNodeIds": ["n2"],
+                      "sourceNodeIds": [
+                        "n2"
+                      ],
                       "children": [],
+                      "actualText": "Q1",
                       "tableSection": "body",
                       "tableRowIndex": 0,
                       "tableColumnIndex": 1

@@ -154,6 +154,65 @@
                 <p id="profile-description" class="section-copy">Balanced general-purpose profile suitable for most document types.</p>
                 <button id="profile-advanced-toggle" class="ghost-button compact-button" type="button">Advanced</button>
                 <div id="profile-advanced-panel" hidden>
+                  <fieldset class="field-group" aria-labelledby="native-tagging-legend">
+                    <legend id="native-tagging-legend" class="field-label">Native tagging</legend>
+                    <label class="field-stack" for="writer-mode">
+                      <span class="field-label">Writer mode</span>
+                      <select id="writer-mode" class="url-input" aria-describedby="writer-mode-help">
+                        <option value="">Profile default</option>
+                        <option value="auto">auto — native-first with raster fallback</option>
+                        <option value="native">native — strict, fail if match rate below threshold</option>
+                        <option value="raster">raster — rasterize every page (legacy)</option>
+                      </select>
+                      <span id="writer-mode-help" class="field-help">Native preserves fonts and selectable text; raster rasterizes pages as images.</span>
+                    </label>
+                    <label class="field-stack" for="native-match-threshold">
+                      <span class="field-label">Native match threshold (0 – 1)</span>
+                      <input
+                        type="number"
+                        id="native-match-threshold"
+                        class="url-input"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        placeholder="0.8"
+                        aria-describedby="native-match-threshold-help"
+                      />
+                      <span id="native-match-threshold-help" class="field-help">Auto mode falls back to raster when fewer than this fraction of operators match a tag.</span>
+                    </label>
+                    <label class="field-stack" for="already-tagged-threshold">
+                      <span class="field-label">Already-tagged threshold (0 – 1)</span>
+                      <input
+                        type="number"
+                        id="already-tagged-threshold"
+                        class="url-input"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        placeholder="0.5"
+                        aria-describedby="already-tagged-threshold-help"
+                      />
+                      <span id="already-tagged-threshold-help" class="field-help">When this fraction of source operators are already inside BMC/BDC blocks, treat the source as pre-tagged.</span>
+                    </label>
+                    <label class="field-stack" for="already-tagged-policy">
+                      <span class="field-label">Already-tagged policy</span>
+                      <select id="already-tagged-policy" class="url-input" aria-describedby="already-tagged-policy-help">
+                        <option value="">Profile default</option>
+                        <option value="bailout-to-raster">bailout-to-raster — rasterize to avoid orphan-MCID structure tree</option>
+                        <option value="passthrough">passthrough — keep source tagging, refresh metadata only</option>
+                      </select>
+                      <span id="already-tagged-policy-help" class="field-help">Passthrough preserves original fonts and structure; bailout rasterizes.</span>
+                    </label>
+                    <label class="field-stack" for="reading-order-strategy">
+                      <span class="field-label">Reading-order strategy</span>
+                      <select id="reading-order-strategy" class="url-input" aria-describedby="reading-order-strategy-help">
+                        <option value="">Profile default</option>
+                        <option value="semantic">semantic — honor upstream readingOrder (recommended)</option>
+                        <option value="file">file — content-stream order (debug only)</option>
+                      </select>
+                      <span id="reading-order-strategy-help" class="field-help">Semantic uses the semantic-engine's readingOrder field for structure tree layout.</span>
+                    </label>
+                  </fieldset>
                   <label class="field-stack" for="profile-overrides">
                     <span class="field-label">Profile overrides (JSON)</span>
                     <textarea
@@ -163,6 +222,7 @@
                       placeholder='{"parser": {"ocrMode": "force"}}'
                       aria-label="Profile overrides JSON"
                     ></textarea>
+                    <span class="field-help">Freeform overrides are merged into the resolved profile after the form controls above.</span>
                   </label>
                 </div>
               </section>

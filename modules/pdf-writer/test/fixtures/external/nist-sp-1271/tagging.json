@@ -1,0 +1,2741 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentId": "layout:00-source:semantic:tagging",
+  "source": {
+    "semanticDocumentId": "layout:00-source:semantic",
+    "filePath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\tmp\\external-probe-fixtures\\nist-sp-1271\\00-source.pdf",
+    "headingNormalization": {
+      "applied": false,
+      "totalHeadingCount": 2,
+      "adjustedHeadingCount": 0,
+      "firstDetectedHeading": "H1",
+      "maxNormalizedHeading": "H1",
+      "adjustments": []
+    },
+    "tableRegularityCorrection": {
+      "applied": false,
+      "algorithm": "grid-normalization-v1",
+      "tablesInspected": 9,
+      "correctedTables": 0,
+      "repairedRowCount": 0,
+      "insertedPlaceholderCellCount": 0,
+      "insertedSyntheticRowCount": 0,
+      "shiftedCellCount": 0
+    },
+    "tableStructureRepairs": 0,
+    "repeatedHeaderRows": 0
+  },
+  "root": {
+    "id": "tag:document",
+    "type": "Document",
+    "children": [
+      {
+        "id": "tag:n-1-2",
+        "type": "P",
+        "label": "August 2021 https://doi.org/10.6028/NIST.SP.1271",
+        "sourceNodeIds": [
+          "n-1-2"
+        ],
+        "children": []
+      },
+      {
+        "id": "tag:n-1-1",
+        "type": "P",
+        "label": "NIST Special Publication 1271",
+        "sourceNodeIds": [
+          "n-1-1"
+        ],
+        "children": []
+      },
+      {
+        "id": "tag:section:n-1-4",
+        "type": "Sect",
+        "children": [
+          {
+            "id": "tag:n-1-4",
+            "type": "H1",
+            "label": "Getting Started with the NIST",
+            "sourceNodeIds": [
+              "n-1-4"
+            ],
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "tag:section:n-1-5",
+        "type": "Sect",
+        "children": [
+          {
+            "id": "tag:n-1-5",
+            "type": "H1",
+            "label": "Cybersecurity Framework: A Quick Start Guide",
+            "sourceNodeIds": [
+              "n-1-5"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-6",
+            "type": "P",
+            "label": "Amy Mahn, Jeffrey Marron, Stephen Quinn, Daniel Topper 1 1 2 3 1 NIST Applied Cybersecurity Division, Information Technology Laboratory 2 NIST Computer Security Division, Information Technology Laboratory 3 Huntington Ingalls Industries What is the NIST Cybersecurity Framework, and how can my organization use it? The NIST Cybersecurity Framework can help an organization begin or improve their cybersecurity program.",
+            "sourceNodeIds": [
+              "n-1-6"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-17",
+            "type": "P",
+            "label": "4 Built off of practices that are known to be effective, it can help organizations improve their cybersecurity posture. It fosters communication among both internal and external stakeholders about cybersecurity, and for larger organizations, helps to better integrate and align cybersecurity risk management with broader enterprise risk management processes as described in the NISTIR 82865 series. The Framework is organized by five key Functions – Identify, Protect, Detect, Respond, Recover. These five widely understood terms, when considered together, provide a comprehensive view of the lifecycle for managing cybersecurity risk over time. The activities listed under each Function may offer a good starting point for your organization:",
+            "sourceNodeIds": [
+              "n-1-17"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-26",
+            "type": "P",
+            "label": "IDENTIFY",
+            "sourceNodeIds": [
+              "n-1-26"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:1:1",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:1:1:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-1-27",
+                    "type": "TD",
+                    "label": "Develop an organizational",
+                    "sourceNodeIds": [
+                      "n-1-27"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-28",
+                    "type": "TD",
+                    "label": "● Maintain hardware and software inventory –",
+                    "sourceNodeIds": [
+                      "n-1-28"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:1:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-1-29",
+                    "type": "TD",
+                    "label": "understanding to manage",
+                    "sourceNodeIds": [
+                      "n-1-29"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-30",
+                    "type": "TD",
+                    "label": "It’s important to have an understanding of the",
+                    "sourceNodeIds": [
+                      "n-1-30"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:1:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-1-31",
+                    "type": "TD",
+                    "label": "cybersecurity risk to: systems,",
+                    "sourceNodeIds": [
+                      "n-1-31"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-32",
+                    "type": "TD",
+                    "label": "computers and software in your enterprise",
+                    "sourceNodeIds": [
+                      "n-1-32"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:1:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-1-33",
+                    "type": "TD",
+                    "label": "assets, data, and capabilities.",
+                    "sourceNodeIds": [
+                      "n-1-33"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-34",
+                    "type": "TD",
+                    "label": "because these are frequently the entry points",
+                    "sourceNodeIds": [
+                      "n-1-34"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-1-35",
+            "type": "P",
+            "label": "of malicious actors. This inventory could be as",
+            "sourceNodeIds": [
+              "n-1-35"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:1:2",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:1:2:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-1-37",
+                    "type": "TD",
+                    "label": "● Identify critical enterprise processes and",
+                    "sourceNodeIds": [
+                      "n-1-37"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-36",
+                    "type": "TD",
+                    "label": "simple as a spreadsheet.",
+                    "sourceNodeIds": [
+                      "n-1-36"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-1-38",
+                    "type": "TD",
+                    "label": "assets – What are your enterprise’s activities",
+                    "sourceNodeIds": [
+                      "n-1-38"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-39",
+                    "type": "TD",
+                    "label": "● Establish policies for cybersecurity that include",
+                    "sourceNodeIds": [
+                      "n-1-39"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-1-40",
+                    "type": "TD",
+                    "label": "that absolutely must continue in order to be",
+                    "sourceNodeIds": [
+                      "n-1-40"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-41",
+                    "type": "TD",
+                    "label": "roles and responsibilities – These policies and",
+                    "sourceNodeIds": [
+                      "n-1-41"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-1-42",
+                    "type": "TD",
+                    "label": "viable? For example, this could be maintaining",
+                    "sourceNodeIds": [
+                      "n-1-42"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-43",
+                    "type": "TD",
+                    "label": "procedures should clearly describe your",
+                    "sourceNodeIds": [
+                      "n-1-43"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-1-44",
+                    "type": "TD",
+                    "label": "a website to retrieve payments, protecting",
+                    "sourceNodeIds": [
+                      "n-1-44"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-45",
+                    "type": "TD",
+                    "label": "expectations for how cybersecurity activities will",
+                    "sourceNodeIds": [
+                      "n-1-45"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:5",
+                "type": "TR",
+                "tableRowIndex": 5,
+                "children": [
+                  {
+                    "id": "tag:n-1-46",
+                    "type": "TD",
+                    "label": "customer/patient information securely, or",
+                    "sourceNodeIds": [
+                      "n-1-46"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-47",
+                    "type": "TD",
+                    "label": "protect your information and systems, and how",
+                    "sourceNodeIds": [
+                      "n-1-47"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:6",
+                "type": "TR",
+                "tableRowIndex": 6,
+                "children": [
+                  {
+                    "id": "tag:n-1-48",
+                    "type": "TD",
+                    "label": "ensuring that the information your enterprise",
+                    "sourceNodeIds": [
+                      "n-1-48"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-49",
+                    "type": "TD",
+                    "label": "they support critical enterprise processes.",
+                    "sourceNodeIds": [
+                      "n-1-49"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:7",
+                "type": "TR",
+                "tableRowIndex": 7,
+                "children": [
+                  {
+                    "id": "tag:n-1-50",
+                    "type": "TD",
+                    "label": "collects remains accessible and accurate.",
+                    "sourceNodeIds": [
+                      "n-1-50"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-51",
+                    "type": "TD",
+                    "label": "Cybersecurity policies should be integrated with",
+                    "sourceNodeIds": [
+                      "n-1-51"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:8",
+                "type": "TR",
+                "tableRowIndex": 8,
+                "children": [
+                  {
+                    "id": "tag:n-1-53",
+                    "type": "TD",
+                    "label": "● Document information flows – It’s important to",
+                    "sourceNodeIds": [
+                      "n-1-53"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-52",
+                    "type": "TD",
+                    "label": "other enterprise risk considerations (e.g.,",
+                    "sourceNodeIds": [
+                      "n-1-52"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:9",
+                "type": "TR",
+                "tableRowIndex": 9,
+                "children": [
+                  {
+                    "id": "tag:n-1-55",
+                    "type": "TD",
+                    "label": "not only understand what type of information",
+                    "sourceNodeIds": [
+                      "n-1-55"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-54",
+                    "type": "TD",
+                    "label": "financial, reputational).",
+                    "sourceNodeIds": [
+                      "n-1-54"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:10",
+                "type": "TR",
+                "tableRowIndex": 10,
+                "children": [
+                  {
+                    "id": "tag:n-1-56",
+                    "type": "TD",
+                    "label": "your enterprise collects and uses, but also to",
+                    "sourceNodeIds": [
+                      "n-1-56"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-57",
+                    "type": "TD",
+                    "label": "● Identify threats, vulnerabilities, and risk to",
+                    "sourceNodeIds": [
+                      "n-1-57"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:11",
+                "type": "TR",
+                "tableRowIndex": 11,
+                "children": [
+                  {
+                    "id": "tag:n-1-58",
+                    "type": "TD",
+                    "label": "understand where the data is located and and",
+                    "sourceNodeIds": [
+                      "n-1-58"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-59",
+                    "type": "TD",
+                    "label": "assets – Ensure risk management processes are",
+                    "sourceNodeIds": [
+                      "n-1-59"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:12",
+                "type": "TR",
+                "tableRowIndex": 12,
+                "children": [
+                  {
+                    "id": "tag:n-1-60",
+                    "type": "TD",
+                    "label": "how it is used, especially where contracts and",
+                    "sourceNodeIds": [
+                      "n-1-60"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-61",
+                    "type": "TD",
+                    "label": "established and managed to ensure internal",
+                    "sourceNodeIds": [
+                      "n-1-61"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:13",
+                "type": "TR",
+                "tableRowIndex": 13,
+                "children": [
+                  {
+                    "id": "tag:n-1-62",
+                    "type": "TD",
+                    "label": "external partners are engaged.",
+                    "sourceNodeIds": [
+                      "n-1-62"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-63",
+                    "type": "TD",
+                    "label": "and external threats are identified, assessed,",
+                    "sourceNodeIds": [
+                      "n-1-63"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:14",
+                "type": "TR",
+                "tableRowIndex": 14,
+                "children": [
+                  {
+                    "id": "tag:n-1-66",
+                    "type": "TD",
+                    "label": "4 https://www.nist.gov/cyberframework",
+                    "sourceNodeIds": [
+                      "n-1-66"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-65",
+                    "type": "TD",
+                    "label": "responses are identified and prioritized,",
+                    "sourceNodeIds": [
+                      "n-1-65"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:1:2:body:row:15",
+                "type": "TR",
+                "tableRowIndex": 15,
+                "children": [
+                  {
+                    "id": "tag:n-1-67",
+                    "type": "TD",
+                    "label": "5",
+                    "sourceNodeIds": [
+                      "n-1-67"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 15,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-1-68",
+                    "type": "TD",
+                    "label": "executed, and results monitored.",
+                    "sourceNodeIds": [
+                      "n-1-68"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 15,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-1-64",
+            "type": "P",
+            "label": "and documented in risk registers. Ensure risk",
+            "sourceNodeIds": [
+              "n-1-64"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-69",
+            "type": "P",
+            "label": "https://csrc.nist.gov/publications/detail/nistir/8286/final",
+            "sourceNodeIds": [
+              "n-1-69"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-1",
+            "type": "P",
+            "label": "PROTECT ● Conduct regular backups – Many operating Develop and implement the systems have built-in backup capabilities; appropriate safeguards to software and cloud solutions are also available ensure delivery of services. that can automate the backup process. A good practice is to keep one frequently backed up set of data offline to protect it against ransomware.",
+            "sourceNodeIds": [
+              "n-2-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:2:1",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:2:1:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-2-13",
+                    "type": "TD",
+                    "label": "● Manage access to assets and information –",
+                    "sourceNodeIds": [
+                      "n-2-13"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-12",
+                    "type": "TD",
+                    "label": "● Protect your devices – Consider installing host-",
+                    "sourceNodeIds": [
+                      "n-2-12"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-2-15",
+                    "type": "TD",
+                    "label": "Create unique accounts for each employee and",
+                    "sourceNodeIds": [
+                      "n-2-15"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-14",
+                    "type": "TD",
+                    "label": "based firewalls and other protections such as",
+                    "sourceNodeIds": [
+                      "n-2-14"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-2-17",
+                    "type": "TD",
+                    "label": "ensure that users only have access to",
+                    "sourceNodeIds": [
+                      "n-2-17"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-16",
+                    "type": "TD",
+                    "label": "endpoint security products. Apply uniform",
+                    "sourceNodeIds": [
+                      "n-2-16"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-2-19",
+                    "type": "TD",
+                    "label": "information, computers, and applications that are",
+                    "sourceNodeIds": [
+                      "n-2-19"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-18",
+                    "type": "TD",
+                    "label": "configurations to devices and control changes",
+                    "sourceNodeIds": [
+                      "n-2-18"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-2-21",
+                    "type": "TD",
+                    "label": "needed for their jobs. Authenticate users (e.g.,",
+                    "sourceNodeIds": [
+                      "n-2-21"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-20",
+                    "type": "TD",
+                    "label": "to device configurations. Disable device",
+                    "sourceNodeIds": [
+                      "n-2-20"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:5",
+                "type": "TR",
+                "tableRowIndex": 5,
+                "children": [
+                  {
+                    "id": "tag:n-2-23",
+                    "type": "TD",
+                    "label": "passwords, multi-factor techniques) before they",
+                    "sourceNodeIds": [
+                      "n-2-23"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-22",
+                    "type": "TD",
+                    "label": "services or features that are not necessary to",
+                    "sourceNodeIds": [
+                      "n-2-22"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:6",
+                "type": "TR",
+                "tableRowIndex": 6,
+                "children": [
+                  {
+                    "id": "tag:n-2-25",
+                    "type": "TD",
+                    "label": "are granted access to information, computers,",
+                    "sourceNodeIds": [
+                      "n-2-25"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-24",
+                    "type": "TD",
+                    "label": "support mission functions. Ensure that there is",
+                    "sourceNodeIds": [
+                      "n-2-24"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:7",
+                "type": "TR",
+                "tableRowIndex": 7,
+                "children": [
+                  {
+                    "id": "tag:n-2-27",
+                    "type": "TD",
+                    "label": "and applications. Tightly manage and track",
+                    "sourceNodeIds": [
+                      "n-2-27"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-26",
+                    "type": "TD",
+                    "label": "a policy and that devices are disposed of",
+                    "sourceNodeIds": [
+                      "n-2-26"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:8",
+                "type": "TR",
+                "tableRowIndex": 8,
+                "children": [
+                  {
+                    "id": "tag:n-2-29",
+                    "type": "TD",
+                    "label": "physical access to devices.",
+                    "sourceNodeIds": [
+                      "n-2-29"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-28",
+                    "type": "TD",
+                    "label": "securely.",
+                    "sourceNodeIds": [
+                      "n-2-28"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:9",
+                "type": "TR",
+                "tableRowIndex": 9,
+                "children": [
+                  {
+                    "id": "tag:n-2-32",
+                    "type": "TD",
+                    "label": "● Protect sensitive data – If your enterprise stores",
+                    "sourceNodeIds": [
+                      "n-2-32"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-31",
+                    "type": "TD",
+                    "label": "both the operating system and applications that",
+                    "sourceNodeIds": [
+                      "n-2-31"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:10",
+                "type": "TR",
+                "tableRowIndex": 10,
+                "children": [
+                  {
+                    "id": "tag:n-2-34",
+                    "type": "TD",
+                    "label": "or transmits sensitive data, make sure that this",
+                    "sourceNodeIds": [
+                      "n-2-34"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-33",
+                    "type": "TD",
+                    "label": "are installed on your computers and other",
+                    "sourceNodeIds": [
+                      "n-2-33"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:11",
+                "type": "TR",
+                "tableRowIndex": 11,
+                "children": [
+                  {
+                    "id": "tag:n-2-36",
+                    "type": "TD",
+                    "label": "data is protected by encryption both while it’s",
+                    "sourceNodeIds": [
+                      "n-2-36"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-35",
+                    "type": "TD",
+                    "label": "devices to protect them from attack. If possible,",
+                    "sourceNodeIds": [
+                      "n-2-35"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:12",
+                "type": "TR",
+                "tableRowIndex": 12,
+                "children": [
+                  {
+                    "id": "tag:n-2-38",
+                    "type": "TD",
+                    "label": "stored on computers as well as when it’s",
+                    "sourceNodeIds": [
+                      "n-2-38"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-37",
+                    "type": "TD",
+                    "label": "enable automatic updates. Consider using",
+                    "sourceNodeIds": [
+                      "n-2-37"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:13",
+                "type": "TR",
+                "tableRowIndex": 13,
+                "children": [
+                  {
+                    "id": "tag:n-2-40",
+                    "type": "TD",
+                    "label": "transmitted to other parties. Consider utilizing",
+                    "sourceNodeIds": [
+                      "n-2-40"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-39",
+                    "type": "TD",
+                    "label": "software tools to scan devices for additional",
+                    "sourceNodeIds": [
+                      "n-2-39"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:14",
+                "type": "TR",
+                "tableRowIndex": 14,
+                "children": [
+                  {
+                    "id": "tag:n-2-42",
+                    "type": "TD",
+                    "label": "integrity checking to ensure only approved",
+                    "sourceNodeIds": [
+                      "n-2-42"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-41",
+                    "type": "TD",
+                    "label": "vulnerabilities; remediate vulnerabilities with high",
+                    "sourceNodeIds": [
+                      "n-2-41"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:15",
+                "type": "TR",
+                "tableRowIndex": 15,
+                "children": [
+                  {
+                    "id": "tag:n-2-44",
+                    "type": "TD",
+                    "label": "changes to the data have been made. Securely",
+                    "sourceNodeIds": [
+                      "n-2-44"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 15,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-43",
+                    "type": "TD",
+                    "label": "likelihood and/or impact.",
+                    "sourceNodeIds": [
+                      "n-2-43"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 15,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:16",
+                "type": "TR",
+                "tableRowIndex": 16,
+                "children": [
+                  {
+                    "id": "tag:n-2-45",
+                    "type": "TD",
+                    "label": "delete and/or destroy data when it’s no longer",
+                    "sourceNodeIds": [
+                      "n-2-45"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 16,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-46",
+                    "type": "TD",
+                    "label": "● Train users – Regularly train and retrain all",
+                    "sourceNodeIds": [
+                      "n-2-46"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 16,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:1:body:row:17",
+                "type": "TR",
+                "tableRowIndex": 17,
+                "children": [
+                  {
+                    "id": "tag:n-2-47",
+                    "type": "TD",
+                    "label": "needed or required for compliance purposes.",
+                    "sourceNodeIds": [
+                      "n-2-47"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 17,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-48",
+                    "type": "TD",
+                    "label": "users to be sure that they are aware of",
+                    "sourceNodeIds": [
+                      "n-2-48"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 17,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-2-30",
+            "type": "P",
+            "label": "● Manage device vulnerabilities – Regularly update",
+            "sourceNodeIds": [
+              "n-2-30"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-49",
+            "type": "P",
+            "label": "enterprise cybersecurity policies and procedures and their specific roles and",
+            "sourceNodeIds": [
+              "n-2-49"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:2:2",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:2:2:head",
+                "type": "THead",
+                "children": [
+                  {
+                    "id": "tag:table:table:2:2:head:row:0",
+                    "type": "TR",
+                    "tableRowIndex": 0,
+                    "children": [
+                      {
+                        "id": "tag:n-2-52",
+                        "type": "TH",
+                        "label": "DETECT",
+                        "sourceNodeIds": [
+                          "n-2-52"
+                        ],
+                        "children": [],
+                        "tableSection": "head",
+                        "tableRowIndex": 0,
+                        "tableColumnIndex": 0
+                      },
+                      {
+                        "id": "tag:n-2-51",
+                        "type": "TH",
+                        "label": "responsibilities as a condition of employment.",
+                        "sourceNodeIds": [
+                          "n-2-51"
+                        ],
+                        "children": [],
+                        "tableSection": "head",
+                        "tableRowIndex": 0,
+                        "tableColumnIndex": 1
+                      }
+                    ],
+                    "tableColumnCount": 2
+                  }
+                ]
+              },
+              {
+                "id": "tag:table:table:2:2:body",
+                "type": "TBody",
+                "children": [
+                  {
+                    "id": "tag:table:table:2:2:body:row:1",
+                    "type": "TR",
+                    "tableRowIndex": 1,
+                    "children": [
+                      {
+                        "id": "tag:n-2-54",
+                        "type": "TD",
+                        "label": "appropriate activities to identify",
+                        "sourceNodeIds": [
+                          "n-2-54"
+                        ],
+                        "children": [],
+                        "tableSection": "body",
+                        "tableRowIndex": 1,
+                        "tableColumnIndex": 0
+                      },
+                      {
+                        "id": "tag:n-2-55",
+                        "type": "TD",
+                        "label": "● Know the expected data flows for your",
+                        "sourceNodeIds": [
+                          "n-2-55"
+                        ],
+                        "children": [],
+                        "tableSection": "body",
+                        "tableRowIndex": 1,
+                        "tableColumnIndex": 1
+                      }
+                    ],
+                    "tableColumnCount": 2
+                  },
+                  {
+                    "id": "tag:table:table:2:2:body:row:2",
+                    "type": "TR",
+                    "tableRowIndex": 2,
+                    "children": [
+                      {
+                        "id": "tag:n-2-56",
+                        "type": "TD",
+                        "label": "the occurrence of a",
+                        "sourceNodeIds": [
+                          "n-2-56"
+                        ],
+                        "children": [],
+                        "tableSection": "body",
+                        "tableRowIndex": 2,
+                        "tableColumnIndex": 0
+                      },
+                      {
+                        "id": "tag:n-2-57",
+                        "type": "TD",
+                        "label": "enterprise – If you know what and how data is",
+                        "sourceNodeIds": [
+                          "n-2-57"
+                        ],
+                        "children": [],
+                        "tableSection": "body",
+                        "tableRowIndex": 2,
+                        "tableColumnIndex": 1
+                      }
+                    ],
+                    "tableColumnCount": 2
+                  }
+                ]
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-2-53",
+            "type": "P",
+            "label": "Develop and implement the cybersecurity event. expected to be used for your enterprise, you are much more likely to notice when the",
+            "sourceNodeIds": [
+              "n-2-53"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:2:3",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:2:3:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-2-62",
+                    "type": "TD",
+                    "label": "● Test and update detection processes – Develop",
+                    "sourceNodeIds": [
+                      "n-2-62"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-61",
+                    "type": "TD",
+                    "label": "unexpected happens – and unexpected is never",
+                    "sourceNodeIds": [
+                      "n-2-61"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-2-64",
+                    "type": "TD",
+                    "label": "and test processes and procedures for",
+                    "sourceNodeIds": [
+                      "n-2-64"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-63",
+                    "type": "TD",
+                    "label": "a good thing when it comes to cybersecurity.",
+                    "sourceNodeIds": [
+                      "n-2-63"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-2-66",
+                    "type": "TD",
+                    "label": "detecting unauthorized entities and actions on",
+                    "sourceNodeIds": [
+                      "n-2-66"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-65",
+                    "type": "TD",
+                    "label": "Unexpected data flows might include customer",
+                    "sourceNodeIds": [
+                      "n-2-65"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-2-68",
+                    "type": "TD",
+                    "label": "the networks and in the physical environment,",
+                    "sourceNodeIds": [
+                      "n-2-68"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-67",
+                    "type": "TD",
+                    "label": "information being exported from an internal",
+                    "sourceNodeIds": [
+                      "n-2-67"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-2-70",
+                    "type": "TD",
+                    "label": "including personnel activity. Staff should be",
+                    "sourceNodeIds": [
+                      "n-2-70"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-69",
+                    "type": "TD",
+                    "label": "database and exiting the network. If you have",
+                    "sourceNodeIds": [
+                      "n-2-69"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:5",
+                "type": "TR",
+                "tableRowIndex": 5,
+                "children": [
+                  {
+                    "id": "tag:n-2-72",
+                    "type": "TD",
+                    "label": "aware of their roles and responsibilities for",
+                    "sourceNodeIds": [
+                      "n-2-72"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-71",
+                    "type": "TD",
+                    "label": "contracted work to a cloud or managed service",
+                    "sourceNodeIds": [
+                      "n-2-71"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:6",
+                "type": "TR",
+                "tableRowIndex": 6,
+                "children": [
+                  {
+                    "id": "tag:n-2-74",
+                    "type": "TD",
+                    "label": "detection and related reporting both within",
+                    "sourceNodeIds": [
+                      "n-2-74"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-73",
+                    "type": "TD",
+                    "label": "provider, discuss with them how they track",
+                    "sourceNodeIds": [
+                      "n-2-73"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:7",
+                "type": "TR",
+                "tableRowIndex": 7,
+                "children": [
+                  {
+                    "id": "tag:n-2-76",
+                    "type": "TD",
+                    "label": "your organization and to external governance",
+                    "sourceNodeIds": [
+                      "n-2-76"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-75",
+                    "type": "TD",
+                    "label": "data flows and report, including unexpected",
+                    "sourceNodeIds": [
+                      "n-2-75"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:2:3:body:row:8",
+                "type": "TR",
+                "tableRowIndex": 8,
+                "children": [
+                  {
+                    "id": "tag:n-2-78",
+                    "type": "TD",
+                    "label": "and legal authorities.",
+                    "sourceNodeIds": [
+                      "n-2-78"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-2-77",
+                    "type": "TD",
+                    "label": "events.",
+                    "sourceNodeIds": [
+                      "n-2-77"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:table:table:3:1",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:3:1:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-3-1",
+                    "type": "TD",
+                    "label": "● Maintain and monitor logs – Logs are crucial in",
+                    "sourceNodeIds": [
+                      "n-3-1"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-2",
+                    "type": "TD",
+                    "label": "● Understand the impact of cybersecurity events –",
+                    "sourceNodeIds": [
+                      "n-3-2"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-3-3",
+                    "type": "TD",
+                    "label": "order to identify anomalies in your enterprise’s",
+                    "sourceNodeIds": [
+                      "n-3-3"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-4",
+                    "type": "TD",
+                    "label": "If a cybersecurity event is detected, your enterprise",
+                    "sourceNodeIds": [
+                      "n-3-4"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-3-5",
+                    "type": "TD",
+                    "label": "computers and applications. These logs record",
+                    "sourceNodeIds": [
+                      "n-3-5"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-6",
+                    "type": "TD",
+                    "label": "should work quickly and thoroughly to understand",
+                    "sourceNodeIds": [
+                      "n-3-6"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-3-7",
+                    "type": "TD",
+                    "label": "events such as changes to systems or accounts as",
+                    "sourceNodeIds": [
+                      "n-3-7"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-8",
+                    "type": "TD",
+                    "label": "the breadth and depth of the impact. Seek help.",
+                    "sourceNodeIds": [
+                      "n-3-8"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-3-9",
+                    "type": "TD",
+                    "label": "well as the initiation of communication channels.",
+                    "sourceNodeIds": [
+                      "n-3-9"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-10",
+                    "type": "TD",
+                    "label": "Communicating information on the event with",
+                    "sourceNodeIds": [
+                      "n-3-10"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:5",
+                "type": "TR",
+                "tableRowIndex": 5,
+                "children": [
+                  {
+                    "id": "tag:n-3-11",
+                    "type": "TD",
+                    "label": "Consider using software tools that can aggregate",
+                    "sourceNodeIds": [
+                      "n-3-11"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-12",
+                    "type": "TD",
+                    "label": "appropriate stakeholders will help keep you in",
+                    "sourceNodeIds": [
+                      "n-3-12"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:6",
+                "type": "TR",
+                "tableRowIndex": 6,
+                "children": [
+                  {
+                    "id": "tag:n-3-13",
+                    "type": "TD",
+                    "label": "these logs and look for patterns or anomalies from",
+                    "sourceNodeIds": [
+                      "n-3-13"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-14",
+                    "type": "TD",
+                    "label": "good stead in terms of partners, oversight bodies,",
+                    "sourceNodeIds": [
+                      "n-3-14"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:1:body:row:7",
+                "type": "TR",
+                "tableRowIndex": 7,
+                "children": [
+                  {
+                    "id": "tag:n-3-15",
+                    "type": "TD",
+                    "label": "expected network behavior.",
+                    "sourceNodeIds": [
+                      "n-3-15"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-16",
+                    "type": "TD",
+                    "label": "and others (potentially including investors) and",
+                    "sourceNodeIds": [
+                      "n-3-16"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-3-17",
+            "type": "P",
+            "label": "improve policies and processes. RESPOND",
+            "sourceNodeIds": [
+              "n-3-17"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:3:2",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:3:2:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-3-20",
+                    "type": "TD",
+                    "label": "Develop and implement the",
+                    "sourceNodeIds": [
+                      "n-3-20"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-19",
+                    "type": "TD",
+                    "label": "● Coordinate with internal and external",
+                    "sourceNodeIds": [
+                      "n-3-19"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:2:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-3-21",
+                    "type": "TD",
+                    "label": "appropriate activities to take",
+                    "sourceNodeIds": [
+                      "n-3-21"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-22",
+                    "type": "TD",
+                    "label": "stakeholders – It’s important to make sure that",
+                    "sourceNodeIds": [
+                      "n-3-22"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:2:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-3-23",
+                    "type": "TD",
+                    "label": "action regarding a detected",
+                    "sourceNodeIds": [
+                      "n-3-23"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-24",
+                    "type": "TD",
+                    "label": "your enterprise’s response plans and updates",
+                    "sourceNodeIds": [
+                      "n-3-24"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:2:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-3-25",
+                    "type": "TD",
+                    "label": "cybersecurity event.",
+                    "sourceNodeIds": [
+                      "n-3-25"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-26",
+                    "type": "TD",
+                    "label": "include all key stakeholders and external",
+                    "sourceNodeIds": [
+                      "n-3-26"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-3-27",
+            "type": "P",
+            "label": "service providers. They can contribute to improvements in planning and execution. ● Ensure response plans are tested – It’s even more important to test response plans to make sure each person knows their responsibilities in executing the plan. The better prepared your organization is, the more effective the response is likely to be. This includes knowing any legal reporting requirements or required information sharing.",
+            "sourceNodeIds": [
+              "n-3-27"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-37",
+            "type": "P",
+            "label": "● Ensure response plans are updated – Testing the plan (and execution during an incident) inevitably will reveal needed improvements. Be sure to update response plans with lessons learned.",
+            "sourceNodeIds": [
+              "n-3-37"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-42",
+            "type": "P",
+            "label": "RECOVER Develop and implement the",
+            "sourceNodeIds": [
+              "n-3-42"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:3:3",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:3:3:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-3-45",
+                    "type": "TD",
+                    "label": "appropriate activities to maintain",
+                    "sourceNodeIds": [
+                      "n-3-45"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-44",
+                    "type": "TD",
+                    "label": "● Ensure recovery plans are updated – As with",
+                    "sourceNodeIds": [
+                      "n-3-44"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:3:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-3-47",
+                    "type": "TD",
+                    "label": "plans for resilience and to restore",
+                    "sourceNodeIds": [
+                      "n-3-47"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-46",
+                    "type": "TD",
+                    "label": "response plans, testing execution will improve",
+                    "sourceNodeIds": [
+                      "n-3-46"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:3:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-3-48",
+                    "type": "TD",
+                    "label": "any capabilities or services that",
+                    "sourceNodeIds": [
+                      "n-3-48"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-49",
+                    "type": "TD",
+                    "label": "employee and partner awareness and highlight",
+                    "sourceNodeIds": [
+                      "n-3-49"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:3:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-3-50",
+                    "type": "TD",
+                    "label": "were impaired due to a cyber-",
+                    "sourceNodeIds": [
+                      "n-3-50"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-51",
+                    "type": "TD",
+                    "label": "areas for improvement. Be sure to update",
+                    "sourceNodeIds": [
+                      "n-3-51"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:3:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-3-52",
+                    "type": "TD",
+                    "label": "security event.",
+                    "sourceNodeIds": [
+                      "n-3-52"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-53",
+                    "type": "TD",
+                    "label": "Recovery plans with lessons learned.",
+                    "sourceNodeIds": [
+                      "n-3-53"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:table:table:3:4",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:3:4:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-3-55",
+                    "type": "TD",
+                    "label": "● Communicate with internal and external",
+                    "sourceNodeIds": [
+                      "n-3-55"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-54",
+                    "type": "TD",
+                    "label": "● Manage public relations and company",
+                    "sourceNodeIds": [
+                      "n-3-54"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:4:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-3-57",
+                    "type": "TD",
+                    "label": "stakeholders – Part of recovery depends upon",
+                    "sourceNodeIds": [
+                      "n-3-57"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-56",
+                    "type": "TD",
+                    "label": "reputation – One of the key aspects of recovery",
+                    "sourceNodeIds": [
+                      "n-3-56"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:4:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-3-59",
+                    "type": "TD",
+                    "label": "effective communication. Your recovery plans",
+                    "sourceNodeIds": [
+                      "n-3-59"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-58",
+                    "type": "TD",
+                    "label": "is managing the enterprise’s reputation. When",
+                    "sourceNodeIds": [
+                      "n-3-58"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:4:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-3-61",
+                    "type": "TD",
+                    "label": "need to carefully account for what, how, and",
+                    "sourceNodeIds": [
+                      "n-3-61"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-60",
+                    "type": "TD",
+                    "label": "developing a recovery plan, consider how you",
+                    "sourceNodeIds": [
+                      "n-3-60"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:4:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-3-63",
+                    "type": "TD",
+                    "label": "when information will be shared with various",
+                    "sourceNodeIds": [
+                      "n-3-63"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-62",
+                    "type": "TD",
+                    "label": "will manage public relations so that your",
+                    "sourceNodeIds": [
+                      "n-3-62"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:4:body:row:5",
+                "type": "TR",
+                "tableRowIndex": 5,
+                "children": [
+                  {
+                    "id": "tag:n-3-65",
+                    "type": "TD",
+                    "label": "stakeholders so that all interested parties",
+                    "sourceNodeIds": [
+                      "n-3-65"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-64",
+                    "type": "TD",
+                    "label": "information sharing is accurate, complete, and",
+                    "sourceNodeIds": [
+                      "n-3-64"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              },
+              {
+                "id": "tag:table:table:3:4:body:row:6",
+                "type": "TR",
+                "tableRowIndex": 6,
+                "children": [
+                  {
+                    "id": "tag:n-3-67",
+                    "type": "TD",
+                    "label": "receive the information they need but no",
+                    "sourceNodeIds": [
+                      "n-3-67"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-3-66",
+                    "type": "TD",
+                    "label": "timely – and not reactionary.",
+                    "sourceNodeIds": [
+                      "n-3-66"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 1
+                  }
+                ],
+                "tableColumnCount": 2
+              }
+            ],
+            "tableColumnCount": 2,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 2,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-3-68",
+            "type": "P",
+            "label": "inappropriate information is shared.",
+            "sourceNodeIds": [
+              "n-3-68"
+            ],
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+}

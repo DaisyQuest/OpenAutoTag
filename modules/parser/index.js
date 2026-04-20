@@ -258,12 +258,88 @@ function shouldRunOcrForPage(page, ocrOptions) {
     return true;
   }
 
+  // Hybrid trigger: if the page embeds a "bad source OCR" font, re-OCR
+  // the page even if the text layer is dense. The existing text layer
+  // is unreliable and our Tesseract output is meaningfully better
+  // (observed on NY civil court scans: "_Cou_nty_of K_ing_s" → "County
+  // of Kings"). See docs/hybrid-ocr-mode.md.
+  //
+  // Opt-in via OAT_HYBRID_OCR=1. Default OFF because hybrid output
+  // can interact with the OCR-strip pass in ways that leave stripped
+  // MCIDs orphaned (blank struct leaves) on a small number of docs
+  // until we add a second-pass leaf cleanup. When enabled on a source
+  // PDF with garbled OCR, the resulting tag tree contains clean
+  // paragraph text rather than OCR gibberish.
+  if (process.env.OAT_HYBRID_OCR === "1" && detectBadSourceOcr(page)) {
+    page._hybridCandidate = true;
+    return true;
+  }
+
   const summary = summarizePageText(page);
   return (
     summary.blockCount <= ocrOptions.sparseTextBlockThreshold ||
     summary.characterCount <= ocrOptions.sparseCharacterThreshold ||
     summary.coverageRatio <= ocrOptions.sparseCoverageThreshold
   );
+}
+
+/**
+ * Detects whether a page's existing text layer is a low-quality OCR
+ * overlay that should be re-OCR'd via Tesseract. Heuristics:
+ *   1. Font-name producer signal: HiddenHorzOCR, HiddenVertOCR, OCR-A,
+ *      OCR-B, Invisible*Text — these name patterns uniquely identify
+ *      scanned-PDF OCR layers shipped by Adobe Acrobat, ABBYY, etc.
+ *   2. Token-shape garbage: if ≥30% of non-trivial tokens on the page
+ *      have shape like `_Cou_nty_`, `1111...`, single-char-runs, or
+ *      >50% non-alphanumeric chars, the OCR is unreliable.
+ * Either signal flips the page into hybrid mode.
+ */
+function detectBadSourceOcr(page) {
+  if (!page) return false;
+  const OCR_FONT_PATTERN = /hidden\s*(horz|vert)?\s*ocr|\bocr[-_ ]?[ab]\b|invisible.*text/i;
+  const blocks = page.textBlocks || [];
+  // Signal 1: the page contains a block whose font name matches a
+  // known OCR-overlay producer pattern.
+  for (const block of blocks) {
+    const fontName = String(block.fontName || "");
+    if (OCR_FONT_PATTERN.test(fontName)) return true;
+  }
+  // Signal 2: presence of HIGH-CONFIDENCE scan-artifact tokens. These
+  // shapes are virtually never produced by native text authoring —
+  // they're specific to legacy OCR engines failing on stylized fonts
+  // or horizontal rules. A single occurrence is enough to flag.
+  for (const block of blocks) {
+    const text = String(block.text || "");
+    // Long runs of identical chars (horizontal rule OCR'd as "1" or "_").
+    if (/(.)\1{15,}/.test(text)) return true;
+    // Multiple consecutive underscore-prefixed short tokens
+    // ("_Cou_nty_of K_ing_s") — seal/letterhead OCR failure.
+    if (/(_[a-zA-Z]{1,3}){3,}/.test(text)) return true;
+  }
+  if (blocks.length < 3) return false;
+  // Signal 3: a large share of the page's tokens have garbage shape.
+  let garbage = 0;
+  let total = 0;
+  for (const block of blocks) {
+    const tokens = String(block.text || "").split(/\s+/).filter(t => t.length >= 2);
+    for (const token of tokens) {
+      total++;
+      if (isGarbageToken(token)) garbage++;
+    }
+  }
+  if (total === 0) return false;
+  return garbage / total >= 0.3;
+}
+
+function isGarbageToken(token) {
+  // Runs of identical chars ("1111", "____").
+  if (/^(.)\1{3,}$/.test(token)) return true;
+  // >50% non-alphanumeric.
+  const nonAlnum = token.replace(/[a-zA-Z0-9]/g, "").length;
+  if (nonAlnum / token.length > 0.5) return true;
+  // Underscore insertions like "_Cou_nty_of".
+  if (/(_[a-zA-Z]{1,3}){2,}/.test(token)) return true;
+  return false;
 }
 
 function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
@@ -300,7 +376,13 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
     };
   }
 
-  const shouldReplaceNativeText =
+  // Hybrid-mode override: if the page was flagged as having a
+  // bad source OCR layer, ALWAYS adopt the Tesseract output even if
+  // it produces fewer total characters. The native layer is garbage
+  // (e.g. HiddenHorzOCR renders "_Cou_nty_of K_ing_s") — Tesseract's
+  // cleaner text is the desired accessible layer.
+  const forceReplaceViaHybrid = page._hybridCandidate === true;
+  const shouldReplaceNativeText = forceReplaceViaHybrid ||
     nativeSummary.blockCount === 0 ||
     nativeSummary.characterCount === 0 ||
     (ocrCharacterCount >= nativeSummary.characterCount + ocrOptions.minCharacterGain &&
@@ -322,6 +404,11 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
   return {
     ...page,
     textBlocks: reindexBlocks(page.pageNumber, ocrResult.textBlocks),
+    // Public flag: downstream consumers (semantic engine, tag-builder)
+    // use this to inject /ActualText on struct leaves built from hybrid
+    // pages — the content stream still has the garbled source OCR text
+    // ops for rendering, but AT should read Tesseract's clean text.
+    hybrid: forceReplaceViaHybrid ? true : undefined,
     ocr: {
       status: "applied",
       mergeStrategy: nativeSummary.blockCount === 0 ? "replace-empty-page" : "replace-sparse-page",

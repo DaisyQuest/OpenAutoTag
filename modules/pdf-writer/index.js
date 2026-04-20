@@ -27,10 +27,34 @@ const nativeJavaDir = path.join(moduleDir, "java");
 const nativeParserSource = path.join(nativeJavaDir, "NativeContentStreamParser.java");
 const nativeMatcherSource = path.join(nativeJavaDir, "NativeTagMatcher.java");
 const nativeRewriterSource = path.join(nativeJavaDir, "NativeContentStreamRewriter.java");
+const passthroughMetadataSource = path.join(nativeJavaDir, "PassthroughMetadataCli.java");
 
 const VALID_MODES = new Set(["native", "raster", "auto"]);
-const DEFAULT_MODE = "raster";
+// Default is "auto": probe native first, fall back to raster when the match
+// rate is below threshold or when the source is already marked-content
+// tagged. Justification for this default (measured 2026-04-18):
+//   - 6 LRBTest PDFs (varied size/complexity): 100% match rate each
+//   - Autonics-TK-manual.pdf (already-tagged): bail-out triggers cleanly
+//   - Regression baseline pinned in matcher-regression.test.js
+// The flip is safe because every failure path in resolveWriterMode already
+// routes to raster — native never "wins" when the probe says it shouldn't.
+const DEFAULT_MODE = "auto";
 const DEFAULT_NATIVE_MATCH_THRESHOLD = 0.8;
+const DEFAULT_ALREADY_TAGGED_THRESHOLD = 0.5;
+const VALID_ALREADY_TAGGED_POLICIES = new Set(["bailout-to-raster", "passthrough"]);
+// Default behavior when the source PDF is already structurally
+// tagged (StructTreeRoot + /MarkInfo /Marked=true + high marked-
+// content fraction): pass the source bytes through unchanged so its
+// existing fonts and structure tree are preserved exactly. The
+// older default `bailout-to-raster` was actively destructive —
+// rasterizing pages destroyed the source fonts, which then forced
+// invisible NotoSans-overlay text that looked like gibberish in
+// Adobe's tag panel. `bailout-to-raster` remains available for
+// callers who explicitly want it (e.g., redaction flows where
+// erasing content visually matters more than preserving structure).
+const DEFAULT_ALREADY_TAGGED_POLICY = "passthrough";
+const VALID_READING_ORDER_STRATEGIES = new Set(["semantic", "file"]);
+const DEFAULT_READING_ORDER_STRATEGY = "semantic";
 
 function parseArgs(argv) {
   const args = new Map();
@@ -39,6 +63,14 @@ function parseArgs(argv) {
   }
   const rawMode = args.get("--mode") || DEFAULT_MODE;
   const mode = VALID_MODES.has(rawMode) ? rawMode : DEFAULT_MODE;
+  const rawPolicy = args.get("--already-tagged-policy") || DEFAULT_ALREADY_TAGGED_POLICY;
+  const alreadyTaggedPolicy = VALID_ALREADY_TAGGED_POLICIES.has(rawPolicy)
+    ? rawPolicy
+    : DEFAULT_ALREADY_TAGGED_POLICY;
+  const rawReadingOrder = args.get("--reading-order-strategy") || DEFAULT_READING_ORDER_STRATEGY;
+  const readingOrderStrategy = VALID_READING_ORDER_STRATEGIES.has(rawReadingOrder)
+    ? rawReadingOrder
+    : DEFAULT_READING_ORDER_STRATEGY;
   return {
     pdfPath: args.get("--pdf"),
     tagsPath: args.get("--tags"),
@@ -48,15 +80,64 @@ function parseArgs(argv) {
     mode,
     nativeMatchThreshold: args.has("--native-match-threshold")
       ? Number(args.get("--native-match-threshold"))
-      : DEFAULT_NATIVE_MATCH_THRESHOLD
+      : DEFAULT_NATIVE_MATCH_THRESHOLD,
+    alreadyTaggedThreshold: args.has("--already-tagged-threshold")
+      ? Number(args.get("--already-tagged-threshold"))
+      : DEFAULT_ALREADY_TAGGED_THRESHOLD,
+    alreadyTaggedPolicy,
+    readingOrderStrategy
   };
 }
 
-export { parseArgs, VALID_MODES, DEFAULT_MODE, DEFAULT_NATIVE_MATCH_THRESHOLD };
+/**
+ * Fraction of text-bearing operators in a parser-output operators document
+ * that are lexically inside a pre-existing BMC/BDC block in the source PDF.
+ * Returned in [0, 1]; 0 when no text operators are present.
+ *
+ * Used by `resolveWriterMode` to decide whether auto mode should fall back
+ * to raster: if a source PDF is already tagged, the native rewriter will
+ * correctly refuse to re-wrap its operators (to avoid invalid nesting),
+ * which leaves any structure tree we'd build referencing orphan MCIDs.
+ * Falling back to raster in that case is strictly safer than shipping a
+ * structure tree that points at nothing.
+ */
+export function computeMarkedContentFraction(operatorsDoc) {
+  let total = 0;
+  let marked = 0;
+  for (const page of operatorsDoc?.pages || []) {
+    for (const op of page?.operators || []) {
+      if (!op?.text || op.text.trim() === "") continue;
+      total++;
+      if (op.insideMarkedContent) marked++;
+    }
+  }
+  return total > 0 ? marked / total : 0;
+}
+
+// Threshold above which auto mode treats the source as "already tagged"
+// and bails out to raster instead of producing an orphan-MCID structure tree.
+export const ALREADY_TAGGED_THRESHOLD = 0.5;
+
+export {
+  parseArgs,
+  VALID_MODES,
+  DEFAULT_MODE,
+  DEFAULT_NATIVE_MATCH_THRESHOLD,
+  DEFAULT_ALREADY_TAGGED_THRESHOLD,
+  VALID_ALREADY_TAGGED_POLICIES,
+  DEFAULT_ALREADY_TAGGED_POLICY,
+  VALID_READING_ORDER_STRATEGIES,
+  DEFAULT_READING_ORDER_STRATEGY
+};
 
 function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { env }, (error, stdout, stderr) => {
+    // 512 MB buffer on both streams — long PDFs (100+ pages) produce
+    // enough per-page stderr from the Java rewriter to exceed the
+    // default 1 MB. The rewriter's stdout is only a single-line JSON
+    // summary but the stderr carries per-page progress; both are
+    // bounded in practice by page count so 512 MB is ample.
+    execFile(command, args, { env, maxBuffer: 512 * 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || error.message));
         return;
@@ -69,8 +150,10 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, classStats] = await Promise.all([stat(javaSourcePath), stat(javaClassPath)]);
-    return sourceStats.mtimeMs > classStats.mtimeMs;
+    const classStats = await stat(javaClassPath);
+    const allSources = [javaSourcePath, ...collectNativeJavaSources()];
+    const sourceStats = await Promise.all(allSources.map((src) => stat(src)));
+    return sourceStats.some((s) => s.mtimeMs > classStats.mtimeMs);
   } catch {
     return true;
   }
@@ -86,6 +169,9 @@ function collectNativeJavaSources() {
   }
   if (existsSync(nativeRewriterSource)) {
     sources.push(nativeRewriterSource);
+  }
+  if (existsSync(passthroughMetadataSource)) {
+    sources.push(passthroughMetadataSource);
   }
   return sources;
 }
@@ -432,6 +518,50 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
   return JSON.parse(stdout);
 }
 
+/**
+ * Passthrough flow: copy the source PDF's bytes verbatim to the output path,
+ * then invoke a Java helper that opens the copy, refreshes /Info and XMP, and
+ * saves incrementally so the content stream + structure tree stay byte-
+ * identical to the producer's output. The saveIncremental path appends a
+ * delta section rather than re-serializing the whole document — that's what
+ * makes this safe for already-tagged PDFs where any round-trip through
+ * PDFBox's full save can subtly alter content stream bytes.
+ */
+async function runPassthroughFlow({ pdfPath, outputPath, title, language }) {
+  await ensureJavaHelperCompiled();
+  const sourceBytes = (await stat(pdfPath)).size;
+  await copyFile(pdfPath, outputPath);
+
+  const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const stdout = await execCommand(
+    javaCommand,
+    [
+      "-cp", `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+      "PassthroughMetadataCli",
+      "--pdf", outputPath,
+      "--title", title,
+      "--language", language
+    ],
+    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+  );
+
+  let report = {};
+  try {
+    report = JSON.parse(stdout);
+  } catch {
+    // If the Java side wrote no stdout or it's malformed, fall back to
+    // reporting what we know: the copy succeeded, metadata refresh status
+    // unknown.
+    report = { metadataRefreshed: false };
+  }
+  const outputBytes = (await stat(outputPath)).size;
+  return {
+    metadataRefreshed: Boolean(report.metadataRefreshed),
+    sourceBytes,
+    outputBytes
+  };
+}
+
 async function runNativeParser({ pdfPath, operatorsPath }) {
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
   const stdout = await execCommand(
@@ -472,21 +602,31 @@ async function runNativeMatcher({ operatorsPath, semanticPath, tagsPath, tagPlan
   return stdout;
 }
 
-async function runNativeRewriter({ pdfPath, tagPlanPath, outputPath }) {
+async function runNativeRewriter({ pdfPath, tagPlanPath, tagsPath, outputPath, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY }) {
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
+  const args = [
+    "-cp",
+    `${buildDir}${path.delimiter}${pdfboxJarPath}`,
+    "NativeContentStreamRewriter",
+    "--pdf",
+    pdfPath,
+    "--tag-plan",
+    tagPlanPath,
+    "--output",
+    outputPath,
+    "--reading-order-strategy",
+    readingOrderStrategy
+  ];
+  // When the caller passes a tagging.json (the hierarchical tag
+  // tree from tag-builder), forward it so the rewriter emits a
+  // nested structure tree (Document > Sect > H1 / Table > TR > TD)
+  // instead of the legacy flat Document-has-all-leaves shape.
+  if (tagsPath) {
+    args.push("--tags", tagsPath);
+  }
   const stdout = await execCommand(
     javaCommand,
-    [
-      "-cp",
-      `${buildDir}${path.delimiter}${pdfboxJarPath}`,
-      "NativeContentStreamRewriter",
-      "--pdf",
-      pdfPath,
-      "--tag-plan",
-      tagPlanPath,
-      "--output",
-      outputPath
-    ],
+    args,
     { env: await buildJavaExecEnv({ bundledJavaHome }) }
   );
   return stdout;
@@ -496,27 +636,37 @@ function isNativeRewriterAvailable() {
   return existsSync(nativeRewriterSource);
 }
 
-async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath }) {
+async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cached, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY }) {
   await ensureJavaHelperCompiled();
 
   const tempBase = `${outputPath}.native`;
-  const operatorsPath = `${tempBase}-operators.json`;
-  const tagPlanPath = `${tempBase}-tag-plan.json`;
+  // If the auto-mode probe already parsed + matched, reuse its artifacts.
+  // Otherwise do the work now (mode=native path, or cached files missing).
+  let operatorsPath = cached?.operatorsPath;
+  let tagPlanPath = cached?.tagPlanPath;
 
-  await runNativeParser({ pdfPath: path.resolve(pdfPath), operatorsPath });
-  await runNativeMatcher({
-    operatorsPath,
-    semanticPath: path.resolve(semanticPath),
-    tagsPath: path.resolve(tagsPath),
-    tagPlanPath
-  });
+  if (!operatorsPath) {
+    operatorsPath = `${tempBase}-operators.json`;
+    await runNativeParser({ pdfPath: path.resolve(pdfPath), operatorsPath });
+  }
+  if (!tagPlanPath) {
+    tagPlanPath = `${tempBase}-tag-plan.json`;
+    await runNativeMatcher({
+      operatorsPath,
+      semanticPath: path.resolve(semanticPath),
+      tagsPath: path.resolve(tagsPath),
+      tagPlanPath
+    });
+  }
 
-  const tagPlan = JSON.parse(await readFile(tagPlanPath, "utf8"));
+  const tagPlan = cached?.plan ?? JSON.parse(await readFile(tagPlanPath, "utf8"));
 
   const rewriterStdout = await runNativeRewriter({
     pdfPath: path.resolve(pdfPath),
     tagPlanPath,
-    outputPath: path.resolve(outputPath)
+    tagsPath: tagsPath ? path.resolve(tagsPath) : undefined,
+    outputPath: path.resolve(outputPath),
+    readingOrderStrategy
   });
 
   let rewriterReport;
@@ -541,11 +691,27 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath }) {
     pagesRaster: 0,
     structureElementCount: rewriterReport.structureElementCount || 0,
     markedContentCount: rewriterReport.markedContentCount || 0,
+    readingOrderStrategy: rewriterReport.readingOrderStrategy || readingOrderStrategy,
+    // Surface the matcher's reading-order diagnostics for downstream
+    // reporting. pagesWithMonotonicReadingOrder < totalPages is a signal
+    // that upstream semantic ordering may be inconsistent on some pages.
+    pagesWithMonotonicReadingOrder: overall.pagesWithMonotonicReadingOrder ?? null,
+    meanReadingOrderCoverage: overall.meanReadingOrderCoverage != null
+      ? Number(overall.meanReadingOrderCoverage)
+      : null,
     tagPlan
   };
 }
 
-async function resolveWriterMode({ mode, nativeMatchThreshold, pdfPath, tagsPath, semanticPath, outputPath }) {
+async function resolveWriterMode({
+  mode,
+  nativeMatchThreshold,
+  alreadyTaggedThreshold = DEFAULT_ALREADY_TAGGED_THRESHOLD,
+  pdfPath,
+  tagsPath,
+  semanticPath,
+  outputPath
+}) {
   if (mode === "raster") {
     return { effectiveMode: "raster" };
   }
@@ -579,17 +745,90 @@ async function resolveWriterMode({ mode, nativeMatchThreshold, pdfPath, tagsPath
 
     const tagPlan = JSON.parse(await readFile(tagPlanPath, "utf8"));
     const overall = tagPlan.overall || {};
-    const operatorCount = overall.operatorCount || 0;
-    const matchedOperators = overall.matchedOperators || 0;
-    const meanMatchRate = operatorCount > 0 ? matchedOperators / operatorCount : 0;
+    // Matcher emits both the percentage-style meanMatchRate and per-page
+    // counts; prefer the explicit totals when present.
+    const operatorCount = overall.operatorCount
+      ?? (tagPlan.pages || []).reduce((sum, pg) => sum + (pg.summary?.totalOperators || 0), 0);
+    const matchedOperators = overall.matchedOperators
+      ?? (tagPlan.pages || []).reduce((sum, pg) => sum + (pg.summary?.matchedOperators || 0), 0);
+    const meanMatchRate = overall.meanMatchRate != null
+      ? Number(overall.meanMatchRate)
+      : (operatorCount > 0 ? matchedOperators / operatorCount : 0);
 
-    if (meanMatchRate >= nativeMatchThreshold) {
-      return { effectiveMode: "native", probeMatchRate: meanMatchRate, probePlan: tagPlan };
+    // Source-already-tagged detection. If most text operators in the source
+    // are already inside BMC/BDC blocks, the rewriter will skip wrapping
+    // them (correctly, to avoid invalid nesting), which would leave the
+    // newly-built structure tree pointing at MCIDs that don't exist — a
+    // worse output than raster. Fall back in that case.
+    //
+    // But BMC/BDC can be used for non-accessibility purposes (OCGs,
+    // artifacts, drawing hints). To prevent passthrough from declaring a
+    // non-tagged PDF "tagged," we also require the source catalog to carry
+    // /StructTreeRoot and /MarkInfo with Marked=true. Both signals must fire
+    // before the already-tagged branch is taken.
+    let markedFraction = 0;
+    let sourceHasStructTree = false;
+    let sourceMarkInfoMarked = false;
+    try {
+      const operatorsDoc = JSON.parse(await readFile(operatorsPath, "utf8"));
+      markedFraction = computeMarkedContentFraction(operatorsDoc);
+      sourceHasStructTree = Boolean(operatorsDoc?.source?.hasStructTree);
+      sourceMarkInfoMarked = Boolean(operatorsDoc?.source?.markInfoMarked);
+    } catch {
+      // Older operators.json shape without these fields — don't block.
     }
+    const sourceIsStructurallyTagged = sourceHasStructTree && sourceMarkInfoMarked;
+
+    // Native-first auto-mode policy. We prefer re-tagging from
+    // scratch (native) over preserving the source's structure
+    // (passthrough) because source-authored tag trees ship with
+    // pervasive producer bugs — broken /Pg refs, heading-level
+    // skips, empty placeholder elements, unembedded Standard 14
+    // fonts, missing /ToUnicode, missing Link /Contents. Our native
+    // pipeline generates clean output that passes PDF/UA-1 in one
+    // shot via the shared accessibility pass. Passthrough survives
+    // only as a fallback when match rate is too low for confident
+    // re-tagging AND the source is already tagged (in which case
+    // preserving even flawed source structure beats emitting a
+    // raster-plus-invisible-text artifact).
+    if (meanMatchRate >= nativeMatchThreshold) {
+      return {
+        effectiveMode: "native",
+        probeMatchRate: meanMatchRate,
+        probeOperatorCount: operatorCount,
+        probeMatchedOperators: matchedOperators,
+        probeMarkedFraction: markedFraction,
+        probePlan: tagPlan,
+        probeOperatorsPath: operatorsPath,
+        probeTagPlanPath: tagPlanPath,
+        sourceHasStructTree,
+        sourceMarkInfoMarked
+      };
+    }
+
+    if (markedFraction >= alreadyTaggedThreshold && sourceIsStructurallyTagged) {
+      return {
+        effectiveMode: "already-tagged",
+        autoFallbackReason:
+          `Match rate ${meanMatchRate.toFixed(3)} below native threshold ${nativeMatchThreshold}, ` +
+          `but source is already structurally tagged (${Math.round(markedFraction * 100)}% marked content, /StructTreeRoot + /MarkInfo.Marked=true). ` +
+          `Falling back to passthrough preservation rather than raster.`,
+        probeMatchRate: meanMatchRate,
+        probeOperatorCount: operatorCount,
+        probeMatchedOperators: matchedOperators,
+        probeMarkedFraction: markedFraction,
+        sourceHasStructTree,
+        sourceMarkInfoMarked
+      };
+    }
+
     return {
       effectiveMode: "raster",
-      autoFallbackReason: `Match rate ${meanMatchRate.toFixed(3)} below threshold ${nativeMatchThreshold}`,
-      probeMatchRate: meanMatchRate
+      autoFallbackReason: `Match rate ${meanMatchRate.toFixed(3)} below threshold ${nativeMatchThreshold} and source is not already tagged — raster fallback`,
+      probeMatchRate: meanMatchRate,
+      probeOperatorCount: operatorCount,
+      probeMatchedOperators: matchedOperators,
+      probeMarkedFraction: markedFraction
     };
   } catch (error) {
     return {
@@ -599,7 +838,18 @@ async function resolveWriterMode({ mode, nativeMatchThreshold, pdfPath, tagsPath
   }
 }
 
-export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, redactionsPath, outputPath, mode = DEFAULT_MODE, nativeMatchThreshold = DEFAULT_NATIVE_MATCH_THRESHOLD }) {
+export async function writeTaggedArtifacts({
+  pdfPath,
+  tagsPath,
+  semanticPath,
+  redactionsPath,
+  outputPath,
+  mode = DEFAULT_MODE,
+  nativeMatchThreshold = DEFAULT_NATIVE_MATCH_THRESHOLD,
+  alreadyTaggedThreshold = DEFAULT_ALREADY_TAGGED_THRESHOLD,
+  alreadyTaggedPolicy = DEFAULT_ALREADY_TAGGED_POLICY,
+  readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY
+}) {
   if (!pdfPath || !tagsPath || !outputPath) {
     throw new Error(
       "Usage: node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> [--semantic <semantic.ordered.json>] [--redactions <redaction-plan.json>] --output <tagged.pdf>"
@@ -631,15 +881,108 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
   const modeDecision = await resolveWriterMode({
     mode,
     nativeMatchThreshold,
+    alreadyTaggedThreshold,
     pdfPath,
     tagsPath,
     semanticPath,
     outputPath
   });
 
+  // Caller's policy decides what to do when the probe flags the source as
+  // already tagged. The probe itself surfaces this as a distinct mode
+  // ("already-tagged") rather than collapsing to raster so the caller can
+  // branch cleanly on the chosen policy.
+  if (modeDecision.effectiveMode === "already-tagged") {
+    if (alreadyTaggedPolicy === "passthrough") {
+      modeDecision.effectiveMode = "passthrough";
+    } else {
+      modeDecision.effectiveMode = "raster";
+      modeDecision.autoFallbackReason +=
+        " Policy=bailout-to-raster; raster fallback (text will be rasterized — fonts may substitute).";
+    }
+  }
+
+  // --- Passthrough flow ---
+  // The source PDF is already marked-content tagged and the caller picked
+  // `alreadyTaggedPolicy=passthrough`. Copy the source bytes verbatim so
+  // fonts and content streams are preserved exactly as the producer emitted
+  // them, then update /Info + XMP so the document's producer/title/language
+  // reflect our processing. We do NOT overwrite or augment the existing
+  // structure tree — that respects the source's own tagging decisions.
+  if (modeDecision.effectiveMode === "passthrough") {
+    const sourceResolved = path.resolve(pdfPath);
+    const outputResolved = path.resolve(outputPath);
+    const passthroughReport = await runPassthroughFlow({
+      pdfPath: sourceResolved,
+      outputPath: outputResolved,
+      title,
+      language
+    });
+
+    const manifest = {
+      schemaVersion: "1.0.0",
+      writerMode: "passthrough",
+      nativeTaggingApplied: true,
+      sourcePdf: sourceResolved,
+      outputPdf: outputResolved,
+      tagging: taggingDocument,
+      semanticSource: path.resolve(semanticPath),
+      summary: {
+        writerMode: "passthrough",
+        requestedMode: mode,
+        alreadyTaggedPolicy,
+        autoFallbackReason: modeDecision.autoFallbackReason || null,
+        probeMatchRate: modeDecision.probeMatchRate ?? null,
+        probeOperatorCount: modeDecision.probeOperatorCount ?? null,
+        probeMatchedOperators: modeDecision.probeMatchedOperators ?? null,
+        probeMarkedFraction: modeDecision.probeMarkedFraction ?? null,
+        matchThreshold: nativeMatchThreshold,
+        alreadyTaggedThreshold,
+        readingOrderStrategy,
+        metadataRefreshed: passthroughReport.metadataRefreshed,
+        sourceBytes: passthroughReport.sourceBytes,
+        outputBytes: passthroughReport.outputBytes,
+        language
+      }
+    };
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+    return {
+      status: "completed",
+      writerMode: "passthrough",
+      outputPath: outputResolved,
+      manifestPath: path.resolve(manifestPath),
+      nativeTaggingApplied: true,
+      language,
+      tagNodeCount: countTagNodes(taggingDocument.root),
+      title,
+      requestedMode: mode,
+      alreadyTaggedPolicy,
+      autoFallbackReason: modeDecision.autoFallbackReason || null,
+      probeMatchRate: modeDecision.probeMatchRate ?? null,
+      probeMarkedFraction: modeDecision.probeMarkedFraction ?? null,
+      matchThreshold: nativeMatchThreshold,
+      alreadyTaggedThreshold,
+      readingOrderStrategy
+    };
+  }
+
   // --- Native flow ---
   if (modeDecision.effectiveMode === "native") {
-    const nativeReport = await runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath });
+    const nativeReport = await runNativeFlow({
+      pdfPath,
+      tagsPath,
+      semanticPath,
+      outputPath,
+      readingOrderStrategy,
+      cached: modeDecision.probePlan
+        ? {
+            operatorsPath: modeDecision.probeOperatorsPath,
+            tagPlanPath: modeDecision.probeTagPlanPath,
+            plan: modeDecision.probePlan
+          }
+        : undefined
+    });
 
     const manifest = {
       schemaVersion: "1.0.0",
@@ -651,17 +994,23 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
       semanticSource: path.resolve(semanticPath),
       summary: {
         writerMode: "native",
+        requestedMode: mode,
+        autoFallbackReason: modeDecision.autoFallbackReason || null,
         operatorCount: nativeReport.operatorCount,
         matchedOperators: nativeReport.matchedOperators,
         matchRate: nativeReport.matchRate,
+        matchThreshold: nativeMatchThreshold,
+        alreadyTaggedThreshold,
+        alreadyTaggedPolicy,
+        readingOrderStrategy: nativeReport.readingOrderStrategy,
+        pagesWithMonotonicReadingOrder: nativeReport.pagesWithMonotonicReadingOrder,
+        meanReadingOrderCoverage: nativeReport.meanReadingOrderCoverage,
         nativeViable: nativeReport.nativeViable,
         pagesNative: nativeReport.pagesNative,
         pagesRaster: nativeReport.pagesRaster,
         structureElementCount: nativeReport.structureElementCount,
         markedContentCount: nativeReport.markedContentCount,
-        language,
-        autoFallbackReason: modeDecision.autoFallbackReason || null,
-        requestedMode: mode
+        language
       }
     };
 
@@ -678,13 +1027,20 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
       operatorCount: nativeReport.operatorCount,
       matchedOperators: nativeReport.matchedOperators,
       matchRate: nativeReport.matchRate,
+      matchThreshold: nativeMatchThreshold,
+      alreadyTaggedThreshold,
+      alreadyTaggedPolicy,
+      readingOrderStrategy: nativeReport.readingOrderStrategy,
+      pagesWithMonotonicReadingOrder: nativeReport.pagesWithMonotonicReadingOrder,
+      meanReadingOrderCoverage: nativeReport.meanReadingOrderCoverage,
       nativeViable: nativeReport.nativeViable,
       pagesNative: nativeReport.pagesNative,
       pagesRaster: nativeReport.pagesRaster,
       structureElementCount: nativeReport.structureElementCount,
       markedContentCount: nativeReport.markedContentCount,
       title,
-      requestedMode: mode
+      requestedMode: mode,
+      autoFallbackReason: null
     };
   }
 
@@ -714,6 +1070,16 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
     semanticSource: path.resolve(semanticPath),
     summary: {
       writerMode: "raster",
+      requestedMode: mode,
+      autoFallbackReason: modeDecision.autoFallbackReason || null,
+      probeMatchRate: modeDecision.probeMatchRate ?? null,
+      probeOperatorCount: modeDecision.probeOperatorCount ?? null,
+      probeMatchedOperators: modeDecision.probeMatchedOperators ?? null,
+      probeMarkedFraction: modeDecision.probeMarkedFraction ?? null,
+      matchThreshold: nativeMatchThreshold,
+      alreadyTaggedThreshold,
+      alreadyTaggedPolicy,
+      readingOrderStrategy,
       instructionRecordCount: records.length,
       structureElementCount: javaReport.structureElementCount,
       markedContentCount: javaReport.markedContentCount,
@@ -721,9 +1087,7 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
       tableAttributeCount: javaReport.tableAttributeCount || 0,
       redactionCount: javaReport.redactionCount || 0,
       accessibilityTreeRedacted: Boolean(redactions?.redactionPlan?.matches?.length),
-      language,
-      autoFallbackReason: modeDecision.autoFallbackReason || null,
-      requestedMode: mode
+      language
     }
   };
 
@@ -744,7 +1108,15 @@ export async function writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, re
     metadataApplied: javaReport.metadataApplied,
     title,
     requestedMode: mode,
-    autoFallbackReason: modeDecision.autoFallbackReason || null
+    autoFallbackReason: modeDecision.autoFallbackReason || null,
+    probeMatchRate: modeDecision.probeMatchRate ?? null,
+    probeOperatorCount: modeDecision.probeOperatorCount ?? null,
+    probeMatchedOperators: modeDecision.probeMatchedOperators ?? null,
+    probeMarkedFraction: modeDecision.probeMarkedFraction ?? null,
+    matchThreshold: nativeMatchThreshold,
+    alreadyTaggedThreshold,
+    alreadyTaggedPolicy,
+    readingOrderStrategy
   };
 }
 

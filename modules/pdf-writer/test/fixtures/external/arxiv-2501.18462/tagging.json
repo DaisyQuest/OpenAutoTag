@@ -1,0 +1,1649 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentId": "layout:00-source:semantic:tagging",
+  "source": {
+    "semanticDocumentId": "layout:00-source:semantic",
+    "filePath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\tmp\\external-probe-fixtures\\arxiv-2501.18462\\00-source.pdf",
+    "headingNormalization": {
+      "applied": true,
+      "totalHeadingCount": 2,
+      "adjustedHeadingCount": 1,
+      "firstDetectedHeading": "H2",
+      "maxNormalizedHeading": "H1",
+      "adjustments": [
+        {
+          "nodeId": "n-1-7",
+          "text": "Massive Online Course on Entrepreneurship. Case Study",
+          "from": "H2",
+          "to": "H1"
+        }
+      ]
+    },
+    "tableRegularityCorrection": {
+      "applied": false,
+      "algorithm": "grid-normalization-v1",
+      "tablesInspected": 1,
+      "correctedTables": 0,
+      "repairedRowCount": 0,
+      "insertedPlaceholderCellCount": 0,
+      "insertedSyntheticRowCount": 0,
+      "shiftedCellCount": 0
+    },
+    "tableStructureRepairs": 0,
+    "repeatedHeaderRows": 0
+  },
+  "root": {
+    "id": "tag:document",
+    "type": "Document",
+    "children": [
+      {
+        "id": "tag:n-1-1",
+        "type": "P",
+        "label": "Available online at www.sciencedirect.com",
+        "sourceNodeIds": [
+          "n-1-1"
+        ],
+        "children": []
+      },
+      {
+        "id": "tag:n-1-2",
+        "type": "P",
+        "label": "cor1",
+        "sourceNodeIds": [
+          "n-1-2"
+        ],
+        "children": []
+      },
+      {
+        "id": "tag:n-1-3",
+        "type": "P",
+        "label": "Procedia Computer Science 00 (2024) 000–000 www.elsevier.com/locate/procedia",
+        "sourceNodeIds": [
+          "n-1-3"
+        ],
+        "children": []
+      },
+      {
+        "id": "tag:n-1-5",
+        "type": "P",
+        "label": "28th International Conference on Knowledge-Based and Intelligent Information & Engineering Systems (KES 2024)",
+        "sourceNodeIds": [
+          "n-1-5"
+        ],
+        "children": []
+      },
+      {
+        "id": "tag:section:n-1-7",
+        "type": "Sect",
+        "children": [
+          {
+            "id": "tag:n-1-7",
+            "type": "H1",
+            "label": "Massive Online Course on Entrepreneurship. Case Study",
+            "sourceNodeIds": [
+              "n-1-7"
+            ],
+            "children": [],
+            "detectedType": "H2",
+            "detectedHeadingLevel": 2
+          },
+          {
+            "id": "tag:n-1-8",
+            "type": "P",
+            "label": "a a Manuela Petrescu, Tudor Dan Mihoc",
+            "sourceNodeIds": [
+              "n-1-8"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-11",
+            "type": "P",
+            "label": "aDepartment of Computer Science, Babe¸s Bolyai University, Cluj-Napoca, Romania",
+            "sourceNodeIds": [
+              "n-1-11"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-12",
+            "type": "P",
+            "label": "Abstract",
+            "sourceNodeIds": [
+              "n-1-12"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-13",
+            "type": "P",
+            "label": "Entrepreneurship is a key component of society, and universities and major political structures have tried to support its development in recent years. The present study aims to check the perception of students (based on gender) about entrepreneurial intentions after participating in a course that had a large number of undergraduate students. There were 970 students enrolled from different faculties with various specializations. We conducted a gender-based survey on the unconventional entrepreneurial fundamentals course, where each course was delivered by a different speaker. We also compared the responses provided by computer science students with the overall responses to find differences in their perceptions related to the feasibility of teaching entrepreneurship online, determining the entrepreneurial intention of the students taking this course, and analyzing the perceptions related to the business environment and the ease of starting a business. We found that students, regardless of gender or field of study, prefer interactive online presentations based on the manner in which lectures on this subject were conducted.",
+            "sourceNodeIds": [
+              "n-1-13"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-22",
+            "type": "P",
+            "label": "© 2024 The Authors. Published by Elsevier B.V. This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/) Peer-review under responsibility of the scientific committee of the KES International.",
+            "sourceNodeIds": [
+              "n-1-22"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-25",
+            "type": "P",
+            "label": "Keywords: entrepreneurial skills; challenges; e-learning; online teaching; empirical study; massive course; gender;",
+            "sourceNodeIds": [
+              "n-1-25"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-7:list:1",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-1-26",
+                "type": "LI",
+                "label": "1. Introduction",
+                "sourceNodeIds": [
+                  "n-1-26"
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tag:section:n-1-27",
+        "type": "Sect",
+        "children": [
+          {
+            "id": "tag:n-1-27",
+            "type": "H1",
+            "label": "arXiv:2501.18462v1 [cs.HC] 30 Jan 2025",
+            "sourceNodeIds": [
+              "n-1-27"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-28",
+            "type": "P",
+            "label": "Entrepreneurship is a key component of society, and universities and major political structures have tried to support its development in recent years. Scholars and practitioners are still looking for the best methods to teach entrepreneurship, as an entrepreneur is expected to have different skills: leadership, attention to detail, the ability to develop a business plan, pitch a project idea, find required resources (financial and human resources), and cope with specific risk, just to name a few of them. The European Union in Enterprise 2020 Action Plan developed programs to exchange best practices and promote entrepreneurial education. There are even programs created for young children to learn about the entrepreneurial mindset [15] and at university levels, more and more courses teach and promote",
+            "sourceNodeIds": [
+              "n-1-28"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-35",
+            "type": "P",
+            "label": "∗ Corresponding author. Tel.: +40-740330982. E-mail address: tudor.mihoc@ubbcluj.ro",
+            "sourceNodeIds": [
+              "n-1-35"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-1-37",
+            "type": "P",
+            "label": "1877-0509 © 2024 The Authors. Published by Elsevier B.V. This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/) Peer-review under responsibility of the scientific committee of the KES International.",
+            "sourceNodeIds": [
+              "n-1-37"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-1",
+            "type": "P",
+            "label": "2",
+            "sourceNodeIds": [
+              "n-2-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-2",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000",
+            "sourceNodeIds": [
+              "n-2-2"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-3",
+            "type": "P",
+            "label": "entrepreneurial education [10, 21, 14] in normal circumstances or pandemics [11]. The best universities have created organizations for supporting women in business, for developing their entrepreneurial skills; just to name a few: Harvard Undergraduate Women in Entrepreneurship Organization (HUWE) [3], Yale Women in Business Organization (YWIB) [4], or Cambridge University Women in Business Organization [2]. The present study proposes to check the perception of students (based on gender) about entrepreneurial intentions after participating in a course that had a large number of undergraduate students from different faculties with various specializations. The contributions of this study are threefold. First, we proposed teaching entrepreneurship in an original format, in which the university decides the curricula, and the lectures are taught by people who have domain expertise in that specific area, with a focus on course consistency and accessibility. Moreover, a computer science teacher from the department of Computer Science was involved in each lecture as a moderator to facilitate the interaction between the students and the domain expert. Second, we asked for anonymous feedback from students after each course to verify their level of understanding, and at the end of the course, we asked not only their opinion but also their gender. Finally, the responses were analyzed and discussed. This study was carried out considering the following objectives:",
+            "sourceNodeIds": [
+              "n-2-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:2",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-2-17",
+                "type": "LI",
+                "label": "1. To check the feasibility of teaching entrepreneurship online to a large number of students enrolled in different",
+                "sourceNodeIds": [
+                  "n-2-17"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-2-18",
+            "type": "P",
+            "label": "faculties by analyzing the student’s challenges;",
+            "sourceNodeIds": [
+              "n-2-18"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:3",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-2-19",
+                "type": "LI",
+                "label": "2. To determine students’ entrepreneurial intention;",
+                "sourceNodeIds": [
+                  "n-2-19"
+                ],
+                "children": []
+              },
+              {
+                "id": "tag:n-2-20",
+                "type": "LI",
+                "label": "3. Analyze perceptions related to the business environment and the ease of starting a business for men vs. women.",
+                "sourceNodeIds": [
+                  "n-2-20"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-2-21",
+            "type": "P",
+            "label": "For all of the proposed objectives, we used a gender-based approach and a comparison between computer science students and students from other faculties enrolled in the course. These objectives can be achieved through three research questions:",
+            "sourceNodeIds": [
+              "n-2-21"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-24",
+            "type": "P",
+            "label": "RQ1: What motivated the students to sign up for the entrepreneurship course? RQ2: Do students think the business environment is more favorable for women or men, and why? RQ3: What were the Course’s Challenges?",
+            "sourceNodeIds": [
+              "n-2-24"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-2-27",
+            "type": "P",
+            "label": "The rest of the paper is organized in the following manner: we discuss recent approaches related to gender and entrepreneurship in the Literature Review Section, followed by the Methodology Section, where we describe the methodology used for this case study. In the Data Collection Section, we describe how we collected the data. Next, we investigate the answers to the surveys and research questions in Results and Discussions. In the Threats to Validity Section, we address the threats to validity and conclude in the Conclusion Section.",
+            "sourceNodeIds": [
+              "n-2-27"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:4",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-2-32",
+                "type": "LI",
+                "label": "2. Literature Review",
+                "sourceNodeIds": [
+                  "n-2-32"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-2-33",
+            "type": "P",
+            "label": "Most industrialized nations encourage diversity and inclusion because it is beneficial to society to integrate as many people as possible. In science, as in business, women can be innovative, hard-working, and can bring value to the domain to which they contribute [12, 5]. Universities are exploring the best methods for teaching entrepreneurship. There is an interest in teaching en- trepreneurial skills to women to minimize the gap between different genders in the business domain. Online experiences of teaching entrepreneurial skills at Lancaster University during the COVID pandemic are described in [11], and other articles discuss gender characteristics in entrepreneurial education in Eastern and Northern Europe [13] or the gender gap in tech entrepreneurship [22]. Women are underrepresented in Science, Technology, Engineering, and Mathematics (STEM), and also in entrepreneurship, so experiments involving women and entrepreneurship learning are performed in terms of entrepreneurial self-efficacy and entrepreneurial intent [6]. In ”Gender and Entrepreneurship Research: A Review of Methodological Approaches” the authors argue about developing new teaching methods to match the trends to suit women better [8]. Ioannis Sitaridis et al. considered that entrepreneurial intentions in the information technology field are understudied, so they conducted a study related to ”the impact of gender typed personality and social norms in conjunction with the role of entrepreneurial education” and concluded that personality traits associated with masculinity are strongly related and positively correlated with entrepreneurial intentions [19]. Haus et al. obtained a similar conclusion: men’s intentions are on average higher than women’s intentions. They conducted a review study",
+            "sourceNodeIds": [
+              "n-2-33"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-1",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000 3",
+            "sourceNodeIds": [
+              "n-3-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-3",
+            "type": "P",
+            "label": "of 30 research articles related to the effect of gender on entrepreneurial intentions and concluded that the difference between genders is, in fact, ”a consequence of differences in turning intentions into implementation” [7]. Subjective well-being and performance seem to be correlated with gender and different types of activity: women achieve ”greater subjective well-being and levels of performance when they are high in creativity” [9] and men are better at teamwork. However, both positive gender incongruities are beneficial to all parties involved (men and women) [9].",
+            "sourceNodeIds": [
+              "n-3-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:5",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-3-8",
+                "type": "LI",
+                "label": "3. Methodology",
+                "sourceNodeIds": [
+                  "n-3-8"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-3-9",
+            "type": "P",
+            "label": "3.1. Participants",
+            "sourceNodeIds": [
+              "n-3-9"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-10",
+            "type": "P",
+            "label": "In the entrepreneurial course, 970 students from 15 faculties were enrolled, with different backgrounds, skills, and interests. Due to this diversity, the lectures had to be adapted to be understood by everyone. The proposed examples had to be clear and generic, as close as possible to everyday life and their experiences. Usually, students prefer familiar examples rather than ”waw examples” (the most, the worst...) [16]. As digitization is a key factor in a company’s success, the examples were mainly from this domain, but they were presented in such a manner that even students without any computer science knowledge can understand and assimilate the concepts and the explained software (the lectures contained familiar examples, pictures, and they used a less technical language). To better understand the student’s mindset, we checked what faculties they come from. Using university public data [1], we calculated the percentages of students enrolled in each faculty using the formula: the number of students enrolled in the course divided by the number of students in the faculty. The statistic is presented in Table 1. We noticed an interesting fact: the highest number of enrolled students studied at the Faculty of Physical Education and Sport. Later, we found the reason: this faculty was the only one that automatically enrolled students from a line of study; for all the other faculties in the university, enrollment was optional. As the course was optional, we concluded that the enrollment rates were showing some interest; however, a further inquiry will be necessary to determine whether this interest is based on field dynamics or on the ease of opening a start-up in the business domain. The second largest group in terms of number of students was formed by students from the Faculty of Mathematics and Computer Science, and it may be correlated with the large number of start-ups in the IT domain (a modern trend). Finally, we noticed that some faculties were represented only by a few students (4 students from the Faculty of Law, one from the Faculty of Letters, and 7 from the Faculty of Sociology and Social Work). We observe that students associated with faculties associated with STEM fields, as well as theology faculties, show greater interest in this field. Furthermore, the percentage of students interested in theology is more than twice that of STEM (10% vs 4.9%). The level of interest was not the same among students from other humanities faculties. We reiterate that we did not take the sports faculty into consideration for the previously mentioned reasons.",
+            "sourceNodeIds": [
+              "n-3-10"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-33",
+            "type": "P",
+            "label": "3.2. Experimental Setup",
+            "sourceNodeIds": [
+              "n-3-33"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-34",
+            "type": "P",
+            "label": "The large number of students presented some organizational challenges that supported the decision to use an online format for the course. Their different skills and specializations forced educators to adapt the content to be understood by a large and diverse group of students. At the end of each course, there was a live Q&A session moderated by the computer science teacher. Each lecture was recorded and uploaded to a dedicated platform to address the possibility of missing a course. The lecture presentations were also available (after the course had been delivered) and could be accessed via the course website, making information more accessible to all interested students. The contingency approach to recording and making it available later was appreciated by the students. In one of the feedback responses we received the following comment: ”I found important information, I need to watch some of the lectures again”.",
+            "sourceNodeIds": [
+              "n-3-34"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-43",
+            "type": "P",
+            "label": "3.3. Lecture setup",
+            "sourceNodeIds": [
+              "n-3-43"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-3-44",
+            "type": "P",
+            "label": "In pursuit of improvement, to lower the dropout rates, and to involve the students, we proposed that every interaction had to be online. This includes the topic presentations, the Q&A sessions, the grading, and all the announcements. Each lecture had an important digitization component: from marketing (online campaigns and social media marketing and ads) to the legislation aspects (how to find details on the platforms provided by the state institutions and how to",
+            "sourceNodeIds": [
+              "n-3-44"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-4-1",
+            "type": "P",
+            "label": "4",
+            "sourceNodeIds": [
+              "n-4-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-4-2",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000",
+            "sourceNodeIds": [
+              "n-4-2"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-4-3",
+            "type": "P",
+            "label": "Table 1: Number of students and percentage of students that choose to enroll to the course per faculty. The 15% for the Sport Faculty is not significant due to the automatic enrollment of some students.",
+            "sourceNodeIds": [
+              "n-4-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-4-5",
+            "type": "P",
+            "label": "Faculty No. of students Percentage",
+            "sourceNodeIds": [
+              "n-4-5"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:table:table:4:1",
+            "type": "Table",
+            "sourceNodeIds": [],
+            "children": [
+              {
+                "id": "tag:table:table:4:1:body:row:0",
+                "type": "TR",
+                "tableRowIndex": 0,
+                "children": [
+                  {
+                    "id": "tag:n-4-7",
+                    "type": "TD",
+                    "label": "Mathematics and Computer Science",
+                    "sourceNodeIds": [
+                      "n-4-7"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-8",
+                    "type": "TD",
+                    "label": "146.0",
+                    "sourceNodeIds": [
+                      "n-4-8"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-9",
+                    "type": "TD",
+                    "label": "4.50 %",
+                    "sourceNodeIds": [
+                      "n-4-9"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 0,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:1",
+                "type": "TR",
+                "tableRowIndex": 1,
+                "children": [
+                  {
+                    "id": "tag:n-4-10",
+                    "type": "TD",
+                    "label": "Physics",
+                    "sourceNodeIds": [
+                      "n-4-10"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-11",
+                    "type": "TD",
+                    "label": "13.0",
+                    "sourceNodeIds": [
+                      "n-4-11"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-12",
+                    "type": "TD",
+                    "label": "4.90 %",
+                    "sourceNodeIds": [
+                      "n-4-12"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 1,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:2",
+                "type": "TR",
+                "tableRowIndex": 2,
+                "children": [
+                  {
+                    "id": "tag:n-4-13",
+                    "type": "TD",
+                    "label": "Chemistry",
+                    "sourceNodeIds": [
+                      "n-4-13"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-14",
+                    "type": "TD",
+                    "label": "31.0",
+                    "sourceNodeIds": [
+                      "n-4-14"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-15",
+                    "type": "TD",
+                    "label": "2.80 %",
+                    "sourceNodeIds": [
+                      "n-4-15"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 2,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:3",
+                "type": "TR",
+                "tableRowIndex": 3,
+                "children": [
+                  {
+                    "id": "tag:n-4-16",
+                    "type": "TD",
+                    "label": "Biology and Geology",
+                    "sourceNodeIds": [
+                      "n-4-16"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-17",
+                    "type": "TD",
+                    "label": "18.0",
+                    "sourceNodeIds": [
+                      "n-4-17"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-18",
+                    "type": "TD",
+                    "label": "1.30 %",
+                    "sourceNodeIds": [
+                      "n-4-18"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 3,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:4",
+                "type": "TR",
+                "tableRowIndex": 4,
+                "children": [
+                  {
+                    "id": "tag:n-4-19",
+                    "type": "TD",
+                    "label": "Law",
+                    "sourceNodeIds": [
+                      "n-4-19"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-20",
+                    "type": "TD",
+                    "label": "4.0",
+                    "sourceNodeIds": [
+                      "n-4-20"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-21",
+                    "type": "TD",
+                    "label": "0.10 %",
+                    "sourceNodeIds": [
+                      "n-4-21"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 4,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:5",
+                "type": "TR",
+                "tableRowIndex": 5,
+                "children": [
+                  {
+                    "id": "tag:n-4-22",
+                    "type": "TD",
+                    "label": "Letters",
+                    "sourceNodeIds": [
+                      "n-4-22"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-23",
+                    "type": "TD",
+                    "label": "1.0",
+                    "sourceNodeIds": [
+                      "n-4-23"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-24",
+                    "type": "TD",
+                    "label": "0.03 %",
+                    "sourceNodeIds": [
+                      "n-4-24"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 5,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:6",
+                "type": "TR",
+                "tableRowIndex": 6,
+                "children": [
+                  {
+                    "id": "tag:n-4-25",
+                    "type": "TD",
+                    "label": "History and Philosophy",
+                    "sourceNodeIds": [
+                      "n-4-25"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-26",
+                    "type": "TD",
+                    "label": "13.0",
+                    "sourceNodeIds": [
+                      "n-4-26"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-27",
+                    "type": "TD",
+                    "label": "0.80 %",
+                    "sourceNodeIds": [
+                      "n-4-27"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 6,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:7",
+                "type": "TR",
+                "tableRowIndex": 7,
+                "children": [
+                  {
+                    "id": "tag:n-4-28",
+                    "type": "TD",
+                    "label": "Sociology",
+                    "sourceNodeIds": [
+                      "n-4-28"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-29",
+                    "type": "TD",
+                    "label": "7.0",
+                    "sourceNodeIds": [
+                      "n-4-29"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-30",
+                    "type": "TD",
+                    "label": "0.30 %",
+                    "sourceNodeIds": [
+                      "n-4-30"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 7,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:8",
+                "type": "TR",
+                "tableRowIndex": 8,
+                "children": [
+                  {
+                    "id": "tag:n-4-31",
+                    "type": "TD",
+                    "label": "Psychology",
+                    "sourceNodeIds": [
+                      "n-4-31"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-32",
+                    "type": "TD",
+                    "label": "29.0",
+                    "sourceNodeIds": [
+                      "n-4-32"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-33",
+                    "type": "TD",
+                    "label": "0.40 %",
+                    "sourceNodeIds": [
+                      "n-4-33"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 8,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:9",
+                "type": "TR",
+                "tableRowIndex": 9,
+                "children": [
+                  {
+                    "id": "tag:n-4-34",
+                    "type": "TD",
+                    "label": "Business",
+                    "sourceNodeIds": [
+                      "n-4-34"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-35",
+                    "type": "TD",
+                    "label": "90.0",
+                    "sourceNodeIds": [
+                      "n-4-35"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-36",
+                    "type": "TD",
+                    "label": "5.00 %",
+                    "sourceNodeIds": [
+                      "n-4-36"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 9,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:10",
+                "type": "TR",
+                "tableRowIndex": 10,
+                "children": [
+                  {
+                    "id": "tag:n-4-37",
+                    "type": "TD",
+                    "label": "Political Science, Administration and Communication",
+                    "sourceNodeIds": [
+                      "n-4-37"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-38",
+                    "type": "TD",
+                    "label": "86.0",
+                    "sourceNodeIds": [
+                      "n-4-38"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-39",
+                    "type": "TD",
+                    "label": "2.10 %",
+                    "sourceNodeIds": [
+                      "n-4-39"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 10,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:11",
+                "type": "TR",
+                "tableRowIndex": 11,
+                "children": [
+                  {
+                    "id": "tag:n-4-40",
+                    "type": "TD",
+                    "label": "Sport",
+                    "sourceNodeIds": [
+                      "n-4-40"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-41",
+                    "type": "TD",
+                    "label": "251.0",
+                    "sourceNodeIds": [
+                      "n-4-41"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-42",
+                    "type": "TD",
+                    "label": "15.6 %",
+                    "sourceNodeIds": [
+                      "n-4-42"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 11,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:12",
+                "type": "TR",
+                "tableRowIndex": 12,
+                "children": [
+                  {
+                    "id": "tag:n-4-43",
+                    "type": "TD",
+                    "label": "Greek Catholic Theology",
+                    "sourceNodeIds": [
+                      "n-4-43"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-44",
+                    "type": "TD",
+                    "label": "26.0",
+                    "sourceNodeIds": [
+                      "n-4-44"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-45",
+                    "type": "TD",
+                    "label": "6.80 %",
+                    "sourceNodeIds": [
+                      "n-4-45"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 12,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:13",
+                "type": "TR",
+                "tableRowIndex": 13,
+                "children": [
+                  {
+                    "id": "tag:n-4-46",
+                    "type": "TD",
+                    "label": "Romano Catholic Theology",
+                    "sourceNodeIds": [
+                      "n-4-46"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-47",
+                    "type": "TD",
+                    "label": "30.0",
+                    "sourceNodeIds": [
+                      "n-4-47"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-48",
+                    "type": "TD",
+                    "label": "10.00 %",
+                    "sourceNodeIds": [
+                      "n-4-48"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 13,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              },
+              {
+                "id": "tag:table:table:4:1:body:row:14",
+                "type": "TR",
+                "tableRowIndex": 14,
+                "children": [
+                  {
+                    "id": "tag:n-4-49",
+                    "type": "TD",
+                    "label": "Environment Engineering",
+                    "sourceNodeIds": [
+                      "n-4-49"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 0
+                  },
+                  {
+                    "id": "tag:n-4-50",
+                    "type": "TD",
+                    "label": "1.0",
+                    "sourceNodeIds": [
+                      "n-4-50"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 1
+                  },
+                  {
+                    "id": "tag:n-4-51",
+                    "type": "TD",
+                    "label": "0.16 %",
+                    "sourceNodeIds": [
+                      "n-4-51"
+                    ],
+                    "children": [],
+                    "tableSection": "body",
+                    "tableRowIndex": 14,
+                    "tableColumnIndex": 2
+                  }
+                ],
+                "tableColumnCount": 3
+              }
+            ],
+            "tableColumnCount": 3,
+            "tableRegularity": {
+              "applied": false,
+              "expectedColumnCount": 3,
+              "repairedRowCount": 0,
+              "insertedPlaceholderCellCount": 0,
+              "insertedSyntheticRowCount": 0,
+              "shiftedCellCount": 0
+            }
+          },
+          {
+            "id": "tag:n-4-52",
+            "type": "P",
+            "label": "check the latest financial information). We discussed aspects related to learning different software tools: how to use them to optimize processes or how to create a business plan. After each lecture, we asked for feedback and the students had to take a test. Therefore, we could evaluate student participation, their understanding of the topics taught, and their feelings and perceptions related to the course in general and each topic in particular. Due to some constraints (large number of students and timetable restrictions), we proposed to use the online approach. All the interactions, starting with the announcement, continuing with lectures and Q&A sessions, emails, messaging, and grading were online. The schedule presented a challenge because we had to accommodate different constraints, so we chose a time slot that was convenient for the vast majority of students. The gender-based questions were only asked in the final feedback form.",
+            "sourceNodeIds": [
+              "n-4-52"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-4-61",
+            "type": "P",
+            "label": "3.4. Course structure",
+            "sourceNodeIds": [
+              "n-4-61"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-4-62",
+            "type": "P",
+            "label": "Fundamentals of Entrepreneurship was an optional course organized at the university level. The course contained 12 lectures of two hours each; in each lecture, half an hour was allocated for Q&A sessions. We chose multiple speakers with entrepreneurial experience, helped by a moderator from the Computer Science department. In the unlikely event of scheduling conflicts or other unexpected events, a university backup teacher was prepared to deliver the course. The speakers manage or have a management role in IT companies, IT hubs, or IT innovation clusters; therefore, the examples provided and explained in the course were related to the computer science domain. We establish the curriculum in accordance with the syllabuses for the same course from other universities by a commission formed by teachers from the computer science department. The resulting curriculum is mentioned in Table 2.",
+            "sourceNodeIds": [
+              "n-4-62"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:6",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-4-71",
+                "type": "LI",
+                "label": "4. Data Collection",
+                "sourceNodeIds": [
+                  "n-4-71"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-4-72",
+            "type": "P",
+            "label": "After each lecture, we asked for feedback and asked them to rate the material and, if they wanted, to provide a comment to support their rating. This is the process in which we gather the data. At the end of the course, a more complex survey with open-ended and accountable questions was given. We chose to use open-ended questions because they provide a deeper insight into the opinions and perceptions of the students, while accountable questions give us a simpler way to analyze the students’ characteristics and categorize them accordingly.",
+            "sourceNodeIds": [
+              "n-4-72"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-1",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000 5",
+            "sourceNodeIds": [
+              "n-5-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-3",
+            "type": "P",
+            "label": "Table 2: Fundamentals of Entrepreneurship curriculum",
+            "sourceNodeIds": [
+              "n-5-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-4",
+            "type": "P",
+            "label": "Lecture 1.",
+            "sourceNodeIds": [
+              "n-5-4"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-5",
+            "type": "P",
+            "label": "Introduction to Entrepreneurship and Innovation. Lecture 2.",
+            "sourceNodeIds": [
+              "n-5-5"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-7",
+            "type": "P",
+            "label": "From problem to idea. Validation of the solution. Unique selling proposition. Lecture 3.",
+            "sourceNodeIds": [
+              "n-5-7"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-9",
+            "type": "P",
+            "label": "Digital Transformation and Innovative Thinking. Lecture 4.",
+            "sourceNodeIds": [
+              "n-5-9"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-11",
+            "type": "P",
+            "label": "Who are my Potential Clients and what are their expectations? Lecture 5.",
+            "sourceNodeIds": [
+              "n-5-11"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-13",
+            "type": "P",
+            "label": "Who are my competitors and how can I gain a Competitive Advantage? Lecture 6.",
+            "sourceNodeIds": [
+              "n-5-13"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-15",
+            "type": "P",
+            "label": "Teams and leadership. How to build a team? Team roles. Lecture 7.",
+            "sourceNodeIds": [
+              "n-5-15"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-17",
+            "type": "P",
+            "label": "Business plan. Lecture 8.",
+            "sourceNodeIds": [
+              "n-5-17"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-19",
+            "type": "P",
+            "label": "Social responsibility. Lecture 9.",
+            "sourceNodeIds": [
+              "n-5-19"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-21",
+            "type": "P",
+            "label": "Minimum Viable Product (MVP). Launching a product. Lecture 10. Public speaking. Preparation and presentation of a pitch. Lecture 11. Entrepreneurial ecosystem and growth opportunities. Lecture 12. Funding opportunities.",
+            "sourceNodeIds": [
+              "n-5-21"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-25",
+            "type": "P",
+            "label": "The survey questions were translated into two languages: Romanian and English, allowing each student to select their preferred language. Responses written in Romanian were automatically translated to English using translation tools. The authors then verified the translated responses, checking for language flavors and other inconsistencies. We used online tools for data collection and did not ask for data that included personal information such as names or emails. Also, we did not request that the faculty appear, because the small number of students from some faculties would have given them the impression that we could have identified them. We instead asked for the gender. The methods used are quantitative methods and more specific questionnaire surveys as defined in community standards [17], the methods were previously used in [20, 18]. The questionnaire was open for two weeks at the end of the course, and 123 students participated and provided answers. The survey questions relevant to this study are shown in Table 3.",
+            "sourceNodeIds": [
+              "n-5-25"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-35",
+            "type": "P",
+            "label": "Table 3: Queries from the course completion feedback survey",
+            "sourceNodeIds": [
+              "n-5-35"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-36",
+            "type": "P",
+            "label": "(1) Specify your gender (2) Specify your faculty (3) Why did you decide on this particular course? (4) What did you hope to learn from this course? (5) What do you consider the most important thing / things you have learned in this course? (6) Do you think there is a difference between the way women can do business? (7) Do you think the business environment is more favorable for women or men? Why?",
+            "sourceNodeIds": [
+              "n-5-36"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-43",
+            "type": "P",
+            "label": "There were 45.85% women enrolled in the course and 54.15% men. In our survey, the percentage of women who responded was 45.28%, and the percentage of men was 54.71%. When comparing the percentages of the responses, we noticed that the numbers were close to each other; thus, we conclude that the answers provided in the study were relevant for all the students enrolled.",
+            "sourceNodeIds": [
+              "n-5-43"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:7",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-5-47",
+                "type": "LI",
+                "label": "5. Results and Discussions",
+                "sourceNodeIds": [
+                  "n-5-47"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-5-48",
+            "type": "P",
+            "label": "The following findings for each research question are obtained after collecting data and thematic analysis.",
+            "sourceNodeIds": [
+              "n-5-48"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-49",
+            "type": "P",
+            "label": "5.1. RQ1: What motivated the students to sign up for the entrepreneurship course?",
+            "sourceNodeIds": [
+              "n-5-49"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-5-50",
+            "type": "P",
+            "label": "Being an optional course (with the exception of the Sports Faculty), we were interested in the main reasons why the students enrolled and whether there was a gender-based difference in their approaches. For this, we asked students questions (3) and (4) from Table 3. There were no significant differences related to gender when answering these questions (the responses that did not specify their gender were not included), as can be seen in Figure 1a, and the reasons why women and men enrolled in this course are relatively similar. The same observation applies to computer science students, see Figure 1b. There was",
+            "sourceNodeIds": [
+              "n-5-50"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-6-1",
+            "type": "P",
+            "label": "6",
+            "sourceNodeIds": [
+              "n-6-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-6-2",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000 a small number for other reasons: for example ”I enrolled by chance and I wanted to finish the course”. Most of the",
+            "sourceNodeIds": [
+              "n-6-2"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-6-4",
+            "type": "P",
+            "label": "(a) Total of enrolled students (b) Computer Science students Fig. 1: Students’ reasons for enrolling in the Fundamentals of Entrepreneurship course. Gender-Based students who answered the first question with the option ”I want to start a business”, reinforced their intention when answering the second question: ”I hoped to learn business models and development strategies”, ”Methods to finance my company”, ”business ideas”, ”entrepreneurial mindset”. 5.1.1. Relation between Curiosity and Motivation Most of the students answered Curiosity, followed by ”I want to start a business”. However, analyzing the responses, we noticed that these two items are connected, as most of the curious students replied to the second question with statements such as ”How to start a business”, ”To find information that could help me in the future”, ”How to manage a business”. The students who specified curiosity as the main reason and their expectations are presented in Figure 2.",
+            "sourceNodeIds": [
+              "n-6-4"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-6-15",
+            "type": "P",
+            "label": "Fig. 2: Students expectation for those who identified Curiosity as the main reason to enroll in the course. In conclusion, the student’s interest in the course was mainly due to the intention to open a business, and second, to their curiosity and desire to learn. 5.2. RQ2: Do students think that the business environment is more favorable for women or men, and why? Even if, from a legal point of view, there is no gender-based difference, the student’s responses reflect a different point of view. We analyzed the responses, and the majority of the students appreciated that men and women have equal chances and opportunities and that the business environment is as favorable for men as it is for women. However, other",
+            "sourceNodeIds": [
+              "n-6-15"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-7-1",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000 7",
+            "sourceNodeIds": [
+              "n-7-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-7-3",
+            "type": "P",
+            "label": "responses appreciated that men have more opportunities and are perceived as more suitable for managerial / business roles. We also compared computer science students’ perceptions versus overall perception related to this question. The percentage of students in computer science who appreciated that the business environment is more favorable to men is higher than the general percentage of 29% versus 16%, and the percentage of students who appreciated that men and women have equal chances is smaller: 45% versus 57.14% as can be seen in Figure 3b.",
+            "sourceNodeIds": [
+              "n-7-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-7-8",
+            "type": "P",
+            "label": "(a) Total of enrolled students (b) Computer Science Students",
+            "sourceNodeIds": [
+              "n-7-8"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-7-10",
+            "type": "P",
+            "label": "Fig. 3: The percent of students that perceive gender as an advantage in the business environment.",
+            "sourceNodeIds": [
+              "n-7-10"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-7-11",
+            "type": "P",
+            "label": "From the responses received from the 123 students, synthesized in Figure 3a, we can draw the following observation about the power-related attributes. A set of characteristics was mentioned in the open responses received: courage, boldness, general thinking, manage- ment skills, strength, respect, trustfulness, authority, and perseverance. These characteristics were mostly assigned to men. In their collective perception, 24.95% of the students state that men are more suitable to start and run a business. Sometimes they offer motivation; in other cases, their answer to RQ2 questions is straightforward without additional explanation: For men, Men or Men, for obvious reasons. In Figure 4, the percentage represents the student’s opinion related to men. These students consider men to be more courageous, bold, or have better management skills. Some answers are based on personal observations ”Unfortunately I notice a men’s advantage due to a set of factors”, ”Men are more respected in this environment (business)”, and ”People tend to listen to men more than women. Why? I don’t know”. Other responses were: ”Men are more intelligent” and ”Men take more risks and are more courageous in unpredictable situations”. We noticed that men were characterized only in a positive way, as women were characterized in a positive and also negative way ”less capable”, ”unskillful”, ”more persevering”, ”more convincing”.",
+            "sourceNodeIds": [
+              "n-7-11"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-7-24",
+            "type": "P",
+            "label": "Fig. 4: Men’s Characteristics in students’ opinions",
+            "sourceNodeIds": [
+              "n-7-24"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-1",
+            "type": "P",
+            "label": "8",
+            "sourceNodeIds": [
+              "n-8-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-2",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000",
+            "sourceNodeIds": [
+              "n-8-2"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-3",
+            "type": "P",
+            "label": "(a) Total enrolled students (b) Computer Science students",
+            "sourceNodeIds": [
+              "n-8-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-5",
+            "type": "P",
+            "label": "Fig. 5: Challenges for the enrolled students by Gender",
+            "sourceNodeIds": [
+              "n-8-5"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-6",
+            "type": "P",
+            "label": "Some students, 16.01%, decided not to answer this question or express an opinion, Don’t know / no answer. We consider them to be not interested in the topic. In conclusion, the perception that men have more advantages is deeply rooted; some of the students just acknowledge it, and others offer reasons based on men’s capabilities and overall perception.",
+            "sourceNodeIds": [
+              "n-8-6"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-10",
+            "type": "P",
+            "label": "5.3. RQ3: What were the Course’s Challenges?",
+            "sourceNodeIds": [
+              "n-8-10"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-11",
+            "type": "P",
+            "label": "The open answers provided to this question could be grouped into a few topics: there were no challenges, time table, course’s questionnaires, provided information, delivery method, did not answer. The gender-based challenges for all the enrolled students are presented in Figure 5a and we can observe that, in part, they are similar to the challenges mentioned by the computer science students (Figure 5b). A large group of students appreciated that they did not encounter any difficulties or challenges, others did not respond to this question. More than 50% of the students are in these two groups. For us, one of the major challenges of this course was the timetable. With a large number of students enrolled, it was difficult to find a time slot for everyone to be available, even if the course had an online format. The hour during which the lecture was held was also a major issue raised by some of the students, even if we specifically chose to deliver this course late in the evening. However, taking into account these aspects, as well as the number of students who did not face any challenges or respond, we concluded that most students did not consider timing as a problem. Students mentioned that they encountered difficulties related to each evaluation of the lecture. Part of the challenge was due to the fact that they could not participate in the course and part of it was due to the different teaching methods of each speaker. Regarding this aspect, we informed all speakers that the course would be generic and that they would have to adapt to a diverse group of students. Other challenges were mentioned by a smaller number of people: adapting to each lecturer, to the delivery method, ”too many teaching styles”, ”language”. Technical issues were also mentioned: ”I could not hear well”. Some students appreciated that the course contained ”too much information”, ”many new terms”, ”unknown words”, ”the financial part”. It was interesting to note that the percentage of men who mentioned this challenge was higher than the percentage of women.",
+            "sourceNodeIds": [
+              "n-8-11"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-31",
+            "type": "P",
+            "label": "Discussions: Upon examining these findings, we note the following broad features:",
+            "sourceNodeIds": [
+              "n-8-31"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-8-32",
+            "type": "P",
+            "label": "Since numerous speakers were used, this led to a number of unfavorable outcomes and challenges related to the ongoing adaptation to different teaching philosophies. The large, massive online course format was well-received by the students, in part because of its accessibility. Given that some of the material covered in the course can be challenging, the interactive Q&A section at the end of the course was important to the students. This is a feature that is absent from the recorded courses. In conclusion, regarding the first objective of our study: It would be feasible to hold the course online in a traditional interactive format, and it is preferable to a recorded one or with many invited speakers. For the second objective, we see that students in theology departments, as well as those from STEM departments, are interested in entrepreneurship. Surprisingly, students in theology show the largest interest; maybe a further study is necessary to investigate the reasons. Students from different humanities studies showed lower degrees of interest. No differences were observed between the interest of women and men in this course. They chose the course primarily out of curiosity and a desire to launch a business. In conclusion, with regard to the second objective of our study, we",
+            "sourceNodeIds": [
+              "n-8-32"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-9-1",
+            "type": "P",
+            "label": "M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000 9",
+            "sourceNodeIds": [
+              "n-9-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-9-3",
+            "type": "P",
+            "label": "conclude that there are no significant differences between genders related to entrepreneurial intentions because students are driven by curiosity and the desire to start a business. Regarding the third objective of the study, we observe that power-related attributes are associated with men by respondents of both genders. Given the large number of participants, their diversity (located in different locations) and the fact that certain individuals state that ”the general perception is that ...”, we can conclude that the study reflects the view of an important segment of the population that believes that men are better at management and business.",
+            "sourceNodeIds": [
+              "n-9-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:8",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-9-10",
+                "type": "LI",
+                "label": "6. Threats to Validity",
+                "sourceNodeIds": [
+                  "n-9-10"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-9-11",
+            "type": "P",
+            "label": "Questionnaire studies must address threats to validity and according to existing ACM standards guidelines [17] we decided to take into account the following: target population and sampling (participant selection), actions taken to limit dropouts. Attention was also focused on research ethics. Target population and participant selection: all students enrolled in the course could take part in the intermediary surveys as well as in the final one based on their own decisions. Thus, participation was neither limited nor constrained by any rules, and we addressed as many students as possible with the purpose of having relevant results. The sample group was dynamic (each intermediary survey as the last survey had different participation), so there are no threats related to a small target population or to constraints or rules that would limit the participation. As for external validity: there is a risk that the results obtained in the third objective of the study are not entirely representative for the entire population. Dropouts: As the course had around 970 enrolled students, it was impossible to find a time slot when everyone would be available. Some students had mandatory courses in the time slot, so we faced an initial dropout even if the course was placed Thursday from 6 to 8 p.m. The selected time frame was chosen to increase the chances that students are available. Moreover, the presence was not mandatory, and we recorded and uploaded (with free student access) all the course materials (presentations and recordings) in the event someone was not able to attend; so he or she could find the relevant information. We made all necessary efforts to minimize dropouts. Research ethics: students were informed about the reasons we collect data and their participation in feedback surveys for each course; the final questionnaire was optional, and we did not use any methods to enforce greater participation. The feedback surveys and the final questionnaire were anonymous and the answers to the questions were not mandatory. We had students who skipped some questions, we had students who provided explicit and detailed feedback or answers to specific topics (they could write as much as they wanted, as the form responses were not limited to a specific number of characters).",
+            "sourceNodeIds": [
+              "n-9-11"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:section:n-1-27:list:9",
+            "type": "L",
+            "children": [
+              {
+                "id": "tag:n-9-33",
+                "type": "LI",
+                "label": "7. Conclusions and Future Work",
+                "sourceNodeIds": [
+                  "n-9-33"
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "tag:n-9-34",
+            "type": "P",
+            "label": "We conducted a gender-based study in a massive course on unconventional entrepreneurship fundamentals. The course was held online, there were a large number of students enrolled from different faculties, and each lecture was delivered by a different speaker. At the end of the course, we conducted a survey to find answers to the research questions. The percentage of men/women from the students who responded to the survey (123 responses) was similar to the percentage of men/women enrolled in the course. Furthermore, the students who responded to the survey were from all faculties, so we conclude that the responses are representative. We took into account a gender-based approach and also compared the responses provided by computer science students with the overall responses to find differences in their perceptions. We came to the conclusion that students, regardless of gender or field of study, prefer interactive online presentations in a classical setting based on the manner in which lectures on this subject were conducted. Analyzing how the enrolled students were distributed among the faculties revealed that students studying theology and STEM fields were much more interested in entrepreneurship than students studying the humanities. Further research on the motivations for why students in theology make an oddity out of the other ones in the humanities would be interesting. We learned about the difficulties the students encountered: time constraints, presentations, difficulties adapting to multiple speakers, or evaluations. There were no significant differences in the answers provided by the computer science students compared to the rest of the answers related to the course challenges. We found that most students do not perceive that the business environment benefits men (57.14% from all answers compared to 45% from the computer science students’ answers). However, 24.95% of all students and 29.03% of",
+            "sourceNodeIds": [
+              "n-9-34"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-10-1",
+            "type": "P",
+            "label": "10 M. Petrescu and T. Mihoc / Procedia Computer Science 00 (2024) 000–000",
+            "sourceNodeIds": [
+              "n-10-1"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-10-3",
+            "type": "P",
+            "label": "computer science students stated that men are perceived to be advantaged, perhaps because some of society has the perception that men are better at doing business. The open questions provided a more in-depth analysis; some students considered that men and women have the same business opportunities. In the future, we want to see if business perception changes after taking this course (gender-based), and how they understand and perceive the digitization examples provided in the course. It would also be interesting to find out how they would implement digitization in their field of expertise. Future research should examine whether showcasing successful female entrepreneurs can change public opinion regarding the role women play in entrepreneurship. Some practical suggestions for future improvements of this particular course include a smaller number of teachers who follow a similar teaching style, as well as arranging groups taking into account the students’ various levels of knowledge. This can be determined through a survey administered at the beginning of the course about the concepts that will be presented. The material can thus be modified on the basis of the results.",
+            "sourceNodeIds": [
+              "n-10-3"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-10-14",
+            "type": "P",
+            "label": "References",
+            "sourceNodeIds": [
+              "n-10-14"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-10-15",
+            "type": "P",
+            "label": "[1] Statistics data UBB (accessed in january 2024), \"https://www.ubbcluj.ro/ro/infoubb/documente_publice/statistici\" Cambridge university women in business organisation (accessed September 2022), \"https://www.camwib.com/?fbclid=IwAR0kMe5kJg_ [2] vzpFwq77Sz0Va7ruqp9ql_0TtnxMJ70gEdtgduUOlqepTUzQ\" [3] Harvard undergraduate women entrepreneurship organization (accessed September 2022), \"https://thehub.college.harvard.edu/ organization/huwe\" [4] Yale women in business (ywib) organization (accessed September 2022), \"https://campuspress.yale.edu/business/\" Ellemers, N., de Gilder, D.: Diversity and inclusion. In: The Moral Organization: Key Issues, Analyses, and Solutions, pp. 161–200. Springer [5] (2022) [6] Elliott, C., Mavriplis, C., Anis, H.: An entrepreneurship education and peer mentoring program for women in stem: mentors’ experi- ences and perceptions of entrepreneurial self-efficacy and intent. International Entrepreneurship and Management Journal 16, 43–67 (2020). https://doi.org/10.1007/s11365-019-00624-2 [7] Haus, I., Steinmetz, H., Isidor, R., Kabst, R.: Gender effects on entrepreneurial intention: a meta-analytical structural equation model. International Journal of Gender and Entrepreneurship (2013) [8] Henry, C., Foss, L., Ahl, H.: Gender and entrepreneurship research: A review of methodological approaches. International Small Business Journal 34 (01 2015). https://doi.org/10.1177/0266242614549779 [9] Hmieleski, K.M., Sheppard, L.D.: The yin and yang of entrepreneurship: Gender differences in the importance of communal and agentic characteristics for entrepreneurs’ subjective well-being and performance. Journal of Business Venturing 34(4), 709–730 (2019). https://doi.org/10.1016/j.jbusvent.2018.06.006 [10] Kuratko, D.F.: The emergence of entrepreneurship education: Development, trends, and challenges. Entrepreneurship theory and practice 29(5), 577–597 (2005) [11] Lambert, C.G., Rennie, A.E.W.: Experiences from covid-19 and emergency remote teaching for entrepreneurship education in engineering programmes. Education Sciences 11(6) (2021). https://doi.org/10.3390/educsci11060282 [12] Leisyte, L., Deem, R., Tzanakou, C.: Inclusive universities in a globalized world. Social Inclusion 9, 1–5 (07 2021). https://doi.org/10.17645/si.v9i3.4632 [13] Monastyrskaya, T.I., Shved, V.V., Chudinov, S.I., Medvedeva, N.P., Mazurkevich, O.P.: Teaching entrepreneurship and gender-based assessment of entrepreneurial competences. International Journal of Recent Technology and Engineering (IJRTE) 8(3C) (2019). https://doi.org/10.35940/ijrte.C1017.1183C19 [14] Olokundun, M.A., Moses, C.L., Iyiola, O., Ogunaike, O., Ibidunni, A.S., Kehinde, O., Motilewa, D.: Experiential pedagogy and entrepreneurial intention: A focus on university entrepreneurship programmes (2019) [15] Pac¸o, A.d., Palinhas, M.J.: Teaching entrepreneurship to children: a case study. Journal of Vocational Education & Training 63(4), 593–608 (2011) [16] Petrescu, M., Sterca, A.: Agile methodology in online learning and how it can improve communication. a case study. In Proceedings of the 17th International Conference on Software Technologies pp. 542–549 (2022) [17] Ralph, Paul (ed.): ACM Sigsoft Empirical Standards for Software Engineering Research, version 0.2.0 (2021), https://github.com/ acmsigsoft/EmpiricalStandards [18] Redmond, K., Evans, S., Sahami, M.: A large-scale quantitative study of women in computer science at stanford university. In: Proceeding of the 44th ACM technical symposium on Computer science education. pp. 439–444 (2013) [19] Sitaridis, I., Kitsios, F.: Entrepreneurial intentions in the field of it: The role of gender typed personality and entrepreneurship education. In: 2018 IEEE Global Engineering Education Conference (EDUCON). pp. 1854–1859 (2018). https://doi.org/10.1109/EDUCON.2018.8363460 [20] Tichy, W.F., Lukowicz, P., Prechelt, L., Heinz, E.A.: Experimental evaluation in computer science: A quantitative study. Journal of Systems and Software 28(1), 9–18 (1995) [21] Wagner M., Schaltegger S., H.E.e.a.: University-linked programmes for sustainable entrepreneurship and regional development: how and with what impact? Small Business Economics p. 1141–1158 (2021). https://doi.org//10.1007/s11187-019-00280-4",
+            "sourceNodeIds": [
+              "n-10-15"
+            ],
+            "children": []
+          },
+          {
+            "id": "tag:n-10-60",
+            "type": "P",
+            "label": "´ [22] Wilson, A.W., Paton-Romero, J.D.: Gender equality in tech entrepreneurship: A systematic mapping study. In: 2022 IEEE/ACM 3rd International Workshop on Gender Equality, Diversity and Inclusion in Software Engineering (GEICSE). pp. 51–58 (2022)",
+            "sourceNodeIds": [
+              "n-10-60"
+            ],
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+}

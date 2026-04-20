@@ -55,13 +55,51 @@ export function injectProfileEnv(ctx) {
   if (layout.columnGapThresholdPercent != null) {
     env.LAYOUT_COLUMN_GAP_THRESHOLD_PERCENT = String(layout.columnGapThresholdPercent);
   }
+  if (layout.columnGapMinPixels != null) {
+    env.LAYOUT_COLUMN_GAP_MIN_PIXELS = String(layout.columnGapMinPixels);
+  }
   if (layout.headingScoreThreshold != null) {
     env.LAYOUT_HEADING_SCORE_THRESHOLD = String(layout.headingScoreThreshold);
   }
+  if (layout.headingBoldScoreThreshold != null) {
+    env.LAYOUT_HEADING_BOLD_SCORE_THRESHOLD = String(layout.headingBoldScoreThreshold);
+  }
+  if (layout.headingH1Threshold != null) {
+    env.LAYOUT_HEADING_H1_THRESHOLD = String(layout.headingH1Threshold);
+  }
+  if (layout.headingH2Threshold != null) {
+    env.LAYOUT_HEADING_H2_THRESHOLD = String(layout.headingH2Threshold);
+  }
+  if (layout.rowTolerancePixels != null) {
+    env.LAYOUT_ROW_TOLERANCE_PIXELS = String(layout.rowTolerancePixels);
+  }
+  if (layout.tableRowMinItems != null) {
+    env.LAYOUT_TABLE_ROW_MIN_ITEMS = String(layout.tableRowMinItems);
+  }
 
-  const semantic = ctx.get("semanticEngine");
-  if (semantic.tableContinuationDistanceY != null) {
-    env.SEMANTIC_TABLE_CONTINUATION_DISTANCE_Y = String(semantic.tableContinuationDistanceY);
+  const readingOrder = ctx.get("readingOrder");
+  if (readingOrder.lineGroupEpsilon != null) {
+    env.READING_ORDER_LINE_GROUP_EPSILON = String(readingOrder.lineGroupEpsilon);
+  }
+  if (readingOrder.columnBandThresholdPercent != null) {
+    env.READING_ORDER_COLUMN_BAND_THRESHOLD_PERCENT = String(readingOrder.columnBandThresholdPercent);
+  }
+  if (readingOrder.columnBandMinPixels != null) {
+    env.READING_ORDER_COLUMN_BAND_MIN_PIXELS = String(readingOrder.columnBandMinPixels);
+  }
+
+  // semanticEngine profile fields are reserved for future
+  // implementation. tableContinuationDistance*, listGapThreshold,
+  // etc. do not have corresponding code paths in the semantic
+  // engine yet; they were removed from profile JSONs on
+  // 2026-04-18 to keep profile schemas honest.
+
+  const tagBuilder = ctx.get("tagBuilder");
+  if (tagBuilder.headingLevelClampMin != null) {
+    env.TAG_BUILDER_HEADING_LEVEL_CLAMP_MIN = String(tagBuilder.headingLevelClampMin);
+  }
+  if (tagBuilder.headingLevelClampMax != null) {
+    env.TAG_BUILDER_HEADING_LEVEL_CLAMP_MAX = String(tagBuilder.headingLevelClampMax);
   }
 
   const validator = ctx.get("validator");

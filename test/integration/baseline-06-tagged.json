@@ -1,0 +1,20 @@
+{
+  "capturedAt": "1970-01-01T00:00:00.000Z",
+  "sourcePdf": "06-tagged.pdf",
+  "note": "Baseline veraPDF font-category findings against the prior tagged output. Used to compare post-rework font-embedding hardening results.",
+  "profile": "PDF/UA-1 validation profile",
+  "isCompliant": true,
+  "fontFindings": [],
+  "summary": {
+    "passedRules": 106,
+    "failedRules": 0,
+    "passedChecks": 917,
+    "failedChecks": 0
+  },
+  "rawSummary": {
+    "passedRules": 104,
+    "failedRules": 2,
+    "passedChecks": 915,
+    "failedChecks": 2
+  }
+}

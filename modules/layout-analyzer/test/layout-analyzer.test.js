@@ -471,3 +471,56 @@ test("borderless table detection: single data row with header above is detected 
   assert.equal(blockById.get("d1").tableSection, "body");
   assert.equal(blockById.get("d1").tableRowIndex, 1);
 });
+
+// Profile-plumbing regression. Originally the layout analyzer had
+// hardcoded thresholds (0.16 column gap, 1.55/1.3/1.9 heading scores),
+// and profiles that set e.g. columnGapThresholdPercent=0.12 were
+// silently ignored — confirmed by A/B pipeline comparisons producing
+// byte-identical output for default vs legal/scientific/cjk/forms-heavy
+// profiles. This test pins that the env-var overrides actually change
+// behavior.
+test("layout analyzer respects LAYOUT_HEADING_SCORE_THRESHOLD env override", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-threshold-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  // Body blocks at 10pt set the baseline via median; the candidate
+  // heading at 14pt yields a 1.4× score — below the default 1.55
+  // heading threshold (so classified as paragraph), above a relaxed
+  // 1.35 threshold (so classified as heading).
+  const doc = {
+    schemaVersion: "1.0.0",
+    documentId: "layout:threshold",
+    source: { filePath: "sample.pdf", pageCount: 1 },
+    pages: [{
+      pageNumber: 1,
+      width: 612,
+      height: 792,
+      textBlocks: [
+        { id: "p1", text: "First paragraph at baseline font.", bbox: [72, 40, 400, 12], fontSize: 10, fontName: "Helvetica" },
+        { id: "p2", text: "Second paragraph at baseline font.", bbox: [72, 56, 400, 12], fontSize: 10, fontName: "Helvetica" },
+        { id: "p3", text: "Third paragraph at baseline font.", bbox: [72, 72, 400, 12], fontSize: 10, fontName: "Helvetica" },
+        { id: "p4", text: "Fourth paragraph at baseline font.", bbox: [72, 88, 400, 12], fontSize: 10, fontName: "Helvetica" },
+        { id: "h1", text: "Medium subheading", bbox: [72, 110, 200, 14], fontSize: 14, fontName: "Helvetica" }
+      ]
+    }]
+  };
+  await writeFile(inputPath, JSON.stringify(doc));
+
+  const originalHeading = process.env.LAYOUT_HEADING_SCORE_THRESHOLD;
+  try {
+    delete process.env.LAYOUT_HEADING_SCORE_THRESHOLD;
+    const defaultOutput = await analyzeLayout(inputPath);
+    const h1Default = defaultOutput.pages[0].textBlocks.find((b) => b.id === "h1");
+    assert.equal(h1Default.blockType, "paragraph",
+      "baseline: 1.4× score is below default 1.55 heading threshold");
+
+    process.env.LAYOUT_HEADING_SCORE_THRESHOLD = "1.35";
+    const relaxedOutput = await analyzeLayout(inputPath);
+    const h1Relaxed = relaxedOutput.pages[0].textBlocks.find((b) => b.id === "h1");
+    assert.equal(h1Relaxed.blockType, "heading",
+      "with LAYOUT_HEADING_SCORE_THRESHOLD=1.35, 1.4× score is a heading");
+  } finally {
+    if (originalHeading == null) delete process.env.LAYOUT_HEADING_SCORE_THRESHOLD;
+    else process.env.LAYOUT_HEADING_SCORE_THRESHOLD = originalHeading;
+  }
+});

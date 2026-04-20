@@ -1,10 +1,11 @@
 {
-  "status": "phase-1-proof-of-concept",
+  "status": "production-ready",
   "components": {
     "operatorParser": { "status": "implemented", "file": "NativeContentStreamParser.java" },
-    "tagMatcher": { "status": "in-progress", "file": "NativeTagMatcher.java" },
-    "streamRewriter": { "status": "planned", "file": "NativeContentStreamRewriter.java" },
-    "verification": { "status": "in-progress", "module": "modules/native-verify/" }
+    "tagMatcher": { "status": "implemented", "file": "NativeTagMatcher.java" },
+    "streamRewriter": { "status": "implemented", "file": "NativeContentStreamRewriter.java" },
+    "verification": { "status": "implemented", "module": "modules/native-verify/" },
+    "profileDetector": { "status": "implemented", "file": "modules/profile-detector/index.js" }
   },
   "writerModes": ["native", "raster", "auto"],
   "profileField": "pdfWriter.mode",
@@ -13,11 +14,15 @@
     "30-50x smaller file size (no raster images)",
     "Original fonts retained",
     "Links and form fields preserved",
-    "Copy/paste returns original text"
+    "Copy/paste returns original text",
+    "Hierarchical StructTreeRoot (Document > Sect > H1 / Table > TR > TD) matching tag-builder output",
+    "Rotation transform handles /Rotate 90|180|270 pages correctly",
+    "Bidi reverse-containment fallback for Arabic/Hebrew RTL content"
   ],
   "limitations": [
-    "Requires operator-level matching (may fail on complex layouts)",
-    "XObject forms not yet supported",
+    "XObject Form content streams not descended into (streamOrigin is always 'page')",
+    "/Alt and /ActualText attributes not auto-generated (Figure elements lack alt text)",
+    "Legacy Distiller 5.x PDFs with non-ASCII text and no ToUnicode CMaps decode poorly in the semantic extractor (PDF.js bypass)",
     "Falls back to raster on unmatched pages"
   ],
   "proofMetrics": [
@@ -25,6 +30,7 @@
     "operatorMatchRate",
     "fileSizeRatio",
     "structureFidelity",
-    "veraPdfFindingsDelta"
+    "veraPdfFindingsDelta",
+    "structureTreeDepth"
   ]
 }

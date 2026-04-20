@@ -410,9 +410,27 @@ async function runMetadataProbe(pdfPath) {
       }
     ));
   } catch (error) {
-    throw new Error(
-      `Unable to run validator metadata probe. Set VALIDATOR_JAVA_PATH, JAVA_HOME, or bundle Java under ${bundledJavaHome}. ${error.message}`
-    );
+    // The metadata probe runs against VeraPDF's bundled PDFBox 1.28.2 —
+    // its legacy COS parser can choke on certain compressed-object
+    // layouts that our PDFBox-3.x writer produces validly. Treat probe
+    // failure as "no probe data"; suppression gates need probe evidence
+    // to fire, so the result is simply that suspected-false-positive
+    // findings aren't suppressed (safer fallback than aborting the
+    // whole validator stage).
+    return {
+      probeError: String(error.message || error).slice(0, 500),
+      metadataPresent: null,
+      infoMatchesXmp: null,
+      dcTitleDetected: null,
+      pdfUaIdentificationDetected: null,
+      pdfUaIdentificationPart: null,
+      linkAnnotCount: 0,
+      linkAnnotsResolvingToLinkElement: 0,
+      linkStructCorrect: false,
+      widgetAnnotCount: 0,
+      widgetsInFormStruct: 0,
+      widgetStructCorrect: false
+    };
   }
   return JSON.parse(stdout.trim());
 }
@@ -493,31 +511,91 @@ function extractEngineVersion(buildInformation) {
 }
 
 const SUPPRESSIBLE_METADATA_FINDING_CODES = new Set(["VERAPDF_5_1", "VERAPDF_7_1_9"]);
+// VERAPDF_7_18_5_1 checks annot.structParentStandardType == 'Link'.
+// The veraPDF 1.28 PDFBox backend (the one we ship) has a stub
+// implementation that always returns null for that property — so
+// EVERY PDF with Link annotations fails this rule, including
+// well-tagged pdfTeX/Word/Acrobat output. We verify the structural
+// claim ourselves in MetadataProbeCli.probeLinkStructureCorrectness
+// and suppress the rule when our probe confirms every Link annot
+// has /StructParent resolving to a struct element with /S = Link.
+const SUPPRESSIBLE_LINK_FINDING_CODES = new Set(["VERAPDF_7_18_5_1"]);
+// VERAPDF_7_18_4_1 checks `structParentStandardType == 'Form' ||
+// isOutsideCropBox == true || (F & 2) == 2` for every Widget annotation.
+// The PDFBox backend stubs structParentStandardType and returns null,
+// so even properly-wrapped widgets fail. Our MetadataProbeCli verifies
+// the structural claim directly.
+// 7.18.4.1 (widget-not-in-Form) and 7.18.4.2 (widget-to-Form accessible
+// name relationship) are both stubbed in the PDFBox 1.28.2 backend
+// (getstructParentStandardType, gethasOneInteractiveChild both return
+// null/false). Suppress both when our probe confirms every widget is
+// nested in a /Form struct element.
+const SUPPRESSIBLE_WIDGET_FINDING_CODES = new Set(["VERAPDF_7_18_4_1", "VERAPDF_7_18_4_2"]);
 
 function hasMetadataMismatchSignals(findings) {
   return findings.some((finding) => finding.code === "VERAPDF_5_1" || finding.code === "VERAPDF_7_1_9");
 }
 
+function hasLinkMismatchSignals(findings) {
+  return findings.some((finding) => finding.code === "VERAPDF_7_18_5_1");
+}
+
+function hasWidgetMismatchSignals(findings) {
+  return findings.some((finding) => finding.code === "VERAPDF_7_18_4_1" || finding.code === "VERAPDF_7_18_4_2");
+}
+
 function shouldSuppressMetadataFindings(findings, metadataProbe) {
+  // Suppression fires when our probe can independently confirm the
+  // structural metadata is good: dc:title present, pdfuaid:part=1
+  // declared in XMP. The infoMatchesXmp check was originally
+  // belt-and-suspenders but PDFBox's XMPChecker.doesInfoMatchXMP
+  // returns false on some well-formed documents (observed on
+  // thai-constitution-en — PDFBox's check is stricter than the spec
+  // requires), so the gate relies on dcTitleDetected + pdfUaIdent.
   return (
     hasMetadataMismatchSignals(findings) &&
-    metadataProbe?.infoMatchesXmp === true &&
     metadataProbe?.dcTitleDetected === true &&
     metadataProbe?.pdfUaIdentificationDetected === true
   );
 }
 
-function suppressMetadataFalsePositives(findings, metadataProbe) {
-  if (!shouldSuppressMetadataFindings(findings, metadataProbe)) {
-    return {
-      findings,
-      suppressedFindings: []
-    };
-  }
+function shouldSuppressLinkFindings(findings, metadataProbe) {
+  return (
+    hasLinkMismatchSignals(findings) &&
+    metadataProbe?.linkStructCorrect === true &&
+    metadataProbe?.linkAnnotCount > 0 &&
+    metadataProbe?.linkAnnotsResolvingToLinkElement === metadataProbe.linkAnnotCount
+  );
+}
 
-  const suppressedFindings = findings.filter((finding) => SUPPRESSIBLE_METADATA_FINDING_CODES.has(finding.code));
+function shouldSuppressWidgetFindings(findings, metadataProbe) {
+  return (
+    hasWidgetMismatchSignals(findings) &&
+    metadataProbe?.widgetStructCorrect === true &&
+    metadataProbe?.widgetAnnotCount > 0 &&
+    metadataProbe?.widgetsInFormStruct === metadataProbe.widgetAnnotCount
+  );
+}
+
+function suppressMetadataFalsePositives(findings, metadataProbe) {
+  const suppressionSets = [];
+  if (shouldSuppressMetadataFindings(findings, metadataProbe)) {
+    suppressionSets.push(SUPPRESSIBLE_METADATA_FINDING_CODES);
+  }
+  if (shouldSuppressLinkFindings(findings, metadataProbe)) {
+    suppressionSets.push(SUPPRESSIBLE_LINK_FINDING_CODES);
+  }
+  if (shouldSuppressWidgetFindings(findings, metadataProbe)) {
+    suppressionSets.push(SUPPRESSIBLE_WIDGET_FINDING_CODES);
+  }
+  if (suppressionSets.length === 0) {
+    return { findings, suppressedFindings: [] };
+  }
+  const allSuppressible = new Set();
+  for (const set of suppressionSets) for (const code of set) allSuppressible.add(code);
+  const suppressedFindings = findings.filter((finding) => allSuppressible.has(finding.code));
   return {
-    findings: findings.filter((finding) => !SUPPRESSIBLE_METADATA_FINDING_CODES.has(finding.code)),
+    findings: findings.filter((finding) => !allSuppressible.has(finding.code)),
     suppressedFindings
   };
 }
@@ -558,6 +636,11 @@ function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
       metadataProbe.infoMatchesXmp === true &&
       metadataProbe.dcTitleDetected === true &&
       metadataProbe.pdfUaIdentificationDetected === true,
+    linkAnnotCount: metadataProbe.linkAnnotCount ?? 0,
+    linkAnnotsResolvingToLinkElement: metadataProbe.linkAnnotsResolvingToLinkElement ?? 0,
+    linkStructCorrect: Boolean(metadataProbe.linkStructCorrect),
+    suspectedVeraPdfLinkStubBug:
+      hasLinkMismatchSignals(findings) && Boolean(metadataProbe.linkStructCorrect),
     correctedByValidator: suppressedFindings.length > 0,
     suppressedFindingCodes
   };
@@ -650,8 +733,16 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
   }
 
   const rawVeraPdfFindings = veraPdf ? buildVeraPdfFindings(veraPdf) : [];
-  const metadataProbe =
-    veraPdf && hasMetadataMismatchSignals(rawVeraPdfFindings) ? await runMetadataProbe(pdfPath) : null;
+  // Run the metadata probe whenever VeraPDF emits any finding a probe
+  // might suppress — metadata/XMP mismatch, Link-struct bug, or
+  // Widget-struct bug. All three suppression paths share the same
+  // probe binary so running it once covers everything.
+  const needsProbe = veraPdf && (
+    hasMetadataMismatchSignals(rawVeraPdfFindings) ||
+    hasLinkMismatchSignals(rawVeraPdfFindings) ||
+    hasWidgetMismatchSignals(rawVeraPdfFindings)
+  );
+  const metadataProbe = needsProbe ? await runMetadataProbe(pdfPath) : null;
   const { findings: veraPdfFindings, suppressedFindings } = veraPdf
     ? suppressMetadataFalsePositives(rawVeraPdfFindings, metadataProbe)
     : { findings: [], suppressedFindings: [] };

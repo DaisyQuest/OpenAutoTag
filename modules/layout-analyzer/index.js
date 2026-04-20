@@ -8,6 +8,31 @@ const ajv = new Ajv2020({ allErrors: true });
 const validateLayout = ajv.compile(layoutSchema);
 const validateTableStructure = ajv.compile(tableStructureSchema);
 
+// Profile-tunable thresholds. Defaults mirror the default.json profile
+// so un-configured runs behave identically to today; specialized
+// profiles (legal, scientific, etc.) override via env vars set by
+// orchestrator/profile-runtime.js. Read lazily so tests and callers
+// can adjust env and re-run analyze in the same process.
+function readFloatEnv(name, fallback) {
+  const raw = process.env[name];
+  if (raw == null || raw === "") return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function readThresholds() {
+  return {
+    columnGapThresholdPercent: readFloatEnv("LAYOUT_COLUMN_GAP_THRESHOLD_PERCENT", 0.16),
+    columnGapMinPixels: readFloatEnv("LAYOUT_COLUMN_GAP_MIN_PIXELS", 48),
+    headingScoreThreshold: readFloatEnv("LAYOUT_HEADING_SCORE_THRESHOLD", 1.55),
+    headingBoldScoreThreshold: readFloatEnv("LAYOUT_HEADING_BOLD_SCORE_THRESHOLD", 1.3),
+    headingH1Threshold: readFloatEnv("LAYOUT_HEADING_H1_THRESHOLD", 1.9),
+    headingH2Threshold: readFloatEnv("LAYOUT_HEADING_H2_THRESHOLD", 1.55),
+    rowTolerancePixels: readFloatEnv("LAYOUT_ROW_TOLERANCE_PIXELS", 6),
+    tableRowMinItems: readFloatEnv("LAYOUT_TABLE_ROW_MIN_ITEMS", 2)
+  };
+}
+
 function median(values) {
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
@@ -90,7 +115,7 @@ function clusterByProximity(items, measureFn, tolerance) {
   return clusters;
 }
 
-function detectColumns(page, ignoredBlockIds = new Set()) {
+function detectColumns(page, ignoredBlockIds = new Set(), thresholds = readThresholds()) {
   const blocks = page.textBlocks.filter(
     (block) => normalizeText(block.text).length > 0 && !ignoredBlockIds.has(block.id)
   );
@@ -106,7 +131,7 @@ function detectColumns(page, ignoredBlockIds = new Set()) {
 
   const centers = blocks.map(blockCenterX).sort((left, right) => left - right);
   const widths = blocks.map(blockWidth).filter((width) => width > 0);
-  const gapThreshold = Math.max(page.width * 0.16, median(widths) * 1.9, 48);
+  const gapThreshold = Math.max(page.width * thresholds.columnGapThresholdPercent, median(widths) * 1.9, thresholds.columnGapMinPixels);
 
   let largestGap = 0;
   let splitIndex = -1;
@@ -140,13 +165,13 @@ function detectColumns(page, ignoredBlockIds = new Set()) {
   };
 }
 
-function classifyBlock(block, baselineFontSize) {
+function classifyBlock(block, baselineFontSize, thresholds = readThresholds()) {
   const text = normalizeText(block.text);
   const orderedListMatch = text.match(/^(\d+)[.)]\s+/);
   const isBulletListItem = /^([-*]|\u2022)\s+/.test(text);
   const isBold = /bold/i.test(block.fontName || "");
   const headingScore = block.fontSize / baselineFontSize;
-  const isHeading = headingScore >= 1.55 || (headingScore >= 1.3 && isBold && text.length <= 80);
+  const isHeading = headingScore >= thresholds.headingScoreThreshold || (headingScore >= thresholds.headingBoldScoreThreshold && isBold && text.length <= 80);
 
   if (orderedListMatch) {
     return {
@@ -166,7 +191,7 @@ function classifyBlock(block, baselineFontSize) {
   }
 
   if (isHeading) {
-    const headingLevel = headingScore >= 1.9 ? 1 : headingScore >= 1.55 ? 2 : 3;
+    const headingLevel = headingScore >= thresholds.headingH1Threshold ? 1 : headingScore >= thresholds.headingH2Threshold ? 2 : 3;
     return {
       blockType: "heading",
       headingLevel
@@ -229,7 +254,7 @@ function buildCandidateRows(page, blocks, baselineFontSize) {
         blockHeight(block) <= Math.max(24, baselineFontSize * 2.4)
     );
 
-  const rowTolerance = Math.max(6, baselineFontSize * 0.9);
+  const rowTolerance = Math.max(readThresholds().rowTolerancePixels, baselineFontSize * 0.9);
 
   return clusterByProximity(candidateBlocks, (item) => item.yCenter, rowTolerance)
     .map((row, index) => {
@@ -473,7 +498,7 @@ function buildBorderlessRows(page, blocks, baselineFontSize) {
         blockHeight(block) <= Math.max(24, baselineFontSize * 2.4)
     );
 
-  const rowTolerance = Math.max(6, baselineFontSize * 0.9);
+  const rowTolerance = Math.max(readThresholds().rowTolerancePixels, baselineFontSize * 0.9);
 
   return clusterByProximity(candidateBlocks, (item) => item.yCenter, rowTolerance)
     .map((row, index) => {
@@ -739,9 +764,10 @@ function detectTextGridTables(page, blocks, baselineFontSize) {
 }
 
 function analyzePage(page, baselineFontSize, tableStructurePage = null) {
+  const thresholds = readThresholds();
   const preclassifiedBlocks = page.textBlocks.map((block) => ({
     ...block,
-    ...classifyBlock(block, baselineFontSize)
+    ...classifyBlock(block, baselineFontSize, thresholds)
   }));
   const vectorTableAnalysis = detectVectorTables(page, preclassifiedBlocks, tableStructurePage, baselineFontSize);
   const remainingAfterVector = preclassifiedBlocks.filter((block) => !vectorTableAnalysis.tableMetaById.has(block.id));
@@ -754,7 +780,7 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
     ...vectorTableAnalysis.tableMetaById.entries()
   ]);
   const tables = [...vectorTableAnalysis.tables, ...textGridTableAnalysis.tables, ...borderlessTableAnalysis.tables];
-  const columns = detectColumns({ ...page, textBlocks: preclassifiedBlocks }, new Set(tableMetaById.keys()));
+  const columns = detectColumns({ ...page, textBlocks: preclassifiedBlocks }, new Set(tableMetaById.keys()), thresholds);
   const largestTable = [...tables].sort(
     (left, right) => right.rowCount * right.columnCount - left.rowCount * left.columnCount
   )[0];

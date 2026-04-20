@@ -273,8 +273,24 @@ public class NativeTagMatcher {
     //  Parsing input JSONs into data holders
     // ---------------------------------------------------------------
 
-    private static List<List<OpInfo>> parseOperators(Object json) {
+    /** Per-page metadata parsed from the operators JSON (page height, rotation). */
+    static class PageMeta {
+        int pageNumber;
+        double pageWidth;
+        double pageHeight;
+        int rotation;
+    }
+
+    /** Coordinate frame the parser emits operator (x, y) in. */
+    static String parsedCoordinateOrigin = "bottom";
+
+    private static List<List<OpInfo>> parseOperators(Object json, List<PageMeta> outMeta) {
         Map<String, Object> root = asMap(json);
+        // Newer parser output tags coordinate convention at the top level.
+        // Legacy documents without this field are treated as y=bottom (the
+        // pre-fix convention) so upgrades don't break existing fixtures.
+        Object origin = root.get("coordinateOrigin");
+        parsedCoordinateOrigin = origin instanceof String ? (String) origin : "bottom";
         List<Object> pages = asList(root.get("pages"));
         List<List<OpInfo>> result = new ArrayList<>();
         for (Object pageObj : pages) {
@@ -282,6 +298,12 @@ public class NativeTagMatcher {
             List<Object> ops = asList(page.get("operators"));
             List<OpInfo> pageOps = new ArrayList<>();
             int pageNum = asInt(page.get("pageNumber"));
+            PageMeta meta = new PageMeta();
+            meta.pageNumber = pageNum;
+            meta.pageWidth = page.containsKey("pageWidth") ? asDouble(page.get("pageWidth")) : 612.0;
+            meta.pageHeight = page.containsKey("pageHeight") ? asDouble(page.get("pageHeight")) : 792.0;
+            meta.rotation = page.containsKey("rotation") ? asInt(page.get("rotation")) : 0;
+            outMeta.add(meta);
             for (Object opObj : ops) {
                 Map<String, Object> om = asMap(opObj);
                 OpInfo oi = new OpInfo();
@@ -349,7 +371,46 @@ public class NativeTagMatcher {
     // ---------------------------------------------------------------
 
     private static String normalizeText(String s) {
-        return s.toLowerCase().replaceAll("\\s+", " ").trim();
+        // Normalisation for op/tag text comparison:
+        //   - Strip soft-hyphens (U+00AD) and zero-width marks — invisible
+        //     in the merged semantic text but appear in operator payloads
+        //     at PDF line-break boundaries (e.g. "specifi\u00ad" that a
+        //     tag stores as "specifically").
+        //   - Non-breaking spaces → regular space.
+        //   - Strip C0 control characters (< 0x20) except whitespace. Some
+        //     producers encode ligatures in a non-standard Encoding where
+        //     "fi" becomes U+001F (Unit Separator); the op text comes out
+        //     as "\u001fling" but the semantic engine normalised it to
+        //     "filing". Stripping control chars lets the substring gate
+        //     see "ling" inside "filing".
+        //   - Lowercase and collapse whitespace runs to a single space.
+        if (s == null) return "";
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\u00ad' || c == '\u200b' || c == '\u200c' || c == '\u200d' || c == '\ufeff') continue;
+            if (c == '\u00a0') { sb.append(' '); continue; }
+            if (c < 0x20 && c != '\t' && c != '\n' && c != '\r' && c != ' ') continue;
+            sb.append(c);
+        }
+        return sb.toString().toLowerCase().replaceAll("\\s+", " ").trim();
+    }
+
+    /**
+     * True if the string contains at least one code point in the Arabic
+     * (U+0600-U+06FF, U+0750-U+077F) or Hebrew (U+0590-U+05FF) ranges —
+     * enough to trigger the reverse-containment bidi fallback. We
+     * deliberately don't check for full bidi-strong status: ops that
+     * mix Arabic with Latin digits/punctuation (e.g. UN resolution
+     * numbers) still benefit from the reversal path.
+     */
+    private static boolean containsRtl(String s) {
+        if (s == null) return false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if ((c >= 0x0590 && c <= 0x06FF) || (c >= 0x0750 && c <= 0x077F)) return true;
+        }
+        return false;
     }
 
     private static double textSimilarity(String a, String b) {
@@ -394,11 +455,33 @@ public class NativeTagMatcher {
     //  Matching algorithm
     // ---------------------------------------------------------------
 
+    /**
+     * Score a candidate (operator → tag) match.
+     *
+     * <p>Acceptance requires a substring-strength textual match (textSim ≥
+     * 0.8 — which the substring-containment bump in matchPage sets when op
+     * text appears verbatim in tag text). Weaker similarity (bigram-Jaccard
+     * coincidence on short strings) is not enough: it creates false
+     * positives where a common word from one paragraph's operator bleeds
+     * into an adjacent tag whose text happens to share bigrams. Position-
+     * only matches are also rejected — geographic coincidence is never
+     * enough without text evidence.</p>
+     *
+     * <p>Unmatched operators flow through to the rewriter's /Artifact wrap
+     * path, which is the correct behavior when we can't confidently pair
+     * an operator to a tag.</p>
+     *
+     * <p>Tiers:</p>
+     * <ul>
+     *   <li>textSim ≥ 0.8 AND dist ≤ 2 → 1.0 (perfect)</li>
+     *   <li>textSim ≥ 0.8 AND dist ≤ 10 → 0.8 (strong)</li>
+     *   <li>textSim &lt; 0.8 → 0.0 (reject — coincidental text overlap is unsafe)</li>
+     * </ul>
+     */
     private static double operatorConfidence(double dx, double dy, double textSim) {
         double dist = Math.sqrt(dx * dx + dy * dy);
-        if (textSim >= 0.5 && dist <= 2.0) return 1.0;
-        if (textSim >= 0.5 && dist <= 10.0) return 0.8;
-        if (dist <= 10.0) return 0.5; // position match, text mismatch
+        if (textSim >= 0.8 && dist <= 2.0) return 1.0;
+        if (textSim >= 0.8 && dist <= 10.0) return 0.8;
         return 0.0;
     }
 
@@ -406,11 +489,44 @@ public class NativeTagMatcher {
      * Match operators on a given page to semantic nodes.
      * Returns a list of assignments and a list of unmatched operator indices.
      */
+    /**
+     * Transform an operator (x, y) captured in post-rotation display space
+     * back into the unrotated portrait frame the layout extractor uses for
+     * semantic bboxes. For /Rotate 0 we pass through; for 90/180/270 we
+     * apply the inverse of PDFBox's TextPosition rotation so the matcher's
+     * bbox check operates in a consistent frame.
+     *
+     * <p>Derivation: PDFBox's {@code TextPosition.getX/getY()} returns
+     * coordinates in the rotated display frame (x in [0, rotatedWidth],
+     * y in [0, rotatedHeight], top-origin). The layout extractor
+     * ({@code modules/parser} → PDF.js) emits bboxes in the unrotated
+     * portrait frame using the cropBox dimensions PDFBox reports
+     * ({@code pageWidth} × {@code pageHeight}). For /Rotate 90 CW the
+     * display frame is {@code pageHeight} × {@code pageWidth}, and
+     * display (x_L, y_L) corresponds to portrait (y_L, pageHeight - x_L).
+     * Verified empirically against usgs-of2024-1001 — "Analyte" op at
+     * display (135, 134) transforms to portrait (134, 657), which falls
+     * inside sem bbox (81, 648, w=517, h=97).</p>
+     */
+    private static double[] unrotateOpToPortrait(double x, double y,
+                                                 double pageWidth, double pageHeight,
+                                                 int rotation) {
+        int r = ((rotation % 360) + 360) % 360;
+        switch (r) {
+            case 90:  return new double[] { y, pageHeight - x };
+            case 180: return new double[] { pageWidth - x, pageHeight - y };
+            case 270: return new double[] { pageWidth - y, x };
+            default:  return new double[] { x, y };
+        }
+    }
+
     private static MatchResult matchPage(
             List<OpInfo> operators,
             List<SemanticNode> pageNodes,
             List<TagNode> flatTags,
+            double pageWidth,
             double pageHeight,
+            int rotation,
             double tolerance) {
 
         // Build semantic-id to tag-node map
@@ -483,8 +599,23 @@ public class NativeTagMatcher {
                 OpInfo op = operators.get(i);
                 if (op.text.trim().isEmpty()) continue;
 
-                // Convert operator PDF y to top-origin y
-                double convertedY = pageHeight - op.y;
+                // Convert operator (x, y) into the frame the semantic bbox
+                // uses. Two things to undo:
+                //  1. y-origin: legacy parsers emit bottom-origin y; current
+                //     parser emits top-origin (signaled by coordinateOrigin).
+                //  2. rotation: PDFBox TextPosition reports display-space
+                //     coords for rotated pages (e.g. /Rotate 90 landscape),
+                //     but semantic bboxes stay in the unrotated portrait
+                //     frame. For rotated pages, apply the inverse rotation
+                //     first, then the y-origin flip if needed.
+                double opX = op.x;
+                double opYTop = "top".equals(parsedCoordinateOrigin) ? op.y : (pageHeight - op.y);
+                if (rotation != 0) {
+                    double[] portraitXY = unrotateOpToPortrait(opX, opYTop, pageWidth, pageHeight, rotation);
+                    opX = portraitXY[0];
+                    opYTop = portraitXY[1];
+                }
+                double convertedY = opYTop;
 
                 // Check position within bbox + tolerance
                 double nodeMinX = minX - tolerance;
@@ -492,7 +623,7 @@ public class NativeTagMatcher {
                 double nodeMinY = minY - tolerance;
                 double nodeMaxY = maxY + tolerance;
 
-                if (op.x < nodeMinX || op.x > nodeMaxX) continue;
+                if (opX < nodeMinX || opX > nodeMaxX) continue;
                 if (convertedY < nodeMinY || convertedY > nodeMaxY) continue;
 
                 // Position is within range - compute text similarity for this operator
@@ -504,11 +635,47 @@ public class NativeTagMatcher {
                 if (normalizedNodeText.contains(normalizedOpText) && normalizedOpText.length() > 0) {
                     textSim = Math.max(textSim, 0.8);
                 }
+                // pdfTeX and similar producers encode inter-word spacing via
+                // TJ array horizontal displacements instead of literal space
+                // characters. The operator text comes out as
+                // "Availableonlineatwww.sciencedirect.com" while the tag
+                // text (built from the text stripper's clustered output) is
+                // "Available online at www.sciencedirect.com". Both forms
+                // describe the same glyph run. Accept a spaceless-substring
+                // match as evidence, gated by a minimum length so a 3-char
+                // op cannot coincidentally match common words (the 5-char
+                // floor is conservative — shorter ops must match with
+                // spaces intact or fall through to unmatched).
+                if (textSim < 0.8 && normalizedOpText.length() >= 5) {
+                    String opNoSpace = normalizedOpText.replaceAll("\\s+", "");
+                    String nodeNoSpace = normalizedNodeText.replaceAll("\\s+", "");
+                    if (opNoSpace.length() >= 5 && nodeNoSpace.contains(opNoSpace)) {
+                        textSim = Math.max(textSim, 0.8);
+                    }
+                }
+                // RTL/bidi fallback: PDFBox captures Arabic/Hebrew glyphs in
+                // rendering (visual) order via TextPosition's glyph-stream
+                // callback, while the layout extractor emits text in Unicode
+                // logical order. For pure-RTL segments this means the op
+                // string is the reverse of the tag string. The ≥5-char
+                // spaceless floor keeps this safe — short reversed runs are
+                // vanishingly unlikely to coincide. Verified on
+                // un-sc-arabic: page 1 had 23 substantive (len≥5) unmatched
+                // Arabic ops; 14 of them matched via reverse containment.
+                if (textSim < 0.8 && normalizedOpText.length() >= 5 && containsRtl(normalizedOpText)) {
+                    String opRev = new StringBuilder(normalizedOpText.replaceAll("\\s+", "")).reverse().toString();
+                    String nodeNoSpace = normalizedNodeText.replaceAll("\\s+", "");
+                    if (opRev.length() >= 5 && nodeNoSpace.contains(opRev)) {
+                        textSim = Math.max(textSim, 0.8);
+                    }
+                }
 
                 double dx = 0, dy = 0;
-                // Distance to nearest bbox edge (0 if inside)
-                if (op.x < minX) dx = minX - op.x;
-                else if (op.x > maxX) dx = op.x - maxX;
+                // Distance to nearest bbox edge (0 if inside) — use the
+                // rotation-adjusted opX so the distance gate for confidence
+                // tiers agrees with the containment gate above.
+                if (opX < minX) dx = minX - opX;
+                else if (opX > maxX) dx = opX - maxX;
                 if (convertedY < minY) dy = minY - convertedY;
                 else if (convertedY > maxY) dy = convertedY - maxY;
 
@@ -558,6 +725,32 @@ public class NativeTagMatcher {
         result.assignments = assignments;
         result.unmatchedOperators = unmatched;
         result.totalOperators = (int) operators.stream().filter(o -> !o.text.trim().isEmpty()).count();
+
+        // Reading-order diagnostics. We check monotonicity on the INPUT order
+        // (pageNodes, as emitted by the upstream semantic engine / reading-
+        // order stage) — not sortedNodes, which we just sorted ascending by
+        // readingOrder and would trivially test as monotonic. A false here
+        // says the semantic engine's emission order diverges from the
+        // readingOrder field it assigned. That's a signal to investigate
+        // upstream, not the matcher.
+        int ordered = 0;
+        int roMin = Integer.MAX_VALUE;
+        int roMax = Integer.MIN_VALUE;
+        Integer prev = null;
+        boolean monotonic = true;
+        for (SemanticNode sn : pageNodes) {
+            if (sn.readingOrder > 0) {
+                ordered++;
+                roMin = Math.min(roMin, sn.readingOrder);
+                roMax = Math.max(roMax, sn.readingOrder);
+            }
+            if (prev != null && sn.readingOrder < prev) monotonic = false;
+            prev = sn.readingOrder;
+        }
+        result.readingOrderMonotonic = monotonic;
+        result.readingOrderCoverage = pageNodes.isEmpty() ? 1.0 : (double) ordered / pageNodes.size();
+        result.readingOrderMin = roMin == Integer.MAX_VALUE ? 0 : roMin;
+        result.readingOrderMax = roMax == Integer.MIN_VALUE ? 0 : roMax;
         return result;
     }
 
@@ -565,6 +758,17 @@ public class NativeTagMatcher {
         List<Assignment> assignments;
         List<OpInfo> unmatchedOperators;
         int totalOperators;
+        // Diagnostic signals for reading-order fidelity. `readingOrderMonotonic`
+        // is true when the underlying semantic-node readingOrder values of
+        // consecutive assignments never decrease — a direct check that the
+        // matcher preserved the upstream reading order. `readingOrderCoverage`
+        // is the fraction of semantic nodes on this page that had a non-zero
+        // readingOrder value (low coverage means reading-order is ambiguous,
+        // worth surfacing).
+        boolean readingOrderMonotonic;
+        double readingOrderCoverage;
+        int readingOrderMin;
+        int readingOrderMax;
     }
 
     // ---------------------------------------------------------------
@@ -626,6 +830,7 @@ public class NativeTagMatcher {
         String operatorsPath = null;
         String semanticPath = null;
         String tagsPath = null;
+        String outputPath = null;
         double pageHeight = 792.0;
         double tolerance = 5.0;
 
@@ -639,6 +844,9 @@ public class NativeTagMatcher {
                     break;
                 case "--tags":
                     if (i + 1 < args.length) tagsPath = args[++i];
+                    break;
+                case "--output":
+                    if (i + 1 < args.length) outputPath = args[++i];
                     break;
                 case "--page-height":
                     if (i + 1 < args.length) pageHeight = Double.parseDouble(args[++i]);
@@ -670,7 +878,8 @@ public class NativeTagMatcher {
         Object semanticData = parseJson(semanticJson);
         Object tagsData = parseJson(tagsJson);
 
-        List<List<OpInfo>> operatorPages = parseOperators(operatorData);
+        List<PageMeta> pageMetas = new ArrayList<>();
+        List<List<OpInfo>> operatorPages = parseOperators(operatorData, pageMetas);
         List<SemanticNode> allSemanticNodes = parseSemanticNodes(semanticData);
         Map<String, Object> tagsRoot = asMap(tagsData);
         TagNode tagRoot = parseTagNode(tagsRoot.get("root"));
@@ -694,14 +903,27 @@ public class NativeTagMatcher {
         int totalPages = operatorPages.size();
         int pagesAboveThreshold = 0;
         double totalMatchRate = 0;
+        int grandTotalOps = 0;
+        int grandMatchedOps = 0;
+        int pagesWithMonotonicReadingOrder = 0;
+        double totalReadingOrderCoverage = 0;
         boolean firstPage = true;
 
         for (int p = 0; p < operatorPages.size(); p++) {
             List<OpInfo> pageOps = operatorPages.get(p);
-            int pageNum = pageOps.isEmpty() ? (p + 1) : pageOps.get(0).page;
+            PageMeta meta = p < pageMetas.size() ? pageMetas.get(p) : null;
+            int pageNum = meta != null ? meta.pageNumber
+                    : (pageOps.isEmpty() ? (p + 1) : pageOps.get(0).page);
             List<SemanticNode> pageNodes = nodesByPage.getOrDefault(pageNum, new ArrayList<>());
 
-            MatchResult result = matchPage(pageOps, pageNodes, flatTags, pageHeight, tolerance);
+            // Per-page geometry from the parser; the --page-height CLI flag
+            // is retained as a fallback for pre-schema JSONs that don't
+            // carry it. pageWidth and rotation come from the parser's
+            // operators JSON too (rotation=0 is the common path).
+            double pageH = meta != null ? meta.pageHeight : pageHeight;
+            double pageW = meta != null ? meta.pageWidth : 612.0;
+            int pageRot = meta != null ? meta.rotation : 0;
+            MatchResult result = matchPage(pageOps, pageNodes, flatTags, pageW, pageH, pageRot, tolerance);
 
             int matched = result.totalOperators - result.unmatchedOperators.size();
             double matchRate = result.totalOperators > 0 ? (double) matched / result.totalOperators : 1.0;
@@ -717,12 +939,16 @@ public class NativeTagMatcher {
 
             if (matchRate >= 0.8) pagesAboveThreshold++;
             totalMatchRate += matchRate;
+            grandTotalOps += result.totalOperators;
+            grandMatchedOps += matched;
+            if (result.readingOrderMonotonic) pagesWithMonotonicReadingOrder++;
+            totalReadingOrderCoverage += result.readingOrderCoverage;
 
             if (!firstPage) json.append(",");
             firstPage = false;
 
             json.append("{\"pageNumber\":").append(pageNum);
-            json.append(",\"pageHeight\":").append(fmt(pageHeight));
+            json.append(",\"pageHeight\":").append(fmt(pageH));
 
             // Assignments
             json.append(",\"assignments\":[");
@@ -772,20 +998,43 @@ public class NativeTagMatcher {
             json.append(",\"unmatchedOperators\":").append(result.unmatchedOperators.size());
             json.append(",\"matchRate\":").append(fmt(matchRate));
             json.append(",\"meanConfidence\":").append(fmt(meanConfidence));
+            json.append(",\"readingOrderMonotonic\":").append(result.readingOrderMonotonic);
+            json.append(",\"readingOrderCoverage\":").append(fmt(result.readingOrderCoverage));
+            json.append(",\"readingOrderMin\":").append(result.readingOrderMin);
+            json.append(",\"readingOrderMax\":").append(result.readingOrderMax);
             json.append("}}");
         }
 
         json.append("]");
 
-        // Overall summary
+        // Overall summary. operatorCount/matchedOperators are corpus-level
+        // sums; the JS-side match-rate computation reads these directly
+        // rather than re-summing the pages array.
         double meanMatchRate = totalPages > 0 ? totalMatchRate / totalPages : 0;
+        double corpusMatchRate = grandTotalOps > 0 ? (double) grandMatchedOps / grandTotalOps : 0;
+        double meanReadingOrderCoverage = totalPages > 0 ? totalReadingOrderCoverage / totalPages : 0;
         json.append(",\"overall\":{");
         json.append("\"totalPages\":").append(totalPages);
+        json.append(",\"operatorCount\":").append(grandTotalOps);
+        json.append(",\"matchedOperators\":").append(grandMatchedOps);
+        json.append(",\"matchRate\":").append(fmt(corpusMatchRate));
         json.append(",\"meanMatchRate\":").append(fmt(meanMatchRate));
         json.append(",\"pagesAboveThreshold\":").append(pagesAboveThreshold);
+        json.append(",\"pagesWithMonotonicReadingOrder\":").append(pagesWithMonotonicReadingOrder);
+        json.append(",\"meanReadingOrderCoverage\":").append(fmt(meanReadingOrderCoverage));
         json.append(",\"nativeViable\":").append(meanMatchRate >= 0.7 && pagesAboveThreshold >= (totalPages * 0.5));
         json.append("}}");
 
-        System.out.println(json.toString());
+        if (outputPath != null) {
+            try (java.io.Writer w = new java.io.OutputStreamWriter(
+                    new java.io.FileOutputStream(outputPath),
+                    java.nio.charset.StandardCharsets.UTF_8)) {
+                w.write(json.toString());
+            }
+            // Still emit to stdout so callers that capture it keep working.
+            System.out.println(json.toString());
+        } else {
+            System.out.println(json.toString());
+        }
     }
 }

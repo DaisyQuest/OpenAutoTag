@@ -284,3 +284,97 @@ export async function diffRuns({ runADir, runBDir }) {
     aggregate: { meanDelta, improvedCount, regressedCount, unchangedCount }
   };
 }
+
+// ---------------------------------------------------------------------------
+// Tool: detect_profile — run the parser, then the detector heuristic
+// ---------------------------------------------------------------------------
+export async function detectProfile({ pdfPath }) {
+  const { autoDetectProfile } = await import("../../../orchestrator/auto-profile.js");
+  return autoDetectProfile({ pdfPath });
+}
+
+// ---------------------------------------------------------------------------
+// Tool: sweep_corpus — classify every PDF in a directory via the
+// profile detector and return distribution + low-confidence
+// outliers. Use this on a new corpus to get a one-screen summary
+// of producer/script distribution before deciding which profiles
+// to stress-test.
+// ---------------------------------------------------------------------------
+export async function sweepCorpus({ directory, limit }) {
+  if (!directory) throw new Error("sweep_corpus: directory is required");
+  const { autoDetectProfile } = await import("../../../orchestrator/auto-profile.js");
+
+  let entries;
+  try {
+    entries = await readdir(directory);
+  } catch (err) {
+    throw new Error(`sweep_corpus: cannot read ${directory}: ${err.message}`);
+  }
+  const pdfs = entries
+    .filter((f) => f.toLowerCase().endsWith(".pdf"))
+    .sort()
+    .slice(0, limit && limit > 0 ? limit : entries.length);
+
+  const results = [];
+  const distribution = {};
+  const lowConfidence = [];
+  for (const pdf of pdfs) {
+    const pdfPath = path.join(directory, pdf);
+    try {
+      const detection = await autoDetectProfile({ pdfPath });
+      const row = {
+        pdf,
+        profileId: detection.profileId,
+        confidence: detection.confidence,
+        producer: detection.signals.producer,
+        dominantScript: detection.signals.dominantScript,
+        dominantScriptRatio: detection.signals.dominantScriptRatio,
+        hasAcroForm: detection.signals.hasAcroForm,
+        opsPerPage: detection.signals.opsPerPage,
+        reasoning: detection.reasoning
+      };
+      results.push(row);
+      distribution[detection.profileId] = (distribution[detection.profileId] || 0) + 1;
+      if (detection.confidence < 0.75) lowConfidence.push({ pdf, profileId: detection.profileId, confidence: detection.confidence, reasoning: detection.reasoning });
+    } catch (err) {
+      results.push({ pdf, error: err.message.slice(0, 200) });
+    }
+  }
+
+  return {
+    directory,
+    pdfCount: pdfs.length,
+    distribution,
+    lowConfidenceCount: lowConfidence.length,
+    lowConfidence: lowConfidence.slice(0, 25),
+    perDoc: results
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Tool: parse_metadata — cheap probe of source-level + per-page counts
+// ---------------------------------------------------------------------------
+export async function parseMetadata({ pdfPath }) {
+  const { autoDetectProfile } = await import("../../../orchestrator/auto-profile.js");
+  // autoDetectProfile writes operators.json as a side effect; we
+  // re-read that file here and return a summary (no operator array)
+  // so the MCP response stays under protocol size limits even for
+  // 500-page docs.
+  const detection = await autoDetectProfile({ pdfPath });
+  return {
+    source: {
+      producer: detection.signals.producer,
+      creator: detection.signals.creator || "",
+      pdfVersion: detection.signals.pdfVersion,
+      hasStructTree: detection.signals.hasStructTree,
+      markInfoMarked: detection.signals.markInfoMarked,
+      hasAcroForm: detection.signals.hasAcroForm
+    },
+    totalPages: detection.signals.totalPages,
+    opsPerPage: detection.signals.opsPerPage,
+    dominantScript: detection.signals.dominantScript,
+    dominantScriptRatio: detection.signals.dominantScriptRatio,
+    scriptCounts: detection.signals.scriptCounts,
+    suggestedProfile: detection.profileId
+  };
+}

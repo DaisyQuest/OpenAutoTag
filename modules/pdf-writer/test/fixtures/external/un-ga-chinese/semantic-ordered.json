@@ -1,0 +1,4393 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentId": "layout:00-source:semantic",
+  "source": {
+    "layoutDocumentId": "layout:00-source",
+    "filePath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\tmp\\calibration-corpus\\pipeline-artifacts\\un-ga-chinese\\00-source.pdf",
+    "language": "en-US",
+    "languageConfidence": 0.54
+  },
+  "nodes": [
+    {
+      "id": "n-1-2",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b2",
+      "role": "P",
+      "text": "联 合 国",
+      "bbox": [
+        123.38,
+        42.839999999999996,
+        44.04056,
+        14.04
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-0",
+      "readingOrder": 1
+    },
+    {
+      "id": "n-1-3",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b3",
+      "role": "P",
+      "text": "/RES/78/205",
+      "bbox": [
+        496.9,
+        45.95999999999998,
+        54.35231999999996,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-1",
+      "readingOrder": 2
+    },
+    {
+      "id": "n-1-5",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b5",
+      "role": "P",
+      "text": "Distr.: General 22 December 2023",
+      "bbox": [
+        397.03,
+        76.93999999999997,
+        76.04460000000012,
+        21.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-5",
+        "n-1-6"
+      ],
+      "paragraphGroupId": "pg-1-2",
+      "readingOrder": 4
+    },
+    {
+      "id": "n-1-7",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b7",
+      "role": "P",
+      "text": "第七十八届会议 议程项目 71 (b) 促进和保护人权：人权问题，包括增进人权和 基本自由切实享受的各种途径",
+      "bbox": [
+        60,
+        216.77000000000004,
+        210.27071999999998,
+        64.55999999999995
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-7",
+        "n-1-8",
+        "n-1-9",
+        "n-1-10"
+      ],
+      "paragraphGroupId": "pg-1-3",
+      "readingOrder": 5
+    },
+    {
+      "id": "n-1-11",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b11",
+      "role": "P",
+      "text": "2023 年 12 月 19 日大会决议 [根据第三委员会的报告(A/78/481/Add.2，第 139 段)通过] 78/205. 保护和援助境内流离失所者 大会， 遵循《联合国宪章》的宗旨和原则， 回顾境内流离失所者指的是被强迫或不得不逃亡或离开家园或习惯住所的 个人或群体，他们背井离乡尤其是迫于或为了逃避武装冲突、普遍暴力、侵犯 人权行为或天灾人祸，但他们并没有越过国际承认的国家边界，1",
+      "bbox": [
+        74.664,
+        305.45,
+        413.9393600000001,
+        176.42000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-11",
+        "n-1-12",
+        "n-1-13",
+        "n-1-14",
+        "n-1-15",
+        "n-1-16",
+        "n-1-17",
+        "n-1-18"
+      ],
+      "paragraphGroupId": "pg-1-4",
+      "readingOrder": 6
+    },
+    {
+      "id": "n-1-19",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b19",
+      "role": "P",
+      "text": "深感不安的是，由于侵犯和践踏人权及违反国际人道法行为、武装冲突、 迫害、暴力和包括恐怖主义在内其他原因及天灾人祸，世界各地出现了大量境 内流离失所者，他们没有得到充分的保护和援助，人数之多令人震惊，意识到 这一情况给收容社区、国家当局、地方当局和国际社会带来严重的挑战，",
+      "bbox": [
+        123.26,
+        494.26,
+        365.53752000000003,
+        58.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-19",
+        "n-1-20",
+        "n-1-21",
+        "n-1-22"
+      ],
+      "paragraphGroupId": "pg-1-5",
+      "readingOrder": 7
+    },
+    {
+      "id": "n-1-23",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b23",
+      "role": "P",
+      "text": "回顾境内流离失所的人数极为庞大，而且这些人有可能作为难民或移民在 其他国家寻求保护和援助，注意到需要思考有效战略以确保境内流离失所者在 这方面获得充分保护和援助，包括需要全面的分列数据和采取旨在防止和减少 这种流离失所的其他措施，",
+      "bbox": [
+        123.26,
+        565.3000000000001,
+        365.3433600000001,
+        58.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-23",
+        "n-1-24",
+        "n-1-25",
+        "n-1-26"
+      ],
+      "paragraphGroupId": "pg-1-6",
+      "readingOrder": 8
+    },
+    {
+      "id": "n-1-27",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b27",
+      "role": "P",
+      "text": "重申大会 1991 年 12 月 19 日第 46/182 号决议及其附件所载指导原则、大会 和经济及社会理事会其他相关决议及经社理事会的商定结论，又重申提供人道 __________________ 1 见《关于境内流离失所问题的指导原则》(E/CN.4/1998/53/Add.2，附件)，导言，第 2 段。",
+      "bbox": [
+        99.624,
+        636.34,
+        389.3367200000001,
+        60.979999999999905
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-27",
+        "n-1-28",
+        "n-1-29",
+        "n-1-30"
+      ],
+      "paragraphGroupId": "pg-1-7",
+      "readingOrder": 9
+    },
+    {
+      "id": "n-1-31",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b31",
+      "role": "P",
+      "text": "23-26026 (C) 050124 090124 *2326026*",
+      "bbox": [
+        60,
+        737.28,
+        144.16987999999998,
+        24.840000000000032
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-31",
+        "n-1-32"
+      ],
+      "paragraphGroupId": "pg-1-8",
+      "readingOrder": 10
+    },
+    {
+      "id": "n-1-1",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b1",
+      "role": "H2",
+      "text": "A",
+      "bbox": [
+        482.35,
+        36.47999999999998,
+        14.468880000000013,
+        20.04
+      ],
+      "headingLevel": 2,
+      "columnHint": 0,
+      "confidence": 0.93,
+      "sourceBlockType": "heading",
+      "regionKind": null,
+      "readingOrder": 0
+    },
+    {
+      "id": "n-1-4",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b4",
+      "role": "H2",
+      "text": "大 会",
+      "bbox": [
+        123.38,
+        69.38000000000002,
+        52.32000000000002,
+        18.960000000000008
+      ],
+      "headingLevel": 2,
+      "columnHint": 0,
+      "confidence": 0.93,
+      "sourceBlockType": "heading",
+      "regionKind": null,
+      "readingOrder": 3
+    },
+    {
+      "id": "n-2-1",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.26199999999994,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-1",
+        "n-2-2"
+      ],
+      "paragraphGroupId": "pg-2-0",
+      "readingOrder": 11
+    },
+    {
+      "id": "n-2-3",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b3",
+      "role": "P",
+      "text": "主义援助的人道、中立、公正和独立原则，还重申所有参与在复杂紧急情况下 和自然灾害中提供人道主义援助的行为体都必须促进和充分遵守这些原则，",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.18592,
+        26.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-3",
+        "n-2-4"
+      ],
+      "paragraphGroupId": "pg-2-1",
+      "readingOrder": 12
+    },
+    {
+      "id": "n-2-5",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b5",
+      "role": "P",
+      "text": "强调各国担负首要责任，必须不带任何歧视地向其管辖范围内境内流离失 所者提供保护和援助，并与流离失所者、收容方、民间社会、地方当局、发展 行为体、私营部门和国际社会适当合作，消除流离失所问题的根源，支持所有 持久解决办法，",
+      "bbox": [
+        123.26,
+        116.66000000000003,
+        365.3433600000001,
+        58.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-5",
+        "n-2-6",
+        "n-2-7",
+        "n-2-8"
+      ],
+      "paragraphGroupId": "pg-2-2",
+      "readingOrder": 13
+    },
+    {
+      "id": "n-2-9",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b9",
+      "role": "P",
+      "text": "表示尤其关切境内流离失所者，包括妇女、儿童、老年人和残疾人、土著 人民以及在民族或族裔、宗教和语言等方面属于少数群体的人等特别弱势群体 可能遭受的歧视日益增加，强调需要通过提供充分保护和获得援助的机会，确 保他们的具体需求得到满足，",
+      "bbox": [
+        123.26,
+        187.7,
+        365.53752000000003,
+        58.589999999999975
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-9",
+        "n-2-10",
+        "n-2-11",
+        "n-2-12"
+      ],
+      "paragraphGroupId": "pg-2-3",
+      "readingOrder": 14
+    },
+    {
+      "id": "n-2-13",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b13",
+      "role": "P",
+      "text": "表示最严重关切全球粮食不安全和营养不良情况严重，发生饥荒和丧失生 计的风险不断增加，流离失所的影响和风险也在增加，认识到迫切需要作出更 多努力，包括提供国际支持，以解决这一问题，",
+      "bbox": [
+        123.26,
+        258.77000000000004,
+        365.5452000000001,
+        42.47999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-13",
+        "n-2-14",
+        "n-2-15"
+      ],
+      "paragraphGroupId": "pg-2-4",
+      "readingOrder": 15
+    },
+    {
+      "id": "n-2-16",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b16",
+      "role": "P",
+      "text": "注意到国际社会需要消除造成流离失所现象的根源，提高对世界各地境内 流离失所问题的认识，包括认识到长期颠沛流离的数百万人的处境，其中许多 人身处城市地区，没有在收容营内，迫切需要向境内流离失所者提供适当人道 主义援助和保护，并推进持久解决方案，包括为此制定可持续的当地解决方案，",
+      "bbox": [
+        123.26,
+        313.73,
+        375.85152,
+        58.579999999999984
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-16",
+        "n-2-17",
+        "n-2-18",
+        "n-2-19"
+      ],
+      "paragraphGroupId": "pg-2-5",
+      "readingOrder": 16
+    },
+    {
+      "id": "n-2-20",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b20",
+      "role": "P",
+      "text": "认识到违反国际人道法的行为可能会导致流离失所，并回顾如果武装冲突 各方遵守国际人道法，尤其是遵守区分、相称和预防的基本原则，以及除非为 平民安全着想或出于迫切军事理由而需要之外不得强迫平民流离失所的规则，2 则流离失所现象可以减少，",
+      "bbox": [
+        123.26,
+        384.79,
+        365.6,
+        58.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-20",
+        "n-2-21",
+        "n-2-22",
+        "n-2-23"
+      ],
+      "paragraphGroupId": "pg-2-6",
+      "readingOrder": 17
+    },
+    {
+      "id": "n-2-24",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b24",
+      "role": "P",
+      "text": "表示深为关切地雷、战争遗留爆炸物和简易爆炸装置对逃离冲突的境内流 离失所者造成威胁，在某些情况下妨碍他们自愿回返、融入当地生活和重新安 置，也有碍于人道主义援助物质的安全运达，注意到亟需防范地雷和其他战争 遗留爆炸物，并向收容社区和地方组织提供支持，",
+      "bbox": [
+        123.26,
+        455.71,
+        365.53752000000003,
+        58.589999999999975
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-24",
+        "n-2-25",
+        "n-2-26",
+        "n-2-27"
+      ],
+      "paragraphGroupId": "pg-2-7",
+      "readingOrder": 18
+    },
+    {
+      "id": "n-2-28",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b28",
+      "role": "P",
+      "text": "表示尤其关切，许多境内流离失所儿童特别是女童在流离失所的各个阶段， 由于学校遭袭击、学校建筑受损或被毁、不安全、校内外暴力包括性别暴力泛 滥、证件丢失、语言障碍和歧视而无法获得教育，",
+      "bbox": [
+        123.26,
+        526.7800000000001,
+        365.8562400000003,
+        42.59999999999991
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-28",
+        "n-2-29",
+        "n-2-30"
+      ],
+      "paragraphGroupId": "pg-2-8",
+      "readingOrder": 19
+    },
+    {
+      "id": "n-2-31",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b31",
+      "role": "P",
+      "text": "又表示尤其关切许多境内流离失所者包括妇女、男子、女童和男童在流离 失所的各个阶段，无法获得所需医疗保健，包括精神卫生和心理社会支持，",
+      "bbox": [
+        123.26,
+        581.74,
+        365.5452000000001,
+        26.639999999999986
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-31",
+        "n-2-32"
+      ],
+      "paragraphGroupId": "pg-2-9",
+      "readingOrder": 20
+    },
+    {
+      "id": "n-2-33",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b33",
+      "role": "P",
+      "text": "认识到灾害包括气候变化不利影响造成的灾害次数、规模和频率增加，在 某些情况下可能加剧流离失所现象，并给收容社区带来更大压力，鼓励联合国 和所有相关行为体与各国政府合作，加大工作力度，努力满足在自然灾害(包括",
+      "bbox": [
+        123.26,
+        620.74,
+        365.69,
+        42.620000000000005
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-33",
+        "n-2-34",
+        "n-2-35"
+      ],
+      "paragraphGroupId": "pg-2-10",
+      "readingOrder": 21
+    },
+    {
+      "id": "n-2-36",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b36",
+      "role": "P",
+      "text": "__________________ 2 《1949 年 8 月 12 日日内瓦四公约关于保护非国际性武装冲突受难者的附加议定书》(第二议 定书)(联合国，《条约汇编》，第 1125 卷，第 17513 号)，第十三和十七条。",
+      "bbox": [
+        99.624,
+        690.84,
+        389.3259999999999,
+        35.27999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-36",
+        "n-2-37",
+        "n-2-38"
+      ],
+      "paragraphGroupId": "pg-2-11",
+      "readingOrder": 22
+    },
+    {
+      "id": "n-2-39",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b39",
+      "role": "P",
+      "text": "2/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        491.98,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-39",
+        "n-2-40"
+      ],
+      "paragraphGroupId": "pg-2-12",
+      "readingOrder": 23
+    },
+    {
+      "id": "n-3-1",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.35776,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-1",
+        "n-3-2"
+      ],
+      "paragraphGroupId": "pg-3-0",
+      "readingOrder": 24
+    },
+    {
+      "id": "n-3-3",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b3",
+      "role": "P",
+      "text": "气候变化所致严重自然灾害)中流离失所民众的需求，在这方面，注意到必须分 享预防和防备这种流离失所现象的最佳做法，",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.4251999999997,
+        26.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-3",
+        "n-3-4"
+      ],
+      "paragraphGroupId": "pg-3-1",
+      "readingOrder": 25
+    },
+    {
+      "id": "n-3-5",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b5",
+      "role": "P",
+      "text": "表示关切数百万人每年因突发和缓发灾害而流离失所，认识到建立国家和 社区抗灾能力，包括准备、预防、减少灾害风险和适应气候变化等多项措施， 可通过将减少灾害风险战略纳入国家、区域和全球发展政策和方案等办法，减 少灾后流离失所风险，在这方面，认识到可持续发展在避免和减少损失和损害 风险方面具有重要作用，",
+      "bbox": [
+        123.26,
+        116.66000000000003,
+        365.51448000000005,
+        74.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-5",
+        "n-3-6",
+        "n-3-7",
+        "n-3-8",
+        "n-3-9"
+      ],
+      "paragraphGroupId": "pg-3-2",
+      "readingOrder": 26
+    },
+    {
+      "id": "n-3-10",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b10",
+      "role": "P",
+      "text": "认识到如果收容社区受到灾害影响，境内流离失所者会变得更加脆弱，",
+      "bbox": [
+        144.74,
+        203.66000000000003,
+        325.96608000000015,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-3-3",
+      "readingOrder": 27
+    },
+    {
+      "id": "n-3-11",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b11",
+      "role": "P",
+      "text": "表示最严重关切冠状病毒病(COVID-19)大流行的人道主义影响以及疫情持 续后果和长期影响构成的风险，包括对本已庞大的人道主义需求和发展需求造 成的冲击以及境内流离失所者和收容社区的困苦，认识到疫情对流离失所妇女、 儿童和弱势群体的影响尤其严重，深为关切人道主义援助和保护需求不断增加， 其原因包括性暴力和性别暴力、性剥削和性虐待、各种形式的贩运人口、强行 征募和绑架以及暴力侵害流离失所儿童等暴力行径增加，教育特别是女童教育 受到严重影响，粮食不安全和营养不良水平居高不下，饥荒风险、生计损失以 及对健康包括精神卫生及传染性和非传染性疾病的所有负面影响越来越大，这 一切又因卫生系统被削弱以及流离失所的影响和风险而雪上加霜，认识到由于 武装冲突、贫困、自然灾害所致灾难、暴力、气候变化的不利影响和其他环境 挑战而加剧的风险和影响，还认识到秘书长就应对COVID-19疫情的影响作出努 力并提出多项措施，并注意到分别于 2023 年 9 月 20 日和 21 日在纽约举行的大 会大流行病预防、防范和应对问题高级别会议政治宣言3 和全民健康覆盖问题高 级别会议政治宣言，4",
+      "bbox": [
+        123.26,
+        226.72999999999996,
+        375.85152,
+        218.54000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-11",
+        "n-3-12",
+        "n-3-13",
+        "n-3-14",
+        "n-3-15",
+        "n-3-16",
+        "n-3-17",
+        "n-3-18",
+        "n-3-19",
+        "n-3-20",
+        "n-3-21",
+        "n-3-22",
+        "n-3-23",
+        "n-3-24"
+      ],
+      "paragraphGroupId": "pg-3-4",
+      "readingOrder": 28
+    },
+    {
+      "id": "n-3-25",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b25",
+      "role": "P",
+      "text": "意识到境内流离失所包括长期和反复暂时流离失所状况所涉及的人权、人 道主义和发展问题及可能存在的建设和平和过渡期正义问题，各国有责任在国 际社会支持下确保提供保护和援助，包括尊重和保护所有境内流离失所者的人 权和基本自由，以期找到持久解决办法，",
+      "bbox": [
+        123.26,
+        457.75,
+        365.35104000000007,
+        58.58999999999992
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-25",
+        "n-3-26",
+        "n-3-27",
+        "n-3-28"
+      ],
+      "paragraphGroupId": "pg-3-5",
+      "readingOrder": 29
+    },
+    {
+      "id": "n-3-29",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b29",
+      "role": "P",
+      "text": "认识到国家和地方当局及收容社区对保护和援助境内流离失所者作出的重 要贡献，承认收容大批境内流离失所者可能给国家当局和地方社区带来压力， 又认识到需要满足它们的需求，为增强收容社区和地方能力提供适当支持，",
+      "bbox": [
+        123.26,
+        528.82,
+        365.35104000000007,
+        42.479999999999905
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-29",
+        "n-3-30",
+        "n-3-31"
+      ],
+      "paragraphGroupId": "pg-3-6",
+      "readingOrder": 30
+    },
+    {
+      "id": "n-3-32",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b32",
+      "role": "P",
+      "text": "回顾世界人权会议 1993年 6月 25日通过的《维也纳宣言和行动纲领》，5 其 中提及需制订处理境内流离失所问题的全球战略，并回顾大会和安全理事会的 所有相关决议，",
+      "bbox": [
+        123.26,
+        583.7800000000001,
+        365.69,
+        42.59999999999991
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-32",
+        "n-3-33",
+        "n-3-34"
+      ],
+      "paragraphGroupId": "pg-3-7",
+      "readingOrder": 31
+    },
+    {
+      "id": "n-3-35",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b35",
+      "role": "P",
+      "text": "__________________ 3 第 78/3 号决议，附件。 4 第 78/4 号决议，附件。 5 A/CONF.157/24(Part I)和 A/CONF.157/24(Part I)/Corr.1，第三章。",
+      "bbox": [
+        99.624,
+        666.84,
+        275.7889999999999,
+        59.27999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-35",
+        "n-3-36",
+        "n-3-37",
+        "n-3-38"
+      ],
+      "paragraphGroupId": "pg-3-8",
+      "readingOrder": 32
+    },
+    {
+      "id": "n-3-39",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b39",
+      "role": "P",
+      "text": "3/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        492.1600000000001,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-39",
+        "n-3-40"
+      ],
+      "paragraphGroupId": "pg-3-9",
+      "readingOrder": 33
+    },
+    {
+      "id": "n-4-1",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205 又回顾大会 2021 年 12 月 16 日第 76/167 号决议和人权理事会 2022 年 7 月 7 日第 50/6 号决议，6",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.26199999999994,
+        55.09999999999991
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-1",
+        "n-4-2",
+        "n-4-3",
+        "n-4-4"
+      ],
+      "paragraphGroupId": "pg-4-0",
+      "readingOrder": 34
+    },
+    {
+      "id": "n-4-5",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b5",
+      "role": "P",
+      "text": "认识到境内流离失所者在充分平等和不受歧视的条件下，同本国其他人一 样享有国际法和国内法规定的同等权利和自由，包括行动和居住自由权，并应 受到保护，以免被任意强迫流离失所，",
+      "bbox": [
+        123.26,
+        116.66000000000003,
+        365.35104000000007,
+        42.599999999999966
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-5",
+        "n-4-6",
+        "n-4-7"
+      ],
+      "paragraphGroupId": "pg-4-1",
+      "readingOrder": 35
+    },
+    {
+      "id": "n-4-8",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b8",
+      "role": "P",
+      "text": "回顾包括国际人权法，特别是《儿童权利公约》，7 以及国际难民法和国际 人道法，包括可适用的 1949年日内瓦四公约 及其1977年《附加议定书》 等国",
+      "bbox": [
+        123.26,
+        171.73999999999995,
+        365.70728,
+        26.52000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-8",
+        "n-4-9"
+      ],
+      "paragraphGroupId": "pg-4-2",
+      "readingOrder": 36
+    },
+    {
+      "id": "n-4-10",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b10",
+      "role": "P",
+      "text": "8 9 际法相关规范，是向武装冲突中和外国占领下的平民，包括向境内流离失所者 提供保护和援助的重要法律框架，",
+      "bbox": [
+        123.26,
+        187.81999999999996,
+        365.18592,
+        42.510000000000076
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-10",
+        "n-4-11",
+        "n-4-12",
+        "n-4-13"
+      ],
+      "paragraphGroupId": "pg-4-3",
+      "readingOrder": 37
+    },
+    {
+      "id": "n-4-14",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b14",
+      "role": "P",
+      "text": "认识到无身份证件的境内流离失所者包括妇女、儿童、老年人和残疾人， 可能面临人权受侵犯和被践踏的风险，在实现其权利和获得服务方面可能面临 困难，",
+      "bbox": [
+        123.26,
+        242.69,
+        365.35104000000007,
+        42.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-14",
+        "n-4-15",
+        "n-4-16"
+      ],
+      "paragraphGroupId": "pg-4-4",
+      "readingOrder": 38
+    },
+    {
+      "id": "n-4-17",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b17",
+      "role": "P",
+      "text": "又认识到已加大对境内流离失所者的保护力度，确定、重申和统一了保护 境内流离失所者的具体标准，特别是提出了《关于境内流离失所问题的指导原 则》，10",
+      "bbox": [
+        123.26,
+        297.77,
+        365.43360000000007,
+        42.48000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-17",
+        "n-4-18",
+        "n-4-19"
+      ],
+      "paragraphGroupId": "pg-4-5",
+      "readingOrder": 39
+    },
+    {
+      "id": "n-4-20",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b20",
+      "role": "P",
+      "text": "欢迎在处理境内流离失所情势时进一步传播、宣传和适用《关于境内流离 失所问题的指导原则》，并将其纳入国内法律和政策，",
+      "bbox": [
+        123.26,
+        352.75,
+        365.3433600000001,
+        26.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-20",
+        "n-4-21"
+      ],
+      "paragraphGroupId": "pg-4-6",
+      "readingOrder": 40
+    },
+    {
+      "id": "n-4-22",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b22",
+      "role": "P",
+      "text": "赞赏地注意到，为确保适当解决境内流离失所者的所有人权问题，各国人 权机构在流离失所的各个阶段所发挥的重要作用，",
+      "bbox": [
+        123.26,
+        391.75,
+        365.53752000000003,
+        26.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-22",
+        "n-4-23"
+      ],
+      "paragraphGroupId": "pg-4-7",
+      "readingOrder": 41
+    },
+    {
+      "id": "n-4-24",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b24",
+      "role": "P",
+      "text": "痛惜强迫流离失所的做法及其对大批民众享受人权和基本自由的负面影响， 回顾《国际刑事法院罗马规约》11 的相关规定，其中将驱逐或强行迁移人口定 为危害人类罪，将非法驱逐、迁移或下令迁移平民定为战争罪，",
+      "bbox": [
+        123.26,
+        430.75,
+        366.00767999999994,
+        42.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-24",
+        "n-4-25",
+        "n-4-26"
+      ],
+      "paragraphGroupId": "pg-4-8",
+      "readingOrder": 42
+    },
+    {
+      "id": "n-4-27",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b27",
+      "role": "P",
+      "text": "认识到《非洲联盟保护和援助非洲境内流离失所者公约》(《坎帕拉公 约》)12 的重要性，该公约借鉴了大湖区问题国际会议通过的《保护和援助境内 流离失所者议定书》和《回返者财产权议定书》，是加强国家和区域保护和援助 非洲境内流离失所者规范框架的重要步骤，欢迎 2017 年 4 月举办第一次公约缔 约国会议，",
+      "bbox": [
+        123.26,
+        485.71,
+        365.7831200000001,
+        74.67000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-27",
+        "n-4-28",
+        "n-4-29",
+        "n-4-30",
+        "n-4-31"
+      ],
+      "paragraphGroupId": "pg-4-9",
+      "readingOrder": 43
+    },
+    {
+      "id": "n-4-32",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b32",
+      "role": "P",
+      "text": "__________________ 6 见《大会正式记录，第七十七届会议，补编第 53 号》(A/77/53)，第八章，A 节。 7 联合国，《条约汇编》，第 1577 卷，第 27531 号。 8 同上，第 75 卷，第 970-973 号。 9 同上，第 1125 卷，第 17512 和 17513 号。 10 E/CN.4/1998/53/Add.2，附件。 11 联合国，《条约汇编》，第 2187 卷，第 38544 号。 12 同上，第 3014 卷，第 52375 号。",
+      "bbox": [
+        99.624,
+        594.82,
+        341.5659999999999,
+        131.29999999999995
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-32",
+        "n-4-33",
+        "n-4-34",
+        "n-4-35",
+        "n-4-36",
+        "n-4-37",
+        "n-4-38",
+        "n-4-39"
+      ],
+      "paragraphGroupId": "pg-4-10",
+      "readingOrder": 44
+    },
+    {
+      "id": "n-4-40",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b40",
+      "role": "P",
+      "text": "4/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        491.98,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-40",
+        "n-4-41"
+      ],
+      "paragraphGroupId": "pg-4-11",
+      "readingOrder": 45
+    },
+    {
+      "id": "n-5-1",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.35776,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-1",
+        "n-5-2"
+      ],
+      "paragraphGroupId": "pg-5-0",
+      "readingOrder": 46
+    },
+    {
+      "id": "n-5-3",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b3",
+      "role": "P",
+      "text": "注意到机构间常设委员会的《境内流离失所者问题持久解决办法框架》，13 并表示注意到秘书长政策委员会 2011 年 10 月 4 日认可结束冲突后流离失所问题 初步框架的决定，",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.8168800000002,
+        42.599999999999966
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-3",
+        "n-5-4",
+        "n-5-5"
+      ],
+      "paragraphGroupId": "pg-5-1",
+      "readingOrder": 47
+    },
+    {
+      "id": "n-5-6",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b6",
+      "role": "P",
+      "text": "着重指出联合国相关机构和人道主义组织要依照国际法向境内流离失所 者，包括向冲突区内的境内流离失所者提供安全和不受阻碍的人道主义援助准入，",
+      "bbox": [
+        123.26,
+        132.73999999999995,
+        376.2796800000003,
+        26.52000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-6",
+        "n-5-7"
+      ],
+      "paragraphGroupId": "pg-5-2",
+      "readingOrder": 48
+    },
+    {
+      "id": "n-5-8",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b8",
+      "role": "P",
+      "text": "认识到《2030 年可持续发展议程》14 力求满足包括境内流离失所者在内最 弱势群体的需求，满足境内流离失所者需求有助于各国实现本国整体发展目标，",
+      "bbox": [
+        123.26,
+        171.73999999999995,
+        375.85152,
+        26.52000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-8",
+        "n-5-9"
+      ],
+      "paragraphGroupId": "pg-5-3",
+      "readingOrder": 49
+    },
+    {
+      "id": "n-5-10",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b10",
+      "role": "P",
+      "text": "注意到营地外和城市地区境内流离失所者人数不断增加，需要满足他们和 收容家庭的眼前和长期需要，认识到联合国住房和可持续城市发展大会(人居三 大会)通过的《新城市议程》15 的重要性，",
+      "bbox": [
+        123.26,
+        210.77000000000004,
+        365.6756,
+        42.47999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-10",
+        "n-5-11",
+        "n-5-12"
+      ],
+      "paragraphGroupId": "pg-5-4",
+      "readingOrder": 50
+    },
+    {
+      "id": "n-5-13",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b13",
+      "role": "P",
+      "text": "表示注意到 2016 年 5 月 23 日和 24 日在土耳其伊斯坦布尔举行的首届世界 人道主义峰会，又表示注意到秘书长关于世界人道主义峰会成果的报告，16 其 中除其他外为加强会员国与人道主义行为体和发展行为体之间的伙伴关系，合 作应对境内流离失所者的紧急和长期需求提出各项建议，",
+      "bbox": [
+        123.26,
+        265.72999999999996,
+        365.70072000000016,
+        58.56000000000006
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-13",
+        "n-5-14",
+        "n-5-15",
+        "n-5-16"
+      ],
+      "paragraphGroupId": "pg-5-5",
+      "readingOrder": 51
+    },
+    {
+      "id": "n-5-17",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b17",
+      "role": "P",
+      "text": "注意到需要找出持久办法解决各国境内流离失所者问题并克服这方面可能 存在的障碍，认识到持久解决办法包括安全和有尊严的自愿可持续回返，以及 在流离失所者目前所在地区自愿就地安置或在该国另一个地方自愿安置，同时 不损害境内流离失所者离开本国或寻求避难的权利，",
+      "bbox": [
+        123.26,
+        336.77,
+        365.35104000000007,
+        58.58000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-17",
+        "n-5-18",
+        "n-5-19",
+        "n-5-20"
+      ],
+      "paragraphGroupId": "pg-5-6",
+      "readingOrder": 52
+    },
+    {
+      "id": "n-5-21",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b21",
+      "role": "P",
+      "text": "强调应从人道主义和发展角度持久解决境内流离失所者问题，及时让境内 流离失所者和收容社区参与其中，",
+      "bbox": [
+        123.26,
+        407.71,
+        365.3433600000001,
+        26.640000000000043
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-21",
+        "n-5-22"
+      ],
+      "paragraphGroupId": "pg-5-7",
+      "readingOrder": 53
+    },
+    {
+      "id": "n-5-23",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b23",
+      "role": "P",
+      "text": "意识到必须提供大量人道主义援助和发展援助才能满足长期境内流离失所 者的需求，弥合需求与资源之间的巨大缺口，",
+      "bbox": [
+        123.26,
+        446.71,
+        365.35104000000007,
+        26.640000000000043
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-23",
+        "n-5-24"
+      ],
+      "paragraphGroupId": "pg-5-8",
+      "readingOrder": 54
+    },
+    {
+      "id": "n-5-25",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b25",
+      "role": "P",
+      "text": "认识到需要提高境内流离失所信息的范围、质量和可得性，针对境内流离 失所者以及新的和长期的流离失所现象对收容社区所产生影响，收集可靠、及 时、纵向和分列数据，包括按性别、年龄、残疾情况和地点分列的数据，以便 改进境内流离失所问题的政策、方案编制、预防和应对措施，促进实现持久解 决，包括在这方面认识到境内流离失所问题监测中心管理的境内流离失所问题 全球数据库以及境内流离失所问题机构间联合概况调查处和难民、境内流离失 所者及无国籍状态统计问题专家组提供的技术支助所具有的关联性，并注意到 统计委员会颁布了《境内流离失所者统计问题国际建议书》，",
+      "bbox": [
+        123.26,
+        485.71,
+        365.35104000000007,
+        122.67000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-25",
+        "n-5-26",
+        "n-5-27",
+        "n-5-28",
+        "n-5-29",
+        "n-5-30",
+        "n-5-31",
+        "n-5-32"
+      ],
+      "paragraphGroupId": "pg-5-9",
+      "readingOrder": 55
+    },
+    {
+      "id": "n-5-33",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b33",
+      "role": "P",
+      "text": "__________________ 13 A/HRC/13/21/Add.4。 14 第 70/1 号决议。 15 第 71/256 号决议，附件。 16 A/71/353。",
+      "bbox": [
+        99.624,
+        648.84,
+        124.79599999999999,
+        77.27999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-33",
+        "n-5-34",
+        "n-5-35",
+        "n-5-36",
+        "n-5-37"
+      ],
+      "paragraphGroupId": "pg-5-10",
+      "readingOrder": 56
+    },
+    {
+      "id": "n-5-38",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b38",
+      "role": "P",
+      "text": "5/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        492.1600000000001,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-38",
+        "n-5-39"
+      ],
+      "paragraphGroupId": "pg-5-11",
+      "readingOrder": 57
+    },
+    {
+      "id": "n-6-1",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.26199999999994,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-1",
+        "n-6-2"
+      ],
+      "paragraphGroupId": "pg-6-0",
+      "readingOrder": 58
+    },
+    {
+      "id": "n-6-3",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b3",
+      "role": "P",
+      "text": "表示赞赏许多国家的政府、政府间组织、区域组织和非政府组织为境内流 离失所者人权问题特别报告员及其前任和历任负责境内流离失所者人权事务秘 书长代表的工作提供支持和协助，并依照各自的职权和责任帮助向境内流离失 所者提供保护和援助，",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.35872000000006,
+        58.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-3",
+        "n-6-4",
+        "n-6-5",
+        "n-6-6"
+      ],
+      "paragraphGroupId": "pg-6-1",
+      "readingOrder": 59
+    },
+    {
+      "id": "n-6-7",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b7",
+      "role": "P",
+      "text": "欢迎特别报告员与各国政府、联合国相关办事处和机构以及其他国际和区 域组织继续合作，鼓励进一步加强这种协作，以推动制定更好的境内流离失所 者战略，改善对境内流离失所者的保护和援助，并持久解决这一问题，",
+      "bbox": [
+        123.26,
+        148.7,
+        365.3433600000001,
+        42.599999999999966
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-7",
+        "n-6-8",
+        "n-6-9"
+      ],
+      "paragraphGroupId": "pg-6-2",
+      "readingOrder": 60
+    },
+    {
+      "id": "n-6-10",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b10",
+      "role": "P",
+      "text": "赞赏地肯定国际红十字与红新月运动及其他人道主义机构同各国政府和相 关国际机构合作，在保护和援助境内流离失所者方面作出重要而独立的贡献，",
+      "bbox": [
+        123.26,
+        203.66000000000003,
+        365.49984000000006,
+        26.670000000000016
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-10",
+        "n-6-11"
+      ],
+      "paragraphGroupId": "pg-6-3",
+      "readingOrder": 61
+    },
+    {
+      "id": "n-6-12",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b12",
+      "role": "P",
+      "text": "表示赞赏地注意到特别报告员在其提交人权理事会第五十三届会议的报告17 中确定的四个专题优先事项及订立的两项战略目标，即支持各国政府制定关于 境内流离失所问题的国家文书和体制，促进以可行办法持久解决境内流离失所 者问题，包括让发展行为体参与其中，",
+      "bbox": [
+        123.26,
+        242.69,
+        365.57,
+        58.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-12",
+        "n-6-13",
+        "n-6-14",
+        "n-6-15"
+      ],
+      "paragraphGroupId": "pg-6-4",
+      "readingOrder": 62
+    },
+    {
+      "id": "n-6-17",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b17",
+      "role": "P",
+      "text": "及其中所载结论；",
+      "bbox": [
+        123.26,
+        329.69,
+        84.13151999999998,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-6-5",
+      "readingOrder": 64
+    },
+    {
+      "id": "n-6-19",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b19",
+      "role": "P",
+      "text": "境内流离失所者困境的认识，不断努力满足他们的发展需求和其他具体需求， 包括将境内流离失所者人权纳入联合国系统所有相关部门的主要工作；",
+      "bbox": [
+        123.26,
+        368.71,
+        365.18592,
+        26.640000000000043
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-19",
+        "n-6-20"
+      ],
+      "paragraphGroupId": "pg-6-6",
+      "readingOrder": 66
+    },
+    {
+      "id": "n-6-22",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b22",
+      "role": "P",
+      "text": "断对话，继续分析境内流离失所问题的原因，继续跟踪了解流离失所者的需求 和人权，包括妇女、儿童、老年人和残疾人等可能处境十分脆弱的流离失所者 的需求，了解应急准备程度以及加强保护和援助的途径，包括为此酌情加强国 家人权机构的作用，了解对境内流离失所者的保护情况以及持久解决流离失所 者问题的办法，包括消除为境内流离失所者落实住房、土地和财产权利时可能 遇到的障碍，又鼓励特别报告员针对后一项工作，在其活动中采用机构间常设 委员会的《境内流离失所者问题持久解决办法框架》，还鼓励特别报告员考虑到 各国在各自管辖范围内对保护和援助境内流离失所者负有首要责任，继续推动 满足收容社区的需求，促进制定全面战略；",
+      "bbox": [
+        123.26,
+        423.79,
+        365.65064,
+        138.50999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-22",
+        "n-6-23",
+        "n-6-24",
+        "n-6-25",
+        "n-6-26",
+        "n-6-27",
+        "n-6-28",
+        "n-6-29",
+        "n-6-30"
+      ],
+      "paragraphGroupId": "pg-6-7",
+      "readingOrder": 68
+    },
+    {
+      "id": "n-6-32",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b32",
+      "role": "P",
+      "text": "区域组织为满足境内流离失所者的保护、援助和发展需求和持久解决这些问题 而采取的各项举措，鼓励区域组织加大活动力度，并加强与特别报告员的合作；",
+      "bbox": [
+        123.26,
+        590.74,
+        375.85152,
+        26.639999999999986
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-32",
+        "n-6-33"
+      ],
+      "paragraphGroupId": "pg-6-8",
+      "readingOrder": 70
+    },
+    {
+      "id": "n-6-35",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b35",
+      "role": "P",
+      "text": "别报告员的活动提供便利，并积极回应特别报告员提出的要求，使她能够继续",
+      "bbox": [
+        123.26,
+        645.84,
+        365.18592,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-6-9",
+      "readingOrder": 72
+    },
+    {
+      "id": "n-6-36",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b36",
+      "role": "P",
+      "text": "__________________ 17 A/HRC/53/35。 18 A/HRC/53/35。",
+      "bbox": [
+        99.624,
+        684.84,
+        83.27600000000001,
+        41.27999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-36",
+        "n-6-37",
+        "n-6-38"
+      ],
+      "paragraphGroupId": "pg-6-10",
+      "readingOrder": 73
+    },
+    {
+      "id": "n-6-39",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b39",
+      "role": "P",
+      "text": "6/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        491.98,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-39",
+        "n-6-40"
+      ],
+      "paragraphGroupId": "pg-6-11",
+      "readingOrder": 74
+    },
+    {
+      "id": "n-6-16",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b16",
+      "role": "LI",
+      "text": "1. 表示赞赏地注意到境内流离失所者人权问题特别报告员的主要报告18",
+      "bbox": [
+        144.74,
+        313.73,
+        344.09,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:16",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 63
+    },
+    {
+      "id": "n-6-18",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b18",
+      "role": "LI",
+      "text": "2. 赞扬特别报告员迄今开展的活动，赞扬她发挥推动作用，提高人们对",
+      "bbox": [
+        144.74,
+        352.75,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:18",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 65
+    },
+    {
+      "id": "n-6-21",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b21",
+      "role": "LI",
+      "text": "3. 鼓励特别报告员通过同各国政府、各有关政府间组织和非政府组织不",
+      "bbox": [
+        144.74,
+        407.71,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:21",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 67
+    },
+    {
+      "id": "n-6-31",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b31",
+      "role": "LI",
+      "text": "4. 欢迎非洲联盟、大湖区问题国际会议、美洲国家组织和欧洲委员会等",
+      "bbox": [
+        144.74,
+        574.7800000000001,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:31",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 69
+    },
+    {
+      "id": "n-6-34",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b34",
+      "role": "LI",
+      "text": "5. 敦促各国政府，特别是存在境内流离失所状况的各国政府，继续为特",
+      "bbox": [
+        144.74,
+        629.74,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:34",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 71
+    },
+    {
+      "id": "n-7-1",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.35776,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-1",
+        "n-7-2"
+      ],
+      "paragraphGroupId": "pg-7-0",
+      "readingOrder": 75
+    },
+    {
+      "id": "n-7-3",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b3",
+      "role": "P",
+      "text": "进行和加强同各国政府的对话，协商应对境内流离失所状况，感谢许多国家的 政府已采取此类行动；",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.18592,
+        26.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-3",
+        "n-7-4"
+      ],
+      "paragraphGroupId": "pg-7-1",
+      "readingOrder": 76
+    },
+    {
+      "id": "n-7-6",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b6",
+      "role": "P",
+      "text": "务授权向它们提出的建议和意见，并将就此采取的措施告知特别报告员；",
+      "bbox": [
+        123.26,
+        132.73999999999995,
+        336.2937600000002,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-7-2",
+      "readingOrder": 78
+    },
+    {
+      "id": "n-7-8",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b8",
+      "role": "P",
+      "text": "行为体对话时采用《关于境内流离失所问题的指导原则》，请她继续努力推动传 播、宣传和适用《指导原则》，并将其纳入国内法律和政策，支持努力促进能力 建设和采用《指导原则》，并支持制订国内立法和政策；",
+      "bbox": [
+        123.26,
+        171.73999999999995,
+        365.4816,
+        42.480000000000075
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-8",
+        "n-7-9",
+        "n-7-10"
+      ],
+      "paragraphGroupId": "pg-7-3",
+      "readingOrder": 80
+    },
+    {
+      "id": "n-7-12",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b12",
+      "role": "P",
+      "text": "尊重、保护和落实他们的人权，从而为其国家、经济和社会发展进程作出贡献， 鼓励国际社会、联合国系统、特别报告员、相关国际和区域组织以及各捐助国 本着团结精神并根据国际合作相关原则以及《关于境内流离失所问题的指导原 则》，继续支持开展国际、区域和国家努力以满足境内流离失所者包括儿童的需 求并落实其人权，确保人道主义援助、早期恢复及发展援助努力获得适当供资；",
+      "bbox": [
+        123.26,
+        242.69,
+        375.85152,
+        74.63999999999999
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-12",
+        "n-7-13",
+        "n-7-14",
+        "n-7-15",
+        "n-7-16"
+      ],
+      "paragraphGroupId": "pg-7-4",
+      "readingOrder": 82
+    },
+    {
+      "id": "n-7-18",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b18",
+      "role": "P",
+      "text": "特别是根据国家和区域框架颁布和执行注重性别平等的政策和战略，应对长期流 离失所现象带来的挑战，同时确认《关于境内流离失所问题的指导原则》是保护 境内流离失所者的重要国际框架，鼓励所有利益攸关方按照其任务授权在处理境 内流离失所者问题时适用《指导原则》，在这方面，确认国家和地方当局和机构 应各国请求，通过继续为各国的能力建设大力提供国际支持等办法，在满足境内 流离失所者的具体需求和设法解决流离失所问题方面所发挥的核心作用；",
+      "bbox": [
+        123.26,
+        345.77,
+        365.83679999999987,
+        90.5
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-18",
+        "n-7-19",
+        "n-7-20",
+        "n-7-21",
+        "n-7-22",
+        "n-7-23"
+      ],
+      "paragraphGroupId": "pg-7-5",
+      "readingOrder": 84
+    },
+    {
+      "id": "n-7-25",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b25",
+      "role": "P",
+      "text": "件；",
+      "bbox": [
+        123.26,
+        464.71,
+        21.11999999999999,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-7-6",
+      "readingOrder": 86
+    },
+    {
+      "id": "n-7-27",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b27",
+      "role": "P",
+      "text": "《2018-2020 年促进预防境内流离失所、保护境内流离失所者和解决境内流离失 所者问题行动计划(GP20)》及其后续举措(GP2.0)的执行工作；",
+      "bbox": [
+        123.26,
+        503.73999999999995,
+        365.7868800000001,
+        26.640000000000043
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-27",
+        "n-7-28"
+      ],
+      "paragraphGroupId": "pg-7-7",
+      "readingOrder": 88
+    },
+    {
+      "id": "n-7-30",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b30",
+      "role": "P",
+      "text": "《境内流离失所问题行动议程》，肯定加大力度消除境内流离失所的根源、预防 境内流离失所、保护和更好地协助境内流离失所者及持久解决境内流离失所问 题至关重要，鼓励秘书长酌情与会员国、联合国系统和其他相关行为体包括国 际金融机构、非政府组织和受流离失所问题影响社区合作，推进这些努力，包 括定期加强后续行动和协作，还赞赏联合国系统，包括解决境内流离失所问题 临时特别顾问所作的努力；",
+      "bbox": [
+        123.26,
+        558.82,
+        365.48159999999996,
+        90.49999999999989
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-30",
+        "n-7-31",
+        "n-7-32",
+        "n-7-33",
+        "n-7-34",
+        "n-7-35"
+      ],
+      "paragraphGroupId": "pg-7-8",
+      "readingOrder": 90
+    },
+    {
+      "id": "n-7-37",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b37",
+      "role": "P",
+      "text": "政策，鼓励各国依照《关于境内流离失所问题的指导原则》，继续以包容性和非 歧视性方式这样做，敦促各国加大力度执行这些国内法律和政策，包括在政府 内部指定国家协调中心，负责境内流离失所问题，特别是为政策和方案制定国",
+      "bbox": [
+        123.26,
+        677.76,
+        365.47104,
+        42.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-37",
+        "n-7-38",
+        "n-7-39"
+      ],
+      "paragraphGroupId": "pg-7-9",
+      "readingOrder": 92
+    },
+    {
+      "id": "n-7-40",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b40",
+      "role": "P",
+      "text": "7/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        492.1600000000001,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-40",
+        "n-7-41"
+      ],
+      "paragraphGroupId": "pg-7-10",
+      "readingOrder": 93
+    },
+    {
+      "id": "n-7-5",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b5",
+      "role": "LI",
+      "text": "6. 邀请各国政府在与特别报告员对话时，认真考虑特别报告员按照其任",
+      "bbox": [
+        144.74,
+        116.66000000000003,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:5",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 77
+    },
+    {
+      "id": "n-7-7",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b7",
+      "role": "LI",
+      "text": "7. 欢迎特别报告员在与各国政府、政府间组织和非政府组织及其他相关",
+      "bbox": [
+        144.74,
+        155.66000000000003,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:7",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 79
+    },
+    {
+      "id": "n-7-11",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b11",
+      "role": "LI",
+      "text": "8. 确认会员国负有首要责任，必须推动解决本国境内流离失所者问题，",
+      "bbox": [
+        144.74,
+        226.72999999999996,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:11",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 81
+    },
+    {
+      "id": "n-7-17",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b17",
+      "role": "LI",
+      "text": "9. 请会员国加强努力，确保为境内流离失所者提供保护和更有效的援助，",
+      "bbox": [
+        144.74,
+        329.69,
+        344.5776000000002,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:17",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 83
+    },
+    {
+      "id": "n-7-24",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b24",
+      "role": "LI",
+      "text": "10. 鼓励各国确保境内流离失所者包括儿童可以办理手续获得适当身份证",
+      "bbox": [
+        144.74,
+        448.75,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:24",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 85
+    },
+    {
+      "id": "n-7-26",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b26",
+      "role": "LI",
+      "text": "11. 注 意 到纪念境内流离失所问题指导原则二十周年多利益攸关方的",
+      "bbox": [
+        144.74,
+        487.75,
+        344.0265599999999,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:26",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 87
+    },
+    {
+      "id": "n-7-29",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b29",
+      "role": "LI",
+      "text": "12. 赞赏地注意到秘书长境内流离失所问题高级别小组的报告和后续的",
+      "bbox": [
+        144.74,
+        542.74,
+        344.08632000000006,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:29",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 89
+    },
+    {
+      "id": "n-7-36",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b36",
+      "role": "LI",
+      "text": "13. 表示赞赏越来越多的国家已颁布针对流离失所各个阶段的国内立法和",
+      "bbox": [
+        144.74,
+        661.8000000000001,
+        344.05752,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:36",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 91
+    },
+    {
+      "id": "n-8-1",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.26199999999994,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-1",
+        "n-8-2"
+      ],
+      "paragraphGroupId": "pg-8-0",
+      "readingOrder": 94
+    },
+    {
+      "id": "n-8-3",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b3",
+      "role": "P",
+      "text": "家目标和指标，并为此划拨预算资源，鼓励国际社会和国家行为体应各国政府 的请求向它们提供这方面的财政支持与合作；",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.18592,
+        26.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-3",
+        "n-8-4"
+      ],
+      "paragraphGroupId": "pg-8-1",
+      "readingOrder": 95
+    },
+    {
+      "id": "n-8-6",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b6",
+      "role": "P",
+      "text": "展方面的援助，并且为联合国相关机构和人道主义组织在这方面开展的努力提 供便利，为此应依照国际法允许并协助人道主义人员安全无阻地通行，救济物 资和设备送达境内流离失所者手中，维持现有的境内流离失所者营地和居住区 的平民和人道主义性质，并采取必要步骤确保人道主义人员的安全保障，以便 他们可以高效履行其援助境内流离失所者的任务；",
+      "bbox": [
+        123.26,
+        132.73999999999995,
+        365.18592,
+        74.52000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-6",
+        "n-8-7",
+        "n-8-8",
+        "n-8-9",
+        "n-8-10"
+      ],
+      "paragraphGroupId": "pg-8-2",
+      "readingOrder": 97
+    },
+    {
+      "id": "n-8-12",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b12",
+      "role": "P",
+      "text": "犯和践踏人权行为和违反国际人道法行为的伤害，他们特别脆弱或成为性暴力 和性别暴力、性剥削和性虐待、各种形式的贩运人口、19 强行征募和绑架等行 为的特定施害目标，鼓励特别报告员考虑到大会和安全理事会所有相关决议， 继续致力促进采取行动，以满足他们的具体援助和保护需求，并促请各国与国 际机构和其他利益攸关方合作，向遭受上述威胁、侵犯和践踏行为伤害的境内 流离失所者以及遭受严重创伤者、老年人和残疾人等其他有特殊需求的境内流 离失所者群体提供保护和援助；",
+      "bbox": [
+        123.26,
+        235.72999999999996,
+        365.8100000000001,
+        106.56000000000006
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-12",
+        "n-8-13",
+        "n-8-14",
+        "n-8-15",
+        "n-8-16",
+        "n-8-17",
+        "n-8-18"
+      ],
+      "paragraphGroupId": "pg-8-3",
+      "readingOrder": 99
+    },
+    {
+      "id": "n-8-20",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b20",
+      "role": "P",
+      "text": "作，包括就境内流离失所问题以及与土地和财产归还及赔偿有关的问题，对 负责登记和制定国家法律和政策的机构工作人员进行培训；",
+      "bbox": [
+        123.26,
+        370.75,
+        364.8691199999998,
+        26.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-20",
+        "n-8-21"
+      ],
+      "paragraphGroupId": "pg-8-4",
+      "readingOrder": 101
+    },
+    {
+      "id": "n-8-23",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b23",
+      "role": "P",
+      "text": "境内流离失所者方面发挥的中心作用，欢迎继续采取各项举措确保改进针对境 内流离失所者的保护、援助和发展战略，并更好地协调针对他们开展的活动， 强调需要加强国家和地方当局、收容社区、地方组织、联合国各组织和其他相 关行为体应对境内流离失所问题的巨大人道主义挑战的能力；",
+      "bbox": [
+        123.26,
+        425.71,
+        365.18592,
+        58.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-23",
+        "n-8-24",
+        "n-8-25",
+        "n-8-26"
+      ],
+      "paragraphGroupId": "pg-8-5",
+      "readingOrder": 103
+    },
+    {
+      "id": "n-8-28",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b28",
+      "role": "P",
+      "text": "励在这方面作出进一步努力；",
+      "bbox": [
+        123.26,
+        512.74,
+        136.69919999999996,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-8-6",
+      "readingOrder": 105
+    },
+    {
+      "id": "n-8-30",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b30",
+      "role": "P",
+      "text": "离失所的各个阶段与境内流离失所者和收容社区进行沟通和协商，并酌情让境 内流离失所者参与同其有关的政策、方案和活动，同时考虑到各国负有在其管 辖范围内保护和援助境内流离失所者的首要责任；",
+      "bbox": [
+        123.26,
+        551.74,
+        365.18592,
+        42.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-30",
+        "n-8-31",
+        "n-8-32"
+      ],
+      "paragraphGroupId": "pg-8-7",
+      "readingOrder": 107
+    },
+    {
+      "id": "n-8-34",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b34",
+      "role": "P",
+      "text": "离失所妇女在与境内流离失所问题有关的所有方面，包括在促进和保护人权、 防止侵犯人权行为、持久解决办法的制定和执行、和平进程、建设和平、过渡",
+      "bbox": [
+        123.26,
+        622.7800000000001,
+        365.18592,
+        26.53999999999985
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-34",
+        "n-8-35"
+      ],
+      "paragraphGroupId": "pg-8-8",
+      "readingOrder": 109
+    },
+    {
+      "id": "n-8-36",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b36",
+      "role": "P",
+      "text": "__________________ 19 依照《联合国打击跨国有组织犯罪公约关于预防、禁止和惩治贩运人口特别是妇女和儿童行 为的补充议定书》(联合国，《条约汇编》，第 2237 卷，第 39574 号)第 3 条的定义。",
+      "bbox": [
+        99.624,
+        690.84,
+        388.856,
+        35.27999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-36",
+        "n-8-37",
+        "n-8-38"
+      ],
+      "paragraphGroupId": "pg-8-9",
+      "readingOrder": 110
+    },
+    {
+      "id": "n-8-39",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b39",
+      "role": "P",
+      "text": "8/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        491.98,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-39",
+        "n-8-40"
+      ],
+      "paragraphGroupId": "pg-8-10",
+      "readingOrder": 111
+    },
+    {
+      "id": "n-8-5",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b5",
+      "role": "LI",
+      "text": "14. 促请各国政府为境内流离失所者提供保护和援助，包括重返社会及发",
+      "bbox": [
+        144.74,
+        116.66000000000003,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:5",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 96
+    },
+    {
+      "id": "n-8-11",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b11",
+      "role": "LI",
+      "text": "15. 表示尤其关切许多境内流离失所者包括妇女和儿童受到各种威胁、侵",
+      "bbox": [
+        144.74,
+        219.77000000000004,
+        344.07288000000005,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:11",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 98
+    },
+    {
+      "id": "n-8-19",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b19",
+      "role": "LI",
+      "text": "16. 鼓励国际社会应受流离失所问题影响国家的请求向它们提供技术合",
+      "bbox": [
+        144.74,
+        354.79,
+        343.7750400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:19",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 100
+    },
+    {
+      "id": "n-8-22",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b22",
+      "role": "LI",
+      "text": "17. 强调紧急救济协调员通过机构间群组系统等渠道，在协调保护和援助",
+      "bbox": [
+        144.74,
+        409.75,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:22",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 102
+    },
+    {
+      "id": "n-8-27",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b27",
+      "role": "LI",
+      "text": "18. 赞赏地注意到人道主义应急计划日益重视境内流离失所者问题，并鼓",
+      "bbox": [
+        144.74,
+        496.78,
+        344.07288000000005,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:27",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 104
+    },
+    {
+      "id": "n-8-29",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b29",
+      "role": "LI",
+      "text": "19. 强调各国政府和其他相关行为体必须根据各自担负的具体任务，在流",
+      "bbox": [
+        144.74,
+        535.7800000000001,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:29",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 106
+    },
+    {
+      "id": "n-8-33",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b33",
+      "role": "LI",
+      "text": "20. 促请各国与国际机构和其他利益攸关方合作，特别保障和支持境内流",
+      "bbox": [
+        144.74,
+        606.82,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:33",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 108
+    },
+    {
+      "id": "n-9-1",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.35776,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-1",
+        "n-9-2"
+      ],
+      "paragraphGroupId": "pg-9-0",
+      "readingOrder": 112
+    },
+    {
+      "id": "n-9-3",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b3",
+      "role": "P",
+      "text": "期正义、冲突后重建和发展等方面，充分切实参与直接影响其生活的各级决策 进程和所有活动；",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.18592,
+        26.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-3",
+        "n-9-4"
+      ],
+      "paragraphGroupId": "pg-9-1",
+      "readingOrder": 113
+    },
+    {
+      "id": "n-9-6",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b6",
+      "role": "P",
+      "text": "机构间常设委员会和派驻存在境内流离失所状况的国家的联合国国家工作队加 强协作与协调，向特别报告员提供一切可能的协助和支持，并请特别报告员继 续参与机构间常设委员会及其各附属机构的工作；",
+      "bbox": [
+        123.26,
+        132.73999999999995,
+        365.18592,
+        42.480000000000075
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-6",
+        "n-9-7",
+        "n-9-8"
+      ],
+      "paragraphGroupId": "pg-9-2",
+      "readingOrder": 115
+    },
+    {
+      "id": "n-9-10",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b10",
+      "role": "P",
+      "text": "强协调，提高效力、效率和可预测性；",
+      "bbox": [
+        123.26,
+        203.66000000000003,
+        178.70688,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-9-3",
+      "readingOrder": 117
+    },
+    {
+      "id": "n-9-12",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b12",
+      "role": "P",
+      "text": "行为体向联合国相关机构和人道主义组织提供充足和可预测的资源，确保向被 迫流离失所者提供适足支助；",
+      "bbox": [
+        123.26,
+        242.69,
+        365.18592,
+        26.640000000000043
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-12",
+        "n-9-13"
+      ],
+      "paragraphGroupId": "pg-9-4",
+      "readingOrder": 119
+    },
+    {
+      "id": "n-9-15",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b15",
+      "role": "P",
+      "text": "义务，以防止发生强迫流离失所现象，促进保护平民，促请各国政府根据各 自可适用的国际法义务，采取措施不加区别地尊重和保护所有境内流离失所 者的人权；",
+      "bbox": [
+        123.26,
+        297.77,
+        364.8691199999998,
+        42.48000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-15",
+        "n-9-16",
+        "n-9-17"
+      ],
+      "paragraphGroupId": "pg-9-5",
+      "readingOrder": 121
+    },
+    {
+      "id": "n-9-19",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b19",
+      "role": "P",
+      "text": "作，确保境内流离失所儿童不受任何歧视，享有获得包括初级和中级教育在内 优质教育的权利，并向现有的学校提供帮助，使其能够接收境内流离失所者， 促请武装冲突各方尊重学校和其他教育机构的平民性质，不采取可能不利于保 护这些建筑物免遭直接攻击的行动，强烈谴责所有违反国际人道法攻击和威胁 攻击学校的行为；",
+      "bbox": [
+        123.26,
+        368.71,
+        365.18592,
+        74.64000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-19",
+        "n-9-20",
+        "n-9-21",
+        "n-9-22",
+        "n-9-23"
+      ],
+      "paragraphGroupId": "pg-9-6",
+      "readingOrder": 123
+    },
+    {
+      "id": "n-9-25",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b25",
+      "role": "P",
+      "text": "紧急有效应对、预防和防备全球日益严重且影响数百万民众包括境内流离失所 者，特别是那些正面临饥荒或可能马上面临饥荒的民众的粮食不安全问题，包 括为此加强人道主义和发展合作并提供紧急资金，以满足受影响民众包括境内 流离失所者的需求，并促请会员国和武装冲突各方遵守国际人道法，确保安全 和畅通无阻的人道主义援助准入；",
+      "bbox": [
+        123.26,
+        471.79,
+        365.18592,
+        74.55000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-25",
+        "n-9-26",
+        "n-9-27",
+        "n-9-28",
+        "n-9-29"
+      ],
+      "paragraphGroupId": "pg-9-7",
+      "readingOrder": 125
+    },
+    {
+      "id": "n-9-31",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b31",
+      "role": "P",
+      "text": "包括疫苗、治疗和诊断服务以及其他保健产品，是在公平、一致、全球团结、 重振多边合作和不让任何一个人掉队的原则基础上开展全球大流行病预防、防 犯和应对工作的重要组成部分；",
+      "bbox": [
+        123.26,
+        574.7800000000001,
+        365.18592,
+        42.59999999999991
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-31",
+        "n-9-32",
+        "n-9-33"
+      ],
+      "paragraphGroupId": "pg-9-8",
+      "readingOrder": 127
+    },
+    {
+      "id": "n-9-35",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b35",
+      "role": "P",
+      "text": "持下，适当满足境内流离失所者的身心健康需要，这可能包括提供协助、医疗 保健、心理社会服务和其他咨询服务；",
+      "bbox": [
+        123.26,
+        645.84,
+        365.18592,
+        26.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-35",
+        "n-9-36"
+      ],
+      "paragraphGroupId": "pg-9-9",
+      "readingOrder": 129
+    },
+    {
+      "id": "n-9-38",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b38",
+      "role": "P",
+      "text": "尊重和保护医务人员和专门履行医护责任的人道主义人员及其交通工具和设备 及医院和其他医疗设施，在这方面，注意到国内法律框架和其他适当措施在促",
+      "bbox": [
+        123.26,
+        700.8000000000001,
+        365.18592,
+        26.519999999999868
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-38",
+        "n-9-39"
+      ],
+      "paragraphGroupId": "pg-9-10",
+      "readingOrder": 131
+    },
+    {
+      "id": "n-9-40",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b40",
+      "role": "P",
+      "text": "9/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        492.1600000000001,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-40",
+        "n-9-41"
+      ],
+      "paragraphGroupId": "pg-9-11",
+      "readingOrder": 132
+    },
+    {
+      "id": "n-9-5",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b5",
+      "role": "LI",
+      "text": "21. 鼓励联合国各相关组织以及各人道主义援助、人权和发展组织，通过",
+      "bbox": [
+        144.74,
+        116.66000000000003,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:5",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 114
+    },
+    {
+      "id": "n-9-9",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b9",
+      "role": "LI",
+      "text": "22. 鼓励机构间常设委员会在预防、应对和解决境内流离失所问题方面加",
+      "bbox": [
+        144.74,
+        187.7,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:9",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 116
+    },
+    {
+      "id": "n-9-11",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b11",
+      "role": "LI",
+      "text": "23. 表示深为关切人道主义呼吁所获资金不足，在这方面，敦促所有相关",
+      "bbox": [
+        144.74,
+        226.72999999999996,
+        344.07288000000005,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:11",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 118
+    },
+    {
+      "id": "n-9-14",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b14",
+      "role": "LI",
+      "text": "24. 促请武装冲突各方履行其根据国际人道法和适用国际人权法担负的",
+      "bbox": [
+        144.74,
+        281.69,
+        343.7750400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:14",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 120
+    },
+    {
+      "id": "n-9-18",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b18",
+      "role": "LI",
+      "text": "25. 促请各国与所有其他相关行为体包括人道主义和发展机构及捐助方合",
+      "bbox": [
+        144.74,
+        352.75,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:18",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 122
+    },
+    {
+      "id": "n-9-24",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b24",
+      "role": "LI",
+      "text": "26. 促请会员国、联合国、人道主义组织和发展组织以及其他相关行为体",
+      "bbox": [
+        144.74,
+        455.71,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:24",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 124
+    },
+    {
+      "id": "n-9-30",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b30",
+      "role": "LI",
+      "text": "27. 确认所有人平等和及时获得安全、优质、有效和可负担的医疗对策，",
+      "bbox": [
+        144.74,
+        558.82,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:30",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 126
+    },
+    {
+      "id": "n-9-34",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b34",
+      "role": "LI",
+      "text": "28. 重点指出各国要在各相关伙伴包括人道主义和发展机构和捐助方的支",
+      "bbox": [
+        144.74,
+        629.74,
+        344.05752,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:34",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 128
+    },
+    {
+      "id": "n-9-37",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b37",
+      "role": "LI",
+      "text": "29. 强调指出各方有义务根据国际人道法和国内法律法规，在所有情况下",
+      "bbox": [
+        144.74,
+        684.84,
+        344.05752,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:37",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 130
+    },
+    {
+      "id": "n-10-1",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.26199999999994,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-1",
+        "n-10-2"
+      ],
+      "paragraphGroupId": "pg-10-0",
+      "readingOrder": 133
+    },
+    {
+      "id": "n-10-3",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b3",
+      "role": "P",
+      "text": "进这些人员的安全和保护方面所具有的作用，敦促各国和武装冲突各方制定和 采取有效措施，防止和处理针对这些人员及其运输工具和设备及医院和其他医 疗设施的暴力行为，强烈敦促各国在其管辖范围内全面、迅速、公正、有效地 调查武装冲突中违反国际人道法关于保护伤病人员包括境内流离失所者、医务 人员和专门履行医护职责的人道主义人员及其运输工具和设备及医院和其他医 疗设施等规定的行为，依照国内法和国际法酌情对此类行为的负责者采取行动， 以便加强预防措施，确保追究责任，消除受害者包括境内流离失所者的不满；",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        375.85152,
+        106.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-3",
+        "n-10-4",
+        "n-10-5",
+        "n-10-6",
+        "n-10-7",
+        "n-10-8",
+        "n-10-9"
+      ],
+      "paragraphGroupId": "pg-10-1",
+      "readingOrder": 134
+    },
+    {
+      "id": "n-10-11",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b11",
+      "role": "P",
+      "text": "与其他因素一道加剧民众流离失所问题，在这方面，回顾《2015-2030 年仙台减 少灾害风险框架》 及其中期审查政治宣言、 2015 年 12 月在《联合国气候变",
+      "bbox": [
+        123.26,
+        212.69,
+        365.7053600000001,
+        26.640000000000043
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-11",
+        "n-10-12"
+      ],
+      "paragraphGroupId": "pg-10-2",
+      "readingOrder": 136
+    },
+    {
+      "id": "n-10-13",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b13",
+      "role": "P",
+      "text": "20 21 化框架公约》下通过的《巴黎协定》22 以及《南森倡议》等与境内流离失所问 题有关的相关举措及其后续落实进程，鼓励特别报告员与各国、政府间组织和 非政府组织紧密协作，继续探讨灾害所致境内流离失所现象所涉及的人权问题 和层面，以期帮助会员国努力建立地方复原力和防范流离失所的能力，或者通 过精心计划的恢复方案提供援助，为境内流离失所者及其收容者提供支持，向 被迫逃亡者提供保护；",
+      "bbox": [
+        123.26,
+        228.89000000000001,
+        365.53368000000023,
+        106.43999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-13",
+        "n-10-14",
+        "n-10-15",
+        "n-10-16",
+        "n-10-17",
+        "n-10-18",
+        "n-10-19",
+        "n-10-20"
+      ],
+      "paragraphGroupId": "pg-10-3",
+      "readingOrder": 137
+    },
+    {
+      "id": "n-10-22",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b22",
+      "role": "P",
+      "text": "害发生时流离失所的风险，包括解决造成这种流离失所的潜在风险因素和肇因， 做好准备应对不利后果，支持持久解决与灾害有关的流离失所问题，并酌情将 灾后重建和恢复，包括将“重建得更好”原则纳入灾区和流离失所者临时住区 的经济和社会可持续发展，促进将定期备灾和救灾演习纳入恢复和重新安置工 作，以确保迅速和有效应对灾害和相关流离失所问题，并促进跨境合作以增强 抗灾能力和减少灾害风险包括流离失所风险，其中包括建立或改善与长期风险 管理系统连通的多灾种预警系统包括热浪预警，辅之以提高公众意识运动，确 认在接获优质预报后及早采取行动可以减少极端天气事件的影响；",
+      "bbox": [
+        123.26,
+        363.79,
+        375.85152,
+        122.51999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-22",
+        "n-10-23",
+        "n-10-24",
+        "n-10-25",
+        "n-10-26",
+        "n-10-27",
+        "n-10-28",
+        "n-10-29"
+      ],
+      "paragraphGroupId": "pg-10-4",
+      "readingOrder": 139
+    },
+    {
+      "id": "n-10-31",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b31",
+      "role": "P",
+      "text": "况下还是建设和平挑战，促请各国提出持久解决办法，克服这方面可能存在的 障碍，并在本国国家发展计划中顾及境内流离失所者和收容社区的需求、脆弱 性和能力；",
+      "bbox": [
+        123.26,
+        514.78,
+        365.18592,
+        42.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-31",
+        "n-10-32",
+        "n-10-33"
+      ],
+      "paragraphGroupId": "pg-10-5",
+      "readingOrder": 141
+    },
+    {
+      "id": "n-10-35",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b35",
+      "role": "P",
+      "text": "合作，力求取得多年期共同成果，以期减少境内流离失所者的需求和脆弱性， 支持国家优先事项，同时充分尊重人道主义原则对于人道主义行动的重要性；",
+      "bbox": [
+        123.26,
+        585.82,
+        365.18592,
+        26.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-35",
+        "n-10-36"
+      ],
+      "paragraphGroupId": "pg-10-6",
+      "readingOrder": 143
+    },
+    {
+      "id": "n-10-38",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b38",
+      "role": "P",
+      "text": "作，包括提供资源，制订解决长期流离失所问题的协调一致的多年期计划及提",
+      "bbox": [
+        123.26,
+        640.8000000000001,
+        365.33568,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-10-7",
+      "readingOrder": 145
+    },
+    {
+      "id": "n-10-39",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b39",
+      "role": "P",
+      "text": "__________________ 20 第 69/283 号决议，附件二。 21 第 77/289 号决议，附件。 22 见 FCCC/CP/2015/10/Add.1，第 1/CP.21 号决定，附件。",
+      "bbox": [
+        99.624,
+        666.84,
+        241.58599999999998,
+        59.27999999999997
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-39",
+        "n-10-40",
+        "n-10-41",
+        "n-10-42"
+      ],
+      "paragraphGroupId": "pg-10-8",
+      "readingOrder": 146
+    },
+    {
+      "id": "n-10-43",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b43",
+      "role": "P",
+      "text": "10/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        491.98,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-43",
+        "n-10-44"
+      ],
+      "paragraphGroupId": "pg-10-9",
+      "readingOrder": 147
+    },
+    {
+      "id": "n-10-10",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b10",
+      "role": "LI",
+      "text": "30. 确认气候变化的负面影响是环境退化和极端气候现象的肇因，有可能",
+      "bbox": [
+        144.74,
+        196.7,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:10",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 135
+    },
+    {
+      "id": "n-10-21",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b21",
+      "role": "LI",
+      "text": "31. 申明需要切实执行《2015-2030 年仙台减少灾害风险框架》，以减少灾",
+      "bbox": [
+        144.74,
+        347.69,
+        343.9903199999999,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:21",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 138
+    },
+    {
+      "id": "n-10-30",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b30",
+      "role": "LI",
+      "text": "32. 确认境内流离失所问题既是人道主义挑战，又是发展挑战，在有些情",
+      "bbox": [
+        144.74,
+        498.82,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:30",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 140
+    },
+    {
+      "id": "n-10-34",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b34",
+      "role": "LI",
+      "text": "33. 鼓励发展行为体和人道主义行为体根据各自任务规定进行更加密切的",
+      "bbox": [
+        144.74,
+        569.74,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:34",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 142
+    },
+    {
+      "id": "n-10-37",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b37",
+      "role": "LI",
+      "text": "34. 又鼓励加强国际合作，尤其是人道主义行为体和发展行为体之间的合",
+      "bbox": [
+        144.74,
+        624.82,
+        343.89312000000007,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:37",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 144
+    },
+    {
+      "id": "n-11-1",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.35776,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-1",
+        "n-11-2"
+      ],
+      "paragraphGroupId": "pg-11-0",
+      "readingOrder": 148
+    },
+    {
+      "id": "n-11-3",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b3",
+      "role": "P",
+      "text": "供专门知识，以帮助受影响的国家特别是发展中国家在境内流离失所者和有关 收容社区的援助、保护、增强复原力和复原等方面作出努力并制定有关政策， 将境内流离失所者的人权和需求纳入农村和城市发展战略，并让境内流离失所 者和收容社区参与制定和执行这些战略；",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.18592,
+        58.56
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-3",
+        "n-11-4",
+        "n-11-5",
+        "n-11-6"
+      ],
+      "paragraphGroupId": "pg-11-1",
+      "readingOrder": 149
+    },
+    {
+      "id": "n-11-8",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b8",
+      "role": "P",
+      "text": "营部门密切合作，进一步执行《新城市议程》以推动在城市地区更有效地防备 和应对紧急情况，指出必须本着国际合作的精神，适当满足城市环境中境内流 离失所者的特殊需求，并向收容城市提供支持，包括确保公平享有赚取收入机 会和预防任意强迫迁离；",
+      "bbox": [
+        123.26,
+        164.66000000000003,
+        365.18592,
+        58.589999999999975
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-8",
+        "n-11-9",
+        "n-11-10",
+        "n-11-11"
+      ],
+      "paragraphGroupId": "pg-11-2",
+      "readingOrder": 151
+    },
+    {
+      "id": "n-11-13",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b13",
+      "role": "P",
+      "text": "供者继续与特别报告员密切合作，共同努力对境内流离失所者的需要作出更可 预测的响应，包括为实施持久解决办法提供长期发展援助，以期减少境内流离 失所现象；",
+      "bbox": [
+        123.26,
+        251.69,
+        365.3414400000001,
+        42.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-13",
+        "n-11-14",
+        "n-11-15"
+      ],
+      "paragraphGroupId": "pg-11-3",
+      "readingOrder": 153
+    },
+    {
+      "id": "n-11-17",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b17",
+      "role": "P",
+      "text": "解决办法，满足境内流离失所者及其收容社区的需求，包括借助创收活动和可 持续谋生机会来推动实现自给自足，从而增进各种机会，让流离失所者充分发 挥人的潜能；",
+      "bbox": [
+        123.26,
+        322.73,
+        365.18592,
+        42.620000000000005
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-17",
+        "n-11-18",
+        "n-11-19"
+      ],
+      "paragraphGroupId": "pg-11-4",
+      "readingOrder": 155
+    },
+    {
+      "id": "n-11-21",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b21",
+      "role": "P",
+      "text": "发展框架，并回顾《2030 年议程》力求满足包括境内流离失所者在内最弱势群 体的需求，在这方面，着重指出必须采取行动，减少流离失所风险，推进持久 解决，促进可持续发展，确保不让任何一个人掉队；",
+      "bbox": [
+        123.26,
+        393.79,
+        365.43959999999976,
+        42.47999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-21",
+        "n-11-22",
+        "n-11-23"
+      ],
+      "paragraphGroupId": "pg-11-5",
+      "readingOrder": 157
+    },
+    {
+      "id": "n-11-25",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b25",
+      "role": "P",
+      "text": "及援助需求，强调有效建设和平的一个必要内容是持久解决境内流离失所者问 题，包括自愿回返、可持续重返社会、复原与和解进程，以及酌情促使境内流 离失所者积极参与和平进程；",
+      "bbox": [
+        123.26,
+        464.71,
+        365.18592,
+        42.629999999999995
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-25",
+        "n-11-26",
+        "n-11-27"
+      ],
+      "paragraphGroupId": "pg-11-6",
+      "readingOrder": 159
+    },
+    {
+      "id": "n-11-29",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b29",
+      "role": "P",
+      "text": "任务规定范围内加紧努力，与各国家政府和过渡政府合作，并同联合国相关实 体协商，在就审议中情况提供咨询意见或提出国别冲突后局势建设和平战略时， 顾及境内流离失所者的权利和具体需求，包括他们安全、有尊严的自愿回返、 重返社会和复原及相关土地和财产问题；",
+      "bbox": [
+        123.26,
+        535.7800000000001,
+        375.85152,
+        58.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-29",
+        "n-11-30",
+        "n-11-31",
+        "n-11-32"
+      ],
+      "paragraphGroupId": "pg-11-7",
+      "readingOrder": 161
+    },
+    {
+      "id": "n-11-34",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b34",
+      "role": "P",
+      "text": "内流离失所者公约》(《坎帕拉公约》)十周年，欢迎签署和批准该公约的非洲国 家数目越来越多，在这方面鼓励取得更大进展，并鼓励其他区域机制制定各自 区域的保护境内流离失所者规范框架；",
+      "bbox": [
+        123.26,
+        622.7800000000001,
+        365.67768,
+        42.61999999999989
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-34",
+        "n-11-35",
+        "n-11-36"
+      ],
+      "paragraphGroupId": "pg-11-8",
+      "readingOrder": 163
+    },
+    {
+      "id": "n-11-38",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b38",
+      "role": "P",
+      "text": "工作队与境内流离失所问题监测中心合作，并在境内流离失所问题机构间联合 概况调查处的技术支持和协助下，为提供有关境内流离失所情况的可靠数据作",
+      "bbox": [
+        123.26,
+        693.84,
+        365.18592,
+        26.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-38",
+        "n-11-39"
+      ],
+      "paragraphGroupId": "pg-11-9",
+      "readingOrder": 165
+    },
+    {
+      "id": "n-11-40",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b40",
+      "role": "P",
+      "text": "11/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        492.15999999999997,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-40",
+        "n-11-41"
+      ],
+      "paragraphGroupId": "pg-11-10",
+      "readingOrder": 166
+    },
+    {
+      "id": "n-11-7",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b7",
+      "role": "LI",
+      "text": "35. 促请联合国与会员国和其他相关行为体包括地方政府、民间社会和私",
+      "bbox": [
+        144.74,
+        148.7,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:7",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 150
+    },
+    {
+      "id": "n-11-12",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b12",
+      "role": "LI",
+      "text": "36. 鼓励会员国、人道主义机构、捐助方、发展行为体和其他发展援助提",
+      "bbox": [
+        144.74,
+        235.72999999999996,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:12",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 152
+    },
+    {
+      "id": "n-11-16",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b16",
+      "role": "LI",
+      "text": "37. 鼓励各国政府、联合国各机构和其他利益攸关方推动采取包容性持久",
+      "bbox": [
+        144.74,
+        306.77,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:16",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 154
+    },
+    {
+      "id": "n-11-20",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b20",
+      "role": "LI",
+      "text": "38. 敦促所有国家酌情将《2030 年可持续发展议程》纳入各自国家政策和",
+      "bbox": [
+        144.74,
+        377.71,
+        344.06039999999985,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:20",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 156
+    },
+    {
+      "id": "n-11-24",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b24",
+      "role": "LI",
+      "text": "39. 注意到必须在和平进程中酌情顾及境内流离失所者的人权和具体保护",
+      "bbox": [
+        144.74,
+        448.75,
+        344.0131200000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:24",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 158
+    },
+    {
+      "id": "n-11-28",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b28",
+      "role": "LI",
+      "text": "40. 欢迎建设和平委员会在这方面所发挥的作用，继续敦促该委员会在其",
+      "bbox": [
+        144.74,
+        519.82,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:28",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 160
+    },
+    {
+      "id": "n-11-33",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b33",
+      "role": "LI",
+      "text": "41. 回顾非洲联盟 2019 年除其他外专门纪念《非洲联盟保护和援助非洲境",
+      "bbox": [
+        144.74,
+        606.82,
+        344.3484000000002,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:33",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 162
+    },
+    {
+      "id": "n-11-37",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b37",
+      "role": "LI",
+      "text": "42. 鼓励会员国、机构间常设委员会成员、联合国人道主义协调员和国家",
+      "bbox": [
+        144.74,
+        677.76,
+        344.0054400000001,
+        10.559999999999945
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:37",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 164
+    },
+    {
+      "id": "n-12-1",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b1",
+      "role": "P",
+      "text": "保护和援助境内流离失所者 A/RES/78/205",
+      "bbox": [
+        60,
+        49.200000000000045,
+        492.26199999999994,
+        9.839999999999918
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-1",
+        "n-12-2"
+      ],
+      "paragraphGroupId": "pg-12-0",
+      "readingOrder": 167
+    },
+    {
+      "id": "n-12-3",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b3",
+      "role": "P",
+      "text": "出贡献，并酌情在这些方面提供财政资源，鼓励各国通过本国国家统计局适当 考虑到《境内流离失所者统计问题国际建议书》；",
+      "bbox": [
+        123.26,
+        77.66000000000003,
+        365.18592,
+        26.63999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-3",
+        "n-12-4"
+      ],
+      "paragraphGroupId": "pg-12-1",
+      "readingOrder": 168
+    },
+    {
+      "id": "n-12-6",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b6",
+      "role": "P",
+      "text": "助，并预防和减少境内流离失所现象，在这方面，鼓励秘书长与会员国和联合 国系统合作，探索如何更好地满足境内流离失所者的长期需求，为收容社区提 供支持并改善数百万境内流离失所者的生活；",
+      "bbox": [
+        123.26,
+        132.73999999999995,
+        365.33568,
+        42.480000000000075
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-6",
+        "n-12-7",
+        "n-12-8"
+      ],
+      "paragraphGroupId": "pg-12-2",
+      "readingOrder": 170
+    },
+    {
+      "id": "n-12-10",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b10",
+      "role": "P",
+      "text": "便切实加强和执行其任务，并鼓励联合国人权事务高级专员办事处与紧急救济 协调员、联合国秘书处人道主义事务协调厅、联合国难民事务高级专员公署、 国际移民组织、联合国所有其他相关办事处和机构及相关组织密切合作，继续 支持特别报告员并与其合作；",
+      "bbox": [
+        123.26,
+        203.66000000000003,
+        365.18592,
+        58.589999999999975
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-10",
+        "n-12-11",
+        "n-12-12",
+        "n-12-13"
+      ],
+      "paragraphGroupId": "pg-12-3",
+      "readingOrder": 172
+    },
+    {
+      "id": "n-12-15",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b15",
+      "role": "P",
+      "text": "作创造更加稳定的基础；",
+      "bbox": [
+        123.26,
+        290.69,
+        115.69535999999998,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-12-4",
+      "readingOrder": 174
+    },
+    {
+      "id": "n-12-17",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b17",
+      "role": "P",
+      "text": "情况的报告；",
+      "bbox": [
+        123.26,
+        329.69,
+        63.127679999999984,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-12-5",
+      "readingOrder": 176
+    },
+    {
+      "id": "n-12-19",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b19",
+      "role": "P",
+      "text": "2023 年 12 月 19 日 第 50 次全体会议",
+      "bbox": [
+        403.75,
+        403.63,
+        85.20768000000004,
+        26.639999999999986
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-19",
+        "n-12-20"
+      ],
+      "paragraphGroupId": "pg-12-6",
+      "readingOrder": 178
+    },
+    {
+      "id": "n-12-21",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b21",
+      "role": "P",
+      "text": "12/12 23-26026",
+      "bbox": [
+        60,
+        745.68,
+        491.98,
+        9
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-21",
+        "n-12-22"
+      ],
+      "paragraphGroupId": "pg-12-7",
+      "readingOrder": 179
+    },
+    {
+      "id": "n-12-5",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b5",
+      "role": "LI",
+      "text": "43. 回顾需要考虑制定有效战略，确保境内流离失所者获得充分保护和援",
+      "bbox": [
+        144.74,
+        116.66000000000003,
+        343.87872000000004,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:5",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 169
+    },
+    {
+      "id": "n-12-9",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b9",
+      "role": "LI",
+      "text": "44. 请秘书长继续在现有资源范围内向特别报告员提供一切必要协助，以",
+      "bbox": [
+        144.74,
+        187.7,
+        343.87104000000005,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:9",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 171
+    },
+    {
+      "id": "n-12-14",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b14",
+      "role": "LI",
+      "text": "45. 鼓励特别报告员继续寻求各国及各相关组织和机构提供捐助，为其工",
+      "bbox": [
+        144.74,
+        274.73,
+        344.0054400000001,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:14",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 173
+    },
+    {
+      "id": "n-12-16",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b16",
+      "role": "LI",
+      "text": "46. 请特别报告员向大会第七十九届和第八十届会议提交关于本决议执行",
+      "bbox": [
+        144.74,
+        313.73,
+        343.87104000000005,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:16",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 175
+    },
+    {
+      "id": "n-12-18",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b18",
+      "role": "LI",
+      "text": "47. 决定在大会第八十届会议上继续审议保护和援助境内流离失所者问题。",
+      "bbox": [
+        144.74,
+        352.75,
+        344.32032000000015,
+        10.560000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:18",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 177
+    }
+  ],
+  "orderedNodeIds": [
+    "n-1-1",
+    "n-1-2",
+    "n-1-3",
+    "n-1-4",
+    "n-1-5",
+    "n-1-7",
+    "n-1-11",
+    "n-1-19",
+    "n-1-23",
+    "n-1-27",
+    "n-1-31",
+    "n-2-1",
+    "n-2-3",
+    "n-2-5",
+    "n-2-9",
+    "n-2-13",
+    "n-2-16",
+    "n-2-20",
+    "n-2-24",
+    "n-2-28",
+    "n-2-31",
+    "n-2-33",
+    "n-2-36",
+    "n-2-39",
+    "n-3-1",
+    "n-3-3",
+    "n-3-5",
+    "n-3-10",
+    "n-3-11",
+    "n-3-25",
+    "n-3-29",
+    "n-3-32",
+    "n-3-35",
+    "n-3-39",
+    "n-4-1",
+    "n-4-5",
+    "n-4-8",
+    "n-4-10",
+    "n-4-14",
+    "n-4-17",
+    "n-4-20",
+    "n-4-22",
+    "n-4-24",
+    "n-4-27",
+    "n-4-32",
+    "n-4-40",
+    "n-5-1",
+    "n-5-3",
+    "n-5-6",
+    "n-5-8",
+    "n-5-10",
+    "n-5-13",
+    "n-5-17",
+    "n-5-21",
+    "n-5-23",
+    "n-5-25",
+    "n-5-33",
+    "n-5-38",
+    "n-6-1",
+    "n-6-3",
+    "n-6-7",
+    "n-6-10",
+    "n-6-12",
+    "n-6-16",
+    "n-6-17",
+    "n-6-18",
+    "n-6-19",
+    "n-6-21",
+    "n-6-22",
+    "n-6-31",
+    "n-6-32",
+    "n-6-34",
+    "n-6-35",
+    "n-6-36",
+    "n-6-39",
+    "n-7-1",
+    "n-7-3",
+    "n-7-5",
+    "n-7-6",
+    "n-7-7",
+    "n-7-8",
+    "n-7-11",
+    "n-7-12",
+    "n-7-17",
+    "n-7-18",
+    "n-7-24",
+    "n-7-25",
+    "n-7-26",
+    "n-7-27",
+    "n-7-29",
+    "n-7-30",
+    "n-7-36",
+    "n-7-37",
+    "n-7-40",
+    "n-8-1",
+    "n-8-3",
+    "n-8-5",
+    "n-8-6",
+    "n-8-11",
+    "n-8-12",
+    "n-8-19",
+    "n-8-20",
+    "n-8-22",
+    "n-8-23",
+    "n-8-27",
+    "n-8-28",
+    "n-8-29",
+    "n-8-30",
+    "n-8-33",
+    "n-8-34",
+    "n-8-36",
+    "n-8-39",
+    "n-9-1",
+    "n-9-3",
+    "n-9-5",
+    "n-9-6",
+    "n-9-9",
+    "n-9-10",
+    "n-9-11",
+    "n-9-12",
+    "n-9-14",
+    "n-9-15",
+    "n-9-18",
+    "n-9-19",
+    "n-9-24",
+    "n-9-25",
+    "n-9-30",
+    "n-9-31",
+    "n-9-34",
+    "n-9-35",
+    "n-9-37",
+    "n-9-38",
+    "n-9-40",
+    "n-10-1",
+    "n-10-3",
+    "n-10-10",
+    "n-10-11",
+    "n-10-13",
+    "n-10-21",
+    "n-10-22",
+    "n-10-30",
+    "n-10-31",
+    "n-10-34",
+    "n-10-35",
+    "n-10-37",
+    "n-10-38",
+    "n-10-39",
+    "n-10-43",
+    "n-11-1",
+    "n-11-3",
+    "n-11-7",
+    "n-11-8",
+    "n-11-12",
+    "n-11-13",
+    "n-11-16",
+    "n-11-17",
+    "n-11-20",
+    "n-11-21",
+    "n-11-24",
+    "n-11-25",
+    "n-11-28",
+    "n-11-29",
+    "n-11-33",
+    "n-11-34",
+    "n-11-37",
+    "n-11-38",
+    "n-11-40",
+    "n-12-1",
+    "n-12-3",
+    "n-12-5",
+    "n-12-6",
+    "n-12-9",
+    "n-12-10",
+    "n-12-14",
+    "n-12-15",
+    "n-12-16",
+    "n-12-17",
+    "n-12-18",
+    "n-12-19",
+    "n-12-21"
+  ]
+}

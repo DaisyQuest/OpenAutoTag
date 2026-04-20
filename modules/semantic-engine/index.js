@@ -340,11 +340,205 @@ function inferConfidence(block, role, artifactPlacement, tableMetadata) {
   return block.blockType === "unknown" ? 0.4 : 0.88;
 }
 
+// ---- Inline style classification (A1 Em/Strong, A2 Code) ----
+//
+// These helpers feature-detect run-level metadata on a layout text block.
+// Today the layout analyzer exposes only block-level `fontName`, so most
+// corpus blocks will have no `inlineRuns` array and the run-level classifier
+// is a no-op. We still classify the block as a whole for A2 (Code) because
+// a paragraph whose fontName is monospaced really is a code paragraph.
+//
+// For A1, the gate in the plan ("don't emit Em/Strong if the ENTIRE paragraph
+// is bold/italic") means we must NOT block-fallback for Em/Strong: that case
+// is already handled by heading promotion, and emitting /Strong on a whole-
+// bold paragraph would duplicate /H# emphasis. So Em/Strong ride only on
+// run-level detections.
+
+const MONOSPACE_FONT_FAMILIES = [
+  "Courier",
+  "NotoSansMono",
+  "Consolas",
+  "Menlo",
+  "Source Code Pro",
+  "SourceCodePro",
+  "Fira Code",
+  "FiraCode",
+  "Inconsolata",
+  "Roboto Mono",
+  "RobotoMono",
+  "JetBrains Mono",
+  "JetBrainsMono",
+  "Ubuntu Mono",
+  "UbuntuMono",
+  "Liberation Mono",
+  "LiberationMono"
+];
+
+function isMonospaceFont(fontName) {
+  if (!fontName) return false;
+  const name = String(fontName);
+  for (const family of MONOSPACE_FONT_FAMILIES) {
+    if (name.toLowerCase().includes(family.toLowerCase())) return true;
+  }
+  // Trailing "Mono" / "Monospace" / "Mono-Regular" etc.
+  return /(^|[-_ ,+])mono(space)?([-_ ,+].*)?$/i.test(name);
+}
+
+function isBoldFont(fontName, fontWeight) {
+  if (Number.isFinite(fontWeight) && fontWeight >= 600) return true;
+  if (typeof fontWeight === "string" && /bold/i.test(fontWeight)) return true;
+  if (!fontName) return false;
+  return /bold|black|heavy|semibold|demibold/i.test(fontName);
+}
+
+function isItalicFont(fontName, fontStyle) {
+  if (typeof fontStyle === "string" && /italic|oblique/i.test(fontStyle)) return true;
+  if (!fontName) return false;
+  return /italic|oblique/i.test(fontName);
+}
+
+function classifyRunStyle(run, block) {
+  const fontName = run.fontName || block.fontName;
+  const fontWeight = run.fontWeight ?? block.fontWeight;
+  const fontStyle = run.fontStyle ?? block.fontStyle;
+  return {
+    bold: isBoldFont(fontName, fontWeight),
+    italic: isItalicFont(fontName, fontStyle),
+    mono: isMonospaceFont(fontName)
+  };
+}
+
+// Emit inlineRuns annotation on a paragraph-like node. Each annotated run
+// carries { text, start, end, semanticRole } where semanticRole is one of
+// "Em" | "Strong" | "Code". Returns null when no runs need tagging so we
+// don't pollute nodes with empty arrays.
+function classifyInlineRuns(block) {
+  const runs = Array.isArray(block.inlineRuns) ? block.inlineRuns : null;
+  if (!runs || runs.length === 0) return null;
+
+  // Determine paragraph-majority style. Weight by text length to avoid a
+  // tiny non-matching run dominating.
+  let totalLen = 0;
+  let boldLen = 0;
+  let italicLen = 0;
+  const perRun = [];
+  for (const r of runs) {
+    const text = String(r.text || "");
+    const style = classifyRunStyle(r, block);
+    perRun.push({ run: r, text, style });
+    totalLen += text.length;
+    if (style.bold) boldLen += text.length;
+    if (style.italic) italicLen += text.length;
+  }
+  if (totalLen === 0) return null;
+
+  const majorityBold = boldLen / totalLen >= 0.9;
+  const majorityItalic = italicLen / totalLen >= 0.9;
+
+  const out = [];
+  let cursor = 0;
+  for (const { run, text, style } of perRun) {
+    const start = cursor;
+    const end = cursor + text.length;
+    cursor = end;
+
+    let semanticRole = null;
+    if (style.mono) {
+      semanticRole = "Code";
+    } else if (style.bold && !majorityBold) {
+      semanticRole = "Strong";
+    } else if (style.italic && !majorityItalic) {
+      semanticRole = "Em";
+    }
+
+    if (semanticRole) {
+      out.push({
+        text,
+        start,
+        end,
+        semanticRole,
+        ...(run.bbox ? { bbox: run.bbox } : {}),
+        ...(run.fontName ? { fontName: run.fontName } : {})
+      });
+    }
+  }
+
+  return out.length > 0 ? out : null;
+}
+
+// ---- A3 Abbreviations ----
+const ABBREVIATION_DICTIONARY = Object.freeze({
+  W3C: "World Wide Web Consortium",
+  URL: "Uniform Resource Locator",
+  URI: "Uniform Resource Identifier",
+  HTML: "HyperText Markup Language",
+  HTTP: "HyperText Transfer Protocol",
+  HTTPS: "HyperText Transfer Protocol Secure",
+  PDF: "Portable Document Format",
+  XML: "Extensible Markup Language",
+  JSON: "JavaScript Object Notation",
+  API: "Application Programming Interface",
+  USA: "United States of America",
+  UK: "United Kingdom",
+  EU: "European Union",
+  UN: "United Nations",
+  NYC: "New York City",
+  ISO: "International Organization for Standardization",
+  IEEE: "Institute of Electrical and Electronics Engineers",
+  NASA: "National Aeronautics and Space Administration",
+  FBI: "Federal Bureau of Investigation",
+  CEO: "Chief Executive Officer",
+  CIO: "Chief Information Officer",
+  CFO: "Chief Financial Officer"
+});
+
+// Matches an all-caps / digit token of length 2-6. We enforce token
+// boundaries so "UKULELE" (not in dict anyway) doesn't trigger on a prefix
+// and "MP3S" (not in dict) isn't pulled out of a longer word.
+const ABBREVIATION_TOKEN_RE = /(?<![A-Za-z0-9])([A-Z0-9]{2,6})(?![A-Za-z0-9])/g;
+
+function classifyAbbreviations(text) {
+  if (!text || typeof text !== "string") return null;
+  const out = [];
+  ABBREVIATION_TOKEN_RE.lastIndex = 0;
+  let match;
+  while ((match = ABBREVIATION_TOKEN_RE.exec(text)) !== null) {
+    const token = match[1];
+    const expansion = ABBREVIATION_DICTIONARY[token];
+    if (!expansion) continue;
+    out.push({
+      token,
+      start: match.index,
+      end: match.index + token.length,
+      expansion,
+      semanticRole: "Span"
+    });
+  }
+  return out.length > 0 ? out : null;
+}
+
 function buildSemanticNode(block, pageNumber, index, state, options) {
   const artifactPlacement = inferArtifactPlacement(block);
   const tableMetadata = inferTableMetadata(block, pageNumber, index, state, options);
   const listMetadata = inferListMetadata(block, pageNumber, index, state);
   const role = inferRole(block, artifactPlacement, tableMetadata);
+
+  // A1 Em/Strong + A2 Code at run level. Feature-detected on block.inlineRuns;
+  // no-op when the layout analyzer doesn't carry run metadata.
+  const inlineRuns = !artifactPlacement ? classifyInlineRuns(block) : null;
+
+  // A2 Code block-level: whole paragraph in a monospace font becomes Code.
+  // Only applied to P nodes (not headings, tables, lists, artifacts).
+  const blockSemanticRole =
+    role === "P" && isMonospaceFont(block.fontName) ? "Code" : null;
+
+  // A3 Abbreviations: scan plain text for dictionary hits. Applied to P and
+  // heading nodes; suppressed inside tables/artifacts/lists where call-outs
+  // are less meaningful.
+  const abbreviations =
+    role === "P" || role.startsWith("H")
+      ? classifyAbbreviations(block.text)
+      : null;
 
   return {
     id: `n-${pageNumber}-${index + 1}`,
@@ -379,8 +573,122 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
           listItemIndex: listMetadata.listItemIndex,
           listStyle: listMetadata.listStyle
         }
-      : {})
+      : {}),
+    ...(inlineRuns ? { inlineRuns } : {}),
+    ...(blockSemanticRole ? { semanticRole: blockSemanticRole } : {}),
+    ...(abbreviations ? { abbreviations } : {})
   };
+}
+
+// ---- A4 BlockQuote detection ----
+//
+// After nodes are built for a page, detect contiguous runs of paragraph
+// nodes whose left margin (bbox[0]) is significantly deeper than the page's
+// baseline left margin, and which are NOT inside a list or table. Baseline
+// is the mode of left margins across the page's non-list, non-table P nodes.
+// Feature-gated: if fewer than 3 baseline paragraphs exist, skip (too little
+// evidence to establish a baseline).
+
+function computeLeftMarginMode(paragraphs) {
+  const buckets = new Map();
+  // Round to 1-point buckets; visually-equal left margins in PDFs can differ
+  // by sub-point amounts due to kerning/anchoring.
+  for (const p of paragraphs) {
+    const x = Array.isArray(p.bbox) ? Math.round(p.bbox[0]) : null;
+    if (x == null) continue;
+    buckets.set(x, (buckets.get(x) || 0) + 1);
+  }
+  let bestX = null;
+  let bestCount = 0;
+  for (const [x, count] of buckets) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestX = x;
+    }
+  }
+  return { mode: bestX, modeCount: bestCount, total: paragraphs.length };
+}
+
+function isEligibleForBlockQuote(node) {
+  if (!node) return false;
+  if (node.role !== "P") return false;
+  if (node.listGroupId) return false;
+  if (node.tableId) return false;
+  if (node.artifactType) return false;
+  return Array.isArray(node.bbox);
+}
+
+function markBlockQuotesForPage(pageNodes, { pageNumber, thresholdRatio = 0.1 } = {}) {
+  const paragraphs = pageNodes.filter(isEligibleForBlockQuote);
+  if (paragraphs.length < 3) return; // too little evidence
+
+  const { mode, modeCount } = computeLeftMarginMode(paragraphs);
+  if (mode == null || modeCount < 2) return;
+
+  // "10% greater than baseline" — apply threshold against the mode value
+  // directly. Guard against a degenerate mode of 0 (no left margin at all).
+  const threshold = Math.max(mode * (1 + thresholdRatio), mode + 12);
+
+  let groupSeq = 0;
+  let activeGroupId = null;
+  let activeNodes = [];
+
+  const closeGroup = () => {
+    // Require at least 1 paragraph; matches plan ("contiguous paragraph
+    // sequences"). We keep single-P quotes because short pull-quotes are
+    // real. A stricter gate can be added later.
+    if (activeNodes.length >= 1) {
+      for (const n of activeNodes) {
+        n.blockQuoteGroupId = activeGroupId;
+      }
+    }
+    activeGroupId = null;
+    activeNodes = [];
+  };
+
+  for (const node of pageNodes) {
+    if (!isEligibleForBlockQuote(node)) {
+      if (activeGroupId) closeGroup();
+      continue;
+    }
+    const leftMargin = node.bbox[0];
+    const isIndented = leftMargin >= threshold;
+    if (isIndented) {
+      if (!activeGroupId) {
+        groupSeq += 1;
+        activeGroupId = `bq:${pageNumber}:${groupSeq}`;
+      }
+      activeNodes.push(node);
+    } else if (activeGroupId) {
+      closeGroup();
+    }
+  }
+  if (activeGroupId) closeGroup();
+}
+
+// ---- A9 BibEntry state machine ----
+//
+// Walk all nodes in document order. When a heading whose text matches the
+// bibliography patterns is encountered, enter "in references" mode. Every P
+// node from that heading until the next heading (of any level) or end of
+// document is annotated with bibEntry: true. Non-P nodes (tables, lists,
+// artifacts) are passed through unchanged.
+
+const BIB_HEADING_RE = /^\s*(References|Bibliography|Works Cited|Literature Cited)\s*$/i;
+
+function markBibEntries(nodes) {
+  let inReferences = false;
+  for (const node of nodes) {
+    if (!node || !node.role) continue;
+    if (node.role.startsWith("H")) {
+      inReferences = BIB_HEADING_RE.test(String(node.text || ""));
+      continue;
+    }
+    if (inReferences && node.role === "P") {
+      node.bibEntry = true;
+      node.semanticRole = node.semanticRole || "BibEntry";
+    }
+  }
 }
 
 function collectLeadingTableXPositions(page) {
@@ -400,7 +708,14 @@ function buildNodesForPage(page, state, options) {
     state = { activeList: null, activeTable: null, tableSequence: 0 };
   }
   const pageOptions = { ...options, pageWidth: page.width || 612 };
-  return page.textBlocks.map((block, index) => buildSemanticNode(block, page.pageNumber, index, state, pageOptions));
+  // Propagate the parser's hybrid-OCR flag onto each semantic node so
+  // tag-builder can inject /ActualText for AT on hybrid pages.
+  const pageIsHybrid = page.hybrid === true;
+  return page.textBlocks.map((block, index) => {
+    const node = buildSemanticNode(block, page.pageNumber, index, state, pageOptions);
+    if (pageIsHybrid) node.hybrid = true;
+    return node;
+  });
 }
 
 export async function buildSemanticDocument(inputPath, options) {
@@ -426,8 +741,18 @@ export async function buildSemanticDocument(inputPath, options) {
     }
 
     const pageNodes = buildNodesForPage(page, state, effectiveOptions);
+    // A4 BlockQuote is a page-level pass; run it before cross-page passes so
+    // left-margin mode is computed from a single page's paragraphs.
+    markBlockQuotesForPage(pageNodes, {
+      pageNumber: page.pageNumber,
+      thresholdRatio: effectiveOptions.blockQuoteThresholdRatio
+    });
     nodes.push(...pageNodes);
   }
+
+  // A9 BibEntry is a document-level pass; it needs headings from all pages
+  // to decide where the "References" section starts and ends.
+  markBibEntries(nodes);
 
   const semanticDocument = {
     schemaVersion: "1.0.0",

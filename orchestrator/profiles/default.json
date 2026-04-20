@@ -27,9 +27,6 @@
     "tableRowMinItems": 2
   },
   "semanticEngine": {
-    "tableContinuationDistanceY": 48,
-    "tableContinuationDistanceX": 160,
-    "listGapThreshold": 28,
     "languageHint": null
   },
   "readingOrder": {
@@ -46,7 +43,12 @@
     "licenseFlagPolicy": "warn"
   },
   "pdfWriter": {
-    "stripCidSet": true
+    "stripCidSet": true,
+    "mode": "auto",
+    "nativeMatchThreshold": 0.8,
+    "alreadyTaggedThreshold": 0.5,
+    "alreadyTaggedPolicy": "passthrough",
+    "readingOrderStrategy": "semantic"
   },
   "validator": {
     "veraPdfFlavour": "ua1",

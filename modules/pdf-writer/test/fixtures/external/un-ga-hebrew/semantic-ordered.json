@@ -1,0 +1,4984 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentId": "layout:00-source:semantic",
+  "source": {
+    "layoutDocumentId": "layout:00-source",
+    "filePath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\tmp\\calibration-corpus\\pipeline-artifacts\\un-ga-hebrew\\00-source.pdf",
+    "language": "en-US",
+    "languageConfidence": 0.99
+  },
+  "nodes": [
+    {
+      "id": "n-1-2",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b2",
+      "role": "P",
+      "text": "United Nations /RES/78/205",
+      "bbox": [
+        123.38,
+        43.80000000000003,
+        428.66995999999995,
+        14.04
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-2",
+        "n-1-3"
+      ],
+      "paragraphGroupId": "pg-1-0",
+      "readingOrder": 1
+    },
+    {
+      "id": "n-1-5",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b5",
+      "role": "P",
+      "text": "Distr.: General 22 December 2023",
+      "bbox": [
+        397.03,
+        76.69999999999996,
+        80.89511999999996,
+        21.72
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-5",
+        "n-1-6"
+      ],
+      "paragraphGroupId": "pg-1-1",
+      "readingOrder": 3
+    },
+    {
+      "id": "n-1-7",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b7",
+      "role": "P",
+      "text": "Seventy-eighth session Agenda item 71 (b) Promotion and protection of human rights: human rights questions, including alternative approaches for improving the effective enjoyment of human rights and fundamental freedoms",
+      "bbox": [
+        60,
+        212.29999999999998,
+        264.7783033199999,
+        69.99000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-7",
+        "n-1-8",
+        "n-1-9",
+        "n-1-10",
+        "n-1-11",
+        "n-1-12"
+      ],
+      "paragraphGroupId": "pg-1-2",
+      "readingOrder": 4
+    },
+    {
+      "id": "n-1-13",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b13",
+      "role": "P",
+      "text": "Resolution adopted by the General Assembly on 19 December 2023",
+      "bbox": [
+        123.38,
+        300.65,
+        290.13940799999995,
+        29.04000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-13",
+        "n-1-14"
+      ],
+      "paragraphGroupId": "pg-1-3",
+      "readingOrder": 5
+    },
+    {
+      "id": "n-1-15",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b15",
+      "role": "P",
+      "text": "[on the report of the Third Committee (A/78/481/Add.2, para. 139)]",
+      "bbox": [
+        123.38,
+        344.33000000000004,
+        287.40668000000005,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-4",
+      "readingOrder": 6
+    },
+    {
+      "id": "n-1-16",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b16",
+      "role": "P",
+      "text": "78/205. Protection of and assistance to internally displaced persons",
+      "bbox": [
+        72.384,
+        367.49,
+        372.37769119999956,
+        12
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-5",
+      "readingOrder": 7
+    },
+    {
+      "id": "n-1-17",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b17",
+      "role": "P",
+      "text": "The General Assembly,",
+      "bbox": [
+        147.14,
+        394.01000000000005,
+        99.48000000000002,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-6",
+      "readingOrder": 8
+    },
+    {
+      "id": "n-1-18",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b18",
+      "role": "P",
+      "text": "Guided by the purposes and principles of the Charter of the United Nations,",
+      "bbox": [
+        147.14,
+        412.03000000000003,
+        325.74911999999983,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-7",
+      "readingOrder": 9
+    },
+    {
+      "id": "n-1-19",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b19",
+      "role": "P",
+      "text": "Recalling that internally displaced persons are persons or groups of persons who have been forced or obliged to flee or to leave their homes or places of habitual residence, in particular as a result of or in order to avoid the effects of armed conflict, situations of generalized violence, violations of human rights or natural or human- 1 made disasters, and who have not crossed an internationally recognized State border,",
+      "bbox": [
+        123.38,
+        430.03000000000003,
+        365.36,
+        57.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-19",
+        "n-1-20",
+        "n-1-21",
+        "n-1-22",
+        "n-1-23",
+        "n-1-24"
+      ],
+      "paragraphGroupId": "pg-1-8",
+      "readingOrder": 10
+    },
+    {
+      "id": "n-1-25",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b25",
+      "role": "P",
+      "text": "Deeply disturbed by the alarmingly high numbers of internally displaced persons throughout the world, for reasons including violations and abuses of human rights and violations of international humanitarian law, armed conflict, persecution, violence and other reasons, including terrorism, as well as natural and human-made disasters, who receive inadequate protection and assistance, and conscious of the serious challenges that this is creating for host communities, national and local authorities and the international community,",
+      "bbox": [
+        123.38,
+        496.03000000000003,
+        365.06863999999996,
+        81.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-25",
+        "n-1-26",
+        "n-1-27",
+        "n-1-28",
+        "n-1-29",
+        "n-1-30",
+        "n-1-31"
+      ],
+      "paragraphGroupId": "pg-1-9",
+      "readingOrder": 11
+    },
+    {
+      "id": "n-1-32",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b32",
+      "role": "P",
+      "text": "Recalling the very large number of people who are displaced within national borders and the potential for such persons to seek protection and assistance in other countries as refugees or migrants, and noting the need for reflection on effective strategies to ensure adequate protection and assistance for internally displaced persons in this regard, including the need for comprehensive and disaggregated data and other measures aimed at preventing and reducing such displacements,",
+      "bbox": [
+        123.38,
+        586.06,
+        364.30320000000006,
+        69.96000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-32",
+        "n-1-33",
+        "n-1-34",
+        "n-1-35",
+        "n-1-36",
+        "n-1-37"
+      ],
+      "paragraphGroupId": "pg-1-10",
+      "readingOrder": 12
+    },
+    {
+      "id": "n-1-38",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b38",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        671.02,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-11",
+      "readingOrder": 13
+    },
+    {
+      "id": "n-1-39",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b39",
+      "role": "P",
+      "text": "See Guiding Principles on Internal Displacement (E/CN.4/1998/53/Add.2, annex), introduction, 1",
+      "bbox": [
+        117.02,
+        684.696,
+        364.5043999999997,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-39",
+        "n-1-40"
+      ],
+      "paragraphGroupId": "pg-1-12",
+      "readingOrder": 14
+    },
+    {
+      "id": "n-1-41",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b41",
+      "role": "P",
+      "text": "para. 2.",
+      "bbox": [
+        123.38,
+        695.256,
+        27.511079999999993,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-1-13",
+      "readingOrder": 15
+    },
+    {
+      "id": "n-1-42",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b42",
+      "role": "P",
+      "text": "23-26026 (E) 090124 *2326026*",
+      "bbox": [
+        65.424,
+        737.616,
+        101.172,
+        24.624000000000024
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-1-42",
+        "n-1-43"
+      ],
+      "paragraphGroupId": "pg-1-14",
+      "readingOrder": 16
+    },
+    {
+      "id": "n-1-1",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b1",
+      "role": "H1",
+      "text": "A",
+      "bbox": [
+        482.14,
+        36.47999999999998,
+        14.901499511999987,
+        20.04
+      ],
+      "headingLevel": 1,
+      "columnHint": 0,
+      "confidence": 0.93,
+      "sourceBlockType": "heading",
+      "regionKind": null,
+      "readingOrder": 0
+    },
+    {
+      "id": "n-1-4",
+      "pageNumber": 1,
+      "sourceBlockId": "p1-b4",
+      "role": "H1",
+      "text": "General Assembly",
+      "bbox": [
+        123.38,
+        66.37999999999997,
+        148.65628693560006,
+        20.039999999999992
+      ],
+      "headingLevel": 1,
+      "columnHint": 0,
+      "confidence": 0.93,
+      "sourceBlockType": "heading",
+      "regionKind": null,
+      "readingOrder": 2
+    },
+    {
+      "id": "n-2-1",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b1",
+      "role": "P",
+      "text": "A/RES/78/205 Protection of and assistance to internally displaced persons",
+      "bbox": [
+        60,
+        50.51999999999997,
+        491.8952800000005,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-1",
+        "n-2-2"
+      ],
+      "paragraphGroupId": "pg-2-0",
+      "readingOrder": 17
+    },
+    {
+      "id": "n-2-3",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b3",
+      "role": "P",
+      "text": "Reaffirming General Assembly resolution 46/182 of 19 December 1991 and the guiding principles contained in the annex thereto, other relevant General Assembly and Economic and Social Council resolutions and agreed conclusions of the Council, reaffirming also the principles of humanity, neutrality, impartiality and independence in the provision of humanitarian assistance, and reaffirming further the need for all actors engaged in the provision of humanitarian assistance in situations of complex emergencies and natural disasters to promote and fully respect these principles,",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.80548,
+        81.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-3",
+        "n-2-4",
+        "n-2-5",
+        "n-2-6",
+        "n-2-7",
+        "n-2-8",
+        "n-2-9"
+      ],
+      "paragraphGroupId": "pg-2-1",
+      "readingOrder": 18
+    },
+    {
+      "id": "n-2-10",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b10",
+      "role": "P",
+      "text": "Emphasizing that States have the primary responsibility to provide protection and assistance to internally displaced persons within their jurisdiction, without discrimination, as well as to address the root causes of the displacement problem and to support all durable solutions in appropriate cooperation with those displaced, their hosts, civil society, local authorities, development actors, the private sector and the international community,",
+      "bbox": [
+        123.38,
+        162.38000000000002,
+        364.31639999999993,
+        69.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-10",
+        "n-2-11",
+        "n-2-12",
+        "n-2-13",
+        "n-2-14",
+        "n-2-15"
+      ],
+      "paragraphGroupId": "pg-2-2",
+      "readingOrder": 19
+    },
+    {
+      "id": "n-2-16",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b16",
+      "role": "P",
+      "text": "Expressing particular concern at the increased level of discrimination experienced by internally displaced persons, including those who may be in particularly vulnerable situations, including women, children, older persons and persons with disabilities, Indigenous Peoples and persons belonging to national or ethnic, religious and linguistic minorities, and emphasizing the need to ensure that their specific needs are met through the provision of adequate protection and access to assistance,",
+      "bbox": [
+        123.38,
+        240.41,
+        364.68368000000004,
+        81.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-16",
+        "n-2-17",
+        "n-2-18",
+        "n-2-19",
+        "n-2-20",
+        "n-2-21",
+        "n-2-22"
+      ],
+      "paragraphGroupId": "pg-2-3",
+      "readingOrder": 20
+    },
+    {
+      "id": "n-2-23",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b23",
+      "role": "P",
+      "text": "Expressing gravest concerns about the high levels of global food insecurity and malnutrition and rising risks of famine, loss of livelihoods, and the impacts and risks for displacement, and recognizing that additional efforts, including international support, are urgently needed to address this,",
+      "bbox": [
+        123.38,
+        330.41,
+        364.33691999999985,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-23",
+        "n-2-24",
+        "n-2-25",
+        "n-2-26"
+      ],
+      "paragraphGroupId": "pg-2-4",
+      "readingOrder": 21
+    },
+    {
+      "id": "n-2-27",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b27",
+      "role": "P",
+      "text": "Noting the need to address the root causes of displacement and for increased awareness within the international community of the issue of internal displacement worldwide, including the situation of millions living in protracted situations of displacement, many of them outside camp settings and in urban areas, and the urgency of providing adequate humanitarian assistance and protection to internally displaced persons, as well as advancing durable solutions, including through developing locally sustainable solutions,",
+      "bbox": [
+        123.38,
+        384.41,
+        364.45895999999993,
+        81.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-27",
+        "n-2-28",
+        "n-2-29",
+        "n-2-30",
+        "n-2-31",
+        "n-2-32",
+        "n-2-33"
+      ],
+      "paragraphGroupId": "pg-2-5",
+      "readingOrder": 22
+    },
+    {
+      "id": "n-2-34",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b34",
+      "role": "P",
+      "text": "Recognizing that violations of international humanitarian law can cause displacement, and recalling that displacement could be reduced if international humanitarian law was respected by all parties to armed conflict, in particular the fundamental principles of distinction, proportionality and precaution, as well as the prohibition of forced displacement of the civilian population, unless the security of the civilians involved or imperative military reasons so demand,2",
+      "bbox": [
+        123.38,
+        474.43,
+        364.4324400000004,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-34",
+        "n-2-35",
+        "n-2-36",
+        "n-2-37",
+        "n-2-38",
+        "n-2-39"
+      ],
+      "paragraphGroupId": "pg-2-6",
+      "readingOrder": 23
+    },
+    {
+      "id": "n-2-40",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b40",
+      "role": "P",
+      "text": "Expressing deep concern at the threat posed by landmines, explosive remnants of war and improvised explosive devices to internally displaced persons fleeing conflict, impeding, in certain instances, their voluntary return, local integration and resettlement and the safe delivery of humanitarian assistance, and noting the urgency of providing protection from landmines and other explosive remnants of war and supporting host communities and local organizations,",
+      "bbox": [
+        123.38,
+        552.43,
+        364.4776800000001,
+        69.99000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-40",
+        "n-2-41",
+        "n-2-42",
+        "n-2-43",
+        "n-2-44",
+        "n-2-45"
+      ],
+      "paragraphGroupId": "pg-2-7",
+      "readingOrder": 24
+    },
+    {
+      "id": "n-2-46",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b46",
+      "role": "P",
+      "text": "Expressing particular concern that many internally displaced children, in particular girls, lack access to education in all phases of displacement owing to attacks against schools, damaged or destroyed school buildings, insecurity, the prevalence of",
+      "bbox": [
+        123.38,
+        630.4599999999999,
+        364.52748000000037,
+        33.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-46",
+        "n-2-47",
+        "n-2-48"
+      ],
+      "paragraphGroupId": "pg-2-8",
+      "readingOrder": 25
+    },
+    {
+      "id": "n-2-49",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b49",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        689.376,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-2-9",
+      "readingOrder": 26
+    },
+    {
+      "id": "n-2-50",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b50",
+      "role": "P",
+      "text": "2 Protocol Additional to the Geneva Conventions of 12 August 1949, and relating to the Protection of Victims of Non-International Armed Conflicts (Protocol II) (United Nations, Treaty Series, vol. 1125, No. 17513), arts. 13 and 17.",
+      "bbox": [
+        117.02,
+        702.936,
+        367.9061999999989,
+        29.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-50",
+        "n-2-51",
+        "n-2-52"
+      ],
+      "paragraphGroupId": "pg-2-10",
+      "readingOrder": 27
+    },
+    {
+      "id": "n-2-53",
+      "pageNumber": 2,
+      "sourceBlockId": "p2-b53",
+      "role": "P",
+      "text": "2/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.98,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-2-53",
+        "n-2-54"
+      ],
+      "paragraphGroupId": "pg-2-11",
+      "readingOrder": 28
+    },
+    {
+      "id": "n-3-1",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b1",
+      "role": "P",
+      "text": "Protection of and assistance to internally displaced persons A/RES/78/205",
+      "bbox": [
+        60,
+        50.51999999999997,
+        492.1177600000001,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-1",
+        "n-3-2"
+      ],
+      "paragraphGroupId": "pg-3-0",
+      "readingOrder": 29
+    },
+    {
+      "id": "n-3-3",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b3",
+      "role": "P",
+      "text": "violence, including gender-based violence, in and around schools, loss of documentation, language barriers and discrimination,",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.53420000000034,
+        21.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-3",
+        "n-3-4"
+      ],
+      "paragraphGroupId": "pg-3-1",
+      "readingOrder": 30
+    },
+    {
+      "id": "n-3-5",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b5",
+      "role": "P",
+      "text": "Expressing particular concern also that many internally displaced persons, including women, men, girls and boys, do not receive the health care they require in all phases of displacement, including mental health care and psychosocial support,",
+      "bbox": [
+        123.38,
+        102.38000000000002,
+        364.509,
+        33.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-5",
+        "n-3-6",
+        "n-3-7"
+      ],
+      "paragraphGroupId": "pg-3-2",
+      "readingOrder": 31
+    },
+    {
+      "id": "n-3-8",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b8",
+      "role": "P",
+      "text": "Recognizing the increase in the number, scale and frequency of disasters, including those related to the adverse effects of climate change, which in certain instances may contribute to displacement and additional pressure on host communities, encouraging the United Nations and all relevant actors to strengthen efforts in cooperation with national Governments aimed at addressing the needs of persons displaced internally by natural disasters, including those exacerbated by climate change, and noting in this regard the importance of sharing best practices to prevent and prepare for such displacements,",
+      "bbox": [
+        123.38,
+        144.38000000000002,
+        364.57488,
+        93.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-8",
+        "n-3-9",
+        "n-3-10",
+        "n-3-11",
+        "n-3-12",
+        "n-3-13",
+        "n-3-14",
+        "n-3-15"
+      ],
+      "paragraphGroupId": "pg-3-3",
+      "readingOrder": 32
+    },
+    {
+      "id": "n-3-16",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b16",
+      "role": "P",
+      "text": "Expressing concern that many millions of people are displaced each year by sudden-and slow-onset disasters, recognizing that building resilience of nations and communities, including through preparedness, prevention, disaster risk reduction and climate-change adaptation measures can reduce disaster displacement risk, including through integrating disaster risk reduction strategies into national, regional and global development policies and programmes, and in this regard recognizing also the important role of sustainable development in averting and reducing the risk of loss and damage,",
+      "bbox": [
+        123.38,
+        246.41,
+        364.46279999999996,
+        93.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-16",
+        "n-3-17",
+        "n-3-18",
+        "n-3-19",
+        "n-3-20",
+        "n-3-21",
+        "n-3-22",
+        "n-3-23"
+      ],
+      "paragraphGroupId": "pg-3-4",
+      "readingOrder": 33
+    },
+    {
+      "id": "n-3-24",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b24",
+      "role": "P",
+      "text": "Recognizing that the vulnerability of internally displaced persons may increase when their host communities are affected by disasters,",
+      "bbox": [
+        123.38,
+        348.41,
+        364.31699999999967,
+        21.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-24",
+        "n-3-25"
+      ],
+      "paragraphGroupId": "pg-3-5",
+      "readingOrder": 34
+    },
+    {
+      "id": "n-3-26",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b26",
+      "role": "P",
+      "text": "Expressing gravest concerns about the humanitarian impact of and risks posed by the ongoing consequences and long-term effects of the coronavirus disease (COVID-19) pandemic, including on the already significant levels of humanitarian and development needs and suffering of internally displaced persons and host communities, recognizing the disproportionate impact of the pandemic on displaced women, children and people in vulnerable situations, and profoundly concerned by rising humanitarian assistance and protection needs including due to the increase in violence, including sexual and gender-based violence, sexual exploitation and abuse, trafficking in persons in all its forms, forced recruitment and abduction, and violence against displaced children, and the significant impact on education, especially for girls, as well as high levels of food insecurity and malnutrition and rising risks of famine, loss of livelihoods, and all the negative impacts on health, including mental health and communicable and non-communicable diseases, which are also exacerbated by weakened health systems, and the impacts and risks for displacement; and recognizing the compounded risks and impacts due to armed conflict, poverty, disasters caused by natural hazards, violence, the adverse effects of climate change, and other environmental challenges; and further recognizing the efforts and measures proposed by the Secretary-General concerning the response to the impact of the COVID-19 pandemic, and taking note of the political declarations on pandemic prevention, preparedness and response3 and on universal health coverage adopted at the General Assembly high-level meetings held in New 4",
+      "bbox": [
+        123.38,
+        378.41,
+        364.99004,
+        238.00999999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-26",
+        "n-3-27",
+        "n-3-28",
+        "n-3-29",
+        "n-3-30",
+        "n-3-31",
+        "n-3-32",
+        "n-3-33",
+        "n-3-34",
+        "n-3-35",
+        "n-3-36",
+        "n-3-37",
+        "n-3-38",
+        "n-3-39",
+        "n-3-40",
+        "n-3-41",
+        "n-3-42",
+        "n-3-43",
+        "n-3-44",
+        "n-3-45",
+        "n-3-46"
+      ],
+      "paragraphGroupId": "pg-3-6",
+      "readingOrder": 35
+    },
+    {
+      "id": "n-3-47",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b47",
+      "role": "P",
+      "text": "York on 20 and 21 September 2023, respectively,",
+      "bbox": [
+        123.38,
+        618.4599999999999,
+        206.62019999999995,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-3-7",
+      "readingOrder": 36
+    },
+    {
+      "id": "n-3-48",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b48",
+      "role": "P",
+      "text": "Conscious of the human rights, humanitarian and development dimensions, as well as the possible peacebuilding and transitional justice dimensions, of internal displacement, including in protracted and repeated temporary displacement situations, and the responsibilities of States, with the support of the international community, to ensure the provision of protection and assistance, including by",
+      "bbox": [
+        123.38,
+        636.4599999999999,
+        364.52412,
+        57.95600000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-48",
+        "n-3-49",
+        "n-3-50",
+        "n-3-51",
+        "n-3-52"
+      ],
+      "paragraphGroupId": "pg-3-8",
+      "readingOrder": 37
+    },
+    {
+      "id": "n-3-53",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b53",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        699.816,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-3-9",
+      "readingOrder": 38
+    },
+    {
+      "id": "n-3-54",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b54",
+      "role": "P",
+      "text": "3 Resolution 78/3, annex. 4 Resolution 78/4, annex.",
+      "bbox": [
+        117.02,
+        713.496,
+        94.82952000000002,
+        18.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-54",
+        "n-3-55"
+      ],
+      "paragraphGroupId": "pg-3-10",
+      "readingOrder": 39
+    },
+    {
+      "id": "n-3-56",
+      "pageNumber": 3,
+      "sourceBlockId": "p3-b56",
+      "role": "P",
+      "text": "3/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.91999999999996,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-3-56",
+        "n-3-57"
+      ],
+      "paragraphGroupId": "pg-3-11",
+      "readingOrder": 40
+    },
+    {
+      "id": "n-4-1",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b1",
+      "role": "P",
+      "text": "A/RES/78/205 Protection of and assistance to internally displaced persons",
+      "bbox": [
+        60,
+        50.51999999999997,
+        491.8952800000005,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-1",
+        "n-4-2"
+      ],
+      "paragraphGroupId": "pg-4-0",
+      "readingOrder": 41
+    },
+    {
+      "id": "n-4-3",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b3",
+      "role": "P",
+      "text": "respecting and protecting the human rights and fundamental freedoms of all internally displaced persons, with a view to finding durable solutions,",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.16747999999984,
+        21.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-3",
+        "n-4-4"
+      ],
+      "paragraphGroupId": "pg-4-1",
+      "readingOrder": 42
+    },
+    {
+      "id": "n-4-5",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b5",
+      "role": "P",
+      "text": "Recognizing the important contributions made by national and local authorities and host communities to protect and assist internally displaced persons, acknowledging that the hosting of large groups of internally displaced persons can put pressure on those authorities and communities, and recognizing also the importance of adequately supporting host communities, as well as local capacities, by addressing their needs,",
+      "bbox": [
+        123.38,
+        102.38000000000002,
+        364.62252000000046,
+        69.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-5",
+        "n-4-6",
+        "n-4-7",
+        "n-4-8",
+        "n-4-9",
+        "n-4-10"
+      ],
+      "paragraphGroupId": "pg-4-2",
+      "readingOrder": 43
+    },
+    {
+      "id": "n-4-11",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b11",
+      "role": "P",
+      "text": "Recalling the Vienna Declaration and Programme of Action adopted by the World Conference on Human Rights on 25 June 1993,5 regarding the need to develop global strategies to address the problem of internal displacement, and recalling also all relevant resolutions of the General Assembly and the Security Council,",
+      "bbox": [
+        123.38,
+        180.38000000000002,
+        364.60112000000004,
+        45.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-11",
+        "n-4-12",
+        "n-4-13",
+        "n-4-14"
+      ],
+      "paragraphGroupId": "pg-4-3",
+      "readingOrder": 44
+    },
+    {
+      "id": "n-4-15",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b15",
+      "role": "P",
+      "text": "Recalling also General Assembly resolution 76/167 of 16 December 2021 and Human Rights Council resolution 50/6 of 7 July 2022,6",
+      "bbox": [
+        123.38,
+        234.38000000000002,
+        364.6568000000001,
+        21.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-15",
+        "n-4-16"
+      ],
+      "paragraphGroupId": "pg-4-4",
+      "readingOrder": 45
+    },
+    {
+      "id": "n-4-17",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b17",
+      "role": "P",
+      "text": "Recognizing that internally displaced persons are to enjoy, in full equality and without discrimination, the same rights and freedoms under international and domestic law as do other persons in their country, including the right to freedom of movement and residence, and should be protected against arbitrary displacement,",
+      "bbox": [
+        123.38,
+        264.41,
+        364.1874000000002,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-17",
+        "n-4-18",
+        "n-4-19",
+        "n-4-20"
+      ],
+      "paragraphGroupId": "pg-4-5",
+      "readingOrder": 46
+    },
+    {
+      "id": "n-4-21",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b21",
+      "role": "P",
+      "text": "Recalling the relevant norms of international law, which includes international 7 human rights law, inter alia, the Convention on the Rights of the Child, as well as international refugee law and international humanitarian law, including the Geneva 8 9 Conventions of 1949 and the Additional Protocols thereto of 1977, as applicable, as a vital legal framework for the protection of and assistance to civilians in armed conflict and under foreign occupation, including internally displaced persons,",
+      "bbox": [
+        123.38,
+        318.41,
+        364.90675999999996,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-21",
+        "n-4-22",
+        "n-4-23",
+        "n-4-24",
+        "n-4-25",
+        "n-4-26",
+        "n-4-27",
+        "n-4-28",
+        "n-4-29"
+      ],
+      "paragraphGroupId": "pg-4-6",
+      "readingOrder": 47
+    },
+    {
+      "id": "n-4-30",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b30",
+      "role": "P",
+      "text": "Recognizing that internally displaced persons, including women, children, older persons and persons with disabilities, without identity documents, may be at risk of human rights violations and abuses, and may face difficulties in the realization of their rights and in accessing services,",
+      "bbox": [
+        123.38,
+        396.41,
+        364.19556000000006,
+        45.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-30",
+        "n-4-31",
+        "n-4-32",
+        "n-4-33"
+      ],
+      "paragraphGroupId": "pg-4-7",
+      "readingOrder": 48
+    },
+    {
+      "id": "n-4-34",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b34",
+      "role": "P",
+      "text": "Recognizing also that the protection of internally displaced persons has been strengthened by identifying, reaffirming and consolidating specific standards for their protection, in particular through the Guiding Principles on Internal Displacement,10",
+      "bbox": [
+        123.38,
+        450.43,
+        364.40819999999985,
+        33.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-34",
+        "n-4-35",
+        "n-4-36"
+      ],
+      "paragraphGroupId": "pg-4-8",
+      "readingOrder": 49
+    },
+    {
+      "id": "n-4-37",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b37",
+      "role": "P",
+      "text": "Welcoming the increasing dissemination, promotion, application and integration into domestic laws and policies of the Guiding Principles on Internal Displacement when dealing with situations of internal displacement,",
+      "bbox": [
+        123.38,
+        492.43,
+        364.19147999999973,
+        33.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-37",
+        "n-4-38",
+        "n-4-39"
+      ],
+      "paragraphGroupId": "pg-4-9",
+      "readingOrder": 50
+    },
+    {
+      "id": "n-4-40",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b40",
+      "role": "P",
+      "text": "Noting with appreciation the important role of national human rights institutions, during all phases of displacement, in ensuring that all human rights issues of internally displaced persons are appropriately addressed,",
+      "bbox": [
+        123.38,
+        534.43,
+        364.49676000000034,
+        33.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-40",
+        "n-4-41",
+        "n-4-42"
+      ],
+      "paragraphGroupId": "pg-4-10",
+      "readingOrder": 51
+    },
+    {
+      "id": "n-4-43",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b43",
+      "role": "P",
+      "text": "Deploring practices of forced displacement and their negative consequences for the enjoyment of human rights and fundamental freedoms by large groups of populations, and recalling the relevant provisions of the Rome Statute of the International Criminal Court that define the deportation or forcible transfer of 11",
+      "bbox": [
+        123.38,
+        576.4599999999999,
+        364.3369199999999,
+        45.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-43",
+        "n-4-44",
+        "n-4-45",
+        "n-4-46",
+        "n-4-47"
+      ],
+      "paragraphGroupId": "pg-4-11",
+      "readingOrder": 52
+    },
+    {
+      "id": "n-4-48",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b48",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        636.82,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-4-12",
+      "readingOrder": 53
+    },
+    {
+      "id": "n-4-49",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b49",
+      "role": "P",
+      "text": "5 A/CONF.157/24 (Part I), chap. III. 6 See Official Records of the General Assembly, Seventy-seventh Session, Supplement No. 53 (A/77/53), chap. VIII, sect. A. 7 United Nations, Treaty Series, vol. 1577, No. 27531. 8 Ibid., vol. 75, Nos. 970–973. 9 Ibid., vol. 1125, Nos. 17512 and 17513. 10 E/CN.4/1998/53/Add.2, annex. 11 United Nations, Treaty Series, vol. 2187, No. 38544.",
+      "bbox": [
+        114.26,
+        650.5,
+        349.3965199999995,
+        81.95600000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-49",
+        "n-4-50",
+        "n-4-51",
+        "n-4-52",
+        "n-4-53",
+        "n-4-54",
+        "n-4-55",
+        "n-4-56"
+      ],
+      "paragraphGroupId": "pg-4-13",
+      "readingOrder": 54
+    },
+    {
+      "id": "n-4-57",
+      "pageNumber": 4,
+      "sourceBlockId": "p4-b57",
+      "role": "P",
+      "text": "4/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.98,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-4-57",
+        "n-4-58"
+      ],
+      "paragraphGroupId": "pg-4-14",
+      "readingOrder": 55
+    },
+    {
+      "id": "n-5-1",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b1",
+      "role": "P",
+      "text": "Protection of and assistance to internally displaced persons A/RES/78/205",
+      "bbox": [
+        60,
+        50.51999999999997,
+        492.1177600000001,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-1",
+        "n-5-2"
+      ],
+      "paragraphGroupId": "pg-5-0",
+      "readingOrder": 56
+    },
+    {
+      "id": "n-5-3",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b3",
+      "role": "P",
+      "text": "population as a crime against humanity and the unlawful deportation, transfer or ordering of the displacement of the civilian population as war crimes,",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.14756000000006,
+        21.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-3",
+        "n-5-4"
+      ],
+      "paragraphGroupId": "pg-5-1",
+      "readingOrder": 57
+    },
+    {
+      "id": "n-5-5",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b5",
+      "role": "P",
+      "text": "Recognizing the importance of the African Union Convention for the Protection 12 and Assistance of Internally Displaced Persons in Africa (Kampala Convention), which builds on the Protocol on the Protection of and Assistance to Internally Displaced Persons and the Protocol on the Property Rights of Returning Persons, adopted by the International Conference on the Great Lakes Region, and which marks a significant step towards strengthening the national and regional normative framework for the protection of and assistance to internally displaced persons in Africa, and welcoming the holding of the first Conference of States Parties to the Convention in April 2017,",
+      "bbox": [
+        123.38,
+        102.38000000000002,
+        365.36,
+        105.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-5",
+        "n-5-6",
+        "n-5-7",
+        "n-5-8",
+        "n-5-9",
+        "n-5-10",
+        "n-5-11",
+        "n-5-12",
+        "n-5-13",
+        "n-5-14"
+      ],
+      "paragraphGroupId": "pg-5-2",
+      "readingOrder": 58
+    },
+    {
+      "id": "n-5-15",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b15",
+      "role": "P",
+      "text": "Noting the Framework on Durable Solutions for Internally Displaced Persons of the Inter-Agency Standing Committee,13 and taking note of the decision of the Policy Committee of the Secretary-General of 4 October 2011 endorsing the preliminary framework on ending displacement in the aftermath of conflict,",
+      "bbox": [
+        123.38,
+        216.38000000000002,
+        364.3647599999997,
+        45.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-15",
+        "n-5-16",
+        "n-5-17",
+        "n-5-18"
+      ],
+      "paragraphGroupId": "pg-5-3",
+      "readingOrder": 59
+    },
+    {
+      "id": "n-5-19",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b19",
+      "role": "P",
+      "text": "Underlining the necessity of safe and unhindered humanitarian access for the relevant United Nations agencies and humanitarian organizations to internally displaced persons, including those residing in conflict areas, in accordance with international law,",
+      "bbox": [
+        123.38,
+        270.41,
+        364.3374,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-19",
+        "n-5-20",
+        "n-5-21",
+        "n-5-22"
+      ],
+      "paragraphGroupId": "pg-5-4",
+      "readingOrder": 60
+    },
+    {
+      "id": "n-5-23",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b23",
+      "role": "P",
+      "text": "14 Recognizing that the 2030 Agenda for Sustainable Development seeks to address the needs of the most vulnerable, including internally displaced persons, and that addressing the needs of internally displaced persons can help countries to achieve their overall development goals,",
+      "bbox": [
+        123.38,
+        324.40999999999997,
+        364.7535200000001,
+        45.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-23",
+        "n-5-24",
+        "n-5-25",
+        "n-5-26",
+        "n-5-27"
+      ],
+      "paragraphGroupId": "pg-5-5",
+      "readingOrder": 61
+    },
+    {
+      "id": "n-5-28",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b28",
+      "role": "P",
+      "text": "Noting the increasing number of internally displaced persons outside camps and in urban areas and the need to meet their immediate and their long-term needs, and the needs of host families, and recognizing the importance of the New Urban Agenda adopted at the United Nations Conference on Housing and Sustainable Urban Development (Habitat III),15",
+      "bbox": [
+        123.38,
+        378.41,
+        364.99472000000003,
+        57.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-28",
+        "n-5-29",
+        "n-5-30",
+        "n-5-31",
+        "n-5-32"
+      ],
+      "paragraphGroupId": "pg-5-6",
+      "readingOrder": 62
+    },
+    {
+      "id": "n-5-33",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b33",
+      "role": "P",
+      "text": "Taking note of the first World Humanitarian Summit, held in Istanbul, Turkey, on 23 and 24 May 2016, and taking note also of the report of the Secretary-General on the outcome of the World Humanitarian Summit,16 which contains, inter alia, recommendations to strengthen partnerships between Member States and humanitarian and development actors to address the urgent and long-term needs of internally displaced persons,",
+      "bbox": [
+        123.38,
+        444.43,
+        364.94528,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-33",
+        "n-5-34",
+        "n-5-35",
+        "n-5-36",
+        "n-5-37",
+        "n-5-38"
+      ],
+      "paragraphGroupId": "pg-5-7",
+      "readingOrder": 63
+    },
+    {
+      "id": "n-5-39",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b39",
+      "role": "P",
+      "text": "Noting the need for finding durable solutions for internally displaced persons in their countries and addressing possible obstacles in this regard, and recognizing that durable solutions include voluntary and sustainable return in safety and with dignity, as well as voluntary local integration in the areas to which persons have been displaced or voluntary settlement in another part of the country, without prejudice to the right of internally displaced persons to leave their country or to seek asylum,",
+      "bbox": [
+        123.38,
+        522.43,
+        364.20636,
+        69.99000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-39",
+        "n-5-40",
+        "n-5-41",
+        "n-5-42",
+        "n-5-43",
+        "n-5-44"
+      ],
+      "paragraphGroupId": "pg-5-8",
+      "readingOrder": 64
+    },
+    {
+      "id": "n-5-45",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b45",
+      "role": "P",
+      "text": "Emphasizing that all durable solutions for internally displaced persons should be approached from a humanitarian and development perspective, involving the timely engagement of internally displaced persons and host communities,",
+      "bbox": [
+        123.38,
+        600.4599999999999,
+        364.2687599999998,
+        33.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-45",
+        "n-5-46",
+        "n-5-47"
+      ],
+      "paragraphGroupId": "pg-5-9",
+      "readingOrder": 65
+    },
+    {
+      "id": "n-5-48",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b48",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        669.34,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-5-10",
+      "readingOrder": 66
+    },
+    {
+      "id": "n-5-49",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b49",
+      "role": "P",
+      "text": "12 Ibid., vol. 3014, No. 52375. 13 A/HRC/13/21/Add.4. 14 Resolution 70/1. 15 Resolution 71/256, annex. 16 A/71/353.",
+      "bbox": [
+        114.26,
+        683.02,
+        112.65503999999997,
+        49.55600000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-49",
+        "n-5-50",
+        "n-5-51",
+        "n-5-52",
+        "n-5-53"
+      ],
+      "paragraphGroupId": "pg-5-11",
+      "readingOrder": 67
+    },
+    {
+      "id": "n-5-54",
+      "pageNumber": 5,
+      "sourceBlockId": "p5-b54",
+      "role": "P",
+      "text": "5/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.91999999999996,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-5-54",
+        "n-5-55"
+      ],
+      "paragraphGroupId": "pg-5-12",
+      "readingOrder": 68
+    },
+    {
+      "id": "n-6-1",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b1",
+      "role": "P",
+      "text": "A/RES/78/205 Protection of and assistance to internally displaced persons",
+      "bbox": [
+        60,
+        50.51999999999997,
+        491.8952800000005,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-1",
+        "n-6-2"
+      ],
+      "paragraphGroupId": "pg-6-0",
+      "readingOrder": 69
+    },
+    {
+      "id": "n-6-3",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b3",
+      "role": "P",
+      "text": "Mindful of the significant humanitarian and development assistance required to meet the needs of people in protracted situations of internal displacement and of the large gap between needs and resources,",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.2201599999999,
+        33.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-3",
+        "n-6-4",
+        "n-6-5"
+      ],
+      "paragraphGroupId": "pg-6-1",
+      "readingOrder": 70
+    },
+    {
+      "id": "n-6-6",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b6",
+      "role": "P",
+      "text": "Recognizing the need for increased coverage, quality and availability of information on internal displacement and to collect reliable, timely, longitudinal and disaggregated data, including data disaggregated by sex, age, disability and location, on internally displaced persons and the impact of new and protracted displacement on host communities in order to improve policy and programming, preventive measures on and response to internal displacement and to promote the achievement of durable solutions, including, in this respect, the relevance of the Global Internal Displacement Database maintained by the Internal Displacement Monitoring Centre and the technical support available from the inter-agency Joint Internal Displacement Profiling Service and the Expert Group on Refugee, Internally Displaced Persons and Statelessness Statistics, and noting the adoption by the Statistical Commission of the International Recommendations on Internally Displaced Persons Statistics,",
+      "bbox": [
+        123.38,
+        114.38000000000002,
+        364.74368,
+        141.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-6",
+        "n-6-7",
+        "n-6-8",
+        "n-6-9",
+        "n-6-10",
+        "n-6-11",
+        "n-6-12",
+        "n-6-13",
+        "n-6-14",
+        "n-6-15",
+        "n-6-16",
+        "n-6-17"
+      ],
+      "paragraphGroupId": "pg-6-2",
+      "readingOrder": 71
+    },
+    {
+      "id": "n-6-18",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b18",
+      "role": "P",
+      "text": "Expressing its appreciation to those Governments and intergovernmental, regional and non-governmental organizations that have supported and facilitated the work of the Special Rapporteur on the human rights of internally displaced persons, and of her predecessors, the former representatives of the Secretary-General on the human rights of internally displaced persons, and have helped, according to their roles and responsibilities, to provide protection and assistance to internally displaced persons,",
+      "bbox": [
+        123.38,
+        264.41,
+        364.94468,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-18",
+        "n-6-19",
+        "n-6-20",
+        "n-6-21",
+        "n-6-22",
+        "n-6-23"
+      ],
+      "paragraphGroupId": "pg-6-3",
+      "readingOrder": 72
+    },
+    {
+      "id": "n-6-24",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b24",
+      "role": "P",
+      "text": "Welcoming the continuing cooperation between the Special Rapporteur and national Governments and the relevant offices and agencies of the United Nations as well as with other international and regional organizations, and encouraging further strengthening of this collaboration in order to promote better strategies for, protection of, assistance to and durable solutions for internally displaced persons,",
+      "bbox": [
+        123.38,
+        342.41,
+        364.37963999999965,
+        57.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-24",
+        "n-6-25",
+        "n-6-26",
+        "n-6-27",
+        "n-6-28"
+      ],
+      "paragraphGroupId": "pg-6-4",
+      "readingOrder": 73
+    },
+    {
+      "id": "n-6-29",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b29",
+      "role": "P",
+      "text": "Acknowledging with appreciation the important and independent contribution of the International Red Cross and Red Crescent Movement and other humanitarian agencies in protecting and assisting internally displaced persons, in cooperation with national Governments and relevant international bodies,",
+      "bbox": [
+        123.38,
+        408.43,
+        364.44623999999993,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-29",
+        "n-6-30",
+        "n-6-31",
+        "n-6-32"
+      ],
+      "paragraphGroupId": "pg-6-5",
+      "readingOrder": 74
+    },
+    {
+      "id": "n-6-33",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b33",
+      "role": "P",
+      "text": "Taking note with appreciation of the four thematic priorities set by the Special Rapporteur as contained in the report to the Human Rights Council at its fifty-third session17 and the two strategic objectives of supporting Governments in developing national instruments and institutions on internal displacement and facilitating viable, durable solutions for internally displaced persons, including through the engagement of development actors,",
+      "bbox": [
+        123.38,
+        462.43,
+        364.88948,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-33",
+        "n-6-34",
+        "n-6-35",
+        "n-6-36",
+        "n-6-37",
+        "n-6-38"
+      ],
+      "paragraphGroupId": "pg-6-6",
+      "readingOrder": 75
+    },
+    {
+      "id": "n-6-40",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b40",
+      "role": "P",
+      "text": "on the human rights of internally displaced persons18 and the conclusions contained therein;",
+      "bbox": [
+        123.38,
+        552.43,
+        364.48568,
+        21.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-40",
+        "n-6-41"
+      ],
+      "paragraphGroupId": "pg-6-7",
+      "readingOrder": 77
+    },
+    {
+      "id": "n-6-43",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b43",
+      "role": "P",
+      "text": "the catalytic role that she plays in raising the level of awareness about the plight of internally displaced persons and for her ongoing efforts to address their development and other specific needs, including through the mainstreaming of the human rights of internally displaced persons into all relevant parts of the United Nations system;",
+      "bbox": [
+        123.38,
+        594.4599999999999,
+        364.28231999999986,
+        45.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-43",
+        "n-6-44",
+        "n-6-45",
+        "n-6-46"
+      ],
+      "paragraphGroupId": "pg-6-8",
+      "readingOrder": 79
+    },
+    {
+      "id": "n-6-48",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b48",
+      "role": "P",
+      "text": "Governments and all intergovernmental and non-governmental organizations concerned, to continue her analysis of the reasons for internal displacement and to remain apprised of the needs and human rights of those who are displaced, including",
+      "bbox": [
+        123.38,
+        660.4599999999999,
+        364.71932000000004,
+        33.95600000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-48",
+        "n-6-49",
+        "n-6-50"
+      ],
+      "paragraphGroupId": "pg-6-9",
+      "readingOrder": 81
+    },
+    {
+      "id": "n-6-51",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b51",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        699.816,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-6-10",
+      "readingOrder": 82
+    },
+    {
+      "id": "n-6-52",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b52",
+      "role": "P",
+      "text": "17 A/HRC/53/35. 18 A/HRC/53/35.",
+      "bbox": [
+        114.26,
+        713.496,
+        62.969999999999985,
+        18.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-52",
+        "n-6-53"
+      ],
+      "paragraphGroupId": "pg-6-11",
+      "readingOrder": 83
+    },
+    {
+      "id": "n-6-54",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b54",
+      "role": "P",
+      "text": "6/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.98,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-6-54",
+        "n-6-55"
+      ],
+      "paragraphGroupId": "pg-6-12",
+      "readingOrder": 84
+    },
+    {
+      "id": "n-6-39",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b39",
+      "role": "LI",
+      "text": "1. Takes note with appreciation of the main report of the Special Rapporteur",
+      "bbox": [
+        147.14,
+        540.43,
+        340.77635999999984,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:39",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 76
+    },
+    {
+      "id": "n-6-42",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b42",
+      "role": "LI",
+      "text": "2. Commends the Special Rapporteur for the activities undertaken so far, for",
+      "bbox": [
+        147.14,
+        582.4599999999999,
+        340.4492399999997,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:42",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 78
+    },
+    {
+      "id": "n-6-47",
+      "pageNumber": 6,
+      "sourceBlockId": "p6-b47",
+      "role": "LI",
+      "text": "3. Encourages the Special Rapporteur, through continuous dialogue with",
+      "bbox": [
+        147.14,
+        648.4599999999999,
+        340.5329999999999,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:6:47",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 80
+    },
+    {
+      "id": "n-7-1",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b1",
+      "role": "P",
+      "text": "Protection of and assistance to internally displaced persons A/RES/78/205",
+      "bbox": [
+        60,
+        50.51999999999997,
+        492.1177600000001,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-1",
+        "n-7-2"
+      ],
+      "paragraphGroupId": "pg-7-0",
+      "readingOrder": 85
+    },
+    {
+      "id": "n-7-3",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b3",
+      "role": "P",
+      "text": "the needs of those who may be in particularly vulnerable situations, including women, children, older persons and persons with disabilities, the level of emergency preparedness and ways to strengthen protection and assistance, including by enhancing the role of national human rights institutions, where appropriate, and the protection of internally displaced persons, as well as durable solutions for internally displaced persons, including by addressing possible obstacles to the exercise of housing, land and property rights for internally displaced persons, also encourages the Special Rapporteur, with regard to the latter, to use, in her activities, the Framework on Durable Solutions for Internally Displaced Persons of the Inter-Agency Standing Committee, and further encourages the Special Rapporteur to continue to advocate the needs of host communities and promote comprehensive strategies, taking into account the primary responsibility of States for the protection of and assistance to internally displaced persons within their jurisdiction;",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.52724,
+        153.96
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-3",
+        "n-7-4",
+        "n-7-5",
+        "n-7-6",
+        "n-7-7",
+        "n-7-8",
+        "n-7-9",
+        "n-7-10",
+        "n-7-11",
+        "n-7-12",
+        "n-7-13",
+        "n-7-14",
+        "n-7-15"
+      ],
+      "paragraphGroupId": "pg-7-1",
+      "readingOrder": 86
+    },
+    {
+      "id": "n-7-17",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b17",
+      "role": "P",
+      "text": "African Union, the International Conference on the Great Lakes Region, the Organization of American States and the Council of Europe, to address the protection, assistance and development needs of internally displaced persons and to find durable solutions for them, and encourages regional organizations to strengthen their activities and their cooperation with the Special Rapporteur;",
+      "bbox": [
+        123.38,
+        246.41,
+        364.4478,
+        57.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-17",
+        "n-7-18",
+        "n-7-19",
+        "n-7-20",
+        "n-7-21"
+      ],
+      "paragraphGroupId": "pg-7-2",
+      "readingOrder": 88
+    },
+    {
+      "id": "n-7-23",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b23",
+      "role": "P",
+      "text": "Rapporteur, in particular Governments with situations of internal displacement, and to respond favourably to requests from the Special Rapporteur to enable her to continue and enhance dialogue with Governments in addressing situations of internal displacement, and thanks those Governments that have already done so;",
+      "bbox": [
+        123.38,
+        324.41,
+        364.29023999999976,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-23",
+        "n-7-24",
+        "n-7-25",
+        "n-7-26"
+      ],
+      "paragraphGroupId": "pg-7-3",
+      "readingOrder": 90
+    },
+    {
+      "id": "n-7-28",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b28",
+      "role": "P",
+      "text": "Special Rapporteur, to the recommendations and suggestions addressed to them, in accordance with her mandate, and to inform her of measures taken thereon;",
+      "bbox": [
+        123.38,
+        390.41,
+        364.09775999999994,
+        21.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-28",
+        "n-7-29"
+      ],
+      "paragraphGroupId": "pg-7-4",
+      "readingOrder": 92
+    },
+    {
+      "id": "n-7-31",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b31",
+      "role": "P",
+      "text": "the Special Rapporteur in her dialogue with Governments, intergovernmental and non-governmental organizations and other relevant actors, and requests her to continue her efforts to further their dissemination, promotion, application and integration into domestic laws and policies and to provide support for efforts to promote capacity-building and the use of the Guiding Principles, as well as the development of domestic legislation and policies;",
+      "bbox": [
+        123.38,
+        432.43,
+        364.5529200000003,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-31",
+        "n-7-32",
+        "n-7-33",
+        "n-7-34",
+        "n-7-35",
+        "n-7-36"
+      ],
+      "paragraphGroupId": "pg-7-5",
+      "readingOrder": 94
+    },
+    {
+      "id": "n-7-38",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b38",
+      "role": "P",
+      "text": "durable solutions for their internally displaced persons, as well as to respect, protect and fulfil their human rights, thus contributing to their national, economic and social development processes, and encourages the international community, the United Nations system, the Special Rapporteur, relevant international and regional organizations and donor countries to continue to support international, regional and national efforts to meet the needs and fulfil the human rights of internally displaced persons, including children, on the basis of solidarity, the principles of international cooperation and the Guiding Principles on Internal Displacement and to ensure that humanitarian assistance, early recovery and development assistance efforts are appropriately funded;",
+      "bbox": [
+        123.38,
+        522.43,
+        364.37136,
+        117.99000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-38",
+        "n-7-39",
+        "n-7-40",
+        "n-7-41",
+        "n-7-42",
+        "n-7-43",
+        "n-7-44",
+        "n-7-45",
+        "n-7-46",
+        "n-7-47"
+      ],
+      "paragraphGroupId": "pg-7-6",
+      "readingOrder": 96
+    },
+    {
+      "id": "n-7-49",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b49",
+      "role": "P",
+      "text": "of and better assistance to internally displaced persons, in particular to address the challenges of protracted displacement, by adopting and implementing gender- sensitive policies and strategies, in accordance with national and regional frameworks, while recognizing the Guiding Principles on Internal Displacement as an important international framework for the protection of internally displaced persons, encourages all relevant actors, in accordance with their mandates, to make",
+      "bbox": [
+        123.38,
+        660.4599999999999,
+        364.95668,
+        69.95600000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-49",
+        "n-7-50",
+        "n-7-51",
+        "n-7-52",
+        "n-7-53",
+        "n-7-54"
+      ],
+      "paragraphGroupId": "pg-7-7",
+      "readingOrder": 98
+    },
+    {
+      "id": "n-7-55",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b55",
+      "role": "P",
+      "text": "7/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.91999999999996,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-7-55",
+        "n-7-56"
+      ],
+      "paragraphGroupId": "pg-7-8",
+      "readingOrder": 99
+    },
+    {
+      "id": "n-7-16",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b16",
+      "role": "LI",
+      "text": "4. Welcomes the initiatives undertaken by regional organizations, such as the",
+      "bbox": [
+        147.14,
+        234.38000000000002,
+        340.4783999999999,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:16",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 87
+    },
+    {
+      "id": "n-7-22",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b22",
+      "role": "LI",
+      "text": "5. Urges all Governments to continue to facilitate the activities of the Special",
+      "bbox": [
+        147.14,
+        312.41,
+        340.5406799999998,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:22",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 89
+    },
+    {
+      "id": "n-7-27",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b27",
+      "role": "LI",
+      "text": "6. Invites Governments to give serious consideration, in dialogue with the",
+      "bbox": [
+        147.14,
+        378.41,
+        340.5295199999999,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:27",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 91
+    },
+    {
+      "id": "n-7-30",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b30",
+      "role": "LI",
+      "text": "7. Welcomes the use of the Guiding Principles on Internal Displacement by",
+      "bbox": [
+        147.14,
+        420.43,
+        340.44191999999987,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:30",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 93
+    },
+    {
+      "id": "n-7-37",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b37",
+      "role": "LI",
+      "text": "8. Recognizes that Member States have the primary responsibility to promote",
+      "bbox": [
+        147.14,
+        510.43,
+        340.59107999999975,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:37",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 95
+    },
+    {
+      "id": "n-7-48",
+      "pageNumber": 7,
+      "sourceBlockId": "p7-b48",
+      "role": "LI",
+      "text": "9. Requests Member States to strengthen their efforts to ensure the protection",
+      "bbox": [
+        147.14,
+        648.4599999999999,
+        340.5104399999998,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:7:48",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 97
+    },
+    {
+      "id": "n-8-1",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b1",
+      "role": "P",
+      "text": "A/RES/78/205 Protection of and assistance to internally displaced persons",
+      "bbox": [
+        60,
+        50.51999999999997,
+        491.8952800000005,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-1",
+        "n-8-2"
+      ],
+      "paragraphGroupId": "pg-8-0",
+      "readingOrder": 100
+    },
+    {
+      "id": "n-8-3",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b3",
+      "role": "P",
+      "text": "use of the Guiding Principles when dealing with situations of internal displacement, and in this regard recognizes the central role of national and local authorities and institutions in addressing the specific needs of internally displaced persons and in finding solutions to displacement through, inter alia, continued and enhanced international support, upon request, for the capacity-building of States;",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.32132000000007,
+        57.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-3",
+        "n-8-4",
+        "n-8-5",
+        "n-8-6",
+        "n-8-7"
+      ],
+      "paragraphGroupId": "pg-8-1",
+      "readingOrder": 101
+    },
+    {
+      "id": "n-8-9",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b9",
+      "role": "P",
+      "text": "children, have access to a process to obtain appropriate identification documents;",
+      "bbox": [
+        123.38,
+        150.38000000000002,
+        349.4067599999998,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-8-2",
+      "readingOrder": 103
+    },
+    {
+      "id": "n-8-11",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b11",
+      "role": "P",
+      "text": "Advancing Prevention, Protection and Solutions for Internally Displaced Persons 2018–2020 (GP20) to commemorate the twentieth anniversary of the Guiding Principles on Internal Displacement, and its follow-up initiative, (GP2.0);",
+      "bbox": [
+        123.38,
+        180.38000000000002,
+        364.2640800000003,
+        33.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-11",
+        "n-8-12",
+        "n-8-13"
+      ],
+      "paragraphGroupId": "pg-8-3",
+      "readingOrder": 105
+    },
+    {
+      "id": "n-8-15",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b15",
+      "role": "P",
+      "text": "Panel on Internal Displacement and the follow-up Action Agenda on Internal Displacement, acknowledges that increased efforts on addressing the root causes as well as prevention, protection and improved assistance to internally displaced persons and durable solutions for internal displacement are critically important, and encourages the Secretary-General to work with Member States, the United Nations system and other relevant actors, as appropriate, including international financial institutions, non-governmental organizations, and displacement-affected communities on taking forward these efforts, including through regular and enhanced follow-up and collaboration, and further appreciates the efforts of the United Nations system, including the temporary Special Adviser on Solutions to Internal Displacement;",
+      "bbox": [
+        123.38,
+        234.38000000000002,
+        365.1272000000001,
+        117.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-15",
+        "n-8-16",
+        "n-8-17",
+        "n-8-18",
+        "n-8-19",
+        "n-8-20",
+        "n-8-21",
+        "n-8-22",
+        "n-8-23",
+        "n-8-24"
+      ],
+      "paragraphGroupId": "pg-8-4",
+      "readingOrder": 107
+    },
+    {
+      "id": "n-8-26",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b26",
+      "role": "P",
+      "text": "have adopted domestic legislation and policies dealing with all stages of displacement, encourages States to continue to do so in an inclusive and non-discriminatory way, consistent with the Guiding Principles on Internal Displacement, urges States to increase their efforts to implement such domestic laws and policies, including through the identification of national focal points within Governments for issues of internal displacement, in particular for setting national targets and indicators for policy and programmes and for the allocation of budget resources, and encourages the international community and national actors to provide financial support and cooperation to Governments, upon request, in this regard;",
+      "bbox": [
+        123.38,
+        372.41,
+        364.94,
+        105.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-26",
+        "n-8-27",
+        "n-8-28",
+        "n-8-29",
+        "n-8-30",
+        "n-8-31",
+        "n-8-32",
+        "n-8-33",
+        "n-8-34"
+      ],
+      "paragraphGroupId": "pg-8-5",
+      "readingOrder": 109
+    },
+    {
+      "id": "n-8-36",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b36",
+      "role": "P",
+      "text": "reintegration and development assistance, to internally displaced persons and to facilitate the efforts of the relevant United Nations agencies and humanitarian organizations in this regard by allowing and facilitating safe and unhindered access for humanitarian personnel and the delivery of supplies and equipment to internally displaced persons, in accordance with international law, by maintaining the civilian and humanitarian character of camps and settlements for internally displaced persons, where they exist, and by taking the steps necessary to ensure the safety and security of humanitarian personnel so that they may efficiently perform their task of assisting internally displaced persons;",
+      "bbox": [
+        123.38,
+        498.43,
+        364.5567599999998,
+        105.98999999999995
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-36",
+        "n-8-37",
+        "n-8-38",
+        "n-8-39",
+        "n-8-40",
+        "n-8-41",
+        "n-8-42",
+        "n-8-43",
+        "n-8-44"
+      ],
+      "paragraphGroupId": "pg-8-6",
+      "readingOrder": 111
+    },
+    {
+      "id": "n-8-46",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b46",
+      "role": "P",
+      "text": "abuses of human rights and violations of international humanitarian law experienced by many internally displaced persons, including women and children, who are particularly vulnerable or specifically targeted especially for sexual and gender-based violence and sexual exploitation and abuse, trafficking in persons in all its forms,19 forced recruitment and abduction, encourages the continued commitment of the",
+      "bbox": [
+        123.38,
+        624.4599999999999,
+        365.36,
+        57.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-46",
+        "n-8-47",
+        "n-8-48",
+        "n-8-49",
+        "n-8-50"
+      ],
+      "paragraphGroupId": "pg-8-7",
+      "readingOrder": 113
+    },
+    {
+      "id": "n-8-51",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b51",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        689.376,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-8-8",
+      "readingOrder": 114
+    },
+    {
+      "id": "n-8-52",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b52",
+      "role": "P",
+      "text": "19 As defined in article 3 of the Protocol to Prevent, Suppress and Punish Trafficking in Persons, Especially Women and Children, supplementing the United Nations Convention against Transnational Organized Crime (United Nations, Treaty Series, vol. 2237, No. 39574).",
+      "bbox": [
+        114.26,
+        702.936,
+        360.2888399999992,
+        29.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-52",
+        "n-8-53",
+        "n-8-54"
+      ],
+      "paragraphGroupId": "pg-8-9",
+      "readingOrder": 115
+    },
+    {
+      "id": "n-8-55",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b55",
+      "role": "P",
+      "text": "8/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.98,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-8-55",
+        "n-8-56"
+      ],
+      "paragraphGroupId": "pg-8-10",
+      "readingOrder": 116
+    },
+    {
+      "id": "n-8-8",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b8",
+      "role": "LI",
+      "text": "10. Encourages States to ensure that internally displaced persons, including",
+      "bbox": [
+        147.14,
+        138.38000000000002,
+        340.48836000000006,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:8",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 102
+    },
+    {
+      "id": "n-8-10",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b10",
+      "role": "LI",
+      "text": "11. Notes the implementation of the multi-stakeholder Plan of Action for",
+      "bbox": [
+        147.14,
+        168.38000000000002,
+        340.8453200000001,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:10",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 104
+    },
+    {
+      "id": "n-8-14",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b14",
+      "role": "LI",
+      "text": "12. Notes with appreciation the report of the Secretary-General’s High-level",
+      "bbox": [
+        147.14,
+        222.38000000000002,
+        341.20676000000003,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:14",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 106
+    },
+    {
+      "id": "n-8-25",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b25",
+      "role": "LI",
+      "text": "13. Expresses its appreciation for the fact that an increasing number of States",
+      "bbox": [
+        147.14,
+        360.41,
+        340.69187999999986,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:25",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 108
+    },
+    {
+      "id": "n-8-35",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b35",
+      "role": "LI",
+      "text": "14. Calls upon Governments to provide protection and assistance, including",
+      "bbox": [
+        147.14,
+        486.43,
+        340.5939599999998,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:35",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 110
+    },
+    {
+      "id": "n-8-45",
+      "pageNumber": 8,
+      "sourceBlockId": "p8-b45",
+      "role": "LI",
+      "text": "15. Expresses particular concern about the full range of threats, violations and",
+      "bbox": [
+        147.14,
+        612.4599999999999,
+        340.6288799999999,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:8:45",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 112
+    },
+    {
+      "id": "n-9-1",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b1",
+      "role": "P",
+      "text": "Protection of and assistance to internally displaced persons A/RES/78/205",
+      "bbox": [
+        60,
+        50.51999999999997,
+        492.1177600000001,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-1",
+        "n-9-2"
+      ],
+      "paragraphGroupId": "pg-9-0",
+      "readingOrder": 117
+    },
+    {
+      "id": "n-9-3",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b3",
+      "role": "P",
+      "text": "Special Rapporteur to promote action to address their particular assistance and protection needs, and calls upon States, in cooperation with international agencies and other stakeholders, to provide protection and assistance to internally displaced persons who are victims of the above-mentioned threats, violations and abuses, as well as other groups of internally displaced persons with special needs, such as severely traumatized individuals, older persons and persons with disabilities, taking into account all relevant resolutions of the General Assembly and the Security Council;",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.88072000000005,
+        81.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-3",
+        "n-9-4",
+        "n-9-5",
+        "n-9-6",
+        "n-9-7",
+        "n-9-8",
+        "n-9-9"
+      ],
+      "paragraphGroupId": "pg-9-1",
+      "readingOrder": 118
+    },
+    {
+      "id": "n-9-11",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b11",
+      "role": "P",
+      "text": "to States affected by displacement, upon their request, including for the training of staff members of institutions in charge of registration and development of national laws and policies on internal displacement and issues related to land and property restitution and compensation;",
+      "bbox": [
+        123.38,
+        174.38000000000002,
+        364.43399999999986,
+        45.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-11",
+        "n-9-12",
+        "n-9-13",
+        "n-9-14"
+      ],
+      "paragraphGroupId": "pg-9-2",
+      "readingOrder": 120
+    },
+    {
+      "id": "n-9-16",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b16",
+      "role": "P",
+      "text": "coordination of the protection of and assistance to internally displaced persons, inter alia, through the inter-agency cluster system, welcomes continued initiatives to ensure better protection, assistance and development strategies for internally displaced persons, as well as better coordination of activities regarding them, and emphasizes the need to strengthen the capacities of national and local authorities, host communities, local organizations, United Nations organizations and other relevant actors to meet the immense humanitarian challenges of internal displacement;",
+      "bbox": [
+        123.38,
+        240.41,
+        364.4175599999998,
+        81.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-16",
+        "n-9-17",
+        "n-9-18",
+        "n-9-19",
+        "n-9-20",
+        "n-9-21",
+        "n-9-22"
+      ],
+      "paragraphGroupId": "pg-9-3",
+      "readingOrder": 122
+    },
+    {
+      "id": "n-9-24",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b24",
+      "role": "P",
+      "text": "internally displaced persons in humanitarian response plans, and encourages further efforts in this regard;",
+      "bbox": [
+        123.38,
+        342.41,
+        364.2073200000001,
+        21.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-24",
+        "n-9-25"
+      ],
+      "paragraphGroupId": "pg-9-4",
+      "readingOrder": 124
+    },
+    {
+      "id": "n-9-27",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b27",
+      "role": "P",
+      "text": "internally displaced persons and host communities by Governments and other relevant actors, in accordance with their specific mandates, during all phases of displacement, as well as the participation of internally displaced persons, where appropriate, in policies, programmes and activities pertaining to them, taking into account the primary responsibility of States for the protection of and assistance to internally displaced persons within their jurisdiction;",
+      "bbox": [
+        123.38,
+        384.41,
+        364.33416,
+        69.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-27",
+        "n-9-28",
+        "n-9-29",
+        "n-9-30",
+        "n-9-31",
+        "n-9-32"
+      ],
+      "paragraphGroupId": "pg-9-5",
+      "readingOrder": 126
+    },
+    {
+      "id": "n-9-34",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b34",
+      "role": "P",
+      "text": "stakeholders, to provide for and support, in particular, the full and meaningful participation of internally displaced women at all levels of decision-making processes and in all activities that have a direct impact on their lives, in all aspects of internal displacement, including the promotion and protection of human rights, the prevention of human rights violations and the design and implementation of durable solutions, peace processes, peacebuilding, transitional justice, post-conflict reconstruction and development;",
+      "bbox": [
+        123.38,
+        474.43,
+        365.1396800000001,
+        69.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-34",
+        "n-9-35",
+        "n-9-36",
+        "n-9-37",
+        "n-9-38",
+        "n-9-39"
+      ],
+      "paragraphGroupId": "pg-9-6",
+      "readingOrder": 128
+    },
+    {
+      "id": "n-9-41",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b41",
+      "role": "P",
+      "text": "assistance, human rights and development organizations to enhance their collaboration and coordination through the Inter-Agency Standing Committee and United Nations country teams in countries with situations of internal displacement and to provide all possible assistance and support to the Special Rapporteur, and requests the continued participation of the Special Rapporteur in the work of the Inter-Agency Standing Committee and its subsidiary bodies;",
+      "bbox": [
+        123.38,
+        564.43,
+        364.71763999999996,
+        69.99000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-41",
+        "n-9-42",
+        "n-9-43",
+        "n-9-44",
+        "n-9-45",
+        "n-9-46"
+      ],
+      "paragraphGroupId": "pg-9-7",
+      "readingOrder": 130
+    },
+    {
+      "id": "n-9-48",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b48",
+      "role": "P",
+      "text": "coordination, effectiveness, efficiency and predictability in preventing, responding to and finding solutions to internal displacement;",
+      "bbox": [
+        123.38,
+        654.4599999999999,
+        364.05792,
+        21.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-48",
+        "n-9-49"
+      ],
+      "paragraphGroupId": "pg-9-8",
+      "readingOrder": 132
+    },
+    {
+      "id": "n-9-51",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b51",
+      "role": "P",
+      "text": "appeals, and in this respect urges all relevant actors to provide the relevant United Nations agencies and humanitarian organizations with sufficient and predictable resources to ensure adequate support for those who are forcibly displaced;",
+      "bbox": [
+        123.38,
+        696.4559999999999,
+        364.16748000000007,
+        33.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-51",
+        "n-9-52",
+        "n-9-53"
+      ],
+      "paragraphGroupId": "pg-9-9",
+      "readingOrder": 134
+    },
+    {
+      "id": "n-9-54",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b54",
+      "role": "P",
+      "text": "9/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.91999999999996,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-9-54",
+        "n-9-55"
+      ],
+      "paragraphGroupId": "pg-9-10",
+      "readingOrder": 135
+    },
+    {
+      "id": "n-9-10",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b10",
+      "role": "LI",
+      "text": "16. Encourages the international community to provide technical cooperation",
+      "bbox": [
+        147.14,
+        162.38000000000002,
+        340.4645999999998,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:10",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 119
+    },
+    {
+      "id": "n-9-15",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b15",
+      "role": "LI",
+      "text": "17. Emphasizes the central role of the Emergency Relief Coordinator in the",
+      "bbox": [
+        147.14,
+        228.38000000000002,
+        340.53575999999987,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:15",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 121
+    },
+    {
+      "id": "n-9-23",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b23",
+      "role": "LI",
+      "text": "18. Notes with appreciation the increased attention paid to the issue of",
+      "bbox": [
+        147.14,
+        330.41,
+        340.6686000000002,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:23",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 123
+    },
+    {
+      "id": "n-9-26",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b26",
+      "role": "LI",
+      "text": "19. Emphasizes the importance of communication and consultation with",
+      "bbox": [
+        147.14,
+        372.41,
+        340.4358000000003,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:26",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 125
+    },
+    {
+      "id": "n-9-33",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b33",
+      "role": "LI",
+      "text": "20. Calls upon States, in cooperation with international agencies and other",
+      "bbox": [
+        147.14,
+        462.43,
+        340.88148000000075,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:33",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 127
+    },
+    {
+      "id": "n-9-40",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b40",
+      "role": "LI",
+      "text": "21. Encourages all relevant United Nations organizations and humanitarian",
+      "bbox": [
+        147.14,
+        552.43,
+        340.52964,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:40",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 129
+    },
+    {
+      "id": "n-9-47",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b47",
+      "role": "LI",
+      "text": "22. Encourages the Inter-Agency Standing Committee to enhance",
+      "bbox": [
+        147.14,
+        642.4599999999999,
+        340.81068000000016,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:47",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 131
+    },
+    {
+      "id": "n-9-50",
+      "pageNumber": 9,
+      "sourceBlockId": "p9-b50",
+      "role": "LI",
+      "text": "23. Expresses deep concern at the insufficient funding levels of humanitarian",
+      "bbox": [
+        147.14,
+        684.4559999999999,
+        340.57331999999974,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:9:50",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 133
+    },
+    {
+      "id": "n-10-1",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b1",
+      "role": "P",
+      "text": "A/RES/78/205 Protection of and assistance to internally displaced persons",
+      "bbox": [
+        60,
+        50.51999999999997,
+        491.8952800000005,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-1",
+        "n-10-2"
+      ],
+      "paragraphGroupId": "pg-10-0",
+      "readingOrder": 136
+    },
+    {
+      "id": "n-10-4",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b4",
+      "role": "P",
+      "text": "under international humanitarian law, and international human rights law, as applicable, with a view to preventing forced displacement and promoting the protection of civilians, and calls upon Governments to take measures to respect and protect the human rights of all internally displaced persons, without distinction of any kind, in accordance with their applicable obligations under international law;",
+      "bbox": [
+        123.38,
+        84.38000000000002,
+        364.55075999999997,
+        57.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-4",
+        "n-10-5",
+        "n-10-6",
+        "n-10-7",
+        "n-10-8"
+      ],
+      "paragraphGroupId": "pg-10-1",
+      "readingOrder": 138
+    },
+    {
+      "id": "n-10-10",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b10",
+      "role": "P",
+      "text": "humanitarian and development agencies and donors, to ensure the right to a quality education, including primary and secondary education, for internally displaced children, without discrimination of any kind, as well as to support existing schools to enable them to include internally displaced persons, calls upon all parties to armed conflict to respect the civilian character of schools and other educational institutions and to refrain from undertaking actions that could adversely affect the protection of these buildings against direct attacks, and strongly condemns all attacks, as well as threats of attack, against schools, in contravention of international humanitarian law;",
+      "bbox": [
+        123.38,
+        162.38000000000002,
+        364.38491999999974,
+        93.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-10",
+        "n-10-11",
+        "n-10-12",
+        "n-10-13",
+        "n-10-14",
+        "n-10-15",
+        "n-10-16",
+        "n-10-17"
+      ],
+      "paragraphGroupId": "pg-10-2",
+      "readingOrder": 140
+    },
+    {
+      "id": "n-10-19",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b19",
+      "role": "P",
+      "text": "development organizations and other relevant actors to urgently and effectively respond to, prevent and prepare for rising global food insecurity affecting millions of people, including internally displaced persons, especially those who are facing famine or the immediate risk of famine, including by enhancing humanitarian and development cooperation and providing urgent funding to respond to the needs of the affected population, including internally displaced persons, and calls upon Member States and parties to armed conflicts to respect international humanitarian law and ensure safe and unhindered humanitarian access;",
+      "bbox": [
+        123.38,
+        276.41,
+        364.6013999999999,
+        93.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-19",
+        "n-10-20",
+        "n-10-21",
+        "n-10-22",
+        "n-10-23",
+        "n-10-24",
+        "n-10-25",
+        "n-10-26"
+      ],
+      "paragraphGroupId": "pg-10-3",
+      "readingOrder": 142
+    },
+    {
+      "id": "n-10-28",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b28",
+      "role": "P",
+      "text": "effective and affordable medical countermeasures, including vaccines, therapeutics and diagnostics and other health products, is an essential part of global pandemic prevention, preparedness and response based on equity, unity, global solidarity, reinvigorated multilateral cooperation and the principle of leaving no one behind;",
+      "bbox": [
+        123.38,
+        390.41,
+        364.65899999999993,
+        45.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-28",
+        "n-10-29",
+        "n-10-30",
+        "n-10-31"
+      ],
+      "paragraphGroupId": "pg-10-4",
+      "readingOrder": 144
+    },
+    {
+      "id": "n-10-33",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b33",
+      "role": "P",
+      "text": "including humanitarian and development agencies and donors, as appropriate, to address the physical and mental health needs of internally displaced persons, which may include assistance, health care and psychosocial and other counselling services;",
+      "bbox": [
+        123.38,
+        456.43,
+        364.07783999999987,
+        33.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-33",
+        "n-10-34",
+        "n-10-35"
+      ],
+      "paragraphGroupId": "pg-10-5",
+      "readingOrder": 146
+    },
+    {
+      "id": "n-10-37",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b37",
+      "role": "P",
+      "text": "and national laws and regulations, as applicable, to respect and protect medical personnel, as well as humanitarian personnel exclusively engaged in medical duties, their means of transport and equipment, as well as hospitals and other medical facilities, in all circumstances, in this regard notes the role of domestic legal frameworks and other appropriate measures in promoting the safety and protection of such personnel, urges States and all parties to armed conflict to develop and integrate effective measures to prevent and address violence against such personnel, their means of transport and equipment, as well as hospitals and other medical facilities, and strongly urges States to conduct full, prompt, impartial and effective investigations within their jurisdiction of violations of international humanitarian law related to the protection of the wounded and sick, including internally displaced persons, medical personnel and humanitarian personnel exclusively engaged in medical duties, their means of transport and equipment, as well as hospitals and other medical facilities in armed conflict, and, where appropriate, to take action against those responsible in accordance with domestic and international law, with a view to reinforcing preventive measures, ensuring accountability and addressing the grievances of victims, including internally displaced persons;",
+      "bbox": [
+        123.38,
+        510.43,
+        364.5578399999998,
+        201.98599999999993
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-37",
+        "n-10-38",
+        "n-10-39",
+        "n-10-40",
+        "n-10-41",
+        "n-10-42",
+        "n-10-43",
+        "n-10-44",
+        "n-10-45",
+        "n-10-46",
+        "n-10-47",
+        "n-10-48",
+        "n-10-49",
+        "n-10-50",
+        "n-10-51",
+        "n-10-52",
+        "n-10-53"
+      ],
+      "paragraphGroupId": "pg-10-6",
+      "readingOrder": 148
+    },
+    {
+      "id": "n-10-54",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b54",
+      "role": "P",
+      "text": "10/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.98,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-10-54",
+        "n-10-55"
+      ],
+      "paragraphGroupId": "pg-10-7",
+      "readingOrder": 149
+    },
+    {
+      "id": "n-10-3",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b3",
+      "role": "LI",
+      "text": "24. Calls upon all parties to armed conflict to comply with their obligations",
+      "bbox": [
+        147.14,
+        72.38000000000002,
+        340.5033599999997,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:3",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 137
+    },
+    {
+      "id": "n-10-9",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b9",
+      "role": "LI",
+      "text": "25. Calls upon States, in cooperation with all other relevant actors, including",
+      "bbox": [
+        147.14,
+        150.38000000000002,
+        340.41936,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:9",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 139
+    },
+    {
+      "id": "n-10-18",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b18",
+      "role": "LI",
+      "text": "26. Calls upon Member States, the United Nations, humanitarian and",
+      "bbox": [
+        147.14,
+        264.41,
+        340.59336000000036,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:18",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 141
+    },
+    {
+      "id": "n-10-27",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b27",
+      "role": "LI",
+      "text": "27. Recognizes that equitable and timely access for all to safe, quality,",
+      "bbox": [
+        147.14,
+        378.41,
+        340.52532000000014,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:27",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 143
+    },
+    {
+      "id": "n-10-32",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b32",
+      "role": "LI",
+      "text": "28. Highlights the need for States, with the support of relevant partners,",
+      "bbox": [
+        147.14,
+        444.43,
+        340.39187999999984,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:32",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 145
+    },
+    {
+      "id": "n-10-36",
+      "pageNumber": 10,
+      "sourceBlockId": "p10-b36",
+      "role": "LI",
+      "text": "29. Stresses the obligation, in accordance with international humanitarian law",
+      "bbox": [
+        147.14,
+        498.43,
+        340.34711999999985,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:10:36",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 147
+    },
+    {
+      "id": "n-11-1",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b1",
+      "role": "P",
+      "text": "Protection of and assistance to internally displaced persons A/RES/78/205",
+      "bbox": [
+        60,
+        50.51999999999997,
+        492.1177600000001,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-1",
+        "n-11-2"
+      ],
+      "paragraphGroupId": "pg-11-0",
+      "readingOrder": 150
+    },
+    {
+      "id": "n-11-4",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b4",
+      "role": "P",
+      "text": "environmental degradation and extreme weather events, which may, among other factors, contribute to human displacement, and in this regard recalls the Sendai 20 Framework for Disaster Risk Reduction 2015–2030 and the political declaration of 21 its midterm review, the Paris Agreement adopted under the United Nations Framework Convention on Climate Change in December 2015 22 and relevant initiatives related to internal displacement, such as the Nansen Initiative, and their follow-up processes, and encourages the Special Rapporteur, in close collaboration with States and intergovernmental and non-governmental organizations, to continue to explore the human rights implications and dimensions of disaster-induced internal displacement, with a view to supporting Member States in their efforts to build local resilience and capacity to prevent and prepare for displacement or to provide assistance through well-planned recovery programmes that support internally displaced persons and their hosts and provide protection to those who are forced to flee;",
+      "bbox": [
+        123.38,
+        84.38000000000002,
+        365.02292,
+        165.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-4",
+        "n-11-5",
+        "n-11-6",
+        "n-11-7",
+        "n-11-8",
+        "n-11-9",
+        "n-11-10",
+        "n-11-11",
+        "n-11-12",
+        "n-11-13",
+        "n-11-14",
+        "n-11-15",
+        "n-11-16",
+        "n-11-17",
+        "n-11-18",
+        "n-11-19"
+      ],
+      "paragraphGroupId": "pg-11-1",
+      "readingOrder": 152
+    },
+    {
+      "id": "n-11-21",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b21",
+      "role": "P",
+      "text": "for Disaster Risk Reduction 2015–2030 to reduce the risk of displacement in the context of disasters, including by addressing the underlying risk factors and causes of such displacement, preparing for the adverse consequences and supporting durable solutions to disaster-related displacement, and to integrate, as appropriate, post- disaster reconstruction and recovery, including the principle of “build back better”, into the economic and social sustainable development of affected areas, as well as temporary settlements where displaced persons live, to promote periodic disaster preparedness and response exercises in recovery and resettlement efforts, with a view to ensuring a rapid and effective response to disasters and related displacement, and to promote transboundary cooperation to build resilience and reduce disaster risk, including displacement risk, including by establishing or improving multi-hazard early warning systems, including heatwave early warning, connected to longer-term risk management systems and supported by public awareness campaigns, recognizing that early action following quality forecasts can reduce the impact of extreme weather events;",
+      "bbox": [
+        123.38,
+        270.41,
+        365.07668,
+        177.97999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-21",
+        "n-11-22",
+        "n-11-23",
+        "n-11-24",
+        "n-11-25",
+        "n-11-26",
+        "n-11-27",
+        "n-11-28",
+        "n-11-29",
+        "n-11-30",
+        "n-11-31",
+        "n-11-32",
+        "n-11-33",
+        "n-11-34",
+        "n-11-35"
+      ],
+      "paragraphGroupId": "pg-11-2",
+      "readingOrder": 154
+    },
+    {
+      "id": "n-11-37",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b37",
+      "role": "P",
+      "text": "a development challenge, and in some cases can also be a peacebuilding challenge, and calls upon States to provide durable solutions and address possible obstacles in this regard and to include the needs, vulnerabilities and capacities of internally displaced persons and host communities in their national development plans;",
+      "bbox": [
+        123.38,
+        468.43,
+        364.40543999999966,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-37",
+        "n-11-38",
+        "n-11-39",
+        "n-11-40"
+      ],
+      "paragraphGroupId": "pg-11-3",
+      "readingOrder": 156
+    },
+    {
+      "id": "n-11-42",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b42",
+      "role": "P",
+      "text": "actors, in accordance with their respective mandates, towards collective results over multiple years, with the aim of reducing the needs and vulnerabilities of internally displaced persons, in support of national priorities, while fully respecting the importance of humanitarian principles for humanitarian action;",
+      "bbox": [
+        123.38,
+        534.43,
+        364.3375200000004,
+        45.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-42",
+        "n-11-43",
+        "n-11-44",
+        "n-11-45"
+      ],
+      "paragraphGroupId": "pg-11-4",
+      "readingOrder": 158
+    },
+    {
+      "id": "n-11-47",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b47",
+      "role": "P",
+      "text": "humanitarian and development actors, including through the provision of resources, coherent multi-year planning that addresses protracted displacement and expertise to assist affected countries, in particular developing countries, in their national efforts and policies related to assistance, protection, resilience-building and rehabilitation for internally displaced persons and host communities, as appropriate, and the integration of the human rights and needs of internally displaced persons into both rural and urban",
+      "bbox": [
+        123.38,
+        600.4599999999999,
+        365.25320000000005,
+        69.96000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-47",
+        "n-11-48",
+        "n-11-49",
+        "n-11-50",
+        "n-11-51",
+        "n-11-52"
+      ],
+      "paragraphGroupId": "pg-11-5",
+      "readingOrder": 160
+    },
+    {
+      "id": "n-11-53",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b53",
+      "role": "P",
+      "text": "__________________",
+      "bbox": [
+        99.624,
+        689.376,
+        72.03036000000006,
+        8.039999999999964
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-11-6",
+      "readingOrder": 161
+    },
+    {
+      "id": "n-11-54",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b54",
+      "role": "P",
+      "text": "20 Resolution 69/283, annex II. 21 Resolution 77/289, annex. 22 See FCCC/CP/2015/10/Add.1, decision 1/CP.21, annex.",
+      "bbox": [
+        114.26,
+        702.936,
+        217.4782799999997,
+        29.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-54",
+        "n-11-55",
+        "n-11-56"
+      ],
+      "paragraphGroupId": "pg-11-7",
+      "readingOrder": 162
+    },
+    {
+      "id": "n-11-57",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b57",
+      "role": "P",
+      "text": "11/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.91999999999996,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-11-57",
+        "n-11-58"
+      ],
+      "paragraphGroupId": "pg-11-8",
+      "readingOrder": 163
+    },
+    {
+      "id": "n-11-3",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b3",
+      "role": "LI",
+      "text": "30. Recognizes the adverse effects of climate change as contributors to",
+      "bbox": [
+        147.14,
+        72.38000000000002,
+        340.50588000000005,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:3",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 151
+    },
+    {
+      "id": "n-11-20",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b20",
+      "role": "LI",
+      "text": "31. Affirms the need for the effective implementation of the Sendai Framework",
+      "bbox": [
+        147.14,
+        258.41,
+        340.51343999999983,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:20",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 153
+    },
+    {
+      "id": "n-11-36",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b36",
+      "role": "LI",
+      "text": "32. Recognizes that internal displacement is not only a humanitarian but also",
+      "bbox": [
+        147.14,
+        456.43,
+        340.4445599999998,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:36",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 155
+    },
+    {
+      "id": "n-11-41",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b41",
+      "role": "LI",
+      "text": "33. Encourages closer cooperation between development and humanitarian",
+      "bbox": [
+        147.14,
+        522.43,
+        340.6705199999998,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:41",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 157
+    },
+    {
+      "id": "n-11-46",
+      "pageNumber": 11,
+      "sourceBlockId": "p11-b46",
+      "role": "LI",
+      "text": "34. Also encourages strengthened international cooperation, in particular between",
+      "bbox": [
+        147.14,
+        588.4599999999999,
+        340.8471600000005,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:11:46",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 159
+    },
+    {
+      "id": "n-12-1",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b1",
+      "role": "P",
+      "text": "A/RES/78/205 Protection of and assistance to internally displaced persons",
+      "bbox": [
+        60,
+        50.51999999999997,
+        491.8952800000005,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-1",
+        "n-12-2"
+      ],
+      "paragraphGroupId": "pg-12-0",
+      "readingOrder": 164
+    },
+    {
+      "id": "n-12-3",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b3",
+      "role": "P",
+      "text": "development strategies, as well as the participation of both internally displaced persons and host communities in the design and implementation of those strategies;",
+      "bbox": [
+        123.38,
+        72.38000000000002,
+        364.3168800000006,
+        21.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-3",
+        "n-12-4"
+      ],
+      "paragraphGroupId": "pg-12-1",
+      "readingOrder": 165
+    },
+    {
+      "id": "n-12-6",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b6",
+      "role": "P",
+      "text": "other relevant actors, including local governments, civil society and the private sector, in furtherance of the New Urban Agenda in order to promote more effective emergency preparedness and response in urban areas, and notes the importance of addressing, as appropriate, the particular needs and vulnerabilities of internally displaced persons in urban settings and of supporting host cities, in the spirit of international cooperation, including by ensuring equal access to income-earning opportunities and preventing arbitrary forced evictions;",
+      "bbox": [
+        123.38,
+        114.38000000000002,
+        364.99232,
+        81.96000000000001
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-6",
+        "n-12-7",
+        "n-12-8",
+        "n-12-9",
+        "n-12-10",
+        "n-12-11",
+        "n-12-12"
+      ],
+      "paragraphGroupId": "pg-12-2",
+      "readingOrder": 167
+    },
+    {
+      "id": "n-12-14",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b14",
+      "role": "P",
+      "text": "actors and other providers of development assistance to continue to work together, in close cooperation with the Special Rapporteur, to provide a more predictable response to the needs of internally displaced persons, including long-term development assistance for the implementation of durable solutions, with a view to reducing internal displacement;",
+      "bbox": [
+        123.38,
+        216.38000000000002,
+        364.89236000000034,
+        45.98999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-14",
+        "n-12-15",
+        "n-12-16",
+        "n-12-17"
+      ],
+      "paragraphGroupId": "pg-12-3",
+      "readingOrder": 169
+    },
+    {
+      "id": "n-12-19",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b19",
+      "role": "P",
+      "text": "promote an inclusive approach to durable solutions that addresses the needs of internally displaced persons and their host communities, including the promotion of opportunities to fully harness the human potential of the displaced populations by promoting self- sufficiency through income-generating activities and sustainable livelihood opportunities;",
+      "bbox": [
+        123.38,
+        282.41,
+        365.31668,
+        45.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-19",
+        "n-12-20",
+        "n-12-21",
+        "n-12-22"
+      ],
+      "paragraphGroupId": "pg-12-4",
+      "readingOrder": 171
+    },
+    {
+      "id": "n-12-24",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b24",
+      "role": "P",
+      "text": "Development into their respective national policies and development frameworks, as appropriate, and recalls that the 2030 Agenda seeks to address the needs of the most vulnerable, including internally displaced persons, and in this regard underlines the importance of actions to reduce displacement risks, facilitate durable solutions, promote sustainable development and ensure that no one is left behind;",
+      "bbox": [
+        123.38,
+        348.41,
+        364.42188,
+        57.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-24",
+        "n-12-25",
+        "n-12-26",
+        "n-12-27",
+        "n-12-28"
+      ],
+      "paragraphGroupId": "pg-12-5",
+      "readingOrder": 173
+    },
+    {
+      "id": "n-12-30",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b30",
+      "role": "P",
+      "text": "and assistance needs of internally displaced persons into consideration, when appropriate, in peace processes, and emphasizes that durable solutions for internally displaced persons, including through voluntary return, sustainable reintegration, rehabilitation and reconciliation processes and their active participation, as appropriate, in the peace process are necessary elements of effective peacebuilding;",
+      "bbox": [
+        123.38,
+        426.43,
+        364.4813999999999,
+        57.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-30",
+        "n-12-31",
+        "n-12-32",
+        "n-12-33",
+        "n-12-34"
+      ],
+      "paragraphGroupId": "pg-12-6",
+      "readingOrder": 175
+    },
+    {
+      "id": "n-12-36",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b36",
+      "role": "P",
+      "text": "continues to urge the Commission to intensify its efforts, within its mandate, in cooperation with national and transitional Governments and in consultation with the relevant United Nations entities, to incorporate the rights and the specific needs of internally displaced persons, including their voluntary return in safety and with dignity, reintegration and rehabilitation, as well as related land and property issues, when advising on or proposing country-specific peacebuilding strategies for post- conflict situations in cases under consideration;",
+      "bbox": [
+        123.38,
+        503.9500000000001,
+        365.07668,
+        80.90999999999991
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-36",
+        "n-12-37",
+        "n-12-38",
+        "n-12-39",
+        "n-12-40",
+        "n-12-41",
+        "n-12-42"
+      ],
+      "paragraphGroupId": "pg-12-7",
+      "readingOrder": 177
+    },
+    {
+      "id": "n-12-44",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b44",
+      "role": "P",
+      "text": "the tenth anniversary of the African Union Convention for the Protection and Assistance of Internally Displaced Persons in Africa (Kampala Convention), welcomes progress in the number of African States having signed and ratified the Convention, encourages further progress in this regard, and encourages other regional mechanisms to develop their own regional normative frameworks for the protection of internally displaced persons;",
+      "bbox": [
+        123.38,
+        604.42,
+        364.6300799999999,
+        69
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-44",
+        "n-12-45",
+        "n-12-46",
+        "n-12-47",
+        "n-12-48",
+        "n-12-49"
+      ],
+      "paragraphGroupId": "pg-12-8",
+      "readingOrder": 179
+    },
+    {
+      "id": "n-12-51",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b51",
+      "role": "P",
+      "text": "Committee, United Nations humanitarian coordinators and country teams to contribute to the provision of reliable data on internal displacement situations, with the cooperation of the Internal Displacement Monitoring Centre and the technical",
+      "bbox": [
+        123.38,
+        692.976,
+        364.7038799999999,
+        33.60000000000002
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-51",
+        "n-12-52",
+        "n-12-53"
+      ],
+      "paragraphGroupId": "pg-12-9",
+      "readingOrder": 181
+    },
+    {
+      "id": "n-12-54",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b54",
+      "role": "P",
+      "text": "12/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.98,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-12-54",
+        "n-12-55"
+      ],
+      "paragraphGroupId": "pg-12-10",
+      "readingOrder": 182
+    },
+    {
+      "id": "n-12-5",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b5",
+      "role": "LI",
+      "text": "35. Calls upon the United Nations to work closely with Member States and",
+      "bbox": [
+        147.14,
+        102.38000000000002,
+        340.56456000000003,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:5",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 166
+    },
+    {
+      "id": "n-12-13",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b13",
+      "role": "LI",
+      "text": "36. Encourages Member States, humanitarian agencies, donors, development",
+      "bbox": [
+        147.14,
+        204.38000000000002,
+        340.7548800000003,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:13",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 168
+    },
+    {
+      "id": "n-12-18",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b18",
+      "role": "LI",
+      "text": "37. Encourages Governments, United Nations agencies and other stakeholders to",
+      "bbox": [
+        147.14,
+        270.41,
+        340.7742000000004,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:18",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 170
+    },
+    {
+      "id": "n-12-23",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b23",
+      "role": "LI",
+      "text": "38. Urges all countries to integrate the 2030 Agenda for Sustainable",
+      "bbox": [
+        147.14,
+        336.41,
+        340.55088000000035,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:23",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 172
+    },
+    {
+      "id": "n-12-29",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b29",
+      "role": "LI",
+      "text": "39. Notes the importance of taking the human rights and the specific protection",
+      "bbox": [
+        147.14,
+        414.43,
+        340.4945999999999,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:29",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 174
+    },
+    {
+      "id": "n-12-35",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b35",
+      "role": "LI",
+      "text": "40. Welcomes the role of the Peacebuilding Commission in this regard, and",
+      "bbox": [
+        147.14,
+        492.19,
+        340.4039999999998,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:35",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 176
+    },
+    {
+      "id": "n-12-43",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b43",
+      "role": "LI",
+      "text": "41. Recalls the dedication by the African Union of 2019 to, inter alia, mark",
+      "bbox": [
+        147.14,
+        592.54,
+        340.26072,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:43",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 178
+    },
+    {
+      "id": "n-12-50",
+      "pageNumber": 12,
+      "sourceBlockId": "p12-b50",
+      "role": "LI",
+      "text": "42. Encourages Member States, members of the Inter-Agency Standing",
+      "bbox": [
+        147.14,
+        681.22,
+        340.9995200000001,
+        9.960000000000036
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:12:50",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 180
+    },
+    {
+      "id": "n-13-1",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b1",
+      "role": "P",
+      "text": "Protection of and assistance to internally displaced persons A/RES/78/205",
+      "bbox": [
+        60,
+        50.51999999999997,
+        492.1177600000001,
+        8.519999999999996
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-1",
+        "n-13-2"
+      ],
+      "paragraphGroupId": "pg-13-0",
+      "readingOrder": 183
+    },
+    {
+      "id": "n-13-3",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b3",
+      "role": "P",
+      "text": "support and assistance of the Joint Internal Displacement Profiling Service, and to provide financial resources, as appropriate, in these respects, and encourages States to take into account the International Recommendations on Internally Displaced Persons Statistics through their national statistics offices, where applicable;",
+      "bbox": [
+        123.38,
+        72.26000000000002,
+        364.13759999999996,
+        45.47999999999999
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-3",
+        "n-13-4",
+        "n-13-5",
+        "n-13-6"
+      ],
+      "paragraphGroupId": "pg-13-1",
+      "readingOrder": 184
+    },
+    {
+      "id": "n-13-8",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b8",
+      "role": "P",
+      "text": "protection and assistance for internally displaced persons and to prevent and reduce such displacement, and in this regard encourages the Secretary-General to work with Member States and the United Nations system to explore ways to better address the long-term needs of internally displaced persons, support communities that host them and improve the lives of the many millions of internally displaced persons;",
+      "bbox": [
+        123.38,
+        137.29999999999998,
+        364.6943599999999,
+        57.23999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-8",
+        "n-13-9",
+        "n-13-10",
+        "n-13-11",
+        "n-13-12"
+      ],
+      "paragraphGroupId": "pg-13-2",
+      "readingOrder": 186
+    },
+    {
+      "id": "n-13-14",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b14",
+      "role": "P",
+      "text": "Rapporteur, from within existing resources, with all assistance necessary to strengthen and carry out her mandate effectively, and encourages the Office of the United Nations High Commissioner for Human Rights, in close cooperation with the Emergency Relief Coordinator, the Office for the Coordination of Humanitarian Affairs of the United Nations Secretariat, the Office of the United Nations High Commissioner for Refugees, the International Organization for Migration and all other relevant United Nations offices and agencies and related organizations, to continue to support and cooperate with the Special Rapporteur;",
+      "bbox": [
+        123.38,
+        214.09999999999994,
+        364.60067999999984,
+        92.67000000000004
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-14",
+        "n-13-15",
+        "n-13-16",
+        "n-13-17",
+        "n-13-18",
+        "n-13-19",
+        "n-13-20",
+        "n-13-21"
+      ],
+      "paragraphGroupId": "pg-13-3",
+      "readingOrder": 188
+    },
+    {
+      "id": "n-13-23",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b23",
+      "role": "P",
+      "text": "of States, relevant organizations and institutions in order to create a more stable basis for her work;",
+      "bbox": [
+        123.38,
+        326.33000000000004,
+        363.9981599999997,
+        21.839999999999975
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-23",
+        "n-13-24"
+      ],
+      "paragraphGroupId": "pg-13-4",
+      "readingOrder": 190
+    },
+    {
+      "id": "n-13-26",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b26",
+      "role": "P",
+      "text": "seventy-ninth and eightieth sessions a report on the implementation of the present resolution;",
+      "bbox": [
+        123.38,
+        367.73,
+        364.30343999999985,
+        21.839999999999975
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-26",
+        "n-13-27"
+      ],
+      "paragraphGroupId": "pg-13-5",
+      "readingOrder": 192
+    },
+    {
+      "id": "n-13-29",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b29",
+      "role": "P",
+      "text": "assistance to internally displaced persons at its eightieth session.",
+      "bbox": [
+        123.38,
+        409.63,
+        277.6648799999997,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "paragraphGroupId": "pg-13-6",
+      "readingOrder": 194
+    },
+    {
+      "id": "n-13-30",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b30",
+      "role": "P",
+      "text": "50th plenary meeting 19 December 2023",
+      "bbox": [
+        397.27,
+        433.63,
+        90.86508000000003,
+        21.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-30",
+        "n-13-31"
+      ],
+      "paragraphGroupId": "pg-13-7",
+      "readingOrder": 195
+    },
+    {
+      "id": "n-13-32",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b32",
+      "role": "P",
+      "text": "13/13 23-26026",
+      "bbox": [
+        60,
+        746.76,
+        491.91999999999996,
+        8.519999999999982
+      ],
+      "columnHint": 0,
+      "confidence": 0.88,
+      "sourceBlockType": "paragraph",
+      "regionKind": null,
+      "_mergedFrom": [
+        "n-13-32",
+        "n-13-33"
+      ],
+      "paragraphGroupId": "pg-13-8",
+      "readingOrder": 196
+    },
+    {
+      "id": "n-13-7",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b7",
+      "role": "LI",
+      "text": "43. Recalls the need to reflect on effective strategies to ensure adequate",
+      "bbox": [
+        147.14,
+        125.53999999999999,
+        340.50647999999984,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:13:7",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 185
+    },
+    {
+      "id": "n-13-13",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b13",
+      "role": "LI",
+      "text": "44. Requests the Secretary-General to continue to provide the Special",
+      "bbox": [
+        147.14,
+        202.33999999999995,
+        340.75800000000044,
+        9.960000000000008
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:13:13",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 187
+    },
+    {
+      "id": "n-13-22",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b22",
+      "role": "LI",
+      "text": "45. Encourages the Special Rapporteur to continue to seek the contributions",
+      "bbox": [
+        147.14,
+        314.57,
+        340.54667999999947,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:13:22",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 189
+    },
+    {
+      "id": "n-13-25",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b25",
+      "role": "LI",
+      "text": "46. Requests the Special Rapporteur to submit to the General Assembly at its",
+      "bbox": [
+        147.14,
+        355.97,
+        340.54319999999996,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:13:25",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 191
+    },
+    {
+      "id": "n-13-28",
+      "pageNumber": 13,
+      "sourceBlockId": "p13-b28",
+      "role": "LI",
+      "text": "47. Decides to continue its consideration of the question of protection of and",
+      "bbox": [
+        147.14,
+        397.61,
+        340.50888,
+        9.95999999999998
+      ],
+      "columnHint": 0,
+      "confidence": 0.94,
+      "sourceBlockType": "list-item",
+      "regionKind": null,
+      "listGroupId": "list:13:28",
+      "listLevel": 1,
+      "listItemIndex": 0,
+      "listStyle": "ordered",
+      "readingOrder": 193
+    }
+  ],
+  "orderedNodeIds": [
+    "n-1-1",
+    "n-1-2",
+    "n-1-4",
+    "n-1-5",
+    "n-1-7",
+    "n-1-13",
+    "n-1-15",
+    "n-1-16",
+    "n-1-17",
+    "n-1-18",
+    "n-1-19",
+    "n-1-25",
+    "n-1-32",
+    "n-1-38",
+    "n-1-39",
+    "n-1-41",
+    "n-1-42",
+    "n-2-1",
+    "n-2-3",
+    "n-2-10",
+    "n-2-16",
+    "n-2-23",
+    "n-2-27",
+    "n-2-34",
+    "n-2-40",
+    "n-2-46",
+    "n-2-49",
+    "n-2-50",
+    "n-2-53",
+    "n-3-1",
+    "n-3-3",
+    "n-3-5",
+    "n-3-8",
+    "n-3-16",
+    "n-3-24",
+    "n-3-26",
+    "n-3-47",
+    "n-3-48",
+    "n-3-53",
+    "n-3-54",
+    "n-3-56",
+    "n-4-1",
+    "n-4-3",
+    "n-4-5",
+    "n-4-11",
+    "n-4-15",
+    "n-4-17",
+    "n-4-21",
+    "n-4-30",
+    "n-4-34",
+    "n-4-37",
+    "n-4-40",
+    "n-4-43",
+    "n-4-48",
+    "n-4-49",
+    "n-4-57",
+    "n-5-1",
+    "n-5-3",
+    "n-5-5",
+    "n-5-15",
+    "n-5-19",
+    "n-5-23",
+    "n-5-28",
+    "n-5-33",
+    "n-5-39",
+    "n-5-45",
+    "n-5-48",
+    "n-5-49",
+    "n-5-54",
+    "n-6-1",
+    "n-6-3",
+    "n-6-6",
+    "n-6-18",
+    "n-6-24",
+    "n-6-29",
+    "n-6-33",
+    "n-6-39",
+    "n-6-40",
+    "n-6-42",
+    "n-6-43",
+    "n-6-47",
+    "n-6-48",
+    "n-6-51",
+    "n-6-52",
+    "n-6-54",
+    "n-7-1",
+    "n-7-3",
+    "n-7-16",
+    "n-7-17",
+    "n-7-22",
+    "n-7-23",
+    "n-7-27",
+    "n-7-28",
+    "n-7-30",
+    "n-7-31",
+    "n-7-37",
+    "n-7-38",
+    "n-7-48",
+    "n-7-49",
+    "n-7-55",
+    "n-8-1",
+    "n-8-3",
+    "n-8-8",
+    "n-8-9",
+    "n-8-10",
+    "n-8-11",
+    "n-8-14",
+    "n-8-15",
+    "n-8-25",
+    "n-8-26",
+    "n-8-35",
+    "n-8-36",
+    "n-8-45",
+    "n-8-46",
+    "n-8-51",
+    "n-8-52",
+    "n-8-55",
+    "n-9-1",
+    "n-9-3",
+    "n-9-10",
+    "n-9-11",
+    "n-9-15",
+    "n-9-16",
+    "n-9-23",
+    "n-9-24",
+    "n-9-26",
+    "n-9-27",
+    "n-9-33",
+    "n-9-34",
+    "n-9-40",
+    "n-9-41",
+    "n-9-47",
+    "n-9-48",
+    "n-9-50",
+    "n-9-51",
+    "n-9-54",
+    "n-10-1",
+    "n-10-3",
+    "n-10-4",
+    "n-10-9",
+    "n-10-10",
+    "n-10-18",
+    "n-10-19",
+    "n-10-27",
+    "n-10-28",
+    "n-10-32",
+    "n-10-33",
+    "n-10-36",
+    "n-10-37",
+    "n-10-54",
+    "n-11-1",
+    "n-11-3",
+    "n-11-4",
+    "n-11-20",
+    "n-11-21",
+    "n-11-36",
+    "n-11-37",
+    "n-11-41",
+    "n-11-42",
+    "n-11-46",
+    "n-11-47",
+    "n-11-53",
+    "n-11-54",
+    "n-11-57",
+    "n-12-1",
+    "n-12-3",
+    "n-12-5",
+    "n-12-6",
+    "n-12-13",
+    "n-12-14",
+    "n-12-18",
+    "n-12-19",
+    "n-12-23",
+    "n-12-24",
+    "n-12-29",
+    "n-12-30",
+    "n-12-35",
+    "n-12-36",
+    "n-12-43",
+    "n-12-44",
+    "n-12-50",
+    "n-12-51",
+    "n-12-54",
+    "n-13-1",
+    "n-13-3",
+    "n-13-7",
+    "n-13-8",
+    "n-13-13",
+    "n-13-14",
+    "n-13-22",
+    "n-13-23",
+    "n-13-25",
+    "n-13-26",
+    "n-13-28",
+    "n-13-29",
+    "n-13-30",
+    "n-13-32"
+  ]
+}

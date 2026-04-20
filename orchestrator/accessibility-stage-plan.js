@@ -215,7 +215,7 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
         const inputPath = artifacts.semanticMerged || artifacts.semantic;
 
         try {
-          const stageOutputPath = await runJsonStage("modules/reading-order/index.js", [inputPath], outputPath);
+          const stageOutputPath = await runJsonStage("modules/reading-order/index.js", [inputPath], outputPath, { env: profileEnv });
           return {
             outputPath: stageOutputPath,
             artifacts: { semanticOrdered: stageOutputPath }
@@ -245,6 +245,15 @@ function buildWriterModeArgs(profileContext) {
   }
   if (writerConfig.nativeMatchThreshold != null) {
     args.push("--native-match-threshold", String(writerConfig.nativeMatchThreshold));
+  }
+  if (writerConfig.alreadyTaggedThreshold != null) {
+    args.push("--already-tagged-threshold", String(writerConfig.alreadyTaggedThreshold));
+  }
+  if (writerConfig.alreadyTaggedPolicy) {
+    args.push("--already-tagged-policy", String(writerConfig.alreadyTaggedPolicy));
+  }
+  if (writerConfig.readingOrderStrategy) {
+    args.push("--reading-order-strategy", String(writerConfig.readingOrderStrategy));
   }
   return args;
 }

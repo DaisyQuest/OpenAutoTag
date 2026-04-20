@@ -87,6 +87,70 @@ const profileDescription = document.querySelector("#profile-description");
 const profileAdvancedToggle = document.querySelector("#profile-advanced-toggle");
 const profileAdvancedPanel = document.querySelector("#profile-advanced-panel");
 const profileOverridesTextarea = document.querySelector("#profile-overrides");
+const writerModeSelect = document.querySelector("#writer-mode");
+const nativeMatchThresholdInput = document.querySelector("#native-match-threshold");
+const alreadyTaggedThresholdInput = document.querySelector("#already-tagged-threshold");
+const alreadyTaggedPolicySelect = document.querySelector("#already-tagged-policy");
+const readingOrderStrategySelect = document.querySelector("#reading-order-strategy");
+
+/**
+ * Assemble the final `profileOverrides` payload for a batch/job submission.
+ *
+ * Form controls (mode picker, threshold inputs, policy/reading-order
+ * selects) are merged into a `pdfWriter` block first; any freeform JSON the
+ * user pasted into the overrides textarea is deep-merged on top (so power
+ * users can still override even the form-surfaced fields). Missing or
+ * empty controls are left unset — the server falls back to the profile
+ * default for anything we don't explicitly send.
+ *
+ * Returns `null` when nothing needs to be sent, so callers can skip the
+ * `profileOverrides` key entirely rather than sending an empty object.
+ */
+function buildProfileOverridesPayload() {
+  const writer = {};
+  const mode = writerModeSelect?.value;
+  if (mode) writer.mode = mode;
+  const matchThr = nativeMatchThresholdInput?.value;
+  if (matchThr !== "" && matchThr != null) {
+    const n = Number(matchThr);
+    if (Number.isFinite(n) && n >= 0 && n <= 1) writer.nativeMatchThreshold = n;
+  }
+  const markedThr = alreadyTaggedThresholdInput?.value;
+  if (markedThr !== "" && markedThr != null) {
+    const n = Number(markedThr);
+    if (Number.isFinite(n) && n >= 0 && n <= 1) writer.alreadyTaggedThreshold = n;
+  }
+  const policy = alreadyTaggedPolicySelect?.value;
+  if (policy) writer.alreadyTaggedPolicy = policy;
+  const roStrategy = readingOrderStrategySelect?.value;
+  if (roStrategy) writer.readingOrderStrategy = roStrategy;
+
+  const overrides = {};
+  if (Object.keys(writer).length > 0) {
+    overrides.pdfWriter = writer;
+  }
+
+  const raw = profileOverridesTextarea?.value?.trim();
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      // Shallow-merge: freeform pdfWriter overrides win, but we keep any
+      // other stage keys (parser, layoutAnalyzer, etc.) from the textarea.
+      for (const [stageKey, stageVal] of Object.entries(parsed || {})) {
+        if (stageKey === "pdfWriter" && overrides.pdfWriter && stageVal && typeof stageVal === "object") {
+          overrides.pdfWriter = { ...overrides.pdfWriter, ...stageVal };
+        } else {
+          overrides[stageKey] = stageVal;
+        }
+      }
+    } catch (error) {
+      // Swallow — the existing textarea-only code path also silently drops
+      // invalid JSON (see startBatch below); surfacing is a separate story.
+    }
+  }
+
+  return Object.keys(overrides).length > 0 ? overrides : null;
+}
 
 function hasWorkspaceAccess() {
   return Boolean(state.authConfig?.publicMode || getSessionAccess().api);
@@ -521,31 +585,86 @@ function renderOutcomeCell(item) {
   `;
 }
 
+/**
+ * Build a tooltip line that explains why the writer chose its mode. This
+ * surfaces `autoFallbackReason`, `probeMatchRate`, and `probeMarkedFraction`
+ * that the writer already writes to the manifest — converting telemetry we
+ * already collect into discoverable UX.
+ */
+function buildModeDecisionTooltip(summary) {
+  const parts = [];
+  if (summary?.autoFallbackReason) {
+    parts.push(`Reason: ${summary.autoFallbackReason}`);
+  }
+  if (summary?.probeMatchRate != null) {
+    parts.push(`Probe match rate: ${(Number(summary.probeMatchRate) * 100).toFixed(1)}%`);
+  }
+  if (summary?.probeMarkedFraction != null) {
+    parts.push(`Source already-tagged: ${(Number(summary.probeMarkedFraction) * 100).toFixed(1)}%`);
+  }
+  if (summary?.matchThreshold != null) {
+    parts.push(`Match threshold: ${summary.matchThreshold}`);
+  }
+  if (summary?.alreadyTaggedThreshold != null) {
+    parts.push(`Already-tagged threshold: ${summary.alreadyTaggedThreshold}`);
+  }
+  if (summary?.alreadyTaggedPolicy) {
+    parts.push(`Already-tagged policy: ${summary.alreadyTaggedPolicy}`);
+  }
+  if (summary?.readingOrderStrategy) {
+    parts.push(`Reading order: ${summary.readingOrderStrategy}`);
+  }
+  if (summary?.pagesWithMonotonicReadingOrder != null && summary?.pagesNative != null && summary.pagesNative > 0) {
+    parts.push(`Monotonic reading order on ${summary.pagesWithMonotonicReadingOrder}/${summary.pagesNative} pages`);
+  }
+  return parts.join(" \u2022 ");
+}
+
 function renderNativeBadge(item, { prominent = false } = {}) {
   const writerMode = item.summary?.writerMode || item.writerReport?.writerMode;
   if (!writerMode) return "";
   const cls = prominent ? "native-retained-prominent" : "";
+  const decisionTooltip = buildModeDecisionTooltip(item.summary || item.writerReport || {});
 
   if (writerMode === "native") {
-    const matchRate = item.summary?.operatorMatchRate ?? item.writerReport?.matchRate;
+    const matchRate = item.summary?.operatorMatchRate ?? item.summary?.matchRate ?? item.writerReport?.matchRate;
     const matchDetail = matchRate != null ? `<span class="native-match-detail">${Math.round(matchRate * 100)}% fidelity</span>` : "";
-    return `<span class="native-badge native-retained ${cls}" title="Original vector text, fonts, and links preserved. No rasterization. Text stays sharp at any zoom."><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED ${matchDetail}</span>`;
+    const baseTitle = "Original vector text, fonts, and links preserved. No rasterization. Text stays sharp at any zoom.";
+    const title = decisionTooltip ? `${baseTitle}\n\n${decisionTooltip}` : baseTitle;
+    return `<span class="native-badge native-retained ${cls}" title="${escapeAttr(title)}"><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED ${matchDetail}</span>`;
+  }
+  if (writerMode === "passthrough") {
+    const baseTitle = "Source PDF was already tagged. Copied verbatim and refreshed metadata; original fonts, structure, and content streams preserved exactly.";
+    const title = decisionTooltip ? `${baseTitle}\n\n${decisionTooltip}` : baseTitle;
+    return `<span class="native-badge native-retained ${cls}" title="${escapeAttr(title)}"><span class="native-badge-icon">\u{1F4C4}</span> SOURCE PASSTHROUGH</span>`;
   }
   if (writerMode === "raster") {
-    return `<span class="native-badge native-raster" title="Pages rasterized to images with invisible text overlay.">RASTER</span>`;
+    const baseTitle = "Pages rasterized to images with invisible text overlay.";
+    const title = decisionTooltip ? `${baseTitle}\n\n${decisionTooltip}` : baseTitle;
+    return `<span class="native-badge native-raster" title="${escapeAttr(title)}">RASTER</span>`;
   }
   if (writerMode === "auto") {
     const pagesNative = item.summary?.pagesNative ?? item.writerReport?.pagesNative ?? 0;
     const pagesRaster = item.summary?.pagesRaster ?? item.writerReport?.pagesRaster ?? 0;
     if (pagesNative > 0 && pagesRaster === 0) {
-      return `<span class="native-badge native-retained ${cls}" title="All ${pagesNative} pages preserved natively. Vector text, fonts, and links intact."><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED</span>`;
+      const baseTitle = `All ${pagesNative} pages preserved natively. Vector text, fonts, and links intact.`;
+      const title = decisionTooltip ? `${baseTitle}\n\n${decisionTooltip}` : baseTitle;
+      return `<span class="native-badge native-retained ${cls}" title="${escapeAttr(title)}"><span class="native-badge-icon">\u{1F6E1}\uFE0F</span> NATIVE PDF RETAINED</span>`;
     }
     if (pagesNative > 0) {
-      return `<span class="native-badge native-partial" title="${pagesNative} pages native, ${pagesRaster} pages rasterized."><span class="native-badge-icon">\u{26A0}\uFE0F</span> ${pagesNative}/${pagesNative + pagesRaster} NATIVE</span>`;
+      const baseTitle = `${pagesNative} pages native, ${pagesRaster} pages rasterized.`;
+      const title = decisionTooltip ? `${baseTitle}\n\n${decisionTooltip}` : baseTitle;
+      return `<span class="native-badge native-partial" title="${escapeAttr(title)}"><span class="native-badge-icon">\u{26A0}\uFE0F</span> ${pagesNative}/${pagesNative + pagesRaster} NATIVE</span>`;
     }
-    return `<span class="native-badge native-raster" title="Auto mode fell back to raster on all pages.">RASTER FALLBACK</span>`;
+    const baseTitle = "Auto mode fell back to raster on all pages.";
+    const title = decisionTooltip ? `${baseTitle}\n\n${decisionTooltip}` : baseTitle;
+    return `<span class="native-badge native-raster" title="${escapeAttr(title)}">RASTER FALLBACK</span>`;
   }
   return "";
+}
+
+function escapeAttr(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function renderSignalCell(item) {
@@ -1124,8 +1243,9 @@ async function startBatch() {
     const formData = new FormData();
     formData.append("workloadId", state.selectedWorkloadId);
     formData.append("profileId", state.selectedProfileId || "default");
-    if (profileOverridesTextarea && profileOverridesTextarea.value.trim()) {
-      formData.append("profileOverrides", profileOverridesTextarea.value.trim());
+    const batchOverrides = buildProfileOverridesPayload();
+    if (batchOverrides) {
+      formData.append("profileOverrides", JSON.stringify(batchOverrides));
     }
 
     for (const item of state.selections) {
@@ -1186,9 +1306,10 @@ async function startUrlJob() {
         fileUrl,
         workloadId: state.selectedWorkloadId,
         profileId: state.selectedProfileId || "default",
-        ...(profileOverridesTextarea && profileOverridesTextarea.value.trim()
-          ? { profileOverrides: JSON.parse(profileOverridesTextarea.value.trim()) }
-          : {})
+        ...(() => {
+          const overrides = buildProfileOverridesPayload();
+          return overrides ? { profileOverrides: overrides } : {};
+        })()
       })
     });
     const job = await response.json();

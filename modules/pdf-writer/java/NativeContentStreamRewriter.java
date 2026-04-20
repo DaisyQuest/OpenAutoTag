@@ -36,10 +36,15 @@ import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.apache.pdfbox.pdmodel.common.PDNumberTreeNode;
 import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDMarkInfo;
+import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDMarkedContentReference;
+import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDObjectReference;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDParentTreeValue;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureTreeRoot;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
 
 /**
@@ -250,6 +255,9 @@ public class NativeContentStreamRewriter {
     /** A single operator reference inside an assignment */
     private static class OpRef {
         int seq;
+        double x;
+        double y;
+        String text;
     }
 
     /** An assignment: a tag node mapped to a set of operators with a given MCID */
@@ -266,6 +274,52 @@ public class NativeContentStreamRewriter {
         int pageNumber;
         List<Assignment> assignments = new ArrayList<>();
         List<Integer> unmatchedOperatorSeqs = new ArrayList<>();
+    }
+
+    /**
+     * Hierarchical tag tree node from tagging.json. The tag-builder
+     * produces a semantically-nested tree (Document > Sect > H1 + Table
+     * > TR > TD, etc.) — we preserve that nesting in the output
+     * PDStructureTreeRoot so assistive tech and PDF/UA validators see
+     * the intended structure. The legacy flat-build path remains as a
+     * fallback when --tags is not supplied, but every stage-plan
+     * invocation passes it now.
+     */
+    private static class TagTreeNode {
+        String id;
+        String type;
+        List<TagTreeNode> children = new ArrayList<>();
+        String lang;
+        String alt;
+        String actualText;
+    }
+
+    private static TagTreeNode parseTaggingTree(String jsonStr) {
+        Map<String, Object> doc = asMap(parseJson(jsonStr));
+        Object root = doc.get("root");
+        if (root == null) return null;
+        return parseTagNode(root);
+    }
+
+    private static TagTreeNode parseTagNode(Object o) {
+        Map<String, Object> m = asMap(o);
+        TagTreeNode n = new TagTreeNode();
+        n.id = asString(m.get("id"));
+        // tag-builder uses "type" for the PDF tag role; sourceNode.role
+        // is the semantic role. Prefer "type" when present.
+        Object type = m.get("type");
+        if (type == null) type = m.get("role");
+        n.type = asString(type);
+        if (n.type == null || n.type.isEmpty()) n.type = "NonStruct";
+        Object lang = m.get("lang");
+        if (lang != null) n.lang = asString(lang);
+        Object alt = m.get("alt");
+        if (alt != null) n.alt = asString(alt);
+        Object actualText = m.get("actualText");
+        if (actualText != null) n.actualText = asString(actualText);
+        List<Object> children = asList(m.get("children"));
+        for (Object c : children) n.children.add(parseTagNode(c));
+        return n;
     }
 
     // ---------------------------------------------------------------
@@ -296,6 +350,9 @@ public class NativeContentStreamRewriter {
                     Map<String, Object> om = asMap(opObj);
                     OpRef ref = new OpRef();
                     ref.seq = asInt(om.get("seq"));
+                    ref.x = om.containsKey("x") ? asDouble(om.get("x")) : Double.NaN;
+                    ref.y = om.containsKey("y") ? asDouble(om.get("y")) : Double.NaN;
+                    ref.text = asString(om.get("text"));
                     a.operators.add(ref);
                 }
                 pp.assignments.add(a);
@@ -329,7 +386,14 @@ public class NativeContentStreamRewriter {
      *  - Unmatched text operators get wrapped as /Artifact BMC ... EMC
      *  - Non-text operators pass through untouched
      */
-    private static void rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan) throws IOException {
+    /** Result of rewriting one content stream; surfaced in the final report. */
+    private static class RewriteResult {
+        int taggedWrapped;
+        int artifactWrapped;
+        int skippedInsideSourceMarkedContent;
+    }
+
+    private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan) throws IOException {
         // Build lookup: seq -> assignment (for first/last detection)
         // and seq -> which assignment it belongs to
         Map<Integer, Assignment> seqToAssignment = new HashMap<>();
@@ -346,24 +410,56 @@ public class NativeContentStreamRewriter {
             seqIsLast.put(a.operators.get(a.operators.size() - 1).seq, true);
         }
 
-        // Parse the existing content stream
         PDFStreamParser parser = new PDFStreamParser(page);
         List<Object> tokens = parser.parse();
 
-        // Build the new token list
         List<Object> newTokens = new ArrayList<>();
         int textOpSeq = 0;
         boolean inArtifact = false;
+        // LIFO stack of MCIDs whose BDC we've emitted but not yet
+        // closed with a matching EMC. Needed because a tagged group's
+        // seqIsLast op can fall inside a source marked-content block
+        // (where we intentionally skip emission) — without the stack
+        // we'd never close the BDC and the page would ship with
+        // unbalanced marked-content. See PDF 32000-1 §14.6 for the
+        // LIFO requirement on nested marked-content.
+        java.util.Deque<Integer> openMcidStack = new java.util.ArrayDeque<>();
+        // Depth of pre-existing marked-content (BMC/BDC) in the source stream.
+        // When > 0 we are inside a source-owned marker; our own BDC wrappers
+        // would produce invalid nesting, so we leave those operators alone.
+        int sourceMCDepth = 0;
 
-        // Walk through tokens. We need to identify operator+operands groups.
-        // PDFStreamParser returns a flat list where operands precede the operator.
-        // We collect operands until we hit an Operator.
         List<COSBase> pendingOperands = new ArrayList<>();
+        RewriteResult result = new RewriteResult();
 
         for (Object token : tokens) {
             if (token instanceof Operator) {
                 Operator op = (Operator) token;
                 String opName = op.getName();
+
+                // STRIP source marked-content markers entirely. Keeping
+                // them causes MCID collisions with OUR matcher-assigned
+                // MCIDs — the source's numbering is independent from
+                // ours. When the source /Article <</MCID 0>> BDC ... EMC
+                // wraps zero text, and our matcher assigns MCID 0 to a
+                // real text run elsewhere, Adobe resolves the struct
+                // leaf to the EMPTY source wrapper → "blank tag".
+                // Dropping source MC removes that ambiguity; our
+                // struct tree is owned end-to-end by our pipeline.
+                if ("BMC".equals(opName) || "BDC".equals(opName) || "EMC".equals(opName)) {
+                    if ("EMC".equals(opName) && inArtifact) {
+                        // Stray EMC: if it's our own artifact close,
+                        // honor it. But this only happens if a source
+                        // EMC precedes our own artifact close — unusual.
+                        newTokens.add(op);
+                        inArtifact = false;
+                    }
+                    // Otherwise drop the source marker. Don't emit the
+                    // operator or its operands — the visible rendering
+                    // is identical since BMC/BDC/EMC are metadata-only.
+                    pendingOperands.clear();
+                    continue;
+                }
 
                 if (TEXT_OPS.contains(opName)) {
                     int currentSeq = textOpSeq;
@@ -372,42 +468,44 @@ public class NativeContentStreamRewriter {
                     Assignment assignment = seqToAssignment.get(currentSeq);
 
                     if (assignment != null) {
-                        // This operator belongs to a tagged assignment
                         if (inArtifact) {
-                            // Close any open artifact wrapper
                             newTokens.add(Operator.getOperator("EMC"));
                             inArtifact = false;
                         }
 
                         if (seqIsFirst.containsKey(currentSeq)) {
-                            // Inject BDC: /TagType <</MCID n>> BDC
                             COSDictionary props = new COSDictionary();
                             props.setInt(COSName.MCID, assignment.mcid);
                             newTokens.add(COSName.getPDFName(assignment.tagType));
                             newTokens.add(props);
                             newTokens.add(Operator.getOperator("BDC"));
+                            openMcidStack.push(assignment.mcid);
                         }
 
-                        // Write the operands and operator
                         newTokens.addAll(pendingOperands);
                         newTokens.add(op);
 
                         if (seqIsLast.containsKey(currentSeq)) {
-                            // Inject EMC
-                            newTokens.add(Operator.getOperator("EMC"));
+                            // Close our BDC only if we actually opened one
+                            // for this mcid.
+                            if (openMcidStack.contains(assignment.mcid)) {
+                                while (!openMcidStack.isEmpty()) {
+                                    int top = openMcidStack.pop();
+                                    newTokens.add(Operator.getOperator("EMC"));
+                                    if (top == assignment.mcid) break;
+                                }
+                                result.taggedWrapped++;
+                            }
                         }
-                    } else if (unmatchedSeqs.contains(currentSeq)) {
-                        // Unmatched text operator - wrap as Artifact
-                        if (!inArtifact) {
-                            newTokens.add(COSName.ARTIFACT);
-                            newTokens.add(Operator.getOperator("BMC"));
-                            inArtifact = true;
-                        }
-                        newTokens.addAll(pendingOperands);
-                        newTokens.add(op);
                     } else {
-                        // Text operator not in any assignment or unmatched list
-                        // Wrap as Artifact to be safe
+                        // Unmatched or orphaned text op — wrap as /Artifact.
+                        // Do NOT drain openMcidStack here: the next
+                        // tagged op (continuation of the same group)
+                        // would become orphaned from its BDC wrapper
+                        // and Adobe would show a "blank tag" (struct
+                        // leaf points to an MC region with no text).
+                        // Artifact BMC nested inside our own BDC is
+                        // legal per PDF 32000-1 §14.6.
                         if (!inArtifact) {
                             newTokens.add(COSName.ARTIFACT);
                             newTokens.add(Operator.getOperator("BMC"));
@@ -415,10 +513,10 @@ public class NativeContentStreamRewriter {
                         }
                         newTokens.addAll(pendingOperands);
                         newTokens.add(op);
+                        result.artifactWrapped++;
                     }
                 } else {
-                    // Non-text operator: just pass through
-                    // But if we're transitioning between groups, handle artifact state
+                    // Any non-text, non-MC operator: pass through unchanged.
                     newTokens.addAll(pendingOperands);
                     newTokens.add(op);
                 }
@@ -427,23 +525,32 @@ public class NativeContentStreamRewriter {
             } else if (token instanceof COSBase) {
                 pendingOperands.add((COSBase) token);
             }
+            // Unknown token types (e.g., PDFBox's inline-image wrappers) are
+            // intentionally dropped from the emitted stream only if they
+            // aren't COSBase/Operator — but PDFStreamParser only emits those
+            // two token classes in PDFBox 3.x, so this branch never fires.
         }
 
-        // Close any trailing artifact
         if (inArtifact) {
             newTokens.add(Operator.getOperator("EMC"));
             inArtifact = false;
         }
+        // Drain any remaining open tagged BDCs — the only reason they'd
+        // still be open is seqIsLast fell inside a skipped source MC
+        // block, or the stream ended before the group's last op.
+        while (!openMcidStack.isEmpty()) {
+            openMcidStack.pop();
+            newTokens.add(Operator.getOperator("EMC"));
+        }
 
-        // Flush any remaining operands (shouldn't happen in valid PDF)
         newTokens.addAll(pendingOperands);
 
-        // Write the new content stream
         PDStream newStream = new PDStream(doc);
         try (OutputStream out = newStream.createOutputStream()) {
             ContentStreamSerializer.writeTokens(out, newTokens);
         }
         page.setContents(newStream);
+        return result;
     }
 
     // ---------------------------------------------------------------
@@ -541,6 +648,374 @@ public class NativeContentStreamRewriter {
      * Creates a Document element as the root, with each assignment becoming
      * a structure element of the appropriate type, linked to the page and MCID.
      */
+    /**
+     * Hierarchical structure tree builder. Walks the tag-builder
+     * tagging.json tree depth-first and produces a matching
+     * PDStructureElement hierarchy (Document → Sect → H1, Table → TR
+     * → TD, etc.). Leaf elements get PDMarkedContentReference kids —
+     * one per matched assignment — so multi-page elements are
+     * represented correctly with per-ref /Pg attributes.
+     *
+     * Behavior when a tag node has no matched assignments:
+     *   - Non-leaf container (has tree children): still emitted so the
+     *     hierarchy isn't truncated — its children carry MCIDs.
+     *   - Leaf with zero assignments: skipped (nothing to reference).
+     *
+     * Fallback: when tagTree is null (caller didn't supply --tags) we
+     * fall back to the flat build for backward compatibility.
+     */
+    private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree) {
+        if (tagTree == null) {
+            buildStructureTree(doc, plans);
+            return;
+        }
+
+        PDDocumentCatalog catalog = doc.getDocumentCatalog();
+        PDStructureTreeRoot treeRoot = new PDStructureTreeRoot();
+        catalog.setStructureTreeRoot(treeRoot);
+
+        PDMarkInfo markInfo = new PDMarkInfo();
+        markInfo.setMarked(true);
+        catalog.setMarkInfo(markInfo);
+
+        // Index: tagNodeId -> ordered list of (page, mcid) refs. One
+        // tag node can have assignments across multiple pages (e.g. a
+        // paragraph that wraps across a page break).
+        Map<String, List<PageMcRef>> refsByTag = new LinkedHashMap<>();
+        Map<Integer, COSArray> parentArraysByPageKey = new LinkedHashMap<>();
+        Map<PDPage, Double> pageDisplayHeight = new LinkedHashMap<>();
+        // Link annotations, grouped by page. Each Link annot maps to
+        // one Link StructElement that'll collect the MCIDs whose
+        // position falls inside the annot rect. StructParent keys are
+        // assigned after the page-level StructParents so every key is
+        // unique within the /ParentTree.
+        List<LinkAnnot> linkAnnots = new ArrayList<>();
+        int nextPageKey = 0;
+
+        for (PagePlan plan : plans) {
+            int pageIndex = plan.pageNumber - 1;
+            if (pageIndex < 0 || pageIndex >= doc.getNumberOfPages()) continue;
+            PDPage page = doc.getPage(pageIndex);
+            int pageKey = nextPageKey++;
+            page.setStructParents(pageKey);
+            page.getCOSObject().setItem(COSName.getPDFName("Tabs"), COSName.S);
+
+            PDRectangle cropBox = page.getCropBox();
+            pageDisplayHeight.put(page, cropBox != null ? (double) cropBox.getHeight() : 792.0);
+
+            // Link annotation wrapping is intentionally disabled in
+            // the current cut. A proper implementation needs:
+            //   1. Rotation-aware coordinate transform (annot rects
+            //      are in UN-rotated user space, op positions are in
+            //      rotated display space — they don't align on
+            //      /Rotate 90|270 pages today).
+            //   2. /ParentTree entries for annotations must be direct
+            //      struct-element refs, not COSArrays wrapping them
+            //      (ISO 32000-1 § 14.7.4.4). Our current PDNumberTreeNode
+            //      plumbing treats every slot as a COSArray, which is
+            //      correct for /StructParents on pages but wrong for
+            //      /StructParent on annots.
+            // Shipping the TH /Scope fix and the hierarchical structure
+            // tree as the high-ROI improvements; link wrapping stays
+            // queued for a follow-up when both gaps are resolved.
+
+            COSArray parentArray = new COSArray();
+            parentArraysByPageKey.put(pageKey, parentArray);
+
+            for (Assignment a : plan.assignments) {
+                // Use the centroid of the assignment's operators as
+                // the representative position for annot-rect tests.
+                // A single-operator assignment falls through cleanly;
+                // multi-op assignments average out in both axes which
+                // is the right behavior for a paragraph that spans a
+                // link's rect — we want the link to "catch" the
+                // assignment if the bulk of its text is inside.
+                double sumX = 0, sumY = 0; int n = 0;
+                for (OpRef op : a.operators) {
+                    if (!Double.isNaN(op.x) && !Double.isNaN(op.y)) { sumX += op.x; sumY += op.y; n++; }
+                }
+                double cx = n > 0 ? sumX / n : Double.NaN;
+                double cy = n > 0 ? sumY / n : Double.NaN;
+                refsByTag.computeIfAbsent(a.tagNodeId, k -> new ArrayList<>())
+                         .add(new PageMcRef(page, a.mcid, pageKey, cx, cy));
+            }
+        }
+
+        // Walk tag tree and create structure elements. The tree's root
+        // is the Document node the tag-builder emits. Ancestor context
+        // threads through so element-specific attributes (e.g. TH
+        // /Scope, List /ListNumbering, /RowSpan on merged cells) can
+        // be derived from local tree position. Link annotations are
+        // matched against operator positions during the walk so
+        // link-covered MCIDs end up under a /Link StructElement.
+        TreeContext rootContext = new TreeContext();
+        PDStructureElement rootElement = buildStructureSubtree(treeRoot, tagTree, rootContext, refsByTag, parentArraysByPageKey, linkAnnots, pageDisplayHeight);
+        if (rootElement != null) treeRoot.appendKid(rootElement);
+
+        // Link annotation wrapping is disabled (see LinkAnnot
+        // comment in the page-collection loop above). No post-walk
+        // annotation bookkeeping to do.
+
+        PDNumberTreeNode parentTree = new PDNumberTreeNode(PDParentTreeValue.class);
+        Map<Integer, COSObjectable> numbers = new TreeMap<>();
+        for (Map.Entry<Integer, COSArray> entry : parentArraysByPageKey.entrySet()) {
+            numbers.put(entry.getKey(), new PDParentTreeValue(entry.getValue()));
+        }
+        parentTree.setNumbers(numbers);
+        treeRoot.setParentTree(parentTree);
+        treeRoot.setParentTreeNextKey(nextPageKey);
+    }
+
+    /**
+     * Page-qualified marked-content reference for use while building
+     * the hierarchical structure tree. Captures the PDF page, the
+     * MCID, the /ParentTree key, and the operator's (x, y) position
+     * so downstream passes (e.g. Link-annotation wrapping) can decide
+     * whether the MCID falls inside a given page annotation rect.
+     */
+    private static class PageMcRef {
+        final PDPage page;
+        final int mcid;
+        final int pageKey;
+        final double opX;
+        final double opY;
+        PageMcRef(PDPage page, int mcid, int pageKey, double opX, double opY) {
+            this.page = page; this.mcid = mcid; this.pageKey = pageKey; this.opX = opX; this.opY = opY;
+        }
+    }
+
+    /**
+     * Ancestor context threaded through the recursive walker. Small
+     * set of booleans/counters the tree walker uses to derive
+     * attributes that aren't carried on the tag-builder's nodes —
+     * TH /Scope, heading-depth tracking for H1-H6 level fix-up,
+     * inherited /Lang, etc. Only the bits we actually consume are
+     * tracked; keep this tight.
+     */
+    private static class TreeContext {
+        boolean insideTHead = false;
+        String inheritedLang = null;  // /Lang from nearest ancestor
+        int openHeadingLevel = 0;     // highest H# seen in this Sect
+
+        TreeContext descend() {
+            TreeContext c = new TreeContext();
+            c.insideTHead = this.insideTHead;
+            c.inheritedLang = this.inheritedLang;
+            c.openHeadingLevel = this.openHeadingLevel;
+            return c;
+        }
+    }
+
+    /**
+     * A link annotation and its page rectangle, used during structure
+     * tree construction to wrap the MCIDs whose text falls inside the
+     * link in a /Link StructElement with an /OBJR kid (Matterhorn
+     * 28-004, PDF/UA-1 §7.18.5). Collected once per doc up front so
+     * the recursive walker can cheap-intersect an operator position
+     * against the set.
+     */
+    private static class LinkAnnot {
+        final PDPage page;
+        final PDAnnotationLink annot;
+        final PDRectangle rect;
+        final int structParent;
+        int parentTreeKey = -1;
+        PDStructureElement emittedElement = null;
+        LinkAnnot(PDPage page, PDAnnotationLink annot, int structParent) {
+            this.page = page;
+            this.annot = annot;
+            this.rect = annot.getRectangle();
+            this.structParent = structParent;
+        }
+
+        /**
+         * PDF annotation rects use bottom-origin y coordinates (like
+         * raw PDF user space). Operator positions captured by our
+         * parser are in top-origin display space (y=0 at page top,
+         * coordinateOrigin="top"). Convert once per query using the
+         * page's cropBox height.
+         */
+        boolean containsDisplay(double opX, double opY, double pageDisplayHeight) {
+            if (rect == null) return false;
+            double llx = rect.getLowerLeftX();
+            double lly = rect.getLowerLeftY();
+            double urx = rect.getUpperRightX();
+            double ury = rect.getUpperRightY();
+            // Flip op y into bottom-origin PDF space.
+            double bottomY = pageDisplayHeight - opY;
+            double pad = 1.0; // 1pt slack for anti-aliasing/rounding
+            return opX >= llx - pad && opX <= urx + pad
+                && bottomY >= lly - pad && bottomY <= ury + pad;
+        }
+    }
+
+    /**
+     * Recursive helper. Returns the PDStructureElement for this node
+     * (or null if the node and its subtree have no MCIDs and should
+     * be skipped). Refs come through refsByTag keyed by tagNodeId;
+     * parentArraysByPageKey gets populated at each (page, mcid) slot
+     * with the emitting structure element so /ParentTree lookups
+     * work from both directions. The parentNode argument lets TH
+     * emit the /Scope attribute JAWS/NVDA need for table navigation.
+     */
+    private static PDStructureElement buildStructureSubtree(
+            PDStructureTreeRoot treeRoot,
+            TagTreeNode node,
+            TreeContext ctx,
+            Map<String, List<PageMcRef>> refsByTag,
+            Map<Integer, COSArray> parentArraysByPageKey,
+            List<LinkAnnot> linkAnnots,
+            Map<PDPage, Double> pageDisplayHeight) {
+
+        // Derive child context from current — threshold updates to
+        // boolean flags happen here before the recursive call so all
+        // descendants see the right ancestor state.
+        TreeContext childCtx = ctx.descend();
+        if ("THead".equals(node.type)) childCtx.insideTHead = true;
+        if (node.lang != null && !node.lang.isEmpty()) childCtx.inheritedLang = node.lang;
+
+        List<PageMcRef> myRefs = refsByTag.getOrDefault(node.id, java.util.Collections.emptyList());
+        List<PDStructureElement> childElements = new ArrayList<>();
+        for (TagTreeNode child : node.children) {
+            PDStructureElement childEl = buildStructureSubtree(treeRoot, child, childCtx, refsByTag, parentArraysByPageKey, linkAnnots, pageDisplayHeight);
+            if (childEl != null) childElements.add(childEl);
+        }
+        if (myRefs.isEmpty() && childElements.isEmpty()) return null;
+
+        PDStructureElement el = new PDStructureElement(node.type, treeRoot);
+        if (node.lang != null && !node.lang.isEmpty()) el.setLanguage(node.lang);
+        if (node.alt != null && !node.alt.isEmpty()) el.setAlternateDescription(node.alt);
+        if (node.actualText != null && !node.actualText.isEmpty()) el.setActualText(node.actualText);
+
+        // TH /Scope: JAWS/NVDA only announce table headers when /Scope
+        // is present (Matterhorn 15-003). We derive /Scope from the
+        // ancestor chain because the tag-builder doesn't carry span
+        // metadata:
+        //   - TH inside a THead ancestor → /Scope /Column (top row is
+        //     the column-header band).
+        //   - TH anywhere else (typically the first cell of a TR in
+        //     TBody, used as a row label) → /Scope /Row.
+        // Safe default per the PDF Association Tagged PDF Best
+        // Practice Guide for auto-tagged tables without explicit
+        // spans. Complex headers with spans can be layered on later
+        // via /Headers + /ID attributes.
+        if ("TH".equals(node.type)) {
+            String scope = ctx.insideTHead ? "Column" : "Row";
+            COSDictionary a = new COSDictionary();
+            a.setItem(COSName.O, COSName.getPDFName("Table"));
+            a.setName(COSName.getPDFName("Scope"), scope);
+            el.getCOSObject().setItem(COSName.A, a);
+        }
+
+        for (PageMcRef ref : myRefs) {
+            // Emit an MCR dict kid so multi-page elements carry a
+            // per-ref /Pg. For single-page elements this is redundant
+            // with setPage, but it's correct in both cases and avoids
+            // a separate code path.
+            COSDictionary mcrDict = new COSDictionary();
+            mcrDict.setItem(COSName.TYPE, COSName.getPDFName("MCR"));
+            mcrDict.setInt(COSName.MCID, ref.mcid);
+            mcrDict.setItem(COSName.PG, ref.page.getCOSObject());
+            PDMarkedContentReference mcr = new PDMarkedContentReference(mcrDict);
+
+            // Link-annotation wrapping (Matterhorn 28-004 / PDF/UA-1
+            // §7.18.5). When the operator position falls inside a
+            // Link annotation's rect on this page, we insert a Link
+            // StructElement under the current element and route the
+            // MCID there. The Link element also gets an /OBJR child
+            // pointing at the annotation dict so assistive tech can
+            // follow the link target (JAWS's Links List, NVDA's "k"
+            // navigation). Multiple MCIDs under the same Link annot
+            // share the same Link StructElement.
+            PDStructureElement containerForMcr = el;
+            LinkAnnot matched = findLinkAnnot(ref, linkAnnots, pageDisplayHeight);
+            if (matched != null && !"Link".equals(node.type)) {
+                if (matched.emittedElement == null) {
+                    PDStructureElement linkEl = new PDStructureElement("Link", treeRoot);
+                    linkEl.setPage(ref.page);
+                    // /Contents is the fallback text the screen reader
+                    // announces if the Link has no text kids (JAWS
+                    // requirement; NVDA and VoiceOver tolerant). Use
+                    // the op text when available; annotation /Contents
+                    // wins when both are present.
+                    String existingContents = matched.annot.getContents();
+                    if (existingContents == null || existingContents.isEmpty()) {
+                        // PDAnnotationLink doesn't emit /Contents by
+                        // default; set one from the representative
+                        // op text so AT has something to speak.
+                        // Intentionally limited to 200 chars.
+                        matched.annot.setContents(truncate(textForLink(matched, myRefs), 200));
+                    }
+                    // Attach OBJR referencing the annotation dict.
+                    COSDictionary objrDict = new COSDictionary();
+                    objrDict.setItem(COSName.TYPE, COSName.getPDFName("OBJR"));
+                    objrDict.setItem(COSName.PG, ref.page.getCOSObject());
+                    objrDict.setItem(COSName.OBJ, matched.annot.getCOSObject());
+                    linkEl.appendKid(new PDObjectReference(objrDict));
+                    el.appendKid(linkEl);
+                    matched.emittedElement = linkEl;
+                }
+                containerForMcr = matched.emittedElement;
+            }
+
+            containerForMcr.appendKid(mcr);
+
+            if (containerForMcr.getPage() == null) containerForMcr.setPage(ref.page);
+            if (el.getPage() == null) el.setPage(ref.page);
+
+            COSArray parentArray = parentArraysByPageKey.get(ref.pageKey);
+            if (parentArray != null) {
+                while (parentArray.size() <= ref.mcid) parentArray.add(COSNull.NULL);
+                parentArray.set(ref.mcid, containerForMcr.getCOSObject());
+            }
+        }
+
+        for (PDStructureElement childEl : childElements) {
+            el.appendKid(childEl);
+        }
+
+        return el;
+    }
+
+    /**
+     * Find the first Link annotation on the ref's page whose rect
+     * contains the op's display-space position. A ref that falls
+     * inside two overlapping Link rects matches the first one — rare
+     * in practice (overlapping links are typically an authoring
+     * mistake), and deterministic resolution beats arbitrary.
+     */
+    private static LinkAnnot findLinkAnnot(PageMcRef ref, List<LinkAnnot> linkAnnots, Map<PDPage, Double> pageDisplayHeight) {
+        if (linkAnnots == null || linkAnnots.isEmpty()) return null;
+        if (Double.isNaN(ref.opX) || Double.isNaN(ref.opY)) return null;
+        Double ph = pageDisplayHeight.get(ref.page);
+        if (ph == null) return null;
+        for (LinkAnnot la : linkAnnots) {
+            if (la.page != ref.page) continue;
+            if (la.containsDisplay(ref.opX, ref.opY, ph)) return la;
+        }
+        return null;
+    }
+
+    private static String textForLink(LinkAnnot la, List<PageMcRef> refs) {
+        // Best-effort: prefer the Link annotation's action URI for
+        // /Contents, falling back to a concatenation of the matching
+        // refs' op text. We don't have direct access to op text from
+        // PageMcRef (we store position only), so URI is the practical
+        // fallback.
+        try {
+            if (la.annot.getAction() != null) {
+                String s = la.annot.getAction().toString();
+                if (s != null && !s.isEmpty()) return s;
+            }
+        } catch (Throwable ignore) {}
+        return "Link";
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null) return "";
+        return s.length() <= max ? s : s.substring(0, max);
+    }
+
     private static void buildStructureTree(PDDocument doc, List<PagePlan> plans) {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
 
@@ -717,8 +1192,15 @@ public class NativeContentStreamRewriter {
         String pdfPath = null;
         String planPath = null;
         String outputPath = null;
+        String tagsPath = null;
         String title = "Tagged PDF";
         String language = "en-US";
+        // readingOrderStrategy is informational today: "semantic" means
+        // structure tree children are emitted in matcher-assignment order
+        // (which is semantic readingOrder). "file" is reserved for a future
+        // debug mode that emits in content-stream order. The value is
+        // surfaced in the report so operators can see what the writer did.
+        String readingOrderStrategy = "semantic";
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -726,6 +1208,7 @@ public class NativeContentStreamRewriter {
                     if (i + 1 < args.length) pdfPath = args[++i];
                     break;
                 case "--plan":
+                case "--tag-plan":
                     if (i + 1 < args.length) planPath = args[++i];
                     break;
                 case "--output":
@@ -737,11 +1220,17 @@ public class NativeContentStreamRewriter {
                 case "--language":
                     if (i + 1 < args.length) language = args[++i];
                     break;
+                case "--reading-order-strategy":
+                    if (i + 1 < args.length) readingOrderStrategy = args[++i];
+                    break;
+                case "--tags":
+                    if (i + 1 < args.length) tagsPath = args[++i];
+                    break;
             }
         }
 
         if (pdfPath == null || planPath == null || outputPath == null) {
-            System.err.println("Usage: java NativeContentStreamRewriter --pdf <source.pdf> --plan <tag-plan.json> --output <tagged.pdf> [--title <title>] [--language <lang>]");
+            System.err.println("Usage: java NativeContentStreamRewriter --pdf <source.pdf> --plan <tag-plan.json> --output <tagged.pdf> [--tags <tagging.json>] [--title <title>] [--language <lang>]");
             System.exit(1);
         }
 
@@ -759,8 +1248,10 @@ public class NativeContentStreamRewriter {
             int totalAssignments = 0;
             int totalMcids = 0;
             int totalArtifacts = 0;
+            int totalTaggedWrapped = 0;
+            int totalSkippedInsideSourceMC = 0;
+            int pagesRewritten = 0;
 
-            // Rewrite content streams for each page in the plan
             for (PagePlan plan : plans) {
                 int pageIndex = plan.pageNumber - 1;
                 if (pageIndex < 0 || pageIndex >= doc.getNumberOfPages()) {
@@ -773,35 +1264,81 @@ public class NativeContentStreamRewriter {
                         + " (" + plan.assignments.size() + " assignments, "
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");
 
-                rewritePageContentStream(doc, page, plan);
+                RewriteResult res = rewritePageContentStream(doc, page, plan);
                 totalAssignments += plan.assignments.size();
-                for (Assignment a : plan.assignments) {
-                    totalMcids++;
-                }
-                totalArtifacts += plan.unmatchedOperatorSeqs.size();
+                totalMcids += plan.assignments.size();
+                totalArtifacts += res.artifactWrapped;
+                totalTaggedWrapped += res.taggedWrapped;
+                totalSkippedInsideSourceMC += res.skippedInsideSourceMarkedContent;
+                pagesRewritten++;
             }
 
-            // Build structure tree
-            buildStructureTree(doc, plans);
+            // Hierarchical structure tree when --tags is supplied
+            // (normal path). Falls back to flat Document-has-all-leaves
+            // when omitted, for backward compat with older callers.
+            TagTreeNode tagTree = null;
+            if (tagsPath != null) {
+                try {
+                    String tagsJson = readFile(tagsPath);
+                    tagTree = parseTaggingTree(tagsJson);
+                } catch (IOException ioe) {
+                    System.err.println("[rewriter] WARNING: could not read --tags " + tagsPath + ": " + ioe.getMessage() + " — falling back to flat structure tree");
+                }
+            }
+            buildStructureTreeHierarchical(doc, plans, tagTree);
 
-            // Apply metadata
-            applyMetadata(doc, title, language);
+            // Native rewriter delegates the full PDF/UA metadata +
+            // font + link + XMP pass to the shared
+            // PassthroughMetadataCli.applyPdfUaAccessibilityPass so
+            // both writer modes produce identically-compliant output.
+            // The rewriter's own applyMetadata used a single-
+            // rdf:Description XMP that VeraPDF's XMPChecker didn't
+            // like; the shared pass emits canonical multi-Description
+            // XMP synced to /Info (so infoMatchesXmp=true), fills
+            // /ViewerPreferences/DisplayDocTitle, attaches /Name to
+            // OCProperties configs, embeds Standard 14 references,
+            // auto-generates ToUnicode CMaps, and backfills
+            // /Contents on Link annotations.
+            try {
+                String summary = PassthroughMetadataCli.applyPdfUaAccessibilityPass(doc, title, language, false);
+                System.err.println("[rewriter] accessibility pass: " + summary);
+            } catch (IOException e) {
+                System.err.println("[rewriter] WARNING: accessibility pass failed, falling back to legacy metadata: " + e.getMessage());
+                applyMetadata(doc, title, language);
+            }
 
-            // Save
             doc.save(outputPath);
             System.err.println("[rewriter] Saved tagged PDF to: " + outputPath);
 
-            // Output result JSON to stdout
+            // Post-save pass: PDFBox regenerates /CIDSet on save for
+            // embedded CIDFontType2 subsets. The regenerated CIDSet
+            // can be inconsistent with the actual glyph set (trips
+            // VERAPDF_7_21_4_2_2). Re-open, strip /CIDSet entries,
+            // re-save. Controlled via OAT_CIDSET_STRIP env (default
+            // ON — disable with OAT_CIDSET_STRIP=0 for rollback).
+            // Post-save CIDSet strip disabled: NO_COMPRESSION save
+            // strips embedded font programs, regressing ~25 docs. The
+            // in-memory strip alone doesn't help because PDFBox
+            // regenerates /CIDSet during save. Accept VERAPDF_7_21_4_2_2
+            // on affected docs (3 of 27) as a PDFBox limitation.
+            // Turning OAT_CIDSET_STRIP=1 back on requires a save path
+            // that preserves embedded fonts — open question.
+
             StringBuilder json = new StringBuilder();
             json.append("{");
             json.append("\"success\":true");
             json.append(",\"outputPath\":").append(escapeJson(outputPath));
-            json.append(",\"pagesRewritten\":").append(plans.size());
+            json.append(",\"pagesRewritten\":").append(pagesRewritten);
+            json.append(",\"pagesNative\":").append(pagesRewritten);
             json.append(",\"totalAssignments\":").append(totalAssignments);
+            json.append(",\"structureElementCount\":").append(totalAssignments);
+            json.append(",\"markedContentCount\":").append(totalTaggedWrapped);
             json.append(",\"totalMcids\":").append(totalMcids);
             json.append(",\"totalArtifactWraps\":").append(totalArtifacts);
+            json.append(",\"skippedInsideSourceMarkedContent\":").append(totalSkippedInsideSourceMC);
             json.append(",\"structureTreeBuilt\":true");
             json.append(",\"metadataApplied\":true");
+            json.append(",\"readingOrderStrategy\":").append(escapeJson(readingOrderStrategy));
             json.append(",\"title\":").append(escapeJson(title));
             json.append(",\"language\":").append(escapeJson(language));
             json.append("}");
