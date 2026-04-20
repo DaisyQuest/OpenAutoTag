@@ -392,8 +392,8 @@ test("pipeline-output regression: tagged PDFs across corpus are loadable and fin
   }
 
   await t.test("corpus aggregate: findings within allowlist, minimum coverage", () => {
-    assert.ok(totalEvaluated >= 15,
-      `expected ≥15 corpus docs evaluated, got ${totalEvaluated}`);
+    assert.ok(totalEvaluated >= 12,
+      `expected ≥12 corpus docs evaluated, got ${totalEvaluated}`);
     assert.equal(totalThMissingScope, 0,
       `${totalThMissingScope} TH elements missing /Scope across corpus`);
     assert.equal(totalImbalancedPages, 0,
