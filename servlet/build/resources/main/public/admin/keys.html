@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API Key Management</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="dashboard">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">BuildEverything</a>
+        <div class="topbar-links">
+          <a class="topbar-link" href="/">Workspace</a>
+          <a class="topbar-link is-active" href="/admin/keys.html">API Keys</a>
+          <a class="topbar-link" href="/admin/system.html">System</a>
+          <a class="topbar-link" href="/admin/agents.html">Agents</a>
+          <a class="topbar-link" href="/admin/queue.html">Queue</a>
+          <a class="topbar-link" href="/admin/history.html">History</a>
+          <a class="topbar-link" href="/admin/artifacts.html">Artifacts</a>
+        </div>
+        <div class="topbar-actions">
+          <span id="session-pill" class="session-pill">Loading access</span>
+          <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+        </div>
+      </nav>
+
+      <header class="hero admin-hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Private Mode Controls</p>
+            <h1>Issue, review, and revoke managed API keys.</h1>
+            <p class="lede">
+              Managed API keys are stored hashed at rest, shown in full only once at creation time, and can be revoked
+              immediately from this console.
+            </p>
+          </div>
+          <aside class="hero-command">
+            <div id="key-hero-summary" class="hero-stat-grid">
+              <article class="summary-card">
+                <span class="summary-label">Auth mode</span>
+                <strong>Loading</strong>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </header>
+
+      <section class="panel auth-strip" aria-labelledby="auth-title">
+        <div class="section-heading">
+          <div class="heading-stack">
+            <h2 id="auth-title">Admin access</h2>
+            <p id="auth-copy" class="section-copy">
+              Use an admin key to inspect existing API keys and create or revoke managed keys.
+            </p>
+          </div>
+          <span id="auth-caption">Checking mode</span>
+        </div>
+        <form id="auth-form" class="auth-form">
+          <label class="field-stack" for="auth-key">
+            <span class="field-label">Admin key</span>
+            <input
+              id="auth-key"
+              class="url-input auth-input"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste the X-ADMIN-KEY value"
+            />
+          </label>
+          <button id="auth-submit" class="action-button" type="submit">Unlock admin pages</button>
+        </form>
+        <p id="auth-message" class="message-line" aria-live="polite">Checking access requirements.</p>
+      </section>
+
+      <main id="main-content" class="dashboard admin-dashboard">
+        <section class="panel admin-grid-panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Create a managed key</h2>
+              <p class="section-copy">Create a named key for workload access without exposing the bootstrap admin secret.</p>
+            </div>
+          </div>
+          <form id="create-key-form" class="stack-form">
+            <label class="field-stack" for="key-label">
+              <span class="field-label">Label</span>
+              <input id="key-label" class="text-input" type="text" maxlength="120" placeholder="Production upload service" />
+            </label>
+            <label class="field-stack" for="key-description">
+              <span class="field-label">Description</span>
+              <textarea
+                id="key-description"
+                class="text-area"
+                rows="3"
+                maxlength="240"
+                placeholder="Optional note about who uses this key and why."
+              ></textarea>
+            </label>
+            <div class="action-row">
+              <button id="create-key-submit" class="action-button" type="submit">Create managed key</button>
+            </div>
+          </form>
+          <p id="create-key-message" class="message-line" aria-live="polite">No key has been created in this session.</p>
+        </section>
+
+        <section class="panel admin-grid-panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>One-time reveal</h2>
+              <p class="section-copy">Copy the new key immediately. It will not be shown again after this page state changes.</p>
+            </div>
+          </div>
+          <div id="created-key-panel" class="secure-output empty-state">
+            Create a managed key to reveal it here once.
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Managed key inventory</h2>
+              <p class="section-copy">
+                Active keys can be used through the <code>X-API-KEY</code> header. Revoked keys stay visible for audit
+                context.
+              </p>
+            </div>
+            <span id="key-table-caption">Loading keys</span>
+          </div>
+          <div class="table-shell">
+            <table class="dashboard-table" aria-describedby="key-table-caption">
+              <thead>
+                <tr>
+                  <th scope="col">Label</th>
+                  <th scope="col">Prefix</th>
+                  <th scope="col">Created</th>
+                  <th scope="col">Last used</th>
+                  <th scope="col">State</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="key-table-body">
+                <tr>
+                  <td colspan="6" class="empty-row">Unlock admin access to inspect managed keys.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/admin/keys.js"></script>
+  </body>
+</html>

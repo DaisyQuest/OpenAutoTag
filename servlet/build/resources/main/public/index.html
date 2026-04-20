@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Accessibility Engine</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="dashboard">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">
+          <span class="brand-icon">&#x1F6E1;&#xFE0F;</span>
+          <span>PDF Accessibility Engine</span>
+        </a>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" aria-label="Toggle navigation menu" />
+        <label for="nav-toggle" class="nav-toggle-label" aria-hidden="true">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </label>
+        <div class="topbar-collapsible">
+          <div class="topbar-links">
+            <a class="topbar-link is-active" href="/">Workspace</a>
+            <a class="topbar-link" href="/difftool">Diff Tool</a>
+            <a class="topbar-link" href="/admin/keys.html">API Keys</a>
+            <a class="topbar-link" href="/admin/system.html">System</a>
+            <a class="topbar-link" href="/admin/queue.html">Queue</a>
+            <a class="topbar-link" href="/admin/history.html">History</a>
+            <a class="topbar-link" href="/admin/artifacts.html">Artifacts</a>
+            <a class="topbar-link" href="/howitworks.html">How It Works</a>
+          </div>
+          <div class="topbar-actions">
+            <span id="session-pill" class="session-pill">Loading access</span>
+            <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+          </div>
+        </div>
+      </nav>
+
+      <header class="hero hero-dashboard">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">PDF Accessibility Engine</p>
+            <h1>Tag, validate, repair, and preserve PDFs from one control surface.</h1>
+            <p class="lede">
+              Drop a folder, queue local PDFs, or point the server at a remote PDF URL. The dashboard keeps
+              workload selection, live batch state, report signals, and artifact access in one tabular workspace.
+            </p>
+            <div class="hero-link-row">
+              <a class="ghost-link" href="/admin/system.html">System</a>
+              <a class="ghost-link" href="/admin/queue.html">Queue</a>
+              <a class="ghost-link" href="/admin/history.html">History</a>
+              <a class="ghost-link" href="/testing-matrix.html">Testing Matrix</a>
+            </div>
+            <div class="hero-link-row hero-reports-row">
+              <span class="hero-link-label">Reports:</span>
+              <a class="ghost-link report-link" href="/nativity-report.html">Native Tagging</a>
+              <a class="ghost-link report-link" href="/font-report.html">Font Health</a>
+              <a class="ghost-link report-link" href="/repair-report.html">Corruption Repair</a>
+              <a class="ghost-link report-link" href="/paragraph-report.html">Paragraph Merge</a>
+              <a class="ghost-link report-link" href="/evidence.html">Evidence</a>
+            </div>
+            <div class="hero-step-grid" aria-label="Dashboard workflow">
+              <article class="hero-step">
+                <span class="hero-step-number">01</span>
+                <strong>Queue</strong>
+                <p>Collect PDFs from files, whole directories, or a single remote URL without losing context.</p>
+              </article>
+              <article class="hero-step">
+                <span class="hero-step-number">02</span>
+                <strong>Run</strong>
+                <p>Launch the selected PDF workload as one batch with a single local upload.</p>
+              </article>
+              <article class="hero-step">
+                <span class="hero-step-number">03</span>
+                <strong>Review</strong>
+                <p>Scan the results table, then inspect the selected document inline.</p>
+              </article>
+            </div>
+          </div>
+
+          <aside class="hero-command">
+            <section class="auth-panel" aria-labelledby="auth-title">
+              <div class="surface-header auth-panel-header">
+                <div>
+                  <p class="eyebrow surface-eyebrow">Access</p>
+                  <h2 id="auth-title">Unlock the workspace</h2>
+                </div>
+                <span id="auth-caption" class="surface-caption">Checking mode</span>
+              </div>
+              <p id="auth-copy" class="section-copy">
+                Private mode accepts an API key for workload actions, and an admin key also unlocks the workspace.
+              </p>
+              <form id="auth-form" class="auth-form">
+                <label class="field-stack" for="auth-key">
+                  <span class="field-label">Access key</span>
+                  <input
+                    id="auth-key"
+                    class="url-input auth-input"
+                    type="password"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="Paste an API key or admin key"
+                  />
+                </label>
+                <button id="auth-submit" class="action-button" type="submit">Unlock workspace</button>
+              </form>
+              <p id="auth-message" class="message-line" aria-live="polite">Checking access requirements.</p>
+            </section>
+
+            <div class="hero-stat-grid">
+              <article class="summary-card">
+                <span class="summary-label">Queued PDFs</span>
+                <strong id="queued-count">0</strong>
+              </article>
+              <article class="summary-card">
+                <span class="summary-label">Payload</span>
+                <strong id="queued-size">0 B</strong>
+              </article>
+              <article class="summary-card">
+                <span class="summary-label">Batch State</span>
+                <strong id="batch-state">Idle</strong>
+              </article>
+            </div>
+
+            <section class="intake-surface" aria-labelledby="intake-title">
+              <div class="surface-header">
+                <div>
+                  <p class="eyebrow surface-eyebrow">Intake</p>
+                  <h2 id="intake-title">Queue PDFs</h2>
+                </div>
+                <span class="surface-caption">Files, folders, or URL</span>
+              </div>
+
+              <section class="workload-surface" aria-labelledby="workload-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="workload-title">Workload</h4>
+                  <span id="workload-caption">Loading workloads</span>
+                </div>
+                <div id="workload-list" class="workload-list"></div>
+              </section>
+
+              <section class="profile-surface" aria-labelledby="profile-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="profile-title">Profile</h4>
+                  <span id="profile-caption">Loading profiles</span>
+                </div>
+                <select id="profile-select" class="url-input" aria-label="Select a profile">
+                  <option value="default">Default</option>
+                </select>
+                <p id="profile-description" class="section-copy">Balanced general-purpose profile suitable for most document types.</p>
+                <button id="profile-advanced-toggle" class="ghost-button compact-button" type="button">Advanced</button>
+                <div id="profile-advanced-panel" hidden>
+                  <fieldset class="field-group" aria-labelledby="native-tagging-legend">
+                    <legend id="native-tagging-legend" class="field-label">Native tagging</legend>
+                    <label class="field-stack" for="writer-mode">
+                      <span class="field-label">Writer mode</span>
+                      <select id="writer-mode" class="url-input" aria-describedby="writer-mode-help">
+                        <option value="">Profile default</option>
+                        <option value="auto">auto — native-first with raster fallback</option>
+                        <option value="native">native — strict, fail if match rate below threshold</option>
+                        <option value="raster">raster — rasterize every page (legacy)</option>
+                      </select>
+                      <span id="writer-mode-help" class="field-help">Native preserves fonts and selectable text; raster rasterizes pages as images.</span>
+                    </label>
+                    <label class="field-stack" for="native-match-threshold">
+                      <span class="field-label">Native match threshold (0 – 1)</span>
+                      <input
+                        type="number"
+                        id="native-match-threshold"
+                        class="url-input"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        placeholder="0.8"
+                        aria-describedby="native-match-threshold-help"
+                      />
+                      <span id="native-match-threshold-help" class="field-help">Auto mode falls back to raster when fewer than this fraction of operators match a tag.</span>
+                    </label>
+                    <label class="field-stack" for="already-tagged-threshold">
+                      <span class="field-label">Already-tagged threshold (0 – 1)</span>
+                      <input
+                        type="number"
+                        id="already-tagged-threshold"
+                        class="url-input"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        placeholder="0.5"
+                        aria-describedby="already-tagged-threshold-help"
+                      />
+                      <span id="already-tagged-threshold-help" class="field-help">When this fraction of source operators are already inside BMC/BDC blocks, treat the source as pre-tagged.</span>
+                    </label>
+                    <label class="field-stack" for="already-tagged-policy">
+                      <span class="field-label">Already-tagged policy</span>
+                      <select id="already-tagged-policy" class="url-input" aria-describedby="already-tagged-policy-help">
+                        <option value="">Profile default</option>
+                        <option value="bailout-to-raster">bailout-to-raster — rasterize to avoid orphan-MCID structure tree</option>
+                        <option value="passthrough">passthrough — keep source tagging, refresh metadata only</option>
+                      </select>
+                      <span id="already-tagged-policy-help" class="field-help">Passthrough preserves original fonts and structure; bailout rasterizes.</span>
+                    </label>
+                    <label class="field-stack" for="reading-order-strategy">
+                      <span class="field-label">Reading-order strategy</span>
+                      <select id="reading-order-strategy" class="url-input" aria-describedby="reading-order-strategy-help">
+                        <option value="">Profile default</option>
+                        <option value="semantic">semantic — honor upstream readingOrder (recommended)</option>
+                        <option value="file">file — content-stream order (debug only)</option>
+                      </select>
+                      <span id="reading-order-strategy-help" class="field-help">Semantic uses the semantic-engine's readingOrder field for structure tree layout.</span>
+                    </label>
+                  </fieldset>
+                  <label class="field-stack" for="profile-overrides">
+                    <span class="field-label">Profile overrides (JSON)</span>
+                    <textarea
+                      id="profile-overrides"
+                      class="url-input"
+                      rows="4"
+                      placeholder='{"parser": {"ocrMode": "force"}}'
+                      aria-label="Profile overrides JSON"
+                    ></textarea>
+                    <span class="field-help">Freeform overrides are merged into the resolved profile after the form controls above.</span>
+                  </label>
+                </div>
+              </section>
+
+              <div
+                id="dropzone"
+                class="dropzone"
+                role="button"
+                tabindex="0"
+                aria-label="Drop PDF files or folders here"
+              >
+                <div class="dropzone-copy">
+                  <p class="dropzone-title">Drag PDFs or whole folders here</p>
+                  <p class="dropzone-subtitle">Directory drops keep relative paths intact.</p>
+                </div>
+              </div>
+
+              <section class="url-intake" aria-labelledby="url-intake-title">
+                <div class="section-heading compact-heading">
+                  <h4 id="url-intake-title">Remote PDF</h4>
+                  <span>Single URL</span>
+                </div>
+                <div class="url-intake-row">
+                  <input
+                    id="url-input"
+                    class="url-input"
+                    type="url"
+                    inputmode="url"
+                    placeholder="https://example.com/document.pdf"
+                    aria-label="Remote PDF URL"
+                  />
+                  <button id="start-url-job" class="action-button secondary" type="button">Run URL</button>
+                </div>
+                <p class="section-copy url-copy">
+                  Fetch a remote PDF from the server side and run the selected workload without uploading it manually.
+                </p>
+              </section>
+
+              <div class="controls">
+                <label class="action-button">
+                  <input id="file-picker" type="file" accept=".pdf,application/pdf" multiple hidden />
+                  <span>Select PDFs</span>
+                </label>
+                <label class="action-button secondary">
+                  <input
+                    id="directory-picker"
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    webkitdirectory
+                    hidden
+                  />
+                  <span>Select Folder</span>
+                </label>
+                <button id="clear-selection" class="ghost-button" type="button">Clear</button>
+                <button id="start-batch" class="launch-button" type="button">Run Selected Workload</button>
+              </div>
+
+              <p id="intake-message" class="message-line" aria-live="polite">Nothing queued yet.</p>
+            </section>
+          </aside>
+        </div>
+      </header>
+
+      <main id="main-content" class="dashboard">
+        <section class="panel queue-panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Selection Ledger</h2>
+              <p class="section-copy">
+                Review the queue before upload. Relative paths, source origin, and payload size stay visible.
+              </p>
+            </div>
+            <span id="selection-caption">0 documents ready</span>
+          </div>
+          <div class="table-shell">
+            <table class="dashboard-table" aria-describedby="selection-caption">
+              <thead>
+                <tr>
+                  <th scope="col">Document</th>
+                  <th scope="col">Relative Path</th>
+                  <th scope="col">Source</th>
+                  <th scope="col">Size</th>
+                </tr>
+              </thead>
+              <tbody id="selection-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel batch-panel">
+          <div class="section-heading">
+            <div class="heading-stack">
+              <h2>Batch Operations</h2>
+              <p class="section-copy">
+                Scan the table for workload status and inline signals. The inspector shows the selected document in detail.
+              </p>
+            </div>
+            <span id="batch-caption">No batch running</span>
+          </div>
+
+          <div id="batch-overview" class="batch-overview empty-state">
+            Start a batch to see tagging and validation results here.
+          </div>
+
+          <div class="results-workspace">
+            <div class="table-shell results-table-shell">
+              <table class="dashboard-table results-table" aria-describedby="batch-caption">
+                <thead>
+                  <tr>
+                    <th scope="col">Document</th>
+                    <th scope="col">Workload</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Outcome</th>
+                    <th scope="col">Signals</th>
+                    <th scope="col">Updated</th>
+                    <th scope="col">Primary Action</th>
+                  </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+              </table>
+            </div>
+
+            <aside id="detail-panel" class="detail-panel">
+              <div class="empty-detail">
+                Select a batch row to inspect workload diagnostics, inline reports, and artifact actions.
+              </div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

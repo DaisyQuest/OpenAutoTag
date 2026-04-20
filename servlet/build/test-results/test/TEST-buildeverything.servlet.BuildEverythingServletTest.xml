@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="buildeverything.servlet.BuildEverythingServletTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-04-20T17:19:19.283Z" hostname="runnervmeorf1" time="1.064">
+  <properties/>
+  <testcase name="diffToolCssIsAccessible()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.674"/>
+  <testcase name="diffToolJsIsAccessible()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.026"/>
+  <testcase name="rootServesDashboardHtml()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.03"/>
+  <testcase name="workloadsEndpointMatchesNodeCatalog()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.054"/>
+  <testcase name="diffToolPageServesHtml()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.025"/>
+  <testcase name="healthEndpointReportsRuntimeRoots()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.049"/>
+  <testcase name="dashboardLinksToTheDiffTool()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.023"/>
+  <testcase name="unknownRouteReturnsJson404()" classname="buildeverything.servlet.BuildEverythingServletTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@62679465{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6a988392{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@62679465{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6a988392{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@31024624{HTTP/1.1, (http/1.1)}{0.0.0.0:36159}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@4f2613d1{STARTING}[12.0.16,sto=0] @1155ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@4f2613d1{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@31024624{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@62679465{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6a988392{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@15fc442{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@3f3c7bdb{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@15fc442{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@3f3c7bdb{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@456abb66{HTTP/1.1, (http/1.1)}{0.0.0.0:41473}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@4a951911{STARTING}[12.0.16,sto=0] @1598ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@4a951911{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@456abb66{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@15fc442{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@3f3c7bdb{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@150d80c4{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6826c41e{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@150d80c4{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6826c41e{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@3003697{HTTP/1.1, (http/1.1)}{0.0.0.0:41207}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@42561fba{STARTING}[12.0.16,sto=0] @1627ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@42561fba{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@3003697{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@150d80c4{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6826c41e{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@2d140a7{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@347bdeef{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@2d140a7{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@347bdeef{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@2aa27288{HTTP/1.1, (http/1.1)}{0.0.0.0:32899}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@1e7f2e0f{STARTING}[12.0.16,sto=0] @1650ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@1e7f2e0f{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@2aa27288{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@2d140a7{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@347bdeef{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@4b61d0c6{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6f815e7f{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@4b61d0c6{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6f815e7f{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@65e7f52a{HTTP/1.1, (http/1.1)}{0.0.0.0:44837}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@19f9d595{STARTING}[12.0.16,sto=0] @1708ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@19f9d595{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@65e7f52a{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@4b61d0c6{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@6f815e7f{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@4925f4f5{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@1ad926d3{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@4925f4f5{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@1ad926d3{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@3a43d133{HTTP/1.1, (http/1.1)}{0.0.0.0:44265}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@62315f22{STARTING}[12.0.16,sto=0] @1755ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@62315f22{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@3a43d133{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@4925f4f5{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@1ad926d3{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@3e6fd0b9{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@7fcff1b9{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@3e6fd0b9{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@7fcff1b9{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@697446d4{HTTP/1.1, (http/1.1)}{0.0.0.0:41409}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@5339bbad{STARTING}[12.0.16,sto=0] @1786ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@5339bbad{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@697446d4{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@3e6fd0b9{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@7fcff1b9{STOPPED}}
+[Test worker] INFO org.eclipse.jetty.server.Server - jetty-12.0.16; built: 2024-12-09T21:02:54.535Z; git: c3f88bafb4e393f23204dc14dc57b042e84debc7; jvm 21.0.10+7-LTS
+[Test worker] INFO org.eclipse.jetty.session.DefaultSessionIdManager - Session workerName=node0
+[Test worker] INFO org.eclipse.jetty.server.handler.ContextHandler - Started oeje10s.ServletContextHandler@42cc13a0{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@32fdec40{STARTED}}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Started oeje10s.ServletContextHandler@42cc13a0{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@32fdec40{STARTED}}
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@6813a331{HTTP/1.1, (http/1.1)}{0.0.0.0:35951}
+[Test worker] INFO org.eclipse.jetty.server.Server - Started oejs.Server@6c8a68c1{STARTING}[12.0.16,sto=0] @1809ms
+[Test worker] INFO org.eclipse.jetty.server.Server - Stopped oejs.Server@6c8a68c1{STOPPING}[12.0.16,sto=0]
+[Test worker] INFO org.eclipse.jetty.server.AbstractConnector - Stopped ServerConnector@6813a331{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+[Test worker] INFO org.eclipse.jetty.ee10.servlet.ServletContextHandler - Stopped oeje10s.ServletContextHandler@42cc13a0{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.SessionHandler@32fdec40{STOPPED}}
+]]></system-err>
+</testsuite>
