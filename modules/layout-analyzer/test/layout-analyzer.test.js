@@ -694,3 +694,198 @@ test("layout analyzer detects narrow 2-column table whose anchor span is smaller
   assert.equal(blockById.get("d1").blockType, "table-cell", "d1 should be table-cell");
   assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
 });
+
+test("orphan adoption: wide merged column-header block above table is tagged as spanning header", async () => {
+  // Reproduces the 'irregulartable-badheaders.pdf' pattern where all 7 column
+  // labels were merged by the parser into a single wide text block that exceeds
+  // the text.length and width filters of buildCandidateRows.  The adoption pass
+  // (Pass B) must tag it as a col0/span7 header row prepended before the data.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-orphan-merged-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:orphan-merged-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 612,
+        height: 792,
+        textBlocks: [
+          // Merged column-header row: 7 labels in one wide block (exceeds 64-char / 68%-width filters)
+          { id: "hdr", text: "Year Undiscounted Discounted Undiscounted Discounted Undiscounted Discounted",
+            bbox: [80, 152, 457, 11], fontSize: 12, fontName: "Helvetica" },
+          // Data rows – 7 narrow columns
+          { id: "d1c0", text: "1",        bbox: [92,  168, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c1", text: "$16,949",  bbox: [135, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c2", text: "$15,840",  bbox: [207, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c3", text: "$0",       bbox: [291, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c4", text: "$0",       bbox: [363, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c5", text: "-$16,949", bbox: [421, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c6", text: "-$15,840", bbox: [493, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c0", text: "2",        bbox: [92,  184, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c1", text: "$1,990",   bbox: [135, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c2", text: "$1,738",   bbox: [207, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c3", text: "$16,949",  bbox: [291, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c4", text: "$14,804",  bbox: [363, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c5", text: "$14,959",  bbox: [421, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c6", text: "$13,066",  bbox: [493, 184, 36, 11], fontSize: 12, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+
+  const hdr = blockById.get("hdr");
+  assert.equal(hdr.blockType, "table-cell", "merged header block should become table-cell");
+  assert.equal(hdr.tableRole, "header", "merged header should have role=header");
+  assert.equal(hdr.tableColumnIndex, 0, "merged header should start at column 0");
+  assert.equal(hdr.tableColumnSpan, 7, "merged header should span all 7 columns");
+  assert.equal(hdr.tableRowIndex, 0, "merged header row should be row 0");
+
+  // Data rows must be shifted up by 1 (one pre-header row inserted)
+  assert.equal(blockById.get("d1c0").tableRowIndex, 1, "first data row should be row 1");
+  assert.equal(blockById.get("d2c0").tableRowIndex, 2, "second data row should be row 2");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "should count 1 header row");
+});
+
+test("orphan adoption: spanner header cells above table are tagged with correct column spans", async () => {
+  // Reproduces the 'Status Quo / IFR / Cost Savings' pattern where each spanner
+  // header is centred over 2 data columns but does not left-align with any
+  // individual column anchor so it is rejected by areRowsCompatible.
+  // Pass B must tag: Status Quo → col1/span2, IFR → col3/span2, Cost Savings → col5/span2.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-orphan-spanner-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:orphan-spanner",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 612,
+        height: 792,
+        textBlocks: [
+          // Spanner row (y=137): cells centred over pairs of data columns
+          { id: "sq",  text: "Status Quo",   bbox: [164, 137, 49, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "ifr", text: "IFR",          bbox: [324, 137, 17, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "cs",  text: "Cost Savings", bbox: [448, 137, 58, 11], fontSize: 12, fontName: "Helvetica" },
+          // Data rows (col0=Year, col1-2=SQ, col3-4=IFR, col5-6=CS)
+          { id: "d1c0", text: "1",        bbox: [92,  168, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c1", text: "$16,949",  bbox: [135, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c2", text: "$15,840",  bbox: [207, 168, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c3", text: "$0",       bbox: [291, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c4", text: "$0",       bbox: [363, 168, 11, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c5", text: "-$16,949", bbox: [421, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c6", text: "-$15,840", bbox: [493, 168, 39, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c0", text: "2",        bbox: [92,  184, 6,  11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c1", text: "$1,990",   bbox: [135, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c2", text: "$1,738",   bbox: [207, 184, 30, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c3", text: "$16,949",  bbox: [291, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c4", text: "$14,804",  bbox: [363, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c5", text: "$14,959",  bbox: [421, 184, 36, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c6", text: "$13,066",  bbox: [493, 184, 36, 11], fontSize: 12, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+
+  const sqBlock = blockById.get("sq");
+  assert.equal(sqBlock.blockType, "table-cell", "Status Quo should be table-cell");
+  assert.equal(sqBlock.tableRole, "header", "Status Quo should be header");
+  assert.equal(sqBlock.tableColumnIndex, 1, "Status Quo should start at column 1");
+  assert.equal(sqBlock.tableColumnSpan, 2, "Status Quo should span 2 columns");
+
+  const ifrBlock = blockById.get("ifr");
+  assert.equal(ifrBlock.blockType, "table-cell", "IFR should be table-cell");
+  assert.equal(ifrBlock.tableRole, "header", "IFR should be header");
+  assert.equal(ifrBlock.tableColumnIndex, 3, "IFR should start at column 3");
+  assert.equal(ifrBlock.tableColumnSpan, 2, "IFR should span 2 columns");
+
+  const csBlock = blockById.get("cs");
+  assert.equal(csBlock.blockType, "table-cell", "Cost Savings should be table-cell");
+  assert.equal(csBlock.tableRole, "header", "Cost Savings should be header");
+  assert.equal(csBlock.tableColumnIndex, 5, "Cost Savings should start at column 5");
+  assert.equal(csBlock.tableColumnSpan, 2, "Cost Savings should span 2 columns");
+
+  // Existing data rows must be shifted by 1 (one spanner row inserted)
+  assert.equal(blockById.get("d1c0").tableRowIndex, 1, "first data row should shift to row 1");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "should count 1 header row");
+});
+
+test("orphan adoption: same-row header cell offset from column anchor is adopted (Pass A)", async () => {
+  // Reproduces the 'Metric' cell pattern: the leftmost column header appears at
+  // x=140 while the data cells in that column start at x=79-95 (anchor ≈ 85).
+  // The gap (55 px) exceeds the normal tolerance (≈41 px), so assignItemsToAnchors
+  // misses it.  Pass A of adoptOrphanTableBlocks must adopt it as col0/header.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-orphan-passA-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:orphan-passA",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 612,
+        height: 792,
+        textBlocks: [
+          // Header row: col0 label is indented 55 px right of the data column anchor
+          { id: "h0", text: "Metric",          bbox: [140, 526, 29, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          { id: "h1", text: "All Entities",    bbox: [263, 526, 50, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          { id: "h2", text: "Small Entities",  bbox: [358, 526, 62, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          { id: "h3", text: "Small Entity Share", bbox: [448, 526, 83, 11], fontSize: 12, fontName: "Helvetica-Bold" },
+          // Data rows – col0 data cells left-align at x≈80-95 (anchor ≈ 85)
+          { id: "d1c0", text: "Original 10-year total costs",     bbox: [95, 546, 120, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c1", text: "$24,688 million",                  bbox: [253, 546, 70, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c2", text: "$13,095 million",                  bbox: [354, 546, 70, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d1c3", text: "53.0%",                            bbox: [448, 546, 28, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c0", text: "10-year PV savings",               bbox: [80, 562, 241, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c1", text: "$1,472 million",                   bbox: [253, 562, 65, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c2", text: "N/A",                              bbox: [354, 562, 28, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d2c3", text: "53.0%",                            bbox: [448, 562, 28, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c0", text: "Annualized savings",               bbox: [79, 578, 151, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c1", text: "$395 million",                     bbox: [253, 578, 57, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c2", text: "$210 million",                     bbox: [354, 578, 57, 11], fontSize: 12, fontName: "Helvetica" },
+          { id: "d3c3", text: "53.0%",                            bbox: [448, 578, 28, 11], fontSize: 12, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+
+  const metricBlock = blockById.get("h0");
+  assert.equal(metricBlock.blockType, "table-cell", "Metric should be table-cell");
+  assert.equal(metricBlock.tableRole, "header", "Metric should be header");
+  assert.equal(metricBlock.tableColumnIndex, 0, "Metric should be in column 0");
+
+  // Other header cells are detected normally
+  assert.equal(blockById.get("h1").tableRole, "header", "All Entities should be header");
+  assert.equal(blockById.get("h1").tableColumnIndex, 1, "All Entities should be column 1");
+
+  // Data rows must not be re-indexed (no above-table orphans; Pass A only adds a missing cell)
+  assert.equal(blockById.get("d1c0").tableRowIndex, 1, "first data row should be row 1");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
