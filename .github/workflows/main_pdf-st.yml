@@ -34,7 +34,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache veraPDF installation
+        id: cache-verapdf
+        uses: actions/cache@v4
+        with:
+          path: modules/validator/vendor/verapdf
+          key: verapdf-pdfbox-1.28.2-${{ runner.os }}
+
       - name: Install veraPDF
+        if: steps.cache-verapdf.outputs.cache-hit != 'true'
         run: npm run install:verapdf
 
       - name: Bundle Java runtime for App Service

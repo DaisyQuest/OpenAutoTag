@@ -14,6 +14,7 @@ const extractDir = path.join(vendorDir, "verapdf");
 const appDir = path.join(extractDir, "app");
 const autoInstallPath = path.join(extractDir, "auto-install.xml");
 const releaseUrl = "https://software.verapdf.org/releases/verapdf-pdfbox-installer.zip";
+const releaseUrlVersioned = "https://software.verapdf.org/releases/1.28/verapdf-pdfbox-1.28.2-installer.zip";
 
 function escapeXml(value) {
   return String(value)
@@ -51,12 +52,25 @@ async function downloadInstaller() {
     return;
   }
 
-  const response = await fetch(releaseUrl);
-  if (!response.ok || !response.body) {
-    throw new Error(`Unable to download veraPDF installer from ${releaseUrl}.`);
+  // Try the versioned URL first (more stable), then fall back to the unversioned alias.
+  const urls = [releaseUrlVersioned, releaseUrl];
+  let lastError;
+  for (const url of urls) {
+    let response;
+    try {
+      response = await fetch(url);
+    } catch (error) {
+      lastError = new Error(`Network error fetching ${url}: ${error.message}`);
+      continue;
+    }
+    if (!response.ok || !response.body) {
+      lastError = new Error(`Unable to download veraPDF installer from ${url} (HTTP ${response.status}).`);
+      continue;
+    }
+    await pipeline(Readable.fromWeb(response.body), createWriteStream(zipPath));
+    return;
   }
-
-  await pipeline(Readable.fromWeb(response.body), createWriteStream(zipPath));
+  throw lastError;
 }
 
 async function extractInstaller() {
