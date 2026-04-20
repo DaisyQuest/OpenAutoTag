@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Font Health Report Viewer</title>
+  <style>
+    :root {
+      --bg: #f8fafc; --fg: #0f172a; --muted: #64748b; --border: #e2e8f0;
+      --card-bg: #fff; --card-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      --accent: #2563eb; --accent-bg: #eff6ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c1222; --fg: #e2e8f0; --muted: #94a3b8; --border: #1e293b;
+        --card-bg: #1e293b; --card-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        --accent: #60a5fa; --accent-bg: #1e3a5f;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--fg); min-height: 100vh;
+    }
+    .loader-shell {
+      max-width: 640px; margin: 4rem auto; padding: 2rem; text-align: center;
+    }
+    .loader-shell h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .loader-shell .subtitle { font-size: 0.95rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: 12px; padding: 2.5rem;
+      background: var(--card-bg); cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent); background: var(--accent-bg);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+    .upload-label { font-weight: 600; font-size: 1rem; }
+    .upload-hint { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; }
+
+    .status-msg {
+      margin-top: 1rem; padding: 0.6rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; display: none;
+    }
+    .status-msg.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .status-msg.loading { display: block; background: var(--accent-bg); color: var(--accent); border: 1px solid var(--border); }
+    @media (prefers-color-scheme: dark) {
+      .status-msg.error { background: #450a0a; border-color: #991b1b; }
+    }
+
+    .or-divider {
+      display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0;
+      color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    #report-output { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+
+<div id="loader-ui" class="loader-shell">
+  <h1>Font Health Report Viewer</h1>
+  <p class="subtitle">View a font health report by Job ID or upload a report JSON file.</p>
+
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" id="file-input" accept=".json,application/json" />
+    <span class="upload-icon">&#128295;</span>
+    <div class="upload-label">Drop a font report JSON here</div>
+    <div class="upload-hint">or click to browse</div>
+  </div>
+
+  <div class="or-divider">or</div>
+
+  <p style="font-size:0.85rem;color:var(--muted)">
+    Pass <code>?jobId=&lt;id&gt;</code> in the URL to fetch automatically.
+  </p>
+
+  <div id="status" class="status-msg"></div>
+</div>
+
+<div id="report-output"></div>
+
+<script type="module">
+  let renderFontReport;
+
+  // Try to import the module (works when served by the orchestrator)
+  try {
+    const mod = await import('/modules/corruption-repairer/lib/font-report-renderer.js');
+    renderFontReport = mod.renderFontReport;
+  } catch {
+    // Fallback: fetch the module source via relative path
+    try {
+      const resp = await fetch('../../modules/corruption-repairer/lib/font-report-renderer.js');
+      if (resp.ok) {
+        const src = await resp.text();
+        const blob = new Blob(
+          [src.replace('export function renderFontReport', 'globalThis.__frRender = function')],
+          { type: 'text/javascript' }
+        );
+        const url = URL.createObjectURL(blob);
+        await import(url);
+        URL.revokeObjectURL(url);
+        renderFontReport = globalThis.__frRender;
+      }
+    } catch { /* will use inline fallback below */ }
+  }
+
+  // Minimal inline fallback if module loading fails entirely
+  if (!renderFontReport) {
+    renderFontReport = (report) => {
+      const summary = report.summary || {};
+      return `<div style="max-width:800px;margin:2rem auto;padding:2rem;font-family:sans-serif">
+        <h1>Font Health Report</h1>
+        <p><strong>Overall Grade:</strong> ${summary.overallGrade || '?'}</p>
+        <p><strong>Font Health:</strong> ${Math.round((summary.overallFontHealth || 0) * 100)}%</p>
+        <p><strong>Total Fonts:</strong> ${summary.totalFonts || (report.fonts || []).length}</p>
+        <pre style="background:#f1f5f9;padding:1rem;border-radius:8px;overflow:auto;font-size:0.8rem">${JSON.stringify(report, null, 2)}</pre>
+      </div>`;
+    };
+  }
+
+  const loaderUI = document.getElementById('loader-ui');
+  const reportOutput = document.getElementById('report-output');
+  const statusEl = document.getElementById('status');
+  const uploadZone = document.getElementById('upload-zone');
+  const fileInput = document.getElementById('file-input');
+
+  function showReport(report) {
+    const html = renderFontReport(report);
+    loaderUI.style.display = 'none';
+    // Extract body content from the full HTML document
+    const match = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    if (match) {
+      const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
+      reportOutput.innerHTML = (styleMatch ? `<style>${styleMatch[1]}</style>` : '') + match[1];
+    } else {
+      reportOutput.innerHTML = html;
+    }
+  }
+
+  function showError(msg) {
+    statusEl.className = 'status-msg error';
+    statusEl.textContent = msg;
+  }
+
+  function showLoading(msg) {
+    statusEl.className = 'status-msg loading';
+    statusEl.textContent = msg || 'Loading...';
+  }
+
+  // File upload handler
+  function handleFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const report = JSON.parse(reader.result);
+        showReport(report);
+      } catch (e) {
+        showError('Invalid JSON file: ' + e.message);
+      }
+    };
+    reader.onerror = () => showError('Failed to read file.');
+    reader.readAsText(file);
+  }
+
+  fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+  // Drag & drop
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  // Auto-fetch from jobId URL param
+  const params = new URLSearchParams(window.location.search);
+  const jobId = params.get('jobId');
+  if (jobId) {
+    showLoading(`Fetching font report for job ${jobId}...`);
+    try {
+      const resp = await fetch(`/jobs/${encodeURIComponent(jobId)}/artifacts/fontReport`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+      const report = await resp.json();
+      showReport(report);
+    } catch (e) {
+      showError(`Failed to fetch report: ${e.message}`);
+    }
+  }
+</script>
+
+</body>
+</html>

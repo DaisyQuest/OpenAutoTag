@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Report Viewer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="report">
+    <a class="skip-link" href="#report-main">Skip to report</a>
+    <div class="page-shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand-mark" href="/">BuildEverything</a>
+        <div class="topbar-links">
+          <a class="topbar-link" href="/">Workspace</a>
+          <a class="topbar-link" href="/admin/keys.html">API Keys</a>
+          <a class="topbar-link" href="/admin/system.html">System</a>
+          <a class="topbar-link" href="/admin/queue.html">Queue</a>
+          <a class="topbar-link" href="/admin/history.html">History</a>
+          <a class="topbar-link" href="/admin/artifacts.html">Artifacts</a>
+        </div>
+        <div class="topbar-actions">
+          <span id="session-pill" class="session-pill">Loading access</span>
+          <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+        </div>
+      </nav>
+
+      <header class="hero report-hero">
+        <div class="report-hero-copy">
+          <p class="eyebrow">On-Demand Browser Reports</p>
+          <h1 id="report-title">Loading report…</h1>
+          <p id="report-subtitle" class="lede">
+            Fetching the latest job artifacts and building a browser-native report view.
+          </p>
+        </div>
+        <div class="report-hero-actions">
+          <a class="ghost-link" href="/">Back to batch dashboard</a>
+          <div id="report-job-status" class="hero-status-card">
+            <span class="summary-label">Job status</span>
+            <strong>Loading…</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="panel auth-strip" aria-labelledby="report-auth-title">
+        <div class="section-heading">
+          <div class="heading-stack">
+            <h2 id="report-auth-title">Access</h2>
+            <p id="auth-copy" class="section-copy">Reports use the same session-scoped workspace key as the dashboard.</p>
+          </div>
+          <span id="auth-caption">Checking mode</span>
+        </div>
+        <form id="auth-form" class="auth-form">
+          <label class="field-stack" for="auth-key">
+            <span class="field-label">Access key</span>
+            <input
+              id="auth-key"
+              class="url-input auth-input"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste an API key or admin key"
+            />
+          </label>
+          <button id="auth-submit" class="action-button" type="submit">Unlock report</button>
+        </form>
+        <p id="auth-message" class="message-line" aria-live="polite">Checking access requirements.</p>
+      </section>
+
+      <main id="report-main" class="report-layout">
+        <aside class="panel report-sidebar">
+          <div class="section-heading">
+            <h2>Artifacts</h2>
+            <span id="report-artifact-count">0 available</span>
+          </div>
+          <nav id="report-tabs" class="report-tabs" aria-label="Report artifacts"></nav>
+          <div id="report-links" class="report-links"></div>
+        </aside>
+
+        <section class="panel report-main">
+          <div id="report-summary" class="report-summary-grid">
+            <article class="summary-card">
+              <span class="summary-label">State</span>
+              <strong>Loading…</strong>
+            </article>
+          </div>
+          <div id="report-content" class="report-content">
+            <div class="empty-report">Rendering report…</div>
+          </div>
+          <details class="raw-json-panel">
+            <summary>Raw JSON</summary>
+            <pre id="report-raw-json" class="code-block"></pre>
+          </details>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/report.js"></script>
+  </body>
+</html>

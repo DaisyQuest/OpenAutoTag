@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Native PDF Tagging Report</title>
+  <style>
+    :root {
+      --bg: #fafbfc; --fg: #1e293b; --muted: #64748b; --border: #e2e8f0;
+      --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+      --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fde68a;
+      --red: #dc2626; --red-bg: #fef2f2; --red-border: #fecaca;
+      --blue: #2563eb; --blue-bg: #eff6ff;
+      --card-bg: #fff; --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8; --border: #334155;
+        --green-bg: #052e16; --green-border: #166534;
+        --amber-bg: #451a03; --amber-border: #92400e;
+        --red-bg: #450a0a; --red-border: #991b1b;
+        --blue-bg: #1e3a5f;
+        --card-bg: #1e293b; --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+    .subtitle { color: var(--muted); margin-bottom: 1.5rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.03em; margin-bottom: 1.5rem; }
+    .badge-native { background: linear-gradient(135deg, #0d6e3f, #16a34a); color: white; box-shadow: 0 2px 8px rgba(13,110,63,0.3); }
+    .badge-raster { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+    .badge-icon { font-size: 1.2rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: var(--card-shadow); }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .metric { text-align: center; }
+    .metric-value { font-size: 2rem; font-weight: 700; }
+    .metric-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-green .metric-value { color: var(--green); }
+    .metric-amber .metric-value { color: var(--amber); }
+    .metric-red .metric-value { color: var(--red); }
+    table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+    th, td { text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
+    th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .compare-native { background: var(--green-bg); }
+    .compare-raster { background: var(--red-bg); }
+    .bar-container { height: 20px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .bar-green { background: var(--green); }
+    .bar-amber { background: var(--amber); }
+    .advantage-list { list-style: none; padding: 0; }
+    .advantage-list li { padding: 0.4rem 0; display: flex; align-items: flex-start; gap: 0.5rem; }
+    .advantage-list li::before { content: "\2713"; color: var(--green); font-weight: bold; flex-shrink: 0; }
+    .risk-list li::before { content: "\26A0"; color: var(--amber); }
+    .page-table tr:nth-child(even) { background: rgba(0,0,0,0.02); }
+    @media (prefers-color-scheme: dark) { .page-table tr:nth-child(even) { background: rgba(255,255,255,0.02); } }
+    .empty-state { text-align: center; padding: 3rem; color: var(--muted); }
+    #file-input { margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Native PDF Tagging Report</h1>
+  <p class="subtitle">Content preservation analysis for accessibility-tagged output</p>
+
+  <div id="report-content">
+    <div class="empty-state">
+      <p>Load a writer report JSON to see the nativity analysis.</p>
+      <input type="file" id="file-input" accept=".json">
+      <p style="margin-top:1rem;font-size:0.85rem;color:var(--muted)">Or pass <code>?jobId=&lt;id&gt;</code> in the URL to load from the server.</p>
+    </div>
+  </div>
+
+  <script>
+    function renderReport(data) {
+      const mode = data.writerMode || data.writerReport?.writerMode || "unknown";
+      const isNative = mode === "native" || (data.pagesNative > 0 && data.pagesRaster === 0);
+      const isPartial = mode === "auto" && data.pagesNative > 0 && data.pagesRaster > 0;
+
+      const matchRate = data.matchRate ?? data.operatorMatchRate ?? null;
+      const operatorCount = data.operatorCount ?? data.totalOperators ?? 0;
+      const matchedOps = data.matchedOperators ?? Math.round(operatorCount * (matchRate || 0));
+      const structureElements = data.structureElementCount ?? data.totalAssignments ?? 0;
+      const markedContent = data.markedContentCount ?? data.totalMcids ?? 0;
+      const pagesNative = data.pagesNative ?? data.pagesRewritten ?? 0;
+      const pagesRaster = data.pagesRaster ?? 0;
+      const totalPages = pagesNative + pagesRaster || data.totalPages || 0;
+
+      const originalSize = data.originalFileSize ?? data.sourceFileSize ?? null;
+      const outputSize = data.outputFileSize ?? data.fileSize ?? null;
+      const rasterSize = data.rasterFileSize ?? data.estimatedRasterSize ?? null;
+
+      const badgeClass = isNative ? "badge-native" : "badge-raster";
+      const badgeText = isNative ? "NATIVE PDF RETAINED" : isPartial ? `${pagesNative}/${totalPages} NATIVE` : "RASTER MODE";
+      const badgeIcon = isNative ? "\uD83D\uDEE1\uFE0F" : "\uD83D\uDDBC\uFE0F";
+
+      let html = `<div class="badge ${badgeClass}"><span class="badge-icon">${badgeIcon}</span> ${badgeText}</div>`;
+
+      html += `<h2>Content Preservation</h2><div class="card"><div class="metric-grid">`;
+      html += metric("Operator Match", matchRate != null ? (matchRate * 100).toFixed(1) + "%" : "N/A", matchRate >= 0.9 ? "green" : matchRate >= 0.7 ? "amber" : "red");
+      html += metric("Structure Elements", structureElements, "green");
+      html += metric("Pages Native", `${pagesNative}/${totalPages}`, pagesRaster === 0 ? "green" : "amber");
+      html += metric("Marked Content", markedContent, "green");
+      html += `</div></div>`;
+
+      if (originalSize || rasterSize) {
+        html += `<h2>File Size Comparison</h2><div class="card"><table>
+          <tr><th>Version</th><th>Size</th><th>Ratio</th></tr>`;
+        if (originalSize) html += `<tr><td>Original PDF</td><td>${formatBytes(originalSize)}</td><td>1.0x</td></tr>`;
+        if (outputSize) html += `<tr class="compare-native"><td><strong>Native Tagged</strong></td><td><strong>${formatBytes(outputSize)}</strong></td><td>${originalSize ? (outputSize/originalSize).toFixed(1)+"x" : "—"}</td></tr>`;
+        if (rasterSize) html += `<tr class="compare-raster"><td>Raster Tagged (estimated)</td><td>${formatBytes(rasterSize)}</td><td>${originalSize ? (rasterSize/originalSize).toFixed(1)+"x" : "—"}</td></tr>`;
+        html += `</table></div>`;
+      }
+
+      html += `<h2>What "Native PDF Retained" Means</h2><div class="card">
+        <p style="margin-bottom:0.8rem">When a PDF is tagged natively, the original document content is preserved exactly as authored. The accessibility engine injects structure annotations (BDC/MCID/EMC marked-content sequences) around the <em>existing</em> text operators without rasterizing or re-encoding any content.</p>
+        <ul class="advantage-list">
+          <li>Vector text preserved — sharp at any zoom level, no DPI artifacts</li>
+          <li>Original fonts retained — no substitution with fallback fonts</li>
+          <li>Hyperlinks and bookmarks preserved — clickable references survive tagging</li>
+          <li>Form fields and annotations retained — interactive elements remain functional</li>
+          <li>Copy/paste returns the original text — not OCR-reconstructed approximations</li>
+          <li>File size comparable to original — no raster image inflation (typically 10-30x smaller than raster mode)</li>
+          <li>Structure tree points at real content — accessibility tools read actual document operators</li>
+        </ul>
+      </div>`;
+
+      if (pagesRaster > 0) {
+        html += `<h2>Raster Fallback Pages</h2><div class="card">
+          <p>${pagesRaster} page(s) fell back to raster mode because operator matching confidence was below the threshold. These pages have:</p>
+          <ul class="advantage-list risk-list">
+            <li>Text rasterized at 144 DPI — may appear blurry when zoomed</li>
+            <li>Invisible text overlay for accessibility — approximate positions</li>
+            <li>Links and form fields on these pages are not preserved</li>
+          </ul>
+        </div>`;
+      }
+
+      html += `<h2>Per-Page Analysis</h2><div class="card">`;
+      if (data.pages && data.pages.length) {
+        html += `<table class="page-table"><tr><th>Page</th><th>Mode</th><th>Operators</th><th>Matched</th><th>Match Rate</th><th>Assignments</th></tr>`;
+        for (const pg of data.pages) {
+          const pgMatch = pg.matchRate ?? (pg.summary?.matchRate) ?? null;
+          const pgOps = pg.operatorCount ?? pg.summary?.totalOperators ?? "—";
+          const pgMatched = pg.summary?.matchedOperators ?? "—";
+          const pgAssign = pg.assignments?.length ?? pg.summary?.assignments ?? "—";
+          const pgMode = pgMatch != null && pgMatch >= 0.8 ? "native" : "raster";
+          html += `<tr><td>${pg.pageNumber}</td><td>${pgMode}</td><td>${pgOps}</td><td>${pgMatched}</td>
+            <td><div class="bar-container"><div class="bar-fill ${pgMatch >= 0.8 ? 'bar-green' : 'bar-amber'}" style="width:${(pgMatch||0)*100}%"></div></div> ${pgMatch != null ? (pgMatch*100).toFixed(0)+"%" : "—"}</td>
+            <td>${pgAssign}</td></tr>`;
+        }
+        html += `</table>`;
+      } else {
+        html += `<p style="color:var(--muted)">Per-page data not available in this report.</p>`;
+      }
+      html += `</div>`;
+
+      document.getElementById("report-content").innerHTML = html;
+    }
+
+    function metric(label, value, tone) {
+      return `<div class="metric metric-${tone}"><div class="metric-value">${value}</div><div class="metric-label">${label}</div></div>`;
+    }
+
+    function formatBytes(b) {
+      if (!b) return "—";
+      const units = ["B","KB","MB","GB"];
+      const exp = Math.min(Math.floor(Math.log(b)/Math.log(1024)), units.length-1);
+      return (b/1024**exp).toFixed(exp===0?0:1) + " " + units[exp];
+    }
+
+    // Load from URL param or file input
+    const params = new URLSearchParams(location.search);
+    const jobId = params.get("jobId");
+    if (jobId) {
+      fetch(`/jobs/${jobId}/artifacts/writerReport`)
+        .then(r => r.json())
+        .then(renderReport)
+        .catch(e => {
+          document.getElementById("report-content").innerHTML =
+            `<div class="card"><p>Failed to load writer report for job ${jobId}: ${e.message}</p></div>`;
+        });
+    }
+
+    document.getElementById("file-input")?.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try { renderReport(JSON.parse(reader.result)); }
+        catch (err) { alert("Invalid JSON: " + err.message); }
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>

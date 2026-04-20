@@ -160,6 +160,12 @@ public class BuildEverythingServlet extends HttpServlet {
             return;
         }
 
+        if ("GET".equals(method) && "/difftool".equals(path)) {
+            if (serveStaticAsset(response, "/difftool.html")) {
+                return;
+            }
+        }
+
         writeError(response, HttpServletResponse.SC_NOT_FOUND, "Not found");
     }
 

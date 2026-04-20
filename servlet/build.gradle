@@ -48,6 +48,7 @@ dependencies {
   testImplementation platform("org.junit:junit-bom:${junitVersion}")
   testImplementation "org.junit.jupiter:junit-jupiter"
   testImplementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:${jettyVersion}"
+  testRuntimeOnly "org.junit.platform:junit-platform-launcher"
   testRuntimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
 }
 
@@ -74,6 +75,17 @@ tasks.register("runStandalone", JavaExec) {
   systemProperty "buildeverything.repoRoot", repoRoot.get().absolutePath
   if (project.hasProperty("port")) {
     systemProperty "buildeverything.port", String.valueOf(project.property("port"))
+  }
+}
+
+tasks.register("runDiffTool", JavaExec) {
+  group = "application"
+  description = "Run the Swing diff-tool GUI."
+  dependsOn(tasks.named("classes"))
+  classpath = sourceSets.main.runtimeClasspath + configurations.standaloneRuntime
+  mainClass = "buildeverything.servlet.DiffToolSwingApp"
+  if (project.hasProperty("serverUrl")) {
+    args(String.valueOf(project.property("serverUrl")))
   }
 }
 

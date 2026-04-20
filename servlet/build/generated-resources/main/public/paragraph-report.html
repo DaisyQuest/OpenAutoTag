@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paragraph Merger Report</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a2e; --fg2: #555; --accent: #2563eb; --border: #d0d5dd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f172a; --fg: #e2e8f0; --fg2: #94a3b8; --accent: #60a5fa; --border: #334155; }
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--fg); padding: 2rem; max-width: 900px; margin: 0 auto; line-height: 1.6; }
+  h1 { margin-bottom: 0.5rem; }
+  .info { color: var(--fg2); margin-bottom: 1rem; }
+  #status { padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0; }
+  #report { margin-top: 1rem; }
+  label { font-weight: 600; }
+  input[type=file] { margin: 0.5rem 0; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<h1>Paragraph Merger Report Viewer</h1>
+<p class="info">Load a paragraph-merger JSON report to view it rendered as HTML.</p>
+
+<div>
+  <label for="file-input">Choose JSON report file:</label><br>
+  <input type="file" id="file-input" accept=".json">
+</div>
+
+<div id="status"></div>
+<div id="report"></div>
+
+<script type="module">
+  // Inline a minimal renderer for the browser (mirrors lib/report-renderer.js logic)
+  const input = document.getElementById('file-input');
+  const status = document.getElementById('status');
+  const reportDiv = document.getElementById('report');
+
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    status.textContent = 'Loading...';
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      // Open rendered HTML in a new window / iframe
+      const isCorpus = data.documentsEvaluated != null;
+      status.textContent = `Loaded ${isCorpus ? 'corpus summary' : 'document report'}: ${file.name}`;
+
+      // Use the CLI to pre-render, or for browser: fetch pre-rendered HTML.
+      // For now, display raw JSON with a note to use CLI for full rendering.
+      status.innerHTML = `<p>Loaded <strong>${file.name}</strong> (${isCorpus ? 'corpus summary' : 'document report'}).</p>
+        <p>For the best experience, use the CLI renderer:</p>
+        <pre>node modules/paragraph-merger/render-report.js --input ${file.name}</pre>
+        <p>Below is the raw JSON preview.</p>`;
+      reportDiv.innerHTML = '<pre style="max-height:600px;overflow:auto;padding:1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.85rem">' +
+        escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+    } catch (err) {
+      status.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Also support ?path= query param for server-served pre-rendered HTML
+  const params = new URLSearchParams(location.search);
+  const pathParam = params.get('path');
+  if (pathParam) {
+    status.textContent = 'Loading from path...';
+    fetch(pathParam)
+      .then(r => { if (!r.ok) throw new Error(r.statusText); return r.text(); })
+      .then(html => {
+        // If it's HTML, embed it; if JSON, show preview
+        if (html.trim().startsWith('<!DOCTYPE') || html.trim().startsWith('<html')) {
+          reportDiv.innerHTML = '<iframe srcdoc="' + html.replace(/"/g, '&quot;') + '" style="width:100%;height:80vh;border:1px solid var(--border);border-radius:8px"></iframe>';
+          status.textContent = 'Loaded rendered report.';
+        } else {
+          reportDiv.innerHTML = '<pre style="max-height:600px;overflow:auto">' + escapeHtml(html) + '</pre>';
+          status.textContent = 'Loaded JSON (use CLI for HTML rendering).';
+        }
+      })
+      .catch(err => { status.textContent = 'Error loading: ' + err.message; });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

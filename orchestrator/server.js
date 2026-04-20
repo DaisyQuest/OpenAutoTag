@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { getRuntimeRoot, getRuntimeSubdir, isAzureAppServiceRuntime } from "../scripts/runtime-paths.js";
+import { compareDocuments } from "./diff-engine.js";
 import { createAgentRegistry } from "./agent-registry.js";
 import { loadAgentRuntimeConfig } from "./agent-runtime-config.js";
 import { startAgentSupervisor } from "./agent-supervisor.js";
@@ -1161,6 +1162,76 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
   };
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Diff-tool helpers                                                         */
+/* -------------------------------------------------------------------------- */
+
+async function runValidatorOnPdf(validatorPath, pdfPath, outputDir, prefix) {
+  const { execFile: execFileCb } = await import("node:child_process");
+  const manifestPath = `${pdfPath}.tags.json`;
+
+  // Create a minimal manifest so the validator does not crash
+  try {
+    await stat(manifestPath);
+  } catch {
+    await writeFile(manifestPath, JSON.stringify({ version: "1.0.0", documentId: prefix, tags: [] }));
+  }
+
+  return new Promise((resolve, reject) => {
+    execFileCb(
+      process.execPath,
+      [validatorPath, "--pdf", pdfPath, "--manifest", manifestPath, "--skip-font-audit"],
+      { maxBuffer: 20 * 1024 * 1024, timeout: 120_000 },
+      (error, stdout) => {
+        if (error && !stdout) {
+          reject(error);
+          return;
+        }
+        try {
+          resolve(JSON.parse(stdout));
+        } catch {
+          reject(new Error("Validator produced invalid JSON"));
+        }
+      }
+    );
+  });
+}
+
+async function runDiffPipeline(sourcePath, outputDir, writerMode) {
+  const { runPipeline } = await import("./pipeline-runner.js");
+
+  const result = await runPipeline({
+    filePath: sourcePath,
+    outputDir,
+    jobId: `diff-${crypto.randomUUID()}`,
+    options: {
+      profileId: "default",
+      profileOverrides: {
+        pdfWriter: { mode: writerMode }
+      }
+    }
+  });
+
+  const artifacts = result?.artifacts || {};
+  const reports = {};
+
+  for (const [key, filePath] of Object.entries(artifacts)) {
+    if (
+      filePath &&
+      typeof filePath === "string" &&
+      (key === "validationReport" || key === "writerReport" || key === "tagDeltaReport" || key === "fontReport")
+    ) {
+      try {
+        reports[key] = JSON.parse(await readFile(filePath, "utf8"));
+      } catch {
+        // Skip unreadable artifacts
+      }
+    }
+  }
+
+  return reports;
+}
+
 export function createAppServer({
   queue,
   uploadRoot = getRuntimeSubdir("uploads", { repoRoot }),
@@ -1594,6 +1665,138 @@ export function createAppServer({
         });
         return;
       }
+
+      /* ── Diff tool routes ─────────────────────────────────────── */
+
+      if (request.method === "GET" && url.pathname === "/difftool") {
+        const assetPath = path.join(publicDir, "difftool.html");
+        if (await serveStaticAsset(response, assetPath)) {
+          return;
+        }
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/difftool/compare") {
+        const formData = await readFormData(request);
+
+        const sourcePdf = formData.get("sourcePdf");
+        const competitorPdf = formData.get("competitorPdf");
+
+        if (!sourcePdf || !competitorPdf) {
+          writeJson(response, 400, { error: "Both sourcePdf and competitorPdf files are required." });
+          return;
+        }
+
+        const writerMode = String(formData.get("writerMode") || "auto");
+        const diffDir = path.join(uploadRoot, `diff-${crypto.randomUUID()}`);
+        await mkdir(diffDir, { recursive: true });
+
+        const sourcePath = path.join(diffDir, "source.pdf");
+        const competitorPath = path.join(diffDir, "competitor.pdf");
+
+        await writeFile(sourcePath, Buffer.from(await sourcePdf.arrayBuffer()));
+        await writeFile(competitorPath, Buffer.from(await competitorPdf.arrayBuffer()));
+
+        const validatorPath = path.join(repoRoot, "modules", "validator", "index.js");
+        const documents = [];
+
+        // Validate source
+        try {
+          const sourceReport = await runValidatorOnPdf(validatorPath, sourcePath, diffDir, "source");
+          documents.push({
+            id: "source",
+            label: sourcePdf.name || "Source Document",
+            role: "source",
+            validationReport: sourceReport
+          });
+        } catch {
+          documents.push({
+            id: "source",
+            label: sourcePdf.name || "Source Document",
+            role: "source",
+            validationReport: null
+          });
+        }
+
+        // Validate competitor
+        try {
+          const competitorReport = await runValidatorOnPdf(validatorPath, competitorPath, diffDir, "competitor");
+          documents.push({
+            id: "competitor",
+            label: competitorPdf.name || "Competitor Document",
+            role: "competitor",
+            validationReport: competitorReport
+          });
+        } catch {
+          documents.push({
+            id: "competitor",
+            label: competitorPdf.name || "Competitor Document",
+            role: "competitor",
+            validationReport: null
+          });
+        }
+
+        // Run our pipeline on the source
+        try {
+          const pipelineOutputDir = path.join(diffDir, `autotag-${writerMode}`);
+          await mkdir(pipelineOutputDir, { recursive: true });
+
+          const pipelineResult = await runDiffPipeline(sourcePath, pipelineOutputDir, writerMode);
+          documents.push({
+            id: `ours-${writerMode}`,
+            label: `AutoTag (${writerMode})`,
+            role: "ours",
+            validationReport: pipelineResult.validationReport,
+            writerReport: pipelineResult.writerReport,
+            tagDeltaReport: pipelineResult.tagDeltaReport,
+            fontReport: pipelineResult.fontReport
+          });
+        } catch {
+          documents.push({
+            id: `ours-${writerMode}`,
+            label: `AutoTag (${writerMode})`,
+            role: "ours",
+            validationReport: null
+          });
+        }
+
+        const report = compareDocuments(documents);
+
+        // Clean up temp files in background
+        rm(diffDir, { recursive: true, force: true }).catch(() => {});
+
+        writeJson(response, 200, report);
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/difftool/analyze") {
+        const formData = await readFormData(request);
+        const pdfFile = formData.get("pdf");
+
+        if (!pdfFile) {
+          writeJson(response, 400, { error: "A pdf file is required." });
+          return;
+        }
+
+        const analyzeDir = path.join(uploadRoot, `analyze-${crypto.randomUUID()}`);
+        await mkdir(analyzeDir, { recursive: true });
+        const pdfPath = path.join(analyzeDir, "input.pdf");
+        await writeFile(pdfPath, Buffer.from(await pdfFile.arrayBuffer()));
+
+        let validationReport = null;
+        const validatorPath = path.join(repoRoot, "modules", "validator", "index.js");
+
+        try {
+          validationReport = await runValidatorOnPdf(validatorPath, pdfPath, analyzeDir, "input");
+        } catch {
+          // Validation failed — return null report
+        }
+
+        rm(analyzeDir, { recursive: true, force: true }).catch(() => {});
+        writeJson(response, 200, { validationReport });
+        return;
+      }
+
+      /* ── Static asset fallback ─────────────────────────────────── */
 
       if (request.method === "GET") {
         const assetPath = resolvePublicAsset(url.pathname);

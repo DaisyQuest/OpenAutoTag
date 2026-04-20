@@ -87,6 +87,41 @@ class BuildEverythingServletTest {
         assertEquals("Not found", payload.path("error").asText());
     }
 
+    @Test
+    void diffToolPageServesHtml() throws Exception {
+        HttpResponse<String> response = get("/difftool");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.headers().firstValue("content-type").orElse("").contains("text/html"));
+        assertTrue(response.body().contains("PDF Diff Tool"));
+        assertTrue(response.body().contains("difftool.js"));
+    }
+
+    @Test
+    void diffToolCssIsAccessible() throws Exception {
+        HttpResponse<String> response = get("/difftool.css");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.headers().firstValue("content-type").orElse("").contains("text/css"));
+        assertTrue(response.body().contains(".difftool-grid"));
+    }
+
+    @Test
+    void diffToolJsIsAccessible() throws Exception {
+        HttpResponse<String> response = get("/difftool.js");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.headers().firstValue("content-type").orElse("").contains("javascript"));
+    }
+
+    @Test
+    void dashboardLinksToTheDiffTool() throws Exception {
+        HttpResponse<String> response = get("/");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("/difftool"), "Dashboard should link to /difftool");
+    }
+
     private HttpResponse<String> get(String path) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:" + port + path))
