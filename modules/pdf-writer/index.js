@@ -602,7 +602,7 @@ async function runNativeMatcher({ operatorsPath, semanticPath, tagsPath, tagPlan
   return stdout;
 }
 
-async function runNativeRewriter({ pdfPath, tagPlanPath, tagsPath, outputPath, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY }) {
+async function runNativeRewriter({ pdfPath, tagPlanPath, tagsPath, outputPath, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY, title, language }) {
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
   const args = [
     "-cp",
@@ -624,6 +624,12 @@ async function runNativeRewriter({ pdfPath, tagPlanPath, tagsPath, outputPath, r
   if (tagsPath) {
     args.push("--tags", tagsPath);
   }
+  if (title) {
+    args.push("--title", title);
+  }
+  if (language) {
+    args.push("--language", language);
+  }
   const stdout = await execCommand(
     javaCommand,
     args,
@@ -636,7 +642,7 @@ function isNativeRewriterAvailable() {
   return existsSync(nativeRewriterSource);
 }
 
-async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cached, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY }) {
+async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cached, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY, title, language }) {
   await ensureJavaHelperCompiled();
 
   const tempBase = `${outputPath}.native`;
@@ -666,7 +672,9 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
     tagPlanPath,
     tagsPath: tagsPath ? path.resolve(tagsPath) : undefined,
     outputPath: path.resolve(outputPath),
-    readingOrderStrategy
+    readingOrderStrategy,
+    title,
+    language
   });
 
   let rewriterReport;
@@ -975,6 +983,8 @@ export async function writeTaggedArtifacts({
       semanticPath,
       outputPath,
       readingOrderStrategy,
+      title,
+      language,
       cached: modeDecision.probePlan
         ? {
             operatorsPath: modeDecision.probeOperatorsPath,
