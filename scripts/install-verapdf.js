@@ -54,7 +54,7 @@ async function downloadInstaller() {
 
   // Try the versioned URL first (more stable), then fall back to the unversioned alias.
   const urls = [releaseUrlVersioned, releaseUrl];
-  let lastError;
+  let lastError = new Error("Unable to download veraPDF installer: no URLs available.");
   for (const url of urls) {
     let response;
     try {
