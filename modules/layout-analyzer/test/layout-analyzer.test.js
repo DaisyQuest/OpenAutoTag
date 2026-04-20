@@ -524,3 +524,173 @@ test("layout analyzer respects LAYOUT_HEADING_SCORE_THRESHOLD env override", asy
     else process.env.LAYOUT_HEADING_SCORE_THRESHOLD = originalHeading;
   }
 });
+
+test("layout analyzer detects header row when header font differs from data font (font-name distinctiveness)", async () => {
+  // Simulates Autonics-style PDFs where headers use an obfuscated font like
+  // g_d0_f1 while data rows use g_d0_f2 / g_d0_f9, with no "Bold" in the name.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-font-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:font-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header row uses font g_d0_f1 (same size as data, no "Bold" in name)
+          { id: "h1", text: "Parameter", bbox: [119, 181, 49, 10], fontSize: 10.0, fontName: "g_d0_f1" },
+          { id: "h2", text: "Description", bbox: [194, 181, 55, 10], fontSize: 10.0, fontName: "g_d0_f1" },
+          // Data rows use different fonts g_d0_f9 and g_d0_f2
+          { id: "d1", text: "RAMU", bbox: [119, 195, 24, 9], fontSize: 9.5, fontName: "g_d0_f9" },
+          { id: "d2", text: "Settings for Ramp-up change rate.", bbox: [194, 195, 145, 9], fontSize: 9.5, fontName: "g_d0_f2" },
+          { id: "d3", text: "RAMD", bbox: [119, 211, 24, 9], fontSize: 9.5, fontName: "g_d0_f9" },
+          { id: "d4", text: "Settings for Ramp-down change rate.", bbox: [194, 211, 157, 9], fontSize: 9.5, fontName: "g_d0_f2" },
+          { id: "d5", text: "rUNT", bbox: [119, 226, 24, 9], fontSize: 9.5, fontName: "g_d0_f9" },
+          { id: "d6", text: "Settings for Ramp time unit.", bbox: [194, 226, 117, 9], fontSize: 9.5, fontName: "g_d0_f2" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+  assert.equal(blockById.get("h1").tableRole, "header", "h1 should be header");
+  assert.equal(blockById.get("h2").tableRole, "header", "h2 should be header");
+  assert.equal(blockById.get("d1").tableRole, "cell", "d1 should be cell");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("layout analyzer detects header row when header is 5% larger (10pt over 9.5pt baseline)", async () => {
+  // Autonics-style PDFs: header rows at 10pt, body rows at 9.5pt, same font family.
+  // Old threshold 1.08 rejected this (10/9.5=1.053 < 1.08); new 1.03 accepts it.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-fontsize-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:fontsize-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header at 10pt
+          { id: "h1", text: "Display", bbox: [105, 393, 49, 10], fontSize: 10.0, fontName: "Helvetica" },
+          { id: "h2", text: "Parameter Description", bbox: [215, 393, 107, 10], fontSize: 10.0, fontName: "Helvetica" },
+          // Data at 9.5pt (same font family — no "Bold", no size jump > 8%)
+          { id: "d1", text: "L-SV", bbox: [105, 407, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d2", text: "Set value low-limit", bbox: [215, 407, 96, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d3", text: "H-SV", bbox: [105, 422, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d4", text: "Set value high-limit", bbox: [215, 422, 99, 9], fontSize: 9.5, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+  assert.equal(blockById.get("h1").tableRole, "header", "h1 should be header");
+  assert.equal(blockById.get("h2").tableRole, "header", "h2 should be header");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("layout analyzer detects header with single-letter and Unicode-symbol column labels", async () => {
+  // Autonics-style multi-column headers that use single Latin letters (e.g. 'A','B')
+  // and Unicode temperature symbols like '(℃)' and '(℉)' as column labels.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-unicode-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:unicode-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header row contains single-char and Unicode-symbol labels
+          { id: "h1", text: "Display", bbox: [105, 181, 60, 10], fontSize: 10.0, fontName: "Helvetica" },
+          { id: "h2", text: "(℃)", bbox: [215, 181, 24, 10], fontSize: 10.0, fontName: "Helvetica" },
+          { id: "h3", text: "(℉)", bbox: [315, 181, 24, 10], fontSize: 10.0, fontName: "Helvetica" },
+          // Data rows at 9.5pt
+          { id: "d1", text: "1", bbox: [105, 195, 10, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d2", text: "-200 to 1350", bbox: [215, 195, 80, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d3", text: "-328 to 2462", bbox: [315, 195, 80, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d4", text: "0.1", bbox: [105, 210, 14, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d5", text: "-199.9 to 999.9", bbox: [215, 210, 90, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d6", text: "-199.9 to 999.9", bbox: [315, 210, 90, 9], fontSize: 9.5, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "table should be detected");
+  assert.equal(blockById.get("h1").tableRole, "header", "Display should be header");
+  assert.equal(blockById.get("h2").tableRole, "header", "(℃) should be header");
+  assert.equal(blockById.get("h3").tableRole, "header", "(℉) should be header");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});
+
+test("layout analyzer detects narrow 2-column table whose anchor span is smaller than page.width*0.14", async () => {
+  // Reproduces the Autonics page 67 'Parameter | Description' table:
+  // anchors at x=119 and x=194 → anchor-span = 75px, but page.width*0.14 ≈ 83px.
+  // The visual row span (right - left) is 219px, which clears the gate once we
+  // use Math.max(anchor_span, visual_row_span) for horizontalSpan.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-narrow-table-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:narrow-table",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [{
+        pageNumber: 1,
+        width: 595,
+        height: 842,
+        textBlocks: [
+          // Header row: anchor span 194-119=75px < page.width*0.14≈83px
+          // but visual span 194+55-119=130px clears the gate
+          { id: "h1", text: "Parameter", bbox: [119, 181, 49, 10], fontSize: 10.0, fontName: "Helvetica-Bold" },
+          { id: "h2", text: "Description", bbox: [194, 181, 55, 10], fontSize: 10.0, fontName: "Helvetica-Bold" },
+          { id: "d1", text: "RAMU", bbox: [119, 195, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d2", text: "Set the ramp-up rate.", bbox: [194, 195, 90, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d3", text: "RAMD", bbox: [119, 211, 24, 9], fontSize: 9.5, fontName: "Helvetica" },
+          { id: "d4", text: "Set the ramp-down rate.", bbox: [194, 211, 100, 9], fontSize: 9.5, fontName: "Helvetica" }
+        ]
+      }]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const blockById = new Map(page.textBlocks.map((b) => [b.id, b]));
+
+  assert.equal(page.structureSignals.tableDetected, true, "narrow table should be detected");
+  assert.equal(blockById.get("h1").blockType, "table-cell", "h1 should be table-cell");
+  assert.equal(blockById.get("h1").tableRole, "header", "h1 should be header");
+  assert.equal(blockById.get("d1").blockType, "table-cell", "d1 should be table-cell");
+  assert.equal(page.structureSignals.tableHeaderRowCount, 1, "one header row");
+});

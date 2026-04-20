@@ -209,7 +209,9 @@ function looksNumericish(text) {
 
 function looksHeaderish(text) {
   const normalized = normalizeText(text);
-  return normalized.length > 0 && normalized.length <= 48 && /[A-Za-z]{2}/.test(normalized) && !looksNumericish(normalized);
+  // Accept single Latin letters and Unicode letters/symbols (e.g. ℃, ℉) as
+  // valid header content in addition to multi-char Latin words.
+  return normalized.length > 0 && normalized.length <= 48 && /[A-Za-z\u0080-\uFFFF]/.test(normalized) && !looksNumericish(normalized);
 }
 
 function countMatches(leftValues, rightValues, tolerance) {
@@ -342,11 +344,23 @@ function detectHeaderRow(rows) {
   const restNumericRatio = mean(restRows.map((row) => row.numericRatio));
   const restFontSize = mean(restRows.map((row) => row.meanFontSize));
 
-  return (
-    firstRow.boldRatio >= 0.5 ||
-    (firstRow.headerishRatio >= 0.75 && restNumericRatio >= 0.3) ||
-    (firstRow.headerishRatio >= 0.75 && firstRow.meanFontSize >= restFontSize * 1.08)
-  );
+  if (firstRow.boldRatio >= 0.5) return true;
+  if (firstRow.headerishRatio >= 0.75 && restNumericRatio >= 0.3) return true;
+  // Lowered ratio from 1.08 to 1.03: a consistent 3-5% font-size bump (e.g. 10pt
+  // header over 9.5pt body) is a reliable header signal in technical manuals.
+  if (firstRow.headerishRatio >= 0.75 && firstRow.meanFontSize >= restFontSize * 1.03) return true;
+
+  // Font-name distinctiveness: if the first row uses at least one font name
+  // that does not appear in any data row, it is highly likely to be a header
+  // (technical PDFs often use a separate font for column labels).
+  const firstRowFonts = new Set(firstRow.items.map((i) => i.block.fontName).filter(Boolean));
+  const restFonts = new Set(restRows.flatMap((r) => r.items.map((i) => i.block.fontName)).filter(Boolean));
+
+  if (firstRowFonts.size > 0 && [...firstRowFonts].some((f) => !restFonts.has(f)) && firstRow.headerishRatio >= 0.5) {
+    return true;
+  }
+
+  return false;
 }
 
 function summarizeTableBand(rows, page, baselineFontSize) {
@@ -372,6 +386,15 @@ function summarizeTableBand(rows, page, baselineFontSize) {
   const consistentColumnRows = stableRows.filter(
     (row) => row.assignments.length >= Math.max(2, Math.min(anchors.length, anchors.length - 1))
   ).length;
+  // Measure horizontal span as the wider of anchor-centroid spread and the widest
+  // multi-item row's visual extent.  The anchor-centroid measure underestimates span
+  // when the rightmost column has wide cells (its anchor sits at the left edge of those
+  // cells, not their right edge), which causes narrow-but-valid tables to fail the
+  // minimum-span gate in isConfidentTableBand / isValidBorderless.
+  const anchorSpan = anchors.length >= 2 ? anchors.at(-1).x - anchors[0].x : 0;
+  const rowVisualSpan = rows
+    .filter((r) => r.items.length >= 2)
+    .reduce((maxSpan, r) => Math.max(maxSpan, r.right - r.left), 0);
 
   return {
     rows,
@@ -384,7 +407,7 @@ function summarizeTableBand(rows, page, baselineFontSize) {
     stableCoverage: rows.length === 0 ? 0 : stableRows.length / rows.length,
     consistentColumnRows,
     hasHeaderRow: detectHeaderRow(stableRows),
-    horizontalSpan: anchors.length >= 2 ? anchors.at(-1).x - anchors[0].x : 0
+    horizontalSpan: Math.max(anchorSpan, rowVisualSpan)
   };
 }
 
