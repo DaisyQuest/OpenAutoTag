@@ -235,7 +235,7 @@ describe("MCP tool handlers", () => {
 
   it("loadNativeTagging returns expected shape", async () => {
     const data = await loadNativeTagging();
-    assert.equal(data.status, "phase-1-proof-of-concept");
+    assert.equal(data.status, "production-ready");
     assert.ok(data.components.operatorParser, "missing operatorParser component");
     assert.equal(data.components.operatorParser.status, "implemented");
     assert.equal(data.components.operatorParser.file, "NativeContentStreamParser.java");
