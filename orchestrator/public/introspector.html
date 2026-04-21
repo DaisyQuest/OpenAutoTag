@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Introspector</title>
+    <link rel="stylesheet" href="/introspector.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#report-workspace">Skip to report workspace</a>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">OT</span>
+        <span>
+          <strong>OpenAutoTag</strong>
+          <small>PDF Introspector</small>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/">Workspace</a>
+        <a href="/difftool">Diff Tool</a>
+        <a aria-current="page" href="/introspector">Introspector</a>
+        <a href="/admin/artifacts.html">Artifacts</a>
+      </nav>
+      <div class="access-strip">
+        <span id="access-state">Checking access</span>
+        <button id="sample-report" class="text-button" type="button">Sample</button>
+      </div>
+    </header>
+
+    <main id="report-workspace" class="workspace">
+      <section class="control-panel" aria-labelledby="intake-title">
+        <div class="panel-heading">
+          <p class="eyebrow">Intake</p>
+          <h1 id="intake-title">PDF report builder</h1>
+          <p>
+            Aggregate parser, layout, native tagging, validation, font, repair, table, redaction,
+            and comparison signals into one navigable report.
+          </p>
+        </div>
+
+        <form id="analysis-form" class="analysis-form">
+          <label class="drop-target" for="pdf-input">
+            <input id="pdf-input" name="pdf" type="file" accept="application/pdf,.pdf" />
+            <span class="drop-kicker">PDF</span>
+            <strong id="file-name">Choose a document</strong>
+            <small id="file-meta">Local upload, processed by the existing queue API.</small>
+          </label>
+
+          <div class="field-grid">
+            <label>
+              <span>Workload</span>
+              <select id="workload-select" name="workloadId">
+                <option value="accessibility-tagging">Accessibility Tagging</option>
+              </select>
+            </label>
+            <label>
+              <span>Profile</span>
+              <select id="profile-select" name="profileId">
+                <option value="default">Default</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="button-row">
+            <button id="run-analysis" class="primary-button" type="submit">Run Analysis</button>
+            <button id="reset-report" class="secondary-button" type="button">Reset</button>
+          </div>
+        </form>
+
+        <div class="status-panel" aria-live="polite">
+          <div>
+            <span class="status-label">Status</span>
+            <strong id="run-state">Ready</strong>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <span id="progress-fill"></span>
+          </div>
+          <p id="run-message">Load the sample report or process a PDF.</p>
+        </div>
+
+        <section class="capability-panel" aria-labelledby="capability-title">
+          <div class="panel-heading compact">
+            <p class="eyebrow">Coverage</p>
+            <h2 id="capability-title">Capability stack</h2>
+          </div>
+          <div id="capability-stack" class="capability-stack"></div>
+        </section>
+      </section>
+
+      <section class="report-panel" aria-labelledby="report-title">
+        <div class="report-toolbar">
+          <div>
+            <p class="eyebrow">Report</p>
+            <h2 id="report-title">Ultimate PDF introspection report</h2>
+          </div>
+          <div class="toolbar-actions">
+            <button id="copy-json" class="icon-button" type="button" title="Copy report JSON" aria-label="Copy report JSON">
+              JSON
+            </button>
+            <button id="download-html" class="icon-button" type="button" title="Download standalone HTML" aria-label="Download standalone HTML">
+              HTML
+            </button>
+            <button id="print-report" class="icon-button" type="button" title="Print report" aria-label="Print report">
+              Print
+            </button>
+          </div>
+        </div>
+
+        <nav id="report-tabs" class="report-tabs" aria-label="Report sections"></nav>
+
+        <article id="report-canvas" class="report-canvas" tabindex="-1"></article>
+      </section>
+    </main>
+
+    <template id="artifact-link-template">
+      <a class="artifact-link" target="_blank" rel="noreferrer"></a>
+    </template>
+
+    <script type="module" src="/introspector.js"></script>
+  </body>
+</html>

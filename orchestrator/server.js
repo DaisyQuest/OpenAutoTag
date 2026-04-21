@@ -1666,6 +1666,15 @@ export function createAppServer({
         return;
       }
 
+      /* ── Introspector routes ──────────────────────────────────── */
+
+      if (request.method === "GET" && url.pathname === "/introspector") {
+        const assetPath = path.join(publicDir, "introspector.html");
+        if (await serveStaticAsset(response, assetPath)) {
+          return;
+        }
+      }
+
       /* ── Diff tool routes ─────────────────────────────────────── */
 
       if (request.method === "GET" && url.pathname === "/difftool") {

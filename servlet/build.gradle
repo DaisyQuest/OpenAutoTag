@@ -89,6 +89,17 @@ tasks.register("runDiffTool", JavaExec) {
   }
 }
 
+tasks.register("runIntrospector", JavaExec) {
+  group = "application"
+  description = "Run the Swing PDF introspector GUI."
+  dependsOn(tasks.named("classes"))
+  classpath = sourceSets.main.runtimeClasspath + configurations.standaloneRuntime
+  mainClass = "buildeverything.servlet.PdfIntrospectorSwingApp"
+  if (project.hasProperty("serverUrl")) {
+    args(String.valueOf(project.property("serverUrl")))
+  }
+}
+
 tasks.register("downloadDependencies", Copy) {
   group = "build"
   description = "Resolve and copy compile, runtime, standalone, and test dependencies."

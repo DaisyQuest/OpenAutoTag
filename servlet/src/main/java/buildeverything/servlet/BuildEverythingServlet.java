@@ -166,6 +166,12 @@ public class BuildEverythingServlet extends HttpServlet {
             }
         }
 
+        if ("GET".equals(method) && "/introspector".equals(path)) {
+            if (serveStaticAsset(response, "/introspector.html")) {
+                return;
+            }
+        }
+
         writeError(response, HttpServletResponse.SC_NOT_FOUND, "Not found");
     }
 
