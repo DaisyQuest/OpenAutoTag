@@ -3,16 +3,16 @@
   --bg:         #f6f1e8;
   --bg-deep:    #e9dfd0;
   --fg:         #132628;
-  --muted:      #587072;
+  --muted:      #4a5c60;
   --line:       rgba(19,38,40,0.14);
-  --signal:     #0b7a75;
+  --signal:     #0a6b66;
   --signal-deep:#064f4c;
   --warm:       #ca6b2f;
   --danger:     #a43c2d;
   --green:      #16a34a;
   --green-bg:   #ecfdf5;
   --green-border:#a7f3d0;
-  --blue:       #2563eb;
+  --blue:       #1d4ed8;
   --blue-bg:    #eff6ff;
   --code-bg:    #fdfcf9;
   --card-bg:    #fff;
@@ -27,7 +27,7 @@
     --bg:         #0f172a;
     --bg-deep:    #1e293b;
     --fg:         #e2e8f0;
-    --muted:      #94a3b8;
+    --muted:      #a8b8ba;
     --line:       rgba(226,232,240,0.12);
     --signal:     #5eead4;
     --signal-deep:#2dd4bf;
@@ -59,13 +59,26 @@ a { color: var(--signal); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* ── Layout ────────────────────────────────────────────────── */
+/* Override body from styles.css to restore howitworks background */
+body {
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.72;
+  font-size: 16px;
+}
+
+/* Topbar margin override — styles.css topbar sits above page-grid */
+.topbar {
+  margin: 1rem auto 0;
+}
+
 .page-grid {
   display: grid;
   grid-template-columns: 240px 1fr;
   max-width: 1200px;
   margin: 0 auto;
   gap: 2.5rem;
-  padding: 2rem 2rem 4rem;
+  padding: 1.5rem 2rem 4rem;
 }
 @media (max-width: 860px) {
   .page-grid { grid-template-columns: 1fr; padding: 1rem; }

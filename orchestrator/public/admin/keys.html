@@ -13,19 +13,32 @@
       <div class="orb orb-b"></div>
 
       <nav class="topbar" aria-label="Primary">
-        <a class="brand-mark" href="/">BuildEverything</a>
-        <div class="topbar-links">
-          <a class="topbar-link" href="/">Workspace</a>
-          <a class="topbar-link is-active" href="/admin/keys.html">API Keys</a>
-          <a class="topbar-link" href="/admin/system.html">System</a>
-          <a class="topbar-link" href="/admin/agents.html">Agents</a>
-          <a class="topbar-link" href="/admin/queue.html">Queue</a>
-          <a class="topbar-link" href="/admin/history.html">History</a>
-          <a class="topbar-link" href="/admin/artifacts.html">Artifacts</a>
-        </div>
-        <div class="topbar-actions">
-          <span id="session-pill" class="session-pill">Loading access</span>
-          <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+        <a class="brand-mark" href="/">
+          <span class="brand-icon">&#x1F6E1;&#xFE0F;</span>
+          <span>PDF Accessibility Engine</span>
+        </a>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" aria-label="Toggle navigation menu" />
+        <label for="nav-toggle" class="nav-toggle-label" aria-hidden="true">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </label>
+        <div class="topbar-collapsible">
+          <div class="topbar-links">
+            <a class="topbar-link" href="/">Workspace</a>
+            <a class="topbar-link" href="/difftool">Diff Tool</a>
+            <a class="topbar-link is-active" href="/admin/keys.html">API Keys</a>
+            <a class="topbar-link" href="/admin/system.html">System</a>
+            <a class="topbar-link" href="/admin/agents.html">Agents</a>
+            <a class="topbar-link" href="/admin/queue.html">Queue</a>
+            <a class="topbar-link" href="/admin/history.html">History</a>
+            <a class="topbar-link" href="/admin/artifacts.html">Artifacts</a>
+            <a class="topbar-link" href="/howitworks.html">How It Works</a>
+          </div>
+          <div class="topbar-actions">
+            <span id="session-pill" class="session-pill">Loading access</span>
+            <button id="clear-session" class="ghost-button compact-button" type="button">Clear keys</button>
+          </div>
         </div>
       </nav>
 

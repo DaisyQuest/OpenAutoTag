@@ -2,9 +2,9 @@
   --paper: #f6f1e8;
   --paper-deep: #e9dfd0;
   --ink: #132628;
-  --muted: #587072;
+  --muted: #4a5c60;
   --line: rgba(19, 38, 40, 0.14);
-  --signal: #0b7a75;
+  --signal: #0a6b66;
   --signal-deep: #064f4c;
   --warm: #ca6b2f;
   --danger: #a43c2d;
@@ -2432,8 +2432,7 @@ body[data-admin-page="agents"] {
     grid-template-columns: 1fr;
   }
 
-  .auth-form,
-  .topbar {
+  .auth-form {
     grid-template-columns: 1fr;
     display: grid;
   }
@@ -2678,7 +2677,8 @@ body[data-admin-page="agents"] {
     --paper: #1a2426;
     --paper-deep: #141c1e;
     --ink: #e8e2d8;
-    --muted: #94a3a5;
+    --muted: #a8b8ba;
+    --signal: #4ec9c4;
     --line: rgba(232, 226, 216, 0.12);
     --shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
   }
