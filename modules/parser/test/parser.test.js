@@ -62,6 +62,37 @@ test("parser keeps wide same-baseline gaps as separate blocks", () => {
   assert.equal(blocks[1].text, "Right note");
 });
 
+test("parser preserves rotated axis labels as vertical blocks", () => {
+  const blocks = groupTextItemsToBlocks(1, 792, [
+    {
+      str: "60",
+      width: 7.47,
+      height: 6.72,
+      transform: [6.72, 0, 0, 6.72, 82.76, 503.33],
+      fontName: "Helvetica"
+    },
+    {
+      str: "Inverse usage",
+      width: 44.77,
+      height: 6.72,
+      transform: [0, 6.72, -6.72, 0, 73.16, 503.81],
+      fontName: "Helvetica-Bold"
+    }
+  ]);
+
+  const label = blocks.find((block) => block.text === "Inverse usage");
+  const tick = blocks.find((block) => block.text === "60");
+
+  assert.equal(blocks.length, 2);
+  assert.ok(label);
+  assert.ok(tick);
+  assert.equal(label.writingMode, "vertical");
+  assert.equal(label.textRotation, 90);
+  assert.ok(label.bbox[2] <= 7);
+  assert.ok(label.bbox[3] >= 44);
+  assert.equal(tick.writingMode, "horizontal");
+});
+
 test("parser extracts text blocks with bounding boxes", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "parser-test-"));
   const pdfPath = path.join(tempDir, "sample.pdf");

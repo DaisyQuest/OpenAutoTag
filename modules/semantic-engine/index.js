@@ -547,6 +547,8 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     role,
     text: block.text,
     bbox: block.bbox,
+    ...(block.writingMode ? { writingMode: block.writingMode } : {}),
+    ...(Number.isFinite(block.textRotation) ? { textRotation: block.textRotation } : {}),
     headingLevel: role.startsWith("H") ? Math.min(block.headingLevel || 2, 6) : undefined,
     columnHint: Number.isInteger(block.columnHint) ? block.columnHint : 0,
     confidence: inferConfidence(block, role, artifactPlacement, tableMetadata),

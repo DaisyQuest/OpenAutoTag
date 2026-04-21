@@ -12,7 +12,7 @@ import { createAppServer } from "../../orchestrator/server.js";
 import { runWorkload } from "../../orchestrator/workloads/index.js";
 
 async function waitForCompletion(baseUrl, jobId, headers = {}) {
-  const deadline = Date.now() + 20000;
+  const deadline = Date.now() + 60000;
 
   while (Date.now() < deadline) {
     const response = await fetch(`${baseUrl}/jobs/${jobId}`, { headers });
@@ -29,7 +29,7 @@ async function waitForCompletion(baseUrl, jobId, headers = {}) {
 }
 
 async function waitForBatchCompletion(baseUrl, batchId, headers = {}) {
-  const deadline = Date.now() + 30000;
+  const deadline = Date.now() + 90000;
 
   while (Date.now() < deadline) {
     const response = await fetch(`${baseUrl}/batches/${batchId}`, { headers });

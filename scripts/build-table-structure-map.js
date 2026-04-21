@@ -464,6 +464,15 @@ function assignBlocksToCells(cells, textBlocks) {
   }
 }
 
+function hasEnoughTextCellCoverage(cells, rowCount, columnCount) {
+  const assignedCellCount = cells.filter((cell) => (cell.assignedBlockIds || []).length > 0).length;
+  const uniqueAssignedBlockCount = new Set(cells.flatMap((cell) => cell.assignedBlockIds || [])).size;
+  const occupiedCellRatio = assignedCellCount / Math.max(1, cells.length);
+  const logicalCellCount = rowCount * columnCount;
+
+  return occupiedCellRatio >= 0.4 || uniqueAssignedBlockCount >= Math.max(8, Math.ceil(logicalCellCount * 0.35));
+}
+
 function buildTableCandidate(page, component, tableIndex) {
   const horizontalGrid = buildGridClusters(component.horizontals, "horizontal");
   const verticalGrid = buildGridClusters(component.verticals, "vertical");
@@ -492,6 +501,10 @@ function buildTableCandidate(page, component, tableIndex) {
   );
 
   assignBlocksToCells(cells, blocksInside);
+
+  if (!hasEnoughTextCellCoverage(cells, rowCount, columnCount)) {
+    return null;
+  }
 
   const blockDensity = blocksInside.length / Math.max(1, rowCount * columnCount);
   const dividerSignals = mergeSignals.length;

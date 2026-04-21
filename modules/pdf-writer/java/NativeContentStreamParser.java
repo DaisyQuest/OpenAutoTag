@@ -53,6 +53,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     private StringBuilder currentOpText = new StringBuilder();
     /** Record slot for the currently-dispatching text operator (null between ops). */
     private OperatorRecord currentRecord = null;
+    /** Index of the current operator within the page content stream. */
+    private int streamOperatorIndex = 0;
     /** Nesting counter for BMC/BDC/EMC detection in the current stream. */
     private int markedContentDepth = 0;
 
@@ -89,6 +91,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     @Override
     protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
         String opName = operator.getName();
+        int currentOperatorIndex = streamOperatorIndex++;
 
         // Track pre-existing marked-content nesting so downstream stages know
         // which operators are already inside a BDC/BMC block in the source.
@@ -116,6 +119,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             rec.page = currentPage;
             rec.seq = sequenceIndex++;
             rec.op = opName;
+            rec.opIndexInStream = currentOperatorIndex;
             // streamOrigin is always "page" today; XObject-form descent will
             // refine this in a follow-up pass (operators from /Do XObjects
             // currently inherit the page's stream id, which is structurally
@@ -214,6 +218,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     public List<OperatorRecord> parseOnePage(PDDocument doc, int pageIndex) throws IOException {
         records.clear();
         sequenceIndex = 0;
+        streamOperatorIndex = 0;
         markedContentDepth = 0;
         currentPage = pageIndex + 1;
         PDPage page = doc.getPage(pageIndex);
@@ -322,6 +327,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
                     json.append(",\"fontSize\":").append(String.format("%.1f", r.fontSize));
                     json.append(",\"glyphs\":").append(r.glyphs);
                     json.append(",\"streamOrigin\":\"").append(escapeStr(r.streamOrigin)).append("\"");
+                    json.append(",\"opIndexInStream\":").append(r.opIndexInStream);
                     json.append(",\"insideMarkedContent\":").append(r.insideMarkedContent);
                     json.append("}");
                 }

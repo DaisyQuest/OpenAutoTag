@@ -699,6 +699,8 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
     pagesRaster: 0,
     structureElementCount: rewriterReport.structureElementCount || 0,
     markedContentCount: rewriterReport.markedContentCount || 0,
+    totalArtifactWraps: rewriterReport.totalArtifactWraps || 0,
+    splitMarkedContentRuns: rewriterReport.splitMarkedContentRuns || 0,
     readingOrderStrategy: rewriterReport.readingOrderStrategy || readingOrderStrategy,
     // Surface the matcher's reading-order diagnostics for downstream
     // reporting. pagesWithMonotonicReadingOrder < totalPages is a signal
@@ -1020,6 +1022,8 @@ export async function writeTaggedArtifacts({
         pagesRaster: nativeReport.pagesRaster,
         structureElementCount: nativeReport.structureElementCount,
         markedContentCount: nativeReport.markedContentCount,
+        totalArtifactWraps: nativeReport.totalArtifactWraps || 0,
+        splitMarkedContentRuns: nativeReport.splitMarkedContentRuns || 0,
         language
       }
     };
@@ -1048,6 +1052,8 @@ export async function writeTaggedArtifacts({
       pagesRaster: nativeReport.pagesRaster,
       structureElementCount: nativeReport.structureElementCount,
       markedContentCount: nativeReport.markedContentCount,
+      totalArtifactWraps: nativeReport.totalArtifactWraps || 0,
+      splitMarkedContentRuns: nativeReport.splitMarkedContentRuns || 0,
       title,
       requestedMode: mode,
       autoFallbackReason: null

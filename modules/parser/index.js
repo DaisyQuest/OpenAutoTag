@@ -37,20 +37,90 @@ function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
-function toSegment(pageHeight, item) {
-  const fontSize = Math.max(item.height || 0, Math.abs(item.transform[0] || 0), Math.abs(item.transform[3] || 0), 1);
+function normalizeRotationDegrees(degrees) {
+  const normalized = ((degrees % 360) + 360) % 360;
+  return Math.round(normalized / 90) * 90 % 360;
+}
+
+function getTextRotation(transform = []) {
+  const [a = 1, b = 0] = transform;
+  return normalizeRotationDegrees(Math.atan2(b, a) * 180 / Math.PI);
+}
+
+function getWritingMode(rotation) {
+  return rotation === 90 || rotation === 270 ? "vertical" : "horizontal";
+}
+
+function axisAlignedTextBbox(pageHeight, item, fontSize) {
+  const [a = fontSize, b = 0, c = 0, d = fontSize, e = 0, f = 0] = item.transform || [];
   const width = item.width || 0;
   const height = item.height || fontSize;
-  const x = item.transform[4] || 0;
-  const yTop = pageHeight - (item.transform[5] || 0) - height;
+  const inlineScale = Math.hypot(a, b) || fontSize || 1;
+  const blockScale = Math.hypot(c, d) || fontSize || 1;
+  const inline = [a / inlineScale, b / inlineScale];
+  const block = [c / blockScale, d / blockScale];
+  const corners = [
+    [e, f],
+    [e + inline[0] * width, f + inline[1] * width],
+    [e + block[0] * height, f + block[1] * height],
+    [e + inline[0] * width + block[0] * height, f + inline[1] * width + block[1] * height]
+  ];
+  const left = Math.min(...corners.map(([x]) => x));
+  const right = Math.max(...corners.map(([x]) => x));
+  const bottom = Math.min(...corners.map(([, y]) => y));
+  const top = Math.max(...corners.map(([, y]) => y));
+
+  return [left, pageHeight - top, right - left, top - bottom];
+}
+
+function toSegment(pageHeight, item) {
+  const fontSize = Math.max(item.height || 0, Math.abs(item.transform[0] || 0), Math.abs(item.transform[1] || 0), Math.abs(item.transform[2] || 0), Math.abs(item.transform[3] || 0), 1);
+  const rotation = getTextRotation(item.transform);
+  const bbox = axisAlignedTextBbox(pageHeight, item, fontSize);
 
   return {
     text: item.str,
-    bbox: [x, yTop, width, height],
+    bbox,
     fontSize,
     fontName: item.fontName || "unknown",
+    writingMode: getWritingMode(rotation),
+    textRotation: rotation,
     hasEOL: Boolean(item.hasEOL)
   };
+}
+
+function splitNumericSegment(segment) {
+  const text = String(segment.text || "");
+  const trimmed = text.trim();
+  const tokens = trimmed.split(/\s+/);
+
+  if (segment.writingMode !== "horizontal" || tokens.length < 2 || !tokens.every(isCompactNumericToken)) {
+    return [segment];
+  }
+
+  const leadingWhitespace = text.match(/^\s*/)?.[0].length || 0;
+  const usableLength = Math.max(trimmed.length, 1);
+  const widthPerChar = segment.bbox[2] / usableLength;
+  let searchOffset = 0;
+
+  return tokens.map((token, index) => {
+    const tokenOffset = trimmed.indexOf(token, searchOffset);
+    searchOffset = tokenOffset + token.length;
+    const xOffset = Math.max(0, tokenOffset + leadingWhitespace) * widthPerChar;
+
+    return {
+      ...segment,
+      text: token,
+      bbox: [
+        segment.bbox[0] + xOffset,
+        segment.bbox[1],
+        Math.max(token.length * widthPerChar, 1),
+        segment.bbox[3]
+      ],
+      forceBlockBoundaryAfter: index < tokens.length - 1,
+      hasEOL: index === tokens.length - 1 ? segment.hasEOL : false
+    };
+  });
 }
 
 function overlapsVertically(left, right) {
@@ -62,6 +132,26 @@ function overlapsVertically(left, right) {
 }
 
 function isSameLine(previous, next) {
+  if ((previous.writingMode || "horizontal") !== (next.writingMode || "horizontal")) {
+    return false;
+  }
+
+  if (previous.writingMode === "vertical") {
+    const previousCenter = previous.bbox[0] + previous.bbox[2] / 2;
+    const nextCenter = next.bbox[0] + next.bbox[2] / 2;
+    const baselineTolerance = Math.max(2, Math.min(previous.fontSize, next.fontSize) * 0.45);
+    const horizontalOverlap =
+      Math.min(previous.bbox[0] + previous.bbox[2], next.bbox[0] + next.bbox[2]) -
+      Math.max(previous.bbox[0], next.bbox[0]);
+    const minWidth = Math.min(previous.bbox[2], next.bbox[2]);
+    const gap = next.bbox[1] - (previous.bbox[1] + previous.bbox[3]);
+    return (
+      Math.abs(previousCenter - nextCenter) <= baselineTolerance &&
+      horizontalOverlap >= minWidth * 0.35 &&
+      gap <= Math.max(2, Math.min(previous.fontSize, next.fontSize) * 0.5)
+    );
+  }
+
   const previousCenter = previous.bbox[1] + previous.bbox[3] / 2;
   const nextCenter = next.bbox[1] + next.bbox[3] / 2;
   const baselineTolerance = Math.max(2, Math.min(previous.fontSize, next.fontSize) * 0.45);
@@ -72,12 +162,29 @@ function isSameLine(previous, next) {
 }
 
 function isLargeHorizontalGap(previous, next) {
+  if (previous.writingMode === "vertical" || next.writingMode === "vertical") {
+    return false;
+  }
+
   const previousRight = previous.bbox[0] + previous.bbox[2];
   const gap = next.bbox[0] - previousRight;
+
+  if (isCompactNumericToken(previous.text) && isCompactNumericToken(next.text)) {
+    return gap >= Math.max(3, Math.min(previous.fontSize, next.fontSize) * 0.55);
+  }
+
   return gap > Math.max(24, previous.fontSize * 2.5);
 }
 
+function isCompactNumericToken(text) {
+  return /^-?(?:[$£€¥])?(?:\d+(?:[.,]\d+)*|\d*\.\d+)(?:%)?$|^n\/a$/i.test(String(text || "").trim());
+}
+
 function needsWhitespace(previousSegment, nextSegment) {
+  if ((previousSegment.writingMode || "horizontal") !== (nextSegment.writingMode || "horizontal")) {
+    return false;
+  }
+
   const previousText = previousSegment.text;
   const nextText = nextSegment.text;
 
@@ -118,6 +225,16 @@ function mergeLineSegments(pageNumber, lineNumber, segments) {
   }
 
   const fontSize = Math.max(...orderedSegments.map((segment) => segment.fontSize));
+  const writingModeCounts = new Map();
+  const rotationCounts = new Map();
+  for (const segment of orderedSegments) {
+    const writingMode = segment.writingMode || "horizontal";
+    writingModeCounts.set(writingMode, (writingModeCounts.get(writingMode) || 0) + 1);
+    const textRotation = Number.isFinite(segment.textRotation) ? segment.textRotation : 0;
+    rotationCounts.set(textRotation, (rotationCounts.get(textRotation) || 0) + 1);
+  }
+  const writingMode = [...writingModeCounts.entries()].sort((leftEntry, rightEntry) => rightEntry[1] - leftEntry[1])[0]?.[0] || "horizontal";
+  const textRotation = [...rotationCounts.entries()].sort((leftEntry, rightEntry) => rightEntry[1] - leftEntry[1])[0]?.[0] || 0;
   const fontNameCounts = new Map();
   for (const segment of orderedSegments) {
     fontNameCounts.set(segment.fontName, (fontNameCounts.get(segment.fontName) || 0) + 1);
@@ -129,7 +246,9 @@ function mergeLineSegments(pageNumber, lineNumber, segments) {
     text: text.trim(),
     bbox: [left, top, right - left, bottom - top],
     fontSize,
-    fontName
+    fontName,
+    writingMode,
+    textRotation
   };
 }
 
@@ -137,6 +256,7 @@ export function groupTextItemsToBlocks(pageNumber, pageHeight, items) {
   const segments = items
     .filter((item) => "str" in item && item.str && item.str.trim())
     .map((item) => toSegment(pageHeight, item))
+    .flatMap(splitNumericSegment)
     .sort((left, right) => left.bbox[1] - right.bbox[1] || left.bbox[0] - right.bbox[0]);
 
   const lines = [];
@@ -147,6 +267,7 @@ export function groupTextItemsToBlocks(pageNumber, pageHeight, items) {
     const shouldStartNewLine =
       !previous ||
       previous.hasEOL ||
+      previous.forceBlockBoundaryAfter ||
       !isSameLine(previous, segment) ||
       isLargeHorizontalGap(previous, segment) ||
       segment.bbox[0] < previous.bbox[0] - Math.max(previous.fontSize, segment.fontSize);

@@ -8,6 +8,25 @@ import { createSsnSamplePdf } from "../../../test/fixtures/create-ssn-sample-pdf
 import { createSpanishSamplePdf } from "../../../test/fixtures/create-spanish-sample-pdf.js";
 import { inspectPdfLowLevel } from "../../../scripts/inspect-pdf-low-level.js";
 import { writeTaggedArtifacts } from "../index.js";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+
+async function createPaintedSamplePdf(filePath) {
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([612, 792]);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  page.drawText("Tagged", { x: 72, y: 720, size: 18, font });
+  page.drawLine({
+    start: { x: 72, y: 690 },
+    end: { x: 260, y: 690 },
+    thickness: 2,
+    color: rgb(1, 0, 0)
+  });
+  page.drawText("text", { x: 145, y: 720, size: 18, font });
+
+  const bytes = await pdfDoc.save();
+  await writeFile(filePath, bytes);
+}
 
 test("pdf writer adds native structure and creates a sidecar manifest", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "writer-test-"));
@@ -73,6 +92,68 @@ test("pdf writer adds native structure and creates a sidecar manifest", async ()
   assert.match(outputText, /<dc:creator>/);
   assert.match(outputText, /<dc:description>/);
   assert.match(outputText, /<pdfuaid:part>1<\/pdfuaid:part>/);
+});
+
+test("pdf writer artifacts visible non-text paint operators in native mode", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "writer-paint-artifact-test-"));
+  const pdfPath = path.join(tempDir, "painted.pdf");
+  const tagsPath = path.join(tempDir, "tagging.json");
+  const semanticPath = path.join(tempDir, "semantic.json");
+  const outputPath = path.join(tempDir, "output", "tagged.pdf");
+
+  await createPaintedSamplePdf(pdfPath);
+  await writeFile(
+    tagsPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "tagging:painted",
+      source: { semanticDocumentId: "semantic:painted" },
+      root: {
+        id: "tag:document",
+        type: "Document",
+        children: [
+          {
+            id: "tag:n-1-1",
+            type: "P",
+            label: "Tagged text",
+            sourceNodeIds: ["n-1-1"],
+            children: []
+          }
+        ]
+      }
+    }, null, 2)
+  );
+  await writeFile(
+    semanticPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:painted",
+      source: { layoutDocumentId: "layout:painted", filePath: pdfPath },
+      nodes: [
+        {
+          id: "n-1-1",
+          pageNumber: 1,
+          sourceBlockId: "b1",
+          role: "P",
+          text: "Tagged text",
+          bbox: [72, 54, 110, 22],
+          confidence: 0.9,
+          readingOrder: 0
+        }
+      ],
+      orderedNodeIds: ["n-1-1"]
+    }, null, 2)
+  );
+
+  const report = await writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, outputPath });
+  const manifest = JSON.parse(await readFile(report.manifestPath, "utf8"));
+
+  assert.equal(report.nativeTaggingApplied, true);
+  assert.ok(report.markedContentCount >= 2);
+  assert.ok(report.totalArtifactWraps >= 1);
+  assert.ok(report.splitMarkedContentRuns >= 1);
+  assert.ok(manifest.summary.totalArtifactWraps >= 1);
+  assert.ok(manifest.summary.splitMarkedContentRuns >= 1);
 });
 
 test("pdf writer tolerates unsupported Unicode glyphs in invisible overlay text", async () => {

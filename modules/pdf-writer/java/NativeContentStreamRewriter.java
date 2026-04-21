@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSArray;
@@ -70,6 +71,23 @@ public class NativeContentStreamRewriter {
         TEXT_OPS.add("TJ");
         TEXT_OPS.add("'");
         TEXT_OPS.add("\"");
+    }
+
+    // Visible graphics/image paint operators. These do not carry text MCIDs,
+    // but Acrobat still expects them to be tagged or artifacted.
+    private static final Set<String> PAINT_OPS = new HashSet<>();
+    static {
+        PAINT_OPS.add("S");
+        PAINT_OPS.add("s");
+        PAINT_OPS.add("f");
+        PAINT_OPS.add("F");
+        PAINT_OPS.add("f*");
+        PAINT_OPS.add("B");
+        PAINT_OPS.add("B*");
+        PAINT_OPS.add("b");
+        PAINT_OPS.add("b*");
+        PAINT_OPS.add("Do");
+        PAINT_OPS.add("sh");
     }
 
     // ---------------------------------------------------------------
@@ -255,6 +273,7 @@ public class NativeContentStreamRewriter {
     /** A single operator reference inside an assignment */
     private static class OpRef {
         int seq;
+        int opIndexInStream;
         double x;
         double y;
         String text;
@@ -274,6 +293,7 @@ public class NativeContentStreamRewriter {
         int pageNumber;
         List<Assignment> assignments = new ArrayList<>();
         List<Integer> unmatchedOperatorSeqs = new ArrayList<>();
+        List<Integer> unmatchedOperatorIndices = new ArrayList<>();
     }
 
     /**
@@ -350,6 +370,7 @@ public class NativeContentStreamRewriter {
                     Map<String, Object> om = asMap(opObj);
                     OpRef ref = new OpRef();
                     ref.seq = asInt(om.get("seq"));
+                    ref.opIndexInStream = om.containsKey("opIndexInStream") ? asInt(om.get("opIndexInStream")) : ref.seq;
                     ref.x = om.containsKey("x") ? asDouble(om.get("x")) : Double.NaN;
                     ref.y = om.containsKey("y") ? asDouble(om.get("y")) : Double.NaN;
                     ref.text = asString(om.get("text"));
@@ -363,11 +384,90 @@ public class NativeContentStreamRewriter {
             for (Object uObj : unmatched) {
                 Map<String, Object> um = asMap(uObj);
                 pp.unmatchedOperatorSeqs.add(asInt(um.get("seq")));
+                pp.unmatchedOperatorIndices.add(um.containsKey("opIndexInStream") ? asInt(um.get("opIndexInStream")) : asInt(um.get("seq")));
             }
 
             plans.add(pp);
         }
         return plans;
+    }
+
+    private static int splitAssignmentsIntoMarkedRuns(PagePlan plan, Set<Integer> barrierOperatorIndices) {
+        int addedRuns = 0;
+        TreeSet<Integer> barriers = new TreeSet<>(barrierOperatorIndices);
+
+        int nextMcid = 0;
+        for (Assignment assignment : plan.assignments) {
+            nextMcid = Math.max(nextMcid, assignment.mcid + 1);
+        }
+
+        List<Assignment> expanded = new ArrayList<>();
+        for (Assignment assignment : plan.assignments) {
+            if (assignment.operators.size() <= 1) {
+                expanded.add(assignment);
+                continue;
+            }
+
+            List<List<OpRef>> runs = new ArrayList<>();
+            List<OpRef> currentRun = new ArrayList<>();
+            OpRef previous = null;
+            for (OpRef ref : assignment.operators) {
+                if (previous != null && hasBarrierBetween(previous, ref, barriers)) {
+                    runs.add(currentRun);
+                    currentRun = new ArrayList<>();
+                }
+                currentRun.add(ref);
+                previous = ref;
+            }
+            if (!currentRun.isEmpty()) {
+                runs.add(currentRun);
+            }
+
+            if (runs.size() <= 1) {
+                expanded.add(assignment);
+                continue;
+            }
+
+            for (int runIndex = 0; runIndex < runs.size(); runIndex++) {
+                Assignment split = new Assignment();
+                split.tagNodeId = assignment.tagNodeId;
+                split.tagType = assignment.tagType;
+                split.matchConfidence = assignment.matchConfidence;
+                split.mcid = runIndex == 0 ? assignment.mcid : nextMcid++;
+                split.operators.addAll(runs.get(runIndex));
+                expanded.add(split);
+            }
+            addedRuns += runs.size() - 1;
+        }
+
+        plan.assignments = expanded;
+        return addedRuns;
+    }
+
+    private static boolean hasBarrierBetween(OpRef previous, OpRef next, TreeSet<Integer> barriers) {
+        int low = Math.min(previous.opIndexInStream, next.opIndexInStream);
+        int high = Math.max(previous.opIndexInStream, next.opIndexInStream);
+        if (high - low <= 1) return false;
+        return barriers.ceiling(low + 1) != null && barriers.ceiling(low + 1) < high;
+    }
+
+    private static Set<Integer> collectBarrierOperatorIndices(PDPage page, PagePlan plan) throws IOException {
+        Set<Integer> barriers = new HashSet<>(plan.unmatchedOperatorIndices);
+        PDFStreamParser parser = new PDFStreamParser(page);
+        List<Object> tokens = parser.parse();
+        int operatorIndex = 0;
+
+        for (Object token : tokens) {
+            if (token instanceof Operator) {
+                Operator op = (Operator) token;
+                if (PAINT_OPS.contains(op.getName())) {
+                    barriers.add(operatorIndex);
+                }
+                operatorIndex++;
+            }
+        }
+
+        return barriers;
     }
 
     // ---------------------------------------------------------------
@@ -384,7 +484,7 @@ public class NativeContentStreamRewriter {
      *  - Before the first operator of an MCID group: inject /TagType <</MCID n>> BDC
      *  - After the last operator of an MCID group: inject EMC
      *  - Unmatched text operators get wrapped as /Artifact BMC ... EMC
-     *  - Non-text operators pass through untouched
+     *  - Visible non-text paint operators outside tagged content are artifacted
      */
     /** Result of rewriting one content stream; surfaced in the final report. */
     private static class RewriteResult {
@@ -515,8 +615,21 @@ public class NativeContentStreamRewriter {
                         newTokens.add(op);
                         result.artifactWrapped++;
                     }
+                } else if (PAINT_OPS.contains(opName) && openMcidStack.isEmpty()) {
+                    // Decorative paths/images/charts are visible page content.
+                    // Keep their graphics-state/path setup unchanged, but wrap
+                    // the paint operator so Acrobat sees the content as an
+                    // artifact instead of an untagged element.
+                    if (!inArtifact) {
+                        newTokens.add(COSName.ARTIFACT);
+                        newTokens.add(Operator.getOperator("BMC"));
+                        inArtifact = true;
+                    }
+                    newTokens.addAll(pendingOperands);
+                    newTokens.add(op);
+                    result.artifactWrapped++;
                 } else {
-                    // Any non-text, non-MC operator: pass through unchanged.
+                    // Any non-paint, non-MC operator: pass through unchanged.
                     newTokens.addAll(pendingOperands);
                     newTokens.add(op);
                 }
@@ -1240,6 +1353,9 @@ public class NativeContentStreamRewriter {
         // Parse the tag plan
         String planJson = readFile(planPath);
         List<PagePlan> plans = parseTagPlan(planJson);
+        int originalAssignmentCount = 0;
+        for (PagePlan plan : plans) originalAssignmentCount += plan.assignments.size();
+        int splitMarkedContentRuns = 0;
 
         System.err.println("[rewriter] Tag plan has " + plans.size() + " page(s)");
 
@@ -1260,6 +1376,7 @@ public class NativeContentStreamRewriter {
                 }
 
                 PDPage page = doc.getPage(pageIndex);
+                splitMarkedContentRuns += splitAssignmentsIntoMarkedRuns(plan, collectBarrierOperatorIndices(page, plan));
                 System.err.println("[rewriter] Rewriting page " + plan.pageNumber
                         + " (" + plan.assignments.size() + " assignments, "
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");
@@ -1331,10 +1448,11 @@ public class NativeContentStreamRewriter {
             json.append(",\"pagesRewritten\":").append(pagesRewritten);
             json.append(",\"pagesNative\":").append(pagesRewritten);
             json.append(",\"totalAssignments\":").append(totalAssignments);
-            json.append(",\"structureElementCount\":").append(totalAssignments);
+            json.append(",\"structureElementCount\":").append(originalAssignmentCount);
             json.append(",\"markedContentCount\":").append(totalTaggedWrapped);
             json.append(",\"totalMcids\":").append(totalMcids);
             json.append(",\"totalArtifactWraps\":").append(totalArtifacts);
+            json.append(",\"splitMarkedContentRuns\":").append(splitMarkedContentRuns);
             json.append(",\"skippedInsideSourceMarkedContent\":").append(totalSkippedInsideSourceMC);
             json.append(",\"structureTreeBuilt\":true");
             json.append(",\"metadataApplied\":true");

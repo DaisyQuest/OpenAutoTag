@@ -17,6 +17,11 @@ function getLeft(n) { return n.bbox?.[0] ?? 0; }
 function getHeight(n) { return n.bbox?.[3] ?? 0; }
 function getBottom(n) { return getTop(n) + getHeight(n); }
 function getWidth(n) { return n.bbox?.[2] ?? 0; }
+function isRotatedNode(n) {
+  const writingMode = String(n.writingMode || "horizontal").toLowerCase();
+  const textRotation = Number(n.textRotation || 0);
+  return writingMode !== "horizontal" || Math.abs(textRotation % 180) > 1;
+}
 
 // Some PDFs emit text blocks on the same visual line with tiny
 // fractional-Y differences (font baseline / descent variance). Strict
@@ -117,6 +122,10 @@ export function textStructureMerge(semanticDocument, config = {}) {
       // skip the gap and indent break checks, which assume we're moving
       // from one row to the next. Break only on explicit column change.
       const sameRow = getRow(prev) === getRow(curr);
+
+      if (isRotatedNode(prev) || isRotatedNode(curr)) {
+        breakReasons.push("rotated text boundary");
+      }
 
       if (!sameRow) {
         const gap = getTop(curr) - getBottom(prev);

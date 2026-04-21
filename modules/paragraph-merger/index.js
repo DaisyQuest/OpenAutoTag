@@ -45,6 +45,12 @@ function getNodeWidth(node) {
   return node.bbox?.[2] ?? 0;
 }
 
+function isRotatedNode(node) {
+  const writingMode = String(node.writingMode || "horizontal").toLowerCase();
+  const textRotation = Number(node.textRotation || 0);
+  return writingMode !== "horizontal" || Math.abs(textRotation % 180) > 1;
+}
+
 function endsSentence(text) {
   const trimmed = (text || "").trimEnd();
   return /[.!?:;]["'\u201D\u2019)]*$/.test(trimmed);
@@ -59,6 +65,14 @@ function computeMergeConfidence(prev, curr, config) {
   const reasons = [];
   let confidence = 1.0;
   const heuristics = config.heuristics || {};
+
+  if (isRotatedNode(prev) || isRotatedNode(curr)) {
+    return {
+      confidence: 0,
+      merge: false,
+      reasons: ["rotated text boundary"]
+    };
+  }
 
   const prevH = getNodeHeight(prev);
   const currH = getNodeHeight(curr);

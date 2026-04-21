@@ -233,6 +233,7 @@ public class NativeTagMatcher {
         double fontSize;
         int glyphs;
         int page;
+        int opIndexInStream;
     }
 
     static class SemanticNode {
@@ -241,6 +242,8 @@ public class NativeTagMatcher {
         String role;
         String text;
         double bboxX, bboxY, bboxW, bboxH; // bbox y=0 at top
+        String writingMode;
+        double textRotation;
         double confidence;
         int readingOrder;
     }
@@ -258,6 +261,7 @@ public class NativeTagMatcher {
         double x;
         double y;
         double confidence;
+        int opIndexInStream;
     }
 
     static class Assignment {
@@ -316,6 +320,7 @@ public class NativeTagMatcher {
                 oi.fontSize = asDouble(om.get("fontSize"));
                 oi.glyphs = asInt(om.get("glyphs"));
                 oi.page = pageNum;
+                oi.opIndexInStream = om.containsKey("opIndexInStream") ? asInt(om.get("opIndexInStream")) : oi.seq;
                 pageOps.add(oi);
             }
             result.add(pageOps);
@@ -334,6 +339,8 @@ public class NativeTagMatcher {
             sn.pageNumber = asInt(nm.get("pageNumber"));
             sn.role = asString(nm.get("role"));
             sn.text = asString(nm.get("text"));
+            sn.writingMode = asString(nm.get("writingMode"));
+            sn.textRotation = nm.containsKey("textRotation") ? asDouble(nm.get("textRotation")) : 0;
             sn.confidence = nm.containsKey("confidence") ? asDouble(nm.get("confidence")) : 1.0;
             sn.readingOrder = nm.containsKey("readingOrder") ? asInt(nm.get("readingOrder")) : 0;
 
@@ -485,6 +492,102 @@ public class NativeTagMatcher {
         return 0.0;
     }
 
+    private static String normalizedWritingMode(String mode) {
+        if (mode == null) return "";
+        String m = mode.trim().toLowerCase();
+        if ("vertical".equals(m)) return "vertical";
+        if ("horizontal".equals(m)) return "horizontal";
+        return "";
+    }
+
+    private static String combinedWritingMode(List<SemanticNode> nodes) {
+        String mode = "";
+        for (SemanticNode node : nodes) {
+            String next = normalizedWritingMode(node.writingMode);
+            if (next.isEmpty()) continue;
+            if (mode.isEmpty()) mode = next;
+            else if (!mode.equals(next)) return "";
+        }
+        return mode;
+    }
+
+    private static boolean isDirectionalNeighbor(OpInfo current, OpInfo neighbor, boolean vertical) {
+        if (neighbor == null || neighbor.text == null || neighbor.text.trim().isEmpty()) return false;
+        double dx = Math.abs(current.x - neighbor.x);
+        double dy = Math.abs(current.y - neighbor.y);
+        if (vertical) {
+            return dx <= 1.5 && dy > 1.5 && dy >= dx * 2.0;
+        }
+        return dy <= 1.5 && dx > 1.5 && dx >= dy * 2.0;
+    }
+
+    private static String inferOperatorWritingMode(List<OpInfo> operators, int index) {
+        OpInfo current = operators.get(index);
+        OpInfo prev = null;
+        OpInfo next = null;
+
+        for (int i = index - 1; i >= 0; i--) {
+            OpInfo candidate = operators.get(i);
+            if (candidate.text != null && !candidate.text.trim().isEmpty()) {
+                prev = candidate;
+                break;
+            }
+        }
+        for (int i = index + 1; i < operators.size(); i++) {
+            OpInfo candidate = operators.get(i);
+            if (candidate.text != null && !candidate.text.trim().isEmpty()) {
+                next = candidate;
+                break;
+            }
+        }
+
+        int vertical = 0;
+        int horizontal = 0;
+        if (isDirectionalNeighbor(current, prev, true)) vertical++;
+        if (isDirectionalNeighbor(current, next, true)) vertical++;
+        if (isDirectionalNeighbor(current, prev, false)) horizontal++;
+        if (isDirectionalNeighbor(current, next, false)) horizontal++;
+
+        if (vertical > horizontal) return "vertical";
+        if (horizontal > vertical) return "horizontal";
+        return "";
+    }
+
+    private static List<String> inferOperatorWritingModes(List<OpInfo> operators) {
+        List<String> modes = new ArrayList<>(operators.size());
+        for (int i = 0; i < operators.size(); i++) {
+            modes.add(inferOperatorWritingMode(operators, i));
+        }
+        return modes;
+    }
+
+    private static boolean operatorFallsInsideModeNode(double opX, double opY, String mode,
+                                                       List<SemanticNode> pageNodes,
+                                                       double tolerance) {
+        if (mode == null || mode.isEmpty()) return false;
+        for (SemanticNode node : pageNodes) {
+            if (!mode.equals(normalizedWritingMode(node.writingMode))) continue;
+            double nodeMinX = node.bboxX - tolerance;
+            double nodeMaxX = node.bboxX + node.bboxW + tolerance;
+            double nodeMinY = node.bboxY - tolerance;
+            double nodeMaxY = node.bboxY + node.bboxH + tolerance;
+            if (opX >= nodeMinX && opX <= nodeMaxX && opY >= nodeMinY && opY <= nodeMaxY) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean writingModesCompatible(String nodeMode, String opMode,
+                                                  double opX, double opY,
+                                                  List<SemanticNode> pageNodes,
+                                                  double tolerance) {
+        if (nodeMode == null || nodeMode.isEmpty()) return true;
+        if (opMode == null || opMode.isEmpty()) return true;
+        if (nodeMode.equals(opMode)) return true;
+        return !operatorFallsInsideModeNode(opX, opY, opMode, pageNodes, tolerance);
+    }
+
     /**
      * Match operators on a given page to semantic nodes.
      * Returns a list of assignments and a list of unmatched operator indices.
@@ -539,6 +642,7 @@ public class NativeTagMatcher {
 
         // Track which operators have been assigned
         boolean[] assigned = new boolean[operators.size()];
+        List<String> operatorWritingModes = inferOperatorWritingModes(operators);
 
         // MCID counter for this page
         int nextMcid = 0;
@@ -584,6 +688,7 @@ public class NativeTagMatcher {
             }
 
             String nodeText = combinedText.toString();
+            String nodeWritingMode = combinedWritingMode(tagSemNodes);
             Assignment asgn = new Assignment();
             asgn.tagNodeId = tn.id;
             asgn.tagType = tn.type;
@@ -616,6 +721,15 @@ public class NativeTagMatcher {
                     opYTop = portraitXY[1];
                 }
                 double convertedY = opYTop;
+                if (!writingModesCompatible(
+                        nodeWritingMode,
+                        operatorWritingModes.get(i),
+                        opX,
+                        convertedY,
+                        pageNodes,
+                        tolerance)) {
+                    continue;
+                }
 
                 // Check position within bbox + tolerance
                 double nodeMinX = minX - tolerance;
@@ -688,6 +802,7 @@ public class NativeTagMatcher {
                 oa.x = op.x;
                 oa.y = op.y;
                 oa.confidence = conf;
+                oa.opIndexInStream = op.opIndexInStream;
                 asgn.operators.add(oa);
                 assigned[i] = true;
                 totalConfidence += conf;
@@ -968,6 +1083,7 @@ public class NativeTagMatcher {
                     json.append(",\"x\":").append(fmt(oa.x));
                     json.append(",\"y\":").append(fmt(oa.y));
                     json.append(",\"confidence\":").append(fmt(oa.confidence));
+                    json.append(",\"opIndexInStream\":").append(oa.opIndexInStream);
                     json.append("}");
                 }
                 json.append("]");
@@ -984,6 +1100,7 @@ public class NativeTagMatcher {
                 OpInfo op = result.unmatchedOperators.get(u);
                 if (u > 0) json.append(",");
                 json.append("{\"seq\":").append(op.seq);
+                json.append(",\"opIndexInStream\":").append(op.opIndexInStream);
                 json.append(",\"text\":").append(escapeJson(op.text));
                 json.append(",\"x\":").append(fmt(op.x));
                 json.append(",\"y\":").append(fmt(op.y));

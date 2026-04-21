@@ -88,6 +88,19 @@ function blockHeight(block) {
   return block.bbox[3];
 }
 
+function looksLikeStampArtifact(block, page, baselineFontSize) {
+  const text = normalizeText(block.text);
+  if (!text || text.length > 40) {
+    return false;
+  }
+
+  return (
+    block.fontSize >= baselineFontSize * 5 &&
+    blockWidth(block) >= page.width * 0.35 &&
+    blockHeight(block) >= page.height * 0.08
+  );
+}
+
 function clusterByProximity(items, measureFn, tolerance) {
   const sorted = [...items].sort((left, right) => measureFn(left) - measureFn(right));
   const clusters = [];
@@ -165,13 +178,21 @@ function detectColumns(page, ignoredBlockIds = new Set(), thresholds = readThres
   };
 }
 
-function classifyBlock(block, baselineFontSize, thresholds = readThresholds()) {
+function classifyBlock(block, baselineFontSize, thresholds = readThresholds(), page = null) {
   const text = normalizeText(block.text);
   const orderedListMatch = text.match(/^(\d+)[.)]\s+/);
   const isBulletListItem = /^([-*]|\u2022)\s+/.test(text);
   const isBold = /bold/i.test(block.fontName || "");
   const headingScore = block.fontSize / baselineFontSize;
   const isHeading = headingScore >= thresholds.headingScoreThreshold || (headingScore >= thresholds.headingBoldScoreThreshold && isBold && text.length <= 80);
+
+  if (page && looksLikeStampArtifact(block, page, baselineFontSize)) {
+    return {
+      blockType: "paragraph",
+      isArtifact: true,
+      artifactReason: "oversized-stamp"
+    };
+  }
 
   if (orderedListMatch) {
     return {
@@ -205,6 +226,10 @@ function classifyBlock(block, baselineFontSize, thresholds = readThresholds()) {
 
 function looksNumericish(text) {
   return /\d/.test(text) || /[$£€¥%]/.test(text);
+}
+
+function isCompactNumericToken(text) {
+  return /^-?(?:[$£€¥])?(?:\d+(?:[.,]\d+)*|\d*\.\d+)(?:%)?$|^n\/a$/i.test(String(text || "").trim());
 }
 
 function looksHeaderish(text) {
@@ -417,6 +442,11 @@ function summarizeTableBand(rows, page, baselineFontSize) {
   };
 }
 
+function hasStrongNumericDataGrid(summary) {
+  const numericRatio = mean(summary.stableRows.map((row) => row.numericRatio));
+  return summary.columnCount >= 4 && summary.rowCount >= 2 && numericRatio >= 0.72;
+}
+
 function isConfidentTableBand(summary, page) {
   return (
     summary.rowCount >= 2 &&
@@ -425,7 +455,8 @@ function isConfidentTableBand(summary, page) {
     summary.stableCoverage >= 0.67 &&
     summary.horizontalSpan >= Math.max(page.width * 0.14, 64) &&
     summary.consistentColumnRows >= Math.max(2, Math.ceil(summary.rowCount * 0.6)) &&
-    !(summary.rowCount === 2 && summary.columnCount === 2 && !summary.hasHeaderRow)
+    (summary.hasHeaderRow || hasStrongNumericDataGrid(summary)) &&
+    !(summary.columnCount === 2 && !summary.hasHeaderRow)
   );
 }
 
@@ -663,7 +694,8 @@ function detectBorderlessTables(page, blocks, baselineFontSize) {
       summary.assignedCellCount >= 4 &&
       summary.stableCoverage >= 0.6 &&
       summary.horizontalSpan >= Math.max(page.width * 0.14, 64) &&
-      !(summary.rowCount === 2 && summary.columnCount === 2 && !summary.hasHeaderRow);
+      (summary.hasHeaderRow || hasStrongNumericDataGrid(summary)) &&
+      !(summary.columnCount === 2 && !summary.hasHeaderRow);
 
     if (!isValidBorderless) {
       continue;
@@ -705,6 +737,403 @@ function detectBorderlessTables(page, blocks, baselineFontSize) {
   }
 
   return { tableMetaById, tables };
+}
+
+function looksSparseNumericCell(text) {
+  return isCompactNumericToken(text);
+}
+
+function buildSparseNumericRows(blocks, baselineFontSize) {
+  const candidateBlocks = blocks
+    .filter((block) => !block.isArtifact)
+    .filter((block) => block.blockType === "paragraph")
+    .filter((block) => blockHeight(block) <= Math.max(24, baselineFontSize * 2.4))
+    .map((block) => ({
+      block,
+      text: normalizeText(block.text),
+      yCenter: blockCenterY(block)
+    }))
+    .filter((item) => item.text);
+
+  const rowTolerance = Math.max(readThresholds().rowTolerancePixels, baselineFontSize * 0.9);
+
+  return clusterByProximity(candidateBlocks, (item) => item.yCenter, rowTolerance)
+    .map((row, index) => {
+      const items = [...row.items].sort((left, right) => blockLeft(left.block) - blockLeft(right.block));
+      const numericItems = items.filter((item) => looksSparseNumericCell(item.text));
+      const headerItems = items.filter((item) => looksHeaderish(item.text));
+
+      return {
+        id: `srow:${index}`,
+        items,
+        numericItems,
+        headerItems,
+        top: Math.min(...items.map((item) => blockTop(item.block))),
+        bottom: Math.max(...items.map((item) => blockBottom(item.block))),
+        left: blockLeft(items[0].block),
+        right: blockRight(items.at(-1).block)
+      };
+    })
+    .sort((left, right) => left.top - right.top);
+}
+
+function rowOverlapsAnchors(row, anchors, tolerance) {
+  if (anchors.length < 2) return false;
+  const left = anchors[0].x - tolerance;
+  const right = anchors.at(-1).x + tolerance;
+  return row.right >= left && row.left <= right;
+}
+
+function assignBlockToSparseAnchors(block, anchors, tolerance, { allowSpan = false } = {}) {
+  let bestColumnIndex = -1;
+  let bestDistance = Infinity;
+  const left = blockLeft(block);
+  const right = blockRight(block);
+
+  anchors.forEach((anchor, columnIndex) => {
+    const distance = Math.abs(left - anchor.x);
+    if (distance <= tolerance * 3 && distance < bestDistance) {
+      bestColumnIndex = columnIndex;
+      bestDistance = distance;
+    }
+  });
+
+  if (bestColumnIndex < 0) {
+    return null;
+  }
+
+  if (!allowSpan) {
+    return {
+      columnIndex: bestColumnIndex,
+      columnSpan: 1
+    };
+  }
+
+  let rightColumnIndex = bestColumnIndex;
+  anchors.forEach((anchor, columnIndex) => {
+    if (columnIndex >= bestColumnIndex && anchor.x <= right + tolerance * 1.5) {
+      rightColumnIndex = columnIndex;
+    }
+  });
+
+  return {
+    columnIndex: bestColumnIndex,
+    columnSpan: Math.max(1, rightColumnIndex - bestColumnIndex + 1)
+  };
+}
+
+function splitHeaderTokens(text) {
+  return normalizeText(text).split(/\s+/).filter(Boolean);
+}
+
+function unionBbox(boxes) {
+  const validBoxes = boxes.filter((box) => Array.isArray(box) && box.length >= 4);
+  if (validBoxes.length === 0) {
+    return [0, 0, 0, 0];
+  }
+
+  const left = Math.min(...validBoxes.map((box) => box[0]));
+  const top = Math.min(...validBoxes.map((box) => box[1]));
+  const right = Math.max(...validBoxes.map((box) => box[0] + box[2]));
+  const bottom = Math.max(...validBoxes.map((box) => box[1] + box[3]));
+  return [left, top, Math.max(0, right - left), Math.max(0, bottom - top)];
+}
+
+function tokenBboxForSpan(block, tokenIndex, tokenCount, headerTop, headerBottom) {
+  const width = blockWidth(block) / tokenCount;
+  return [
+    blockLeft(block) + width * tokenIndex,
+    headerTop,
+    width,
+    Math.max(blockHeight(block), headerBottom - headerTop)
+  ];
+}
+
+function buildSparseLeafHeaderBlocks({ tableRows, headerRowCount, anchors, anchorTolerance, tableId, pageNumber }) {
+  if (headerRowCount < 2 || anchors.length < 2) {
+    return null;
+  }
+
+  const headerRows = tableRows.slice(0, headerRowCount);
+  const headerTop = Math.min(...headerRows.map((row) => row.top));
+  const headerBottom = Math.max(...headerRows.map((row) => row.bottom));
+  const fragmentsByColumn = anchors.map(() => []);
+  const suppressedBlockIds = new Set();
+  let decomposedSpanningHeader = false;
+  let stackedHeaderFragments = false;
+
+  headerRows.forEach((row, sourceRowIndex) => {
+    for (const item of row.items) {
+      const assignment = assignBlockToSparseAnchors(item.block, anchors, anchorTolerance, {
+        allowSpan: !looksSparseNumericCell(item.text)
+      });
+      if (!assignment) {
+        continue;
+      }
+
+      const span = Math.max(1, Math.min(assignment.columnSpan || 1, anchors.length - assignment.columnIndex));
+      const tokens = splitHeaderTokens(item.text);
+      if (tokens.length === 0) {
+        continue;
+      }
+
+      suppressedBlockIds.add(item.block.id);
+
+      if (span > 1 && tokens.length === span) {
+        decomposedSpanningHeader = true;
+        tokens.forEach((token, offset) => {
+          const columnIndex = assignment.columnIndex + offset;
+          fragmentsByColumn[columnIndex].push({
+            text: token,
+            sourceRowIndex,
+            block: item.block,
+            bbox: tokenBboxForSpan(item.block, offset, span, headerTop, headerBottom)
+          });
+        });
+        continue;
+      }
+
+      for (let offset = 0; offset < span; offset += 1) {
+        const columnIndex = assignment.columnIndex + offset;
+        fragmentsByColumn[columnIndex].push({
+          text: item.text,
+          sourceRowIndex,
+          block: item.block,
+          bbox: [blockLeft(item.block), headerTop, blockWidth(item.block), Math.max(blockHeight(item.block), headerBottom - headerTop)]
+        });
+      }
+    }
+  });
+
+  if (fragmentsByColumn.some((fragments) => fragments.length === 0)) {
+    return null;
+  }
+
+  if (fragmentsByColumn.some((fragments) => fragments.length > 1)) {
+    stackedHeaderFragments = true;
+  }
+
+  if (!decomposedSpanningHeader && !stackedHeaderFragments) {
+    return null;
+  }
+
+  const headerBlocks = fragmentsByColumn.map((fragments, columnIndex) => {
+    const orderedFragments = [...fragments].sort((left, right) => left.sourceRowIndex - right.sourceRowIndex);
+    const text = orderedFragments.map((fragment) => fragment.text).join(" ").replace(/\s+/g, " ").trim();
+    const bbox = unionBbox(orderedFragments.map((fragment) => fragment.bbox));
+    const sourceBlocks = orderedFragments.map((fragment) => fragment.block);
+    const fontSizes = sourceBlocks.map((block) => block.fontSize).filter((value) => Number.isFinite(value) && value > 0);
+    const maxFontSize = fontSizes.length > 0 ? Math.max(...fontSizes) : 10;
+    const firstBlock = sourceBlocks[0] || {};
+
+    return {
+      id: `p${pageNumber}-sparse-header-${tableId.replace(/[^A-Za-z0-9_-]+/g, "-")}-c${columnIndex}`,
+      text,
+      bbox,
+      fontSize: maxFontSize,
+      fontName: firstBlock.fontName || "",
+      blockType: "table-cell",
+      synthetic: true,
+      syntheticReason: "sparse-numeric-leaf-header",
+      sourceBlockIds: [...new Set(sourceBlocks.map((block) => block.id).filter(Boolean))],
+      tableId,
+      tableRole: "header",
+      tableSection: "head",
+      tableRowIndex: 0,
+      tableColumnIndex: columnIndex,
+      tableColumnSpan: 1,
+      tableCellConfidence: 0.94,
+      tableSource: "sparse-numeric-grid",
+      tableDetectionMethod: "sparse-numeric-leaf-header"
+    };
+  });
+
+  return {
+    headerBlocks,
+    suppressedBlockIds,
+    sourceHeaderRowCount: headerRowCount
+  };
+}
+
+function findSparseTableHeaderRowCount(tableRows, firstDenseRow) {
+  const firstDenseRowIndex = tableRows.findIndex((row) => row.id === firstDenseRow.id);
+  const searchLimit = firstDenseRowIndex >= 0 ? firstDenseRowIndex : tableRows.length - 1;
+
+  for (let rowIndex = 0; rowIndex <= searchLimit; rowIndex += 1) {
+    const row = tableRows[rowIndex];
+    const numericCoverage = row.items.length > 0 ? row.numericItems.length / row.items.length : 0;
+
+    if (row.numericItems.length >= 2 && row.headerItems.length === 0 && numericCoverage >= 0.75) {
+      return rowIndex;
+    }
+  }
+
+  return Math.max(0, firstDenseRowIndex);
+}
+
+function detectSparseNumericTables(page, blocks, baselineFontSize) {
+  const rows = buildSparseNumericRows(blocks, baselineFontSize);
+  const denseBands = [];
+  let currentBand = [];
+  const maxRowGap = Math.max(18, baselineFontSize * 2.4);
+
+  for (const row of rows) {
+    const isDenseNumericRow =
+      row.numericItems.length >= 4 &&
+      row.right - row.left >= Math.max(96, page.width * 0.16);
+
+    if (!isDenseNumericRow) {
+      if (currentBand.length >= 3) {
+        denseBands.push(currentBand);
+      }
+      currentBand = [];
+      continue;
+    }
+
+    const previous = currentBand.at(-1);
+    if (!previous || row.top - previous.bottom <= maxRowGap) {
+      currentBand.push(row);
+      continue;
+    }
+
+    if (currentBand.length >= 3) {
+      denseBands.push(currentBand);
+    }
+    currentBand = [row];
+  }
+
+  if (currentBand.length >= 3) {
+    denseBands.push(currentBand);
+  }
+
+  const tableMetaById = new Map();
+  const tables = [];
+  const syntheticBlocks = [];
+  const suppressedBlockIds = new Set();
+  let tableSequence = 0;
+
+  for (const denseBand of denseBands) {
+    const flatNumericItems = denseBand.flatMap((row) => row.numericItems);
+    const anchorTolerance = Math.max(10, baselineFontSize * 1.4);
+    const anchors = clusterByProximity(flatNumericItems, (item) => blockLeft(item.block), anchorTolerance)
+      .filter((cluster) => cluster.items.length >= Math.max(2, Math.ceil(denseBand.length * 0.45)))
+      .map((cluster) => ({ x: cluster.centroid }))
+      .sort((left, right) => left.x - right.x);
+
+    if (anchors.length < 4) {
+      continue;
+    }
+
+    const firstDenseRow = denseBand[0];
+    const tableRows = [...denseBand];
+    let cursor = rows.indexOf(firstDenseRow) - 1;
+
+    while (cursor >= 0) {
+      const candidate = rows[cursor];
+      const nextRow = tableRows[0];
+      const gap = nextRow.top - candidate.bottom;
+      const plausibleSparseRow =
+        candidate.numericItems.length >= 2 ||
+        candidate.headerItems.length >= 1 ||
+        candidate.items.some((item) => item.text.length <= 24 && /[A-Za-z%]/.test(item.text));
+
+      if (gap < -baselineFontSize || gap > maxRowGap || !plausibleSparseRow || !rowOverlapsAnchors(candidate, anchors, anchorTolerance * 3)) {
+        break;
+      }
+
+      tableRows.unshift(candidate);
+      cursor -= 1;
+    }
+
+    tableSequence += 1;
+    const tableId = `table:${page.pageNumber}:sparse-numeric:${tableSequence}`;
+    const headerRowCount = findSparseTableHeaderRowCount(tableRows, firstDenseRow);
+    const leafHeaderPlan = buildSparseLeafHeaderBlocks({
+      tableRows,
+      headerRowCount,
+      anchors,
+      anchorTolerance,
+      tableId,
+      pageNumber: page.pageNumber
+    });
+    const logicalHeaderRowCount = leafHeaderPlan ? 1 : headerRowCount;
+
+    if (leafHeaderPlan) {
+      syntheticBlocks.push(...leafHeaderPlan.headerBlocks);
+      for (const blockId of leafHeaderPlan.suppressedBlockIds) {
+        suppressedBlockIds.add(blockId);
+      }
+    }
+
+    let nextBodyRowIndex = logicalHeaderRowCount;
+    let logicalRowCount = logicalHeaderRowCount;
+    tableRows.forEach((row, rowIndex) => {
+      const isHeaderRow = rowIndex < headerRowCount;
+      if (leafHeaderPlan && isHeaderRow) {
+        return;
+      }
+
+      const rowAssignments = [];
+      for (const item of row.items) {
+        if (!isHeaderRow && !looksSparseNumericCell(item.text)) {
+          continue;
+        }
+
+        const assignment = assignBlockToSparseAnchors(item.block, anchors, anchorTolerance, {
+          allowSpan: isHeaderRow && !looksSparseNumericCell(item.text)
+        });
+        if (!assignment) {
+          continue;
+        }
+
+        rowAssignments.push({ item, assignment });
+      }
+
+      if (rowAssignments.length === 0) {
+        return;
+      }
+
+      const logicalRowIndex = isHeaderRow ? rowIndex : nextBodyRowIndex++;
+      logicalRowCount = Math.max(logicalRowCount, logicalRowIndex + 1);
+
+      for (const { item, assignment } of rowAssignments) {
+        tableMetaById.set(item.block.id, {
+          blockType: "table-cell",
+          tableId,
+          tableRole: isHeaderRow ? "header" : "cell",
+          tableSection: isHeaderRow ? "head" : "body",
+          tableRowIndex: logicalRowIndex,
+          tableColumnIndex: assignment.columnIndex,
+          tableColumnSpan: assignment.columnSpan,
+          tableCellConfidence: 0.92,
+          tableSource: "sparse-numeric-grid",
+          tableDetectionMethod: "sparse-numeric-grid"
+        });
+      }
+    });
+
+    tables.push({
+      id: tableId,
+      source: "sparse-numeric-grid",
+      rowCount: logicalRowCount,
+      columnCount: anchors.length,
+      headerRowCount: logicalHeaderRowCount,
+      mergeSignalCount: 0,
+      confidence: 0.92,
+      ...(leafHeaderPlan
+        ? {
+            headerNormalization: {
+              applied: true,
+              strategy: "sparse-leaf-column-headers-v1",
+              sourceHeaderRowCount: leafHeaderPlan.sourceHeaderRowCount,
+              logicalHeaderRowCount
+            }
+          }
+        : {})
+    });
+  }
+
+  return { tableMetaById, tables, syntheticBlocks, suppressedBlockIds };
 }
 
 function detectTextGridTables(page, blocks, baselineFontSize) {
@@ -834,6 +1263,10 @@ function adoptOrphanTableBlocks(tableMetaById, tables, page, allBlocks, baseline
   const xTolWide = xTolBase * 4;
 
   for (const table of tables) {
+    if (table.headerNormalization?.applied) {
+      continue;
+    }
+
     // Collect all cells assigned to this table
     const assignedCells = [];
     for (const [blockId, meta] of tableMetaById.entries()) {
@@ -879,6 +1312,7 @@ function adoptOrphanTableBlocks(tableMetaById, tables, page, allBlocks, baseline
       const rowYCenter = (band.yMin + band.yMax) / 2;
       const orphans = allBlocks.filter((b) => {
         if (tableMetaById.has(b.id)) return false;
+        if (b.isArtifact) return false;
         const bCenter = b.bbox[1] + b.bbox[3] / 2;
         if (Math.abs(bCenter - rowYCenter) > rowTolerance) return false;
         const bRight = b.bbox[0] + b.bbox[2];
@@ -923,6 +1357,7 @@ function adoptOrphanTableBlocks(tableMetaById, tables, page, allBlocks, baseline
     // ------------------------------------------------------------------
     const orphanAbove = allBlocks.filter((b) => {
       if (tableMetaById.has(b.id)) return false;
+      if (b.isArtifact) return false;
       const bBottom = b.bbox[1] + b.bbox[3];
       // Must sit just above the table top (with 2 px rounding tolerance)
       if (bBottom > tableTop + 2) return false;
@@ -1047,25 +1482,36 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
   const thresholds = readThresholds();
   const preclassifiedBlocks = page.textBlocks.map((block) => ({
     ...block,
-    ...classifyBlock(block, baselineFontSize, thresholds)
+    ...classifyBlock(block, baselineFontSize, thresholds, page)
   }));
   const vectorTableAnalysis = detectVectorTables(page, preclassifiedBlocks, tableStructurePage, baselineFontSize);
   const remainingAfterVector = preclassifiedBlocks.filter((block) => !vectorTableAnalysis.tableMetaById.has(block.id));
-  const textGridTableAnalysis = detectTextGridTables(page, remainingAfterVector, baselineFontSize);
-  const remainingAfterGrid = remainingAfterVector.filter((block) => !textGridTableAnalysis.tableMetaById.has(block.id));
+  const sparseNumericTableAnalysis = detectSparseNumericTables(page, remainingAfterVector, baselineFontSize);
+  const remainingAfterSparseNumeric = remainingAfterVector.filter(
+    (block) => !sparseNumericTableAnalysis.tableMetaById.has(block.id) && !sparseNumericTableAnalysis.suppressedBlockIds.has(block.id)
+  );
+  const textGridTableAnalysis = detectTextGridTables(page, remainingAfterSparseNumeric, baselineFontSize);
+  const remainingAfterGrid = remainingAfterSparseNumeric.filter((block) => !textGridTableAnalysis.tableMetaById.has(block.id));
   const borderlessTableAnalysis = detectBorderlessTables(page, remainingAfterGrid, baselineFontSize);
   const tableMetaById = new Map([
     ...borderlessTableAnalysis.tableMetaById.entries(),
     ...textGridTableAnalysis.tableMetaById.entries(),
+    ...sparseNumericTableAnalysis.tableMetaById.entries(),
     ...vectorTableAnalysis.tableMetaById.entries()
   ]);
-  const tables = [...vectorTableAnalysis.tables, ...textGridTableAnalysis.tables, ...borderlessTableAnalysis.tables];
+  const tables = [
+    ...vectorTableAnalysis.tables,
+    ...sparseNumericTableAnalysis.tables,
+    ...textGridTableAnalysis.tables,
+    ...borderlessTableAnalysis.tables
+  ];
   adoptOrphanTableBlocks(tableMetaById, tables, page, preclassifiedBlocks, baselineFontSize);
   const columns = detectColumns({ ...page, textBlocks: preclassifiedBlocks }, new Set(tableMetaById.keys()), thresholds);
   const largestTable = [...tables].sort(
     (left, right) => right.rowCount * right.columnCount - left.rowCount * left.columnCount
   )[0];
-  const textBlocks = preclassifiedBlocks.map((block) => {
+  const sourceBlocks = preclassifiedBlocks.filter((block) => !sparseNumericTableAnalysis.suppressedBlockIds.has(block.id));
+  const textBlocks = [...sourceBlocks, ...sparseNumericTableAnalysis.syntheticBlocks].map((block) => {
     const tableMetadata = tableMetaById.get(block.id);
     const columnHint = columns.count === 1 ? 0 : blockCenterX(block) < columns.splitX ? 0 : 1;
 
@@ -1075,6 +1521,17 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
       columnHint,
       columnConfidence: columns.confidence
     };
+  }).sort((left, right) => {
+    const rowLeft = Number.isInteger(left.tableRowIndex) ? left.tableRowIndex : null;
+    const rowRight = Number.isInteger(right.tableRowIndex) ? right.tableRowIndex : null;
+    if (left.tableId && left.tableId === right.tableId && rowLeft != null && rowRight != null) {
+      if (rowLeft !== rowRight) return rowLeft - rowRight;
+      const columnLeft = Number.isInteger(left.tableColumnIndex) ? left.tableColumnIndex : 0;
+      const columnRight = Number.isInteger(right.tableColumnIndex) ? right.tableColumnIndex : 0;
+      if (columnLeft !== columnRight) return columnLeft - columnRight;
+    }
+
+    return blockTop(left) - blockTop(right) || blockLeft(left) - blockLeft(right);
   });
 
   return {
@@ -1090,6 +1547,7 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
       tableDetected: tables.length > 0,
       tableCount: tables.length,
       vectorTableCount: vectorTableAnalysis.tables.length,
+      sparseNumericTableCount: sparseNumericTableAnalysis.tables.length,
       textGridTableCount: textGridTableAnalysis.tables.length,
       borderlessTableCount: borderlessTableAnalysis.tables.length,
       tableRowCount: largestTable?.rowCount || 0,
@@ -1133,7 +1591,10 @@ export async function analyzeLayout(inputPath, options = {}) {
 
   const output = {
     ...layoutDocument,
-    pages: layoutDocument.pages.map((page) => analyzePage(page, baselineFontSize, tableStructurePages.get(page.pageNumber)))
+    pages: layoutDocument.pages.map((page) => {
+      const pageBaselineFontSize = median(page.textBlocks.map((block) => block.fontSize));
+      return analyzePage(page, pageBaselineFontSize || baselineFontSize, tableStructurePages.get(page.pageNumber));
+    })
   };
 
   if (!validateLayout(output)) {
