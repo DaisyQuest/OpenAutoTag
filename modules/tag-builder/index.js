@@ -267,6 +267,79 @@ function createListNode(container, listIndex) {
   return listNode;
 }
 
+// ---- List marker helpers (Item 9: Lbl/LBody) ----------------------------
+
+function inferListMarker(node) {
+  if (node.listMarker) return String(node.listMarker);
+  const text = String(node.text || "").trimStart();
+  const bullet = /^([•◦▪▸‣–—]|\*|-)\s+/.exec(text);
+  if (bullet) return bullet[1];
+  const ordered = /^(\d+[.)]\s*|[a-z][.)]\s*|[ivxlcdm]+[.)]\s*)/i.exec(text);
+  if (ordered) return ordered[1].trimEnd();
+  return null;
+}
+
+function inferListNumbering(node) {
+  const style = String(node.listStyle || "");
+  const marker = String(node.listMarker || node.text || "").trimStart();
+  if (/^\d+[.)]/.test(marker) || style === "ordered") return "Decimal";
+  if (/^[a-z][.)]/.test(marker)) return "LowerAlpha";
+  if (/^[A-Z][.)]/.test(marker)) return "UpperAlpha";
+  if (/^[ivxlcdm]+[.)]/i.test(marker) && !/^\d/.test(marker)) return "LowerRoman";
+  if (/^[•◦▪▸‣]/.test(marker) || /^[-*]\s/.test(marker) || style === "unordered") return "Disc";
+  return null;
+}
+
+function createLiLeaf(node, headingNormalization) {
+  const fullText = String(node.text || "");
+  const marker = inferListMarker(node);
+
+  // Escape special regex chars so we can strip the marker safely.
+  let bodyText = fullText;
+  if (marker) {
+    const escaped = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const stripped = fullText.replace(new RegExp(`^${escaped}\\s*`), "").trim();
+    if (stripped.length > 0) bodyText = stripped;
+  }
+
+  const hasMarkerAndBody = marker && bodyText !== fullText && bodyText.length > 0;
+
+  const liNode = {
+    id: `tag:${node.id}`,
+    type: "LI",
+    sourceNodeIds: [],
+    children: []
+  };
+
+  if (hasMarkerAndBody) {
+    // PDF/UA: LI must contain Lbl (marker) and LBody (content).
+    liNode.children.push({
+      id: `tag:${node.id}:lbl`,
+      type: "Lbl",
+      label: marker,
+      actualText: marker,
+      sourceNodeIds: [node.id],
+      children: []
+    });
+    liNode.children.push({
+      id: `tag:${node.id}:lbody`,
+      type: "LBody",
+      label: bodyText,
+      actualText: bodyText,
+      sourceNodeIds: [node.id],
+      children: []
+    });
+  } else {
+    // No detectable marker — emit LI directly with MCID (backward-compat).
+    liNode.sourceNodeIds = [node.id];
+    if (fullText.trim().length > 0) {
+      liNode.actualText = fullText;
+    }
+  }
+
+  return liNode;
+}
+
 function getTableGroupId(node) {
   return (
     node.tableGroupId ||
@@ -1482,7 +1555,8 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
     }
 
     // Step 4: attach /Table attrs with ColSpan/RowSpan and /Headers
-    // arrays on TD/TH cells that need them.
+    // arrays on TD/TH cells that need them. Also attach /Scope on TH
+    // cells (PDF/UA Matterhorn 13-004).
     const decorate = (n) => {
       if (!n) return;
       if (n.type === "TD" || n.type === "TH") {
@@ -1492,6 +1566,21 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
         let meaningful = false;
         if (cs > 1) { attrs.ColSpan = cs; meaningful = true; }
         if (rs > 1) { attrs.RowSpan = rs; meaningful = true; }
+        if (n.type === "TH") {
+          // Assign /Scope: Column headers live in THead, row headers elsewhere.
+          // A TH that spans rows in THead (e.g. a corner cell) gets Both.
+          const isColHeader = Boolean(n._inTHead);
+          const spansRows = rs > 1;
+          let scope;
+          if (isColHeader && spansRows) {
+            scope = "Both";
+          } else if (isColHeader) {
+            scope = "Column";
+          } else {
+            scope = "Row";
+          }
+          n.scope = scope;
+        }
         if (n.type === "TD") {
           const colIdx = Number.isInteger(n.tableColumnIndex) ? n.tableColumnIndex : null;
           const rowIdx = Number.isInteger(n.tableRowIndex) ? n.tableRowIndex : null;
@@ -1932,9 +2021,13 @@ export async function buildTagTree(inputPath, overrides = {}) {
       if (!activeList) {
         listIndex += 1;
         activeList = createListNode(currentContainer(), listIndex);
+        const listNumbering = inferListNumbering(node);
+        if (listNumbering) {
+          activeList.listNumbering = listNumbering;
+        }
       }
 
-      activeList.children.push(createLeaf(node, headingNormalization));
+      activeList.children.push(createLiLeaf(node, headingNormalization));
       activeTable = null;
       continue;
     }

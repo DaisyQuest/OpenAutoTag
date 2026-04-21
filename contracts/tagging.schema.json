@@ -69,6 +69,8 @@
             "P",
             "L",
             "LI",
+            "Lbl",
+            "LBody",
             "Caption",
             "Figure",
             "Aside",
