@@ -15,6 +15,10 @@ const appDir = path.join(extractDir, "app");
 const autoInstallPath = path.join(extractDir, "auto-install.xml");
 const releaseUrl = "https://software.verapdf.org/releases/verapdf-pdfbox-installer.zip";
 const releaseUrlVersioned = "https://software.verapdf.org/releases/1.28/verapdf-pdfbox-1.28.2-installer.zip";
+const configuredInstallerUrls = (process.env.VERAPDF_INSTALLER_URLS || process.env.VERAPDF_INSTALLER_URL || "")
+  .split(/[\r\n,]+/)
+  .map((url) => url.trim())
+  .filter(Boolean);
 
 function escapeXml(value) {
   return String(value)
@@ -52,8 +56,9 @@ async function downloadInstaller() {
     return;
   }
 
-  // Try the versioned URL first (more stable), then fall back to the unversioned alias.
-  const urls = [releaseUrlVersioned, releaseUrl];
+  // Try configured mirrors first. By default, use the public URLs this project
+  // has historically sourced veraPDF from.
+  const urls = configuredInstallerUrls.length > 0 ? configuredInstallerUrls : [releaseUrlVersioned, releaseUrl];
   let lastError = new Error("Unable to download veraPDF installer: no URLs available.");
   for (const url of urls) {
     let response;

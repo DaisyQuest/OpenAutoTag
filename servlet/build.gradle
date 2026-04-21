@@ -12,6 +12,9 @@ def jacksonVersion = providers.gradleProperty("jacksonVersion").getOrElse("2.18.
 def jettyVersion = providers.gradleProperty("jettyVersion").getOrElse("12.0.16")
 def slf4jVersion = providers.gradleProperty("slf4jVersion").getOrElse("2.0.16")
 def junitVersion = providers.gradleProperty("junitVersion").getOrElse("5.11.4")
+def mavenRepoUrl = providers.gradleProperty("mavenRepoUrl")
+  .orElse(providers.environmentVariable("OPENAUTOTAG_MAVEN_REPOSITORY"))
+  .getOrElse("https://repo.maven.apache.org/maven2")
 def repoRoot = providers.gradleProperty("repoRoot")
   .map { file(it) }
   .orElse(provider { projectDir.parentFile })
@@ -23,7 +26,9 @@ java {
 }
 
 repositories {
-  mavenCentral()
+  maven {
+    url = uri(mavenRepoUrl)
+  }
 }
 
 configurations {

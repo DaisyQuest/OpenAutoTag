@@ -23,6 +23,7 @@
     "inspect:pdf": "node scripts/inspect-pdf-low-level.js",
     "serve": "node orchestrator/server.js",
     "start": "node orchestrator/server.js",
+    "portable:build": "powershell -ExecutionPolicy Bypass -File scripts/build-portable.ps1",
     "eval:score": "node modules/mcp-corpus-eval/cli.js score",
     "paragraph:evaluate": "node modules/paragraph-merger/evaluator.js",
     "paragraph:report": "node modules/paragraph-merger/render-report.js",

@@ -17,15 +17,20 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const CJK_DIR = path.join(REPO_ROOT, 'modules', 'font-embedder', 'vendor', 'fonts', 'noto-sans-cjk');
+const CJK_BASE_URL = (process.env.OPENAUTOTAG_NOTO_CJK_BASE_URL || 'https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF').replace(/\/+$/, '');
+const LICENSE_URL = process.env.OPENAUTOTAG_NOTO_CJK_LICENSE_URL || 'https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE';
+
+function cjkFontUrl(family, file) {
+  return `${CJK_BASE_URL}/${family}/${file}`;
+}
 
 const CJK_FONTS = [
-  { file: 'NotoSansCJKjp-Regular.otf', url: 'https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf' },
-  { file: 'NotoSansCJKjp-Bold.otf',    url: 'https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf' },
-  { file: 'NotoSansCJKsc-Regular.otf', url: 'https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf' },
-  { file: 'NotoSansCJKtc-Regular.otf', url: 'https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf' },
-  { file: 'NotoSansCJKkr-Regular.otf', url: 'https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/Korean/NotoSansCJKkr-Regular.otf' }
+  { file: 'NotoSansCJKjp-Regular.otf', url: cjkFontUrl('Japanese', 'NotoSansCJKjp-Regular.otf') },
+  { file: 'NotoSansCJKjp-Bold.otf',    url: cjkFontUrl('Japanese', 'NotoSansCJKjp-Bold.otf') },
+  { file: 'NotoSansCJKsc-Regular.otf', url: cjkFontUrl('SimplifiedChinese', 'NotoSansCJKsc-Regular.otf') },
+  { file: 'NotoSansCJKtc-Regular.otf', url: cjkFontUrl('TraditionalChinese', 'NotoSansCJKtc-Regular.otf') },
+  { file: 'NotoSansCJKkr-Regular.otf', url: cjkFontUrl('Korean', 'NotoSansCJKkr-Regular.otf') }
 ];
-const LICENSE_URL = 'https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE';
 
 function fetchToFile(url, dest) {
   return new Promise((resolve, reject) => {

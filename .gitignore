@@ -5,6 +5,9 @@ dist/
 tmp/
 output/
 .playwright-cli/
+.servlet-bootstrap/
+.servlet-runtime/
+.portable-bootstrap/
 *.log
 eng.traineddata
 org/verapdf/

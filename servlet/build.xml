@@ -6,6 +6,7 @@
     <property name="jetty.version" value="12.0.16"/>
     <property name="slf4j.version" value="2.0.16"/>
     <property name="junit.platform.version" value="1.11.4"/>
+    <property name="maven.repo.url" value="https://repo.maven.apache.org/maven2"/>
 
     <property name="repo.root" location=".."/>
     <property name="src.main.java.dir" location="src/main/java"/>
@@ -23,7 +24,7 @@
     <target name="bootstrap-maven-ant-tasks">
         <mkdir dir="${tools.dir}"/>
         <get
-            src="https://repo.maven.apache.org/maven2/org/apache/maven/maven-ant-tasks/${maven.ant.tasks.version}/maven-ant-tasks-${maven.ant.tasks.version}.jar"
+            src="${maven.repo.url}/org/apache/maven/maven-ant-tasks/${maven.ant.tasks.version}/maven-ant-tasks-${maven.ant.tasks.version}.jar"
             dest="${tools.dir}/maven-ant-tasks-${maven.ant.tasks.version}.jar"
             skipexisting="true"/>
         <path id="maven.ant.tasks.classpath">
@@ -39,23 +40,23 @@
         <mkdir dir="${dependency.copy.dir}"/>
 
         <artifact:dependencies pathId="jackson.path" filesetId="jackson.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <remoteRepository id="central" url="${maven.repo.url}"/>
             <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-databind" version="${jackson.version}"/>
         </artifact:dependencies>
 
         <artifact:dependencies pathId="servlet.path" filesetId="servlet.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <remoteRepository id="central" url="${maven.repo.url}"/>
             <dependency groupId="jakarta.servlet" artifactId="jakarta.servlet-api" version="${servlet.api.version}"/>
         </artifact:dependencies>
 
         <artifact:dependencies pathId="jetty.path" filesetId="jetty.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <remoteRepository id="central" url="${maven.repo.url}"/>
             <dependency groupId="org.eclipse.jetty.ee10" artifactId="jetty-ee10-servlet" version="${jetty.version}"/>
             <dependency groupId="org.slf4j" artifactId="slf4j-simple" version="${slf4j.version}"/>
         </artifact:dependencies>
 
         <artifact:dependencies pathId="junit.path" filesetId="junit.files" useScope="runtime" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-            <remoteRepository id="central" url="https://repo.maven.apache.org/maven2"/>
+            <remoteRepository id="central" url="${maven.repo.url}"/>
             <dependency groupId="org.junit.platform" artifactId="junit-platform-console-standalone" version="${junit.platform.version}"/>
         </artifact:dependencies>
 
