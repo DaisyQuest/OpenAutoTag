@@ -39,6 +39,142 @@ test("layout analyzer classifies headings and lists deterministically", async ()
   assert.equal(listItem.listStyle, "unordered");
 });
 
+test("layout analyzer marks Federal Register publication notice as an artifact", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-fr-stamp-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:fr-stamp",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [
+        {
+          pageNumber: 1,
+          width: 612,
+          height: 792,
+          textBlocks: [
+            { id: "s1", text: "This document is scheduled to be published in the", bbox: [220, 16, 175, 8], fontSize: 7.5, fontName: "Helvetica" },
+            { id: "s2", text: "Federal Register on 2026-04-20 and available online at", bbox: [220, 27, 189, 8], fontSize: 7.5, fontName: "Helvetica" },
+            { id: "s3", text: "https://www.federalregister.gov/d/2026-07663, and on", bbox: [220, 37, 201, 8], fontSize: 7.5, fontName: "Helvetica" },
+            { id: "b1", text: "Billing Code: 4410-13", bbox: [72, 35, 108, 12], fontSize: 12, fontName: "Helvetica" },
+            { id: "b2", text: "DEPARTMENT OF JUSTICE", bbox: [72, 63, 159, 12], fontSize: 12, fontName: "Helvetica" }
+          ]
+        }
+      ]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const stampBlocks = page.textBlocks.filter((block) => block.id.startsWith("s"));
+  const bodyBlock = page.textBlocks.find((block) => block.id === "b1");
+
+  assert.equal(stampBlocks.length, 3);
+  assert.ok(stampBlocks.every((block) => block.isArtifact === true));
+  assert.ok(stampBlocks.every((block) => block.artifactReason === "federal-register-publication-stamp"));
+  assert.equal(bodyBlock.isArtifact, undefined);
+});
+
+test("layout analyzer normalizes sparse numeric multi-row headers into leaf column headers", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-sparse-header-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  const row = (prefix, y, values) =>
+    values.map(([text, x, width], index) => ({
+      id: `${prefix}${index}`,
+      text,
+      bbox: [x, y, width, 11],
+      fontSize: 10,
+      fontName: "Helvetica"
+    }));
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:sparse-header",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [
+        {
+          pageNumber: 1,
+          width: 612,
+          height: 792,
+          textBlocks: [
+            {
+              id: "caption-continuation",
+              text: "implementation delay (in millions of dollars).",
+              bbox: [79.2, 121.2, 200.4, 11],
+              fontSize: 10,
+              fontName: "Helvetica"
+            },
+            { id: "h1", text: "Status Quo", bbox: [164.5, 136.8, 48.6, 11], fontSize: 10, fontName: "Helvetica" },
+            { id: "h2", text: "IFR", bbox: [324.2, 136.8, 17.1, 11], fontSize: 10, fontName: "Helvetica" },
+            { id: "h3", text: "Cost Savings", bbox: [447.9, 136.8, 57.8, 11], fontSize: 10, fontName: "Helvetica" },
+            {
+              id: "h4",
+              text: "Year Undiscounted Discounted Undiscounted Discounted Undiscounted Discounted",
+              bbox: [80.4, 152.3, 457.4, 11],
+              fontSize: 10,
+              fontName: "Helvetica"
+            },
+            ...row("r1-", 167.8, [
+              ["1", 91.8, 5.5],
+              ["$16,949", 134.9, 35.8],
+              ["$15,840", 206.9, 35.8],
+              ["$0", 291.3, 11],
+              ["$0", 363.3, 11],
+              ["-$16,949", 421, 39.4],
+              ["-$15,840", 493, 39.4]
+            ]),
+            ...row("r2-", 183.3, [
+              ["2", 91.8, 5.5],
+              ["$1,990", 137.6, 30.3],
+              ["$1,738", 209.6, 30.3],
+              ["$16,949", 278.9, 35.8],
+              ["$14,804", 350.9, 35.8],
+              ["$14,959", 422.9, 35.8],
+              ["$13,066", 494.9, 35.7]
+            ]),
+            ...row("r3-", 198.8, [
+              ["3", 91.8, 5.5],
+              ["$1,990", 137.6, 30.3],
+              ["$1,625", 209.6, 30.3],
+              ["$1,990", 281.6, 30.3],
+              ["$1,625", 353.6, 30.3],
+              ["$0", 435.3, 11],
+              ["$0", 507.3, 11]
+            ])
+          ]
+        }
+      ]
+    }, null, 2)
+  );
+
+  const output = await analyzeLayout(inputPath);
+  const page = output.pages[0];
+  const headerBlocks = page.textBlocks.filter(
+    (block) => block.tableId === "table:1:sparse-numeric:1" && block.tableRole === "header"
+  );
+
+  assert.equal(page.structureSignals.sparseNumericTableCount, 1);
+  assert.deepEqual(
+    headerBlocks.map((block) => block.text),
+    [
+      "Year",
+      "Status Quo Undiscounted",
+      "Status Quo Discounted",
+      "IFR Undiscounted",
+      "IFR Discounted",
+      "Cost Savings Undiscounted",
+      "Cost Savings Discounted"
+    ]
+  );
+  assert.ok(headerBlocks.every((block, index) => block.synthetic === true && block.tableColumnIndex === index));
+  assert.equal(page.textBlocks.some((block) => block.id === "h4"), false);
+});
+
 test("layout analyzer detects a coherent table band without misclassifying the page as multi-column", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "layout-table-test-"));
   const inputPath = path.join(tempDir, "layout-table.json");

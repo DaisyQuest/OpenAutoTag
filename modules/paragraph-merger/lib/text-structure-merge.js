@@ -72,6 +72,14 @@ function textEndsIncomplete(text) {
     "are", "were", "not", "this", "its", "their", "his", "her"].includes(lastWord);
 }
 
+function getFootnoteGroupId(node) {
+  return node?.footnoteGroupId || null;
+}
+
+function isFootnoteNode(node) {
+  return node?.semanticRole === "Footnote" || node?.footnote === true || getFootnoteGroupId(node) != null;
+}
+
 const DEFAULT_CONFIG = {
   marginTolerance: 8,
   gapBreakMultiplier: 2.2,
@@ -125,6 +133,14 @@ export function textStructureMerge(semanticDocument, config = {}) {
 
       if (isRotatedNode(prev) || isRotatedNode(curr)) {
         breakReasons.push("rotated text boundary");
+      }
+
+      const prevFootnote = isFootnoteNode(prev);
+      const currFootnote = isFootnoteNode(curr);
+      if (prevFootnote !== currFootnote) {
+        breakReasons.push("footnote/body boundary");
+      } else if (prevFootnote && currFootnote && getFootnoteGroupId(prev) !== getFootnoteGroupId(curr)) {
+        breakReasons.push("footnote group boundary");
       }
 
       if (!sameRow) {

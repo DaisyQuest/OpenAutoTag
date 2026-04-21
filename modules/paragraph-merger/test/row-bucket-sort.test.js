@@ -10,6 +10,16 @@ function node(id, text, x, y, width = 30) {
   return { id, role: "P", text, bbox: [x, y, width, 11], pageNumber: 1 };
 }
 
+function footnoteNode(id, text, x, y, width = 30) {
+  return {
+    ...node(id, text, x, y, width),
+    semanticRole: "Footnote",
+    footnote: true,
+    footnoteGroupId: "footnote:1:88:1",
+    footnoteMarker: "88"
+  };
+}
+
 describe("row-bucket sort for same-line blocks with fractional Y drift", () => {
   it("sorts same-visual-row blocks left-to-right regardless of content-stream order", () => {
     // Regression for 2025_35268: each word is its own block, emitted in
@@ -46,5 +56,26 @@ describe("row-bucket sort for same-line blocks with fractional Y drift", () => {
     const result = textStructureMerge(doc);
     assert.equal(result.document.nodes.length, 1, "both lines merge into one paragraph");
     assert.equal(result.document.nodes[0].text, "first line second line");
+  });
+
+  it("keeps footnotes separate from body text while merging the footnote lines", () => {
+    const doc = makeDoc([
+      node("body", "The body paragraph ends near the bottom.", 72, 700, 260),
+      footnoteNode("fn-marker", "88", 72, 732.8, 7),
+      footnoteNode("fn-line-1", "When a 3% discount rate is applied,", 81, 732.3, 220),
+      footnoteNode("fn-line-2", "the annualized cost saving is $276 million.", 72, 743.8, 258)
+    ]);
+
+    const result = textStructureMerge(doc);
+    const body = result.document.nodes.find((n) => n.id === "body");
+    const footnote = result.document.nodes.find((n) => n.footnoteGroupId === "footnote:1:88:1");
+
+    assert.equal(result.document.nodes.length, 2);
+    assert.equal(body.text, "The body paragraph ends near the bottom.");
+    assert.equal(footnote.semanticRole, "Footnote");
+    assert.equal(
+      footnote.text,
+      "88 When a 3% discount rate is applied, the annualized cost saving is $276 million."
+    );
   });
 });

@@ -129,3 +129,71 @@ test("semantic engine preserves artifact, table, and grouped list metadata", asy
   assert.equal(listItem.listItemIndex, 0);
   assert.equal(footer.artifactType, "footer");
 });
+
+test("semantic engine annotates bottom-of-page footnotes without changing the P role", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "semantic-footnote-test-"));
+  const inputPath = path.join(tempDir, "layout.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "layout:footnote",
+      source: { filePath: "sample.pdf", pageCount: 1 },
+      pages: [
+        {
+          pageNumber: 1,
+          width: 612,
+          height: 792,
+          textBlocks: [
+            {
+              id: "body1",
+              text: "The IFR defers the heavy upfront cost by one year.88",
+              bbox: [72, 417, 248, 12],
+              fontSize: 12,
+              fontName: "Helvetica",
+              blockType: "paragraph"
+            },
+            {
+              id: "noteText1",
+              text: "When a 3% discount rate is applied instead of the 7% discount rate, the present value is lower",
+              bbox: [81, 732, 454, 10],
+              fontSize: 10,
+              fontName: "Helvetica",
+              blockType: "paragraph"
+            },
+            {
+              id: "noteMarker",
+              text: "88",
+              bbox: [72, 733, 7, 6.5],
+              fontSize: 6.5,
+              fontName: "Helvetica",
+              blockType: "paragraph"
+            },
+            {
+              id: "noteText2",
+              text: "and the annualized cost saving is $276 million.",
+              bbox: [72, 744, 258, 10],
+              fontSize: 10,
+              fontName: "Helvetica",
+              blockType: "paragraph"
+            }
+          ]
+        }
+      ]
+    }, null, 2)
+  );
+
+  const semantic = await buildSemanticDocument(inputPath);
+  const bySourceId = Object.fromEntries(semantic.nodes.map((node) => [node.sourceBlockId, node]));
+
+  assert.equal(bySourceId.body1.role, "P");
+  assert.equal(bySourceId.body1.semanticRole, undefined);
+  assert.equal(bySourceId.noteMarker.role, "P");
+  assert.equal(bySourceId.noteMarker.semanticRole, "Footnote");
+  assert.equal(bySourceId.noteMarker.footnoteMarker, "88");
+  assert.equal(bySourceId.noteText1.semanticRole, "Footnote");
+  assert.equal(bySourceId.noteText2.semanticRole, "Footnote");
+  assert.equal(bySourceId.noteText1.footnoteGroupId, bySourceId.noteMarker.footnoteGroupId);
+  assert.equal(bySourceId.noteText2.footnoteGroupId, bySourceId.noteMarker.footnoteGroupId);
+});

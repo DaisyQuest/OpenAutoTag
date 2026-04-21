@@ -153,6 +153,10 @@ function resolveTagRole(node, headingNormalization) {
     return `H${normalizedHeadingLevel}`;
   }
 
+  if (node.semanticRole === "Footnote" || node.footnote === true || node.footnoteGroupId) {
+    return "Aside";
+  }
+
   return node.role;
 }
 
@@ -174,7 +178,7 @@ function createLeaf(node, headingNormalization) {
   // /ActualText lives on the Span child below; for direct-MCID roles
   // (TH/TD/LI/Lbl/LBody) it lives on the leaf itself.
   const hasTextContent = typeof node.text === "string" && node.text.trim().length > 0;
-  const directMcidLeaf = ["TH", "TD", "LI", "Lbl", "LBody"].includes(resolvedRole);
+  const directMcidLeaf = ["TH", "TD", "LI", "Lbl", "LBody", "Aside"].includes(resolvedRole);
   if (directMcidLeaf && hasTextContent) {
     leaf.actualText = node.text;
   }
@@ -207,6 +211,14 @@ function createLeaf(node, headingNormalization) {
   if (resolvedRole !== node.role) {
     leaf.detectedType = node.role;
     leaf.detectedHeadingLevel = getDetectedHeadingLevel(node);
+  }
+
+  if (resolvedRole === "Aside" && node.footnoteGroupId) {
+    leaf.semanticRole = "Footnote";
+    leaf.footnoteGroupId = node.footnoteGroupId;
+    if (node.footnoteMarker) {
+      leaf.footnoteMarker = node.footnoteMarker;
+    }
   }
 
   if (resolvedRole === "TH" || resolvedRole === "TD") {
@@ -1000,6 +1012,153 @@ function normalizeTableRegularity(rootNode) {
 
   visit(rootNode);
   summary.applied = summary.correctedTables > 0;
+  return summary;
+}
+
+const TRAILING_TABLE_VALUE_RE =
+  /^(.*\S)\s+(-?(?:[$£€¥]\s*)?\d[\d,]*(?:\.\d+)?(?:\s*(?:%|million|billion|thousand))?)$/i;
+
+function splitTrailingTableValue(label) {
+  const text = String(label || "").replace(/\s+/g, " ").trim();
+  const match = TRAILING_TABLE_VALUE_RE.exec(text);
+  if (!match) {
+    return null;
+  }
+
+  const leftText = match[1].trim();
+  const valueText = match[2].trim();
+  if (!/[A-Za-z]/.test(leftText)) {
+    return null;
+  }
+
+  if (!/[$£€¥%]|\b(?:million|billion|thousand)\b/i.test(valueText)) {
+    return null;
+  }
+
+  return { leftText, valueText };
+}
+
+function setCellLabel(cell, label) {
+  cell.label = label;
+  if (cell.actualText) {
+    cell.actualText = label;
+  }
+
+  for (const child of cell.children || []) {
+    if (child?.actualText) {
+      child.actualText = label;
+    }
+    if (typeof child?.label === "string") {
+      child.label = label;
+    }
+  }
+}
+
+function createSplitValueCell(sourceCell, rowNode, columnIndex, valueText) {
+  return {
+    id: `${sourceCell.id}:split:${columnIndex}`,
+    type: sourceCell.type,
+    label: valueText,
+    actualText: valueText,
+    sourceNodeIds: [],
+    children: [],
+    synthetic: true,
+    repairReason: "split-merged-table-cell",
+    splitFromCellId: sourceCell.id,
+    tableSection: sourceCell.tableSection,
+    tableSource: sourceCell.tableSource,
+    tableRowIndex: toTableCoordinate(rowNode.tableRowIndex) ?? toTableCoordinate(sourceCell.tableRowIndex) ?? 0,
+    tableColumnIndex: columnIndex
+  };
+}
+
+function isEmptySyntheticCell(cell) {
+  return (
+    isTableCellNode(cell) &&
+    cell.synthetic === true &&
+    String(cell.label || "").trim() === "" &&
+    (cell.sourceNodeIds || []).length === 0
+  );
+}
+
+function repairMergedTableTextCells(rootNode) {
+  const summary = {
+    applied: false,
+    splitCellCount: 0,
+    filledPlaceholderCount: 0,
+    insertedCellCount: 0
+  };
+
+  const repairRow = (rowNode) => {
+    const children = rowNode.children || [];
+    for (let index = 0; index < children.length; index += 1) {
+      const cell = children[index];
+      if (!isTableCellNode(cell) || cell.type !== "TD") {
+        continue;
+      }
+
+      if (isEmptySyntheticCell(cell) && index > 0) {
+        const previous = children[index - 1];
+        if (!isTableCellNode(previous) || previous.type !== "TD") {
+          continue;
+        }
+
+        const split = splitTrailingTableValue(previous.label);
+        if (!split) {
+          continue;
+        }
+
+        setCellLabel(previous, split.leftText);
+        setCellLabel(cell, split.valueText);
+        cell.actualText = split.valueText;
+        cell.repairReason = "split-merged-table-cell";
+        cell.splitFromCellId = previous.id;
+        summary.splitCellCount += 1;
+        summary.filledPlaceholderCount += 1;
+        continue;
+      }
+
+      const columnSpan = Math.max(1, Number(cell.columnSpan || 1));
+      if (columnSpan <= 1) {
+        continue;
+      }
+
+      const split = splitTrailingTableValue(cell.label);
+      if (!split) {
+        continue;
+      }
+
+      const startColumn = toTableCoordinate(cell.tableColumnIndex) ?? index;
+      const valueColumn = startColumn + columnSpan - 1;
+      const valueCell = createSplitValueCell(cell, rowNode, valueColumn, split.valueText);
+      setCellLabel(cell, split.leftText);
+      cell.columnSpan = columnSpan - 1;
+      if (cell.columnSpan <= 1) {
+        delete cell.columnSpan;
+      }
+      children.splice(index + 1, 0, valueCell);
+      index += 1;
+      summary.splitCellCount += 1;
+      summary.insertedCellCount += 1;
+    }
+  };
+
+  const visit = (node) => {
+    if (!node) {
+      return;
+    }
+
+    if (node.type === "TR") {
+      repairRow(node);
+    }
+
+    for (const child of node.children || []) {
+      visit(child);
+    }
+  };
+
+  visit(rootNode);
+  summary.applied = summary.splitCellCount > 0;
   return summary;
 }
 
@@ -1830,6 +1989,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
 
   normalizeTableSections(root);
   const tableRegularityCorrection = normalizeTableRegularity(root);
+  const mergedTableTextCellRepair = repairMergedTableTextCells(root);
   normalizeTableSections(root);
   const tableStructureRepairs = validateTableSections(root);
   const repeatedHeaderRows = detectRepeatedHeaders(root);
@@ -1887,6 +2047,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
       ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
       headingNormalization: headingNormalization.summary,
       tableRegularityCorrection,
+      mergedTableTextCellRepair,
       tableStructureRepairs,
       repeatedHeaderRows,
       ...(options.enableTitleDetection ? { titleDetection: { applied: titleEmitted, nodeId: titleEmitted ? titleNodeId : null } } : {}),

@@ -101,6 +101,30 @@ function looksLikeStampArtifact(block, page, baselineFontSize) {
   );
 }
 
+function looksLikeFederalRegisterPublicationStamp(block, page) {
+  const text = normalizeText(block.text);
+  if (!text) {
+    return false;
+  }
+
+  const top = blockTop(block);
+  const left = blockLeft(block);
+  const isInTopBand = top <= page.height * 0.08;
+  const isCenteredNotice = left >= page.width * 0.25;
+
+  if (!isInTopBand || !isCenteredNotice) {
+    return false;
+  }
+
+  return (
+    /^This document is scheduled to be published in the$/i.test(text) ||
+    /^Federal Register on \d{4}-\d{2}-\d{2}\b/i.test(text) ||
+    /(?:^|\/\/)www\.federalregister\.gov\/d\//i.test(text) ||
+    /(?:^|\/\/)federalregister\.gov\/d\//i.test(text) ||
+    /^https?:\/\/govinfo\.gov\/?$/i.test(text)
+  );
+}
+
 function clusterByProximity(items, measureFn, tolerance) {
   const sorted = [...items].sort((left, right) => measureFn(left) - measureFn(right));
   const clusters = [];
@@ -191,6 +215,14 @@ function classifyBlock(block, baselineFontSize, thresholds = readThresholds(), p
       blockType: "paragraph",
       isArtifact: true,
       artifactReason: "oversized-stamp"
+    };
+  }
+
+  if (page && looksLikeFederalRegisterPublicationStamp(block, page)) {
+    return {
+      blockType: "paragraph",
+      isArtifact: true,
+      artifactReason: "federal-register-publication-stamp"
     };
   }
 
@@ -789,6 +821,55 @@ function assignBlockToSparseAnchors(block, anchors, tolerance, { allowSpan = fal
   let bestDistance = Infinity;
   const left = blockLeft(block);
   const right = blockRight(block);
+  const compactHeaderTokens = splitHeaderTokens(block.text);
+
+  if (allowSpan && compactHeaderTokens.length === 1 && isMixedCaseCompactHeaderToken(compactHeaderTokens[0])) {
+    anchors.forEach((anchor, columnIndex) => {
+      const distance = Math.abs(left - anchor.x);
+      if (distance <= tolerance * 3 && distance < bestDistance) {
+        bestColumnIndex = columnIndex;
+        bestDistance = distance;
+      }
+    });
+
+    if (bestColumnIndex >= 0) {
+      return {
+        columnIndex: bestColumnIndex,
+        columnSpan: 1
+      };
+    }
+  }
+
+  if (allowSpan && compactHeaderTokens.length > 1 && areCompactSparseHeaderTokens(compactHeaderTokens)) {
+    anchors.forEach((anchor, columnIndex) => {
+      const distance = Math.abs(left - anchor.x);
+      if (distance <= tolerance * 3 && distance < bestDistance) {
+        bestColumnIndex = columnIndex;
+        bestDistance = distance;
+      }
+    });
+
+    if (bestColumnIndex >= 0) {
+      return {
+        columnIndex: bestColumnIndex,
+        columnSpan: Math.max(1, Math.min(compactHeaderTokens.length, anchors.length - bestColumnIndex))
+      };
+    }
+  }
+
+  if (allowSpan) {
+    const coveredColumns = anchors
+      .map((anchor, columnIndex) => ({ anchor, columnIndex }))
+      .filter(({ anchor }) => anchor.x >= left - tolerance * 3.5 && anchor.x <= right + tolerance * 3.5)
+      .map(({ columnIndex }) => columnIndex);
+
+    if (coveredColumns.length > 0) {
+      return {
+        columnIndex: coveredColumns[0],
+        columnSpan: Math.max(1, coveredColumns.at(-1) - coveredColumns[0] + 1)
+      };
+    }
+  }
 
   anchors.forEach((anchor, columnIndex) => {
     const distance = Math.abs(left - anchor.x);
@@ -811,7 +892,7 @@ function assignBlockToSparseAnchors(block, anchors, tolerance, { allowSpan = fal
 
   let rightColumnIndex = bestColumnIndex;
   anchors.forEach((anchor, columnIndex) => {
-    if (columnIndex >= bestColumnIndex && anchor.x <= right + tolerance * 1.5) {
+    if (columnIndex >= bestColumnIndex && anchor.x <= right + tolerance * 2.5) {
       rightColumnIndex = columnIndex;
     }
   });
@@ -824,6 +905,62 @@ function assignBlockToSparseAnchors(block, anchors, tolerance, { allowSpan = fal
 
 function splitHeaderTokens(text) {
   return normalizeText(text).split(/\s+/).filter(Boolean);
+}
+
+function areCompactSparseHeaderTokens(tokens) {
+  return tokens.every((token) => token.length <= 4 || /^[A-Z0-9%]+$/.test(token));
+}
+
+function isMixedCaseCompactHeaderToken(token) {
+  return token.length <= 6 && /[A-Z]/.test(token) && /[a-z]/.test(token);
+}
+
+function looksSparseMultiColumnHeaderText(text, columnCount) {
+  const tokens = splitHeaderTokens(text);
+  if (tokens.length < Math.min(4, columnCount)) {
+    return false;
+  }
+
+  if (tokens.length > columnCount + 2) {
+    return false;
+  }
+
+  return tokens.every((token) => looksHeaderish(token));
+}
+
+function shouldDecomposeSparseLeafHeader(tokens, span, columnCount) {
+  return (
+    span > 1 &&
+    tokens.length === span &&
+    (areCompactSparseHeaderTokens(tokens) || span === columnCount)
+  );
+}
+
+function looksLikeSparseTableCaptionOrProseRow(row) {
+  if (!row || row.items.length > 2) {
+    return false;
+  }
+
+  const text = normalizeText(row.items.map((item) => item.text).join(" "));
+  if (!text) {
+    return false;
+  }
+
+  if (/^Table\s+\d+\b/i.test(text)) {
+    return true;
+  }
+
+  const tokens = splitHeaderTokens(text);
+  const lowerCaseWordCount = (text.match(/\b[a-z]{2,}\b/g) || []).length;
+  const hasProseWord = /\b(?:a|an|and|are|as|at|by|for|from|in|into|of|on|or|the|to|with)\b/i.test(text);
+  const hasSentencePunctuation = /[.!?][)"']?\s*$/.test(text);
+  const hasInlineProsePunctuation = /[(),:;]/.test(text);
+
+  return (
+    lowerCaseWordCount >= 2 &&
+    hasProseWord &&
+    (hasSentencePunctuation || (tokens.length >= 5 && hasInlineProsePunctuation))
+  );
 }
 
 function unionBbox(boxes) {
@@ -879,7 +1016,7 @@ function buildSparseLeafHeaderBlocks({ tableRows, headerRowCount, anchors, ancho
 
       suppressedBlockIds.add(item.block.id);
 
-      if (span > 1 && tokens.length === span) {
+      if (shouldDecomposeSparseLeafHeader(tokens, span, anchors.length)) {
         decomposedSpanningHeader = true;
         tokens.forEach((token, offset) => {
           const columnIndex = assignment.columnIndex + offset;
@@ -1032,9 +1169,15 @@ function detectSparseNumericTables(page, blocks, baselineFontSize) {
       const candidate = rows[cursor];
       const nextRow = tableRows[0];
       const gap = nextRow.top - candidate.bottom;
+
+      if (looksLikeSparseTableCaptionOrProseRow(candidate)) {
+        break;
+      }
+
       const plausibleSparseRow =
         candidate.numericItems.length >= 2 ||
         candidate.headerItems.length >= 1 ||
+        candidate.items.some((item) => looksSparseMultiColumnHeaderText(item.text, anchors.length)) ||
         candidate.items.some((item) => item.text.length <= 24 && /[A-Za-z%]/.test(item.text));
 
       if (gap < -baselineFontSize || gap > maxRowGap || !plausibleSparseRow || !rowOverlapsAnchors(candidate, anchors, anchorTolerance * 3)) {

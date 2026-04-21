@@ -38,6 +38,26 @@ function isListItemBlock(block) {
   );
 }
 
+function median(values) {
+  const sorted = values.filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+  if (sorted.length === 0) {
+    return 0;
+  }
+
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
+function percentile(values, ratio) {
+  const sorted = values.filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+  if (sorted.length === 0) {
+    return 0;
+  }
+
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.floor(sorted.length * ratio)));
+  return sorted[index];
+}
+
 function inferArtifactPlacement(block) {
   const regionKind = String(block.regionKind || block.region || block.pageRegion || block.sectionKind || "").toLowerCase();
 
@@ -547,6 +567,8 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     role,
     text: block.text,
     bbox: block.bbox,
+    ...(Number.isFinite(block.fontSize) ? { fontSize: block.fontSize } : {}),
+    ...(block.fontName ? { fontName: block.fontName } : {}),
     ...(block.writingMode ? { writingMode: block.writingMode } : {}),
     ...(Number.isFinite(block.textRotation) ? { textRotation: block.textRotation } : {}),
     headingLevel: role.startsWith("H") ? Math.min(block.headingLevel || 2, 6) : undefined,
@@ -693,6 +715,135 @@ function markBibEntries(nodes) {
   }
 }
 
+// ---- Footnote detection ------------------------------------------------
+//
+// The contracts do not expose a dedicated semantic role for footnotes, so
+// footnote candidates stay role=P and carry additive metadata. Tag-builder
+// can then map semanticRole=Footnote to an /Aside without changing the
+// semantic schema enum.
+
+const FOOTNOTE_MARKER_RE = /^\s*(\d{1,3})\s*$/;
+const FOOTNOTE_PREFIX_RE = /^\s*(\d{1,3})\s+\S/;
+
+function getNodeTop(node) {
+  return Array.isArray(node.bbox) ? Number(node.bbox[1]) || 0 : 0;
+}
+
+function getNodeLeft(node) {
+  return Array.isArray(node.bbox) ? Number(node.bbox[0]) || 0 : 0;
+}
+
+function getNodeWidth(node) {
+  return Array.isArray(node.bbox) ? Number(node.bbox[2]) || 0 : 0;
+}
+
+function getNodeFontSize(node) {
+  const fontSize = Number(node.fontSize);
+  if (Number.isFinite(fontSize) && fontSize > 0) {
+    return fontSize;
+  }
+
+  return Array.isArray(node.bbox) ? Number(node.bbox[3]) || 0 : 0;
+}
+
+function isFootnoteMarkerText(text) {
+  return FOOTNOTE_MARKER_RE.test(String(text || ""));
+}
+
+function prefixedFootnoteMarker(text) {
+  const match = FOOTNOTE_PREFIX_RE.exec(String(text || ""));
+  return match ? match[1] : null;
+}
+
+function isFootnoteMarkerNode(node, bodyLeft, bodyFontSize) {
+  const text = String(node.text || "").trim();
+  if (!isFootnoteMarkerText(text)) {
+    return false;
+  }
+
+  const fontSize = getNodeFontSize(node);
+  return (
+    getNodeLeft(node) <= bodyLeft + Math.max(18, bodyFontSize * 1.8) &&
+    getNodeWidth(node) <= Math.max(18, bodyFontSize * 2)
+  );
+}
+
+function lineBucket(node) {
+  return Math.floor(getNodeTop(node) / 6);
+}
+
+function markFootnotes(nodes, pages) {
+  const pageByNumber = new Map((pages || []).map((page) => [page.pageNumber, page]));
+  const nodesByPage = new Map();
+  for (const node of nodes) {
+    if (node.role !== "P" || node.artifactType || node.tableId || node.listGroupId) {
+      continue;
+    }
+
+    const pageNodes = nodesByPage.get(node.pageNumber) || [];
+    pageNodes.push(node);
+    nodesByPage.set(node.pageNumber, pageNodes);
+  }
+
+  for (const [pageNumber, pageNodes] of nodesByPage.entries()) {
+    if (pageNodes.length < 2) {
+      continue;
+    }
+
+    const page = pageByNumber.get(pageNumber) || {};
+    const pageHeight = Number(page.height) || 792;
+    const fontSizes = pageNodes.map(getNodeFontSize).filter((value) => value > 0);
+    const bodyFontSize = percentile(fontSizes, 0.75) || median(fontSizes) || 12;
+    const bodyLeft = Math.min(...pageNodes.map(getNodeLeft));
+    const lowerPageTop = pageHeight * 0.72;
+
+    const lowerSmallNodes = pageNodes.filter((node) => {
+      const fontSize = getNodeFontSize(node);
+      return getNodeTop(node) >= lowerPageTop && fontSize > 0 && fontSize <= bodyFontSize * 0.9;
+    });
+
+    const markerRows = lowerSmallNodes.filter((node) =>
+      isFootnoteMarkerNode(node, bodyLeft, bodyFontSize) || prefixedFootnoteMarker(node.text)
+    );
+
+    if (markerRows.length === 0) {
+      continue;
+    }
+
+    const footnoteTop = Math.min(...markerRows.map(getNodeTop)) - 4;
+    const candidates = lowerSmallNodes
+      .filter((node) => getNodeTop(node) >= footnoteTop)
+      .sort((left, right) => lineBucket(left) - lineBucket(right) || getNodeLeft(left) - getNodeLeft(right));
+
+    let currentGroupId = null;
+    let currentMarker = null;
+    let groupSequence = 0;
+
+    for (const node of candidates) {
+      const markerOnly = isFootnoteMarkerNode(node, bodyLeft, bodyFontSize)
+        ? String(node.text || "").trim()
+        : null;
+      const inlineMarker = prefixedFootnoteMarker(node.text);
+      const startsGroup = Boolean(markerOnly || inlineMarker);
+
+      if (startsGroup) {
+        groupSequence += 1;
+        currentMarker = markerOnly || inlineMarker;
+        currentGroupId = `footnote:${pageNumber}:${currentMarker}:${groupSequence}`;
+      }
+
+      if (!currentGroupId) {
+        continue;
+      }
+
+      node.semanticRole = "Footnote";
+      node.footnote = true;
+      node.footnoteGroupId = currentGroupId;
+      node.footnoteMarker = currentMarker;
+    }
+  }
+}
+
 function collectLeadingTableXPositions(page) {
   const xPositions = [];
   for (const block of page.textBlocks) {
@@ -755,6 +906,7 @@ export async function buildSemanticDocument(inputPath, options) {
   // A9 BibEntry is a document-level pass; it needs headings from all pages
   // to decide where the "References" section starts and ends.
   markBibEntries(nodes);
+  markFootnotes(nodes, layoutDocument.pages);
 
   const semanticDocument = {
     schemaVersion: "1.0.0",

@@ -108,6 +108,7 @@ public class PdfTagWriterCli {
 
             PDStructureTreeRoot structureTreeRoot = new PDStructureTreeRoot();
             catalog.setStructureTreeRoot(structureTreeRoot);
+            ensureEngineRoleMap(structureTreeRoot);
 
             PDMarkInfo markInfo = new PDMarkInfo();
             markInfo.setMarked(true);
@@ -136,6 +137,10 @@ public class PdfTagWriterCli {
                     ((PDStructureTreeRoot) parentNode).appendKid(element);
                 } else {
                     ((PDStructureElement) parentNode).appendKid(element);
+                }
+
+                if ("Aside".equals(instruction.type)) {
+                    element.getCOSObject().setString(COSName.getPDFName("ID"), noteStructureId(instruction.id));
                 }
 
                 if (!instruction.text.isEmpty()) {
@@ -199,6 +204,30 @@ public class PdfTagWriterCli {
                 + "}";
             System.out.println(json);
         }
+    }
+
+    private static void ensureEngineRoleMap(PDStructureTreeRoot structureTreeRoot) {
+        if (structureTreeRoot == null) return;
+
+        COSDictionary rootDict = structureTreeRoot.getCOSObject();
+        COSBase roleMapBase = rootDict.getDictionaryObject(COSName.ROLE_MAP);
+        COSDictionary roleMap;
+        if (roleMapBase instanceof COSDictionary) {
+            roleMap = (COSDictionary) roleMapBase;
+        } else {
+            roleMap = new COSDictionary();
+            rootDict.setItem(COSName.ROLE_MAP, roleMap);
+        }
+
+        if (!roleMap.containsKey(COSName.getPDFName("Aside"))) {
+            roleMap.setItem(COSName.getPDFName("Aside"), COSName.getPDFName("Note"));
+        }
+    }
+
+    private static String noteStructureId(String raw) {
+        String sanitized = raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
+        if (sanitized.isBlank()) sanitized = "unknown";
+        return "note-" + sanitized;
     }
 
     private static Map<String, String> parseArgs(String[] args) {

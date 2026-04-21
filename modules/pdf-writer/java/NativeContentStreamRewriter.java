@@ -312,6 +312,7 @@ public class NativeContentStreamRewriter {
         String lang;
         String alt;
         String actualText;
+        String footnoteGroupId;
     }
 
     private static TagTreeNode parseTaggingTree(String jsonStr) {
@@ -337,6 +338,8 @@ public class NativeContentStreamRewriter {
         if (alt != null) n.alt = asString(alt);
         Object actualText = m.get("actualText");
         if (actualText != null) n.actualText = asString(actualText);
+        Object footnoteGroupId = m.get("footnoteGroupId");
+        if (footnoteGroupId != null) n.footnoteGroupId = asString(footnoteGroupId);
         List<Object> children = asList(m.get("children"));
         for (Object c : children) n.children.add(parseTagNode(c));
         return n;
@@ -877,6 +880,25 @@ public class NativeContentStreamRewriter {
         parentTree.setNumbers(numbers);
         treeRoot.setParentTree(parentTree);
         treeRoot.setParentTreeNextKey(nextPageKey);
+        ensureEngineRoleMap(treeRoot);
+    }
+
+    private static void ensureEngineRoleMap(PDStructureTreeRoot treeRoot) {
+        if (treeRoot == null) return;
+
+        COSDictionary rootDict = treeRoot.getCOSObject();
+        COSBase roleMapBase = rootDict.getDictionaryObject(COSName.ROLE_MAP);
+        COSDictionary roleMap;
+        if (roleMapBase instanceof COSDictionary) {
+            roleMap = (COSDictionary) roleMapBase;
+        } else {
+            roleMap = new COSDictionary();
+            rootDict.setItem(COSName.ROLE_MAP, roleMap);
+        }
+
+        if (!roleMap.containsKey(COSName.getPDFName("Aside"))) {
+            roleMap.setItem(COSName.getPDFName("Aside"), COSName.getPDFName("Note"));
+        }
     }
 
     /**
@@ -999,6 +1021,9 @@ public class NativeContentStreamRewriter {
         if (node.lang != null && !node.lang.isEmpty()) el.setLanguage(node.lang);
         if (node.alt != null && !node.alt.isEmpty()) el.setAlternateDescription(node.alt);
         if (node.actualText != null && !node.actualText.isEmpty()) el.setActualText(node.actualText);
+        if ("Aside".equals(node.type)) {
+            el.getCOSObject().setString(COSName.getPDFName("ID"), noteStructureId(node));
+        }
 
         // TH /Scope: JAWS/NVDA only announce table headers when /Scope
         // is present (Matterhorn 15-003). We derive /Scope from the
@@ -1088,6 +1113,13 @@ public class NativeContentStreamRewriter {
         }
 
         return el;
+    }
+
+    private static String noteStructureId(TagTreeNode node) {
+        String raw = node.footnoteGroupId != null && !node.footnoteGroupId.isBlank() ? node.footnoteGroupId : node.id;
+        String sanitized = raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
+        if (sanitized.isBlank()) sanitized = "unknown";
+        return "note-" + sanitized;
     }
 
     /**

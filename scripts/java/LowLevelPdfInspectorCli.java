@@ -87,10 +87,11 @@ public class LowLevelPdfInspectorCli {
         }
 
         Map<String, Integer> typeCounts = new TreeMap<>();
+        Map<String, Integer> idCountsByType = new TreeMap<>();
         COSDictionary rootDictionary = catalog.getStructureTreeRoot().getCOSObject();
         List<Map<String, Object>> attributeSamples = new ArrayList<>();
         int[] tableAttributeNodeCount = new int[] { 0 };
-        walkStructureKid(rootDictionary.getDictionaryObject(COSName.K), typeCounts, attributeSamples, tableAttributeNodeCount);
+        walkStructureKid(rootDictionary.getDictionaryObject(COSName.K), typeCounts, idCountsByType, attributeSamples, tableAttributeNodeCount);
 
         int totalTypedNodes = 0;
         for (Integer count : typeCounts.values()) {
@@ -99,14 +100,43 @@ public class LowLevelPdfInspectorCli {
 
         result.put("exists", true);
         result.put("parentTreeNextKey", rootDictionary.getInt(COSName.PARENT_TREE_NEXT_KEY));
+        result.put("roleMap", inspectRoleMap(rootDictionary.getDictionaryObject(COSName.ROLE_MAP)));
         result.put("typeCounts", typeCounts);
+        result.put("idCountsByType", idCountsByType);
         result.put("totalTypedNodes", totalTypedNodes);
         result.put("tableAttributeNodeCount", tableAttributeNodeCount[0]);
         result.put("attributeSamples", attributeSamples);
         return result;
     }
 
-    private static void walkStructureKid(COSBase kid, Map<String, Integer> typeCounts, List<Map<String, Object>> attributeSamples, int[] tableAttributeNodeCount) {
+    private static Map<String, String> inspectRoleMap(COSBase roleMapBase) {
+        Map<String, String> roleMap = new TreeMap<>();
+        COSBase resolved = resolve(roleMapBase);
+        if (!(resolved instanceof COSDictionary)) {
+            return roleMap;
+        }
+
+        COSDictionary dictionary = (COSDictionary) resolved;
+        for (COSName key : dictionary.keySet()) {
+            COSBase value = resolve(dictionary.getItem(key));
+            if (value instanceof COSName) {
+                roleMap.put(key.getName(), ((COSName) value).getName());
+            } else if (value instanceof COSString) {
+                roleMap.put(key.getName(), ((COSString) value).getString());
+            } else if (value != null) {
+                roleMap.put(key.getName(), value.toString());
+            }
+        }
+        return roleMap;
+    }
+
+    private static void walkStructureKid(
+        COSBase kid,
+        Map<String, Integer> typeCounts,
+        Map<String, Integer> idCountsByType,
+        List<Map<String, Object>> attributeSamples,
+        int[] tableAttributeNodeCount
+    ) {
         COSBase resolved = resolve(kid);
         if (resolved == null) {
             return;
@@ -115,7 +145,7 @@ public class LowLevelPdfInspectorCli {
         if (resolved instanceof COSArray) {
             COSArray array = (COSArray) resolved;
             for (int index = 0; index < array.size(); index += 1) {
-                walkStructureKid(array.get(index), typeCounts, attributeSamples, tableAttributeNodeCount);
+                walkStructureKid(array.get(index), typeCounts, idCountsByType, attributeSamples, tableAttributeNodeCount);
             }
             return;
         }
@@ -125,9 +155,12 @@ public class LowLevelPdfInspectorCli {
             String structureType = dictionary.getNameAsString(COSName.S);
             if (structureType != null) {
                 typeCounts.put(structureType, typeCounts.getOrDefault(structureType, 0) + 1);
+                if (dictionary.getDictionaryObject(COSName.getPDFName("ID")) != null) {
+                    idCountsByType.put(structureType, idCountsByType.getOrDefault(structureType, 0) + 1);
+                }
                 inspectStructureAttributes(dictionary, structureType, attributeSamples, tableAttributeNodeCount);
             }
-            walkStructureKid(dictionary.getDictionaryObject(COSName.K), typeCounts, attributeSamples, tableAttributeNodeCount);
+            walkStructureKid(dictionary.getDictionaryObject(COSName.K), typeCounts, idCountsByType, attributeSamples, tableAttributeNodeCount);
         }
     }
 

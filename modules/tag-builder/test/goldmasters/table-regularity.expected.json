@@ -25,6 +25,12 @@
             "insertedSyntheticRowCount": 0,
             "shiftedCellCount": 0
           },
+          "mergedTableTextCellRepair": {
+            "applied": false,
+            "splitCellCount": 0,
+            "filledPlaceholderCount": 0,
+            "insertedCellCount": 0
+          },
           "tableStructureRepairs": 0,
           "repeatedHeaderRows": 0
         },
@@ -230,6 +236,12 @@
             "insertedSyntheticRowCount": 0,
             "shiftedCellCount": 0
           },
+          "mergedTableTextCellRepair": {
+            "applied": false,
+            "splitCellCount": 0,
+            "filledPlaceholderCount": 0,
+            "insertedCellCount": 0
+          },
           "tableStructureRepairs": 0,
           "repeatedHeaderRows": 0
         },
@@ -410,6 +422,12 @@
             "insertedSyntheticRowCount": 0,
             "shiftedCellCount": 0
           },
+          "mergedTableTextCellRepair": {
+            "applied": false,
+            "splitCellCount": 0,
+            "filledPlaceholderCount": 0,
+            "insertedCellCount": 0
+          },
           "tableStructureRepairs": 0,
           "repeatedHeaderRows": 0
         },
@@ -517,6 +535,12 @@
             "insertedPlaceholderCellCount": 1,
             "insertedSyntheticRowCount": 1,
             "shiftedCellCount": 0
+          },
+          "mergedTableTextCellRepair": {
+            "applied": false,
+            "splitCellCount": 0,
+            "filledPlaceholderCount": 0,
+            "insertedCellCount": 0
           },
           "tableStructureRepairs": 0,
           "repeatedHeaderRows": 0

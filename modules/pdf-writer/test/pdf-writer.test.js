@@ -94,6 +94,71 @@ test("pdf writer adds native structure and creates a sidecar manifest", async ()
   assert.match(outputText, /<pdfuaid:part>1<\/pdfuaid:part>/);
 });
 
+test("pdf writer role-maps Aside footnote tags to the standard Note type", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "writer-aside-rolemap-test-"));
+  const pdfPath = path.join(tempDir, "sample.pdf");
+  const tagsPath = path.join(tempDir, "tagging.json");
+  const semanticPath = path.join(tempDir, "semantic.json");
+  const outputPath = path.join(tempDir, "output", "tagged.pdf");
+
+  await createSamplePdf(pdfPath);
+  await writeFile(
+    tagsPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "tagging:sample",
+      source: { semanticDocumentId: "semantic:sample" },
+      root: {
+        id: "tag:document",
+        type: "Document",
+        children: [
+          {
+            id: "tag:n-1-1",
+            type: "Aside",
+            label: "Accessibility Report",
+            sourceNodeIds: ["n-1-1"],
+            semanticRole: "Footnote",
+            footnoteGroupId: "footnote:1:1:1",
+            footnoteMarker: "1",
+            children: []
+          }
+        ]
+      }
+    }, null, 2)
+  );
+  await writeFile(
+    semanticPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:sample",
+      source: { layoutDocumentId: "layout:sample", filePath: pdfPath },
+      nodes: [
+        {
+          id: "n-1-1",
+          pageNumber: 1,
+          sourceBlockId: "b1",
+          role: "P",
+          semanticRole: "Footnote",
+          footnote: true,
+          footnoteGroupId: "footnote:1:1:1",
+          footnoteMarker: "1",
+          text: "Accessibility Report",
+          bbox: [72, 48, 220, 24],
+          confidence: 0.9,
+          readingOrder: 0
+        }
+      ],
+      orderedNodeIds: ["n-1-1"]
+    }, null, 2)
+  );
+
+  const report = await writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, outputPath });
+  const inspection = await inspectPdfLowLevel({ pdfPath: report.outputPath });
+
+  assert.equal(inspection.structureTree.roleMap.Aside, "Note");
+  assert.equal(inspection.structureTree.idCountsByType.Aside, inspection.structureTree.typeCounts.Aside);
+});
+
 test("pdf writer artifacts visible non-text paint operators in native mode", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "writer-paint-artifact-test-"));
   const pdfPath = path.join(tempDir, "painted.pdf");

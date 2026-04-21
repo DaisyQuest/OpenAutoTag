@@ -108,6 +108,97 @@ test("tag builder skips artifacts and groups table headers and cells into table 
   assert.deepEqual(bodySection.children[0].children.map((child) => child.label), ["North", "$12M"]);
 });
 
+test("tag builder maps semantic footnotes to Aside leaves", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-footnote-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:footnote",
+      source: { layoutDocumentId: "layout:footnote" },
+      nodes: [
+        { id: "n1", pageNumber: 1, sourceBlockId: "b1", role: "P", text: "Body text.", bbox: [72, 100, 100, 12], confidence: 0.9, readingOrder: 0 },
+        {
+          id: "n2",
+          pageNumber: 1,
+          sourceBlockId: "b2",
+          role: "P",
+          text: "88 Footnote text.",
+          bbox: [72, 730, 180, 10],
+          confidence: 0.9,
+          readingOrder: 1,
+          semanticRole: "Footnote",
+          footnote: true,
+          footnoteGroupId: "footnote:1:88:1",
+          footnoteMarker: "88"
+        }
+      ],
+      orderedNodeIds: ["n1", "n2"]
+    }, null, 2)
+  );
+
+  const tagging = await buildTagTree(inputPath);
+  const footnote = tagging.root.children[1];
+
+  assert.equal(footnote.type, "Aside");
+  assert.equal(footnote.detectedType, "P");
+  assert.equal(footnote.semanticRole, "Footnote");
+  assert.equal(footnote.footnoteMarker, "88");
+  assert.equal(footnote.actualText, "88 Footnote text.");
+  assert.deepEqual(footnote.children, []);
+});
+
+test("tag builder splits trailing values from merged table text into empty repaired cells", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-merged-cell-test-"));
+  const inputPath = path.join(tempDir, "semantic.json");
+
+  await writeFile(
+    inputPath,
+    JSON.stringify({
+      schemaVersion: "1.0.0",
+      documentId: "semantic:merged-cell-table",
+      source: { layoutDocumentId: "layout:merged-cell-table" },
+      nodes: [
+        { id: "h1", pageNumber: 1, sourceBlockId: "h1", role: "TH", text: "Metric", bbox: [0, 20, 10, 10], confidence: 0.95, readingOrder: 0, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 0, tableSection: "head" },
+        { id: "h2", pageNumber: 1, sourceBlockId: "h2", role: "TH", text: "All Entities", bbox: [20, 20, 10, 10], confidence: 0.95, readingOrder: 1, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 1, tableSection: "head" },
+        { id: "h3", pageNumber: 1, sourceBlockId: "h3", role: "TH", text: "Small Entities", bbox: [40, 20, 10, 10], confidence: 0.95, readingOrder: 2, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 2, tableSection: "head" },
+        { id: "h4", pageNumber: 1, sourceBlockId: "h4", role: "TH", text: "Small Entity Share", bbox: [60, 20, 10, 10], confidence: 0.95, readingOrder: 3, tableGroupId: "table-1", tableRowIndex: 0, tableColumnIndex: 3, tableSection: "head" },
+        {
+          id: "c1",
+          pageNumber: 1,
+          sourceBlockId: "c1",
+          role: "TD",
+          text: "10-year PV savings (7% discount) $2,775 million",
+          bbox: [0, 40, 40, 10],
+          confidence: 0.95,
+          readingOrder: 4,
+          tableGroupId: "table-1",
+          tableRowIndex: 1,
+          tableColumnIndex: 0,
+          tableSection: "body"
+        },
+        { id: "c3", pageNumber: 1, sourceBlockId: "c3", role: "TD", text: "$1,472 million", bbox: [40, 40, 10, 10], confidence: 0.95, readingOrder: 5, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 2, tableSection: "body" },
+        { id: "c4", pageNumber: 1, sourceBlockId: "c4", role: "TD", text: "53.0%", bbox: [60, 40, 10, 10], confidence: 0.95, readingOrder: 6, tableGroupId: "table-1", tableRowIndex: 1, tableColumnIndex: 3, tableSection: "body" }
+      ],
+      orderedNodeIds: ["h1", "h2", "h3", "h4", "c1", "c3", "c4"]
+    }, null, 2)
+  );
+
+  const tagging = await buildTagTree(inputPath);
+  const table = tagging.root.children[0];
+  const bodyRow = table.children.find((child) => child.type === "TBody").children[0];
+
+  assert.equal(tagging.source.mergedTableTextCellRepair.applied, true);
+  assert.deepEqual(
+    bodyRow.children.map((child) => child.label),
+    ["10-year PV savings (7% discount)", "$2,775 million", "$1,472 million", "53.0%"]
+  );
+  assert.equal(bodyRow.children[1].synthetic, true);
+  assert.equal(bodyRow.children[1].repairReason, "split-merged-table-cell");
+});
+
 test("tag builder infers table head and body sections when explicit section metadata is missing", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "tag-table-infer-test-"));
   const inputPath = path.join(tempDir, "semantic.json");
