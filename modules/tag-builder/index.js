@@ -1412,7 +1412,15 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
           // A TH that spans rows in THead (e.g. a corner cell) gets Both.
           const isColHeader = Boolean(n._inTHead);
           const spansRows = rs > 1;
-          n.scope = isColHeader && spansRows ? "Both" : isColHeader ? "Column" : "Row";
+          let scope;
+          if (isColHeader && spansRows) {
+            scope = "Both";
+          } else if (isColHeader) {
+            scope = "Column";
+          } else {
+            scope = "Row";
+          }
+          n.scope = scope;
         }
         if (n.type === "TD") {
           const colIdx = Number.isInteger(n.tableColumnIndex) ? n.tableColumnIndex : null;
