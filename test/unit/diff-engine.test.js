@@ -259,6 +259,32 @@ test("compareDocuments includes overall scores", () => {
   assert.ok(typeof report.overallScores.source === "number");
 });
 
+test("compareDocuments preserves PDF profile details for renderers", () => {
+  const docs = [
+    {
+      id: "source",
+      label: "Original",
+      role: "source",
+      file: {
+        fileName: "source.pdf",
+        sizeBytes: 2048,
+        pageCount: 3,
+        title: "Source Title",
+        downloadUrl: "/api/difftool/files/run/source",
+        downloadLabel: "Download source PDF"
+      },
+      validationReport: makeValidationReport()
+    }
+  ];
+
+  const report = compareDocuments(docs);
+  assert.equal(report.documents[0].details.fileName, "source.pdf");
+  assert.equal(report.documents[0].details.pageCount, 3);
+  assert.equal(report.documents[0].details.title, "Source Title");
+  assert.equal(report.documents[0].details.downloadUrl, "/api/difftool/files/run/source");
+  assert.equal(report.documents[0].details.validation.failedRules, 4);
+});
+
 test("category entries are sorted by score descending", () => {
   const docs = [
     {

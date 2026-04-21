@@ -117,10 +117,21 @@
             <span>&#x1F50D;</span> Run Comparison
           </button>
 
+          <button id="export-btn" class="export-button" type="button" disabled>
+            EXPORT
+          </button>
+
           <div id="compare-progress" class="compare-progress">
             <span id="progress-text">Preparing comparison…</span>
             <div class="progress-bar-track">
               <div id="progress-fill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <div id="export-progress" class="compare-progress">
+            <span id="export-progress-text">Preparing export…</span>
+            <div class="progress-bar-track">
+              <div id="export-progress-fill" class="progress-bar-fill"></div>
             </div>
           </div>
 
@@ -142,6 +153,8 @@
               </button>
             </div>
           </div>
+
+          <div id="document-overview" class="document-overview" hidden></div>
 
           <div id="winner-banner" class="winner-banner" hidden>
             <span class="trophy">🏆</span>

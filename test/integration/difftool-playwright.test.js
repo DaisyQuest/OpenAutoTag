@@ -178,6 +178,20 @@ if (!canRun) {
     }
   });
 
+  test("difftool page exposes export action", async () => {
+    const page = await browser.newPage();
+    try {
+      await page.goto(`${baseUrl}/difftool`, { waitUntil: "domcontentloaded" });
+
+      const exportButton = page.locator("#export-btn");
+      assert.ok(await exportButton.isVisible(), "Export button should be visible");
+      assert.ok(await exportButton.isDisabled(), "Export button should be disabled until PDFs are selected");
+      assert.equal((await exportButton.textContent()).trim(), "EXPORT");
+    } finally {
+      await page.close();
+    }
+  });
+
   test("difftool stylesheet is loaded and applies colours", async () => {
     const page = await browser.newPage();
     try {
@@ -192,9 +206,65 @@ if (!canRun) {
       // Verify the compare button has styled background
       const btnBg = await page.evaluate(() => {
         const btn = document.getElementById("compare-btn");
-        return window.getComputedStyle(btn).backgroundImage;
+        return window.getComputedStyle(btn).backgroundColor;
       });
-      assert.ok(btnBg && btnBg !== "none", "Compare button should have gradient background");
+      assert.ok(btnBg && btnBg !== "rgba(0, 0, 0, 0)", "Compare button should have styled background");
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("difftool foreground/background pairs meet 7.5 contrast", async () => {
+    const page = await browser.newPage();
+    try {
+      await page.goto(`${baseUrl}/difftool`, { waitUntil: "domcontentloaded" });
+
+      const ratios = await page.evaluate(() => {
+        function parseRgb(value) {
+          const match = String(value).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          if (!match) return null;
+          return [Number(match[1]), Number(match[2]), Number(match[3])];
+        }
+
+        function luminance([r, g, b]) {
+          return [r, g, b]
+            .map((channel) => {
+              const c = channel / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            })
+            .reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0);
+        }
+
+        function ratio(foreground, background) {
+          const fg = parseRgb(foreground);
+          const bg = parseRgb(background);
+          if (!fg || !bg) return 0;
+          const lighter = Math.max(luminance(fg), luminance(bg));
+          const darker = Math.min(luminance(fg), luminance(bg));
+          return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        return [
+          ".upload-card",
+          ".mode-label-desc",
+          "#compare-btn",
+          "#export-btn",
+          ".variant-tab.active"
+        ].map((selector) => {
+          const element = document.querySelector(selector);
+          const style = window.getComputedStyle(element);
+          const backgroundElement = style.backgroundColor === "rgba(0, 0, 0, 0)" ? element.closest(".upload-card") || element.parentElement : element;
+          const background = window.getComputedStyle(backgroundElement).backgroundColor;
+          return {
+            selector,
+            ratio: ratio(style.color, background)
+          };
+        });
+      });
+
+      for (const item of ratios) {
+        assert.ok(item.ratio >= 7.5, `${item.selector} contrast ${item.ratio.toFixed(2)} should be >= 7.5`);
+      }
     } finally {
       await page.close();
     }

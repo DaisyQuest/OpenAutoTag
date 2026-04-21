@@ -106,6 +106,80 @@ function extractWriterMetrics(writerReport) {
   };
 }
 
+function formatNullableString(value) {
+  const normalized = String(value || "").trim();
+  return normalized || null;
+}
+
+function firstPresent(...values) {
+  return values.find((value) => value !== null && value !== undefined && value !== "");
+}
+
+function buildDocumentDetails(doc, metrics) {
+  const validation = doc.validationReport || null;
+  const writer = extractWriterMetrics(doc.writerReport);
+  const file = doc.file || {};
+  const metadataDiagnostics = validation?.metadataDiagnostics || {};
+  const structure = metrics["structure-tree"] || {};
+  const font = metrics["font-health"] || {};
+
+  return {
+    fileName: formatNullableString(file.fileName || doc.fileName || doc.label),
+    originalName: formatNullableString(file.originalName || doc.originalName || doc.label),
+    sizeBytes: file.sizeBytes ?? null,
+    pageCount: firstPresent(file.pageCount, writer?.totalPages, doc.writerReport?.pageCount) ?? null,
+    title: formatNullableString(firstPresent(file.title, metadataDiagnostics.dcTitleValue, doc.writerReport?.title)),
+    author: formatNullableString(file.author),
+    subject: formatNullableString(file.subject),
+    creator: formatNullableString(file.creator),
+    producer: formatNullableString(file.producer),
+    creationDate: file.creationDate || null,
+    modificationDate: file.modificationDate || null,
+    downloadUrl: file.downloadUrl || doc.downloadUrl || null,
+    downloadLabel: file.downloadLabel || "Download PDF",
+    validation: {
+      available: Boolean(validation),
+      status: validation?.overall?.status || (validation ? (validation.isCompliant ? "pass" : "fail") : "unavailable"),
+      isCompliant: validation?.isCompliant ?? null,
+      failedRules: validation?.summary?.failedRules ?? null,
+      failedChecks: validation?.summary?.failedChecks ?? null,
+      findingCount: validation?.findings?.length ?? null,
+      engine: validation?.engine?.name || null,
+      engineVersion: validation?.engine?.version || null
+    },
+    metadata: {
+      metadataPresent: metadataDiagnostics.metadataPresent ?? null,
+      dcTitleDetected: metadataDiagnostics.dcTitleDetected ?? null,
+      pdfUaIdentificationDetected: metadataDiagnostics.pdfUaIdentificationDetected ?? null,
+      infoMatchesXmp: metadataDiagnostics.infoMatchesXmp ?? null,
+      correctedByValidator: metadataDiagnostics.correctedByValidator ?? null
+    },
+    structure: {
+      hasStructureTree: structure.hasStructureTree ?? null,
+      typedNodes: structure.typedNodes ?? null,
+      markedContentOperators: structure.markedContentOperators ?? null,
+      tableAttributeNodes: structure.tableAttributeNodes ?? null
+    },
+    font: {
+      grade: font.grade || null,
+      issueCount: font.issueCount ?? null,
+      fontCount: font.fontCount ?? null
+    },
+    writer: writer
+      ? {
+          requestedMode: doc.writerReport?.requestedMode || null,
+          mode: writer.mode || doc.writerReport?.writerMode || null,
+          pagesNative: writer.pagesNative,
+          pagesRaster: writer.pagesRaster,
+          totalPages: writer.totalPages,
+          operatorMatchRate: writer.operatorMatchRate,
+          nativeTaggingApplied: doc.writerReport?.nativeTaggingApplied ?? null,
+          autoFallbackReason: doc.writerReport?.autoFallbackReason || null
+        }
+      : null
+  };
+}
+
 function extractTagCoverageMetrics(validationReport, writerReport) {
   const writer = extractWriterMetrics(writerReport);
   const findings = validationReport?.findings || [];
@@ -240,7 +314,7 @@ export function extractDocumentMetrics(doc) {
 /**
  * Compare an array of document descriptors and produce a structured report.
  *
- * @param {Array<{id: string, label: string, role: string, validationReport?, writerReport?, tagDeltaReport?, fontReport?}>} documents
+ * @param {Array<{id: string, label: string, role: string, file?, validationReport?, writerReport?, tagDeltaReport?, fontReport?}>} documents
  * @returns {{ documents, categories, overallWinner, generatedAt }}
  */
 export function compareDocuments(documents) {
@@ -259,6 +333,7 @@ export function compareDocuments(documents) {
       id: doc.id,
       label: doc.label,
       role: doc.role || "document",
+      details: buildDocumentDetails(doc, metrics),
       metrics,
       scores
     };

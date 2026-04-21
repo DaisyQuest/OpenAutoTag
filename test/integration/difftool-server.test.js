@@ -4,6 +4,8 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
+import { PDFDocument } from "pdf-lib";
+import { compareDocuments } from "../../orchestrator/diff-engine.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..", "..");
@@ -71,6 +73,50 @@ function minimalPdf() {
   );
 }
 
+function validationReport({ compliant = false, failedRules = 4, failedChecks = 7 } = {}) {
+  return {
+    isCompliant: compliant,
+    engine: { name: "veraPDF", version: "test" },
+    summary: { failedRules, failedChecks },
+    metadataDiagnostics: {
+      metadataPresent: true,
+      dcTitleDetected: true,
+      pdfUaIdentificationDetected: compliant,
+      infoMatchesXmp: true
+    },
+    findings: compliant ? [] : [{ code: "TAG-001", description: "Missing tag" }]
+  };
+}
+
+function sampleComparisonReport(mode) {
+  const report = compareDocuments([
+    {
+      id: "source",
+      label: "source.pdf",
+      role: "source",
+      file: { fileName: "source.pdf", sizeBytes: 1000, pageCount: 1, downloadUrl: "/api/difftool/files/run/source" },
+      validationReport: validationReport()
+    },
+    {
+      id: "competitor",
+      label: "competitor.pdf",
+      role: "competitor",
+      file: { fileName: "competitor.pdf", sizeBytes: 1000, pageCount: 1, downloadUrl: "/api/difftool/files/run/competitor" },
+      validationReport: validationReport({ failedRules: 2, failedChecks: 3 })
+    },
+    {
+      id: `ours-${mode}`,
+      label: `AutoTag (${mode})`,
+      role: "ours",
+      file: { fileName: `autotag-${mode}.pdf`, sizeBytes: 1200, pageCount: 1, downloadUrl: `/api/difftool/files/run/ours-${mode}` },
+      validationReport: validationReport({ compliant: true, failedRules: 0, failedChecks: 0 }),
+      writerReport: { writerMode: mode, requestedMode: mode, pagesNative: 1, pagesRaster: 0, matchRate: 0.94 }
+    }
+  ]);
+  report.mode = mode;
+  return report;
+}
+
 function buildMultipartBody(boundary, fields) {
   const parts = [];
   for (const field of fields) {
@@ -120,6 +166,7 @@ if (createAppServer) {
     assert.ok(res.headers["content-type"].includes("text/html"));
     assert.ok(res.text.includes("PDF Diff Tool"));
     assert.ok(res.text.includes("difftool.js"));
+    assert.ok(res.text.includes("export-btn"));
   });
 
   test("GET /difftool.html serves the same page via static asset", async () => {
@@ -189,6 +236,35 @@ if (createAppServer) {
     assert.ok(Array.isArray(json.categories), "response should have categories array");
     assert.ok("overallWinner" in json, "response should have overallWinner");
     assert.ok("generatedAt" in json, "response should have generatedAt");
+    assert.equal(json.mode, "auto");
+    assert.ok(json.runId, "response should include a diff run id");
+
+    const source = json.documents.find((document) => document.id === "source");
+    assert.ok(source.details, "source should include PDF details");
+    assert.ok(source.details.downloadUrl, "source should include a download URL");
+
+    const download = await request(server, "GET", source.details.downloadUrl);
+    assert.equal(download.statusCode, 200);
+    assert.ok(download.headers["content-type"].includes("application/pdf"));
+    assert.ok(download.body.subarray(0, 5).equals(Buffer.from("%PDF-")));
+  });
+
+  test("POST /api/difftool/export returns a PDF page per mode", async () => {
+    const payload = JSON.stringify({
+      reports: ["auto", "native", "raster"].map(sampleComparisonReport)
+    });
+
+    const res = await request(server, "POST", "/api/difftool/export", Buffer.from(payload), {
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(payload)
+    });
+
+    assert.equal(res.statusCode, 200);
+    assert.ok(res.headers["content-type"].includes("application/pdf"));
+    assert.ok(res.body.subarray(0, 5).equals(Buffer.from("%PDF-")));
+
+    const pdf = await PDFDocument.load(res.body);
+    assert.equal(pdf.getPageCount(), 3);
   });
 
   test("POST /api/difftool/analyze with a PDF returns analysis", async () => {

@@ -34,6 +34,7 @@ const DEFAULT_REMOTE_DOWNLOAD_POLICY = Object.freeze({
 });
 const DEFAULT_JSON_BODY_LIMIT = 1024 * 1024;
 const DEFAULT_TEXT_BODY_LIMIT = 16 * 1024;
+const DIFF_TOOL_MODES = Object.freeze(["auto", "native", "raster"]);
 const BASE_SECURITY_HEADERS = Object.freeze({
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
@@ -1224,12 +1225,351 @@ async function runDiffPipeline(sourcePath, outputDir, writerMode) {
       try {
         reports[key] = JSON.parse(await readFile(filePath, "utf8"));
       } catch {
-        // Skip unreadable artifacts
+      // Skip unreadable artifacts
       }
     }
   }
 
-  return reports;
+  return {
+    status: result?.status || "unknown",
+    error: result?.error || null,
+    stageSummary: result?.stageSummary || null,
+    artifacts,
+    reports
+  };
+}
+
+function normalizeDiffMode(value) {
+  const candidate = String(value || "auto").toLowerCase();
+  return DIFF_TOOL_MODES.includes(candidate) ? candidate : "auto";
+}
+
+function toIsoString(value) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return value.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+function formatPdfReportBytes(bytes) {
+  const value = Number(bytes || 0);
+  if (!value) {
+    return "0 B";
+  }
+
+  const units = ["B", "KB", "MB", "GB"];
+  const exponent = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+  const scaled = value / 1024 ** exponent;
+  return `${scaled.toFixed(scaled >= 10 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
+}
+
+function safePdfReportText(value, fallback = "") {
+  const text = String(value ?? fallback ?? "")
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7e]/g, "?")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text || fallback;
+}
+
+async function describePdfFile(filePath, { fileName, downloadUrl, downloadLabel }) {
+  let fileStats = null;
+  try {
+    fileStats = await stat(filePath);
+  } catch {
+    fileStats = null;
+  }
+
+  const details = {
+    fileName: fileName || path.basename(filePath),
+    originalName: fileName || path.basename(filePath),
+    sizeBytes: fileStats?.size ?? null,
+    pageCount: null,
+    title: null,
+    author: null,
+    subject: null,
+    creator: null,
+    producer: null,
+    creationDate: null,
+    modificationDate: null,
+    downloadUrl,
+    downloadLabel
+  };
+
+  try {
+    const { PDFDocument } = await import("pdf-lib");
+    const pdf = await PDFDocument.load(await readFile(filePath), { ignoreEncryption: true });
+    details.pageCount = pdf.getPageCount();
+    details.title = pdf.getTitle() || null;
+    details.author = pdf.getAuthor() || null;
+    details.subject = pdf.getSubject() || null;
+    details.creator = pdf.getCreator() || null;
+    details.producer = pdf.getProducer() || null;
+    details.creationDate = toIsoString(pdf.getCreationDate());
+    details.modificationDate = toIsoString(pdf.getModificationDate());
+  } catch {
+    // Keep byte-level details even when a PDF parser cannot read metadata.
+  }
+
+  return details;
+}
+
+function drawWrappedText(page, text, { x, y, width, size, font, color, lineHeight = size + 3, maxLines = 2 }) {
+  const words = safePdfReportText(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(candidate, size) <= width) {
+      current = candidate;
+      continue;
+    }
+
+    if (current) {
+      lines.push(current);
+    }
+    current = word;
+  }
+
+  if (current) {
+    lines.push(current);
+  }
+
+  const visible = lines.slice(0, maxLines);
+  if (lines.length > maxLines && visible.length > 0) {
+    let last = visible[visible.length - 1];
+    while (last.length > 4 && font.widthOfTextAtSize(`${last}...`, size) > width) {
+      last = last.slice(0, -1);
+    }
+    visible[visible.length - 1] = `${last}...`;
+  }
+
+  for (const line of visible) {
+    page.drawText(line, { x, y, size, font, color });
+    y -= lineHeight;
+  }
+
+  return y;
+}
+
+function drawKeyValue(page, label, value, { x, y, labelWidth, valueWidth, size, labelFont, valueFont, color }) {
+  page.drawText(safePdfReportText(label), { x, y, size, font: labelFont, color });
+  return drawWrappedText(page, value, {
+    x: x + labelWidth,
+    y,
+    width: valueWidth,
+    size,
+    font: valueFont,
+    color,
+    maxLines: 1
+  });
+}
+
+function formatScore(value) {
+  return Number.isFinite(Number(value)) ? `${Math.round(Number(value) * 100)}%` : "n/a";
+}
+
+function formatNullable(value) {
+  return value === null || value === undefined || value === "" ? "n/a" : String(value);
+}
+
+function buildDocumentSummaryLine(doc, report) {
+  const details = doc.details || {};
+  const validation = details.validation || {};
+  const writer = details.writer || {};
+  const overallScore = report.overallScores?.[doc.id];
+
+  return [
+    `${doc.label}: ${formatScore(overallScore)}`,
+    `pages ${formatNullable(details.pageCount)}`,
+    `size ${details.sizeBytes == null ? "n/a" : formatPdfReportBytes(details.sizeBytes)}`,
+    `status ${formatNullable(validation.status)}`,
+    `failed rules ${formatNullable(validation.failedRules)}`,
+    writer.mode ? `writer ${writer.mode}` : null,
+    details.font?.grade ? `font ${details.font.grade}` : null
+  ]
+    .filter(Boolean)
+    .join(" | ");
+}
+
+function findCategoryWinnerLabel(category, report) {
+  if (category.winner) {
+    return report.documents.find((doc) => doc.id === category.winner)?.label || category.winner;
+  }
+  if (category.tied?.length) {
+    return "Tied";
+  }
+  return "n/a";
+}
+
+function drawDiffExportPage(pdfDoc, report, mode, fonts, colors) {
+  const page = pdfDoc.addPage([792, 612]);
+  const { width, height } = page.getSize();
+  const margin = 42;
+  let y = height - margin;
+
+  page.drawText("PDF Accessibility DiffTool Report", {
+    x: margin,
+    y,
+    size: 20,
+    font: fonts.bold,
+    color: colors.ink
+  });
+  y -= 26;
+
+  const modeLabel = `${mode.charAt(0).toUpperCase()}${mode.slice(1)} Mode Comparison`;
+  page.drawText(modeLabel, { x: margin, y, size: 14, font: fonts.bold, color: colors.accent });
+  y -= 20;
+
+  const generatedAt = report.generatedAt ? new Date(report.generatedAt).toLocaleString("en-US") : "n/a";
+  y = drawKeyValue(page, "Generated", generatedAt, {
+    x: margin,
+    y,
+    labelWidth: 78,
+    valueWidth: width - margin * 2 - 78,
+    size: 9,
+    labelFont: fonts.bold,
+    valueFont: fonts.regular,
+    color: colors.ink
+  }) - 4;
+
+  const winner = report.overallWinner
+    ? report.documents.find((doc) => doc.id === report.overallWinner)
+    : null;
+  y = drawKeyValue(page, "Winner", winner ? `${winner.label} (${formatScore(report.overallScores?.[winner.id])})` : "n/a", {
+    x: margin,
+    y,
+    labelWidth: 78,
+    valueWidth: width - margin * 2 - 78,
+    size: 9,
+    labelFont: fonts.bold,
+    valueFont: fonts.regular,
+    color: colors.ink
+  }) - 14;
+
+  page.drawText("PDFs Compared", { x: margin, y, size: 12, font: fonts.bold, color: colors.ink });
+  y -= 16;
+  for (const doc of report.documents || []) {
+    y = drawWrappedText(page, buildDocumentSummaryLine(doc, report), {
+      x: margin,
+      y,
+      width: width - margin * 2,
+      size: 9,
+      font: fonts.regular,
+      color: colors.ink,
+      maxLines: 2
+    }) - 3;
+  }
+
+  y -= 10;
+  page.drawText("Category Scores", { x: margin, y, size: 12, font: fonts.bold, color: colors.ink });
+  y -= 16;
+
+  const columns = [
+    { label: "Category", x: margin, width: 170 },
+    { label: "Winner", x: margin + 176, width: 170 },
+    { label: "Scores", x: margin + 352, width: width - margin * 2 - 352 }
+  ];
+
+  for (const column of columns) {
+    page.drawText(column.label, { x: column.x, y, size: 8, font: fonts.bold, color: colors.accent });
+  }
+  y -= 12;
+
+  for (const category of report.categories || []) {
+    if (y < 92) {
+      break;
+    }
+    const scoreText = (category.entries || [])
+      .map((entry) => `${entry.label} ${formatScore(entry.score)}`)
+      .join(" | ");
+    page.drawText(safePdfReportText(category.label), { x: columns[0].x, y, size: 8, font: fonts.bold, color: colors.ink });
+    page.drawText(safePdfReportText(findCategoryWinnerLabel(category, report)), {
+      x: columns[1].x,
+      y,
+      size: 8,
+      font: fonts.regular,
+      color: colors.ink
+    });
+    drawWrappedText(page, scoreText, {
+      x: columns[2].x,
+      y,
+      width: columns[2].width,
+      size: 8,
+      font: fonts.regular,
+      color: colors.ink,
+      maxLines: 2,
+      lineHeight: 10
+    });
+    y -= 22;
+  }
+
+  y = 62;
+  page.drawText("Download Links", { x: margin, y, size: 10, font: fonts.bold, color: colors.ink });
+  y -= 13;
+  const downloadableDocs = (report.documents || []).filter((doc) => doc.details?.downloadUrl);
+  if (downloadableDocs.length === 0) {
+    page.drawText("No PDF download links were available for this comparison.", {
+      x: margin,
+      y,
+      size: 8,
+      font: fonts.regular,
+      color: colors.ink
+    });
+  } else {
+    for (const doc of downloadableDocs.slice(0, 3)) {
+      y = drawWrappedText(page, `${doc.label}: ${doc.details.downloadUrl}`, {
+        x: margin,
+        y,
+        width: width - margin * 2,
+        size: 7,
+        font: fonts.regular,
+        color: colors.ink,
+        maxLines: 1
+      }) - 2;
+    }
+  }
+}
+
+async function createDiffExportPdf(reports) {
+  const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+  const pdfDoc = await PDFDocument.create();
+  const fonts = {
+    regular: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    bold: await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  };
+  const colors = {
+    ink: rgb(0.06, 0.12, 0.13),
+    accent: rgb(0.02, 0.26, 0.25)
+  };
+
+  let renderedPages = 0;
+  for (const mode of DIFF_TOOL_MODES) {
+    const report = reports.find((item) => item?.mode === mode || item?.writerMode === mode || item?.documents?.some((doc) => doc.id === `ours-${mode}`));
+    if (report) {
+      drawDiffExportPage(pdfDoc, report, mode, fonts, colors);
+      renderedPages += 1;
+    }
+  }
+
+  if (renderedPages === 0) {
+    for (const [index, report] of reports.slice(0, 3).entries()) {
+      drawDiffExportPage(pdfDoc, report, `comparison-${index + 1}`, fonts, colors);
+    }
+  }
+
+  return pdfDoc.save();
+}
+
+function createAttachmentDisposition(fileName) {
+  const safeName = sanitizeSegment(fileName, "document.pdf").replace(/"/g, "_");
+  return `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(safeName)}`;
 }
 
 export function createAppServer({
@@ -1241,7 +1581,25 @@ export function createAppServer({
   const agentRegistry = createAgentRegistry();
   const batches = createBatchRegistry({ queue, uploadRoot });
   const remoteDownloadRoot = path.join(uploadRoot, "remote");
+  const diffFiles = new Map();
   queue.setRemoteCapacityProvider?.(() => agentRegistry.countIdle());
+
+  function registerDiffFile({ runId, fileId, filePath, fileName, label }) {
+    const resolvedPath = path.resolve(filePath);
+    if (!isPathInside(uploadRoot, resolvedPath)) {
+      throw new Error("Diff artifact path escaped the upload root.");
+    }
+
+    const runFiles = diffFiles.get(runId) || new Map();
+    runFiles.set(fileId, {
+      filePath: resolvedPath,
+      fileName: sanitizeSegment(fileName || path.basename(filePath), "document.pdf"),
+      label: label || fileId
+    });
+    diffFiles.set(runId, runFiles);
+
+    return `/api/difftool/files/${encodeURIComponent(runId)}/${encodeURIComponent(fileId)}`;
+  }
 
   async function authenticate(request, policy = {}) {
     return auth.requireAccess(request, policy);
@@ -1684,6 +2042,55 @@ export function createAppServer({
         }
       }
 
+      const diffFileMatch = url.pathname.match(/^\/api\/difftool\/files\/([^/]+)\/([^/]+)$/);
+      if (request.method === "GET" && diffFileMatch) {
+        const [, runId, fileId] = diffFileMatch.map((part) => decodeURIComponent(part));
+        const record = diffFiles.get(runId)?.get(fileId);
+
+        if (!record || !isPathInside(uploadRoot, record.filePath)) {
+          writeJson(response, 404, { error: "Diff PDF not found." });
+          return;
+        }
+
+        const body = await readFile(record.filePath);
+        response.writeHead(
+          200,
+          buildResponseHeaders({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": createAttachmentDisposition(record.fileName),
+            "Cache-Control": "no-store"
+          })
+        );
+        response.end(body);
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/difftool/export") {
+        const body = await readJsonBody(request, { maxBytes: 2 * 1024 * 1024 });
+        const reports = Array.isArray(body.reports)
+          ? body.reports
+          : body.reports && typeof body.reports === "object"
+            ? DIFF_TOOL_MODES.map((mode) => ({ ...body.reports[mode], mode })).filter((report) => report.generatedAt)
+            : [];
+
+        if (reports.length === 0) {
+          writeJson(response, 400, { error: "At least one comparison report is required." });
+          return;
+        }
+
+        const pdfBytes = await createDiffExportPdf(reports);
+        response.writeHead(
+          200,
+          buildResponseHeaders({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": createAttachmentDisposition("difftool-comparison-report.pdf"),
+            "Cache-Control": "no-store"
+          })
+        );
+        response.end(Buffer.from(pdfBytes));
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/api/difftool/compare") {
         const formData = await readFormData(request);
 
@@ -1695,8 +2102,9 @@ export function createAppServer({
           return;
         }
 
-        const writerMode = String(formData.get("writerMode") || "auto");
-        const diffDir = path.join(uploadRoot, `diff-${crypto.randomUUID()}`);
+        const writerMode = normalizeDiffMode(formData.get("writerMode"));
+        const runId = crypto.randomUUID();
+        const diffDir = path.join(uploadRoot, "difftool", runId);
         await mkdir(diffDir, { recursive: true });
 
         const sourcePath = path.join(diffDir, "source.pdf");
@@ -1705,16 +2113,37 @@ export function createAppServer({
         await writeFile(sourcePath, Buffer.from(await sourcePdf.arrayBuffer()));
         await writeFile(competitorPath, Buffer.from(await competitorPdf.arrayBuffer()));
 
+        const sourceDownloadUrl = registerDiffFile({
+          runId,
+          fileId: "source",
+          filePath: sourcePath,
+          fileName: sourcePdf.name || "source.pdf",
+          label: "Source PDF"
+        });
+        const competitorDownloadUrl = registerDiffFile({
+          runId,
+          fileId: "competitor",
+          filePath: competitorPath,
+          fileName: competitorPdf.name || "competitor.pdf",
+          label: "Competitor PDF"
+        });
+
         const validatorPath = path.join(repoRoot, "modules", "validator", "index.js");
         const documents = [];
 
         // Validate source
+        const sourceFileDetails = await describePdfFile(sourcePath, {
+          fileName: sourcePdf.name || "source.pdf",
+          downloadUrl: sourceDownloadUrl,
+          downloadLabel: "Download source PDF"
+        });
         try {
           const sourceReport = await runValidatorOnPdf(validatorPath, sourcePath, diffDir, "source");
           documents.push({
             id: "source",
             label: sourcePdf.name || "Source Document",
             role: "source",
+            file: sourceFileDetails,
             validationReport: sourceReport
           });
         } catch {
@@ -1722,17 +2151,24 @@ export function createAppServer({
             id: "source",
             label: sourcePdf.name || "Source Document",
             role: "source",
+            file: sourceFileDetails,
             validationReport: null
           });
         }
 
         // Validate competitor
+        const competitorFileDetails = await describePdfFile(competitorPath, {
+          fileName: competitorPdf.name || "competitor.pdf",
+          downloadUrl: competitorDownloadUrl,
+          downloadLabel: "Download competitor PDF"
+        });
         try {
           const competitorReport = await runValidatorOnPdf(validatorPath, competitorPath, diffDir, "competitor");
           documents.push({
             id: "competitor",
             label: competitorPdf.name || "Competitor Document",
             role: "competitor",
+            file: competitorFileDetails,
             validationReport: competitorReport
           });
         } catch {
@@ -1740,6 +2176,7 @@ export function createAppServer({
             id: "competitor",
             label: competitorPdf.name || "Competitor Document",
             role: "competitor",
+            file: competitorFileDetails,
             validationReport: null
           });
         }
@@ -1750,14 +2187,31 @@ export function createAppServer({
           await mkdir(pipelineOutputDir, { recursive: true });
 
           const pipelineResult = await runDiffPipeline(sourcePath, pipelineOutputDir, writerMode);
+          const outputPdfPath = pipelineResult.artifacts?.taggedPdf || pipelineResult.reports?.writerReport?.outputPath || null;
+          let outputFileDetails = null;
+          if (outputPdfPath) {
+            const outputDownloadUrl = registerDiffFile({
+              runId,
+              fileId: `ours-${writerMode}`,
+              filePath: outputPdfPath,
+              fileName: `autotag-${writerMode}.pdf`,
+              label: `AutoTag ${writerMode} PDF`
+            });
+            outputFileDetails = await describePdfFile(outputPdfPath, {
+              fileName: `autotag-${writerMode}.pdf`,
+              downloadUrl: outputDownloadUrl,
+              downloadLabel: "Download AutoTag output PDF"
+            });
+          }
           documents.push({
             id: `ours-${writerMode}`,
             label: `AutoTag (${writerMode})`,
             role: "ours",
-            validationReport: pipelineResult.validationReport,
-            writerReport: pipelineResult.writerReport,
-            tagDeltaReport: pipelineResult.tagDeltaReport,
-            fontReport: pipelineResult.fontReport
+            file: outputFileDetails,
+            validationReport: pipelineResult.reports.validationReport,
+            writerReport: pipelineResult.reports.writerReport,
+            tagDeltaReport: pipelineResult.reports.tagDeltaReport,
+            fontReport: pipelineResult.reports.fontReport
           });
         } catch {
           documents.push({
@@ -1769,9 +2223,8 @@ export function createAppServer({
         }
 
         const report = compareDocuments(documents);
-
-        // Clean up temp files in background
-        rm(diffDir, { recursive: true, force: true }).catch(() => {});
+        report.mode = writerMode;
+        report.runId = runId;
 
         writeJson(response, 200, report);
         return;
