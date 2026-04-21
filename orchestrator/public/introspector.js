@@ -502,11 +502,10 @@ function renderOverview(report) {
         </div>
       </div>
       <div class="score-panel">
-        <div class="score-ring" style="--score-angle: ${scorePercent * 3.6}deg">
-          <div>
-            <strong>${scorePercent}</strong>
-            <span>Score</span>
-          </div>
+        <div class="score-stack">
+          <strong>${scorePercent}</strong>
+          <span>Score</span>
+          <meter class="score-meter" min="0" max="100" value="${scorePercent}">${scorePercent}%</meter>
         </div>
       </div>
     </div>
