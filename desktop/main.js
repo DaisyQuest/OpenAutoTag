@@ -136,7 +136,7 @@ async function restartServer() {
     }
     await startServer();
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.loadURL(`http://127.0.0.1:${serverPort}`);
+      mainWindow.loadURL(`http://127.0.0.1:${serverPort}/studio`);
     }
   } catch (err) {
     dialog.showErrorBox("Fatal Error", `Could not restart server: ${err.message}`);
@@ -202,7 +202,7 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.loadURL(`http://127.0.0.1:${serverPort}`);
+  mainWindow.loadURL(`http://127.0.0.1:${serverPort}/studio`);
 
   mainWindow.once("ready-to-show", () => {
     if (splashWindow && !splashWindow.isDestroyed()) {

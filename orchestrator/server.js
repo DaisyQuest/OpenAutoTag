@@ -2026,6 +2026,13 @@ export function createAppServer({
 
       /* ── Introspector routes ──────────────────────────────────── */
 
+      if (request.method === "GET" && url.pathname === "/studio") {
+        const assetPath = path.join(publicDir, "studio.html");
+        if (await serveStaticAsset(response, assetPath)) {
+          return;
+        }
+      }
+
       if (request.method === "GET" && url.pathname === "/introspector") {
         const assetPath = path.join(publicDir, "introspector.html");
         if (await serveStaticAsset(response, assetPath)) {

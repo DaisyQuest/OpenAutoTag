@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Perfect Studio</title>
+    <link rel="stylesheet" href="/studio.css?v=html-studio" />
+  </head>
+  <body data-view="studio">
+    <a class="skip-link" href="#studio-main">Skip to main content</a>
+
+    <div class="studio-shell">
+      <nav class="studio-topbar" aria-label="Primary">
+        <a class="studio-brand" href="/studio">
+          <span class="studio-brand-mark" aria-hidden="true">PS</span>
+          <span>Perfect Studio</span>
+        </a>
+        <div class="studio-topbar-links">
+          <a class="studio-topbar-link is-active" href="/studio">Create</a>
+          <a class="studio-topbar-link" href="/">Repair Dashboard</a>
+          <a class="studio-topbar-link" href="/testing-matrix.html">Tests</a>
+          <a class="studio-topbar-link" href="/difftool">Diff Tool</a>
+        </div>
+      </nav>
+
+      <header class="studio-command-bar">
+        <div class="studio-title-group">
+          <p class="studio-kicker">HTML source model</p>
+          <h1>Perfect Studio</h1>
+        </div>
+        <div class="studio-command-actions" aria-label="Document actions">
+          <label class="studio-field studio-template-field" for="template-select">
+            <span>Template</span>
+            <select id="template-select"></select>
+          </label>
+          <button id="new-document" class="studio-button secondary" type="button">New</button>
+          <button id="validate-document" class="studio-button secondary" type="button">Validate</button>
+          <button id="download-html" class="studio-button" type="button">Export HTML</button>
+          <button id="print-pdf" class="studio-button strong" type="button">Print PDF</button>
+        </div>
+      </header>
+
+      <main id="studio-main" class="studio-workspace">
+        <section class="studio-pane source-pane" aria-labelledby="source-title">
+          <div class="pane-header">
+            <div>
+              <p class="studio-kicker">Author</p>
+              <h2 id="source-title">Semantic HTML</h2>
+            </div>
+            <span id="source-state" class="status-pill">Autosaved</span>
+          </div>
+          <textarea id="html-source" spellcheck="false" aria-label="Semantic HTML source"></textarea>
+          <div class="snippet-bar" aria-label="Insert semantic block">
+            <button class="snippet-button" type="button" data-snippet="section">Section</button>
+            <button class="snippet-button" type="button" data-snippet="figure">Figure</button>
+            <button class="snippet-button" type="button" data-snippet="table">Table</button>
+            <button class="snippet-button" type="button" data-snippet="form-field">Field</button>
+            <button class="snippet-button" type="button" data-snippet="artifact">Artifact</button>
+          </div>
+        </section>
+
+        <section class="studio-pane preview-pane" aria-labelledby="preview-title">
+          <div class="pane-header">
+            <div>
+              <p class="studio-kicker">Preview</p>
+              <h2 id="preview-title">Page</h2>
+            </div>
+            <span id="preview-caption" class="status-pill">Live</span>
+          </div>
+          <iframe id="document-preview" title="Document preview" sandbox="allow-same-origin allow-modals"></iframe>
+        </section>
+
+        <aside class="studio-pane inspector-pane" aria-labelledby="inspector-title">
+          <div class="pane-header">
+            <div>
+              <p class="studio-kicker">Publish</p>
+              <h2 id="inspector-title">PDF/UA Readiness</h2>
+            </div>
+            <span id="ready-state" class="status-pill">Checking</span>
+          </div>
+
+          <section class="score-strip" aria-label="Readiness summary">
+            <div>
+              <span class="metric-label">Score</span>
+              <strong id="readiness-score">0</strong>
+            </div>
+            <div>
+              <span class="metric-label">Errors</span>
+              <strong id="error-count">0</strong>
+            </div>
+            <div>
+              <span class="metric-label">Warnings</span>
+              <strong id="warning-count">0</strong>
+            </div>
+          </section>
+
+          <section class="inspector-section" aria-labelledby="issues-title">
+            <div class="section-heading">
+              <h3 id="issues-title">Checks</h3>
+              <span id="issue-count">0 issues</span>
+            </div>
+            <div id="issue-list" class="issue-list"></div>
+          </section>
+
+          <section class="inspector-section" aria-labelledby="structure-title">
+            <div class="section-heading">
+              <h3 id="structure-title">Structure</h3>
+              <span id="structure-count">0 nodes</span>
+            </div>
+            <ol id="structure-list" class="structure-list"></ol>
+          </section>
+
+          <section class="inspector-section" aria-labelledby="metrics-title">
+            <div class="section-heading">
+              <h3 id="metrics-title">Document</h3>
+              <span id="document-status">Draft</span>
+            </div>
+            <dl class="metric-grid">
+              <div>
+                <dt>Headings</dt>
+                <dd id="heading-count">0</dd>
+              </div>
+              <div>
+                <dt>Tables</dt>
+                <dd id="table-count">0</dd>
+              </div>
+              <div>
+                <dt>Figures</dt>
+                <dd id="figure-count">0</dd>
+              </div>
+              <div>
+                <dt>Fields</dt>
+                <dd id="field-count">0</dd>
+              </div>
+            </dl>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script type="module" src="/studio.js?v=html-studio"></script>
+  </body>
+</html>
