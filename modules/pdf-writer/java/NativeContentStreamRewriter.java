@@ -1116,10 +1116,18 @@ public class NativeContentStreamRewriter {
     }
 
     private static String noteStructureId(TagTreeNode node) {
-        String raw = node.footnoteGroupId != null && !node.footnoteGroupId.isBlank() ? node.footnoteGroupId : node.id;
-        String sanitized = raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
-        if (sanitized.isBlank()) sanitized = "unknown";
-        return "note-" + sanitized;
+        String element = sanitizeNoteIdPart(node.id);
+        if (element.isBlank()) element = "unknown";
+
+        String group = sanitizeNoteIdPart(node.footnoteGroupId);
+        if (!group.isBlank()) {
+            return "note-" + group + "-" + element;
+        }
+        return "note-" + element;
+    }
+
+    private static String sanitizeNoteIdPart(String raw) {
+        return raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
     }
 
     /**

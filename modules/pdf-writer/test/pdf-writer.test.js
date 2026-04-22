@@ -94,7 +94,7 @@ test("pdf writer adds native structure and creates a sidecar manifest", async ()
   assert.match(outputText, /<pdfuaid:part>1<\/pdfuaid:part>/);
 });
 
-test("pdf writer role-maps Aside footnote tags to the standard Note type", async () => {
+test("pdf writer role-maps Aside footnote tags to unique standard Note elements", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "writer-aside-rolemap-test-"));
   const pdfPath = path.join(tempDir, "sample.pdf");
   const tagsPath = path.join(tempDir, "tagging.json");
@@ -117,6 +117,16 @@ test("pdf writer role-maps Aside footnote tags to the standard Note type", async
             type: "Aside",
             label: "Accessibility Report",
             sourceNodeIds: ["n-1-1"],
+            semanticRole: "Footnote",
+            footnoteGroupId: "footnote:1:1:1",
+            footnoteMarker: "1",
+            children: []
+          },
+          {
+            id: "tag:n-1-2",
+            type: "Aside",
+            label: "This paragraph explains the report output.",
+            sourceNodeIds: ["n-1-2"],
             semanticRole: "Footnote",
             footnoteGroupId: "footnote:1:1:1",
             footnoteMarker: "1",
@@ -146,9 +156,23 @@ test("pdf writer role-maps Aside footnote tags to the standard Note type", async
           bbox: [72, 48, 220, 24],
           confidence: 0.9,
           readingOrder: 0
+        },
+        {
+          id: "n-1-2",
+          pageNumber: 1,
+          sourceBlockId: "b2",
+          role: "P",
+          semanticRole: "Footnote",
+          footnote: true,
+          footnoteGroupId: "footnote:1:1:1",
+          footnoteMarker: "1",
+          text: "This paragraph explains the report output.",
+          bbox: [72, 100, 250, 18],
+          confidence: 0.9,
+          readingOrder: 1
         }
       ],
-      orderedNodeIds: ["n-1-1"]
+      orderedNodeIds: ["n-1-1", "n-1-2"]
     }, null, 2)
   );
 
@@ -156,6 +180,7 @@ test("pdf writer role-maps Aside footnote tags to the standard Note type", async
   const inspection = await inspectPdfLowLevel({ pdfPath: report.outputPath });
 
   assert.equal(inspection.structureTree.roleMap.Aside, "Note");
+  assert.equal(inspection.structureTree.typeCounts.Aside, 2);
   assert.equal(inspection.structureTree.idCountsByType.Aside, inspection.structureTree.typeCounts.Aside);
 });
 

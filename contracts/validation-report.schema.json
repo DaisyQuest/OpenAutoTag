@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/validation-report.schema.json",
+  "title": "ValidationReport",
+  "description": "Preserves the existing validator report shape while adding a normalized errors array and explicit compliance flags.",
+  "type": "object",
+  "required": [
+    "status",
+    "isCompliant",
+    "statement",
+    "profileName",
+    "findings",
+    "summary"
+  ],
+  "properties": {
+    "status": {
+      "type": "string"
+    },
+    "isCompliant": {
+      "type": "boolean"
+    },
+    "overall": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "statement": {
+      "type": "string"
+    },
+    "rawStatement": {
+      "type": "string"
+    },
+    "profileName": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "description"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string"
+          },
+          "clause": {
+            "type": "string"
+          },
+          "specification": {
+            "type": "string"
+          },
+          "failedChecks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "test": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info",
+              "critical"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "clause": {
+            "type": "string"
+          },
+          "specification": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "required": [
+        "pdfUA",
+        "wcagAA"
+      ],
+      "properties": {
+        "pdfUA": {
+          "type": "boolean"
+        },
+        "wcagAA": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "passedRules": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failedRules": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passedChecks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failedChecks": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "rawSummary": {
+      "type": "object",
+      "properties": {
+        "passedRules": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failedRules": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passedChecks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failedChecks": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "metadataDiagnostics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "fonts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "fontAudit": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

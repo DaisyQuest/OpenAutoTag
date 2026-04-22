@@ -105,6 +105,14 @@ tasks.register("runIntrospector", JavaExec) {
   }
 }
 
+tasks.register("runPerfectStudio", JavaExec) {
+  group = "application"
+  description = "Run the Swing OpenAutoTag Perfect Studio GUI."
+  dependsOn(tasks.named("classes"))
+  classpath = sourceSets.main.runtimeClasspath + configurations.standaloneRuntime
+  mainClass = "buildeverything.servlet.PerfectStudioSwingApp"
+}
+
 tasks.register("downloadDependencies", Copy) {
   group = "build"
   description = "Resolve and copy compile, runtime, standalone, and test dependencies."
