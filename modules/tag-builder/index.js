@@ -318,7 +318,7 @@ function createLiLeaf(node, headingNormalization) {
       type: "Lbl",
       label: marker,
       actualText: marker,
-      sourceNodeIds: [node.id],
+      sourceNodeIds: [],
       children: []
     });
     liNode.children.push({
