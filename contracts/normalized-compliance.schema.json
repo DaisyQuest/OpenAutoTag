@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/normalized-compliance.schema.json",
+  "title": "NormalizedComplianceContract",
+  "description": "Normalized compliance payload emitted by the Perfect Studio corpus runner after reading a validator report.",
+  "type": "object",
+  "required": [
+    "errors",
+    "compliance",
+    "engine",
+    "summary"
+  ],
+  "properties": {
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "source",
+          "page"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "page": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "details": {
+            "type": [
+              "object",
+              "array",
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "required": [
+        "pdfUA",
+        "wcagAA"
+      ],
+      "properties": {
+        "pdfUA": {
+          "type": "boolean"
+        },
+        "wcagAA": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "engine": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true
+    },
+    "summary": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

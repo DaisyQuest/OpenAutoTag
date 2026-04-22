@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -313,6 +314,11 @@ public class NativeContentStreamRewriter {
         String alt;
         String actualText;
         String footnoteGroupId;
+        String headerId;
+        String scope;
+        int rowSpan = 1;
+        int columnSpan = 1;
+        List<String> tableHeaders = new ArrayList<>();
     }
 
     private static TagTreeNode parseTaggingTree(String jsonStr) {
@@ -340,9 +346,66 @@ public class NativeContentStreamRewriter {
         if (actualText != null) n.actualText = asString(actualText);
         Object footnoteGroupId = m.get("footnoteGroupId");
         if (footnoteGroupId != null) n.footnoteGroupId = asString(footnoteGroupId);
+        Object headerId = m.get("headerId");
+        if (headerId != null) n.headerId = nonEmptyString(headerId);
+        Object scope = m.get("scope");
+        if (scope != null) n.scope = normalizeScopeName(asString(scope));
+        Object rowSpan = m.get("rowSpan");
+        if (rowSpan != null) n.rowSpan = positiveInt(rowSpan, n.rowSpan);
+        Object columnSpan = m.get("columnSpan");
+        if (columnSpan != null) n.columnSpan = positiveInt(columnSpan, n.columnSpan);
+        collectStringList(m.get("headers"), n.tableHeaders);
+        collectStringList(m.get("tableHeaders"), n.tableHeaders);
+        Object tableAttrsObj = m.get("tableAttrs");
+        if (tableAttrsObj instanceof Map) {
+            Map<String, Object> tableAttrs = asMap(tableAttrsObj);
+            n.rowSpan = positiveInt(firstPresent(tableAttrs, "RowSpan", "rowSpan"), n.rowSpan);
+            n.columnSpan = positiveInt(firstPresent(tableAttrs, "ColSpan", "columnSpan"), n.columnSpan);
+            Object attrScope = firstPresent(tableAttrs, "Scope", "scope");
+            if ((n.scope == null || n.scope.isEmpty()) && attrScope != null) n.scope = normalizeScopeName(asString(attrScope));
+            collectStringList(firstPresent(tableAttrs, "Headers", "headers"), n.tableHeaders);
+        }
         List<Object> children = asList(m.get("children"));
         for (Object c : children) n.children.add(parseTagNode(c));
         return n;
+    }
+
+    private static Object firstPresent(Map<String, Object> values, String... keys) {
+        for (String key : keys) {
+            if (values.containsKey(key)) return values.get(key);
+        }
+        return null;
+    }
+
+    private static int positiveInt(Object o, int fallback) {
+        int parsed = asInt(o);
+        return parsed > 0 ? parsed : fallback;
+    }
+
+    private static String nonEmptyString(Object o) {
+        String value = asString(o).trim();
+        return value.isEmpty() ? null : value;
+    }
+
+    private static void collectStringList(Object raw, List<String> out) {
+        if (raw == null) return;
+        if (raw instanceof List) {
+            for (Object item : asList(raw)) {
+                String value = nonEmptyString(item);
+                if (value != null && !out.contains(value)) out.add(value);
+            }
+            return;
+        }
+        String value = nonEmptyString(raw);
+        if (value != null && !out.contains(value)) out.add(value);
+    }
+
+    private static String normalizeScopeName(String raw) {
+        String value = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT);
+        if ("column".equals(value) || "col".equals(value)) return "Column";
+        if ("row".equals(value)) return "Row";
+        if ("both".equals(value)) return "Both";
+        return "";
     }
 
     // ---------------------------------------------------------------
@@ -984,6 +1047,51 @@ public class NativeContentStreamRewriter {
         }
     }
 
+    private static void applyTableAttributes(PDStructureElement el, TagTreeNode node, TreeContext ctx) {
+        boolean isTableCell = "TH".equals(node.type) || "TD".equals(node.type);
+        if (!isTableCell) return;
+
+        if ("TH".equals(node.type) && node.headerId != null && !node.headerId.isEmpty()) {
+            el.getCOSObject().setString(COSName.getPDFName("ID"), node.headerId);
+        }
+
+        COSDictionary attrs = new COSDictionary();
+        attrs.setItem(COSName.O, COSName.getPDFName("Table"));
+        boolean hasAttrs = false;
+
+        if (node.columnSpan > 1) {
+            attrs.setInt(COSName.getPDFName("ColSpan"), node.columnSpan);
+            hasAttrs = true;
+        }
+        if (node.rowSpan > 1) {
+            attrs.setInt(COSName.getPDFName("RowSpan"), node.rowSpan);
+            hasAttrs = true;
+        }
+
+        if ("TH".equals(node.type)) {
+            String scope = node.scope != null && !node.scope.isEmpty()
+                ? node.scope
+                : (ctx.insideTHead ? "Column" : "Row");
+            if (!scope.isEmpty()) {
+                attrs.setName(COSName.getPDFName("Scope"), scope);
+                hasAttrs = true;
+            }
+        }
+
+        if (!node.tableHeaders.isEmpty()) {
+            COSArray headers = new COSArray();
+            for (String header : node.tableHeaders) {
+                if (header != null && !header.isEmpty()) headers.add(new COSString(header));
+            }
+            if (headers.size() > 0) {
+                attrs.setItem(COSName.getPDFName("Headers"), headers);
+                hasAttrs = true;
+            }
+        }
+
+        if (hasAttrs) el.getCOSObject().setItem(COSName.A, attrs);
+    }
+
     /**
      * Recursive helper. Returns the PDStructureElement for this node
      * (or null if the node and its subtree have no MCIDs and should
@@ -1015,7 +1123,9 @@ public class NativeContentStreamRewriter {
             PDStructureElement childEl = buildStructureSubtree(treeRoot, child, childCtx, refsByTag, parentArraysByPageKey, linkAnnots, pageDisplayHeight);
             if (childEl != null) childElements.add(childEl);
         }
-        if (myRefs.isEmpty() && childElements.isEmpty()) return null;
+        boolean hasSemanticText = node.actualText != null && !node.actualText.isEmpty();
+        boolean hasAltText = node.alt != null && !node.alt.isEmpty();
+        if (myRefs.isEmpty() && childElements.isEmpty() && !hasSemanticText && !hasAltText) return null;
 
         PDStructureElement el = new PDStructureElement(node.type, treeRoot);
         if (node.lang != null && !node.lang.isEmpty()) el.setLanguage(node.lang);
@@ -1025,25 +1135,7 @@ public class NativeContentStreamRewriter {
             el.getCOSObject().setString(COSName.getPDFName("ID"), noteStructureId(node));
         }
 
-        // TH /Scope: JAWS/NVDA only announce table headers when /Scope
-        // is present (Matterhorn 15-003). We derive /Scope from the
-        // ancestor chain because the tag-builder doesn't carry span
-        // metadata:
-        //   - TH inside a THead ancestor → /Scope /Column (top row is
-        //     the column-header band).
-        //   - TH anywhere else (typically the first cell of a TR in
-        //     TBody, used as a row label) → /Scope /Row.
-        // Safe default per the PDF Association Tagged PDF Best
-        // Practice Guide for auto-tagged tables without explicit
-        // spans. Complex headers with spans can be layered on later
-        // via /Headers + /ID attributes.
-        if ("TH".equals(node.type)) {
-            String scope = ctx.insideTHead ? "Column" : "Row";
-            COSDictionary a = new COSDictionary();
-            a.setItem(COSName.O, COSName.getPDFName("Table"));
-            a.setName(COSName.getPDFName("Scope"), scope);
-            el.getCOSObject().setItem(COSName.A, a);
-        }
+        applyTableAttributes(el, node, ctx);
 
         for (PageMcRef ref : myRefs) {
             // Emit an MCR dict kid so multi-page elements carry a
@@ -1116,10 +1208,18 @@ public class NativeContentStreamRewriter {
     }
 
     private static String noteStructureId(TagTreeNode node) {
-        String raw = node.footnoteGroupId != null && !node.footnoteGroupId.isBlank() ? node.footnoteGroupId : node.id;
-        String sanitized = raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
-        if (sanitized.isBlank()) sanitized = "unknown";
-        return "note-" + sanitized;
+        String element = sanitizeNoteIdPart(node.id);
+        if (element.isBlank()) element = "unknown";
+
+        String group = sanitizeNoteIdPart(node.footnoteGroupId);
+        if (!group.isBlank()) {
+            return "note-" + group + "-" + element;
+        }
+        return "note-" + element;
+    }
+
+    private static String sanitizeNoteIdPart(String raw) {
+        return raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
     }
 
     /**

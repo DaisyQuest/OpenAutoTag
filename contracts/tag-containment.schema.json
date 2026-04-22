@@ -1,0 +1,904 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/tag-containment.schema.json",
+  "title": "TagContainmentDocument",
+  "description": "Formal containment rules for the tagging vocabulary. Document-like containers accept section-level content, paragraphs and lists accept inline or nested flow content as appropriate, tables only contain table sections, and rows only contain TH/TD cells.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "documentId",
+    "root"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "documentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root": {
+      "$ref": "#/$defs/documentNode"
+    }
+  },
+  "additionalProperties": true,
+  "tagContainment": {
+    "Document": [
+      "Sect",
+      "Title",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "Sect": [
+      "Sect",
+      "Title",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "Aside": [
+      "Sect",
+      "Title",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "BlockQuote": [
+      "Sect",
+      "Title",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "Form": [
+      "Sect",
+      "Title",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "L": [
+      "LI"
+    ],
+    "LI": [
+      "Lbl",
+      "LBody",
+      "Span",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "Lbl": [],
+    "LBody": [],
+    "Figure": [
+      "Caption",
+      "Span",
+      "P"
+    ],
+    "Caption": [
+      "Span"
+    ],
+    "Table": [
+      "Caption",
+      "THead",
+      "TBody",
+      "TFoot"
+    ],
+    "THead": [
+      "TR"
+    ],
+    "TBody": [
+      "TR"
+    ],
+    "TFoot": [
+      "TR"
+    ],
+    "TR": [
+      "TH",
+      "TD"
+    ],
+    "TH": [
+      "Span",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "TD": [
+      "Span",
+      "P",
+      "L",
+      "Figure",
+      "Aside",
+      "BlockQuote",
+      "Form",
+      "Table"
+    ],
+    "Title": [
+      "Span"
+    ],
+    "H1": [
+      "Span"
+    ],
+    "H2": [
+      "Span"
+    ],
+    "H3": [
+      "Span"
+    ],
+    "H4": [
+      "Span"
+    ],
+    "H5": [
+      "Span"
+    ],
+    "H6": [
+      "Span"
+    ],
+    "P": [
+      "Span"
+    ],
+    "Span": []
+  },
+  "$defs": {
+    "node": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/documentNode"
+        },
+        {
+          "$ref": "#/$defs/sectNode"
+        },
+        {
+          "$ref": "#/$defs/titleNode"
+        },
+        {
+          "$ref": "#/$defs/headingNode"
+        },
+        {
+          "$ref": "#/$defs/paragraphNode"
+        },
+        {
+          "$ref": "#/$defs/listNode"
+        },
+        {
+          "$ref": "#/$defs/listItemNode"
+        },
+        {
+          "$ref": "#/$defs/listLabelNode"
+        },
+        {
+          "$ref": "#/$defs/listBodyNode"
+        },
+        {
+          "$ref": "#/$defs/figureNode"
+        },
+        {
+          "$ref": "#/$defs/captionNode"
+        },
+        {
+          "$ref": "#/$defs/asideNode"
+        },
+        {
+          "$ref": "#/$defs/blockQuoteNode"
+        },
+        {
+          "$ref": "#/$defs/formNode"
+        },
+        {
+          "$ref": "#/$defs/tableNode"
+        },
+        {
+          "$ref": "#/$defs/tableSectionNode"
+        },
+        {
+          "$ref": "#/$defs/tableRowNode"
+        },
+        {
+          "$ref": "#/$defs/tableCellNode"
+        },
+        {
+          "$ref": "#/$defs/spanNode"
+        }
+      ]
+    },
+    "documentChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sectNode"
+        },
+        {
+          "$ref": "#/$defs/titleNode"
+        },
+        {
+          "$ref": "#/$defs/headingNode"
+        },
+        {
+          "$ref": "#/$defs/paragraphNode"
+        },
+        {
+          "$ref": "#/$defs/listNode"
+        },
+        {
+          "$ref": "#/$defs/figureNode"
+        },
+        {
+          "$ref": "#/$defs/asideNode"
+        },
+        {
+          "$ref": "#/$defs/blockQuoteNode"
+        },
+        {
+          "$ref": "#/$defs/formNode"
+        },
+        {
+          "$ref": "#/$defs/tableNode"
+        }
+      ]
+    },
+    "sectionChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sectNode"
+        },
+        {
+          "$ref": "#/$defs/titleNode"
+        },
+        {
+          "$ref": "#/$defs/headingNode"
+        },
+        {
+          "$ref": "#/$defs/paragraphNode"
+        },
+        {
+          "$ref": "#/$defs/listNode"
+        },
+        {
+          "$ref": "#/$defs/figureNode"
+        },
+        {
+          "$ref": "#/$defs/asideNode"
+        },
+        {
+          "$ref": "#/$defs/blockQuoteNode"
+        },
+        {
+          "$ref": "#/$defs/formNode"
+        },
+        {
+          "$ref": "#/$defs/tableNode"
+        }
+      ]
+    },
+    "listItemChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/listLabelNode"
+        },
+        {
+          "$ref": "#/$defs/listBodyNode"
+        },
+        {
+          "$ref": "#/$defs/spanNode"
+        },
+        {
+          "$ref": "#/$defs/paragraphNode"
+        },
+        {
+          "$ref": "#/$defs/listNode"
+        },
+        {
+          "$ref": "#/$defs/figureNode"
+        },
+        {
+          "$ref": "#/$defs/asideNode"
+        },
+        {
+          "$ref": "#/$defs/blockQuoteNode"
+        },
+        {
+          "$ref": "#/$defs/formNode"
+        },
+        {
+          "$ref": "#/$defs/tableNode"
+        }
+      ]
+    },
+    "figureChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/captionNode"
+        },
+        {
+          "$ref": "#/$defs/spanNode"
+        },
+        {
+          "$ref": "#/$defs/paragraphNode"
+        }
+      ]
+    },
+    "captionChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/spanNode"
+        }
+      ]
+    },
+    "tableChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/captionNode"
+        },
+        {
+          "$ref": "#/$defs/tableSectionNode"
+        }
+      ]
+    },
+    "tableSectionChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/tableRowNode"
+        }
+      ]
+    },
+    "tableRowChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/tableCellNode"
+        }
+      ]
+    },
+    "tableCellChildren": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/spanNode"
+        },
+        {
+          "$ref": "#/$defs/paragraphNode"
+        },
+        {
+          "$ref": "#/$defs/listNode"
+        },
+        {
+          "$ref": "#/$defs/figureNode"
+        },
+        {
+          "$ref": "#/$defs/asideNode"
+        },
+        {
+          "$ref": "#/$defs/blockQuoteNode"
+        },
+        {
+          "$ref": "#/$defs/formNode"
+        },
+        {
+          "$ref": "#/$defs/tableNode"
+        }
+      ]
+    },
+    "emptyChildren": {
+      "type": "array",
+      "maxItems": 0,
+      "items": false
+    },
+    "documentNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Document"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/documentChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "sectNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Sect"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sectionChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "titleNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Title"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/spanNode"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "headingNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/spanNode"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "paragraphNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "P"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/spanNode"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "listNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "L"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/listItemNode"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "listItemNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "LI"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/listItemChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "listLabelNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Lbl"
+        },
+        "children": {
+          "$ref": "#/$defs/emptyChildren"
+        }
+      },
+      "additionalProperties": true
+    },
+    "listBodyNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "LBody"
+        },
+        "children": {
+          "$ref": "#/$defs/emptyChildren"
+        }
+      },
+      "additionalProperties": true
+    },
+    "figureNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Figure"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/figureChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "captionNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Caption"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/captionChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "asideNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Aside"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sectionChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "blockQuoteNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "BlockQuote"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sectionChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "formNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Form"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sectionChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tableNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Table"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tableChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tableSectionNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "THead",
+            "TBody",
+            "TFoot"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tableSectionChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tableRowNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "TR"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tableRowChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tableCellNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "TH",
+            "TD"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tableCellChildren"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "spanNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "Span"
+        },
+        "children": {
+          "$ref": "#/$defs/emptyChildren"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -7,7 +7,9 @@
   "scripts": {
     "install:verapdf": "node scripts/install-verapdf.js",
     "install:fonts": "node scripts/install-fonts.js",
-    "test:ci": "node scripts/run-ci-tests.js",
+    "test:node-ci": "node scripts/run-ci-tests.js",
+    "test:perfect-studio-java-gate": "node --test test/unit/perfect-studio-java.test.js",
+    "test:ci": "npm run test:node-ci && npm run test:perfect-studio-java-gate",
     "test": "node --test",
     "test:integration": "node --test test/integration",
     "test:goldmaster": "node --test test/integration/goldmaster.test.js",
@@ -18,6 +20,7 @@
     "goldmaster:update": "node scripts/update-goldmasters.js",
     "testing-matrix:update": "node scripts/update-testing-matrix.js",
     "process:fixture": "node orchestrator/pipeline-runner.js --pdf tmp/sample.pdf --output-dir tmp/run",
+    "perfect-studio:ci": "node orchestrator/perfect-studio-ci-runner.js --corpus test/LRBTest --output-dir tmp/perfect-studio-ci",
     "map:source-text": "node scripts/build-source-text-map.js",
     "map:table-structure": "node scripts/build-table-structure-map.js",
     "inspect:pdf": "node scripts/inspect-pdf-low-level.js",

@@ -5,12 +5,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const excludedFiles = new Set([path.join(repoRoot, "test", "integration", "goldmaster.test.js")]);
+const goldmasterTestFile = path.join(repoRoot, "test", "integration", "goldmaster.test.js");
+const fontCorpusTestFile = path.join(repoRoot, "test", "integration", "font-embedding.test.js");
+const perfectStudioJavaGateFile = path.join(repoRoot, "test", "unit", "perfect-studio-java.test.js");
+const excludedFiles = new Set();
+const goldmasterStrict = process.env.GOLDMASTER_STRICT === "1";
+const fontCorpusStrict = process.env.FONT_CORPUS_STRICT === "1";
 
-// The font-embedding corpus runner sweeps FONT_CORPUS_DIR (default C:\LRBTest).
-// In CI environments that do not host the corpus we exclude the file entirely
-// to keep the run lean; the test itself also self-skips when the directory is
-// absent, so this is purely a startup-time optimization.
 const fontCorpusDir = process.env.FONT_CORPUS_DIR || "C:\\LRBTest";
 async function pathExists(target) {
   try {
@@ -20,8 +21,42 @@ async function pathExists(target) {
     return false;
   }
 }
-if (!(await pathExists(fontCorpusDir))) {
-  excludedFiles.add(path.join(repoRoot, "test", "integration", "font-embedding.test.js"));
+
+const fontCorpusExists = await pathExists(fontCorpusDir);
+
+if (!goldmasterStrict) {
+  excludedFiles.add(goldmasterTestFile);
+}
+
+excludedFiles.add(perfectStudioJavaGateFile);
+
+if (!fontCorpusExists && fontCorpusStrict) {
+  throw new Error(`FONT_CORPUS_DIR not reachable at ${fontCorpusDir} while FONT_CORPUS_STRICT=1.`);
+}
+
+if (!fontCorpusExists) {
+  excludedFiles.add(fontCorpusTestFile);
+}
+
+function reportSuiteSelection() {
+  process.stdout.write(
+    goldmasterStrict
+      ? "# goldmaster suite enabled via GOLDMASTER_STRICT=1.\n"
+      : `# goldmaster suite skipped in default CI; set GOLDMASTER_STRICT=1 to include ${path.relative(repoRoot, goldmasterTestFile)}.\n`
+  );
+
+  process.stdout.write(
+    `# perfect-studio Java compile gate runs separately via ${path.relative(repoRoot, perfectStudioJavaGateFile)}.\n`
+  );
+
+  if (fontCorpusExists) {
+    process.stdout.write(`# font corpus found at ${fontCorpusDir}; running ${path.relative(repoRoot, fontCorpusTestFile)}.\n`);
+    return;
+  }
+
+  process.stdout.write(
+    `# font corpus skipped because FONT_CORPUS_DIR is unavailable at ${fontCorpusDir}; set FONT_CORPUS_STRICT=1 to fail instead.\n`
+  );
 }
 
 async function listTestFiles(directoryPath) {
@@ -82,6 +117,8 @@ function runTests(testFiles) {
 }
 
 async function main() {
+  reportSuiteSelection();
+
   const testFiles = [
     ...(await listModuleTests()),
     ...(await listTestFiles(path.join(repoRoot, "test", "unit"))),

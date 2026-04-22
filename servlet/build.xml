@@ -171,4 +171,14 @@
             <sysproperty key="buildeverything.repoRoot" value="${repo.root}"/>
         </java>
     </target>
+
+    <target name="run-perfect-studio" depends="compile">
+        <java classname="buildeverything.servlet.PerfectStudioSwingApp" fork="true" failonerror="true">
+            <classpath>
+                <path refid="main.compile.path"/>
+                <pathelement location="${classes.main.dir}"/>
+            </classpath>
+            <sysproperty key="buildeverything.repoRoot" value="${repo.root}"/>
+        </java>
+    </target>
 </project>
