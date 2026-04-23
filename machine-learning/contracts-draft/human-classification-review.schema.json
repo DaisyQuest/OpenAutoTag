@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/machine-learning/contracts-draft/human-classification-review.schema.json",
+  "title": "HumanClassificationReviewRecord",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "recordId",
+    "itemKey",
+    "reviewedAt",
+    "reviewer",
+    "decision",
+    "source",
+    "model",
+    "classifierEvidence",
+    "humanLabelPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1.0"
+    },
+    "recordId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "itemKey": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "no",
+        "review"
+      ]
+    },
+    "acceptedLabel": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rejectedLabel": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notesForAgents": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "reportPath",
+        "documentId",
+        "predictionId"
+      ],
+      "properties": {
+        "reportPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourcePdf": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "semanticPath": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "predictionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceNodeId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceBlockId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "modelHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trainingDatasetVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "classifierEvidence": {
+      "type": "object",
+      "required": [
+        "taskHead",
+        "predictedLabel"
+      ],
+      "properties": {
+        "taskHead": {
+          "type": "string"
+        },
+        "predictedLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "deterministicDecision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "alternatives": {
+          "type": "array"
+        }
+      },
+      "additionalProperties": true
+    },
+    "humanLabelPolicy": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Machine Learning Configuration</title>
+    <link rel="stylesheet" href="/review.css" />
+  </head>
+  <body>
+    <main class="review-shell config-shell">
+      <header class="review-header">
+        <div>
+          <p class="eyebrow">OpenAutoTag ML</p>
+          <h1>Machine learning configuration</h1>
+        </div>
+        <a class="secondary-link" href="/">Review Queue</a>
+      </header>
+
+      <section class="config-grid" aria-label="Machine learning configuration">
+        <article class="config-card">
+          <h2>Current Role Classifier</h2>
+          <dl id="model-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading server configuration.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card">
+          <h2>Human Review Queue</h2>
+          <dl id="review-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading review queue summary.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card">
+          <h2>Current Results</h2>
+          <dl id="results-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading model evaluation.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card">
+          <h2>Matrix Corpus</h2>
+          <dl id="matrix-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading testcase matrix.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card">
+          <h2>Preview And Zoom</h2>
+          <dl id="preview-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading preview configuration.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card">
+          <h2>ML Toggle Experiment</h2>
+          <dl id="experiment-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading comparison defaults.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card config-wide">
+          <h2>Methodology</h2>
+          <ol id="methodology-list" class="config-notes">
+            <li>Loading methodology.</li>
+          </ol>
+        </article>
+
+        <article class="config-card config-wide">
+          <h2>Model Evidence By Version</h2>
+          <div id="model-distribution" class="evidence-grid">Loading model distribution.</div>
+        </article>
+
+        <article class="config-card config-wide">
+          <h2>Release Gate</h2>
+          <dl id="release-config" class="config-list">
+            <dt>Loading</dt>
+            <dd>Reading release gate status.</dd>
+          </dl>
+        </article>
+
+        <article class="config-card config-wide">
+          <h2>Commands</h2>
+          <pre id="command-config" class="command-block">Loading commands.</pre>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="/machine-learning.js"></script>
+  </body>
+</html>

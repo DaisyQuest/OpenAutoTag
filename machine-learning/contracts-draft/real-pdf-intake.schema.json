@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/machine-learning/contracts-draft/real-pdf-intake.schema.json",
+  "title": "RealPdfIntakeBatchDraft",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "batchId",
+    "intakeDate",
+    "owner",
+    "intendedUse",
+    "documents"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1.0-draft"
+    },
+    "batchId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intakeDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceFamily": {
+      "type": "string"
+    },
+    "intendedUse": {
+      "type": "string",
+      "enum": [
+        "smoke-anchor",
+        "training-readiness-anchor",
+        "release-anchor",
+        "shadow-real-pdf",
+        "real-derived-transform-seed",
+        "training-candidate-review",
+        "research-only"
+      ]
+    },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "documentId",
+          "pdfPath",
+          "pdfSha256",
+          "provenance",
+          "privacy",
+          "routing"
+        ],
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pdfPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pdfSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "provenance": {
+            "type": "object",
+            "required": [
+              "sourceType"
+            ],
+            "properties": {
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "public-url",
+                  "public-corpus",
+                  "user-supplied",
+                  "internal-redacted",
+                  "unknown"
+                ]
+              },
+              "sourceUrl": {
+                "type": "string"
+              },
+              "license": {
+                "type": "string"
+              },
+              "acquisitionDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "redistributable": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          },
+          "privacy": {
+            "type": "object",
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "redacted",
+                  "sensitive",
+                  "unknown"
+                ]
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "profile": {
+            "type": "object",
+            "properties": {
+              "pageCount": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "producer": {
+                "type": "string"
+              },
+              "languageScripts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "digitalOrigin": {
+                "type": "string",
+                "enum": [
+                  "born-digital",
+                  "scanned",
+                  "hybrid",
+                  "unknown"
+                ]
+              },
+              "existingStructure": {
+                "type": "string",
+                "enum": [
+                  "tagged",
+                  "untagged",
+                  "partial",
+                  "unknown"
+                ]
+              },
+              "oodScore": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "oodDecision": {
+                "type": "string",
+                "enum": [
+                  "in-distribution",
+                  "near-boundary",
+                  "out-of-distribution",
+                  "unknown"
+                ]
+              }
+            },
+            "additionalProperties": true
+          },
+          "fingerprints": {
+            "type": "object",
+            "properties": {
+              "producerProfileHash": {
+                "type": "string"
+              },
+              "textSourceHash": {
+                "type": "string"
+              },
+              "renderPerceptualHashes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "nearDuplicateClusterId": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "routing": {
+            "type": "object",
+            "required": [
+              "state",
+              "mlMode"
+            ],
+            "properties": {
+              "state": {
+                "type": "string",
+                "enum": [
+                  "registered",
+                  "profiled",
+                  "deterministic-baselined",
+                  "ml-shadowed",
+                  "audit-queued",
+                  "audit-accepted",
+                  "real-derived-seed",
+                  "training-candidate",
+                  "release-gate",
+                  "quarantined"
+                ]
+              },
+              "mlMode": {
+                "type": "string",
+                "enum": [
+                  "disabled",
+                  "research-only",
+                  "shadow",
+                  "assistive-candidate"
+                ]
+              },
+              "promotionTarget": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "smoke-anchor",
+                  "evaluation-anchor",
+                  "release-gate",
+                  "real-derived-corpus-seed",
+                  "training-candidate"
+                ]
+              },
+              "quarantineReason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "artifacts": {
+            "type": "object",
+            "properties": {
+              "deterministicJobDir": {
+                "type": "string"
+              },
+              "mlPredictionPath": {
+                "type": "string"
+              },
+              "shadowReportPath": {
+                "type": "string"
+              },
+              "auditPacketPath": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "audit": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "not-needed",
+                  "queued",
+                  "accepted",
+                  "rejected",
+                  "ambiguous",
+                  "contract-gap"
+                ]
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "correct-deterministic",
+                  "correct-ml",
+                  "both-wrong",
+                  "label-needed",
+                  "ambiguous",
+                  "contract-gap",
+                  "parser-issue",
+                  "layout-issue",
+                  "semantic-issue",
+                  "reading-order-issue",
+                  "tag-builder-issue",
+                  "writer-or-validator-issue"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

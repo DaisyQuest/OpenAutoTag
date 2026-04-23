@@ -217,6 +217,16 @@
                       <span id="reading-order-strategy-help" class="field-help">Semantic uses the semantic-engine's readingOrder field for structure tree layout.</span>
                     </label>
                   </fieldset>
+                  <fieldset class="field-group" aria-labelledby="ml-classifier-legend">
+                    <legend id="ml-classifier-legend" class="field-label">ML classifier</legend>
+                    <label class="checkbox-row" for="ml-classifier-enabled">
+                      <input id="ml-classifier-enabled" type="checkbox" />
+                      <span>
+                        <strong>Run ML-trained classifier</strong>
+                        <small>Default off. Emits ML prediction evidence and routes tagging through the ML-tuned semantic artifact when enabled.</small>
+                      </span>
+                    </label>
+                  </fieldset>
                   <label class="field-stack" for="profile-overrides">
                     <span class="field-label">Profile overrides (JSON)</span>
                     <textarea

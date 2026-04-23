@@ -1,0 +1,9 @@
+{
+  "description": "Cluster of Azure App Service worker agents to deploy in parallel. Add entries to scale out. Each entry needs appName (the Azure webapp) and publishProfileSecret (the repo secret name holding its publish profile). Optional: label (overrides the auto-label derived from the webapp name).",
+  "agents": [
+    {
+      "appName": "pdf-st-agent1",
+      "publishProfileSecret": "AZUREAPPSERVICE_PUBLISHPROFILE_E59120C424904721AB7BDC3F7519957E"
+    }
+  ]
+}

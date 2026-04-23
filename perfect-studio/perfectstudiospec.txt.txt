@@ -1,0 +1,174 @@
+OpenAutoTag: UI & Validation Pipeline Specification
+1. Application Overview
+Platform: Java Swing UI Framework: FlatLaf (Flat Look and Feel) for a modern, sleek, cross-platform design supporting system-native Dark/Light modes. Objective: Provide an industry-leading, highly accessible, and intuitive environment for PDF structural tagging, remediation, and compliance validation.
+
+2. To-the-Pixel Layout Description
+2.1 Main Window Shell
+Default Resolution: 1440px by 900px
+Minimum Resolution: 1024px by 768px
+Layout Manager: BorderLayout attached to the root JFrame.
+Global Typography: Primary UI font is set to Inter or Roboto at 13px (with antialiasing forcefully enabled via JVM args).
+Theme Colors (Dark Mode Profile):
+Background: #1E1E1E
+Surface: #252526
+Accent/Selection: #0078D4
+Foreground/Text: #CCCCCC
+Muted Text: #808080
+2.2 Top Menu Bar (BorderLayout.NORTH - upper layer)
+Height: 30px
+Background: #333333
+Menu Items: File, Edit, View, Tags, Validation, Window, Help.
+Styling: FlatLaf native menu bar. Hover state changes background to #444444. No visible borders.
+2.3 Main Toolbar (BorderLayout.NORTH - lower layer)
+Height: 48px
+Padding: 8px top/bottom, 12px left/right.
+Component: JToolBar (floatable = false).
+Controls (32x32px flat buttons with 16x16px SVG icons):
+Group 1 (File): Open, Save, Export.
+Group 2 (Edit): Undo, Redo.
+Group 3 (Action): Add Tag, Auto-Tag (Magic Wand), Edit Properties.
+Group 4 (Validation): Run Compliance Check.
+Separators: 1px vertical line (#444444), 24px height, with 8px horizontal margins.
+2.4 Left Panel: Tag Tree Hierarchy (BorderLayout.WEST)
+Width: 300px (Wrapped in JSplitPane, minimum width 200px, maximum 600px).
+Border: Matte border 0px 1px 0px 0px (Right edge: #3E3E42).
+Background: #252526
+Core Component: JTree customized with FlatLaf's tree UI.
+Tree Node Rendering (TreeCellRenderer):
+Height: 24px per node.
+Padding: 4px left padding per indent level.
+Icon: 16x16px SVG icon distinct for each semantic type (e.g., <H1> uses a blue heading icon, <Figure> uses an image icon).
+Text: 13px Inter. Bold for structural elements (<Sect>, <Part>), regular for content elements (<P>, <L>).
+Validation Indicator: A right-aligned 6x6px circular badge. Green (#4CAF50) for passing, Red (#F44336) for missing critical attributes (e.g., missing Alt text).
+2.5 Central Panel: PDF Canvas (BorderLayout.CENTER)
+Background: #1E1E1E (Dark mode) to provide contrast against the bright PDF document.
+Layout: JScrollPane containing a custom JPanel (the Canvas).
+Document View:
+PDF Page: Rendered centrally. If zoom is 'Fit Width', 16px padding on left/right.
+Page Border: 1px solid border (#000000) with a CSS-equivalent box-shadow: 0px 4px 10px rgba(0,0,0,0.5).
+Canvas Overlays (GlassPane / Custom Painting):
+Tag Bounding Boxes: Rendered dynamically over the PDF. Unselected tags have a 1px solid border (rgba(0, 120, 215, 0.4)) and a fill of rgba(0, 120, 215, 0.1).
+Active Selection: The currently selected tag in the Tree receives a bold 2px solid border (#0078D4) with 6x6px solid white resize handles at the corners and midpoints.
+Floating Zoom Controls:
+Position: Absolute positioned at bottom: 16px, right: 16px over the Canvas.
+Dimensions: 140px wide, 40px high.
+Styling: Rounded rectangle (20px corner radius), #333333 background, 70% opacity, dropping to 100% on hover.
+Contents: [-] button, 100% label, [+] button.
+2.6 Right Panel: Properties & Reading Order (BorderLayout.EAST)
+Width: 350px (Wrapped in JSplitPane, minimum width 250px).
+Border: Matte border 0px 0px 0px 1px (Left edge: #3E3E42).
+Background: #252526
+Core Component: JTabbedPane (FlatLaf styled: no outer border, active tab receives a 2px bottom underline in #0078D4).
+Tab 1: Element Properties
+Padding: 16px on all sides.
+Layout: GridBagLayout for aligned labels and fields.
+Component Sizing: Labels (12px foreground #CCCCCC), Inputs (28px height, #333333 background, #FFFFFF text, 4px corner radius).
+Fields:
+Type: JComboBox (H1-H6, P, Figure, Table, etc.)
+Title: JTextField
+Actual Text: JTextArea (75px height, line wrap enabled)
+Alternate Text: JTextArea (75px height, line wrap enabled)
+Language: JComboBox
+Bounding Box: A 2x2 grid of JTextFields for [X, Y, W, H].
+Tab 2: Reading Order
+Component: JList with a custom TransferHandler for Drag-and-Drop reordering.
+List Item Height: 32px.
+List Item Styling: Shows a numbered index (e.g., "1.", "2.") followed by the text snippet or tag type.
+Tab 3: Compliance Validation
+Component: JTable listing detected accessibility violations.
+Columns: Severity (Icon), Type, Description, Page.
+2.7 Status Bar (BorderLayout.SOUTH)
+Height: 24px
+Background: #0078D4 (Accent color for active state) or #333333 (Idle).
+Foreground: #FFFFFF
+Padding: 0px 8px
+Layout: BorderLayout
+West: Dynamic status message (e.g., "Validation Complete: 12 Issues Found", "Ready").
+East: Document statistics (e.g., "Page 1 / 42  |  Total Tags: 1042").
+3. Validation Pipeline Architecture (Compile-Time / Bulk Testing)
+To ensure OpenAutoTag produces perfect, specification-compliant output, we will leverage the isolated native modules (as defined in AGENTS.md) in a robust CI pipeline.
+
+3.1 Pipeline Components
+OpenAutoTag Headless Interface: The Java Swing app exposes a CLI strictly for headless execution, consuming contracts and bypassing the UI.
+Test Corpora: A massive repository of "hell-case" PDFs encompassing edge cases: nested tables spanning pages, corrupted font encodings, complex math formulas, and untagged legacy scans.
+Native Validator Worker (modules/validator): The isolated CLI executable responsible for inspecting the output against PDF/UA and WCAG 2.1 AA standards.
+Orchestrator Worker (orchestrator): The module that coordinates the input files, fires the Java generator, pipes to the validator, and parses the final JSON contracts.
+3.2 Pipeline Execution Flow (CI/CD)
+Input: hell-case-01.pdf
+Input: hell-case-N.pdf
+modules/validator out-01.pdf
+modules/validator out-N.pdf
+Pass
+Fail
+CI Trigger: Push/Compile
+Fetch Test Corpora
+Build OpenAutoTag.jar
+Headless Generation Phase
+Batch Processing via CLI
+java -jar OpenAutoTag.jar --headless -i hell-case-01.pdf -o out-01.pdf
+java -jar OpenAutoTag.jar --headless -i hell-case-N.pdf -o out-N.pdf
+Native Validator Worker
+Validation JSON Contract
+Validation JSON Contract
+Orchestrator Parsing
+Metrics & Assertions
+Build Success: Publish Report
+Build Failure: Flag Regression
+3.3 Strict Adherence to AGENTS.md
+CLI Contracts Preserved: The pipeline communicates with modules/validator purely by passing file paths as arguments and capturing standard output.
+JSON Over Stdout: The native validator strictly writes its findings as a structured JSON object to stdout. Errors log to stderr with a non-zero exit code.
+Module Isolation: OpenAutoTag (Java) does not link to or depend on the internal code of the validator. It merely produces a PDF. The orchestrator links the two distinct processes together.
+Deterministic Testing: The pipeline operates with deterministic seeds and disabled probabilistic models during the run to ensure exact reproducible JSON outputs.
+3.4 The Orchestrator's Role
+During the CI run, a simple test suite orchestrates the flow:
+
+Iterates over corpora/*.pdf.
+Invokes java -jar OpenAutoTag.jar --headless.
+Invokes the native module: ./modules/validator/bin/validate <generated.pdf>.
+Parses the stdout JSON stream.
+Asserts that json.errors.length == 0 and json.compliance.pdfUA == true.
+Generates a summary artifact on test failure, detailing the exact structural flaw created by OpenAutoTag.
+4. Visual & Responsive Polish (The "Next Level")
+To elevate the tool from a standard enterprise utility to a premium, state-of-the-art workspace, the following visual and responsive enhancements must be implemented:
+
+4.1 Micro-Animations & Transitions
+Hover Effects: Apply a subtle 150ms ease-in-out background transition to all toolbar buttons and tree nodes.
+Expand/Collapse Animation: When opening or closing JTree nodes, implement a custom TreeWillExpandListener to animate the vertical expansion rather than instantly snapping. This reduces cognitive load when navigating complex PDF structures.
+Validation Pips: The red/green validation badges on tree nodes should employ a subtle pulse animation (scale 1.0 to 1.1 over 800ms) when a new validation error is detected in real-time.
+4.2 Glassmorphism & Overlays
+Zoom Controls: Upgrade the floating zoom controls over the PDF canvas using a translucent, blurred background. In Java Swing, this can be achieved by capturing the underlying canvas region, applying a fast Gaussian blur (radius: 10), and painting it beneath the control panel with an alpha composite.
+Context Menus: Use FlatLaf's Popup.dropShadowPainted to give right-click context menus a deep, soft shadow. Add a 1px inner highlight border (rgba(255,255,255,0.1)) to create a 3D elevated effect in dark mode.
+4.3 High-DPI (HiDPI) and Responsiveness
+Vector Assets: Absolute requirement: ALL icons must be SVGs rendered via FlatSVGIcon. Raster images (.png, .jpg) will artifact on 4K/Retina displays.
+Dynamic SplitPanes: The JSplitPane dividers must be borderless (dividerSize: 4) and invisible until hovered, at which point a 2px accent line (#0078D4) fades in. Double-clicking the divider should auto-collapse or expand the panel to its preferred width.
+Canvas Debouncing: When resizing the main window or moving the split pane, PDF re-rendering is computationally expensive. Implement a 200ms debounce timer on resize events. During the drag, stretch the existing cached PDF image; upon mouse release, re-rasterize the PDF sharply at the new dimensions.
+5. Implementation Gotchas & Explicit Details
+When building out this specification, developers must navigate several known Swing/PDF pitfalls to ensure stability and deterministic behavior:
+
+5.1 Swing Concurrency (The EDT Trap)
+Gotcha: Rendering a 400-page PDF or running a deep accessibility tag validation will instantly freeze the UI if run on the main thread.
+Explicit Detail: All PDF rasterization, tag parsing, and IO operations must be isolated inside a SwingWorker. The canvas should display a beautifully styled indeterminate loading spinner (using a pulsating SVG) in the center of the viewport until the done() callback fires.
+5.2 Deterministic Coordinate Mapping
+Gotcha: The visual bounding box on the screen (pixels) does not match the internal PDF coordinate system (Points, usually starting from bottom-left).
+Explicit Detail: Implement a strict CoordinateMapper utility class. The visual overlays (drawn via GlassPane) must re-calculate their positions dynamically based on the current zoom level, scroll offset, and HiDPI scaling factor. If a tag's box is [X=100, Y=100, W=50, H=50] in PDF Points, it must map flawlessly to the user's screen regardless of their OS-level display scaling.
+5.3 Memory Leaks in the Canvas
+Gotcha: Holding BufferedImage instances for every page of a large PDF will trigger an OutOfMemoryError (OOM).
+Explicit Detail: Implement a Least Recently Used (LRU) Cache for the PDF canvas. Only keep the currently visible page and +/- 1 adjacent page in memory. Discard images for off-screen pages immediately. Primarily rely on soft references (SoftReference<BufferedImage>) for the cache so the JVM can reclaim memory if under extreme pressure.
+5.4 Contract Compliance in the Tag Tree
+Gotcha: Users might drag-and-drop a <TD> (Table Data) node outside of a <TR> (Table Row) in the Reading Order pane, completely breaking the PDF/UA structural contract.
+Explicit Detail: As per AGENTS.md, you must depend purely on contracts/*.json. The Drag-and-Drop TransferHandler must proactively interrogate the tag schema contract. If a drag operation violates the schema (e.g., dropping <P> directly into <Table> bypassing <TR>/<TD>), the drop target must reject the operation. Render a red prohibitory cursor and flash a transient tooltip explaining the schema rule to guide the user.
+6. The WYSIWYG Engine: Pixel-Perfect Tag Interaction
+To achieve a true "What You See Is What You Get" environment, the PDF Canvas cannot simply act as a static image viewer. It must function as a high-performance, fully interactive staging ground where structural manipulations map instantly to the underlying PDF dictionaries.
+
+6.1 Hardware-Accelerated Rendering (VolatileImage)
+Gotcha: Standard BufferedImage manipulation incurs too much CPU overhead when drawing hundreds of semi-transparent bounding boxes simultaneously.
+Explicit Detail: The JPanel canvas must utilize Java's VolatileImage API, forcing the rendering pipeline to strictly execute on the GPU (VRAM) via DirectDraw/OpenGL/Metal. This guarantees 60FPS panning and zooming, even when displaying thousands of complex, nested accessibility overlays.
+6.2 Zero-Latency Interaction Model
+Hit Testing: When hovering the canvas, linearly iterating through an ArrayList of tags is too slow. Implement an optimized spatial index (e.g., a QuadTree or R-Tree) to perform sub-millisecond hit-testing against the tagged bounding boxes. The user's cursor must instantly snap to the contextual resizing handles without any noticeable ghosting or lag.
+Ghost-Dragging: When a user clicks and drags an element to visually re-parent it, do not attempt to re-render the PDF document itself. Instead, clone the visual bounding box into a lightweight JLayer (GlassPane overlay), adjust the opacity to 60%, and animate it tracking the cursor. Upon mouseReleased, snap the tag to the nearest valid container based on the contracts/pdf-tags.json schema.
+6.3 Semantic WYSIWYG Selection Rules
+Content-Aware Snapping: When drawing a new bounding box using the "Add Tag" tool, the engine must perform optical character awareness. As the user drags the marquee, it should "snap" to the bounding lines of the underlying PDF text streams, perfectly aligning the selection tight against the glyph ascenders and descenders.
+Visual Isolation Mode (X-Ray): Provide a toggle (e.g., holding the Spacebar or Alt key) that instantly dims the underlying PDF document to 20% opacity while boosting the Tag Overlays to 100% solid colors based on semantic type (Headings = Blue, Tables = Purple, Paragraphs = Green, Lists = Orange). This "X-Ray" mode allows accessibility experts to instantly diagnose structural flow without visual interference from complex background branding or imagery.
+6.4 The "Live-Diff" Tag Validation
+Visualizing Errors: If the native modules/validator detects an issue (e.g., an image tagged as <Figure> without Alt-Text), the WYSIWYG engine must render a pulsating, diagonal red hatch-pattern (#F44336 at 30% opacity) over the specific element directly on the canvas.
+In-Place Remediation: Hovering over the hatched region must instantly summon a rich, FlatLaf-styled tooltip displaying the exact WCAG 2.1 AA violation rule. Double-clicking the error overlay automatically snaps focus to the right-hand "Properties" panel, focusing the specific text field required to fix the validation error (e.g., placing the caret immediately inside the "Alternate Text" JTextArea).

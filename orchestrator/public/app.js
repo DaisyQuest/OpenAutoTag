@@ -92,6 +92,7 @@ const nativeMatchThresholdInput = document.querySelector("#native-match-threshol
 const alreadyTaggedThresholdInput = document.querySelector("#already-tagged-threshold");
 const alreadyTaggedPolicySelect = document.querySelector("#already-tagged-policy");
 const readingOrderStrategySelect = document.querySelector("#reading-order-strategy");
+const mlClassifierEnabledInput = document.querySelector("#ml-classifier-enabled");
 
 /**
  * Assemble the final `profileOverrides` payload for a batch/job submission.
@@ -150,6 +151,19 @@ function buildProfileOverridesPayload() {
   }
 
   return Object.keys(overrides).length > 0 ? overrides : null;
+}
+
+function buildRuntimeOptionsPayload() {
+  if (!mlClassifierEnabledInput?.checked) {
+    return null;
+  }
+
+  return {
+    mlClassifier: {
+      enabled: true,
+      mode: "shadow"
+    }
+  };
 }
 
 function hasWorkspaceAccess() {
@@ -1247,6 +1261,10 @@ async function startBatch() {
     if (batchOverrides) {
       formData.append("profileOverrides", JSON.stringify(batchOverrides));
     }
+    const runtimeOptions = buildRuntimeOptionsPayload();
+    if (runtimeOptions) {
+      formData.append("options", JSON.stringify(runtimeOptions));
+    }
 
     for (const item of state.selections) {
       formData.append("files", item.file);
@@ -1306,6 +1324,10 @@ async function startUrlJob() {
         fileUrl,
         workloadId: state.selectedWorkloadId,
         profileId: state.selectedProfileId || "default",
+        ...(() => {
+          const options = buildRuntimeOptionsPayload();
+          return options ? { options } : {};
+        })(),
         ...(() => {
           const overrides = buildProfileOverridesPayload();
           return overrides ? { profileOverrides: overrides } : {};

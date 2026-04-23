@@ -93,6 +93,38 @@ test("pipeline runner retries transient stage failures before succeeding", async
   assert.equal(semanticStage.attempts[1].status, "completed");
 });
 
+test("pipeline runner can emit ML prediction evidence behind the default-off toggle", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "pipeline-ml-toggle-test-"));
+  const pdfPath = path.join(tempDir, "sample.pdf");
+  const outputDir = path.join(tempDir, "output");
+
+  await createSamplePdf(pdfPath);
+  const job = await runPipeline({
+    filePath: pdfPath,
+    outputDir,
+    jobId: "ml-toggle-test",
+    options: {
+      mlClassifier: {
+        enabled: true,
+        mode: "shadow"
+      }
+    }
+  });
+
+  await access(job.artifacts.mlPredictions);
+  await access(job.artifacts.semanticMlTuned);
+
+  const mlPredictions = JSON.parse(await readFile(job.artifacts.mlPredictions, "utf8"));
+  const tunedSemantic = JSON.parse(await readFile(job.artifacts.semanticMlTuned, "utf8"));
+
+  assert.equal(job.status, "completed");
+  assert.equal(job.stages.some((stage) => stage.key === "mlClassifier"), true);
+  assert.equal(mlPredictions.runtimePolicy.mode, "shadow");
+  assert.equal(mlPredictions.shadowMode.enabled, true);
+  assert.equal(tunedSemantic.mlTuning.enabled, true);
+  assert.equal(tunedSemantic.mlTuning.applied, false);
+});
+
 test("pipeline runner preserves earlier artifacts and reports a failed stage cleanly", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "pipeline-failure-test-"));
   const pdfPath = path.join(tempDir, "sample.pdf");

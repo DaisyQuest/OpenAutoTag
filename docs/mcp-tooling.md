@@ -1,6 +1,37 @@
 # MCP Tooling for Claude Agents
 
-This repo ships two MCP (Model Context Protocol) servers that give Claude agents structured access to the pipeline's API surface and evaluation harness. They're registered in `.mcp.json` at the repo root and load automatically when Claude Code opens the project.
+This repo ships MCP (Model Context Protocol) tooling that gives Claude agents structured access to the pipeline's API surface and evaluation harness. Local stdio servers are registered in `.mcp.json` at the repo root, and the primary web server also hosts a read-only MCP gateway at `/mcp`.
+
+## Primary Read-Only HTTP Gateway
+
+**Endpoint**: `/mcp`
+
+The primary server exposes a Streamable-HTTP-compatible JSON-RPC MCP gateway for read-only tools. It is mounted in `orchestrator/server.js`, uses the same API authentication policy as other protected primary APIs, and never enqueues jobs, uploads PDFs, writes labels, mutates profiles, or changes artifacts.
+
+The gateway combines:
+
+- `pipeline-introspect`: read-only pipeline, contract, profile, environment, and finding-code inspection.
+- `corpus-eval-readonly`: deterministic corpus sampling plus artifact scoring and run diffing from existing files only.
+- `primary-readonly`: workload, job, and job-artifact inspection from the primary server.
+
+Examples:
+
+```powershell
+# Human-readable manifest
+curl http://localhost:3001/mcp
+
+# MCP tools/list
+curl http://localhost:3001/mcp `
+  -H "Content-Type: application/json" `
+  -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}"
+
+# MCP tools/call
+curl http://localhost:3001/mcp `
+  -H "Content-Type: application/json" `
+  -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"describe_pipeline\",\"arguments\":{}}}"
+```
+
+In private mode, include `X-API-KEY` or `X-ADMIN-KEY`.
 
 ## Pipeline Introspection Server
 
@@ -63,6 +94,8 @@ Returns: [{ code, severity, source, clause, description, remediation }]
 **Server name**: `corpus-eval`
 
 Provides tools for the profile-tuning feedback loop: sample a corpus, run profiles against it, score results, and compare runs.
+
+Only the read-only subset is hosted at `/mcp`. Mutating or write-producing tools such as `run_profile` remain stdio-only and are intentionally excluded from the primary read-only gateway.
 
 ### Tools
 

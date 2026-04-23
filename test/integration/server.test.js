@@ -147,6 +147,114 @@ test("private mode keeps static pages available but blocks protected routes with
   }
 });
 
+test("primary server hosts read-only MCP tools at /mcp", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-mcp-test-"));
+  const queue = createJobQueue({ processor: runWorkload });
+  const server = createAppServer({ queue, uploadRoot: path.join(tempDir, "uploads") });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const manifestResponse = await fetch(`${baseUrl}/mcp`);
+    const manifest = await manifestResponse.json();
+
+    assert.equal(manifestResponse.status, 200);
+    assert.equal(manifest.readOnly, true);
+    assert.equal(manifest.endpoint, "/mcp");
+    assert.ok(manifest.servers.every((entry) => entry.readOnly === true));
+    assert.ok(manifest.tools.some((tool) => tool.name === "describe_pipeline"));
+    assert.ok(manifest.tools.some((tool) => tool.name === "list_jobs"));
+    assert.ok(manifest.tools.some((tool) => tool.name === "sample_corpus"));
+    assert.equal(manifest.tools.some((tool) => tool.name === "run_profile"), false);
+
+    const toolsResponse = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" })
+    });
+    const toolsPayload = await toolsResponse.json();
+    const toolNames = toolsPayload.result.tools.map((tool) => tool.name);
+
+    assert.equal(toolsResponse.status, 200);
+    assert.ok(toolNames.includes("describe_pipeline"));
+    assert.ok(toolNames.includes("score_job"));
+    assert.equal(toolNames.includes("run_profile"), false);
+    assert.ok(toolsPayload.result.tools.every((tool) => tool.annotations?.readOnlyHint === true));
+
+    const callResponse = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "tools/call",
+        params: {
+          name: "describe_pipeline",
+          arguments: {}
+        }
+      })
+    });
+    const callPayload = await callResponse.json();
+    const callResult = JSON.parse(callPayload.result.content[0].text);
+
+    assert.equal(callResponse.status, 200);
+    assert.ok(callResult.stages.some((stage) => stage.name === "parser"));
+
+    const deniedResponse = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 3,
+        method: "tools/call",
+        params: {
+          name: "run_profile",
+          arguments: {}
+        }
+      })
+    });
+    const deniedPayload = await deniedResponse.json();
+
+    assert.equal(deniedResponse.status, 200);
+    assert.equal(deniedPayload.error.code, -32602);
+    assert.match(deniedPayload.error.message, /Unknown read-only MCP tool/);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("private mode protects the /mcp endpoint with API credentials", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-mcp-auth-test-"));
+  const server = createPrivateServer(tempDir, {
+    apiKey: "bootstrap-api-key",
+    adminKey: "bootstrap-admin-key"
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const blockedResponse = await fetch(`${baseUrl}/mcp`);
+    const blockedPayload = await blockedResponse.json();
+    assert.equal(blockedResponse.status, 401);
+    assert.match(blockedPayload.error, /X-API-KEY|X-ADMIN-KEY/i);
+
+    const allowedResponse = await fetch(`${baseUrl}/mcp`, {
+      headers: {
+        "X-API-KEY": "bootstrap-api-key"
+      }
+    });
+    const allowedPayload = await allowedResponse.json();
+    assert.equal(allowedResponse.status, 200);
+    assert.equal(allowedPayload.readOnly, true);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
 test("private mode accepts bootstrap keys and keeps admin endpoints admin-only", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-private-bootstrap-test-"));
   const pdfPath = path.join(tempDir, "sample.pdf");
@@ -566,6 +674,8 @@ test("server accepts uploaded PDF batches and serves browser UI artifacts", asyn
     const homeHtml = await homeResponse.text();
     assert.equal(homeResponse.status, 200);
     assert.match(homeHtml, /Run Selected Workload/);
+    assert.match(homeHtml, /id="ml-classifier-enabled" type="checkbox"/);
+    assert.doesNotMatch(homeHtml, /id="ml-classifier-enabled"[^>]*checked/);
 
     const formData = new FormData();
     formData.append("files", new File([await readFile(pdfPathA)], "alpha.pdf", { type: "application/pdf" }));
@@ -610,6 +720,97 @@ test("server accepts uploaded PDF batches and serves browser UI artifacts", asyn
     const matrixData = await matrixDataResponse.json();
     assert.equal(matrixDataResponse.status, 200);
     assert.ok(matrixData.summary.rowCount >= 1);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+});
+
+test("server forwards uploaded ML classifier options and rejects malformed option JSON", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "server-upload-options-test-"));
+  const pdfPath = path.join(tempDir, "alpha.pdf");
+  await createSamplePdf(pdfPath);
+
+  const processedOptions = [];
+  const queue = createJobQueue({
+    processor: async ({ filePath, outputDir, jobId, workload, options }) => {
+      processedOptions.push(options);
+      const timestamp = new Date().toISOString();
+      return {
+        jobId,
+        status: "completed",
+        workload,
+        input: {
+          filePath,
+          outputDir,
+          options
+        },
+        artifacts: {},
+        stages: [],
+        stageSummary: {
+          total: 0,
+          completedStages: 0,
+          failedStages: 0,
+          skippedStages: 0,
+          totalAttempts: 0,
+          retryableFailures: 0
+        },
+        createdAt: timestamp,
+        updatedAt: timestamp
+      };
+    }
+  });
+  const server = createAppServer({ queue, uploadRoot: path.join(tempDir, "uploads") });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const malformedFormData = new FormData();
+    malformedFormData.append("files", new File([await readFile(pdfPath)], "alpha.pdf", { type: "application/pdf" }));
+    malformedFormData.append("relativePaths", "alpha.pdf");
+    malformedFormData.append("options", "{");
+
+    const malformedResponse = await fetch(`${baseUrl}/process-pdf-upload`, {
+      method: "POST",
+      body: malformedFormData
+    });
+    const malformedPayload = await malformedResponse.json();
+    assert.equal(malformedResponse.status, 400);
+    assert.match(malformedPayload.error, /options must be valid JSON/i);
+
+    const formData = new FormData();
+    formData.append("files", new File([await readFile(pdfPath)], "alpha.pdf", { type: "application/pdf" }));
+    formData.append("relativePaths", "alpha.pdf");
+    formData.append(
+      "options",
+      JSON.stringify({
+        mlClassifier: {
+          enabled: true,
+          mode: "shadow"
+        }
+      })
+    );
+
+    const uploadResponse = await fetch(`${baseUrl}/process-pdf-upload`, {
+      method: "POST",
+      body: formData
+    });
+
+    assert.equal(uploadResponse.status, 202);
+    const batch = await uploadResponse.json();
+    const completedBatch = await waitForBatchCompletion(baseUrl, batch.batchId);
+    assert.equal(completedBatch.status, "completed");
+    assert.equal(processedOptions.length, 1);
+    assert.equal(processedOptions[0].mlClassifier.enabled, true);
+    assert.equal(processedOptions[0].mlClassifier.mode, "shadow");
+    assert.equal(processedOptions[0].profileId, "default");
+
+    const jobResponse = await fetch(`${baseUrl}/jobs/${completedBatch.items[0].jobId}`);
+    const job = await jobResponse.json();
+    assert.equal(jobResponse.status, 200);
+    assert.equal(job.input.options.mlClassifier.enabled, true);
+    assert.equal(job.input.options.mlClassifier.mode, "shadow");
   } finally {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   }

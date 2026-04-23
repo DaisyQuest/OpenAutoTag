@@ -16,6 +16,7 @@ import { loadAgentRuntimeConfig } from "./agent-runtime-config.js";
 import { startAgentSupervisor } from "./agent-supervisor.js";
 import { createEnvironmentAuthController } from "./auth-controller.js";
 import { createJobQueue } from "./job-queue.js";
+import { createReadOnlyMcpGateway } from "./mcp-readonly.js";
 import { getArtifactLabel } from "./public/report-renderers.js";
 import { listProfiles } from "./profile-registry.js";
 import { getPublicWorkload, listWorkloads, runWorkload, summarizeWorkloadJob } from "./workloads/index.js";
@@ -1110,7 +1111,7 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
   }
 
   return {
-    async enqueueUploads(files, workloadId, { profileId = "default", profileOverrides = {} } = {}) {
+    async enqueueUploads(files, workloadId, { profileId = "default", profileOverrides = {}, options = {} } = {}) {
       const batchId = crypto.randomUUID();
       const createdAt = new Date().toISOString();
       const batchRoot = path.join(uploadRoot, batchId);
@@ -1131,7 +1132,7 @@ function createBatchRegistry({ queue, uploadRoot = getRuntimeSubdir("uploads", {
           filePath: persisted.absolutePath,
           outputDir: path.join(outputDir, makeOutputDirectoryName(persisted.relativePath, index)),
           workload,
-          options: { profileId, profileOverrides }
+          options: { ...(options || {}), profileId, profileOverrides }
         });
 
         items.push({
@@ -1580,6 +1581,7 @@ export function createAppServer({
 }) {
   const agentRegistry = createAgentRegistry();
   const batches = createBatchRegistry({ queue, uploadRoot });
+  const mcpGateway = createReadOnlyMcpGateway({ queue });
   const remoteDownloadRoot = path.join(uploadRoot, "remote");
   const diffFiles = new Map();
   queue.setRemoteCapacityProvider?.(() => agentRegistry.countIdle());
@@ -1678,6 +1680,32 @@ export function createAppServer({
         return;
       }
 
+      if (url.pathname === "/mcp") {
+        await authenticate(request, { api: true });
+
+        if (request.method === "GET") {
+          writeJson(response, 200, mcpGateway.manifest());
+          return;
+        }
+
+        if (request.method === "POST") {
+          const body = await readJsonBody(request, { maxBytes: 256 * 1024 });
+          const rpcResponse = await mcpGateway.handleJsonRpc(body);
+          if (rpcResponse == null) {
+            response.writeHead(202, buildResponseHeaders({ "Cache-Control": "no-store" }));
+            response.end();
+            return;
+          }
+          writeJson(response, 200, rpcResponse, {
+            "MCP-Protocol-Version": mcpGateway.manifest().protocolVersion
+          });
+          return;
+        }
+
+        writeJson(response, 405, { error: "/mcp supports GET and POST." }, { Allow: "GET, POST" });
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/process-pdf") {
         await authenticate(request, { api: true });
         const body = await readJsonBody(request);
@@ -1748,12 +1776,22 @@ export function createAppServer({
         const workloadId = String(formData.get("workloadId") || "accessibility-tagging");
         const profileId = String(formData.get("profileId") || "default");
         const profileOverridesRaw = formData.get("profileOverrides");
+        const optionsRaw = formData.get("options");
         let profileOverrides = {};
+        let options = {};
         if (profileOverridesRaw) {
           try {
             profileOverrides = JSON.parse(String(profileOverridesRaw));
           } catch {
             writeJson(response, 400, { error: "profileOverrides must be valid JSON." });
+            return;
+          }
+        }
+        if (optionsRaw) {
+          try {
+            options = JSON.parse(String(optionsRaw));
+          } catch {
+            writeJson(response, 400, { error: "options must be valid JSON." });
             return;
           }
         }
@@ -1769,7 +1807,7 @@ export function createAppServer({
           return;
         }
 
-        const batch = await batches.enqueueUploads(pdfFiles, workloadId, { profileId, profileOverrides });
+        const batch = await batches.enqueueUploads(pdfFiles, workloadId, { profileId, profileOverrides, options });
         writeJson(response, 202, batch);
         return;
       }

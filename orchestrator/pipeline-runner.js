@@ -1,13 +1,21 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createAccessibilityPreparationStages, createTaggingOutputStages } from "./accessibility-stage-plan.js";
+import { normalizeMlClassifierOptions } from "./ml-tuning.js";
 import { createProfileContext } from "./profile-runtime.js";
 import { DEFAULT_STAGE_ATTEMPTS, runManagedWorkload } from "./workload-runner.js";
 
-function createPipelineStages({ filePath, resolvedOutputDir, artifacts, profileContext }) {
+function createPipelineStages({ filePath, resolvedOutputDir, artifacts, profileContext, options }) {
+  const mlClassifier = normalizeMlClassifierOptions(options);
   return [
-    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext }),
-    ...createTaggingOutputStages({ filePath, resolvedOutputDir, artifacts, profileContext })
+    ...createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext, options }),
+    ...createTaggingOutputStages({
+      filePath,
+      resolvedOutputDir,
+      artifacts,
+      profileContext,
+      semanticArtifactKey: mlClassifier.enabled ? "semanticMlTuned" : "semanticOrdered"
+    })
   ];
 }
 
@@ -47,8 +55,18 @@ export async function runPipeline({
 
 async function main() {
   const args = new Map();
-  for (let index = 2; index < process.argv.length; index += 2) {
-    args.set(process.argv[index], process.argv[index + 1]);
+  for (let index = 2; index < process.argv.length; index += 1) {
+    const key = process.argv[index];
+    if (!key.startsWith("--")) {
+      continue;
+    }
+    const next = process.argv[index + 1];
+    if (next && !next.startsWith("--")) {
+      args.set(key, next);
+      index += 1;
+    } else {
+      args.set(key, "true");
+    }
   }
 
   const filePath = args.get("--pdf");
@@ -56,6 +74,8 @@ async function main() {
   const profileId = args.get("--profile");
   const forceWriterMode = args.get("--writer-mode");
   const forceAlreadyTaggedPolicy = args.get("--already-tagged-policy");
+  const mlClassifierEnabled = args.has("--ml-classifier") || args.get("--ml-classifier-enabled") === "true";
+  const mlModelPath = args.get("--ml-model") || args.get("--model");
 
   if (!filePath) {
     throw new Error("Usage: node orchestrator/pipeline-runner.js --pdf <input.pdf> --output-dir <outputDir> [--profile <id|auto>]");
@@ -78,6 +98,13 @@ async function main() {
   }
 
   const options = resolvedProfileId ? { profileId: resolvedProfileId } : {};
+  if (mlClassifierEnabled) {
+    options.mlClassifier = {
+      enabled: true,
+      mode: "shadow",
+      ...(mlModelPath ? { modelPath: mlModelPath } : {})
+    };
+  }
   if (forceWriterMode || forceAlreadyTaggedPolicy) {
     options.profileOverrides = options.profileOverrides || {};
     options.profileOverrides.pdfWriter = options.profileOverrides.pdfWriter || {};

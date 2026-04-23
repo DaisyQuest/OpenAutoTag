@@ -1,6 +1,7 @@
 import { copyFile, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { normalizeMlClassifierOptions } from "./ml-tuning.js";
 import { injectProfileEnv } from "./profile-runtime.js";
 import { runJsonStage } from "./workload-runner.js";
 
@@ -36,10 +37,11 @@ async function fallbackReadingOrder(inputPath, outputPath, reason) {
   };
 }
 
-export function createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext }) {
+export function createAccessibilityPreparationStages({ filePath, resolvedOutputDir, artifacts, profileContext, options = {} }) {
   const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
+  const mlClassifier = normalizeMlClassifierOptions(options);
 
-  return [
+  const stages = [
     {
       key: "layout",
       label: "parser",
@@ -232,6 +234,65 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
       }
     }
   ];
+
+  if (mlClassifier.enabled) {
+    stages.push({
+      key: "mlClassifier",
+      label: "ml-classifier",
+      outputPath: path.join(resolvedOutputDir, "04c-semantic-ml-tuned.json"),
+      run: async () => {
+        const tunedSemanticPath = path.join(resolvedOutputDir, "04c-semantic-ml-tuned.json");
+        const predictionsPath = path.join(resolvedOutputDir, "04b-ml-predictions.json");
+        const args = [
+          "--semantic",
+          artifacts.semanticOrdered,
+          "--layout",
+          artifacts.layoutEnriched,
+          "--output",
+          tunedSemanticPath,
+          "--report",
+          predictionsPath,
+          "--classifier-id",
+          mlClassifier.classifierId,
+          "--mode",
+          mlClassifier.mode
+        ];
+
+        if (mlClassifier.modelPath) {
+          args.push("--model", mlClassifier.modelPath);
+        }
+
+        const outputPath = await runJsonStage(
+          "scripts/apply-ml-tuning.js",
+          args,
+          tunedSemanticPath,
+          {
+            env: {
+              ...profileEnv,
+              OPENAUTOTAG_ML_CLASSIFIER_ENABLED: "1",
+              OPENAUTOTAG_ML_CLASSIFIER_ID: mlClassifier.classifierId,
+              OPENAUTOTAG_ML_CLASSIFIER_MODE: mlClassifier.mode
+            }
+          }
+        );
+
+        return {
+          outputPath,
+          artifacts: {
+            semanticMlTuned: outputPath,
+            mlPredictions: predictionsPath
+          },
+          mlClassifier: {
+            enabled: true,
+            mode: mlClassifier.mode,
+            classifierId: mlClassifier.classifierId
+          }
+        };
+      }
+    });
+  }
+
+  return stages;
 }
 
 function buildWriterModeArgs(profileContext) {

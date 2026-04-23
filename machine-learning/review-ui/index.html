@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ML Human Review</title>
+    <link rel="stylesheet" href="/review.css" />
+  </head>
+  <body>
+    <main class="review-shell">
+      <header class="review-header">
+        <div>
+          <p class="eyebrow">OpenAutoTag ML</p>
+          <h1>Human classification review</h1>
+        </div>
+        <div class="summary-strip" aria-label="Review progress">
+          <span><strong id="summary-reviewed">0</strong> reviewed</span>
+          <span><strong id="summary-remaining">0</strong> remaining</span>
+          <span><strong id="summary-notes">0</strong> notes</span>
+        </div>
+      </header>
+
+      <section class="review-controls" aria-label="Review filters">
+        <label for="status-filter">
+          <span>Status</span>
+          <select id="status-filter">
+            <option value="unreviewed">Unreviewed</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="review">Review</option>
+            <option value="all">All</option>
+          </select>
+        </label>
+        <button id="reload-button" type="button">Reload</button>
+        <a class="secondary-link" href="/api/export" target="_blank" rel="noreferrer">Export JSON</a>
+      </section>
+
+      <section id="review-card" class="review-card" aria-live="polite">
+        <div class="empty-state">Loading review queue.</div>
+      </section>
+    </main>
+
+    <script type="module" src="/review.js"></script>
+  </body>
+</html>

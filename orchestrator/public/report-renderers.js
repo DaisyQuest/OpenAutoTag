@@ -5,6 +5,8 @@ export const artifactLabels = {
   layoutEnriched: "Layout analysis",
   semantic: "Semantic document",
   semanticOrdered: "Reading-order document",
+  semanticMlTuned: "ML-tuned semantic document",
+  mlPredictions: "ML classifier predictions",
   semanticRedacted: "Semantic redaction output",
   redactionPlan: "Redaction plan",
   tagging: "Tagging plan",

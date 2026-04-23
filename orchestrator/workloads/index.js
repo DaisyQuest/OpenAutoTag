@@ -107,21 +107,24 @@ const workloadDefinitions = {
     shortLabel: "Tagging",
     description: "Create tagged, validated PDF/UA output with browser-native reports.",
     primaryArtifact: "validationReport",
-    previewArtifacts: ["validationReport", "tagDeltaReport", "writerReport", "tagManifest"],
-    downloadArtifacts: ["taggedPdf", "validationReport", "tagDeltaReport", "writerReport", "tagManifest"],
+    previewArtifacts: ["validationReport", "mlPredictions", "tagDeltaReport", "writerReport", "tagManifest"],
+    downloadArtifacts: ["taggedPdf", "validationReport", "mlPredictions", "tagDeltaReport", "writerReport", "tagManifest"],
     processor: runPipeline,
     async summarize(job) {
       if (!job?.artifacts?.validationReport) {
         return null;
       }
 
-      const [report, tagDeltaReport, writerReport] = await Promise.all([
+      const [report, tagDeltaReport, writerReport, mlPredictions] = await Promise.all([
         readFile(job.artifacts.validationReport, "utf8").then((content) => JSON.parse(content)),
         job?.artifacts?.tagDeltaReport
           ? readFile(job.artifacts.tagDeltaReport, "utf8").then((content) => JSON.parse(content))
           : Promise.resolve(null),
         job?.artifacts?.writerReport
           ? readFile(job.artifacts.writerReport, "utf8").then((content) => JSON.parse(content)).catch(() => null)
+          : Promise.resolve(null),
+        job?.artifacts?.mlPredictions
+          ? readFile(job.artifacts.mlPredictions, "utf8").then((content) => JSON.parse(content)).catch(() => null)
           : Promise.resolve(null)
       ]);
 
@@ -130,8 +133,16 @@ const workloadDefinitions = {
       const pagesRaster = writerReport?.pagesRaster ?? 0;
       const matchRate = writerReport?.matchRate ?? writerReport?.operatorMatchRate ?? null;
 
+      const summary = getAccessibilitySummary(report, tagDeltaReport);
+      if (mlPredictions) {
+        summary.signals = [
+          `ML ${mlPredictions.runtimePolicy?.mode || "shadow"}: ${mlPredictions.status || "reported"}`,
+          ...(summary.signals || [])
+        ].slice(0, 6);
+      }
+
       return {
-        summary: getAccessibilitySummary(report, tagDeltaReport),
+        summary,
         writerMode,
         pagesNative,
         pagesRaster,
