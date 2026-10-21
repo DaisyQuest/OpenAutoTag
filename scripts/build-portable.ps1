@@ -502,6 +502,7 @@ function Copy-AppSource {
   $removeRelativePaths = @(
     "modules/validator/vendor/verapdf",
     "modules/validator/vendor/verapdf-pdfbox-installer.zip",
+    "modules/validator/vendor/verapdf-greenfield-1.30.3-installer.zip",
     "modules/validator/vendor/java",
     "modules/font-embedder/vendor/fonts/noto-sans-cjk",
     "modules/parser/.cache",
@@ -590,8 +591,8 @@ function Install-AppDependencies {
   if (-not $SkipVeraPdf) {
     Write-Step "Installing portable veraPDF"
     $urls = @(
-      Get-Cfg -Key "verapdf.installer_url" -Default "https://software.verapdf.org/releases/1.28/verapdf-pdfbox-1.28.2-installer.zip"
-      Get-Cfg -Key "verapdf.fallback_url" -Default "https://software.verapdf.org/releases/verapdf-pdfbox-installer.zip"
+      Get-Cfg -Key "verapdf.installer_url" -Default "https://software.verapdf.org/releases/1.30/verapdf-greenfield-1.30.3-installer.zip"
+      Get-Cfg -Key "verapdf.fallback_url" -Default "https://software.verapdf.org/releases/1.30/verapdf-greenfield-1.30.3-installer.zip"
     ) | Where-Object { $_ -and $_.Length -gt 0 }
     $envMap["VERAPDF_INSTALLER_URLS"] = ($urls -join ",")
     Invoke-External -FilePath $NodeTools.Node -Arguments @("scripts/install-verapdf.js") -WorkingDirectory $AppRoot -Environment $envMap

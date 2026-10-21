@@ -1,8 +1,12 @@
 import Ajv2020 from "ajv/dist/2020.js";
+import { enrichDocumentRelations } from "./document-relations.js";
+import { refineHeadingMembership } from "./semantic-quality.js";
+import { listOrdinal } from "./semantic-quality.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
+import { mergeHeadingContinuations } from "./heading-continuation.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateLayout = ajv.compile(layoutSchema);
@@ -34,7 +38,7 @@ function isListItemBlock(block) {
     block.listGroupId != null ||
     block.listId != null ||
     block.listItemIndex != null ||
-    /^([-*]|\u2022|\d+\.)\s+/.test(text)
+    /^([-*]|\u2022|[\u2610\u2611\u2612]|\d+[.)]|[A-Za-z][.)]|[ivxlcdmIVXLCDM]{2,8}[.)])\s+/.test(text)
   );
 }
 
@@ -255,7 +259,7 @@ function inferListMetadata(block, pageNumber, index, state) {
   const explicitGroupId = block.listGroupId || block.listId || block.bulletGroupId;
   const level = Number.isInteger(block.listLevel) ? block.listLevel : 1;
   const itemIndex = Number.isInteger(block.listItemIndex) ? block.listItemIndex : 0;
-  const listStyle = block.listStyle || (/\d+\./.test(String(block.text || "").trim()) ? "ordered" : "unordered");
+  const listStyle = block.listStyle || (listOrdinal(block.text) ? "ordered" : "unordered");
   const x = Array.isArray(block.bbox) ? block.bbox[0] : 0;
   const columnHint = Number.isInteger(block.columnHint) ? block.columnHint : 0;
   const indent = Number.isFinite(block.listIndent) ? block.listIndent : Math.round(x / 18);
@@ -318,7 +322,7 @@ function inferRole(block, artifactPlacement, tableMetadata) {
   }
 
   if (isHeadingBlock(block)) {
-    return `H${Math.min(block.headingLevel || 2, 3)}`;
+    return `H${Math.max(1, Math.min(block.headingLevel || 2, 6))}`;
   }
 
   if (tableMetadata) {
@@ -569,7 +573,11 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     bbox: block.bbox,
     ...(Number.isFinite(block.fontSize) ? { fontSize: block.fontSize } : {}),
     ...(block.fontName ? { fontName: block.fontName } : {}),
+    ...(["ltr", "rtl"].includes(block.direction) ? { direction: block.direction } : {}),
+    ...(block.formFieldIds?.length ? { formFieldIds: [...block.formFieldIds] } : {}),
+    ...(block.listMarker ? { listMarker: block.listMarker } : {}),
     ...(block.writingMode ? { writingMode: block.writingMode } : {}),
+    ...Object.fromEntries(["captionForId", "footnoteReferenceId", "asideAnchorId", "scope"].filter((key) => typeof block[key] === "string").map((key) => [key, block[key]])),
     ...(Number.isFinite(block.textRotation) ? { textRotation: block.textRotation } : {}),
     headingLevel: role.startsWith("H") ? Math.min(block.headingLevel || 2, 6) : undefined,
     columnHint: Number.isInteger(block.columnHint) ? block.columnHint : 0,
@@ -905,8 +913,13 @@ export async function buildSemanticDocument(inputPath, options) {
 
   // A9 BibEntry is a document-level pass; it needs headings from all pages
   // to decide where the "References" section starts and ends.
+  const sourceIds = new Map(nodes.map((n) => [n.sourceBlockId, n.id]));
+  for (const node of nodes) for (const key of ["captionForId", "footnoteReferenceId", "asideAnchorId"])
+    if (sourceIds.has(node[key])) node[key] = sourceIds.get(node[key]);
+  const headingReviewTasks = refineHeadingMembership(nodes, layoutDocument.pages);
   markBibEntries(nodes);
   markFootnotes(nodes, layoutDocument.pages);
+  const headingMerge = mergeHeadingContinuations(nodes);
 
   const semanticDocument = {
     schemaVersion: "1.0.0",
@@ -914,11 +927,15 @@ export async function buildSemanticDocument(inputPath, options) {
     source: {
       layoutDocumentId: layoutDocument.documentId,
       filePath: layoutDocument.source.filePath,
+      ...(layoutDocument.source.title ? { title: layoutDocument.source.title } : {}),
       language: layoutDocument.source.language,
       languageConfidence: layoutDocument.source.languageConfidence
     },
-    nodes
+    nodes: headingMerge.nodes,
+    ...enrichDocumentRelations(headingMerge.nodes, layoutDocument.pages),
+    headingMergeSummary: headingMerge.summary
   };
+  semanticDocument.semanticReviewTasks.push(...headingReviewTasks);
 
   if (!validateSemantic(semanticDocument)) {
     throw new Error(`Semantic engine output failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);

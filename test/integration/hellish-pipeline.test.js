@@ -86,7 +86,10 @@ test("pipeline handles a mathematically generated hell document with exact struc
     assert.equal(layout.pages.length, 3);
     assert.equal(layoutEnriched.pages[0].columns, 2);
     assert.equal(layoutEnriched.pages[1].structureSignals.vectorTableCount, 1);
-    assert.equal(layoutEnriched.pages[1].structureSignals.tableHeaderRowCount, 3);
+    // Real font names keep the bold page heading out of the table's
+    // orphan-header pass. The fixture has two header rows and three data
+    // rows; the old resource IDs let that heading add a phantom row.
+    assert.equal(layoutEnriched.pages[1].structureSignals.tableHeaderRowCount, 2);
     assert.equal(layoutEnriched.pages[2].structureSignals.tableCount, 0);
     assert.equal(layoutEnriched.pages[2].structureSignals.orderedListItemCount, 2);
 
@@ -120,13 +123,13 @@ test("pipeline handles a mathematically generated hell document with exact struc
     assert.equal(pageTwoTable.children[0].children.length, 2);
     assert.equal(pageTwoTable.children[1].children.length, 3);
     assert.equal(pageTwoHeadingBlock.tableId, undefined);
-    assert.equal(pageTwoHeadingBlock.blockType, "paragraph");
+    assert.equal(pageTwoHeadingBlock.blockType, "heading");
 
     const pageTwoHeaderRows = [...new Set(pageTwoTableBlocks.filter((block) => block.tableSection === "head").map((block) => block.tableRowIndex))];
     const pageTwoBodyRows = [...new Set(pageTwoTableBlocks.filter((block) => block.tableSection === "body").map((block) => block.tableRowIndex))];
-    assert.deepEqual(pageTwoHeaderRows, [1, 2]);
-    assert.deepEqual(pageTwoBodyRows, [3, 4, 5]);
-    assert.equal(layoutEnriched.pages[1].structureSignals.tableRowCount, 6);
+    assert.deepEqual(pageTwoHeaderRows, [0, 1]);
+    assert.deepEqual(pageTwoBodyRows, [2, 3, 4]);
+    assert.equal(layoutEnriched.pages[1].structureSignals.tableRowCount, 5);
     assert.equal(tableStructureMap.pages[1].tables[0].rowCount, 5);
 
     const pageTwoHeaderNodes = pageTwoNodes.filter((node) => node.role === "TH");

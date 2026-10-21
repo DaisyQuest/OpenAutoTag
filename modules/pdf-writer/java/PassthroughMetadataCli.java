@@ -42,6 +42,7 @@ import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
+import org.apache.pdfbox.text.TextPosition;
 
 /**
  * Passthrough metadata refresher. Invoked when the pdf-writer's
@@ -49,12 +50,11 @@ import org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferenc
  * tagged and the caller has chosen {@code alreadyTaggedPolicy=passthrough}.
  *
  * <p>The Node side has already copied the source bytes to {@code --pdf}.
- * This CLI opens that copy, refreshes /Info and the XMP packet, then
- * saves <em>incrementally</em>. Incremental save appends a delta section
- * rather than re-serializing the document, so the content streams,
- * structure tree, font programs, and FontFile2 bytes from the original
- * producer are preserved verbatim. That preservation is the entire point
- * of passthrough — a full save-reopen-save cycle can subtly rewrite
+ * This CLI opens that copy, refreshes /Info and the XMP packet, and
+ * consolidates confirmed wrapped headings using their existing references.
+ * The default minimal pass saves <em>incrementally</em>, appending a delta
+ * section while preserving source content streams and font programs.
+ * A full save-reopen-save cycle can subtly rewrite
  * content stream bytes (PDFBox's stream filter chain is not
  * round-trip-stable on all producers), which defeats the purpose.</p>
  */
@@ -65,7 +65,7 @@ public class PassthroughMetadataCli {
     // result so operators can tell which version of this CLI
     // produced a given PDF. Bump on every behavioral change to the
     // passthrough pipeline so stale outputs are easy to spot.
-    private static final String PASSTHROUGH_BUILD_ID = "passthrough-2026-04-19u-symbDiffFallback";
+    private static final String PASSTHROUGH_BUILD_ID = "passthrough-2026-10-21-qualified-structure-v1";
     private static final String DOCUMENT_PRODUCER = "PDF Accessibility Engine (" + PASSTHROUGH_BUILD_ID + ")";
 
     /**
@@ -266,6 +266,9 @@ public class PassthroughMetadataCli {
         File target = new File(pdfPath);
         File incremental = new File(pdfPath + ".metadata-refresh");
         boolean wrote = false;
+        int headingContinuationsMerged = 0;
+        int listFormContainersRepaired = 0;
+        java.util.List<java.util.Map<String, Object>> repairLedger = new java.util.ArrayList<>();
 
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -383,9 +386,19 @@ public class PassthroughMetadataCli {
             // PDFBox's save can't round-trip without corrupting. For
             // those we want a minimal passthrough that touches only
             // /Info + XMP + /ViewerPreferences + /OCProperties and
-            // leaves the struct tree alone. Set PASSTHROUGH_MINIMAL=1
-            // to skip the riskier edits.
+            // retains existing content references and field placement.
+            // Confirmed wrapped-heading repairs still apply. Set
+            // PASSTHROUGH_MINIMAL=1 to skip broader structural edits.
             boolean minimal = "1".equals(System.getenv("PASSTHROUGH_MINIMAL"));
+            var headingBefore = QualifiedStructureRepairs.snapshot(doc);
+            headingContinuationsMerged = mergeHeadingContinuations(doc);
+            QualifiedStructureRepairs.recordChanges(doc, headingBefore, "wrapped-heading", repairLedger);
+            if ("1".equals(System.getenv("PASSTHROUGH_REPAIR_LIST_FORMS"))) {
+                var listBefore = QualifiedStructureRepairs.snapshot(doc);
+                listFormContainersRepaired = repairListFormContainers(doc);
+                QualifiedStructureRepairs.recordChanges(doc, listBefore, "list-form-containment", repairLedger);
+            }
+            if ("1".equals(System.getenv("PASSTHROUGH_REPAIR_LINKS"))) repairLedger.addAll(QualifiedStructureRepairs.apply(doc));
 
             int pgAttached = minimal ? 0 : attachPgFromParentTree(doc);
             if (pgAttached > 0) {
@@ -516,7 +529,7 @@ public class PassthroughMetadataCli {
             // the object-table level).
             boolean encrypted = doc.isEncrypted();
             try (OutputStream os = new FileOutputStream(incremental)) {
-                if (encrypted) {
+                if (encrypted || minimal) {
                     doc.saveIncremental(os);
                 } else {
                     doc.save(os, CompressParameters.NO_COMPRESSION);
@@ -533,7 +546,357 @@ public class PassthroughMetadataCli {
             );
         }
 
-        System.out.println("{\"metadataRefreshed\":" + wrote + ",\"buildId\":\"" + PASSTHROUGH_BUILD_ID + "\"}");
+        System.out.println("{\"metadataRefreshed\":" + wrote + ",\"headingContinuationsMerged\":" + headingContinuationsMerged +
+            ",\"listFormContainersRepaired\":" + listFormContainersRepaired + ",\"repairLedger\":" + QualifiedStructureRepairs.json(repairLedger) + ",\"buildId\":\"" + PASSTHROUGH_BUILD_ID + "\"}");
+    }
+
+    private static COSBase resolved(COSBase value) {
+        return value instanceof COSObject ? ((COSObject) value).getObject() : value;
+    }
+
+    private static String headingText(String text) {
+        return text.replaceAll("[\\s\\p{Zs}]+", " ").trim();
+    }
+
+    private static class HeadingFrame {
+        final StringBuilder text = new StringBuilder();
+        double left = Double.POSITIVE_INFINITY, top = Double.POSITIVE_INFINITY;
+        double right = Double.NEGATIVE_INFINITY, bottom = Double.NEGATIVE_INFINITY;
+        double size;
+        String font;
+        boolean mixed;
+
+        void add(TextPosition position) {
+            String unicode = position.getUnicode();
+            if (unicode == null || headingText(unicode).isEmpty()) {
+                if (unicode != null) text.append(unicode);
+                return;
+            }
+            double glyphSize = Math.abs(position.getYScale());
+            if (position.getDir() != 0 || !Double.isFinite(glyphSize) || glyphSize <= 0 ||
+                position.getFont() == null || position.getFont().getName() == null) { mixed = true; return; }
+            String glyphFont = position.getFont().getName().replaceFirst("^[A-Z]{6}\\+", "").toLowerCase(java.util.Locale.ROOT);
+            if (font == null) { font = glyphFont; size = glyphSize; }
+            else if (!font.equals(glyphFont) || Math.abs(size - glyphSize) > Math.max(size, glyphSize) * 0.05) mixed = true;
+            left = Math.min(left, position.getX());
+            top = Math.min(top, position.getY() - glyphSize);
+            right = Math.max(right, position.getX() + position.getWidth());
+            bottom = Math.max(bottom, position.getY());
+            text.append(unicode);
+        }
+
+        boolean usable() { return !mixed && font != null && size > 0 && Double.isFinite(left) && bottom - top <= size * 1.5; }
+    }
+
+    private static java.util.Map<Integer, HeadingFrame> headingFrames(PDPage page) throws IOException {
+        java.util.Map<Integer, HeadingFrame> frames = new java.util.HashMap<>();
+        org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper() {
+            final java.util.Deque<Integer> stack = new java.util.ArrayDeque<>();
+            int nestedStreamDepth;
+            @Override
+            protected void writePage() throws IOException { /* Collect glyph geometry without writing text. */ }
+            @Override
+            protected void processOperator(org.apache.pdfbox.contentstream.operator.Operator op, java.util.List<COSBase> args) throws IOException {
+                String name = op.getName();
+                if ("BDC".equals(name) || "BMC".equals(name)) {
+                    int mcid = -1;
+                    if (!args.isEmpty() && COSName.ARTIFACT.equals(args.get(0))) mcid = -2;
+                    else if ("BDC".equals(name) && args.size() > 1) {
+                        COSBase properties = resolved(args.get(1));
+                        if (properties instanceof COSName && getResources() != null) {
+                            var propertyList = getResources().getProperties((COSName) properties);
+                            properties = propertyList == null ? null : propertyList.getCOSObject();
+                        }
+                        if (properties instanceof COSDictionary) mcid = ((COSDictionary) properties).getInt(COSName.MCID, -1);
+                    }
+                    stack.push(mcid);
+                } else if ("EMC".equals(name) && !stack.isEmpty()) stack.pop();
+                if ("Do".equals(name)) {
+                    java.util.Deque<Integer> saved = new java.util.ArrayDeque<>(stack);
+                    nestedStreamDepth++;
+                    try { super.processOperator(op, args); }
+                    finally { nestedStreamDepth--; stack.clear(); stack.addAll(saved); }
+                } else super.processOperator(op, args);
+            }
+            @Override
+            protected void processTextPosition(TextPosition position) {
+                if (nestedStreamDepth == 0) {
+                    for (int mcid : stack) {
+                        if (mcid == -2) break;
+                        if (mcid >= 0) {
+                            frames.computeIfAbsent(mcid, key -> new HeadingFrame()).add(position);
+                            break;
+                        }
+                    }
+                }
+                super.processTextPosition(position);
+            }
+        };
+        stripper.processPage(page);
+        return frames;
+    }
+
+    private static class HeadingEntry {
+        COSBase reference;
+        COSDictionary element, parent, page;
+        String role;
+        HeadingFrame frame;
+        java.util.Set<Integer> mcids = new java.util.HashSet<>();
+    }
+
+    private static boolean headingMcids(COSBase value, COSDictionary page, java.util.List<Integer> ids) {
+        return headingMcids(value, page, ids, java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
+    }
+
+    private static boolean headingMcids(COSBase value, COSDictionary page, java.util.List<Integer> ids, java.util.Set<COSBase> visited) {
+        value = resolved(value);
+        if (value instanceof COSInteger) {
+            int id = ((COSInteger) value).intValue();
+            if (id < 0) return false;
+            ids.add(id); return true;
+        }
+        if (value instanceof COSArray) {
+            if (!visited.add(value)) return false;
+            for (COSBase kid : (COSArray) value) if (!headingMcids(kid, page, ids, visited)) return false;
+            return !ids.isEmpty();
+        }
+        if (value instanceof COSDictionary) {
+            COSDictionary mcr = (COSDictionary) value;
+            if (!COSName.getPDFName("MCR").equals(mcr.getCOSName(COSName.TYPE)) || mcr.containsKey(COSName.getPDFName("Stm")) ||
+                (mcr.containsKey(COSName.PG) && mcr.getDictionaryObject(COSName.PG) != page)) return false;
+            return headingMcids(mcr.getItem(COSName.MCID), page, ids, visited);
+        }
+        return false;
+    }
+
+    private static void collectHeadingEntries(COSBase reference, COSDictionary parent,
+            java.util.Map<COSDictionary, java.util.Map<Integer, HeadingFrame>> framesByPage,
+            java.util.List<HeadingEntry> headings, java.util.Set<COSBase> visited) {
+        COSBase value = resolved(reference);
+        if ((value instanceof COSArray || value instanceof COSDictionary) && !visited.add(value)) return;
+        if (value instanceof COSArray) {
+            for (COSBase kid : (COSArray) value) collectHeadingEntries(kid, parent, framesByPage, headings, visited);
+            return;
+        }
+        if (!(value instanceof COSDictionary)) return;
+        COSDictionary element = (COSDictionary) value;
+        String role = element.getNameAsString(COSName.S, "");
+        if (parent != null && role.matches("H[1-6]") && element.getDictionaryObject(COSName.P) == parent &&
+            element.getDictionaryObject(COSName.PG) instanceof COSDictionary && !element.containsKey(COSName.ACTUAL_TEXT) &&
+            !element.containsKey(COSName.ALT) && !element.containsKey(COSName.getPDFName("Ref"))) {
+            COSDictionary page = (COSDictionary) element.getDictionaryObject(COSName.PG);
+            java.util.Map<Integer, HeadingFrame> frames = framesByPage.get(page);
+            java.util.List<Integer> ids = new java.util.ArrayList<>();
+            if (frames != null && headingMcids(element.getItem(COSName.K), page, ids)) {
+                HeadingFrame joined = new HeadingFrame();
+                for (int id : ids) {
+                    HeadingFrame part = frames.get(id);
+                    if (part == null || !part.usable()) { joined.mixed = true; break; }
+                    if (joined.font == null) { joined.font = part.font; joined.size = part.size; }
+                    else if (!joined.font.equals(part.font) || Math.abs(joined.size - part.size) > Math.max(joined.size, part.size) * 0.05) joined.mixed = true;
+                    joined.text.append(part.text);
+                    joined.left = Math.min(joined.left, part.left); joined.right = Math.max(joined.right, part.right);
+                    joined.top = Math.min(joined.top, part.top); joined.bottom = Math.max(joined.bottom, part.bottom);
+                }
+                if (joined.usable()) {
+                    HeadingEntry entry = new HeadingEntry();
+                    entry.reference = reference; entry.element = element; entry.parent = parent; entry.page = page;
+                    entry.role = role; entry.frame = joined; entry.mcids.addAll(ids); headings.add(entry);
+                }
+            }
+        }
+        collectHeadingEntries(element.getItem(COSName.K), element, framesByPage, headings, visited);
+    }
+
+    private static boolean headingContinues(HeadingEntry previous, HeadingEntry next,
+            java.util.Map<Integer, HeadingFrame> pageFrames) {
+        if (previous.page != next.page || !previous.role.equals(next.role)) return false;
+        if (!java.util.Objects.equals(previous.element.getString(COSName.LANG), next.element.getString(COSName.LANG))) return false;
+        if (previous.parent != next.parent && !("Part".equals(previous.parent.getNameAsString(COSName.S)) &&
+            "Part".equals(next.parent.getNameAsString(COSName.S)) &&
+            previous.parent.getDictionaryObject(COSName.P) == next.parent.getDictionaryObject(COSName.P))) return false;
+        HeadingFrame a = previous.frame, b = next.frame;
+        double size = Math.max(a.size, b.size), gap = b.top - a.bottom;
+        if (!a.font.equals(b.font) || Math.abs(a.size - b.size) > size * 0.05 || b.top <= a.top ||
+            gap < -size * 0.25 || gap > size * 0.6 || !(Math.abs(a.left - b.left) <= Math.max(4, size * 0.3) ||
+            Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2) <= Math.max(6, size * 0.5))) return false;
+        String before = headingText(a.text.toString()).toLowerCase(java.util.Locale.ROOT);
+        String after = headingText(b.text.toString());
+        if (!before.matches(".*\\b(a|an|the|in|of|for|to|and|or|with|on|at|by|from|de|del|en|para|y|con|por)$") &&
+            (after.isEmpty() || !Character.isLowerCase(after.codePointAt(0)))) return false;
+        double left = Math.min(a.left, b.left), right = Math.max(a.right, b.right);
+        for (var frame : pageFrames.entrySet()) {
+            if (previous.mcids.contains(frame.getKey()) || next.mcids.contains(frame.getKey())) continue;
+            HeadingFrame blocker = frame.getValue();
+            if (blocker.top > a.top && blocker.top < b.top && Math.min(right, blocker.right) - Math.max(left, blocker.left) > 1) return false;
+        }
+        return true;
+    }
+
+    /** Keep all MCIDs, IDs and styling; demote the continuation to a Span inside the first heading. */
+    public static int mergeHeadingContinuations(PDDocument doc) throws IOException {
+        PDStructureTreeRoot root = doc.getDocumentCatalog().getStructureTreeRoot();
+        if (root == null) return 0;
+        java.util.Map<COSDictionary, java.util.Map<Integer, HeadingFrame>> frames = new java.util.IdentityHashMap<>();
+        for (PDPage page : doc.getPages()) {
+            if (page.getRotation() != 0) continue;
+            try { frames.put(page.getCOSObject(), headingFrames(page)); }
+            catch (IOException | RuntimeException ignored) { /* An unreadable page cannot justify a structure edit. */ }
+        }
+        java.util.List<HeadingEntry> headings = new java.util.ArrayList<>();
+        collectHeadingEntries(root.getCOSObject(), null, frames, headings,
+            java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
+        HeadingEntry previous = null, leader = null;
+        int merged = 0;
+        for (HeadingEntry heading : headings) {
+            if (previous != null && headingContinues(previous, heading, frames.get(heading.page))) {
+                COSBase oldKids = resolved(heading.parent.getItem(COSName.K));
+                if (oldKids instanceof COSArray) {
+                    COSArray siblings = (COSArray) oldKids;
+                    boolean found = false;
+                    for (int i = 0; i < siblings.size(); i++) {
+                        if (siblings.getObject(i) == heading.element) { siblings.remove(i); found = true; break; }
+                    }
+                    if (!found) { previous = heading; leader = heading; continue; }
+                    heading.parent.setItem(COSName.K, siblings);
+                } else if (oldKids == heading.element) heading.parent.removeItem(COSName.K);
+                else { previous = heading; leader = heading; continue; }
+                COSBase leaderKids = resolved(leader.element.getItem(COSName.K));
+                COSArray kids;
+                if (leaderKids instanceof COSArray) kids = (COSArray) leaderKids;
+                else { kids = new COSArray(); kids.add(leader.element.getItem(COSName.K)); }
+                kids.add(heading.reference);
+                leader.element.setItem(COSName.K, kids);
+                heading.element.setName(COSName.S, "Span");
+                heading.element.setItem(COSName.P, leader.reference);
+                merged++;
+            } else leader = heading;
+            previous = heading;
+        }
+        return merged;
+    }
+
+    /** v1 only moves direct, widget-only Form siblings into an existing MCID-only LBody.
+     * Existing indirect objects and ParentTree/IDTree targets are retained. Ambiguity is a no-op. */
+    public static int repairListFormContainers(PDDocument doc) {
+        PDStructureTreeRoot root = doc.getDocumentCatalog().getStructureTreeRoot();
+        if (root == null) return 0;
+        java.util.List<COSDictionary> items = new java.util.ArrayList<>();
+        java.util.Map<COSDictionary, COSDictionary> pages = new java.util.IdentityHashMap<>();
+        java.util.Set<COSBase> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        if (!collectListItems(root.getCOSObject().getItem(COSName.K), root.getCOSObject(), null, items, pages, seen, 0)) return 0;
+        java.util.Map<COSDictionary, Integer> owners = new java.util.IdentityHashMap<>();
+        for (COSBase value : seen) if (value instanceof COSDictionary) {
+            COSDictionary dict = (COSDictionary) value;
+            if ("OBJR".equals(dict.getNameAsString(COSName.TYPE))) {
+                COSDictionary object = dict.getCOSDictionary(COSName.OBJ);
+                if (object != null) owners.merge(object, 1, Integer::sum);
+            }
+        }
+        int repaired = 0;
+        for (COSDictionary item : items) {
+            COSBase value = resolved(item.getItem(COSName.K));
+            if (!(value instanceof COSArray)) continue;
+            COSArray kids = (COSArray) value;
+            COSDictionary body = null; COSBase bodyRef = null;
+            int labels = 0, forms = 0; boolean eligible = true;
+            for (COSBase kid : kids) {
+                COSBase child = resolved(kid);
+                if (!(kid instanceof COSObject) || !(child instanceof COSDictionary)) { eligible = false; break; }
+                COSDictionary dict = (COSDictionary) child;
+                String role = dict.getNameAsString(COSName.S, "");
+                if ("LBody".equals(role) && body == null) { body = dict; bodyRef = kid; }
+                else if ("Lbl".equals(role) && ++labels <= 1) { /* retain label */ }
+                else if ("Form".equals(role)) forms++;
+                else { eligible = false; break; }
+            }
+            if (!eligible || body == null || forms == 0 || !mcidOnlyBody(body.getItem(COSName.K))) continue;
+            COSDictionary page = pages.get(body);
+            if (page == null) continue;
+            for (COSBase kid : kids) {
+                COSDictionary dict = (COSDictionary) resolved(kid);
+                COSDictionary ownPage = pages.get(dict);
+                if (ownPage != null && ownPage != page) { eligible = false; break; }
+                if (!"Form".equals(dict.getNameAsString(COSName.S))) continue;
+                if (!samePageWidgetRefs(dict.getItem(COSName.K), ownPage, page, owners)) {
+                    eligible = false; break;
+                }
+            }
+            if (!eligible) continue;
+            COSArray kept = new COSArray(), contents = new COSArray();
+            for (COSBase kid : kids) {
+                COSDictionary dict = (COSDictionary) resolved(kid);
+                if (dict == body) {
+                    COSBase old = resolved(body.getItem(COSName.K));
+                    if (old instanceof COSArray) for (COSBase content : (COSArray) old) contents.add(content);
+                    else contents.add(body.getItem(COSName.K));
+                    kept.add(kid);
+                } else if ("Form".equals(dict.getNameAsString(COSName.S))) {
+                    contents.add(kid); dict.setItem(COSName.P, bodyRef);
+                } else kept.add(kid);
+            }
+            body.setItem(COSName.K, contents); item.setItem(COSName.K, kept); repaired++;
+        }
+        return repaired;
+    }
+
+    private static boolean samePageWidgetRefs(COSBase raw, COSDictionary inheritedPage, COSDictionary page,
+        java.util.Map<COSDictionary, Integer> owners) {
+        COSBase value = resolved(raw);
+        if (value instanceof COSArray) {
+            COSArray refs = (COSArray) value;
+            if (refs.size() == 0) return false;
+            for (COSBase child : refs) {
+                if (!(resolved(child) instanceof COSDictionary) || !samePageWidgetRefs(child, inheritedPage, page, owners)) return false;
+            }
+            return true;
+        }
+        if (!(value instanceof COSDictionary)) return false;
+        COSDictionary objr = (COSDictionary) value;
+        COSDictionary widget = objr.getCOSDictionary(COSName.OBJ);
+        COSDictionary objectPage = objr.getCOSDictionary(COSName.PG);
+        if (objectPage == null) objectPage = inheritedPage;
+        if (!"OBJR".equals(objr.getNameAsString(COSName.TYPE)) || objectPage != page || widget == null ||
+            owners.getOrDefault(widget, 0) != 1 || !"Widget".equals(widget.getNameAsString(COSName.SUBTYPE)) ||
+            (widget.getCOSDictionary(COSName.P) != null && widget.getCOSDictionary(COSName.P) != page)) return false;
+        COSArray annots = page.getCOSArray(COSName.ANNOTS);
+        if (annots == null) return false;
+        for (COSBase annotation : annots) if (resolved(annotation) == widget) return true;
+        return false;
+    }
+
+    private static boolean mcidOnlyBody(COSBase raw) {
+        COSBase value = resolved(raw);
+        if (value instanceof COSInteger) return ((COSInteger) value).intValue() >= 0;
+        if (!(value instanceof COSArray) || ((COSArray) value).size() == 0) return false;
+        for (COSBase kid : (COSArray) value) {
+            COSBase child = resolved(kid);
+            if (!(child instanceof COSInteger) || ((COSInteger) child).intValue() < 0) return false;
+        }
+        return true;
+    }
+
+    private static boolean collectListItems(COSBase raw, COSDictionary parent, COSDictionary page,
+        java.util.List<COSDictionary> items, java.util.Map<COSDictionary, COSDictionary> pages,
+        java.util.Set<COSBase> seen, int depth) {
+        if (depth > 128 || seen.size() > 100000) return false;
+        COSBase value = resolved(raw);
+        if (value == null || value instanceof COSInteger) return true;
+        if (!seen.add(value)) return false;
+        if (value instanceof COSArray) {
+            for (COSBase kid : (COSArray) value) if (!collectListItems(kid, parent, page, items, pages, seen, depth + 1)) return false;
+            return true;
+        }
+        if (!(value instanceof COSDictionary)) return false;
+        COSDictionary dict = (COSDictionary) value;
+        String type = dict.getNameAsString(COSName.TYPE, "");
+        if ("MCR".equals(type) || "OBJR".equals(type)) return true;
+        if (dict.getDictionaryObject(COSName.P) != parent) return false;
+        COSDictionary ownPage = dict.getCOSDictionary(COSName.PG);
+        if (ownPage != null) page = ownPage;
+        pages.put(dict, page);
+        if ("LI".equals(dict.getNameAsString(COSName.S))) items.add(dict);
+        return collectListItems(dict.getItem(COSName.K), dict, page, items, pages, seen, depth + 1);
     }
 
     private static String formatIso8601(Calendar cal) {

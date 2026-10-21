@@ -36,7 +36,7 @@
   },
   "tagBuilder": {
     "headingLevelClampMin": 1,
-    "headingLevelClampMax": 3
+    "headingLevelClampMax": 6
   },
   "fontEmbedder": {
     "fallbackStrategy": "substitute-when-missing",

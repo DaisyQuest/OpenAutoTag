@@ -332,7 +332,7 @@ test("A15: table cells with ColSpan/RowSpan get /Table attrs when flag is on", a
   assert.ok(bodyCell.tableAttrs.Headers.length > 0);
 });
 
-test("A15: flag off — no tableAttrs emitted (goldmaster contract)", async () => {
+test("A15: explicit flag off emits no tableAttrs", async () => {
   const inputPath = await writeSemantic({
     schemaVersion: "1.0.0",
     documentId: "semantic:a15-off",
@@ -346,14 +346,14 @@ test("A15: flag off — no tableAttrs emitted (goldmaster contract)", async () =
     orderedNodeIds: ["n1", "n2", "n3", "n4"]
   });
 
-  const tagging = await buildTagTree(inputPath);
+  const tagging = await buildTagTree(inputPath, { enableTableHeaders: false });
   const table = tagging.root.children[0];
   const walk = (n) => {
     if (n.tableAttrs) return true;
     for (const c of n.children || []) if (walk(c)) return true;
     return false;
   };
-  assert.equal(walk(table), false, "no tableAttrs should be emitted by default");
+  assert.equal(walk(table), false, "explicit opt-out preserves the legacy output");
 });
 
 // ---- A16: PrintField attr builder ----------------------------------------

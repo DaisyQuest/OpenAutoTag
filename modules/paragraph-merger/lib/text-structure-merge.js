@@ -127,9 +127,31 @@ export function textStructureMerge(semanticDocument, config = {}) {
       const breakReasons = [];
       // Same-row neighbors (common when a line is split into multiple
       // positioned blocks — e.g. scanned PDFs with per-word OCR boxes):
-      // skip the gap and indent break checks, which assume we're moving
-      // from one row to the next. Break only on explicit column change.
+      // skip vertical gap and indent checks while retaining semantic and
+      // widely separated label boundaries.
       const sameRow = getRow(prev) === getRow(curr);
+
+      if (/^[☐☑☒]\s+/.test(String(curr.text || "").trimStart())) {
+        breakReasons.push("new checkbox option");
+      }
+      const prevFields = prev.formFieldIds || [];
+      const currFields = curr.formFieldIds || [];
+      if ((prevFields.length || currFields.length) && !prevFields.some((id) => currFields.includes(id))) {
+        breakReasons.push("form field boundary");
+      }
+      if (sameRow) {
+        const horizontalGap = getLeft(curr) - (getLeft(prev) + getWidth(prev));
+        if (horizontalGap > Math.max(64, Math.max(prev.fontSize || 0, curr.fontSize || 0) * 4)) {
+          breakReasons.push("separate same-row labels");
+        }
+      } else if (Number.isFinite(prev.fontSize) && Number.isFinite(curr.fontSize) &&
+        Math.abs(prev.fontSize - curr.fontSize) / Math.max(prev.fontSize, curr.fontSize) >= 0.25) {
+        breakReasons.push("font size boundary");
+      }
+      if (nonPNodes.some((node) => getTop(node) > getTop(prev) && getTop(node) <= getTop(curr) &&
+        (node.columnHint == null || curr.columnHint == null || node.columnHint === curr.columnHint))) {
+        breakReasons.push("intervening semantic element");
+      }
 
       if (isRotatedNode(prev) || isRotatedNode(curr)) {
         breakReasons.push("rotated text boundary");

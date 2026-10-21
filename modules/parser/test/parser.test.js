@@ -9,6 +9,14 @@ import { createImageOnlyPdf } from "../../../test/fixtures/create-image-only-pdf
 import { createPdfDocumentLoadOptions, groupTextItemsToBlocks, parsePdf } from "../index.js";
 import { renderPageVariantsWithPdfBox, selectBestOcrCandidate } from "../ocr-pipeline.js";
 
+test("parser preserves explicit RTL run direction and logical fragment order", () => {
+  const blocks = groupTextItemsToBlocks(1, 792, [
+    { str: "עולם", width: 30, height: 12, transform: [12,0,0,12,72,680], fontName: "Test", dir: "rtl" },
+    { str: "שלום", width: 32, height: 12, transform: [12,0,0,12,110,680], fontName: "Test", dir: "rtl" }
+  ]);
+  assert.equal(blocks.length, 1); assert.equal(blocks[0].direction, "rtl"); assert.equal(blocks[0].text, "שלום עולם");
+});
+
 test("parser groups fragmented extractor items into a single line block", () => {
   const blocks = groupTextItemsToBlocks(1, 792, [
     {

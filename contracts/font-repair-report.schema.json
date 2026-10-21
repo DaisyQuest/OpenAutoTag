@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/font-repair-report.schema.json",
+  "title": "Qualified font repair and saved-object verification",
+  "type": "object",
+  "required": ["sourceHash", "candidateHash", "repairLedger", "verification"],
+  "properties": {
+    "sourceHash": { "$ref": "repair-audit.schema.json#/properties/sourceHash" },
+    "candidateHash": { "$ref": "repair-audit.schema.json#/properties/candidateHash" },
+    "repairLedger": { "$ref": "repair-audit.schema.json#/properties/repairLedger" },
+    "verification": {
+      "type": "object", "required": ["status", "scope", "reason"],
+      "properties": {
+        "status": { "enum": ["pass", "fail"] },
+        "scope": { "const": "catalog-and-info" },
+        "reason": { "type": "string" }
+      }, "additionalProperties": false
+    }
+  }, "additionalProperties": false
+}

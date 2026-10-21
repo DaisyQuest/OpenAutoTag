@@ -315,6 +315,7 @@ public class NativeContentStreamRewriter {
         String actualText;
         String footnoteGroupId;
         String headerId;
+        String listNumbering;
         String scope;
         int rowSpan = 1;
         int columnSpan = 1;
@@ -348,6 +349,7 @@ public class NativeContentStreamRewriter {
         if (footnoteGroupId != null) n.footnoteGroupId = asString(footnoteGroupId);
         Object headerId = m.get("headerId");
         if (headerId != null) n.headerId = nonEmptyString(headerId);
+        if (m.get("listNumbering") != null) n.listNumbering = nonEmptyString(m.get("listNumbering"));
         Object scope = m.get("scope");
         if (scope != null) n.scope = normalizeScopeName(asString(scope));
         Object rowSpan = m.get("rowSpan");
@@ -843,7 +845,7 @@ public class NativeContentStreamRewriter {
      * Fallback: when tagTree is null (caller didn't supply --tags) we
      * fall back to the flat build for backward compatibility.
      */
-    private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree) {
+    private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree) throws IOException {
         if (tagTree == null) {
             buildStructureTree(doc, plans);
             return;
@@ -930,6 +932,7 @@ public class NativeContentStreamRewriter {
         TreeContext rootContext = new TreeContext();
         PDStructureElement rootElement = buildStructureSubtree(treeRoot, tagTree, rootContext, refsByTag, parentArraysByPageKey, linkAnnots, pageDisplayHeight);
         if (rootElement != null) treeRoot.appendKid(rootElement);
+        StructureIdentifiers.install(treeRoot);
 
         // Link annotation wrapping is disabled (see LinkAnnot
         // comment in the page-collection loop above). No post-walk
@@ -1048,6 +1051,9 @@ public class NativeContentStreamRewriter {
     }
 
     private static void applyTableAttributes(PDStructureElement el, TagTreeNode node, TreeContext ctx) {
+        if ("L".equals(node.type) && node.listNumbering != null && Set.of("None","Disc","Circle","Square","Decimal","UpperRoman","LowerRoman","UpperAlpha","LowerAlpha").contains(node.listNumbering)) {
+            COSDictionary list=new COSDictionary(); list.setName(COSName.O,"List"); list.setName(COSName.getPDFName("ListNumbering"),node.listNumbering); el.getCOSObject().setItem(COSName.A,list);
+        }
         boolean isTableCell = "TH".equals(node.type) || "TD".equals(node.type);
         if (!isTableCell) return;
 

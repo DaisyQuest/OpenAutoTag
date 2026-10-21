@@ -431,7 +431,7 @@ server.tool(
           "curl -X POST http://localhost:3000/process-pdf-upload -F 'file=@input.pdf' -F 'workloadId=corruption-repair'",
           "",
           "# Or run the font repair CLI directly:",
-          "java -cp modules/corruption-repairer/java:modules/pdf-writer/vendor/pdfbox-app-3.0.7.jar FontRepairCli --pdf input.pdf",
+          "java -cp modules/corruption-repairer/java:modules/pdf-writer/vendor/pdfbox-app-3.0.8.jar FontRepairCli --pdf input.pdf",
           "",
           "# View the font health report in browser:",
           "open http://localhost:3000/font-report.html?jobId=<jobId>"
@@ -465,7 +465,7 @@ server.tool(
           "open http://localhost:3000/nativity-report.html?jobId=<jobId>",
           "",
           "# Run the operator-level parser to inspect content streams:",
-          "java -cp build:modules/pdf-writer/vendor/pdfbox-app-3.0.7.jar NativeContentStreamParser --pdf input.pdf --page 0"
+          "java -cp build:modules/pdf-writer/vendor/pdfbox-app-3.0.8.jar NativeContentStreamParser --pdf input.pdf --page 0"
         ],
         keyMetrics: [
           "contentPreservationScore: fraction of text as native vectors (1.0 = fully native)",
@@ -492,7 +492,7 @@ server.tool(
           "open http://localhost:3000/repair-report.html?jobId=<jobId>",
           "",
           "# Run font-specific repair:",
-          "java -cp build:modules/pdf-writer/vendor/pdfbox-app-3.0.7.jar FontRepairCli --pdf input.pdf --output repaired.pdf"
+          "java -cp build:modules/pdf-writer/vendor/pdfbox-app-3.0.8.jar FontRepairCli --pdf input.pdf --output repaired.pdf"
         ],
         structuralChecks: ["XREF_TABLE_BROKEN", "STREAM_LENGTH_MISMATCH", "FLATE_STREAM_CORRUPT", "FONT_DAMAGED", "DANGLING_REFERENCE", "HEADER_DAMAGED", "INCREMENTAL_GARBAGE", "FILE_TRUNCATED"],
         healthScoring: "0-1 score; riskLevel: clean/low/medium/high/critical"

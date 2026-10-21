@@ -52,7 +52,7 @@ test("validator uses veraPDF to report PDF/UA non-compliance", async () => {
   assert.ok(report.findings.length > 0);
 });
 
-test("validator suppresses known veraPDF PDFBox metadata false positives", async () => {
+test("validator passes valid metadata without suppressing any raw failures", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "validator-metadata-fix-test-"));
   const pdfPath = path.join(tempDir, "sample.pdf");
   const tagsPath = path.join(tempDir, "tagging.json");
@@ -126,9 +126,11 @@ test("validator suppresses known veraPDF PDFBox metadata false positives", async
   assert.equal(report.findings.length, 0);
   assert.equal(report.summary.failedRules, 0);
   assert.equal(report.summary.failedChecks, 0);
-  assert.equal(report.rawSummary.failedRules, 2);
-  assert.deepEqual(report.metadataDiagnostics?.suppressedFindingCodes, ["VERAPDF_5_1", "VERAPDF_7_1_9"]);
-  assert.equal(report.metadataDiagnostics?.correctedByValidator, true);
+  assert.equal(report.rawSummary.failedRules, 0);
+  assert.deepEqual(report.rawFindings, []);
+  assert.equal(report.engine.backend, "greenfield");
+  assert.equal(report.metadataDiagnostics?.suppressedFindingCodes?.length || 0, 0);
+  assert.ok(!report.metadataDiagnostics?.correctedByValidator);
 });
 
 test("validator accepts automatically normalized heading sequences", async () => {

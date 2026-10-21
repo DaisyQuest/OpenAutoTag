@@ -8,7 +8,8 @@ const ajv = new Ajv2020({ allErrors: true });
 const validateSemantic = ajv.compile(semanticSchema);
 const validateTagging = ajv.compile(taggingSchema);
 
-// Feature flags for WTPDF / PDF/UA-2 additions. Default-off to
+// Feature flags for optional structure additions. Table header associations are
+// enabled by default; callers may explicitly disable them. Other additions default off to
 // preserve existing fixture output and keep the rewriter's /Form
 // XObject handling untouched on the corpus. Each flag can be lit
 // via an environment variable so integration tests can opt in
@@ -29,7 +30,7 @@ function resolveTagBuilderOptions(overrides = {}) {
     enableLayoutAttrs:
       overrides.enableLayoutAttrs ?? readBooleanEnv("TAG_BUILDER_ENABLE_LAYOUT_ATTRS"),
     enableTableHeaders:
-      overrides.enableTableHeaders ?? readBooleanEnv("TAG_BUILDER_ENABLE_TABLE_HEADERS"),
+      overrides.enableTableHeaders ?? (process.env.TAG_BUILDER_ENABLE_TABLE_HEADERS == null || process.env.TAG_BUILDER_ENABLE_TABLE_HEADERS === "" ? true : readBooleanEnv("TAG_BUILDER_ENABLE_TABLE_HEADERS")),
     enablePrintFieldAttrs:
       overrides.enablePrintFieldAttrs ?? readBooleanEnv("TAG_BUILDER_ENABLE_PRINT_FIELD_ATTRS"),
     captionLookbackParagraphs: Number(overrides.captionLookbackParagraphs ?? 3)
@@ -46,7 +47,7 @@ function readClampRange() {
   const max = Number(process.env.TAG_BUILDER_HEADING_LEVEL_CLAMP_MAX);
   return {
     min: Number.isFinite(min) && min >= 1 && min <= 6 ? min : 1,
-    max: Number.isFinite(max) && max >= 1 && max <= 6 ? max : 3
+    max: Number.isFinite(max) && max >= 1 && max <= 6 ? max : 6
   };
 }
 
@@ -222,6 +223,7 @@ function createLeaf(node, headingNormalization) {
   }
 
   if (resolvedRole === "TH" || resolvedRole === "TD") {
+    if (["Row", "Column", "Both"].includes(node.scope)) leaf.scope = node.scope;
     const tableRowIndex = getTableRowIndex(node);
     const tableColumnIndex = getTableColumnIndex(node);
 
@@ -272,7 +274,7 @@ function createListNode(container, listIndex) {
 function inferListMarker(node) {
   if (node.listMarker) return String(node.listMarker);
   const text = String(node.text || "").trimStart();
-  const bullet = /^([•◦▪▸‣–—]|\*|-)\s+/.exec(text);
+  const bullet = /^([•◦▪▸‣–—☐☑☒]|\*|-)\s+/.exec(text);
   if (bullet) return bullet[1];
   const ordered = /^(\d+[.)]\s*|[a-z][.)]\s*|[ivxlcdm]+[.)]\s*)/i.exec(text);
   if (ordered) return ordered[1].trimEnd();
@@ -282,10 +284,12 @@ function inferListMarker(node) {
 function inferListNumbering(node) {
   const style = String(node.listStyle || "");
   const marker = String(node.listMarker || node.text || "").trimStart();
-  if (/^\d+[.)]/.test(marker) || style === "ordered") return "Decimal";
+  if (/^\d+[.)]/.test(marker)) return "Decimal";
+  const roman = /^([ivxlcdm]+)[.)]/i.exec(marker);
+  if (roman && (roman[1].length > 1 || /^[ivx]$/i.test(roman[1]))) return roman[1] === roman[1].toUpperCase() ? "UpperRoman" : "LowerRoman";
   if (/^[a-z][.)]/.test(marker)) return "LowerAlpha";
   if (/^[A-Z][.)]/.test(marker)) return "UpperAlpha";
-  if (/^[ivxlcdm]+[.)]/i.test(marker) && !/^\d/.test(marker)) return "LowerRoman";
+  if (style === "ordered") return "Decimal";
   if (/^[•◦▪▸‣]/.test(marker) || /^[-*]\s/.test(marker) || style === "unordered") return "Disc";
   return null;
 }
@@ -1513,7 +1517,7 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
     // live inside a THead ancestor — they act as column headers.
     const thCells = [];
     const annotate = (n, inHead) => {
-      if (!n) return;
+      if (!n || (n !== tableNode && n.type === "Table")) return;
       const nextInHead = inHead || n.type === "THead";
       if (n.type === "TH" || n.type === "TD") {
         n._inTHead = nextInHead;
@@ -1528,7 +1532,7 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
     for (const th of thCells) {
       const rowIndex = Number.isInteger(th.tableRowIndex) ? th.tableRowIndex : thFallback;
       const columnIndex = Number.isInteger(th.tableColumnIndex) ? th.tableColumnIndex : thFallback;
-      th.headerId = `H_r${rowIndex}c${columnIndex}`;
+      th.headerId = `${tableNode.id}:H_r${rowIndex}c${columnIndex}_${thFallback}`;
       thFallback += 1;
     }
 
@@ -1541,15 +1545,17 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
       const columnIndex = Number.isInteger(th.tableColumnIndex) ? th.tableColumnIndex : 0;
       const columnSpan = Math.max(1, Number(th.columnSpan || 1));
       const rowSpan = Math.max(1, Number(th.rowSpan || 1));
-      if (th._inTHead) {
+      const scope = ["Row", "Column", "Both"].includes(th.scope) ? th.scope : th._inTHead ? "Column" : "Row";
+      if (scope === "Column" || scope === "Both") {
         for (let col = columnIndex; col < columnIndex + columnSpan; col += 1) {
           if (!headersByColumn.has(col)) headersByColumn.set(col, []);
-          headersByColumn.get(col).push(th.headerId);
+          headersByColumn.get(col).push(th);
         }
-      } else {
+      }
+      if (scope === "Row" || scope === "Both") {
         for (let row = rowIndex; row < rowIndex + rowSpan; row += 1) {
           if (!rowHeaderByRowIndex.has(row)) rowHeaderByRowIndex.set(row, []);
-          rowHeaderByRowIndex.get(row).push(th.headerId);
+          rowHeaderByRowIndex.get(row).push(th);
         }
       }
     }
@@ -1558,7 +1564,7 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
     // arrays on TD/TH cells that need them. Also attach /Scope on TH
     // cells (PDF/UA Matterhorn 13-004).
     const decorate = (n) => {
-      if (!n) return;
+      if (!n || (n !== tableNode && n.type === "Table")) return;
       if (n.type === "TD" || n.type === "TH") {
         const cs = Math.max(1, Number(n.columnSpan || 1));
         const rs = Math.max(1, Number(n.rowSpan || 1));
@@ -1568,12 +1574,11 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
         if (rs > 1) { attrs.RowSpan = rs; meaningful = true; }
         if (n.type === "TH") {
           // Assign /Scope: Column headers live in THead, row headers elsewhere.
-          // A TH that spans rows in THead (e.g. a corner cell) gets Both.
+          // Spanning multiple rows alone does not make a column header a row header.
           const isColHeader = Boolean(n._inTHead);
-          const spansRows = rs > 1;
           let scope;
-          if (isColHeader && spansRows) {
-            scope = "Both";
+          if (["Row", "Column", "Both"].includes(n.scope)) {
+            scope = n.scope;
           } else if (isColHeader) {
             scope = "Column";
           } else {
@@ -1581,12 +1586,21 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
           }
           n.scope = scope;
         }
-        if (n.type === "TD") {
+        if (n.type === "TD" || n.type === "TH") {
           const colIdx = Number.isInteger(n.tableColumnIndex) ? n.tableColumnIndex : null;
           const rowIdx = Number.isInteger(n.tableRowIndex) ? n.tableRowIndex : null;
-          const colHeaders = colIdx != null ? (headersByColumn.get(colIdx) || []) : [];
-          const rowHeaders = rowIdx != null ? (rowHeaderByRowIndex.get(rowIdx) || []) : [];
-          const headerIds = [...new Set([...colHeaders, ...rowHeaders])];
+          const colHeaders = colIdx != null ? Array.from({ length: cs }, (_, i) => headersByColumn.get(colIdx + i) || []).flat() : [];
+          const rowHeaders = rowIdx != null ? Array.from({ length: rs }, (_, i) => rowHeaderByRowIndex.get(rowIdx + i) || []).flat() : [];
+          const eligible = [...colHeaders.filter((h) => h !== n && Number.isInteger(h.tableRowIndex) && h.tableRowIndex < rowIdx),
+            ...rowHeaders.filter((h) => h !== n && Number.isInteger(h.tableColumnIndex) && h.tableColumnIndex < colIdx)];
+          // Prefer the latest occurrence of an otherwise identical repeated header.
+          const repeated = new Map();
+          for (const h of eligible) {
+            const key = `${h.scope || (h._inTHead ? "Column" : "Row")}:${h.tableColumnIndex}:${h.columnSpan || 1}:${h.label || ""}`;
+            const prior = repeated.get(key);
+            if (!prior || h.tableRowIndex >= prior.tableRowIndex) repeated.set(key, h);
+          }
+          const headerIds = [...new Set([...repeated.values()].map((h) => h.headerId))];
           if (headerIds.length > 0) {
             attrs.Headers = headerIds;
             meaningful = true;
@@ -1601,7 +1615,7 @@ function assignHeaderIdsAndTableAttrs(rootNode) {
     // Step 5: clean up the temporary marker so the flag doesn't
     // leak into the emitted tree.
     const cleanup = (n) => {
-      if (!n) return;
+      if (!n || (n !== tableNode && n.type === "Table")) return;
       delete n._inTHead;
       for (const kid of n.children || []) cleanup(kid);
     };
@@ -1955,8 +1969,10 @@ export async function buildTagTree(inputPath, overrides = {}) {
   const headingNormalization = buildHeadingNormalization(orderedNodes);
   const sectionStack = [];
   let activeList = null;
+  let listStack = [], activeListGroup = null;
   let activeTable = null;
   let listIndex = 0;
+  const listItemsBySource = new Map(), paragraphsByGroup = new Map();
 
   // A5: identify which heading should be emitted as Title (if any).
   const titleNodeId = options.enableTitleDetection ? detectTitleNodeId(orderedNodes) : null;
@@ -1971,7 +1987,6 @@ export async function buildTagTree(inputPath, overrides = {}) {
     }
 
     if (node.role === "Artifact") {
-      activeList = null;
       activeTable = null;
       continue;
     }
@@ -2017,17 +2032,51 @@ export async function buildTagTree(inputPath, overrides = {}) {
       continue;
     }
 
+    if (node.role === "LI" && node.listContinuationOf) {
+      const prior = listItemsBySource.get(node.listContinuationOf);
+      if (!prior || !activeList) throw new Error("List continuation has no active preceding item; requires review");
+      let body = prior.children.find((n) => n.type === "LBody");
+      if (!body) {
+        body = { id: `${prior.id}:body`, type: "LBody", sourceNodeIds: prior.sourceNodeIds || [], actualText: prior.actualText, children: [] };
+        delete prior.sourceNodeIds; delete prior.actualText; prior.children.push(body);
+      }
+      if (body.sourceNodeIds?.length) {
+        body.children.unshift({ id: `${body.id}:first`, type: "P", children: [{ id: `${body.id}:first:span`, type: "Span", label: body.label,
+          sourceNodeIds: body.sourceNodeIds, ...(body.actualText ? { actualText: body.actualText } : {}), children: [] }] });
+        delete body.sourceNodeIds; delete body.actualText;
+      }
+      body.children.push(createLeaf({ ...node, role: "P" }, headingNormalization));
+      listItemsBySource.set(node.id, prior);
+      continue;
+    }
     if (node.role === "LI") {
-      if (!activeList) {
+      const level = Math.max(1, Number(node.listLevel) || 1);
+      if (!activeList || (level === 1 && node.listGroupId && activeListGroup && node.listGroupId !== activeListGroup)) {
         listIndex += 1;
         activeList = createListNode(currentContainer(), listIndex);
+        activeListGroup = node.listGroupId || null;
+        listStack = [{ level: 1, list: activeList, last: null }];
         const listNumbering = inferListNumbering(node);
         if (listNumbering) {
           activeList.listNumbering = listNumbering;
         }
       }
-
-      activeList.children.push(createLiLeaf(node, headingNormalization));
+      while (listStack.length > 1 && listStack.at(-1).level > level) listStack.pop();
+      if (level > listStack.at(-1).level) {
+        const parent = listStack.at(-1).last;
+        if (!parent || level !== listStack.at(-1).level + 1) throw new Error("Ambiguous nested list level; requires review");
+        let body = parent.children.find((n) => n.type === "LBody");
+        if (!body) {
+          body = { id: `${parent.id}:body`, type: "LBody", sourceNodeIds: parent.sourceNodeIds || [], label: parent.label, children: [] };
+          delete parent.sourceNodeIds; delete parent.actualText; parent.children.push(body);
+        }
+        const nested = createListNode(body, ++listIndex);
+        const numbering = inferListNumbering(node); if (numbering) nested.listNumbering = numbering;
+        listStack.push({ level, list: nested, last: null });
+      }
+      const leaf = createLiLeaf(node, headingNormalization);
+      listItemsBySource.set(node.id, leaf);
+      listStack.at(-1).list.children.push(leaf); listStack.at(-1).last = leaf;
       activeTable = null;
       continue;
     }
@@ -2071,6 +2120,16 @@ export async function buildTagTree(inputPath, overrides = {}) {
 
     activeTable = null;
     const leaf = createLeaf(node, headingNormalization);
+    if (node.paragraphGroupId && node.role === "P") {
+      const prior = paragraphsByGroup.get(node.paragraphGroupId);
+      if (prior) {
+        if (prior.parent !== currentContainer()) throw new Error("Paragraph continuation crosses a semantic container; requires review");
+        prior.leaf.children.push(...leaf.children);
+        prior.leaf.label = `${prior.leaf.label} ${leaf.label}`;
+        continue;
+      }
+      paragraphsByGroup.set(node.paragraphGroupId, { leaf, parent: currentContainer() });
+    }
     // A6: promote Figure/Table caption-like paragraphs to /Caption.
     if (options.enableCaptionDetection && isCaptionCandidate(node)) {
       captionCandidatesDetected += 1;

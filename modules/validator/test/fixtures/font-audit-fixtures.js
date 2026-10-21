@@ -12,7 +12,7 @@ import { getRuntimeBuildDir } from "../../../../scripts/runtime-paths.js";
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const validatorDir = path.resolve(moduleDir, "..", "..");
 const repoRoot = path.resolve(validatorDir, "..", "..");
-const pdfboxJarPath = path.join(validatorDir, "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(validatorDir, "vendor", "pdfbox-app-3.0.8.jar");
 const buildDir = getRuntimeBuildDir("modules-validator-test-fixtures", { repoRoot });
 const sourcePath = path.join(moduleDir, "FontAuditFixturesCli.java");
 const classPath = path.join(buildDir, "FontAuditFixturesCli.class");

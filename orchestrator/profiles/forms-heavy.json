@@ -6,6 +6,7 @@
   "extends": "default",
   "tags": ["forms", "acroform", "interactive"],
   "paragraphMerger": {
+    "enabled": false,
     "strategy": "text-structure"
   },
   "fontEmbedder": {

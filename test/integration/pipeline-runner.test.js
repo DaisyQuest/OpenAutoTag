@@ -49,16 +49,15 @@ test("pipeline runner processes a sample PDF end-to-end", async () => {
   assert.equal(validationReport.findings.length, 0);
   assert.equal(validationReport.summary.failedRules, 0);
   assert.equal(validationReport.summary.failedChecks, 0);
-  assert.equal(validationReport.rawSummary.failedRules, 2);
+  assert.equal(validationReport.rawSummary.failedRules, 0);
+  assert.deepEqual(validationReport.summary, validationReport.rawSummary);
+  assert.deepEqual(validationReport.rawFindings, []);
+  assert.equal(validationReport.engine.backend, "greenfield");
   assert.equal(
     validationReport.findings.some((finding) => finding.code === "VERAPDF_7_21_4_2_2"),
     false
   );
-  assert.equal(validationReport.metadataDiagnostics?.infoMatchesXmp, true);
-  assert.equal(validationReport.metadataDiagnostics?.dcTitleDetected, true);
-  assert.equal(validationReport.metadataDiagnostics?.pdfUaIdentificationDetected, true);
-  assert.equal(validationReport.metadataDiagnostics?.suspectedVeraPdfMetadataMismatch, true);
-  assert.equal(validationReport.metadataDiagnostics?.correctedByValidator, true);
+  assert.equal(validationReport.metadataDiagnostics, null, "A clean supported-backend result needs no legacy correction");
 });
 
 test("pipeline runner retries transient stage failures before succeeding", async () => {

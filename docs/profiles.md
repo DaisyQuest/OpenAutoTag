@@ -10,7 +10,7 @@ When you submit a PDF for accessibility tagging, the pipeline applies a **profil
 | **Legal** | Court filings, briefs, case law | Tighter column gaps for legal layouts, lower OCR threshold for scanned filings, stricter line grouping |
 | **Scientific** | Academic papers, journal articles | Narrow column gutters for two-column journals, extended heading hierarchy (H1–H4) |
 | **Scanned / Low-Quality** | Photocopies, faxes, degraded scans | Forces OCR on every page, 4 retries, adds 600-DPI render variant |
-| **Forms** | PDFs with interactive form fields | Aggressive font substitution, prioritizes AcroForm /DA validation |
+| **Forms** | PDFs with interactive form fields | Keeps text blocks separate, recognizes checkbox options and form sections, prioritizes AcroForm /DA validation |
 | **CJK** | Chinese, Japanese, Korean documents | CJK OCR languages, Identity-H encoding, Noto Sans CJK fallback |
 
 ## How to Choose
@@ -36,6 +36,32 @@ None of the above?
 ```
 
 ## Selecting a Profile
+
+The Forms profile disables paragraph merging so separate field labels and
+checkbox options are not combined. Other profiles retain paragraph merging
+with guards for field relationships, checkbox boundaries, intervening semantic
+elements, and widely separated labels.
+
+In the default `auto` writer mode, an already tagged document with a structure
+tree, `MarkInfo.Marked=true`, and sufficient marked-content coverage uses the
+configured already-tagged policy before considering text matching. The default
+`passthrough` policy preserves the authored structure, field placement, title,
+and language while refreshing metadata incrementally. Confirmed wrapped heading
+lines are consolidated into one heading using matching font, size, alignment,
+tight spacing, and a linguistic continuation cue such as a trailing "in" or
+"of". Existing MCIDs, IDs, styles, and field references are retained; the writer
+reports the number of repairs as `headingContinuationsMerged`. Independent
+headings, intervening body text, and different sections remain separate.
+The semantic engine applies the same continuation rule before tag construction,
+retaining the component block IDs in `sourceBlockIds`. Existing structure is
+preserved even when a new heuristic tree achieves a high operator match score.
+The writer report marks this with `sourceTaggingPreserved: true`. This does not
+establish PDF/UA compliance; the validator still reports existing problems.
+
+To deliberately replace existing tags, request `--writer-mode native` with the
+pipeline CLI. `PASSTHROUGH_MINIMAL=0` retains the optional broader legacy
+passthrough repair pass; the default preservation pass leaves source structure
+and content intact apart from confirmed wrapped-heading repairs.
 
 ### Via the Dashboard
 
@@ -116,6 +142,46 @@ Overrides are applied on top of the resolved profile chain. For example, if `leg
 |---------|---------|-----|
 | veraPDF flavour | ua1 | ua1 |
 | Skip font audit | false | false |
+
+## Opt-in preservation checks and list-form repair
+
+The accessibility pipeline accepts `--preservation-check` (programmatic option
+`options.preservationCheck: true`). It inspects the source and saved candidate,
+then writes `08-quality-report.json` and two inspection sidecars. It compares page
+geometry/content/resources, field properties and hierarchy, widget appearance and
+ownership, and standard heading content references. Validation must have completed
+with the mandatory font audit and a matching `pdfSha256`; older reports must be
+regenerated. An inspection failure or missing/stale checker report is `error`, and
+a proven preservation regression is `rejected`. Either fails the pipeline stage
+without retry. A completed stage is still `review_required`; this bounded check
+does not certify accessibility. Reports for full rewrites flag the unavailable
+object-identity mapping instead of claiming the preservation checks passed.
+
+`PASSTHROUGH_REPAIR_LIST_FORMS=1` enables the first list-container repair for
+already-tagged PDFs. The default is disabled. It moves direct `Form` children of
+an `LI` into its existing `LBody`, keeping form objects, widget references,
+ParentTree/IDTree targets, and relative form/body-content order. The rule requires
+one MCID-only body, at most one label, and uniquely owned widget-only form content
+on the same page. Ambiguous bodies, shared objects, cross-page widgets, and other
+child roles are left unchanged. `06-writer-report.json` and the tag manifest expose
+`listFormContainersRepaired`. Repeat application is a no-op.
+
+Example from the repository root in PowerShell:
+
+```powershell
+$env:PASSTHROUGH_REPAIR_LIST_FORMS = "1"
+node orchestrator/pipeline-runner.js --pdf input.pdf --output-dir output/review --profile forms-heavy --preservation-check
+```
+
+Use both switches together when qualifying a repair. The saved PDF remains a
+candidate, including after a failed quality stage. Atomic promotion of accepted
+artifacts and corresponding client download policy are future P06 work. The
+quality stage is available in the accessibility pipeline; it is not enabled for
+redaction, which intentionally changes content.
+
+The portable regression suite is `npm run test:production-baseline`. Its six test
+files are mandatory in the default CI runner even when external corpora are
+unavailable. Fixtures are generated locally using existing dependencies.
 
 ## Creating a Custom Profile
 

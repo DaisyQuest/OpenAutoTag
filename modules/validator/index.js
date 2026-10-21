@@ -1,6 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
-import { constants } from "node:fs";
+import { constants, createReadStream } from "node:fs";
+import { createHash } from "node:crypto";
 import { access, chmod, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -27,8 +28,7 @@ const metadataProbeSourcePath = path.join(moduleDir, "java", "MetadataProbeCli.j
 const metadataProbeClassPath = path.join(buildDir, "MetadataProbeCli.class");
 const fontAuditSourcePath = path.join(moduleDir, "java", "FontAuditCli.java");
 const fontAuditClassPath = path.join(buildDir, "FontAuditCli.class");
-const veraPdfJarPath = path.join(vendorDir, "verapdf", "app", "bin", "pdfbox-apps-1.28.2.jar");
-const fontAuditPdfboxJarPath = path.join(vendorDir, "pdfbox-app-3.0.7.jar");
+const fontAuditPdfboxJarPath = path.join(vendorDir, "pdfbox-app-3.0.8.jar");
 
 function parseArgs(argv) {
   const args = new Map();
@@ -206,7 +206,7 @@ async function ensureMetadataProbeCompiled() {
             "-encoding",
             "UTF-8",
             "-cp",
-            veraPdfJarPath,
+            fontAuditPdfboxJarPath,
             "-d",
             buildDir,
             metadataProbeSourcePath
@@ -400,7 +400,7 @@ async function runMetadataProbe(pdfPath) {
       javaCommand,
       [
         "-cp",
-        `${buildDir}${path.delimiter}${veraPdfJarPath}`,
+        `${buildDir}${path.delimiter}${fontAuditPdfboxJarPath}`,
         "MetadataProbeCli",
         "--pdf",
         pdfPath
@@ -410,13 +410,7 @@ async function runMetadataProbe(pdfPath) {
       }
     ));
   } catch (error) {
-    // The metadata probe runs against VeraPDF's bundled PDFBox 1.28.2 —
-    // its legacy COS parser can choke on certain compressed-object
-    // layouts that our PDFBox-3.x writer produces validly. Treat probe
-    // failure as "no probe data"; suppression gates need probe evidence
-    // to fire, so the result is simply that suspected-false-positive
-    // findings aren't suppressed (safer fallback than aborting the
-    // whole validator stage).
+    // Probe failures retain raw failures and are exposed as diagnostic errors.
     return {
       probeError: String(error.message || error).slice(0, 500),
       metadataPresent: null,
@@ -497,6 +491,7 @@ function buildVeraPdfFindings(report) {
       tags: summary.tags || [],
       checks: (summary.checks || []).map((check) => ({
         status: check.status,
+        errorMessage: check.errorMessage || "",
         context: check.context,
         errorArguments: check.errorArguments || []
       }))
@@ -510,121 +505,17 @@ function extractEngineVersion(buildInformation) {
   return release?.version || "unknown";
 }
 
-const SUPPRESSIBLE_METADATA_FINDING_CODES = new Set(["VERAPDF_5_1", "VERAPDF_7_1_9"]);
-// VERAPDF_7_18_5_1 checks annot.structParentStandardType == 'Link'.
-// The veraPDF 1.28 PDFBox backend (the one we ship) has a stub
-// implementation that always returns null for that property — so
-// EVERY PDF with Link annotations fails this rule, including
-// well-tagged pdfTeX/Word/Acrobat output. We verify the structural
-// claim ourselves in MetadataProbeCli.probeLinkStructureCorrectness
-// and suppress the rule when our probe confirms every Link annot
-// has /StructParent resolving to a struct element with /S = Link.
-const SUPPRESSIBLE_LINK_FINDING_CODES = new Set(["VERAPDF_7_18_5_1"]);
-// VERAPDF_7_18_4_1 checks `structParentStandardType == 'Form' ||
-// isOutsideCropBox == true || (F & 2) == 2` for every Widget annotation.
-// The PDFBox backend stubs structParentStandardType and returns null,
-// so even properly-wrapped widgets fail. Our MetadataProbeCli verifies
-// the structural claim directly.
-// 7.18.4.1 (widget-not-in-Form) and 7.18.4.2 (widget-to-Form accessible
-// name relationship) are both stubbed in the PDFBox 1.28.2 backend
-// (getstructParentStandardType, gethasOneInteractiveChild both return
-// null/false). Suppress both when our probe confirms every widget is
-// nested in a /Form struct element.
-const SUPPRESSIBLE_WIDGET_FINDING_CODES = new Set(["VERAPDF_7_18_4_1", "VERAPDF_7_18_4_2"]);
+function hasMetadataMismatchSignals(findings) { return findings.some((f) => ["VERAPDF_5_1", "VERAPDF_7_1_9"].includes(f.code)); }
+function hasLinkMismatchSignals(findings) { return findings.some((f) => f.code === "VERAPDF_7_18_5_1"); }
+function hasWidgetMismatchSignals(findings) { return findings.some((f) => ["VERAPDF_7_18_4_1", "VERAPDF_7_18_4_2"].includes(f.code)); }
 
-function hasMetadataMismatchSignals(findings) {
-  return findings.some((finding) => finding.code === "VERAPDF_5_1" || finding.code === "VERAPDF_7_1_9");
-}
-
-function hasLinkMismatchSignals(findings) {
-  return findings.some((finding) => finding.code === "VERAPDF_7_18_5_1");
-}
-
-function hasWidgetMismatchSignals(findings) {
-  return findings.some((finding) => finding.code === "VERAPDF_7_18_4_1" || finding.code === "VERAPDF_7_18_4_2");
-}
-
-function shouldSuppressMetadataFindings(findings, metadataProbe) {
-  // Suppression fires when our probe can independently confirm the
-  // structural metadata is good: dc:title present, pdfuaid:part=1
-  // declared in XMP. The infoMatchesXmp check was originally
-  // belt-and-suspenders but PDFBox's XMPChecker.doesInfoMatchXMP
-  // returns false on some well-formed documents (observed on
-  // thai-constitution-en — PDFBox's check is stricter than the spec
-  // requires), so the gate relies on dcTitleDetected + pdfUaIdent.
-  return (
-    hasMetadataMismatchSignals(findings) &&
-    metadataProbe?.dcTitleDetected === true &&
-    metadataProbe?.pdfUaIdentificationDetected === true
-  );
-}
-
-function shouldSuppressLinkFindings(findings, metadataProbe) {
-  return (
-    hasLinkMismatchSignals(findings) &&
-    metadataProbe?.linkStructCorrect === true &&
-    metadataProbe?.linkAnnotCount > 0 &&
-    metadataProbe?.linkAnnotsResolvingToLinkElement === metadataProbe.linkAnnotCount
-  );
-}
-
-function shouldSuppressWidgetFindings(findings, metadataProbe) {
-  return (
-    hasWidgetMismatchSignals(findings) &&
-    metadataProbe?.widgetStructCorrect === true &&
-    metadataProbe?.widgetAnnotCount > 0 &&
-    metadataProbe?.widgetsInFormStruct === metadataProbe.widgetAnnotCount
-  );
-}
-
-function suppressMetadataFalsePositives(findings, metadataProbe) {
-  const suppressionSets = [];
-  if (shouldSuppressMetadataFindings(findings, metadataProbe)) {
-    suppressionSets.push(SUPPRESSIBLE_METADATA_FINDING_CODES);
-  }
-  if (shouldSuppressLinkFindings(findings, metadataProbe)) {
-    suppressionSets.push(SUPPRESSIBLE_LINK_FINDING_CODES);
-  }
-  if (shouldSuppressWidgetFindings(findings, metadataProbe)) {
-    suppressionSets.push(SUPPRESSIBLE_WIDGET_FINDING_CODES);
-  }
-  if (suppressionSets.length === 0) {
-    return { findings, suppressedFindings: [] };
-  }
-  const allSuppressible = new Set();
-  for (const set of suppressionSets) for (const code of set) allSuppressible.add(code);
-  const suppressedFindings = findings.filter((finding) => allSuppressible.has(finding.code));
-  return {
-    findings: findings.filter((finding) => !allSuppressible.has(finding.code)),
-    suppressedFindings
-  };
-}
-
-function adjustSummary(rawSummary, suppressedFindings) {
-  const suppressedRuleCount = suppressedFindings.length;
-  const suppressedCheckCount = suppressedFindings.reduce(
-    (total, finding) => total + Number(finding.failedChecks || 0),
-    0
-  );
-
-  return {
-    passedRules: Number(rawSummary?.passedRules || 0) + suppressedRuleCount,
-    failedRules: Math.max(0, Number(rawSummary?.failedRules || 0) - suppressedRuleCount),
-    passedChecks: Number(rawSummary?.passedChecks || 0) + suppressedCheckCount,
-    failedChecks: Math.max(0, Number(rawSummary?.failedChecks || 0) - suppressedCheckCount)
-  };
-}
-
-function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
+function buildMetadataDiagnostics(findings, metadataProbe) {
   if (!metadataProbe) {
     return null;
   }
 
-  const suppressedFindingCodes = suppressedFindings
-    .map((finding) => finding.code)
-    .sort((left, right) => left.localeCompare(right));
-
   return {
+    ...(metadataProbe.probeError ? { probeError: metadataProbe.probeError } : {}),
     metadataPresent: Boolean(metadataProbe.metadataPresent),
     infoMatchesXmp: Boolean(metadataProbe.infoMatchesXmp),
     dcTitleDetected: Boolean(metadataProbe.dcTitleDetected),
@@ -641,8 +532,11 @@ function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
     linkStructCorrect: Boolean(metadataProbe.linkStructCorrect),
     suspectedVeraPdfLinkStubBug:
       hasLinkMismatchSignals(findings) && Boolean(metadataProbe.linkStructCorrect),
-    correctedByValidator: suppressedFindings.length > 0,
-    suppressedFindingCodes
+    widgetStructCorrect: Boolean(metadataProbe.widgetStructCorrect),
+    formChildRuleCorrect: Boolean(metadataProbe.formChildRuleCorrect),
+    invalidFormChildCount: metadataProbe.invalidFormChildCount ?? null,
+    correctedByValidator: false,
+    suppressedFindingCodes: []
   };
 }
 
@@ -688,10 +582,15 @@ function buildMetadataDiagnostics(findings, metadataProbe, suppressedFindings) {
  *   LICENSE_RESTRICTED           (warning, never promoted to error)
  *
  * Schema integration note (advisory; integration owner updates contracts/):
- *   contracts/ does not currently define a validation-report schema. When one is added it should
- *   include the optional `fonts[]` array and `fontAudit` summary above as additive properties so
- *   existing consumers continue to read the report without changes.
+ *   contracts/validation-report.schema.json retains additive fonts/fontAudit fields.
+ *   The preservation gate additionally requires pdfSha256 to match its saved candidate.
  */
+async function pdfHash(pdfPath) {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(pdfPath)) hash.update(chunk);
+  return hash.digest("hex");
+}
+
 export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontAudit = false }) {
   if (!pdfPath || !manifestPath) {
     throw new Error("Usage: node modules/validator/index.js --pdf <tagged.pdf> --manifest <tagged.pdf.tags.json> [--skip-font-audit]");
@@ -699,6 +598,7 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
 
   await access(pdfPath, constants.R_OK);
   await access(manifestPath, constants.R_OK);
+  const pdfSha256 = await pdfHash(pdfPath);
 
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   const manifestFindings = buildManifestFindings(manifest);
@@ -733,19 +633,16 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
   }
 
   const rawVeraPdfFindings = veraPdf ? buildVeraPdfFindings(veraPdf) : [];
-  // Run the metadata probe whenever VeraPDF emits any finding a probe
-  // might suppress — metadata/XMP mismatch, Link-struct bug, or
-  // Widget-struct bug. All three suppression paths share the same
-  // probe binary so running it once covers everything.
+  // Gather independent diagnostics for metadata and annotation findings.
+  // These explain reported failures without changing the validator result.
   const needsProbe = veraPdf && (
     hasMetadataMismatchSignals(rawVeraPdfFindings) ||
     hasLinkMismatchSignals(rawVeraPdfFindings) ||
     hasWidgetMismatchSignals(rawVeraPdfFindings)
   );
   const metadataProbe = needsProbe ? await runMetadataProbe(pdfPath) : null;
-  const { findings: veraPdfFindings, suppressedFindings } = veraPdf
-    ? suppressMetadataFalsePositives(rawVeraPdfFindings, metadataProbe)
-    : { findings: [], suppressedFindings: [] };
+  // Diagnostics can explain a finding, but cannot turn a failed raw check into a pass.
+  const veraPdfFindings = rawVeraPdfFindings;
 
   const executionFindings = veraPdfError
     ? [
@@ -758,41 +655,43 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
       ]
     : [];
 
-  const findings = [...manifestFindings, ...veraPdfFindings, ...fontAuditFindings, ...executionFindings];
+  const findings = [...manifestFindings, ...veraPdfFindings, ...fontAuditFindings, ...executionFindings,
+    ...(fontAuditError ? [{ severity: "error", code: "FONT_AUDIT_EXECUTION_FAILED", source: "font-audit", description: fontAuditError }] : [])];
   const rawSummary = {
     passedRules: veraPdf?.details?.passedRules || 0,
     failedRules: veraPdf?.details?.failedRules || 0,
     passedChecks: veraPdf?.details?.passedChecks || 0,
     failedChecks: veraPdf?.details?.failedChecks || 0
   };
-  const summary = adjustSummary(rawSummary, suppressedFindings);
+  const summary = { ...rawSummary };
 
   const fontAuditErrorCount = fontAuditFindings.filter((f) => f.severity === "error").length;
   const fontAuditWarningCount = fontAuditFindings.filter((f) => f.severity === "warning").length;
   const fontAuditBlockingPreVeraPdf = fontAuditErrorCount > 0;
 
-  const isCompliant = !veraPdfError && findings.length === 0;
+  const isCompliant = !veraPdfError && !fontAuditError && veraPdf?.validationResult?.compliant === true && findings.length === 0;
   const overallStatus = veraPdfError
     ? "error"
     : !isCompliant || fontAuditBlockingPreVeraPdf
       ? "fail"
       : "pass";
 
+  if (pdfSha256 !== await pdfHash(pdfPath)) throw new Error("PDF changed during validation; discard this report and retry against a stable candidate");
   return {
     status: "completed",
+    pdfSha256,
     isCompliant,
     overall: { status: overallStatus },
     statement: veraPdfError
       ? `veraPDF could not be executed: ${veraPdfError}`
-      : isCompliant && suppressedFindings.length > 0
-        ? "PDF file passed validation after correcting known veraPDF PDFBox metadata false positives."
-        : veraPdf.validationResult.statement,
+      : veraPdf.validationResult.statement,
     rawStatement: veraPdf?.validationResult?.statement ?? null,
     profileName: veraPdf?.validationResult?.profileName ?? null,
     findings,
     summary,
     rawSummary,
-    metadataDiagnostics: veraPdf ? buildMetadataDiagnostics(rawVeraPdfFindings, metadataProbe, suppressedFindings) : null,
+    rawFindings: rawVeraPdfFindings,
+    metadataDiagnostics: veraPdf ? buildMetadataDiagnostics(rawVeraPdfFindings, metadataProbe) : null,
     fonts: fontAudit?.fonts || [],
     fontAudit: {
       status: skipFontAudit ? "skipped" : fontAuditError ? "failed" : "ok",
@@ -804,6 +703,7 @@ export async function validateTaggedArtifacts({ pdfPath, manifestPath, skipFontA
     engine: {
       name: "veraPDF",
       version: veraPdf ? extractEngineVersion(veraPdf.buildInformation) : null,
+      backend: veraPdf ? ((veraPdf.buildInformation.releaseDetails || []).some((d) => /pdfbox/i.test(d.id)) ? "pdfbox" : "greenfield") : null,
       executionError: veraPdfError
     }
   };

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/quality-report.schema.json",
+  "title": "Preservation quality report",
+  "type": "object",
+  "required": ["schemaVersion", "policy", "disposition", "sourceHash", "candidateHash", "checks", "findings", "limitations"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "policy": { "const": "preservation-v1" },
+    "disposition": { "enum": ["review_required", "rejected", "error"] },
+    "sourceHash": { "type": ["string", "null"] }, "candidateHash": { "type": ["string", "null"] },
+    "checks": { "type": "array", "items": { "type": "object", "required": ["id", "status"], "properties": {
+      "id": { "type": "string" }, "status": { "enum": ["pass", "fail", "unknown"] }
+    }, "additionalProperties": false } },
+    "reviewTasks": { "type": "array", "items": { "type": "object", "required": ["id", "candidateHash", "status", "code", "target", "evidence", "action"], "properties": {
+      "id": { "type": "string" }, "candidateHash": { "type": ["string", "null"] }, "status": { "const": "open" },
+      "code": { "type": "string" }, "target": { "type": "string" }, "evidence": { "type": "string" }, "action": { "type": "string" }
+    }, "additionalProperties": false } },
+    "fontRepairPlan": { "type": "array", "items": { "type": "object", "required": ["fontKey", "name", "decision", "locations", "evidence", "requiredProof"], "properties": {
+      "fontKey": { "type": "string" }, "name": { "type": "string" }, "decision": { "enum": ["preserve", "review"] },
+      "locations": { "type": "array", "items": { "type": "string" } },
+      "evidence": { "type": "object", "properties": { "embedded": { "type": "boolean" }, "hasToUnicode": { "type": "boolean" }, "coverage": { "type": "number", "minimum": 0, "maximum": 1 } }, "additionalProperties": false },
+      "requiredProof": { "type": "array", "items": { "type": "string" } }
+    }, "additionalProperties": false } },
+    "findings": { "type": "array", "items": { "type": "object", "required": ["code", "description"], "properties": {
+      "code": { "type": "string" }, "description": { "type": "string" }, "location": { "type": "string" }
+    }, "additionalProperties": false } },
+    "limitations": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

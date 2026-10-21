@@ -75,7 +75,7 @@ function buildCidSetFixture() {
 
 test("PdfTagWriterCli strips /CIDSet from Type0 FontDescriptors", async () => {
   // Guard: java toolchain + pdfbox jar
-  const pdfboxJar = path.join(moduleDir, "..", "vendor", "pdfbox-app-3.0.7.jar");
+  const pdfboxJar = path.join(moduleDir, "..", "vendor", "pdfbox-app-3.0.8.jar");
   try {
     await readFile(pdfboxJar);
   } catch {

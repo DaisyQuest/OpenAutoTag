@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/pdf-preservation-inspection.schema.json",
+  "title": "PDF preservation inspection",
+  "type": "object",
+  "required": ["schemaVersion", "scope", "sourceHash", "pages", "fields", "widgets", "headings", "issues", "limitations"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "scope": { "const": "preserved-objects-v1" },
+    "sourceHash": { "$ref": "#/$defs/hash" },
+    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } },
+    "fields": { "type": "object", "additionalProperties": { "$ref": "#/$defs/hash" } },
+    "widgets": { "type": "object", "additionalProperties": { "$ref": "#/$defs/widget" } },
+    "links": { "type": "object", "additionalProperties": { "type": "object", "required": ["digest", "page", "uri", "contents", "owners"], "properties": {
+      "digest": { "$ref": "#/$defs/hash" }, "page": { "type": "integer", "minimum": 1 },
+      "uri": { "type": "string" }, "contents": { "type": "string" }, "owners": { "type": "array", "items": { "type": "string" } }
+    }, "additionalProperties": false } },
+    "headings": { "type": "array", "items": { "type": "object", "required": ["id", "role", "contentRefs"], "properties": {
+      "id": { "type": "string" }, "role": { "type": "string", "pattern": "^H[1-6]$" },
+      "contentRefs": { "type": "array", "items": { "type": "string" } }
+    }, "additionalProperties": false } },
+    "issues": { "type": "array", "items": { "type": "string" } },
+    "limitations": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "page": { "type": "object", "required": ["geometry", "contentHash", "resourcesHash", "annotationsHash"], "properties": {
+      "geometry": { "type": "array", "items": { "type": "number" }, "minItems": 10, "maxItems": 10 },
+      "contentHash": { "$ref": "#/$defs/hash" }, "resourcesHash": { "$ref": "#/$defs/hash" }, "annotationsHash": { "$ref": "#/$defs/hash" }
+    }, "additionalProperties": false },
+    "widget": { "type": "object", "required": ["digest", "page", "owners"], "properties": {
+      "digest": { "$ref": "#/$defs/hash" }, "page": { "type": "integer", "minimum": 1 },
+      "owners": { "type": "array", "items": { "type": "object", "required": ["form", "listItem", "inBody"], "properties": {
+        "form": { "type": "string" }, "listItem": { "type": "string" }, "inBody": { "type": "boolean" }
+      }, "additionalProperties": false } }
+    }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

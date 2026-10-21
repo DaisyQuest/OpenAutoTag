@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import dns from "node:dns/promises";
 import { createWriteStream } from "node:fs";
 import http from "node:http";
+import { artifactDownloadPolicy } from "./artifact-policy.js";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -1968,6 +1969,8 @@ export function createAppServer({
         }
 
         const body = await readFile(artifactPath);
+        const downloadPolicy = await artifactDownloadPolicy(job, artifactName, url.searchParams.get("candidate") === "1", body);
+        if (!downloadPolicy.allowed) { writeJson(response, 409, { error: downloadPolicy.reason }); return; }
         response.writeHead(
           200,
           buildResponseHeaders({

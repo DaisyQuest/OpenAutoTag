@@ -14,7 +14,7 @@ const execFileP = promisify(execFile);
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..", "..");
 const buildDir = getRuntimeBuildDir("profile-detector", { repoRoot });
-const pdfboxJar = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJar = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 const externalPdfDir = path.join(repoRoot, "test", "fixtures", "external");
 

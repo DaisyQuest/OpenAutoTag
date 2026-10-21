@@ -11,8 +11,8 @@ const sourcePath = path.join(__dirname, "java", "HumanReviewRasterCli.java");
 const defaultBuildDir = path.join(repoRoot, "tmp", "build", "ml-human-review-raster");
 const defaultCacheDir = path.join(repoRoot, "output", "ml-human-review", "raster-cache");
 const pdfboxJarCandidates = [
-  path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar"),
-  path.join(repoRoot, "modules", "validator", "vendor", "pdfbox-app-3.0.7.jar")
+  path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar"),
+  path.join(repoRoot, "modules", "validator", "vendor", "pdfbox-app-3.0.8.jar")
 ];
 
 let compilePromise = null;

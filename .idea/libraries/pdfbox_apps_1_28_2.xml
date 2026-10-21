@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="pdfbox-apps-1.28.2">
+  <library name="verapdf-cli-1.30.3">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf/app/bin/pdfbox-apps-1.28.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf/app/bin/cli-1.30.3.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

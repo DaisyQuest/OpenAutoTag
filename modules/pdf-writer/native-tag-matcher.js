@@ -8,7 +8,7 @@ import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
 const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
-const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 const parserSourcePath = path.join(moduleDir, "java", "NativeContentStreamParser.java");

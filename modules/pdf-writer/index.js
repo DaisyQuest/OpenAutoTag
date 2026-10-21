@@ -2,11 +2,13 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { execFile } from "node:child_process";
 import { copyFile, mkdir, readFile, stat, writeFile, access as fsAccess } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import redactionPlanSchema from "../../contracts/redaction-plan.schema.json" with { type: "json" };
+import repairAuditSchema from "../../contracts/repair-audit.schema.json" with { type: "json" };
 import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 
@@ -14,13 +16,14 @@ const ajv = new Ajv2020({ allErrors: true });
 const validateTagging = ajv.compile(taggingSchema);
 const validateSemantic = ajv.compile(semanticSchema);
 const validateRedactionPlan = ajv.compile(redactionPlanSchema);
+const validateRepairAudit = ajv.compile(repairAuditSchema);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
 const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfTagWriterCli.java");
 const javaClassPath = path.join(buildDir, "PdfTagWriterCli.class");
-const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(moduleDir, "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 const nativeJavaDir = path.join(moduleDir, "java");
@@ -160,7 +163,7 @@ async function needsCompilation() {
 }
 
 function collectNativeJavaSources() {
-  const sources = [];
+  const sources = ["QualifiedFontRepairs.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java"].map((file) => path.join(nativeJavaDir, file));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);
   }
@@ -172,11 +175,12 @@ function collectNativeJavaSources() {
   }
   if (existsSync(passthroughMetadataSource)) {
     sources.push(passthroughMetadataSource);
+    sources.push(path.join(path.dirname(passthroughMetadataSource), "QualifiedStructureRepairs.java"));
   }
   return sources;
 }
 
-async function ensureJavaHelperCompiled() {
+export async function ensureJavaHelperCompiled() {
   await ensureJavaBuildArtifact({
     buildDir,
     isCurrent: async () => !(await needsCompilation()),
@@ -231,6 +235,9 @@ function flattenTagTree(node, semanticById, records, parentId = "") {
     tableColumnIndex,
     tableSection,
     scope,
+    headerId: node.headerId || "",
+    headers: node.tableAttrs?.Headers || [],
+    listNumbering: node.listNumbering || "",
     text
   });
 
@@ -248,6 +255,7 @@ function inferTableScope(node, sourceNode, rowSpan, columnSpan) {
   if (type !== "TH") {
     return "";
   }
+  if (["Row", "Column", "Both"].includes(node.scope)) return node.scope;
 
   const rs = Number(rowSpan || 1);
   const cs = Number(columnSpan || 1);
@@ -382,9 +390,10 @@ function findFirstHeadingNode(node) {
 }
 
 function deriveTitle(taggingDocument, semanticDocument, pdfPath) {
+  const sourceTitle = String(semanticDocument?.source?.title || "").trim();
   const headingFromSemantic = semanticDocument?.nodes?.find((node) => /^H\d$/.test(node.role) && node.text.trim())?.text;
   const headingFromTags = findFirstHeadingNode(taggingDocument.root);
-  return headingFromSemantic || headingFromTags || path.basename(pdfPath, path.extname(pdfPath));
+  return sourceTitle || headingFromSemantic || headingFromTags || path.basename(pdfPath, path.extname(pdfPath));
 }
 
 function normalizeDocumentLanguageTag(value, fallback = "en-US") {
@@ -433,7 +442,10 @@ async function buildInstructionFile({ outputPath, taggingDocument, semanticDocum
       record.tableColumnIndex,
       record.tableSection,
       record.scope,
-      encodeField(record.text)
+      encodeField(record.text),
+      encodeField(record.headerId),
+      record.headers.map(encodeField).join(","),
+      record.listNumbering
     ].join("\t");
   });
 
@@ -521,11 +533,9 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
 /**
  * Passthrough flow: copy the source PDF's bytes verbatim to the output path,
  * then invoke a Java helper that opens the copy, refreshes /Info and XMP, and
- * saves incrementally so the content stream + structure tree stay byte-
- * identical to the producer's output. The saveIncremental path appends a
- * delta section rather than re-serializing the whole document — that's what
- * makes this safe for already-tagged PDFs where any round-trip through
- * PDFBox's full save can subtly alter content stream bytes.
+ * saves incrementally so source content and font streams stay intact.
+ * Confirmed wrapped headings are consolidated using their existing MCIDs,
+ * IDs and styles. The delta section avoids re-serializing source content.
  */
 async function runPassthroughFlow({ pdfPath, outputPath, title, language }) {
   await ensureJavaHelperCompiled();
@@ -542,7 +552,8 @@ async function runPassthroughFlow({ pdfPath, outputPath, title, language }) {
       "--title", title,
       "--language", language
     ],
-    { env: await buildJavaExecEnv({ bundledJavaHome }) }
+    { env: { ...await buildJavaExecEnv({ bundledJavaHome }),
+      PASSTHROUGH_MINIMAL: process.env.PASSTHROUGH_MINIMAL ?? "1" } }
   );
 
   let report = {};
@@ -557,6 +568,9 @@ async function runPassthroughFlow({ pdfPath, outputPath, title, language }) {
   const outputBytes = (await stat(outputPath)).size;
   return {
     metadataRefreshed: Boolean(report.metadataRefreshed),
+    headingContinuationsMerged: Number.isInteger(report.headingContinuationsMerged) ? report.headingContinuationsMerged : 0,
+    listFormContainersRepaired: Number.isInteger(report.listFormContainersRepaired) ? report.listFormContainersRepaired : 0,
+    repairLedger: Array.isArray(report.repairLedger) ? report.repairLedger : [],
     sourceBytes,
     outputBytes
   };
@@ -779,28 +793,37 @@ async function resolveWriterMode({
     let markedFraction = 0;
     let sourceHasStructTree = false;
     let sourceMarkInfoMarked = false;
+    let sourceTitle = "";
+    let sourceLanguage = "";
     try {
       const operatorsDoc = JSON.parse(await readFile(operatorsPath, "utf8"));
       markedFraction = computeMarkedContentFraction(operatorsDoc);
       sourceHasStructTree = Boolean(operatorsDoc?.source?.hasStructTree);
       sourceMarkInfoMarked = Boolean(operatorsDoc?.source?.markInfoMarked);
+      sourceTitle = String(operatorsDoc?.source?.title || "").trim();
+      sourceLanguage = String(operatorsDoc?.source?.language || "").trim();
     } catch {
       // Older operators.json shape without these fields — don't block.
     }
     const sourceIsStructurallyTagged = sourceHasStructTree && sourceMarkInfoMarked;
 
-    // Native-first auto-mode policy. We prefer re-tagging from
-    // scratch (native) over preserving the source's structure
-    // (passthrough) because source-authored tag trees ship with
-    // pervasive producer bugs — broken /Pg refs, heading-level
-    // skips, empty placeholder elements, unembedded Standard 14
-    // fonts, missing /ToUnicode, missing Link /Contents. Our native
-    // pipeline generates clean output that passes PDF/UA-1 in one
-    // shot via the shared accessibility pass. Passthrough survives
-    // only as a fallback when match rate is too low for confident
-    // re-tagging AND the source is already tagged (in which case
-    // preserving even flawed source structure beats emitting a
-    // raster-plus-invisible-text artifact).
+    // Operator assignment coverage cannot establish semantic quality.
+    // Honor the already-tagged policy before considering a rebuild. An
+    // explicit native mode remains available for intentional retagging.
+    if (sourceIsStructurallyTagged && markedFraction >= alreadyTaggedThreshold) {
+      return {
+        effectiveMode: "already-tagged",
+        autoFallbackReason: `Source is already structurally tagged (${Math.round(markedFraction * 100)}% marked content, /StructTreeRoot + /MarkInfo.Marked=true); honoring the already-tagged policy.`,
+        probeMatchRate: meanMatchRate,
+        probeOperatorCount: operatorCount,
+        probeMatchedOperators: matchedOperators,
+        probeMarkedFraction: markedFraction,
+        sourceHasStructTree,
+        sourceMarkInfoMarked,
+        sourceTitle,
+        sourceLanguage
+      };
+    }
     if (meanMatchRate >= nativeMatchThreshold) {
       return {
         effectiveMode: "native",
@@ -812,23 +835,9 @@ async function resolveWriterMode({
         probeOperatorsPath: operatorsPath,
         probeTagPlanPath: tagPlanPath,
         sourceHasStructTree,
-        sourceMarkInfoMarked
-      };
-    }
-
-    if (markedFraction >= alreadyTaggedThreshold && sourceIsStructurallyTagged) {
-      return {
-        effectiveMode: "already-tagged",
-        autoFallbackReason:
-          `Match rate ${meanMatchRate.toFixed(3)} below native threshold ${nativeMatchThreshold}, ` +
-          `but source is already structurally tagged (${Math.round(markedFraction * 100)}% marked content, /StructTreeRoot + /MarkInfo.Marked=true). ` +
-          `Falling back to passthrough preservation rather than raster.`,
-        probeMatchRate: meanMatchRate,
-        probeOperatorCount: operatorCount,
-        probeMatchedOperators: matchedOperators,
-        probeMarkedFraction: markedFraction,
-        sourceHasStructTree,
-        sourceMarkInfoMarked
+        sourceMarkInfoMarked,
+        sourceTitle,
+        sourceLanguage
       };
     }
 
@@ -884,9 +893,6 @@ export async function writeTaggedArtifacts({
     return writeSidecarFallback({ pdfPath, taggingDocument, outputPath, manifestPath });
   }
 
-  const title = deriveTitle(taggingDocument, semanticDocument, pdfPath);
-  const language = deriveDocumentLanguage(semanticDocument);
-
   // --- Mode resolution ---
   const modeDecision = await resolveWriterMode({
     mode,
@@ -897,6 +903,9 @@ export async function writeTaggedArtifacts({
     semanticPath,
     outputPath
   });
+  const title = modeDecision.sourceTitle || deriveTitle(taggingDocument, semanticDocument, pdfPath);
+  const language = modeDecision.effectiveMode === "already-tagged" && modeDecision.sourceLanguage
+    ? modeDecision.sourceLanguage : deriveDocumentLanguage(semanticDocument);
 
   // Caller's policy decides what to do when the probe flags the source as
   // already tagged. The probe itself surfaces this as a distinct mode
@@ -918,7 +927,8 @@ export async function writeTaggedArtifacts({
   // fonts and content streams are preserved exactly as the producer emitted
   // them, then update /Info + XMP so the document's producer/title/language
   // reflect our processing. We do NOT overwrite or augment the existing
-  // structure tree — that respects the source's own tagging decisions.
+  // structure tree wholesale. Confirmed heading continuations are repaired
+  // locally while retaining the source's content references and field placement.
   if (modeDecision.effectiveMode === "passthrough") {
     const sourceResolved = path.resolve(pdfPath);
     const outputResolved = path.resolve(outputPath);
@@ -929,10 +939,18 @@ export async function writeTaggedArtifacts({
       language
     });
 
+    const repairAudit = {
+      sourceHash: createHash("sha256").update(await readFile(pdfPath)).digest("hex"),
+      candidateHash: createHash("sha256").update(await readFile(outputPath)).digest("hex"),
+      repairLedger: passthroughReport.repairLedger
+    };
+    if (!validateRepairAudit(repairAudit)) throw new Error(`Repair audit violates its contract: ${ajv.errorsText(validateRepairAudit.errors)}`);
     const manifest = {
       schemaVersion: "1.0.0",
       writerMode: "passthrough",
+      repairAudit,
       nativeTaggingApplied: true,
+      sourceTaggingPreserved: true,
       sourcePdf: sourceResolved,
       outputPdf: outputResolved,
       tagging: taggingDocument,
@@ -950,6 +968,9 @@ export async function writeTaggedArtifacts({
         alreadyTaggedThreshold,
         readingOrderStrategy,
         metadataRefreshed: passthroughReport.metadataRefreshed,
+        headingContinuationsMerged: passthroughReport.headingContinuationsMerged,
+        listFormContainersRepaired: passthroughReport.listFormContainersRepaired,
+        sourceTaggingPreserved: true,
         sourceBytes: passthroughReport.sourceBytes,
         outputBytes: passthroughReport.outputBytes,
         language
@@ -960,7 +981,12 @@ export async function writeTaggedArtifacts({
     return {
       status: "completed",
       writerMode: "passthrough",
+      sourceTaggingPreserved: true,
       outputPath: outputResolved,
+      headingContinuationsMerged: passthroughReport.headingContinuationsMerged,
+      listFormContainersRepaired: passthroughReport.listFormContainersRepaired,
+      repairLedger: passthroughReport.repairLedger,
+      repairAudit,
       manifestPath: path.resolve(manifestPath),
       nativeTaggingApplied: true,
       language,

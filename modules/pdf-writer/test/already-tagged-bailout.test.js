@@ -15,7 +15,7 @@ const execFileP = promisify(execFile);
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..", "..");
 const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
-const pdfboxJar = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJar = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 const fixturePdf = path.join(repoRoot, "Autonics-TK-manual.pdf");
 
@@ -85,7 +85,7 @@ test("Autonics-TK-manual.pdf: parser output crosses the already-tagged threshold
         path.join(repoRoot, "modules", "pdf-writer", "java", "NativeContentStreamRewriter.java"),
         path.join(repoRoot, "modules", "pdf-writer", "java", "PassthroughMetadataCli.java")
       ];
-      await execFileP(javac, ["-encoding", "UTF-8", "-cp", pdfboxJar, "-d", buildDir, ...sources], {
+      await execFileP(javac, ["-encoding", "UTF-8", "-cp", pdfboxJar, "-sourcepath", path.join(repoRoot, "modules", "pdf-writer", "java"), "-d", buildDir, ...sources], {
         env: await buildJavaExecEnv({ bundledJavaHome })
       });
     }

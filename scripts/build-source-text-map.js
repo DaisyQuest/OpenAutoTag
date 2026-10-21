@@ -15,7 +15,7 @@ const repoRoot = path.resolve(scriptDir, "..");
 const buildDir = getRuntimeBuildDir("scripts-source-text-map", { repoRoot });
 const javaSourcePath = path.join(scriptDir, "java", "SourceTextRunExtractorCli.java");
 const javaClassPath = path.join(buildDir, "SourceTextRunExtractorCli.class");
-const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {

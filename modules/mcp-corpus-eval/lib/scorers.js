@@ -19,6 +19,8 @@ async function readJsonSafe(filePath) {
  * come first in left-to-right reading order).
  *
  * @param {string} semanticOrderedPath - Path to 04-semantic-ordered.json
+ * Explicit orderedNodeIds take precedence over readingOrder and legacy array order.
+ * Malformed explicit order or geometry is unavailable, never a zero-error score.
  * @returns {Promise<number|null>} inversion count, or null if unavailable
  */
 export async function readingOrderInversionCount(semanticOrderedPath) {
@@ -27,23 +29,45 @@ export async function readingOrderInversionCount(semanticOrderedPath) {
     return null;
   }
 
+  let ordered = [...doc.nodes];
+  if (ordered.some((node) => !node || typeof node !== "object")) return null;
+  if (doc.orderedNodeIds !== undefined) {
+    if (!Array.isArray(doc.orderedNodeIds) || doc.orderedNodeIds.length !== ordered.length) return null;
+    const byId = new Map(ordered.map((node) => [node.id, node]));
+    if (byId.size !== ordered.length || ordered.some((node) => typeof node.id !== "string" || !node.id.trim()) ||
+        new Set(doc.orderedNodeIds).size !== ordered.length || doc.orderedNodeIds.some((id) => !byId.has(id))) return null;
+    ordered = doc.orderedNodeIds.map((id) => byId.get(id));
+  } else if (ordered.some((node) => node.readingOrder !== undefined)) {
+    if (ordered.some((node) => !Number.isInteger(node.readingOrder) || node.readingOrder < 0) ||
+        new Set(ordered.map((node) => node.readingOrder)).size !== ordered.length) return null;
+    ordered.sort((a, b) => a.readingOrder - b.readingOrder);
+  }
+  if (ordered.some((node) => !Array.isArray(node.bbox) || node.bbox.length !== 4 ||
+      !node.bbox.every(Number.isFinite) || node.bbox[2] < 0 || node.bbox[3] < 0 ||
+      !Number.isInteger(node.pageNumber ?? node.page) || (node.pageNumber ?? node.page) < 1)) return null;
+
   const EPSILON_Y = 6;
   let inversions = 0;
 
   // Group nodes by page
   const byPage = new Map();
-  for (const node of doc.nodes) {
-    if (!node.bbox || node.bbox.length < 4) continue;
-    const page = node.pageNumber ?? node.page ?? 0;
+  for (const node of ordered) {
+    const page = node.pageNumber ?? node.page;
     if (!byPage.has(page)) byPage.set(page, []);
     byPage.get(page).push(node);
   }
 
   for (const [, nodes] of byPage) {
-    // Nodes are in reading order already (orderedNodeIds or array order)
+    // Relative order within each page comes from the declared reading sequence.
     for (let i = 0; i < nodes.length - 1; i++) {
       const current = nodes[i];
       const next = nodes[i + 1];
+      const direction = (node) => node.direction ?? node.textDirection ?? doc.source?.direction ?? "ltr";
+      const horizontal = (node) => (node.writingMode ?? "horizontal") === "horizontal" &&
+        Math.abs((node.textRotation ?? 0) % 360) < 1;
+      if (current.role === "Artifact" || next.role === "Artifact" || !horizontal(current) || !horizontal(next) ||
+          direction(current) !== direction(next) || !["ltr", "rtl"].includes(direction(current)) ||
+          (current.columnHint != null && next.columnHint != null && current.columnHint !== next.columnHint)) continue;
 
       const currentY = current.bbox[1];
       const nextY = next.bbox[1];
@@ -53,7 +77,7 @@ export async function readingOrderInversionCount(semanticOrderedPath) {
         const currentX = current.bbox[0];
         const nextX = next.bbox[0];
         // Inversion: next block starts to the left of current block
-        if (nextX < currentX) {
+        if (direction(current) === "rtl" ? nextX > currentX : nextX < currentX) {
           inversions++;
         }
       }

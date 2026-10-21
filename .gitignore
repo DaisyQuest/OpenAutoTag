@@ -29,3 +29,5 @@ test/LRBTest/
 modules/pdf-writer/test/fixtures/06-tagged/
 modules/pdf-writer/test/fixtures/2025_*/
 modules/pdf-writer/test/fixtures/2026_*/
+
+modules/validator/vendor/verapdf-greenfield-*-installer.zip

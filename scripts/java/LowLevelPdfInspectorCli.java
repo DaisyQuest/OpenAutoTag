@@ -31,6 +31,10 @@ public class LowLevelPdfInspectorCli {
         String pdfPath = requireOption(options, "--pdf");
 
         try (PDDocument document = Loader.loadPDF(new File(pdfPath))) {
+            if ("true".equals(options.get("--preservation"))) {
+                System.out.println(toJson(PreservationInspector.inspect(document, new File(pdfPath))));
+                return;
+            }
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("pdfPath", new File(pdfPath).getAbsolutePath());
             result.put("pageCount", document.getNumberOfPages());

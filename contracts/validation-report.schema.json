@@ -13,6 +13,11 @@
     "summary"
   ],
   "properties": {
+    "pdfSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of the stable candidate inspected by all validation checks."
+    },
     "status": {
       "type": "string"
     },
@@ -195,6 +200,10 @@
     "engine": {
       "type": "object",
       "additionalProperties": true
+    },
+    "rawFindings": {
+      "$ref": "#/properties/findings",
+      "description": "All original veraPDF findings, retained without rule suppression."
     }
   },
   "additionalProperties": true

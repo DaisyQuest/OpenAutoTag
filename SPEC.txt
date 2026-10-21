@@ -82,6 +82,13 @@ Command:
 Output:
 `contracts/tagging.schema.json`
 
+Qualified paragraph and list continuations retain each semantic content identity
+under one P or LBody. Table header associations are enabled by default; explicit
+enableTableHeaders=false or TAG_BUILDER_ENABLE_TABLE_HEADERS=0 retains the legacy
+output. Grouped headers, preceding row/column headers and repeated occurrences
+receive table-scoped IDs. Both native and raster writers emit Headers, IDTree,
+Scope and list numbering, rejecting dangling or cross-table header references.
+
 3.6 Font embedder
 
 Command:
@@ -120,6 +127,116 @@ the output (forbidden by PDF/UA). When --fonts is provided, the writer
 executes each plan.action from the inventory and emits a fonts[] array in
 the writer report with the actual post-write state of every font.
 
+3.7a Qualified font repair (opt-in post-processing)
+
+Command:
+`node modules/pdf-writer/font-repair.js --pdf <preserved.pdf> --output <candidate.pdf> > font-repair.json`
+
+Verification only:
+`node modules/pdf-writer/font-repair.js --pdf <preserved.pdf> --verify <candidate.pdf> > font-proof.json`
+
+Output: `contracts/font-repair-report.schema.json`. Extends the existing
+per-object repair ledger with exact source/candidate hashes and a saved-object
+verification result. No existing CLI contract changes. The pass is explicit,
+not automatically enabled by production-checks. Output must not already exist.
+
+Qualified rules embed pinned PDF.js standard-font CFF programs for canonical
+ZapfDingbats and observed whitespace-only Times-Roman outside editable form
+resources, and complete existing CIDSet bitmaps for embedded TrueType fonts
+with explicit Identity CIDToGIDMap. Custom fonts/mappings remain for review.
+Existing font programs, page and appearance commands, field values, widget
+states and structure are preserved. Saved objects are compared against a fresh
+replay of only these repairs. Encrypted/signed input is outside this pass.
+
+Additional editable-default rules add missing ToUnicode only to embedded,
+nonsymbolic TrueType fonts with explicit WinAnsiEncoding after checking every
+defined encoding/glyph/Unicode mapping against the existing program. An unused
+bare Helvetica AcroForm default can reuse one existing authored Arial program
+only after complete page/appearance usage scanning and matching every defined
+glyph and advance. The original encoding and all 256 advances are retained.
+This does not supply an external fallback font or qualify arbitrary defaults.
+
+`scripts/check-pdf-preservation.js --font-repairs true` independently invokes
+the verification CLI on its source and candidate. Only exact hash-bound proof
+permits the expected resource fingerprint changes. Other preservation checks,
+mandatory validation and the review-only disposition remain in force.
+
+3.7b Qualified link repair (opt-in post-processing)
+
+Command:
+`node modules/pdf-writer/link-repair.js --pdf <preserved.pdf> --output <candidate.pdf> > link-repair.json`
+
+Verification only:
+`node modules/pdf-writer/link-repair.js --pdf <preserved.pdf> --verify <candidate.pdf> > link-proof.json`
+
+Output: the existing `contracts/repair-audit.schema.json`. The audit is emitted
+only after exact saved-object verification succeeds. No overwrite is allowed.
+Only link descriptions, qualified ownership and the necessary ParentTree and
+structure-child entries change. The normal strict preservation gate applies.
+
+Blank descriptions may be filled from an unchanged simple URI action. Existing
+same-URI overlap binding now checks the anchor's reciprocal ParentTree entry
+and rejects compound actions. Different URI actions can receive a separate
+adjacent Link only when the extracted URL/email text matches that action and
+one strongly overlapping authored Link has the same extracted text and a
+qualified containing structure. Rotated pages, QuadPoints, hidden links,
+ambiguous/stale ownership and unsupported actions stay for review. Existing
+annotation order, rectangles, actions, resources and form objects are retained.
+
+These rules also run under the existing PASSTHROUGH_REPAIR_LINKS switch. The
+explicit CLI can follow font remediation without rerunning metadata or other
+writer transformations. Its exact graph verifier is shared with the font pass.
+
+3.7c Qualified structure metadata repair (opt-in post-processing)
+
+Command:
+`node modules/pdf-writer/structure-repair.js --pdf <preserved.pdf> --output <candidate.pdf>`
+
+Verification only: replace `--output` with `--verify`. Both commands emit the
+existing contracts/repair-audit.schema.json only after exact saved-object replay
+verification. The CLI never overwrites its input or an existing output.
+
+Numbered headings are compacted with a single monotone rank mapping only if
+the resulting complete sequence begins at H1 and has no downward level skips.
+Equal levels remain equal, and existing heading membership/content is retained.
+Generic/mixed headings and ambiguous sequences stay for review. Valid custom
+RoleMap chains are resolved without editing the RoleMap.
+
+Optional repeated `--figure "<object> <generation> R" "<reviewed description>"`
+arguments require `--source-sha256 <exact source hash>`. Each target must be an
+unmapped Artifact leaf with no existing Alt/ActualText, unique reciprocal page
+MCID ownership, and exactly one image XObject invocation. Text, Form XObjects,
+inline images, conflicting/nested semantic content and stale decisions fail
+closed. Bare Clip/ClipSpan wrappers are allowed. Review is required to decide
+whether a graphic is meaningful and to supply its description; this pass does
+not guess descriptions or convert arbitrary Artifact tags into standard roles.
+
+Repeated --paragraph "<object> <generation> R" decisions also require the exact
+--source-sha256. Each reviewed heading must own one unique reciprocal page MCID,
+with only layout attributes/classes and optional existing Form children. Only
+its S changes to P; content, fields and ownership stay intact. For fresh gate
+verification supply --structure-repairs true --structure-decisions <json>, where
+the file contains {"sourceSha256":"<hash>","paragraphs":["<object> <generation> R"]}.
+
+Without Form splitting, only approved /S and /Alt entries change. Optional
+`--split-forms true` splits bare Form elements containing multiple OBJRs for
+distinct terminal fields into consecutive Form siblings. Authored semantic
+attributes, mixed children, shared fields and ambiguous ownership stay for
+review. Existing OBJRs, fields, widget dictionaries and annotation slots are
+retained; only structure child/parent relations and reciprocal ParentTree
+targets change. The original Form and its ID remain with its first widget.
+
+`scripts/check-pdf-preservation.js --structure-repairs true` independently
+replays this bounded repair against the source and saved candidate. Only fresh,
+hash-bound proof permits the corresponding Form owner changes; field/content,
+appearance and other preservation checks still apply. This gate option covers
+Form splitting and heading compaction, not reviewed figure decisions.
+
+Content streams, resources, fields, widget appearances, annotation actions,
+metadata and IDTree are preserved. Signed, encrypted and PDF 2.x/namespaced
+documents are outside scope. This explicit pass does not enable legacy broad
+passthrough transformations or alter validator rules.
+
 3.8 Validator
 
 Command:
@@ -128,9 +245,32 @@ Command:
 Output:
 Validation report JSON. Bootstrap validation checks contract completeness, native PDF structure markers, metadata, and known PDF/UA blockers.
 
+The pinned validator is veraPDF 1.30.3 Greenfield. Install using
+`node scripts/install-verapdf.js`; the installer verifies a pinned SHA-256,
+stages and version-checks the CLI, and retains the previous installation before
+replacement. Portable/bootstrap installers use the same release and checksum.
+PDFBox 3.0.8 is separately vendored for writing, inspection and font auditing;
+the diagnostic probe no longer depends on the discontinued veraPDF PDFBox CLI.
+
+Raw veraPDF results are authoritative: `summary` equals `rawSummary`, and
+`rawFindings` retains rule contexts and messages. No raw failure is suppressed.
+Independent metadata, Link/Widget ownership and Form child-rule probes provide
+diagnostics only. Overall success requires a compliant veraPDF result and no
+manifest/font-audit findings or execution error. Separate font-audit failures
+remain blocking even when the raw veraPDF result passes.
+
 4. Shared contracts
 
 Contracts live under `contracts/`.
+
+- semantic-benchmark.schema.json validates independent regression references.
+  npm run benchmark:semantic executes real semantic, ordering and tag-builder
+  CLIs and reports per-dimension checks and content ownership. References record
+  provenance and expert review status. npm run qualify:semantic -- --pdf <file>
+  --reader-evidence <record.json> additionally requires completed reference review
+  and candidate-bound human evidence with reader and PDF viewer versions.
+  Missing qualification returns review_required and exit code 2; synthetic
+  references are never represented as human reader observations.
 
 - `layout.schema.json`
   Raw and enriched geometric text blocks from the source PDF.

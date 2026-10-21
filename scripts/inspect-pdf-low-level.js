@@ -9,8 +9,9 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
 const buildDir = getRuntimeBuildDir("scripts-low-level-inspector", { repoRoot });
 const javaSourcePath = path.join(scriptDir, "java", "LowLevelPdfInspectorCli.java");
+const preservationSourcePath = path.join(scriptDir, "java", "PreservationInspector.java");
 const javaClassPath = path.join(buildDir, "LowLevelPdfInspectorCli.class");
-const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {
@@ -20,7 +21,8 @@ function parseArgs(argv) {
   }
 
   return {
-    pdfPath: args.get("--pdf")
+    pdfPath: args.get("--pdf"),
+    preservation: args.get("--preservation") === "true"
   };
 }
 
@@ -39,8 +41,9 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, classStats] = await Promise.all([stat(javaSourcePath), stat(javaClassPath)]);
-    return sourceStats.mtimeMs > classStats.mtimeMs;
+    const [sourceStats, preservationStats, classStats, helperStats] = await Promise.all([
+      stat(javaSourcePath), stat(preservationSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class"))]);
+    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs);
   } catch {
     return true;
   }
@@ -62,7 +65,7 @@ async function ensureJavaHelperCompiled() {
             pdfboxJarPath,
             "-d",
             buildDir,
-            javaSourcePath
+            javaSourcePath, preservationSourcePath
           ],
           {
             env: await buildJavaExecEnv({ bundledJavaHome })
@@ -77,7 +80,7 @@ async function ensureJavaHelperCompiled() {
   });
 }
 
-export async function inspectPdfLowLevel({ pdfPath }) {
+export async function inspectPdfLowLevel({ pdfPath, preservation = false }) {
   if (!pdfPath) {
     throw new Error("Usage: node scripts/inspect-pdf-low-level.js --pdf <input.pdf>");
   }
@@ -93,7 +96,8 @@ export async function inspectPdfLowLevel({ pdfPath }) {
         `${buildDir}${path.delimiter}${pdfboxJarPath}`,
         "LowLevelPdfInspectorCli",
         "--pdf",
-        path.resolve(pdfPath)
+        path.resolve(pdfPath),
+        ...(preservation ? ["--preservation", "true"] : [])
       ],
       {
         env: await buildJavaExecEnv({ bundledJavaHome })

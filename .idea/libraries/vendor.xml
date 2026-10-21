@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="vendor">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf-pdfbox-installer.zip!/" />
-      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/pdfbox-app-3.0.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/verapdf-greenfield-1.30.3-installer.zip!/" />
+      <root url="jar://$PROJECT_DIR$/modules/validator/vendor/pdfbox-app-3.0.8.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

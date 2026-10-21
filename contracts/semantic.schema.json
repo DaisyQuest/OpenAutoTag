@@ -29,6 +29,10 @@
         },
         "filePath": {
           "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": true
@@ -59,6 +63,32 @@
             "type": "string",
             "minLength": 1
           },
+          "sourceBlockIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "headingLineCount": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "paragraphGroupId": { "type": "string", "minLength": 1 },
+          "continuesFrom": { "type": "string", "minLength": 1 },
+          "listContinuationOf": { "type": "string", "minLength": 1 },
+          "captionForId": { "type": "string", "minLength": 1 },
+          "footnoteReferenceId": { "type": "string", "minLength": 1 },
+          "asideAnchorId": { "type": "string", "minLength": 1 },
+          "scope": { "enum": ["Row", "Column", "Both"] },
+          "formFieldIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "listMarker": {
+            "type": "string",
+            "minLength": 1
+          },
           "role": {
             "type": "string",
             "enum": [
@@ -66,6 +96,9 @@
               "H1",
               "H2",
               "H3",
+              "H4",
+              "H5",
+              "H6",
               "P",
               "L",
               "LI",
@@ -105,6 +138,8 @@
             "minimum": 1,
             "maximum": 6
           },
+          "direction": { "enum": ["ltr", "rtl"] },
+          "listLevel": { "type": "integer", "minimum": 1, "maximum": 32 },
           "columnHint": {
             "type": "integer",
             "minimum": 0
@@ -121,6 +156,41 @@
         },
         "additionalProperties": true
       }
+    },
+    "headingMergeSummary": {
+      "type": "object",
+      "required": ["mergedGroups", "absorbedLines"],
+      "properties": {
+        "mergedGroups": { "type": "integer", "minimum": 0 },
+        "absorbedLines": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "formRelationships": { "type": "array", "items": { "type": "object", "required": ["id", "widgets", "labels"], "properties": {
+      "id": { "type": "string", "minLength": 1 }, "fieldType": { "type": "string" },
+      "widgets": { "type": "array", "items": { "type": "object", "required": ["id", "pageNumber", "bbox"], "properties": {
+        "id": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
+        "bbox": { "$ref": "#/properties/nodes/items/properties/bbox" }
+      }, "additionalProperties": true } },
+      "labels": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+    }, "additionalProperties": false } },
+    "formNavigation": { "type": "object", "required": ["proposedWidgetOrder", "unresolvedWidgetIds", "status"], "properties": {
+      "proposedWidgetOrder": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+      "unresolvedWidgetIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+      "status": { "const": "requires-reader-test" }
+    }, "additionalProperties": false },
+    "semanticReviewTasks": { "type": "array", "items": { "type": "object", "required": ["code"], "properties": {
+      "code": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
+      "nodeId": { "type": "string" }, "widgetId": { "type": "string" }, "relatedNodeId": { "type": "string" },
+      "candidates": { "type": "array", "items": { "type": "string" } }
+    }, "additionalProperties": false } },
+    "relations": {
+      "type": "array",
+      "items": { "type": "object", "required": ["type", "from", "to", "evidence"], "properties": {
+        "type": { "enum": ["precedes", "labels", "describes", "belongsToGroup", "continues", "captionFor", "headerFor"] },
+        "from": { "type": "string", "minLength": 1 }, "to": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 }
+      }, "additionalProperties": false }
     },
     "orderedNodeIds": {
       "type": "array",

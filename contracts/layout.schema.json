@@ -30,6 +30,10 @@
         "pageCount": {
           "type": "integer",
           "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": true
@@ -109,6 +113,16 @@
                 "fontName": {
                   "type": "string"
                 },
+                "direction": { "enum": ["ltr", "rtl"] },
+                "captionForId": { "type": "string", "minLength": 1 },
+                "footnoteReferenceId": { "type": "string", "minLength": 1 },
+                "asideAnchorId": { "type": "string", "minLength": 1 },
+                "scope": { "enum": ["Row", "Column", "Both"] },
+                "formFieldIds": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string", "minLength": 1 }
+                },
                 "blockType": {
                   "type": "string",
                   "enum": [
@@ -128,6 +142,27 @@
                   "type": "integer",
                   "minimum": 0
                 }
+              },
+              "additionalProperties": true
+            }
+          },
+          "formFields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "bbox"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "widgetId": { "type": "string", "minLength": 1 },
+                "fieldId": { "type": "string", "minLength": 1 },
+                "radioButton": { "type": "boolean" },
+                "checkBox": { "type": "boolean" },
+                "readOnly": { "type": "boolean" },
+                "required": { "type": "boolean" },
+                "fieldName": { "type": "string" },
+                "fieldType": { "type": "string" },
+                "tooltip": { "type": "string" },
+                "bbox": { "$ref": "#/properties/pages/items/properties/textBlocks/items/properties/bbox" }
               },
               "additionalProperties": true
             }

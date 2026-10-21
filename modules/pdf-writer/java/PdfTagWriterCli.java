@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import org.apache.pdfbox.Loader;
@@ -24,6 +25,7 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -69,6 +71,9 @@ public class PdfTagWriterCli {
         String tableSection;
         String scope;
         String text;
+        String headerId;
+        List<String> headers=new ArrayList<>();
+        String listNumbering;
     }
 
     private static class RedactionInstruction {
@@ -182,6 +187,7 @@ public class PdfTagWriterCli {
             parentTree.setNumbers(numbers);
             structureTreeRoot.setParentTree(parentTree);
             structureTreeRoot.setParentTreeNextKey(nextPageKey[0]);
+            StructureIdentifiers.install(structureTreeRoot);
 
             outputDocument.save(outputPath);
 
@@ -256,7 +262,7 @@ public class PdfTagWriterCli {
                 }
 
                 String[] parts = line.split("\t", -1);
-                if (parts.length != 15) {
+                if (parts.length != 15 && parts.length != 18) {
                     throw new IllegalArgumentException("Invalid instruction line: " + line);
                 }
 
@@ -276,6 +282,11 @@ public class PdfTagWriterCli {
                 instruction.tableSection = parts[12];
                 instruction.scope = parts[13];
                 instruction.text = new String(Base64.getDecoder().decode(parts[14]), StandardCharsets.UTF_8);
+                if(parts.length==18) {
+                    instruction.headerId=new String(Base64.getDecoder().decode(parts[15]),StandardCharsets.UTF_8);
+                    if(!parts[16].isEmpty()) for(String encoded:parts[16].split(",")) instruction.headers.add(new String(Base64.getDecoder().decode(encoded),StandardCharsets.UTF_8));
+                    instruction.listNumbering=parts[17];
+                }
                 instructions.add(instruction);
             }
         }
@@ -283,12 +294,20 @@ public class PdfTagWriterCli {
     }
 
     private static boolean applyTableAttributes(PDStructureElement element, Instruction instruction) {
+        if("L".equals(instruction.type) && instruction.listNumbering!=null && Set.of("None","Disc","Circle","Square","Decimal","UpperRoman","LowerRoman","UpperAlpha","LowerAlpha").contains(instruction.listNumbering)) {
+            COSDictionary attrs=new COSDictionary(); attrs.setName(COSName.O,"List"); attrs.setName(COSName.getPDFName("ListNumbering"),instruction.listNumbering); element.getCOSObject().setItem(COSName.A,attrs); return false;
+        }
         if (!"TH".equals(instruction.type) && !"TD".equals(instruction.type)) {
             return false;
         }
 
         PDTableAttributeObject attributes = new PDTableAttributeObject();
         boolean applied = false;
+        if("TH".equals(instruction.type) && instruction.headerId!=null && !instruction.headerId.isEmpty()) element.getCOSObject().setString(COSName.ID,instruction.headerId);
+        if(!instruction.headers.isEmpty()) {
+            COSArray headers=new COSArray(); for(String id:instruction.headers) headers.add(new COSString(id));
+            attributes.getCOSObject().setItem(COSName.getPDFName("Headers"),headers); applied=true;
+        }
 
         if (instruction.rowSpan > 1) {
             attributes.setRowSpan(instruction.rowSpan);

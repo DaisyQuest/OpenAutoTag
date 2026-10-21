@@ -205,10 +205,16 @@ function detectColumns(page, ignoredBlockIds = new Set(), thresholds = readThres
 function classifyBlock(block, baselineFontSize, thresholds = readThresholds(), page = null) {
   const text = normalizeText(block.text);
   const orderedListMatch = text.match(/^(\d+)[.)]\s+/);
-  const isBulletListItem = /^([-*]|\u2022)\s+/.test(text);
+  const isBulletListItem = /^([-*]|\u2022|[\u2610\u2611\u2612])\s+/.test(text);
   const isBold = /bold/i.test(block.fontName || "");
   const headingScore = block.fontSize / baselineFontSize;
-  const isHeading = headingScore >= thresholds.headingScoreThreshold || (headingScore >= thresholds.headingBoldScoreThreshold && isBold && text.length <= 80);
+  const isFormSection = page?.formFields?.length > 0 && isBold &&
+    !(block.formFieldIds?.length > 0) && text.length <= 64 &&
+    block.bbox[2] < page.width * 0.65 &&
+    /^(?:\p{Lu}[\p{L}\p{M}'’]*)(?:\s+\p{Lu}[\p{L}\p{M}'’]*)*$/u.test(text) &&
+    headingScore >= 0.95;
+  const isHeading = headingScore >= thresholds.headingScoreThreshold ||
+    (headingScore >= thresholds.headingBoldScoreThreshold && isBold && text.length <= 80) || isFormSection;
 
   if (page && looksLikeStampArtifact(block, page, baselineFontSize)) {
     return {

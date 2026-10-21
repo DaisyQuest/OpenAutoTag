@@ -93,6 +93,8 @@
         "layout": {
           "type": "string"
         },
+        "candidatePdf": { "type": "string" },
+        "qualityReport": { "type": "string" },
         "sourceTextMap": {
           "type": "string"
         },

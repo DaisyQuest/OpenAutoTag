@@ -334,7 +334,8 @@ for (const testCase of inputCases) {
 
     try {
       await writeFile(inputPath, JSON.stringify(testCase.input, null, 2));
-      const actual = await buildTagTree(inputPath);
+      // Frozen legacy snapshots exercise structural repairs independently of header decoration.
+      const actual = await buildTagTree(inputPath, { enableTableHeaders: false });
       const expected = expectedByName.get(testCase.name);
 
       assert.ok(expected, `Missing goldmaster for ${testCase.name}`);

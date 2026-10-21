@@ -13,7 +13,7 @@
         "cost": "Free",
         "website": "https://pdfbox.apache.org",
         "github": "https://github.com/apache/pdfbox",
-        "currentVersion": "3.0.7 (as of our usage)",
+        "currentVersion": "3.0.8 (as of our usage)",
         "features": {
           "createPDF": true,
           "modifyPDF": true,
@@ -37,7 +37,7 @@
         },
         "strengths": ["Mature, well-maintained", "Full content stream access", "Structure tree manipulation", "PDFRenderer for page rasterization", "No licensing cost", "Large community"],
         "weaknesses": ["No automatic accessibility tagging", "Subsetter can be non-deterministic", "CIDSet handling requires manual cleanup", "FlateFilter errors on some corrupt PDFs"],
-        "ourUsage": "Core of our pipeline. PdfTagWriterCli, FontRepairCli, NativeContentStreamParser, NativeTagMatcher, NativeContentStreamRewriter, FontAuditCli, MetadataProbeCli all built on PDFBox 3.0.7.",
+        "ourUsage": "Core of our pipeline. PdfTagWriterCli, FontRepairCli, NativeContentStreamParser, NativeTagMatcher, NativeContentStreamRewriter, FontAuditCli, MetadataProbeCli all built on PDFBox 3.0.8.",
         "evidence": "Direct experience from our pipeline development, April 2026"
       },
       {
@@ -154,7 +154,7 @@
         "cost": "Free",
         "website": "https://verapdf.org/",
         "github": "https://github.com/veraPDF",
-        "currentVersion": "1.28.2 (as of our usage)",
+        "currentVersion": "1.30.3 Greenfield (pinned)",
         "features": {
           "pdfUAValidation": true,
           "pdfAValidation": true,

@@ -1,7 +1,8 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { copyFile, link, mkdir, rename, rm } from "node:fs/promises";
+import { copyFile, mkdir, rename, rm } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
@@ -84,17 +85,15 @@ export async function runJsonStage(scriptRelativePath, args, outputPath, { env }
   return execNodeToFile(scriptRelativePath, args, outputPath, { env });
 }
 
-async function stageInputFile(filePath, outputDir) {
+export async function stageInputFile(filePath, outputDir) {
   const extension = path.extname(filePath) || ".pdf";
   const stagedFilePath = path.join(outputDir, `00-source${extension}`);
 
-  await rm(stagedFilePath, { force: true }).catch(() => {});
-
+  const temporary = `${stagedFilePath}.${randomUUID()}.tmp`;
   try {
-    await link(filePath, stagedFilePath);
-  } catch {
-    await copyFile(filePath, stagedFilePath);
-  }
+    await copyFile(filePath, temporary);
+    await rename(temporary, stagedFilePath);
+  } finally { await rm(temporary, { force: true }); }
 
   return path.resolve(stagedFilePath);
 }

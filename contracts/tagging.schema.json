@@ -89,6 +89,9 @@
         "label": {
           "type": "string"
         },
+        "headerId": { "type": "string", "minLength": 1 },
+        "scope": { "enum": ["Row", "Column", "Both"] },
+        "listNumbering": { "enum": ["None", "Disc", "Circle", "Square", "Decimal", "UpperRoman", "LowerRoman", "UpperAlpha", "LowerAlpha"] },
         "sourceNodeIds": {
           "type": "array",
           "items": {

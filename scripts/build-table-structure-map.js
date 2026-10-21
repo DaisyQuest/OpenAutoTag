@@ -17,7 +17,7 @@ const repoRoot = path.resolve(scriptDir, "..");
 const buildDir = getRuntimeBuildDir("scripts-table-structure-map", { repoRoot });
 const javaSourcePath = path.join(scriptDir, "java", "TableStructureExtractorCli.java");
 const javaClassPath = path.join(buildDir, "TableStructureExtractorCli.class");
-const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {

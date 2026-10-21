@@ -279,6 +279,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             json.append("\"hasStructTree\":").append(hasStructTree);
             json.append(",\"markInfoMarked\":").append(markInfoMarked);
             json.append(",\"hasAcroForm\":").append(hasAcroForm);
+            json.append(",\"title\":").append(escapeJson(info != null ? nullToEmpty(info.getTitle()) : ""));
+            json.append(",\"language\":").append(escapeJson(catalog != null ? nullToEmpty(catalog.getLanguage()) : ""));
             json.append(",\"producer\":").append(escapeJson(producer));
             json.append(",\"creator\":").append(escapeJson(creator));
             json.append(",\"pdfVersion\":\"").append(String.format("%.1f", pdfVersion)).append("\"");

@@ -565,8 +565,8 @@ function Install-VeraPdf {
 
   Write-Step "Installing veraPDF"
   $urls = @(
-    Get-Cfg -Key "verapdf.installer_url" -Default "https://software.verapdf.org/releases/1.28/verapdf-pdfbox-1.28.2-installer.zip"
-    Get-Cfg -Key "verapdf.fallback_url" -Default "https://software.verapdf.org/releases/verapdf-pdfbox-installer.zip"
+    Get-Cfg -Key "verapdf.installer_url" -Default "https://software.verapdf.org/releases/1.30/verapdf-greenfield-1.30.3-installer.zip"
+    Get-Cfg -Key "verapdf.fallback_url" -Default "https://software.verapdf.org/releases/1.30/verapdf-greenfield-1.30.3-installer.zip"
   ) | Where-Object { $_ -and $_.Length -gt 0 }
 
   $envMap = Get-ToolEnvironment -NodeTools $NodeTools

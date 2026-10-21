@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/semantic-benchmark.schema.json",
+  "title": "Semantic regression reference corpus",
+  "type": "object",
+  "required": ["schemaVersion", "cases"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "cases": { "type": "array", "minItems": 1, "maxItems": 500, "items": {
+      "type": "object", "required": ["id", "layout", "expected", "provenance", "expertReview"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "layout": { "$ref": "https://example.local/contracts/layout.schema.json" },
+        "provenance": { "type": "string", "minLength": 1 },
+        "expertReview": { "enum": ["pending", "reviewed"] },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "reviewedAt": { "type": "string", "minLength": 1 },
+        "expected": {
+          "type": "object", "minProperties": 1,
+          "properties": {
+            "roles": { "type": "object", "minProperties": 1, "additionalProperties": { "enum": ["H1", "H2", "H3", "H4", "H5", "H6", "P", "LI", "L", "Table", "TH", "TD", "Artifact"] } },
+            "order": { "$ref": "#/$defs/pairs" },
+            "labels": { "$ref": "#/$defs/referenceMap" },
+            "descriptions": { "$ref": "#/$defs/referenceMap" },
+            "sameList": { "$ref": "#/$defs/pairs" },
+            "separateLists": { "$ref": "#/$defs/pairs" },
+            "sameParagraph": { "$ref": "#/$defs/pairs" },
+            "listBodies": { "$ref": "#/$defs/pairs" },
+            "listNumbering": { "type": "object", "minProperties": 1, "additionalProperties": { "enum": ["Decimal", "LowerAlpha", "UpperAlpha", "LowerRoman", "UpperRoman", "Disc", "None"] } },
+            "tagCounts": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "integer", "minimum": 0 } },
+            "headers": { "$ref": "#/$defs/referenceMap" },
+            "reviewCodes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } }
+          }, "additionalProperties": false
+        }
+      }, "additionalProperties": false
+    } }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1 },
+    "pairs": { "type": "array", "minItems": 1, "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/id" } } },
+    "referenceMap": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } } }
+  }, "additionalProperties": false
+}

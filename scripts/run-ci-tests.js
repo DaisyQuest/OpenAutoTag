@@ -129,6 +129,21 @@ async function main() {
     throw new Error("No CI test files were found.");
   }
 
+  // These portable baseline suites are mandatory, independent of optional external corpora.
+  for (const required of ["modules/mcp-corpus-eval/test/reading-order-contract.test.js",
+    "modules/validator/test/quality-report.test.js", "modules/pdf-writer/test/tagged-form-preservation.test.js",
+    "modules/pdf-writer/test/wrapped-headings.test.js", "modules/pdf-writer/test/list-form-repair.test.js",
+    "test/integration/preservation-quality.test.js", "test/integration/structure-inspection.test.js",
+    "modules/pdf-writer/test/qualified-links.test.js", "modules/reading-order/test/constraints.test.js",
+    "modules/pdf-writer/test/font-repair.test.js", "modules/pdf-writer/test/structure-repair.test.js", "modules/pdf-writer/test/split-forms.test.js", "modules/validator/test/validator.test.js",
+    "modules/validator/test/link-probe.test.js",
+    "modules/semantic-engine/test/document-relations.test.js", "modules/semantic-engine/test/quality-refinements.test.js", "modules/tag-builder/test/advanced-structure.test.js",
+    "test/integration/semantic-quality-benchmark.test.js",
+    "test/integration/saved-table-semantics.test.js",
+    "modules/validator/test/review-plan.test.js", "test/unit/production-artifacts.test.js", "test/unit/reader-qualification.test.js"]) {
+    if (!testFiles.includes(path.join(repoRoot, required))) throw new Error(`Required production baseline is missing: ${required}`);
+  }
+
   await runTests(testFiles);
 }
 

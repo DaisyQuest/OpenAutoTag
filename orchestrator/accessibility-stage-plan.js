@@ -223,6 +223,13 @@ export function createAccessibilityPreparationStages({ filePath, resolvedOutputD
             artifacts: { semanticOrdered: stageOutputPath }
           };
         } catch (error) {
+          // Constraints are authored intent. A geometry fallback must never discard them.
+          const semantic = JSON.parse(await readFile(inputPath, "utf8"));
+          if (semantic.relations?.some((r) => ["precedes", "continues"].includes(r.type)) ||
+              new Set(semantic.nodes.map((n) => n.id)).size !== semantic.nodes.length) {
+            error.retryable = false;
+            throw error;
+          }
           const fallback = await fallbackReadingOrder(inputPath, outputPath, error.message);
           return {
             outputPath: fallback.outputPath,
@@ -328,10 +335,18 @@ export function createTaggingOutputStages({
   taggedPdfFileName = "06-tagged.pdf",
   validationReportFileName = "07-validation-report.json",
   includeValidator = true,
+  preservationCheck = false,
+  productionChecks = false,
   writerArgs = () => []
 }) {
   const profileEnv = profileContext ? injectProfileEnv(profileContext) : {};
   const modeArgs = buildWriterModeArgs(profileContext);
+  if (productionChecks) {
+    preservationCheck = true;
+    taggedPdfFileName = "06-candidate.pdf";
+    Object.assign(profileEnv, { PASSTHROUGH_MINIMAL: "1", PASSTHROUGH_REPAIR_LIST_FORMS: "1", PASSTHROUGH_REPAIR_LINKS: "1", TAG_BUILDER_ENABLE_TABLE_HEADERS: "1" });
+  }
+  if (preservationCheck && !includeValidator) throw new Error("Preservation checking requires the validator stage");
 
   const stages = [
     {
@@ -366,6 +381,7 @@ export function createTaggingOutputStages({
           outputPath: taggedPdf,
           artifacts: {
             taggedPdf,
+            ...(productionChecks ? { candidatePdf: taggedPdf } : {}),
             writerReport,
             tagManifest: path.resolve(`${taggedPdf}.tags.json`)
           }
@@ -407,5 +423,30 @@ export function createTaggingOutputStages({
     });
   }
 
+  if (preservationCheck) {
+    stages.push({
+      key: "preservationQuality",
+      label: "preservation-quality",
+      outputPath: path.join(resolvedOutputDir, "08-quality-report.json"),
+      run: async () => {
+        const outputPath = path.join(resolvedOutputDir, "08-quality-report.json");
+        // The checker writes its report and sidecars before the stage evaluates disposition.
+        await runJsonStage("scripts/check-pdf-preservation.js", [
+          "--source-pdf", filePath, "--candidate-pdf", artifacts.taggedPdf,
+          "--validation-report", artifacts.validationReport, "--output", outputPath
+          , ...(artifacts[semanticArtifactKey] ? ["--semantic", artifacts[semanticArtifactKey]] : [])
+        ], outputPath);
+        const report = JSON.parse(await readFile(outputPath, "utf8"));
+        artifacts.qualityReport = outputPath;
+        if (productionChecks) delete artifacts.taggedPdf;
+        if (report.disposition !== "review_required") {
+          const error = new Error(`Preservation check ${report.disposition}; see ${outputPath}`);
+          error.retryable = false;
+          throw error;
+        }
+        return { outputPath, artifacts: { qualityReport: outputPath }, disposition: report.disposition };
+      }
+    });
+  }
   return stages;
 }

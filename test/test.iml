@@ -7,8 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="pdfbox-apps-1.28.2" level="project" />
+    <orderEntry type="library" name="verapdf-cli-1.30.3" level="project" />
     <orderEntry type="library" name="vendor" level="project" />
-    <orderEntry type="library" name="pdfbox-app-3.0.7" level="project" />
+    <orderEntry type="library" name="pdfbox-app-3.0.8" level="project" />
   </component>
 </module>

@@ -14,6 +14,8 @@ function createPipelineStages({ filePath, resolvedOutputDir, artifacts, profileC
       resolvedOutputDir,
       artifacts,
       profileContext,
+      preservationCheck: options.preservationCheck === true,
+      productionChecks: options.productionChecks === true,
       semanticArtifactKey: mlClassifier.enabled ? "semanticMlTuned" : "semanticOrdered"
     })
   ];
@@ -98,6 +100,8 @@ async function main() {
   }
 
   const options = resolvedProfileId ? { profileId: resolvedProfileId } : {};
+  if (args.get("--preservation-check") === "true") options.preservationCheck = true;
+  if (args.get("--production-checks") === "true") options.productionChecks = true;
   if (mlClassifierEnabled) {
     options.mlClassifier = {
       enabled: true,

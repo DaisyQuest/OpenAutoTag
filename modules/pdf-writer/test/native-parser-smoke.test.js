@@ -6,37 +6,19 @@ import path from "node:path";
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../../scripts/java-runtime.js";
+import { buildJavaExecEnv, resolveJavaTool } from "../../../scripts/java-runtime.js";
 import { getRuntimeBuildDir } from "../../../scripts/runtime-paths.js";
+import { ensureJavaHelperCompiled } from "../index.js";
 
 const execFileP = promisify(execFile);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..", "..");
 const buildDir = getRuntimeBuildDir("modules-pdf-writer", { repoRoot });
-const pdfboxJar = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJar = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 const fixturePdf = path.join(repoRoot, "Autonics-TK-manual.pdf");
-
-async function compileNative() {
-  const sources = [
-    path.join(repoRoot, "modules", "pdf-writer", "java", "NativeContentStreamParser.java"),
-    path.join(repoRoot, "modules", "pdf-writer", "java", "NativeTagMatcher.java"),
-    path.join(repoRoot, "modules", "pdf-writer", "java", "NativeContentStreamRewriter.java"),
-    path.join(repoRoot, "modules", "pdf-writer", "java", "PassthroughMetadataCli.java")
-  ];
-  await ensureJavaBuildArtifact({
-    buildDir,
-    isCurrent: async () => false,
-    compile: async () => {
-      const javac = await resolveJavaTool("javac", "PIPELINE_JAVAC_PATH", { bundledJavaHome });
-      await execFileP(javac, ["-encoding", "UTF-8", "-cp", pdfboxJar, "-d", buildDir, ...sources], {
-        env: await buildJavaExecEnv({ bundledJavaHome })
-      });
-    }
-  });
-}
 
 test("NativeContentStreamParser extracts real Unicode text from Type0/Identity-H subsets", async (t) => {
   if (!existsSync(fixturePdf)) {
@@ -44,7 +26,7 @@ test("NativeContentStreamParser extracts real Unicode text from Type0/Identity-H
     return;
   }
 
-  await compileNative();
+  await ensureJavaHelperCompiled();
   await mkdir(buildDir, { recursive: true });
   const outputPath = path.join(buildDir, "smoke-operators.json");
 

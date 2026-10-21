@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/reader-qualification.schema.json",
+  "title": "Human reader qualification evidence",
+  "type": "object", "required": ["candidateHash", "reviewer", "testedAt", "sessions"],
+  "properties": {
+    "candidateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewer": { "type": "string", "minLength": 1 }, "testedAt": { "type": "string", "minLength": 1 },
+    "sessions": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["reader", "version", "platform", "checks"], "properties": {
+      "reader": { "type": "string", "minLength": 1 }, "version": { "type": "string", "minLength": 1 }, "platform": { "type": "string", "minLength": 1 },
+      "viewer": { "type": "string", "minLength": 1 }, "viewerVersion": { "type": "string", "minLength": 1 },
+      "checks": { "type": "object", "required": ["readingOrder", "headings", "lists", "tables", "links", "labels", "tabOrder", "fillSaveReopen"],
+        "properties": {
+          "readingOrder": { "$ref": "#/$defs/check" }, "headings": { "$ref": "#/$defs/check" }, "lists": { "$ref": "#/$defs/check" },
+          "tables": { "$ref": "#/$defs/check" }, "links": { "$ref": "#/$defs/check" }, "labels": { "$ref": "#/$defs/check" },
+          "tabOrder": { "$ref": "#/$defs/check" }, "fillSaveReopen": { "$ref": "#/$defs/check" }
+        }, "additionalProperties": false }
+    }, "additionalProperties": false } }
+  },
+  "$defs": { "check": { "type": "object", "required": ["status", "evidence"], "properties": {
+    "status": { "enum": ["pass", "fail", "not_applicable"] }, "evidence": { "type": "string", "minLength": 1 }
+  }, "additionalProperties": false } }, "additionalProperties": false
+}

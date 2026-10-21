@@ -14,9 +14,9 @@ const defaultCachePath = getRuntimeCacheDir("tesseract", { repoRoot });
 const javaSourcePath = path.join(moduleDir, "java", "PdfOcrRenderCli.java");
 const javaClassPath = path.join(buildDir, "PdfOcrRenderCli.class");
 const pdfboxJarCandidates = [
-  path.join(moduleDir, "vendor", "pdfbox-app-3.0.7.jar"),
-  path.join(moduleDir, "..", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar"),
-  path.join(moduleDir, "..", "validator", "vendor", "pdfbox-app-3.0.7.jar")
+  path.join(moduleDir, "vendor", "pdfbox-app-3.0.8.jar"),
+  path.join(moduleDir, "..", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar"),
+  path.join(moduleDir, "..", "validator", "vendor", "pdfbox-app-3.0.8.jar")
 ];
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 

@@ -1,0 +1,1192 @@
+{
+  "schemaVersion": "1.0.0",
+  "cases": [
+    {
+      "id": "heading-field-label",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "title",
+                "text": "Supplemental Affirmation in Support of Order to Show Cause",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "heading",
+                "headingLevel": 1
+              },
+              {
+                "id": "label",
+                "text": "Index #:",
+                "bbox": [
+                  72,
+                  150,
+                  100,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "heading",
+                "headingLevel": 2,
+                "formFieldIds": [
+                  "w"
+                ]
+              }
+            ],
+            "formFields": [
+              {
+                "id": "w",
+                "bbox": [
+                  175,
+                  150,
+                  100,
+                  12
+                ],
+                "tooltip": "Index #"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "roles": {
+          "title": "H1",
+          "label": "P"
+        },
+        "labels": {
+          "w": [
+            "label"
+          ]
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "heading-sentence-review",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "sentence",
+                "text": "This is an unusually long sentence which has been emphasized using typography but requires a reviewer to determine whether it introduces a section.",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "heading",
+                "headingLevel": 2
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "reviewCodes": [
+          "HEADING_SENTENCE_REVIEW"
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "wrapped-label",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "a",
+                "text": "Full legal",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "formFieldIds": [
+                  "w"
+                ]
+              },
+              {
+                "id": "b",
+                "text": "name:",
+                "bbox": [
+                  72,
+                  116,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "formFieldIds": [
+                  "w"
+                ]
+              },
+              {
+                "id": "instruction",
+                "text": "Enter all names",
+                "bbox": [
+                  72,
+                  140,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "formFieldIds": [
+                  "w"
+                ]
+              }
+            ],
+            "formFields": [
+              {
+                "id": "w",
+                "bbox": [
+                  310,
+                  100,
+                  160,
+                  24
+                ],
+                "tooltip": "Full legal name"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "w": [
+            "a",
+            "b"
+          ]
+        },
+        "descriptions": {
+          "w": [
+            "instruction"
+          ]
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "ambiguous-label",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "a",
+                "text": "First label",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "formFieldIds": [
+                  "w"
+                ]
+              },
+              {
+                "id": "b",
+                "text": "Second label",
+                "bbox": [
+                  72,
+                  120,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "formFieldIds": [
+                  "w"
+                ]
+              }
+            ],
+            "formFields": [
+              {
+                "id": "w",
+                "bbox": [
+                  310,
+                  100,
+                  100,
+                  24
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "labels": {
+          "w": []
+        },
+        "reviewCodes": [
+          "FORM_LABEL_AMBIGUOUS"
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "decimal-list-pages",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "1. First",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "one"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "2. Second",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "two"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "sameList": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "order": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "listNumbering": {
+          "first": "Decimal"
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "alphabetic-list-pages",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "a) First",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "one"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "b) Second",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "two"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "sameList": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "order": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "listNumbering": {
+          "first": "LowerAlpha"
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "roman-list-pages",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "iv. First",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "one"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "v. Second",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "two"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "sameList": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "order": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "listNumbering": {
+          "first": "LowerRoman"
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "list-restart",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "1. First",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "one"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "1. Restart",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "two"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "separateLists": [
+          [
+            "first",
+            "second"
+          ]
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "list-style-change",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "a) First",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "one"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "b) Second",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "DifferentFont",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "two"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "separateLists": [
+          [
+            "first",
+            "second"
+          ]
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "paragraph-pages",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "A sentence that continues",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "on the next page",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "sameParagraph": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "tagCounts": {
+          "P": 1
+        },
+        "order": [
+          [
+            "first",
+            "second"
+          ]
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "paragraph-ended",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "A finished sentence.",
+                "bbox": [
+                  72,
+                  720,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph"
+              }
+            ]
+          },
+          {
+            "pageNumber": 2,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "second",
+                "text": "another paragraph",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "tagCounts": {
+          "P": 2
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "list-paragraph-continuation",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "first",
+                "text": "1. A sentence that continues",
+                "bbox": [
+                  72,
+                  100,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "list-item",
+                "listGroupId": "one"
+              },
+              {
+                "id": "second",
+                "text": "with a second paragraph",
+                "bbox": [
+                  90,
+                  120,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "listBodies": [
+          [
+            "first",
+            "second"
+          ]
+        ],
+        "tagCounts": {
+          "LI": 1
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "explicit-caption-order",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "caption",
+                "text": "Table 1: Example",
+                "bbox": [
+                  72,
+                  90,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "captionForId": "table-anchor"
+              },
+              {
+                "id": "table-anchor",
+                "text": "Table content",
+                "bbox": [
+                  72,
+                  200,
+                  220,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "order": [
+          [
+            "table-anchor",
+            "caption"
+          ]
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "spanning-heading",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "right",
+                "text": "Right column",
+                "bbox": [
+                  330,
+                  160,
+                  210,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "columnHint": 1
+              },
+              {
+                "id": "heading",
+                "text": "Shared heading",
+                "bbox": [
+                  72,
+                  100,
+                  468,
+                  18
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "heading",
+                "headingLevel": 1
+              },
+              {
+                "id": "left",
+                "text": "Left column",
+                "bbox": [
+                  72,
+                  160,
+                  210,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "columnHint": 0
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "order": [
+          [
+            "heading",
+            "left"
+          ],
+          [
+            "heading",
+            "right"
+          ],
+          [
+            "left",
+            "right"
+          ]
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "spanning-heading-bands",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "top-left",
+                "text": "First column before heading",
+                "bbox": [
+                  72,
+                  100,
+                  210,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "columnHint": 0
+              },
+              {
+                "id": "bottom-left",
+                "text": "First column after heading",
+                "bbox": [
+                  72,
+                  500,
+                  210,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "columnHint": 0
+              },
+              {
+                "id": "top-right",
+                "text": "Second column before heading",
+                "bbox": [
+                  330,
+                  100,
+                  210,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "columnHint": 1
+              },
+              {
+                "id": "bottom-right",
+                "text": "Second column after heading",
+                "bbox": [
+                  330,
+                  500,
+                  210,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "paragraph",
+                "columnHint": 1
+              },
+              {
+                "id": "heading",
+                "text": "Shared heading",
+                "bbox": [
+                  72,
+                  400,
+                  468,
+                  18
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "heading",
+                "headingLevel": 1
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "order": [
+          [
+            "top-left",
+            "top-right"
+          ],
+          [
+            "top-right",
+            "heading"
+          ],
+          [
+            "heading",
+            "bottom-left"
+          ],
+          [
+            "bottom-left",
+            "bottom-right"
+          ]
+        ]
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    },
+    {
+      "id": "multi-level-table",
+      "layout": {
+        "schemaVersion": "1.0.0",
+        "documentId": "semantic-quality-fixture",
+        "source": {
+          "filePath": "generated-reference.pdf",
+          "language": "en-US"
+        },
+        "pages": [
+          {
+            "pageNumber": 1,
+            "width": 612,
+            "height": 800,
+            "textBlocks": [
+              {
+                "id": "group",
+                "text": "Measurements",
+                "bbox": [
+                  72,
+                  100,
+                  130,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "table-cell",
+                "tableId": "table",
+                "tableRowIndex": 0,
+                "tableColumnIndex": 0,
+                "cellRole": "header",
+                "tableSection": "head",
+                "tableColumnSpan": 2
+              },
+              {
+                "id": "ha",
+                "text": "Length",
+                "bbox": [
+                  72,
+                  125,
+                  130,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "table-cell",
+                "tableId": "table",
+                "tableRowIndex": 1,
+                "tableColumnIndex": 0,
+                "cellRole": "header",
+                "tableSection": "head"
+              },
+              {
+                "id": "hb",
+                "text": "Width",
+                "bbox": [
+                  202,
+                  125,
+                  130,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "table-cell",
+                "tableId": "table",
+                "tableRowIndex": 1,
+                "tableColumnIndex": 1,
+                "cellRole": "header",
+                "tableSection": "head"
+              },
+              {
+                "id": "value",
+                "text": "1234",
+                "bbox": [
+                  72,
+                  150,
+                  130,
+                  12
+                ],
+                "fontName": "FixtureSans",
+                "fontSize": 12,
+                "blockType": "table-cell",
+                "tableId": "table",
+                "tableRowIndex": 2,
+                "tableColumnIndex": 0,
+                "tableColumnSpan": 2
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "headers": {
+          "value": [
+            "group",
+            "ha",
+            "hb"
+          ],
+          "ha": [
+            "group"
+          ],
+          "hb": [
+            "group"
+          ]
+        }
+      },
+      "provenance": "maintainer-authored-synthetic-reference",
+      "expertReview": "pending"
+    }
+  ]
+}

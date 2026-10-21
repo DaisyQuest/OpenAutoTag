@@ -1,4 +1,5 @@
 import Ajv2020 from "ajv/dist/2020.js";
+import { applyPrecedence, assignStableLines } from "./constraints.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
@@ -163,18 +164,18 @@ function compareUnits(left, right) {
   const pageOrPhaseOrColumn =
     compareNumbers(left.pageNumber, right.pageNumber) ||
     compareNumbers(left.phase, right.phase) ||
-    compareNumbers(left.columnIndex, right.columnIndex);
+    (left.pageDirection === "rtl" ? -1 : 1) * compareNumbers(left.columnIndex, right.columnIndex);
   if (pageOrPhaseOrColumn !== 0) return pageOrPhaseOrColumn;
 
   const leftTop = Number.isFinite(left.top) ? left.top : 0;
   const rightTop = Number.isFinite(right.top) ? right.top : 0;
-  const sameLine = Math.abs(leftTop - rightTop) < readReadingOrderThresholds().lineGroupEpsilon;
+  const sameLine = left.lineIndex === right.lineIndex;
   if (!sameLine) {
     return leftTop - rightTop;
   }
 
   return (
-    compareNumbers(left.left, right.left) ||
+    (left.lineDirection === "rtl" ? -1 : 1) * compareNumbers(left.left, right.left) ||
     compareNumbers(left.priority, right.priority) ||
     left.sortKey.localeCompare(right.sortKey)
   );
@@ -320,11 +321,15 @@ function buildPageUnits(pageNodes) {
     columnIndex: assignColumnIndex(unit, bands)
   }));
 
-  const sortedUnits = [
+  const units = [
     ...headerArtifacts,
     ...contentUnits,
     ...footerArtifacts
-  ].sort((left, right) => compareUnits(left, right));
+  ];
+  const pageDirection = pageNodes.filter((n) => n.role !== "Artifact").every((n) => n.direction === "rtl") ? "rtl" : "ltr";
+  for (const unit of units) unit.pageDirection = pageDirection;
+  assignStableLines(units, readReadingOrderThresholds().lineGroupEpsilon);
+  const sortedUnits = units.sort((left, right) => compareUnits(left, right));
 
   return sortedUnits;
 }
@@ -360,7 +365,8 @@ export async function assignReadingOrder(inputPath) {
     orderedNodes.push(...flattenUnits(pageUnits));
   }
 
-  const orderedNodeIds = orderedNodes.map((node, index) => {
+  const constrainedNodes = applyPrecedence(orderedNodes, semanticDocument.relations);
+  const orderedNodeIds = constrainedNodes.map((node, index) => {
     node.readingOrder = index;
     return node.id;
   });

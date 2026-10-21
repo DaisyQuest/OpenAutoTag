@@ -14,7 +14,7 @@ const pdfboxJarPath = path.join(
   "modules",
   "pdf-writer",
   "vendor",
-  "pdfbox-app-3.0.7.jar"
+  "pdfbox-app-3.0.8.jar"
 );
 
 function execCommand(command, args) {

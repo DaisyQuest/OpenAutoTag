@@ -13,7 +13,7 @@ const javaSourcePath = path.join(moduleDir, "java", "PdfRepairCli.java");
 const javaClassPath = path.join(buildDir, "PdfRepairCli.class");
 const fontJavaSourcePath = path.join(moduleDir, "java", "FontRepairCli.java");
 const fontJavaClassPath = path.join(buildDir, "FontRepairCli.class");
-const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.7.jar");
+const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
 
 function parseArgs(argv) {

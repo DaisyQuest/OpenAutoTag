@@ -83,6 +83,7 @@ function toSegment(pageHeight, item) {
     bbox,
     fontSize,
     fontName: item.fontName || "unknown",
+    ...(["ltr", "rtl"].includes(item.dir) ? { direction: item.dir } : {}),
     writingMode: getWritingMode(rotation),
     textRotation: rotation,
     hasEOL: Boolean(item.hasEOL)
@@ -205,12 +206,15 @@ function needsWhitespace(previousSegment, nextSegment) {
   }
 
   const previousRight = previousSegment.bbox[0] + previousSegment.bbox[2];
-  const gap = nextSegment.bbox[0] - previousRight;
+  const gap = previousSegment.direction === "rtl" && nextSegment.direction === "rtl"
+    ? previousSegment.bbox[0] - nextSegment.bbox[0] - nextSegment.bbox[2]
+    : nextSegment.bbox[0] - previousRight;
   return gap > Math.max(1.5, previousSegment.fontSize * 0.18);
 }
 
 function mergeLineSegments(pageNumber, lineNumber, segments) {
-  const orderedSegments = [...segments].sort((left, right) => left.bbox[0] - right.bbox[0]);
+  const direction = segments.every((s) => s.direction === "rtl") ? "rtl" : segments.every((s) => s.direction === "ltr") ? "ltr" : undefined;
+  const orderedSegments = [...segments].sort((left, right) => (direction === "rtl" ? -1 : 1) * (left.bbox[0] - right.bbox[0]));
   const left = Math.min(...orderedSegments.map((segment) => segment.bbox[0]));
   const top = Math.min(...orderedSegments.map((segment) => segment.bbox[1]));
   const right = Math.max(...orderedSegments.map((segment) => segment.bbox[0] + segment.bbox[2]));
@@ -247,6 +251,7 @@ function mergeLineSegments(pageNumber, lineNumber, segments) {
     bbox: [left, top, right - left, bottom - top],
     fontSize,
     fontName,
+    ...(direction ? { direction } : {}),
     writingMode,
     textRotation
   };
@@ -650,22 +655,69 @@ export async function parsePdf(filePath, options = {}) {
   const absolutePath = path.resolve(filePath);
   const data = new Uint8Array(await readFile(absolutePath));
   const pdf = await getDocument(createPdfDocumentLoadOptions(data)).promise;
+  const pageCount = pdf.numPages;
 
   const pages = [];
+  const metadata = await pdf.getMetadata();
+  const sourceTitle = typeof metadata.info?.Title === "string" ? metadata.info.Title.trim() : "";
 
-  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
     const textContent = await page.getTextContent();
     const [, , width, height] = page.view;
-    const textBlocks = reindexBlocks(pageNumber, groupTextItemsToBlocks(pageNumber, height, textContent.items));
+    // Text extraction emits resource IDs such as g_d0_f1. Resolve the
+    // actual font name so downstream heuristics can recognize font style.
+    // A broken drawing operator must not invalidate usable extracted text.
+    if (textContent.items.some((item) => item.fontName)) {
+      try { await page.getOperatorList(); } catch { /* retain resource IDs */ }
+    }
+    const items = textContent.items.map((item) => {
+      if (!item.fontName) return item;
+      let font;
+      try { font = page.commonObjs.get(item.fontName); } catch { return item; }
+      return typeof font?.name === "string" && font.name.trim()
+        ? { ...item, fontName: font.name }
+        : item;
+    });
+    const textBlocks = reindexBlocks(pageNumber, groupTextItemsToBlocks(pageNumber, height, items));
+    const annotations = await page.getAnnotations();
+    const formFields = annotations.filter((annot) => annot.subtype === "Widget" &&
+      Array.isArray(annot.rect) && annot.rect.length === 4 && annot.rect.every(Number.isFinite))
+      .map((annot) => ({
+        id: annot.id,
+        fieldName: annot.fieldName || "",
+        fieldType: annot.fieldType || "",
+        widgetId: annot.id,
+        fieldId: annot.fieldName || annot.id,
+        radioButton: Boolean(annot.radioButton),
+        checkBox: Boolean(annot.checkBox),
+        readOnly: Boolean(annot.readOnly),
+        required: Boolean(annot.required),
+        tooltip: annot.alternativeText || "",
+        bbox: [annot.rect[0], height - annot.rect[3],
+          Math.max(0, annot.rect[2] - annot.rect[0]), Math.max(0, annot.rect[3] - annot.rect[1])]
+      }));
+    for (const block of textBlocks) {
+      const [x, y, w, h] = block.bbox;
+      const ids = formFields.filter(({ bbox: [fx, fy, fw, fh] }) => {
+        const centerY = y + h / 2;
+        const gapX = Math.max(fx - (x + w), x - (fx + fw), 0);
+        return centerY >= fy - block.fontSize * 0.4 && centerY <= fy + fh + block.fontSize * 0.4 &&
+          gapX <= Math.max(24, block.fontSize * 2);
+      }).map((field) => field.id);
+      if (ids.length > 0) block.formFieldIds = ids;
+    }
 
     pages.push({
       pageNumber,
       width,
       height,
-      textBlocks
+      textBlocks,
+      ...(formFields.length > 0 ? { formFields } : {})
     });
+    page.cleanup();
   }
+  await pdf.destroy();
 
   const nativeLanguageDetection = detectDocumentLanguageFromPages(pages);
   const ocrOptions = normalizeOcrOptions(options.ocr, nativeLanguageDetection);
@@ -678,7 +730,8 @@ export async function parsePdf(filePath, options = {}) {
     documentId: createDocumentId(absolutePath),
     source: {
       filePath: absolutePath,
-      pageCount: pdf.numPages,
+      ...(sourceTitle ? { title: sourceTitle } : {}),
+      pageCount,
       language: documentLanguageDetection.language,
       languageConfidence: documentLanguageDetection.confidence,
       languageScores: documentLanguageDetection.scores,

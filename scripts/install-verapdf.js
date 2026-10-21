@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
-import { createWriteStream } from "node:fs";
-import { access, chmod, mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { createReadStream, createWriteStream } from "node:fs";
+import { access, chmod, mkdir, mkdtemp, rename, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
@@ -9,12 +10,14 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const vendorDir = path.join(repoRoot, "modules", "validator", "vendor");
-const zipPath = path.join(vendorDir, "verapdf-pdfbox-installer.zip");
+const version = "1.30.3";
+const installerSha256 = "b512bf24945503a33fc10738ecffc1f2dccaaf8593a448e94ee9ac86a9559a59";
+const zipPath = path.join(vendorDir, `verapdf-greenfield-${version}-installer.zip`);
 const extractDir = path.join(vendorDir, "verapdf");
 const appDir = path.join(extractDir, "app");
 const autoInstallPath = path.join(extractDir, "auto-install.xml");
-const releaseUrl = "https://software.verapdf.org/releases/verapdf-pdfbox-installer.zip";
-const releaseUrlVersioned = "https://software.verapdf.org/releases/1.28/verapdf-pdfbox-1.28.2-installer.zip";
+
+const releaseUrlVersioned = "https://software.verapdf.org/releases/1.30/verapdf-greenfield-1.30.3-installer.zip";
 const configuredInstallerUrls = (process.env.VERAPDF_INSTALLER_URLS || process.env.VERAPDF_INSTALLER_URL || "")
   .split(/[\r\n,]+/)
   .map((url) => url.trim())
@@ -31,7 +34,7 @@ function escapeXml(value) {
 
 function runCommand(command, args, { shell = false } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { cwd: repoRoot, shell, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+    execFile(command, args, { cwd: repoRoot, shell, windowsHide: true, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -58,7 +61,7 @@ async function downloadInstaller() {
 
   // Try configured mirrors first. By default, use the public URLs this project
   // has historically sourced veraPDF from.
-  const urls = configuredInstallerUrls.length > 0 ? configuredInstallerUrls : [releaseUrlVersioned, releaseUrl];
+  const urls = configuredInstallerUrls.length > 0 ? configuredInstallerUrls : [releaseUrlVersioned];
   let lastError = new Error("Unable to download veraPDF installer: no URLs available.");
   for (const url of urls) {
     let response;
@@ -79,10 +82,7 @@ async function downloadInstaller() {
 }
 
 async function extractInstaller() {
-  const extracted = await findInstallerDir();
-  if (extracted) {
-    return extracted;
-  }
+  // Always extract from the checksum-verified archive, never trust a stale cached installer JAR.
 
   if (process.platform === "win32") {
     await runCommand("powershell", [
@@ -109,22 +109,22 @@ async function findInstallerDir() {
     return null;
   }
 
-  const entries = await readdir(extractDir, { withFileTypes: true });
-  const installerEntry = entries.find((entry) => entry.isDirectory() && entry.name.startsWith("verapdf-pdfbox-"));
-  return installerEntry ? path.join(extractDir, installerEntry.name) : null;
+  const installerDir = path.join(extractDir, `verapdf-greenfield-${version}`);
+  return await pathExists(path.join(installerDir, `verapdf-izpack-installer-${version}.jar`)) ? installerDir : null;
 }
 
-async function writeAutoInstallFile() {
+async function writeAutoInstallFile(target) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <AutomatedInstallation langpack="eng">
   <com.izforge.izpack.panels.htmlhello.HTMLHelloPanel id="welcome"/>
   <com.izforge.izpack.panels.target.TargetPanel id="install_dir">
-    <installpath>${escapeXml(appDir)}</installpath>
+    <installpath>${escapeXml(target)}</installpath>
   </com.izforge.izpack.panels.target.TargetPanel>
   <com.izforge.izpack.panels.packs.PacksPanel id="sdk_pack_select">
-    <pack index="0" name="veraPDF GUI" selected="true"/>
-    <pack index="1" name="veraPDF Batch files" selected="true"/>
-    <pack index="2" name="veraPDF Validation model" selected="true"/>
+    <pack index="0" name="veraPDF GUI" selected="false"/>
+    <pack index="1" name="veraPDF CLI" selected="true"/>
+    <pack index="2" name="veraPDF Documentation" selected="false"/>
+    <pack index="3" name="veraPDF Sample Plugins" selected="false"/>
   </com.izforge.izpack.panels.packs.PacksPanel>
   <com.izforge.izpack.panels.install.InstallPanel id="install"/>
   <com.izforge.izpack.panels.finish.FinishPanel id="finish"/>
@@ -135,23 +135,23 @@ async function writeAutoInstallFile() {
 }
 
 async function installVeraPdf(installerDir) {
-  await rm(appDir, { recursive: true, force: true });
-  await writeAutoInstallFile();
-
-  const installerPath =
-    process.platform === "win32"
-      ? path.join(installerDir, "verapdf-install.bat")
-      : path.join(installerDir, "verapdf-install");
-
-  if (!(await pathExists(installerPath))) {
-    throw new Error(`veraPDF installer not found at ${installerPath}.`);
+  // Stage and verify the replacement before retaining the prior installation as a backup.
+  const target = await mkdtemp(path.join(extractDir, `install-${version}-`));
+  await writeAutoInstallFile(target);
+  const java = process.env.VALIDATOR_JAVA_PATH || (process.env.JAVA_HOME ? path.join(process.env.JAVA_HOME, "bin", process.platform === "win32" ? "java.exe" : "java") : "java");
+  await runCommand(java, ["-Djava.awt.headless=true", "-jar", path.join(installerDir, `verapdf-izpack-installer-${version}.jar`), autoInstallPath]);
+  const { stdout } = await runCommand(java, ["-jar", path.join(target, "bin", `cli-${version}.jar`), "--version"]);
+  if (!stdout.includes(version)) throw new Error("Unexpected installed veraPDF version");
+  const parent = path.resolve(extractDir) + path.sep;
+  for (const value of [target, appDir]) if (!path.resolve(value).startsWith(parent)) throw new Error("Install path outside vendor workspace");
+  let backup;
+  if (await pathExists(appDir)) {
+    backup = path.join(extractDir, `previous-${Date.now()}`);
+    if (!path.resolve(backup).startsWith(parent)) throw new Error("Backup path outside vendor workspace");
+    await rename(appDir, backup);
   }
-
-  if (process.platform !== "win32") {
-    await chmod(installerPath, 0o755).catch(() => {});
-  }
-
-  await runCommand(installerPath, [autoInstallPath], { shell: process.platform === "win32" });
+  try { await rename(target, appDir); }
+  catch (error) { if (backup) await rename(backup, appDir); throw error; }
 
   if (process.platform !== "win32") {
     for (const launcherPath of [path.join(appDir, "verapdf"), path.join(appDir, "bin", "verapdf")]) {
@@ -166,6 +166,9 @@ async function main() {
   await mkdir(vendorDir, { recursive: true });
   await mkdir(extractDir, { recursive: true });
   await downloadInstaller();
+  const digest = createHash("sha256");
+  for await (const chunk of createReadStream(zipPath)) digest.update(chunk);
+  if (digest.digest("hex") !== installerSha256) throw new Error("veraPDF installer SHA-256 mismatch; cached or mirrored content is not the pinned release");
   const installerDir = await extractInstaller();
   await installVeraPdf(installerDir);
   process.stdout.write(`veraPDF installed at ${appDir}\n`);
