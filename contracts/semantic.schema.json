@@ -89,6 +89,30 @@
             "type": "string",
             "minLength": 1
           },
+          "regionId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rawText": {
+            "type": "string"
+          },
+          "comparisonText": {
+            "type": "string"
+          },
+          "textProvenance": {
+            "enum": [
+              "native",
+              "ocr"
+            ]
+          },
+          "referenceMarkers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
           "role": {
             "type": "string",
             "enum": [
@@ -155,6 +179,214 @@
           }
         },
         "additionalProperties": true
+      }
+    },
+    "inferenceStatus": {
+      "const": "uncalibrated-requires-review"
+    },
+    "outline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "nodeId",
+          "parentNodeId",
+          "level",
+          "evidence",
+          "status"
+        ],
+        "properties": {
+          "nodeId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parentNodeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "const": "requires-review"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "pageNumber",
+          "parentId",
+          "kind",
+          "nodeIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "page",
+              "column",
+              "spanning",
+              "footnotes"
+            ]
+          },
+          "nodeIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tableFragments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "pageNumber",
+          "tableId",
+          "nodeIds",
+          "anchors",
+          "headerSignature",
+          "status",
+          "continuesFrom"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tableId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nodeIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "anchors": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "headerSignature": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "requires-review",
+              "grid-checked",
+              "continuation-proposed"
+            ]
+          },
+          "continuesFrom": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "figures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "pageNumber",
+          "bbox",
+          "captionNodeIds",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "bbox": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0
+              }
+            ],
+            "items": false
+          },
+          "captionNodeIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "status": {
+            "const": "requires-description-review"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "headingMergeSummary": {

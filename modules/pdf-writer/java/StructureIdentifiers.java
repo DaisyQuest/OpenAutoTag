@@ -18,7 +18,7 @@ public final class StructureIdentifiers {
             if(!"TH".equals(target.getNameAsString(COSName.S)) || reference.table()==null || tables.get(target)!=reference.table())
                 throw new IOException("Table header must resolve to a TH in the same table: "+reference.id());
         }
-        if(ids.isEmpty()) return;
+        if(ids.isEmpty()) { root.getCOSObject().removeItem(COSName.getPDFName("IDTree")); return; }
         COSArray names=new COSArray();
         for(var entry:ids.entrySet()) { names.add(new COSString(entry.getKey())); names.add(entry.getValue()); }
         COSDictionary tree=new COSDictionary(); tree.setItem(COSName.NAMES,names);

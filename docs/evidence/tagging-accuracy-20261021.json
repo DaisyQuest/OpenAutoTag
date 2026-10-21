@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-10-21",
+  "baselineCommit": "2e567fe",
+  "scope": "bounded accuracy roadmap engineering delivery",
+  "toolPins": {
+    "pdfbox": "3.0.8",
+    "verapdf": "1.30.3 Greenfield",
+    "profile": "ua1"
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 201,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accuracy-release-baseline.log"
+    },
+    "compatibility": {
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accuracy-compatibility-final.log"
+    },
+    "note": "Suites overlap; no repository-wide coverage claim."
+  },
+  "form": {
+    "candidateSha256": "ede89479e33638a1adffbda2761d1e323732caeecea6bd0f08350bbe2ced2383",
+    "referenceSha256": "e9fc4c318c7d0b75048c9c3dbe035acb1f376be0f80fb1559b101540b3e3b858",
+    "renders": {
+      "preview-1": "pixel-identical at 150 DPI",
+      "preview-2": "pixel-identical at 150 DPI",
+      "pdfjs-candidate-1": "pixel-identical at 150 DPI",
+      "pdfjs-candidate-2": "pixel-identical at 150 DPI"
+    },
+    "pageTextIdentical": true,
+    "widgets": 33,
+    "links": 9,
+    "headings": 5,
+    "rawValidation": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 9874,
+      "failedChecks": 0
+    },
+    "fontAuditErrors": 0,
+    "fillSaveReopen": "passed text, checkbox, accented and Euro probes",
+    "humanReaderQualification": "not performed",
+    "disposition": "review_required",
+    "fieldObjects": 35,
+    "terminalFields": 32
+  },
+  "formVisualAssociations": {
+    "previousUnresolved": 12,
+    "currentUnresolved": 8,
+    "remainingAuthoredNames": 8,
+    "status": "requires-reader-test"
+  },
+  "savedComparison": {
+    "passed": 1828,
+    "failed": 0
+  },
+  "pilot": {
+    "inventory": 12,
+    "primaryExecuted": 9,
+    "finalNodes": 37643,
+    "sourceIdentityFailures": 0,
+    "ownershipFailures": 0,
+    "annotations": "pending independent review",
+    "calibrationStatus": "insufficient evidence",
+    "holdout": "candidate-unreviewed"
+  },
+  "limitations": [
+    "No general precision or conformance claim.",
+    "Actual reader sessions were not performed.",
+    "Multilingual expansion is deferred.",
+    "Performance figures are diagnostics; no controlled previous-build or peak-memory qualification."
+  ],
+  "artifactHashes": {
+    "output/TEST-FORM-accuracy-20261021/06-candidate.pdf": "ede89479e33638a1adffbda2761d1e323732caeecea6bd0f08350bbe2ced2383",
+    "output/TEST-FORM-accuracy-20261021/07-validation-report.json": "6e447ad85a68bba3f9a43127cdfbf49b09049b770e51df9a5a9c7de9ec5f9c72",
+    "output/TEST-FORM-accuracy-20261021/08-quality-report.json": "85e766b6c914626a0b0cdda67848aa5255688d8ba1a52455dac7a8171d3c716d",
+    "output/TEST-FORM-accuracy-20261021/09-saved-semantics.json": "4dd80fcbdcabb35d15f4a1d023a6f2439632636efc4ddbbffe4a520055829cb8",
+    "output/TEST-FORM-accuracy-20261021/10-accuracy-verification.json": "8dec737d97635f75a4b0d60c125771a2428375dcf25c0139a86edc7058303905",
+    "test/fixtures/accuracy-corpus.json": "b5b6268bc2ce3b30fec0de2866a4aec69347d6d75a83f8fd16c3c24a3ed5fe0e",
+    "output/accuracy-pilot-20261021/accuracy-report.json": "c2488fba450e0aad1d7f60fa96d53002d6f2d91f1d44c2d798a7147188492679"
+  }
+}

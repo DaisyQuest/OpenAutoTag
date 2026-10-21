@@ -2,7 +2,8 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { getDocument, VerbosityLevel } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, VerbosityLevel, OPS } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { textEvidence, alignOcrText, imageEvidence } from "./content-evidence.js";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import {
   DEFAULT_RECOGNITION_PROFILES,
@@ -248,6 +249,7 @@ function mergeLineSegments(pageNumber, lineNumber, segments) {
   return {
     id: `p${pageNumber}-b${lineNumber}`,
     text: text.trim(),
+    rawText: text,
     bbox: [left, top, right - left, bottom - top],
     fontSize,
     fontName,
@@ -303,7 +305,7 @@ function sortBlocksByGeometry(blocks) {
 
 function reindexBlocks(pageNumber, blocks) {
   return sortBlocksByGeometry(blocks).map((block, index) => ({
-    ...block,
+    ...textEvidence(block, block.textProvenance || "native"),
     id: `p${pageNumber}-b${index + 1}`,
     text: normalizeText(block.text)
   }));
@@ -527,9 +529,12 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
     };
   }
 
+  const aligned = forceReplaceViaHybrid ? { blocks: ocrResult.textBlocks.map(b=>textEvidence(b,"ocr")), suppressed: 0,
+    conflicts: [{ code: "OCR_HYBRID_REPLACEMENT_REVIEW" }] } : alignOcrText(page.textBlocks, ocrResult.textBlocks);
   return {
     ...page,
-    textBlocks: reindexBlocks(page.pageNumber, ocrResult.textBlocks),
+    nativeTextBlocks: page.textBlocks,
+    textBlocks: reindexBlocks(page.pageNumber, aligned.blocks),
     // Public flag: downstream consumers (semantic engine, tag-builder)
     // use this to inject /ActualText on struct leaves built from hybrid
     // pages — the content stream still has the garbled source OCR text
@@ -537,7 +542,9 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
     hybrid: forceReplaceViaHybrid ? true : undefined,
     ocr: {
       status: "applied",
-      mergeStrategy: nativeSummary.blockCount === 0 ? "replace-empty-page" : "replace-sparse-page",
+      mergeStrategy: forceReplaceViaHybrid ? "replace-suspect-ocr-review-required" : "retain-native-add-nonoverlapping-ocr",
+      suppressedDuplicates: aligned.suppressed,
+      alignmentReview: aligned.conflicts,
       trigger: nativeSummary,
       selectedCandidate,
       candidates: ocrResult.candidates,
@@ -668,9 +675,9 @@ export async function parsePdf(filePath, options = {}) {
     // Text extraction emits resource IDs such as g_d0_f1. Resolve the
     // actual font name so downstream heuristics can recognize font style.
     // A broken drawing operator must not invalidate usable extracted text.
-    if (textContent.items.some((item) => item.fontName)) {
-      try { await page.getOperatorList(); } catch { /* retain resource IDs */ }
-    }
+    let figures=[], imageEvidenceError;
+    try { figures=imageEvidence(await page.getOperatorList(),OPS,page.getViewport({scale:1,rotation:0}),pageNumber); }
+    catch(error) { imageEvidenceError=error.message; }
     const items = textContent.items.map((item) => {
       if (!item.fontName) return item;
       let font;
@@ -694,6 +701,9 @@ export async function parsePdf(filePath, options = {}) {
         readOnly: Boolean(annot.readOnly),
         required: Boolean(annot.required),
         tooltip: annot.alternativeText || "",
+        ...(typeof annot.exportValue === "string" ? { exportValue: annot.exportValue } : {}),
+        ...(typeof annot.buttonValue === "string" ? { buttonValue: annot.buttonValue } : {}),
+        pushButton: Boolean(annot.pushButton),
         bbox: [annot.rect[0], height - annot.rect[3],
           Math.max(0, annot.rect[2] - annot.rect[0]), Math.max(0, annot.rect[3] - annot.rect[1])]
       }));
@@ -713,6 +723,8 @@ export async function parsePdf(filePath, options = {}) {
       width,
       height,
       textBlocks,
+      figures,
+      ...(imageEvidenceError ? { imageEvidenceError } : {}),
       ...(formFields.length > 0 ? { formFields } : {})
     });
     page.cleanup();

@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.apache.pdfbox.pdmodel.common.PDNumberTreeNode;
@@ -561,7 +563,34 @@ public class NativeContentStreamRewriter {
         int skippedInsideSourceMarkedContent;
     }
 
-    private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan) throws IOException {
+    private static void collectListLabels(TagTreeNode node, Map<String,TagTreeNode> labels) {
+        if (node == null) return;
+        if ("LI".equals(node.type)) {
+            TagTreeNode label=null, body=null;
+            for(TagTreeNode child:node.children) { if("Lbl".equals(child.type))label=child; if("LBody".equals(child.type))body=child; }
+            if(label!=null && body!=null && label.actualText!=null && !label.actualText.isEmpty()) labels.put(body.id,label);
+        }
+        for(TagTreeNode child:node.children)collectListLabels(child,labels);
+    }
+
+    // Split only at an exact decoded glyph boundary. Concatenating the two byte
+    // strings reproduces the original operand, and consecutive Tj operations keep
+    // the same text advance, spacing and graphics state. Unsupported runs abstain.
+    private static int markerByteBoundary(PDFont font, byte[] bytes, String marker) {
+        if(font==null || bytes.length>1048576 || marker.length()>128)return -1;
+        try {
+            ByteArrayInputStream in=new ByteArrayInputStream(bytes);StringBuilder decoded=new StringBuilder();
+            while(in.available()>0 && decoded.length()<=marker.length()) {
+                int before=in.available(),code=font.readCode(in);if(in.available()>=before)return -1;
+                String unicode=font.toUnicode(code);if(unicode==null)return -1;decoded.append(unicode);
+                if(decoded.toString().equals(marker))return in.available()>0 ? bytes.length-in.available() : -1;
+                if(!marker.startsWith(decoded.toString()))return -1;
+            }
+        } catch(IOException ignored) { return -1; }
+        return -1;
+    }
+
+    private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan, Map<String,TagTreeNode> listLabels) throws IOException {
         // Build lookup: seq -> assignment (for first/last detection)
         // and seq -> which assignment it belongs to
         Map<Integer, Assignment> seqToAssignment = new HashMap<>();
@@ -599,11 +628,20 @@ public class NativeContentStreamRewriter {
 
         List<COSBase> pendingOperands = new ArrayList<>();
         RewriteResult result = new RewriteResult();
+        PDFont currentFont=null;List<PDFont> fontStack=new ArrayList<>();
+        int nextMcid=plan.assignments.stream().mapToInt(a->a.mcid).max().orElse(-1)+1;
 
         for (Object token : tokens) {
             if (token instanceof Operator) {
                 Operator op = (Operator) token;
                 String opName = op.getName();
+                if("q".equals(opName))fontStack.add(currentFont);
+                if("Q".equals(opName) && !fontStack.isEmpty())currentFont=fontStack.remove(fontStack.size()-1);
+                if("Tf".equals(opName)) {
+                    currentFont=null;
+                    if(pendingOperands.size()==2 && pendingOperands.get(0) instanceof COSName && page.getResources()!=null)
+                        currentFont=page.getResources().getFont((COSName)pendingOperands.get(0));
+                }
 
                 // STRIP source marked-content markers entirely. Keeping
                 // them causes MCID collisions with OUR matcher-assigned
@@ -639,6 +677,20 @@ public class NativeContentStreamRewriter {
                         if (inArtifact) {
                             newTokens.add(Operator.getOperator("EMC"));
                             inArtifact = false;
+                        }
+
+                        TagTreeNode label=listLabels.get(assignment.tagNodeId);
+                        if(label!=null && assignment.operators.size()==1 && "Tj".equals(opName) && pendingOperands.size()==1 && pendingOperands.get(0) instanceof COSString) {
+                            byte[] bytes=((COSString)pendingOperands.get(0)).getBytes();
+                            int boundary=markerByteBoundary(currentFont,bytes,label.actualText);
+                            if(boundary>0) {
+                                Assignment marker=new Assignment();marker.tagNodeId=label.id;marker.tagType="Lbl";marker.mcid=nextMcid++;
+                                marker.operators.add(assignment.operators.get(0));plan.assignments.add(marker);
+                                COSDictionary props=new COSDictionary();props.setInt(COSName.MCID,marker.mcid);
+                                newTokens.add(COSName.getPDFName("Lbl"));newTokens.add(props);newTokens.add(Operator.getOperator("BDC"));
+                                newTokens.add(new COSString(java.util.Arrays.copyOfRange(bytes,0,boundary)));newTokens.add(op);newTokens.add(Operator.getOperator("EMC"));
+                                pendingOperands.set(0,new COSString(java.util.Arrays.copyOfRange(bytes,boundary,bytes.length)));result.taggedWrapped++;
+                            }
                         }
 
                         if (seqIsFirst.containsKey(currentSeq)) {
@@ -1142,6 +1194,7 @@ public class NativeContentStreamRewriter {
         }
 
         applyTableAttributes(el, node, ctx);
+        if (!el.getCOSObject().containsKey(COSName.ID)) el.getCOSObject().setString(COSName.ID, "oat:" + node.id);
 
         for (PageMcRef ref : myRefs) {
             // Emit an MCR dict kid so multi-page elements carry a
@@ -1217,10 +1270,6 @@ public class NativeContentStreamRewriter {
         String element = sanitizeNoteIdPart(node.id);
         if (element.isBlank()) element = "unknown";
 
-        String group = sanitizeNoteIdPart(node.footnoteGroupId);
-        if (!group.isBlank()) {
-            return "note-" + group + "-" + element;
-        }
         return "note-" + element;
     }
 
@@ -1494,6 +1543,8 @@ public class NativeContentStreamRewriter {
         int originalAssignmentCount = 0;
         for (PagePlan plan : plans) originalAssignmentCount += plan.assignments.size();
         int splitMarkedContentRuns = 0;
+        TagTreeNode tagTree = tagsPath == null ? null : parseTaggingTree(readFile(tagsPath));
+        Map<String,TagTreeNode> listLabels=new HashMap<>();collectListLabels(tagTree,listLabels);
 
         System.err.println("[rewriter] Tag plan has " + plans.size() + " page(s)");
 
@@ -1519,7 +1570,7 @@ public class NativeContentStreamRewriter {
                         + " (" + plan.assignments.size() + " assignments, "
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");
 
-                RewriteResult res = rewritePageContentStream(doc, page, plan);
+                RewriteResult res = rewritePageContentStream(doc, page, plan, listLabels);
                 totalAssignments += plan.assignments.size();
                 totalMcids += plan.assignments.size();
                 totalArtifacts += res.artifactWrapped;
@@ -1531,15 +1582,6 @@ public class NativeContentStreamRewriter {
             // Hierarchical structure tree when --tags is supplied
             // (normal path). Falls back to flat Document-has-all-leaves
             // when omitted, for backward compat with older callers.
-            TagTreeNode tagTree = null;
-            if (tagsPath != null) {
-                try {
-                    String tagsJson = readFile(tagsPath);
-                    tagTree = parseTaggingTree(tagsJson);
-                } catch (IOException ioe) {
-                    System.err.println("[rewriter] WARNING: could not read --tags " + tagsPath + ": " + ioe.getMessage() + " — falling back to flat structure tree");
-                }
-            }
             buildStructureTreeHierarchical(doc, plans, tagTree);
 
             // Native rewriter delegates the full PDF/UA metadata +
@@ -1562,6 +1604,8 @@ public class NativeContentStreamRewriter {
                 applyMetadata(doc, title, language);
             }
 
+            // Cleanup can remove empty elements. Rebuild the index from the final reachable tree.
+            StructureIdentifiers.install(doc.getDocumentCatalog().getStructureTreeRoot());
             doc.save(outputPath);
             System.err.println("[rewriter] Saved tagged PDF to: " + outputPath);
 

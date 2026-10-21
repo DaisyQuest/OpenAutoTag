@@ -613,3 +613,8 @@ Validation and saved evidence:
 - The folder contains the two repair audits, reviewed decisions, candidate provenance manifest, validation/preservation reports, `09-quality-verification.json`, reproducible `verify-quality.py`, visual and interaction probes, and `11-semantic-benchmark.json`. Candidate SHA-256: `e9fc4c318c7d0b75048c9c3dbe035acb1f376be0f80fb1559b101540b3e3b858`.
 
 The saved candidate remains **review_required** for semantic and reader qualification. The implementation of item 10 is delivered; independent expert review of the reference corpus and actual screen-reader/keyboard sessions have not been performed. The fresh inference diagnostic artifacts in the same folder expose unresolved form-label relationships; these are not silently written over authored form metadata. Broader corpus, operational and viewer qualification remain open.
+
+
+## 23. Accuracy roadmap engineering delivery, 2026-10-21
+
+Bounded A01–A10 implementations, new contracts, real-PDF diagnostics, saved-output list fixes, paragraph identity repair, form association results and remaining qualification work are recorded in [the accuracy delivery](tagging-accuracy-delivery-20261021.md). Multilingual expansion is deprioritized. The new candidate retains zero raw veraPDF failures, 32 terminal fields, 33 widgets, nine links, five saved headings and identical two-renderer pixels. Independent reference adjudication and actual reader/keyboard observations remain pending; production qualification is not claimed.

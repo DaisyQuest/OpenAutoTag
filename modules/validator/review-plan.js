@@ -18,7 +18,16 @@ export function buildReviewPlan({ candidateHash, findings = [], validation, sema
         /FONT|UNICODE|7_21/.test(f.code) ? "Verify the original font program, encoding and glyph mapping; compare rendering and extracted text before applying a resource change." : "Review this exact object and its semantic context; rerun validation after repair.");
     }
   }
-  for (const task of array(semantic?.semanticReviewTasks)) add(String(task.code || "SEMANTIC_REVIEW"), String(task.widgetId || task.nodeId || "document"), JSON.stringify(task), "Resolve the ambiguous label or hierarchy using the page and authored metadata.");
+  const actions = {
+    FORM: "Compare the widget, authored tooltip, shared prompt and candidate labels; preserve field identity and appearance. Verify the spoken name and tab order.",
+    HEADING: "Review heading membership and the proposed outline against surrounding sections; check the saved reader heading list.",
+    TABLE: "Review the cell grid, spans, fragment boundaries and header edges; verify the saved header targets before accepting a join.",
+    FIGURE: "Review whether this image is meaningful or decorative, its caption association and a supplied description. Do not suppress it on geometry alone.",
+    FOOTNOTE: "Resolve the reference marker and note identity before applying a reading-order anchor.",
+    LIST: "Review the marker sequence, restart and item boundaries; verify the saved list navigation.",
+    OCR: "Compare OCR with the native text and page pixels; resolve conflicts before replacing accessible text."
+  };
+  for (const task of array(semantic?.semanticReviewTasks)) add(String(task.code || "SEMANTIC_REVIEW"), String(task.widgetId || task.nodeId || (task.pageNumber ? `page:${task.pageNumber}:${task.code}` : "document")), JSON.stringify(task), actions[String(task.code).split("_")[0]] || "Resolve the reading-order ambiguity against the page and authored evidence.");
   for (const issue of Array.isArray(inspection?.issues) ? inspection.issues : []) {
     if (typeof issue === "string") add("STRUCTURE_REVIEW", issue, issue, "Inspect the referenced structure object and its forward and reverse ownership relationships.");
   }

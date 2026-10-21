@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import { mergeHeadingContinuations } from "./heading-continuation.js";
+import { inferDocumentHeadings, inferRegionsAndAnchors, refineTableTopology, refineFigures, refineSequenceBoundaries } from "./document-inference.js";
 
 const ajv = new Ajv2020({ allErrors: true });
 const validateLayout = ajv.compile(layoutSchema);
@@ -158,7 +159,10 @@ function inferTableMetadata(block, pageNumber, index, state, options) {
     if (!newPageXPositions.includes(currentX)) {
       newPageXPositions.push(currentX);
     }
-    crossPageContinuation = columnAnchorsMatch(state.activeTable, newPageXPositions, anchorTolerance);
+    const anchors = state.activeTable.columnAnchors || [];
+    const positions = [...new Set(newPageXPositions)].sort((a,b)=>a-b);
+    crossPageContinuation = state.pendingContinuationEvidence === true && anchors.length === positions.length &&
+      anchors.length >= 2 && [...anchors].sort((a,b)=>a-b).every((x,i)=>Math.abs(x-positions[i])<=3);
   }
 
   const continuation = samePageContinuation || samePageAnchorContinuation || crossPageContinuation;
@@ -570,6 +574,10 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     sourceBlockId: block.id,
     role,
     text: block.text,
+    ...(typeof block.rawText === "string" ? { rawText: block.rawText } : {}),
+    ...(typeof block.comparisonText === "string" ? { comparisonText: block.comparisonText } : {}),
+    ...(block.textProvenance ? { textProvenance: block.textProvenance } : {}),
+    ...(block.referenceMarkers ? { referenceMarkers: [...block.referenceMarkers] } : {}),
     bbox: block.bbox,
     ...(Number.isFinite(block.fontSize) ? { fontSize: block.fontSize } : {}),
     ...(block.fontName ? { fontName: block.fontName } : {}),
@@ -892,6 +900,10 @@ export async function buildSemanticDocument(inputPath, options) {
   const nodes = [];
   for (let i = 0; i < layoutDocument.pages.length; i++) {
     const page = layoutDocument.pages[i];
+    const leadingHeaders = page.textBlocks.filter(b => isTableCandidate(b) && String(b.tableRole || b.cellRole).toLowerCase() === "header" && b.bbox[1] <= page.height * .25).map(b => String(b.text || "").trim());
+    state.pendingContinuationEvidence = Boolean(state.activeTable && i > 0 &&
+      state.activeTable.lastY >= layoutDocument.pages[i-1].height * .7 && leadingHeaders.length >= 2 &&
+      JSON.stringify(leadingHeaders) === JSON.stringify(state.activeTable.headerTexts));
 
     // Pre-collect x-positions of this page's leading table cells
     // so cross-page column anchor matching works on the first cell of a new page
@@ -920,6 +932,14 @@ export async function buildSemanticDocument(inputPath, options) {
   markBibEntries(nodes);
   markFootnotes(nodes, layoutDocument.pages);
   const headingMerge = mergeHeadingContinuations(nodes);
+  const refined = headingMerge.nodes;
+  const relationships = enrichDocumentRelations(refined, layoutDocument.pages);
+  headingReviewTasks.push(...refineHeadingMembership(refined, layoutDocument.pages));
+  const headings = inferDocumentHeadings(refined);
+  const regions = inferRegionsAndAnchors(refined, layoutDocument.pages);
+  const tables = refineTableTopology(refined, layoutDocument.pages);
+  const figures = refineFigures(refined, layoutDocument.pages);
+  const boundaries = refineSequenceBoundaries(refined);
 
   const semanticDocument = {
     schemaVersion: "1.0.0",
@@ -932,10 +952,21 @@ export async function buildSemanticDocument(inputPath, options) {
       languageConfidence: layoutDocument.source.languageConfidence
     },
     nodes: headingMerge.nodes,
-    ...enrichDocumentRelations(headingMerge.nodes, layoutDocument.pages),
+    ...relationships,
+    outline: headings.outline,
+    regions: regions.regions,
+    tableFragments: tables.fragments,
+    figures: figures.figures,
+    inferenceStatus: "uncalibrated-requires-review",
     headingMergeSummary: headingMerge.summary
   };
-  semanticDocument.semanticReviewTasks.push(...headingReviewTasks);
+  semanticDocument.relations.push(...regions.relations, ...figures.relations, ...boundaries.relations);
+  semanticDocument.semanticReviewTasks.push(...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
+  for(const page of layoutDocument.pages) {
+    for(const conflict of page.ocr?.alignmentReview||[]) semanticDocument.semanticReviewTasks.push({code:conflict.code,pageNumber:page.pageNumber,candidates:conflict.nativeBlockIds||[]});
+    if(page.imageEvidenceError)semanticDocument.semanticReviewTasks.push({code:"FIGURE_EVIDENCE_INCOMPLETE",pageNumber:page.pageNumber});
+  }
+  semanticDocument.semanticReviewTasks = [...new Map(semanticDocument.semanticReviewTasks.map(t => [JSON.stringify(t),t])).values()];
 
   if (!validateSemantic(semanticDocument)) {
     throw new Error(`Semantic engine output failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);

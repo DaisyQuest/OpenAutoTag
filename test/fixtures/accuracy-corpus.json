@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "1.0.0",
+  "holdoutState": "candidate-unreviewed",
+  "documents": [
+    {
+      "id": "arxiv-2501.18462",
+      "path": "test/fixtures/external/arxiv-2501.18462.pdf",
+      "sha256": "fa62d457ec6925d2c923be430275d55ca575b60429521e5e4fda08da714873db",
+      "lineage": "arxiv-publication-family",
+      "split": "development",
+      "priority": "primary",
+      "features": [
+        "columns",
+        "equations",
+        "headings"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "gpo-fr-notice",
+      "path": "test/fixtures/external/gpo-fr-notice.pdf",
+      "sha256": "6c81365ed9dd0715243f6877a1bfe633653112195b9420d5f5b41032e5da6972",
+      "lineage": "gpo-publication-family",
+      "split": "holdout",
+      "priority": "primary",
+      "features": [
+        "columns",
+        "headings"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "irs-p1040-tax-tables",
+      "path": "test/fixtures/external/irs-p1040-tax-tables.pdf",
+      "sha256": "8ae019bd3b28b07b37e46e18597d8e899222a2224ce7482c015b130033403532",
+      "lineage": "irs-publication-family",
+      "split": "development",
+      "priority": "primary",
+      "features": [
+        "forms",
+        "tables"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "irs-w9",
+      "path": "test/fixtures/external/irs-w9.pdf",
+      "sha256": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+      "lineage": "irs-publication-family",
+      "split": "development",
+      "priority": "primary",
+      "features": [
+        "forms",
+        "tables"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "nist-sp-1271",
+      "path": "test/fixtures/external/nist-sp-1271.pdf",
+      "sha256": "f3b4436626b87fceb12cde8dd29da7432254821e3e2753103fe3500dd1f6e17d",
+      "lineage": "nist-publication-family",
+      "split": "development",
+      "priority": "primary",
+      "features": [
+        "figures",
+        "sidebars"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "scotus-24-656",
+      "path": "test/fixtures/external/scotus-24-656.pdf",
+      "sha256": "780f07a100107f3d2ef4b2e0cc5901f476b583bf45ef4c25cea468dd17c419c4",
+      "lineage": "scotus-publication-family",
+      "split": "development",
+      "priority": "primary",
+      "features": [
+        "headings",
+        "notes"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "thai-constitution-en",
+      "path": "test/fixtures/external/thai-constitution-en.pdf",
+      "sha256": "44d285f03fce87eacbd1da9fa7c6c7369f5ee1094aa9f1682094594c44857f2e",
+      "lineage": "thai-publication-family",
+      "split": "development",
+      "priority": "primary",
+      "features": [
+        "paragraphs",
+        "lists"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "un-ecosoc-multilingual",
+      "path": "test/fixtures/external/un-ecosoc-multilingual.pdf",
+      "sha256": "d6bccdd094077a2a764c4a39d7ff1ba858f0487d3dbfb6975901bb9ab08f892f",
+      "lineage": "un-resolution-family",
+      "split": "holdout",
+      "priority": "secondary",
+      "features": [
+        "headings",
+        "language"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "un-ga-chinese",
+      "path": "test/fixtures/external/un-ga-chinese.pdf",
+      "sha256": "f029e4037f841c91861a449d98c18e1602e0736d1b9071cb4a3c0e6a18ff449e",
+      "lineage": "un-resolution-family",
+      "split": "holdout",
+      "priority": "secondary",
+      "features": [
+        "headings",
+        "language"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "un-ga-hebrew",
+      "path": "test/fixtures/external/un-ga-hebrew.pdf",
+      "sha256": "904ee71804b41e68a80d6d36acb4479ea29ca247df91d6654784bd3131b60c77",
+      "lineage": "un-resolution-family",
+      "split": "holdout",
+      "priority": "primary",
+      "features": [
+        "headings",
+        "language"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "un-sc-arabic",
+      "path": "test/fixtures/external/un-sc-arabic.pdf",
+      "sha256": "dacf4ab8912f7aa4e6dacca9a472113721bf83f9cc8bdb5bc19ce9e272c34d8e",
+      "lineage": "un-resolution-family",
+      "split": "holdout",
+      "priority": "secondary",
+      "features": [
+        "headings",
+        "language"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    },
+    {
+      "id": "usgs-of2024-1001",
+      "path": "test/fixtures/external/usgs-of2024-1001.pdf",
+      "sha256": "0b16f15d4f43d1fad192ae0c3803c3ed346653fe4ad6d143aa762f2f67c17957",
+      "lineage": "usgs-publication-family",
+      "split": "holdout",
+      "priority": "primary",
+      "features": [
+        "rotation",
+        "tables",
+        "figures"
+      ],
+      "provenance": "test/fixtures/external/PROVENANCE.md",
+      "review": {
+        "status": "pending"
+      },
+      "expectations": []
+    }
+  ]
+}

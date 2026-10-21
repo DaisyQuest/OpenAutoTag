@@ -437,6 +437,27 @@ export function createTaggingOutputStages({
           , ...(artifacts[semanticArtifactKey] ? ["--semantic", artifacts[semanticArtifactKey]] : [])
         ], outputPath);
         const report = JSON.parse(await readFile(outputPath, "utf8"));
+        if (productionChecks) {
+          try {
+            const writer = JSON.parse(await readFile(artifacts.writerReport, "utf8"));
+            // Preserved-object repairs already use the hash-bound repair verifier.
+            // Rebuilt trees must additionally agree with the emitted tagging intent.
+            if (writer.writerMode !== "passthrough") {
+              const savedPath=path.join(resolvedOutputDir,"09-saved-semantics.json");
+              await runJsonStage("scripts/check-saved-semantics.js",["--pdf",artifacts.taggedPdf,"--tags",artifacts.tagging,"--report-only","true"],savedPath);
+              artifacts.savedSemantics=savedPath;
+              const saved=JSON.parse(await readFile(savedPath,"utf8"));
+              const pass=saved.disposition==="automated_pass"&&saved.candidateHash===report.candidateHash;
+              report.checks.push({id:"saved_semantics",status:pass?"pass":"fail"});
+              if(!pass){report.disposition="rejected";report.findings.push({code:"SAVED_SEMANTICS_MISMATCH",description:`Saved structure differs from tagging intent; see ${savedPath}`});}
+            }
+          } catch(error) {
+            report.disposition="error";
+            report.checks.push({id:"saved_semantics",status:"unknown"});
+            report.findings.push({code:"SAVED_SEMANTICS_ERROR",description:error.message});
+          }
+          await writeFile(outputPath,JSON.stringify(report,null,2)+"\n");
+        }
         artifacts.qualityReport = outputPath;
         if (productionChecks) delete artifacts.taggedPdf;
         if (report.disposition !== "review_required") {

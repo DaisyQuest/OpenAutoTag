@@ -80,6 +80,8 @@ function isFootnoteNode(node) {
   return node?.semanticRole === "Footnote" || node?.footnote === true || getFootnoteGroupId(node) != null;
 }
 
+import { protectedBoundary, preserveSemanticIdentities } from "./semantic-identities.js";
+
 const DEFAULT_CONFIG = {
   marginTolerance: 8,
   gapBreakMultiplier: 2.2,
@@ -125,6 +127,8 @@ export function textStructureMerge(semanticDocument, config = {}) {
       const prev = sorted[i - 1];
       const curr = sorted[i];
       const breakReasons = [];
+      const protection=protectedBoundary(prev,curr);
+      if(protection)breakReasons.push(protection);
       // Same-row neighbors (common when a line is split into multiple
       // positioned blocks — e.g. scanned PDFs with per-word OCR boxes):
       // skip vertical gap and indent checks while retaining semantic and
@@ -244,7 +248,7 @@ export function textStructureMerge(semanticDocument, config = {}) {
 
   const totalPLines = semanticDocument.nodes.filter((n) => n.role === "P").length;
   const totalParas = allNodes.filter((n) => n.role === "P").length;
-  const output = { ...semanticDocument, nodes: allNodes };
+  const output = preserveSemanticIdentities(semanticDocument, { ...semanticDocument, nodes: allNodes });
 
   const report = {
     strategy: "text-structure-merge",

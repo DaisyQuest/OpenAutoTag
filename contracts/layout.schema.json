@@ -62,6 +62,57 @@
             "type": "number",
             "exclusiveMinimum": 0
           },
+          "figures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "bbox",
+                "source",
+                "operatorIndex"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "bbox": {
+                  "type": "array",
+                  "minItems": 4,
+                  "maxItems": 4,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ],
+                  "items": false
+                },
+                "source": {
+                  "const": "image-operator"
+                },
+                "operatorIndex": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "imageEvidenceError": {
+            "type": "string"
+          },
           "columns": {
             "type": "integer",
             "minimum": 1
@@ -83,6 +134,26 @@
                 },
                 "text": {
                   "type": "string"
+                },
+                "rawText": {
+                  "type": "string"
+                },
+                "comparisonText": {
+                  "type": "string"
+                },
+                "textProvenance": {
+                  "enum": [
+                    "native",
+                    "ocr"
+                  ]
+                },
+                "referenceMarkers": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 },
                 "bbox": {
                   "type": "array",

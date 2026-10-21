@@ -16,9 +16,12 @@ public final class PreservationInspector {
     private final Map<String, Object> widgets = new TreeMap<>();
     private final Map<String, Object> links = new TreeMap<>();
     private final List<Map<String, Object>> headings = new ArrayList<>();
+    private final List<Map<String, Object>> structure = new ArrayList<>();
+    private final Map<COSDictionary, Map<String, Object>> structureByDict = new IdentityHashMap<>();
+    private final List<String> contentOrder = new ArrayList<>();
     private final Set<COSBase> visited = Collections.newSetFromMap(new IdentityHashMap<>());
     private int walked;
-    private COSDictionary roleMap;
+    private COSDictionary roleMap, classMap;
     private final Map<Integer, COSBase> parentSlots = new TreeMap<>();
     private final Map<String, COSBase> idSlots = new TreeMap<>();
     private final Map<String, String> contentOwners = new HashMap<>();
@@ -77,6 +80,7 @@ public final class PreservationInspector {
         var root = doc.getDocumentCatalog().getStructureTreeRoot();
         if (root != null) {
             roleMap = root.getCOSObject().getCOSDictionary(COSName.ROLE_MAP);
+            classMap = root.getCOSObject().getCOSDictionary(COSName.getPDFName("ClassMap"));
             readTree(root.getCOSObject().getDictionaryObject(COSName.PARENT_TREE), false, new HashSet<>(), 0);
             readTree(root.getCOSObject().getDictionaryObject(COSName.ID_TREE), true, new HashSet<>(), 0);
         }
@@ -101,7 +105,8 @@ public final class PreservationInspector {
         limitations.add("Heading coverage resolves RoleMap to H1-H6; generic H hierarchy still requires review.");
         result.put("pages", pages); result.put("fields", fields); result.put("widgets", widgets);
         result.put("links", links);
-        result.put("headings", headings); result.put("issues", issues); result.put("limitations", limitations);
+        result.put("headings", headings); result.put("structure", structure); result.put("contentOrder", contentOrder);
+        result.put("issues", issues); result.put("limitations", limitations);
         return result;
     }
 
@@ -144,6 +149,7 @@ public final class PreservationInspector {
         }
         if ("OBJR".equals(type)) {
             COSBase object = dict.getDictionaryObject(COSName.OBJ);
+            if (page == null && object instanceof COSDictionary) page = ((COSDictionary)object).getCOSDictionary(COSName.P);
             if (!(object instanceof COSDictionary)) issues.add("DANGLING_OBJR:" + ref(parent));
             else {
                 int slot = ((COSDictionary) object).getInt(COSName.STRUCT_PARENT, -1);
@@ -154,11 +160,14 @@ public final class PreservationInspector {
                 Map<String, Object> widget = (Map<String, Object>) widgets.get(ref(object));
                 if (form.isEmpty()) issues.add("WIDGET_OUTSIDE_FORM:" + ref(object));
                 ((List<Map<String, Object>>) widget.get("owners")).add(Map.of("form", form, "listItem", listItem, "inBody", inBody));
+                if (!Objects.equals(pagesByDict.get(page), widget.get("page"))) issues.add("WIDGET_OBJR_PAGE_MISMATCH:" + ref(object));
             }
             if (object != null && links.containsKey(ref(object))) {
                 if (!"Link".equals(resolveRole(parent.getNameAsString(COSName.S, ""), ref(parent)))) issues.add("LINK_OUTSIDE_LINK_TAG:" + ref(object));
                 ((List<String>) ((Map<String, Object>)links.get(ref(object))).get("owners")).add(ref(parent));
+                if (!Objects.equals(pagesByDict.get(page), ((Map<?, ?>)links.get(ref(object))).get("page"))) issues.add("LINK_OBJR_PAGE_MISMATCH:" + ref(object));
             }
+            recordContent(parent, "obj:" + ref(object));
             return;
         }
         String role = dict.getNameAsString(COSName.S, "");
@@ -167,6 +176,19 @@ public final class PreservationInspector {
         if (dict.getDictionaryObject(COSName.P) != parent) issues.add("INCORRECT_STRUCTURE_PARENT:" + ref(dict));
         elements.add(dict);
         role = resolveRole(role, ref(dict));
+        Map<String, Object> semantic = new LinkedHashMap<>();
+        semantic.put("objectRef", ref(dict)); semantic.put("parentRef", ref(parent)); semantic.put("role", role);
+        semantic.put("identifier", dict.getString(COSName.ID, ""));
+        semantic.put("actualText", dict.getString(COSName.ACTUAL_TEXT, ""));
+        semantic.put("alt", dict.getString(COSName.ALT, ""));
+        semantic.put("page", pagesByDict.getOrDefault(page, 0)); semantic.put("children", new ArrayList<String>());
+        semantic.put("contentRefs", new ArrayList<String>()); semantic.put("headers", new ArrayList<String>());
+        semantic.put("scope", ""); semantic.put("listNumbering", ""); semantic.put("rowSpan", 1); semantic.put("columnSpan", 1);
+        readSemanticClasses(dict.getDictionaryObject(COSName.C), semantic, 0);
+        readSemanticAttributes(dict.getDictionaryObject(COSName.A), semantic, 0);
+        structure.add(semantic); structureByDict.put(dict, semantic);
+        Map<String, Object> parentSemantic = structureByDict.get(parent);
+        if (parentSemantic != null) ((List<String>) parentSemantic.get("children")).add(ref(dict));
         String id = dict.getString(COSName.ID);
         if (id != null && resolve(idSlots.get(id)) != dict) issues.add("ID_TREE_MISMATCH:" + ref(dict));
         if (role.matches("H[1-6]")) {
@@ -203,12 +225,52 @@ public final class PreservationInspector {
         return role;
     }
     private void verifyContent(COSDictionary parent, COSDictionary page, COSBase stream, int mcid) {
+        recordContent(parent, "page:" + pagesByDict.getOrDefault(page, 0) + ":stream:" + (stream == null ? "page" : ref(stream)) + ":mcid:" + mcid);
         COSDictionary owner = stream instanceof COSDictionary ? (COSDictionary) stream : page;
         int slot = owner == null ? -1 : owner.getInt(COSName.STRUCT_PARENTS, -1);
         COSBase value = resolve(parentSlots.get(slot));
         if (mcid < 0 || !(value instanceof COSArray) || mcid >= ((COSArray) value).size() || ((COSArray) value).getObject(mcid) != parent) issues.add("MCID_PARENT_TREE_MISMATCH:" + ref(parent) + ":" + mcid);
         String key = ref(owner) + ":" + mcid;
         if (contentOwners.putIfAbsent(key, ref(parent)) != null) issues.add("DUPLICATE_CONTENT_OWNER:" + key);
+    }
+    @SuppressWarnings("unchecked")
+    private void recordContent(COSDictionary owner, String key) {
+        contentOrder.add(key);
+        Map<String, Object> item = structureByDict.get(owner);
+        if (item != null) ((List<String>) item.get("contentRefs")).add(key);
+    }
+    @SuppressWarnings("unchecked")
+    private void readSemanticClasses(COSBase raw, Map<String,Object> item, int depth) throws IOException {
+        if(depth>16)throw new IOException("Semantic class nesting limit exceeded");
+        COSBase value=resolve(raw);
+        if(value instanceof COSArray)for(COSBase c:(COSArray)value)readSemanticClasses(c,item,depth+1);
+        else if(value instanceof COSName) {
+            COSBase attrs=classMap==null?null:classMap.getDictionaryObject((COSName)value);
+            if(attrs==null)issues.add("UNRESOLVED_ATTRIBUTE_CLASS:"+item.get("objectRef"));
+            else readSemanticAttributes(attrs,item,0);
+        }
+    }
+    @SuppressWarnings("unchecked")
+    private void readSemanticAttributes(COSBase raw, Map<String, Object> item, int depth) throws IOException {
+        if (depth > 16) throw new IOException("Semantic attribute nesting limit exceeded");
+        COSBase value = resolve(raw);
+        if (value instanceof COSArray) { for (COSBase v : (COSArray)value) readSemanticAttributes(v, item, depth + 1); }
+        else if (value instanceof COSDictionary) {
+            COSDictionary a = (COSDictionary)value;
+            if ("Table".equals(a.getNameAsString(COSName.O))) {
+                if(a.containsKey(COSName.getPDFName("Scope")))item.put("scope", a.getNameAsString(COSName.getPDFName("Scope"), ""));
+                if(a.containsKey(COSName.getPDFName("RowSpan")))item.put("rowSpan", a.getInt(COSName.getPDFName("RowSpan"), 1));
+                if(a.containsKey(COSName.getPDFName("ColSpan")))item.put("columnSpan", a.getInt(COSName.getPDFName("ColSpan"), 1));
+                COSArray headers = a.getCOSArray(COSName.getPDFName("Headers"));
+                if(headers!=null)((List<String>)item.get("headers")).clear();
+                if (headers != null) for (COSBase h : headers) {
+                    COSBase resolved = resolve(h);
+                    if (resolved instanceof COSString) ((List<String>)item.get("headers")).add(((COSString)resolved).getString());
+                    else issues.add("INVALID_HEADER_REFERENCE:" + item.get("objectRef"));
+                }
+            }
+            if ("List".equals(a.getNameAsString(COSName.O))) item.put("listNumbering", a.getNameAsString(COSName.getPDFName("ListNumbering"), ""));
+        }
     }
     private void checkReachableParentTarget(COSBase raw, int slot) {
         COSBase value = resolve(raw);

@@ -361,6 +361,13 @@ Production qualification requirements (not all completed):
 The current TEST-FORM candidate remains review_required. Synthetic regression
 success and one validated document do not establish general accuracy, full
 PDF/UA conformance, WCAG conformance or universal viewer compatibility.
+Typed accuracy-corpus and saved-semantics contracts now support the real-PDF
+pilot and reopened structural comparison. Rebuilt production candidates must
+agree with emitted intent; preserved repairs retain exact replay verification.
+Paragraph merging must retain source identities and rebind semantic references.
+Heuristic evidence is not a calibrated probability. Multilingual expansion is
+lower priority than the preservation and semantic qualification gates.
+Delivery scope and remaining limits: docs/tagging-accuracy-delivery-20261021.md.
 Current evidence: docs/tagging-quality-claims.md. Further proposed work:
 docs/tagging-accuracy-roadmap.md. Delivery history:
 docs/production-tagging-engine-plan.md, sections 21 and 22.

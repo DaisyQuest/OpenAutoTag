@@ -1,12 +1,12 @@
 # Next tagging accuracy plan
 
-Proposed 2026-10-21, following implementation commit `1b24d87`. This document plans additional work; none of its new capabilities or numerical targets should be described as delivered. See [current claims and evidence](tagging-quality-claims.md) for the implemented boundary.
+Proposed 2026-10-21, following implementation commit `1b24d87`. Bounded slices across A01–A10 are now implemented; see the [delivery and qualification limits](tagging-accuracy-delivery-20261021.md). Numerical targets, independent review, richer reconstruction and release qualification remain open. Multilingual expansion is lower priority. See [current claims and evidence](tagging-quality-claims.md).
 
-The strongest immediate opportunities are to measure real errors, resolve form context, and verify that correct semantic decisions survive writing. The present benchmark has 16 synthetic cases, the latest form inference leaves 12 widgets unresolved, and the preserved-PDF path intentionally retains authored structure except for qualified repairs. Increasing inference sophistication alone will not improve every saved PDF.
+The strongest immediate opportunities are to measure real errors, resolve form context, and verify that correct semantic decisions survive writing. The present benchmark has 16 synthetic cases, the latest form inference leaves eight visual widget associations unresolved (down from 12; all eight have authored tooltips), and the preserved-PDF path intentionally retains authored structure except for qualified repairs. Increasing inference sophistication alone will not improve every saved PDF.
 
 ## Sequencing and shared acceptance rules
 
-Start with A01's 12-document pilot, then A02's saved-output comparison, A03's form relationships and A04's heading model. Use the resulting failure inventory to order A05-A09. A10 consumes evidence from each slice. Extend existing contracts and tools; new schema fields below are proposals requiring contract review before implementation. Keep module boundaries and existing CLIs compatible.
+Start with A01's 12-document pilot, then A02's saved-output comparison, A03's form relationships and A04's heading model. Use the resulting failure inventory to order A05-A09. A10 consumes evidence from each slice. Extend existing contracts and tools; the delivered additive schemas are listed in the delivery record; further schema extensions remain proposals. Keep module boundaries and existing CLIs compatible.
 
 Use one small vertical slice at a time: reference examples, failing test, bounded rule, saved-output check, then qualification. Add public or redistribution-permitted fixtures only; keep private documents in a locally bound manifest. Do not add a model service or new PDF engine to implement the initial phases.
 

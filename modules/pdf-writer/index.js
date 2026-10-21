@@ -211,10 +211,11 @@ function countTagNodes(node) {
   return 1 + node.children.reduce((total, child) => total + countTagNodes(child), 0);
 }
 
-function flattenTagTree(node, semanticById, records, parentId = "") {
+function flattenTagTree(node, semanticById, records, parentId = "", labelSource) {
   const sourceNodes = (node.sourceNodeIds || []).map((id) => semanticById.get(id)).filter(Boolean);
-  const firstSourceNode = sourceNodes[0];
-  const text = sourceNodes.length > 0 ? sourceNodes.map((item) => item.text).join(" ").trim() : node.label || "";
+  const firstSourceNode = sourceNodes[0] || (node.type === "Lbl" ? labelSource : undefined);
+  const text = node.children.length ? "" : typeof node.actualText === "string" ? node.actualText :
+    sourceNodes.length > 0 ? sourceNodes.map((item) => item.text).join(" ").trim() : node.label || "";
   const bbox = firstSourceNode?.bbox || [];
   const rowSpan = node.rowSpan || firstSourceNode?.tableRowSpan || "";
   const columnSpan = node.columnSpan || firstSourceNode?.tableColumnSpan || "";
@@ -242,7 +243,8 @@ function flattenTagTree(node, semanticById, records, parentId = "") {
   });
 
   for (const child of node.children) {
-    flattenTagTree(child, semanticById, records, node.id);
+    const bodySource = node.type === "LI" ? node.children.find(c => c.type === "LBody")?.sourceNodeIds?.map(id => semanticById.get(id)).find(Boolean) : undefined;
+    flattenTagTree(child, semanticById, records, node.id, bodySource);
   }
 }
 

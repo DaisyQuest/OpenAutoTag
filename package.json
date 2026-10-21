@@ -8,7 +8,7 @@
     "install:verapdf": "node scripts/install-verapdf.js",
     "install:fonts": "node scripts/install-fonts.js",
     "test:node-ci": "node scripts/run-ci-tests.js",
-    "test:production-baseline": "node --test modules/mcp-corpus-eval/test/reading-order-contract.test.js modules/validator/test/quality-report.test.js modules/pdf-writer/test/tagged-form-preservation.test.js modules/pdf-writer/test/wrapped-headings.test.js modules/pdf-writer/test/list-form-repair.test.js test/integration/preservation-quality.test.js test/integration/structure-inspection.test.js modules/pdf-writer/test/qualified-links.test.js modules/reading-order/test/constraints.test.js modules/semantic-engine/test/document-relations.test.js modules/tag-builder/test/advanced-structure.test.js modules/validator/test/review-plan.test.js test/unit/production-artifacts.test.js test/unit/reader-qualification.test.js modules/pdf-writer/test/font-repair.test.js modules/validator/test/link-probe.test.js modules/pdf-writer/test/structure-repair.test.js modules/pdf-writer/test/split-forms.test.js modules/validator/test/validator.test.js modules/semantic-engine/test/quality-refinements.test.js test/integration/semantic-quality-benchmark.test.js test/integration/saved-table-semantics.test.js",
+    "test:production-baseline": "node --test modules/mcp-corpus-eval/test/reading-order-contract.test.js modules/validator/test/quality-report.test.js modules/pdf-writer/test/tagged-form-preservation.test.js modules/pdf-writer/test/wrapped-headings.test.js modules/pdf-writer/test/list-form-repair.test.js test/integration/preservation-quality.test.js test/integration/structure-inspection.test.js modules/pdf-writer/test/qualified-links.test.js modules/reading-order/test/constraints.test.js modules/semantic-engine/test/document-relations.test.js modules/tag-builder/test/advanced-structure.test.js modules/validator/test/review-plan.test.js test/unit/production-artifacts.test.js test/unit/reader-qualification.test.js modules/pdf-writer/test/font-repair.test.js modules/validator/test/link-probe.test.js modules/pdf-writer/test/structure-repair.test.js modules/pdf-writer/test/split-forms.test.js modules/validator/test/validator.test.js modules/semantic-engine/test/quality-refinements.test.js test/integration/semantic-quality-benchmark.test.js test/integration/saved-table-semantics.test.js modules/semantic-engine/test/document-inference.test.js modules/semantic-engine/test/table-continuation.test.js modules/parser/test/content-evidence.test.js test/unit/accuracy-calibration.test.js modules/paragraph-merger/test/semantic-identities.test.js modules/paragraph-merger/test/form-boundaries.test.js",
     "test:perfect-studio-java-gate": "node --test test/unit/perfect-studio-java.test.js",
     "test:ci": "npm run test:node-ci && npm run test:perfect-studio-java-gate",
     "test": "node --test",
@@ -48,7 +48,10 @@
     "desktop:build:win": "cd desktop && electron-builder --win",
     "repair:structure": "node modules/pdf-writer/structure-repair.js",
     "benchmark:semantic": "node scripts/semantic-quality-benchmark.js",
-    "qualify:semantic": "node scripts/semantic-quality-benchmark.js --require-reader true"
+    "qualify:semantic": "node scripts/semantic-quality-benchmark.js --require-reader true",
+    "check:saved-semantics": "node scripts/check-saved-semantics.js",
+    "benchmark:accuracy": "node scripts/real-pdf-accuracy-benchmark.js",
+    "test:accuracy": "node --test modules/semantic-engine/test/document-inference.test.js modules/semantic-engine/test/table-continuation.test.js modules/parser/test/content-evidence.test.js test/unit/accuracy-calibration.test.js test/integration/saved-table-semantics.test.js modules/paragraph-merger/test/semantic-identities.test.js modules/paragraph-merger/test/form-boundaries.test.js"
   },
   "engines": {
     "node": "22.x"

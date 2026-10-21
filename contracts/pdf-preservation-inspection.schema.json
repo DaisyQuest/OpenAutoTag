@@ -8,6 +8,90 @@
     "schemaVersion": { "const": "1.0.0" },
     "scope": { "const": "preserved-objects-v1" },
     "sourceHash": { "$ref": "#/$defs/hash" },
+    "structure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "objectRef",
+          "parentRef",
+          "role",
+          "identifier",
+          "page",
+          "children",
+          "contentRefs",
+          "headers",
+          "scope",
+          "listNumbering",
+          "rowSpan",
+          "columnSpan",
+          "actualText",
+          "alt"
+        ],
+        "properties": {
+          "objectRef": {
+            "type": "string"
+          },
+          "parentRef": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "listNumbering": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contentRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rowSpan": {
+            "type": "integer"
+          },
+          "columnSpan": {
+            "type": "integer"
+          },
+          "actualText": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "contentOrder": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
     "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } },
     "fields": { "type": "object", "additionalProperties": { "$ref": "#/$defs/hash" } },
     "widgets": { "type": "object", "additionalProperties": { "$ref": "#/$defs/widget" } },

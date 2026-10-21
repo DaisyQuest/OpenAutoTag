@@ -149,6 +149,7 @@ function buildHeadingNormalization(orderedNodes) {
 }
 
 function resolveTagRole(node, headingNormalization) {
+  if (node.semanticRole === "Caption") return "Caption";
   const normalizedHeadingLevel = headingNormalization.levelsByNodeId.get(node.id);
   if (normalizedHeadingLevel) {
     return `H${normalizedHeadingLevel}`;

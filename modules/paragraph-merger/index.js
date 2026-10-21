@@ -10,6 +10,7 @@ import {
   isLegalCitation
 } from "./lib/heuristics.js";
 import { textStructureMerge } from "./lib/text-structure-merge.js";
+import { protectedBoundary, preserveSemanticIdentities } from "./lib/semantic-identities.js";
 // TODO: import { runAllValidators } from "./lib/validators.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -62,6 +63,8 @@ function startsCapital(text) {
 }
 
 function computeMergeConfidence(prev, curr, config) {
+  const protection=protectedBoundary(prev,curr);
+  if(protection)return {confidence:0,merge:false,reasons:[protection]};
   const reasons = [];
   let confidence = 1.0;
   const heuristics = config.heuristics || {};
@@ -185,7 +188,8 @@ function mergePageParagraphs(pageNodes, config) {
 
   for (let i = 1; i < sorted.length; i++) {
     const next = sorted[i];
-    const decision = computeMergeConfidence(current, next, config);
+    const barrier=nonPNodes.some(n=>getNodeTop(n)>getNodeTop(current)&&getNodeTop(n)<=getNodeTop(next)&&(n.columnHint??0)===(next.columnHint??0));
+    const decision = barrier ? {confidence:0,merge:false,reasons:["intervening semantic element"]} : computeMergeConfidence(current, next, config);
 
     if (decision.merge) {
       merges.push({
@@ -258,10 +262,10 @@ export function mergeParagraphs(semanticDocument, config = {}) {
     });
   }
 
-  const output = {
+  const output = preserveSemanticIdentities(semanticDocument, {
     ...semanticDocument,
     nodes: allNodes
-  };
+  });
 
   const report = {
     enabled: true,

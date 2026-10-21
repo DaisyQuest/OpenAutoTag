@@ -26,7 +26,7 @@ function makeCell(id, x, y, text, extras = {}) {
   };
 }
 
-test("table continues across pages when column anchors match", async () => {
+test("matching columns alone do not join unrelated page tables", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "table-cont-"));
   const inputPath = path.join(tempDir, "layout.json");
 
@@ -58,9 +58,8 @@ test("table continues across pages when column anchors match", async () => {
 
   const tableIds = semantic.nodes.map((n) => n.tableId).filter(Boolean);
   const uniqueIds = [...new Set(tableIds)];
-  // All four cells should share the same tableId
-  assert.equal(uniqueIds.length, 1, `Expected 1 unique tableId, got: ${uniqueIds}`);
-  assert.equal(semantic.nodes[0].tableId, semantic.nodes[2].tableId);
+  assert.ok(uniqueIds.length > 1);
+  assert.notEqual(semantic.nodes[0].tableId, semantic.nodes[2].tableId);
 });
 
 test("table does NOT continue across pages when column anchors do not match", async () => {
@@ -99,7 +98,7 @@ test("table does NOT continue across pages when column anchors do not match", as
   assert.notEqual(page1Ids[0], page2Ids[0], "Tables with non-matching columns should get different tableIds");
 });
 
-test("table with header on page 1 continues on page 2 with correct row indices", async () => {
+test("a table away from the page boundary stays separate and retains row indices", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "table-header-"));
   const inputPath = path.join(tempDir, "layout.json");
 
@@ -136,8 +135,7 @@ test("table with header on page 1 continues on page 2 with correct row indices",
   const tableNodes = semantic.nodes.filter((n) => n.tableId);
   const uniqueTableIds = new Set(tableNodes.map((n) => n.tableId));
 
-  // All cells should share the same tableId
-  assert.equal(uniqueTableIds.size, 1, `Expected 1 table, got ${uniqueTableIds.size}: ${[...uniqueTableIds]}`);
+  assert.ok(uniqueTableIds.size > 1);
 
   // Row indices should be preserved across pages
   const page2Nodes = tableNodes.filter((n) => n.pageNumber === 2);
@@ -192,10 +190,10 @@ test("repeated header row on page 2 is detected", async () => {
       width: 612,
       height: 792,
       textBlocks: [
-        makeCell("b1", 72, 200, "Name", { tableId: "tbl-1", tableRowIndex: 0, tableColumnIndex: 0, tableRole: "header" }),
-        makeCell("b2", 300, 200, "Score", { tableId: "tbl-1", tableRowIndex: 0, tableColumnIndex: 1, tableRole: "header" }),
-        makeCell("b3", 72, 220, "Alice", { tableId: "tbl-1", tableRowIndex: 1, tableColumnIndex: 0 }),
-        makeCell("b4", 300, 220, "95", { tableId: "tbl-1", tableRowIndex: 1, tableColumnIndex: 1 })
+        makeCell("b1", 72, 700, "Name", { tableId: "tbl-1", tableRowIndex: 0, tableColumnIndex: 0, tableRole: "header" }),
+        makeCell("b2", 300, 700, "Score", { tableId: "tbl-1", tableRowIndex: 0, tableColumnIndex: 1, tableRole: "header" }),
+        makeCell("b3", 72, 720, "Alice", { tableId: "tbl-1", tableRowIndex: 1, tableColumnIndex: 0 }),
+        makeCell("b4", 300, 720, "95", { tableId: "tbl-1", tableRowIndex: 1, tableColumnIndex: 1 })
       ]
     },
     {

@@ -63,6 +63,8 @@ export function mergeHeadingContinuations(nodes) {
     const top = Math.min(...lines.map((n) => n.bbox[1]));
     return { ...node,
       text: lines.map((n) => n.text.trim()).join(" "),
+      ...(lines.some(n => typeof n.rawText === "string") ? { rawText: lines.map(n => n.rawText ?? n.text).join("\n") } : {}),
+      ...(lines.some(n => typeof n.comparisonText === "string") ? { comparisonText: lines.map(n => n.text.trim()).join(" ").normalize("NFKC").replace(/\s+/g," ") } : {}),
       bbox: [left, top,
         Math.max(...lines.map((n) => n.bbox[0] + n.bbox[2])) - left,
         Math.max(...lines.map((n) => n.bbox[1] + n.bbox[3])) - top],

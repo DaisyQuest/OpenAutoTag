@@ -155,6 +155,7 @@ public class PdfTagWriterCli {
                 if (applyTableAttributes(element, instruction)) {
                     tableAttributeCount++;
                 }
+                if (!element.getCOSObject().containsKey(COSName.ID)) element.getCOSObject().setString(COSName.ID, "oat:" + instruction.id);
 
                 elements.put(instruction.id, element);
                 structureElementCount++;

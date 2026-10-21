@@ -1,17 +1,17 @@
 # Native tagging and preservation: current design
 
-Updated 2026-10-21 against implementation commit `1b24d87`. This replaces the original proposal, which described native tagging as future work and assumed per-page fallback. See [claims and evidence](tagging-quality-claims.md) for measured results and [the next accuracy plan](tagging-accuracy-roadmap.md) for proposed extensions.
+Updated 2026-10-21 with the [accuracy delivery](tagging-accuracy-delivery-20261021.md). This replaces the original proposal, which described native tagging as future work and assumed per-page fallback. See [claims and evidence](tagging-quality-claims.md) for measured results and [the next accuracy plan](tagging-accuracy-roadmap.md) for proposed extensions.
 
 ## Pipeline and evidence flow
 
 ```text
-PDF -> parser -> layout analyzer -> semantic engine -> reading order -> tag builder
+PDF -> parser -> layout analyzer -> semantic engine -> paragraph merger -> reading order -> tag builder
  |                                                                      |
  +---------------------------> writer <---------------------------------+
                                   |
                            saved candidate PDF
                                   |
-             validator + independent font audit + preservation inspection
+             validator + independent font audit + preservation and saved-semantic inspection
                                   |
                         review candidate and reports
 ```
