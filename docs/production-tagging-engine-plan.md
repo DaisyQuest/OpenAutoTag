@@ -1,6 +1,6 @@
 # OpenAutoTag production engine plan
 
-Implementation plan, 20 October 2026. Scope: the engine in `C:/Users/tabur/PDFIsAbsurd/OpenAutoTag`. The first three bounded deliveries are implemented; see section 16 for evidence and outstanding production work.
+Implementation plan and delivery history, 20-21 October 2026. Scope: the engine in `C:/Users/tabur/PDFIsAbsurd/OpenAutoTag`. Sections 16-22 record successive bounded deliveries; section 22 is the latest result. Earlier counts, suppression behavior and open issues describe their historical build, not the current state. Use the [claims register](tagging-quality-claims.md) for current evidence and the [next accuracy plan](tagging-accuracy-roadmap.md) for additional proposed work. Production qualification remains incomplete.
 
 Build a production engine that preserves document content and interaction, produces defensible semantic structure, and gives a precise outcome when automation cannot finish the job. The eight workstreams below extend the existing pipeline. Delivery begins with trustworthy measurements and a complete form-processing slice, then expands through independently gated capabilities.
 

@@ -1,9 +1,9 @@
 PDF Accessibility Engine
-Version: bootstrap-v2
+Version: tagging-quality-2026-10-21
 
 0. Purpose
 
-Build a contract-first PDF accessibility tagging pipeline that can be implemented in parallel with near-zero merge conflicts.
+Build a contract-first PDF accessibility tagging pipeline with deterministic inference, qualified preservation repairs and independently checked saved outputs.
 
 This repository is intentionally split into isolated modules. Each module is independently buildable, independently testable, and replaceable behind a fixed CLI and fixed JSON contracts.
 
@@ -103,8 +103,10 @@ Reconstructs missing ToUnicode maps from TTF cmap tables, Type1 Differences
 arrays, Adobe Glyph List, or CID Registry/Ordering/Supplement. Reads OS/2
 fsType for a warning-only license flag. Emits a per-font remediation plan
 (embed-as-is, inject-to-unicode, substitute-fallback, subset-and-embed,
-rewrite-encoding, re-embed-from-cache, synthesize-type0-wrapper) consumed
-by the pdf-writer.
+rewrite-encoding, re-embed-from-cache, synthesize-type0-wrapper).
+These actions describe proposed work. The writer does not execute every action;
+an inventory entry must never be reported as a completed saved-PDF repair.
+The explicit qualified font-repair CLI is described in section 3.7a.
 
 Licensing is advisory only: fsType bits are surfaced in license.flag but
 never block embedding. See FLAG in README for future policy work.
@@ -112,20 +114,21 @@ never block embedding. See FLAG in README for future policy work.
 3.7 PDF writer
 
 Command:
-`node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> [--fonts <fonts.json>] [--font-cache <dir>] > writer-report.json`
+`node modules/pdf-writer/index.js --pdf <input.pdf> --tags <tagging.json> --semantic <semantic.ordered.json> --output <tagged.pdf> [--mode auto|native|raster] > writer-report.json`
 
 Output:
 Writer report JSON plus output artifacts at the provided path.
 
-Bootstrap note:
-The current implementation uses Apache PDFBox to add a native structure tree, marked-content overlays, document metadata, and a sidecar manifest. Full content-level MCID tagging of the original source operators remains a later hardening step.
-
-Bootstrap note:
-The overlay font is loaded from a bundled SIL-OFL TrueType (Noto Sans) via
-PDType0Font.load with embedSubset=true. Standard 14 fonts are never used in
-the output (forbidden by PDF/UA). When --fonts is provided, the writer
-executes each plan.action from the inventory and emits a fonts[] array in
-the writer report with the actual post-write state of every font.
+Writer modes:
+Native operator tagging is implemented. Auto mode probes the input and selects
+native tagging, preservation of qualifying already-tagged input, or raster
+reconstruction. The report records the effective mode and fallback reason.
+Existing-tag preservation defaults to incremental metadata/qualified repairs;
+new semantic inference is not wholesale written over the authored tree.
+Raster reconstruction embeds its overlay font (bundled Noto Sans by default),
+but that does not guarantee preservation of editable forms or native content.
+Missing semantic context can produce a sidecar-only copy; inspect writerMode
+and nativeTaggingApplied before claiming that tags were written.
 
 3.7a Qualified font repair (opt-in post-processing)
 
@@ -289,7 +292,8 @@ Contracts live under `contracts/`.
 - `pipeline-job.schema.json`
   Queue and API contract for orchestrator job status.
 
-Contracts are frozen before parallel implementation begins.
+Contracts are reviewed before implementation; compatible extensions are additive
+and schema-tested. Proposed roadmap fields are not part of the implemented API.
 
 5. Repository structure
 
@@ -344,7 +348,19 @@ Bootstrap done:
 - Tests pass
 - Orchestrator can process a sample PDF end-to-end
 
-Production done:
+Production qualification requirements (not all completed):
 
-- PDF writer injects native logical structure into the output PDF
-- Validator confirms baseline PDF/UA compliance against a real ruleset
+- Native structure and intended semantics survive serialization and reopening.
+- Raw validation and the independent font audit pass for the exact candidate.
+- Fields, appearances, links and content pass the applicable preservation proofs.
+- Independently reviewed references and a held-out real-document corpus establish
+  per-feature accuracy and explicit unsupported cases.
+- Candidate-bound human reader/keyboard observations cover intended viewers.
+- Operational limits, packaging, failure handling and rollback are qualified.
+
+The current TEST-FORM candidate remains review_required. Synthetic regression
+success and one validated document do not establish general accuracy, full
+PDF/UA conformance, WCAG conformance or universal viewer compatibility.
+Current evidence: docs/tagging-quality-claims.md. Further proposed work:
+docs/tagging-accuracy-roadmap.md. Delivery history:
+docs/production-tagging-engine-plan.md, sections 21 and 22.

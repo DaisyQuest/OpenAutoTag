@@ -33,6 +33,14 @@ public sources or internal mirrors:
 
 Defaults use the public sources already used by the project.
 
+The checked-in configuration pins veraPDF 1.30.3 Greenfield; PDFBox helpers use
+vendored 3.0.8 jars. Installer mirrors must serve the exact pinned archive bytes
+accepted by `scripts/install-verapdf.js`. The old PDFBox-backend installer is not
+compatible with this pin. Updating a version requires reviewing the version and
+checksum together. The latest tagging delivery tested the installer and engine,
+but did not qualify a complete portable package on a clean machine; see
+[claims and evidence](docs/tagging-quality-claims.md).
+
 ## Build The Package
 
 From the repository root:

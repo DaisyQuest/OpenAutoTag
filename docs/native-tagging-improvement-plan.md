@@ -1,9 +1,13 @@
 # Native Tagging: 20-Point Improvement Plan
 
-**Goal**: guarantee strong native tagging on 99%+ of PDFs in the wild by
-closing measured gaps in our current pipeline, aligning output with
-actual screen-reader behavior (not just PAC/VeraPDF pass), and
-positioning for PDF/UA-2.
+**Historical proposal:** the corpus measurements below belong to the named
+earlier runs and are not current accuracy estimates. The original 99%+ ambition
+was not supported by a representative reviewed corpus and is not a product
+claim. Current measured scope is in [the claims register](tagging-quality-claims.md).
+
+**Goal:** improve measured native tagging quality on independently reviewed
+documents and qualify actual screen-reader behavior. PDF/UA-2 remains a separate
+future qualification effort. See [the next accuracy plan](tagging-accuracy-roadmap.md).
 
 **Evidence base**:
 - End-to-end measurement run 2026-04-18 across 27 corpus PDFs (15

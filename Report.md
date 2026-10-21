@@ -1,3 +1,12 @@
+# Background research: PDF tagging vocabulary
+
+This is an archived research note about PDF concepts and external tools. It is
+not a statement that OpenAutoTag implements every structure type or workflow
+described below. Current implemented capabilities and verified limits are in
+[the claims register](docs/tagging-quality-claims.md); the technical architecture
+is in [the current design](docs/native-tagging-design.md). External vendor/version
+statements below require re-verification before reuse as current claims.
+
 I’m separating the PDF tag vocabulary from the software behaviors that auto-generate it, using standards and vendor documentation to map taggable elements, typical detection heuristics, and where native tagging falls short.
 
 I’ve pinned down the element inventory, including the PDF 1.7 set and PDF 2.0 additions. Next I’m detailing native export from source semantics versus Acrobat-style post-processing, especially for annotations, forms, tables, and review-prone cases.

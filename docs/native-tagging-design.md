@@ -1,204 +1,80 @@
-# Native PDF Tagging — Design Document
+# Native tagging and preservation: current design
 
-## Problem Statement
+Updated 2026-10-21 against implementation commit `1b24d87`. This replaces the original proposal, which described native tagging as future work and assumed per-page fallback. See [claims and evidence](tagging-quality-claims.md) for measured results and [the next accuracy plan](tagging-accuracy-roadmap.md) for proposed extensions.
 
-The current PDF writer rasterizes every page into a flat image and overlays
-invisible text for accessibility. This destroys native PDF content: vector
-text becomes pixels, fonts are discarded, links and form fields are lost,
-and the output is functionally a scanned document.
+## Pipeline and evidence flow
 
-"Native tagging" preserves the original PDF content streams and injects
-structure annotations (BMC/BDC/EMC marked-content sequences) around the
-existing text operators. The result is a tagged PDF where text stays sharp,
-fonts stay embedded, and the structure tree points at real content — not a
-synthetic overlay.
-
-## Architecture
-
-```
-                    ┌─────────────────────────────┐
-                    │     Existing Pipeline        │
-                    │  parser → layout → semantic  │
-                    │  → reading-order → tags      │
-                    └──────────┬──────────────────┘
-                               │
-                    ┌──────────▼──────────────────┐
-                    │    Native Tagging Bridge     │
-                    │                              │
-                    │  1. Operator-level parser    │
-                    │     (content stream → ops)   │
-                    │                              │
-                    │  2. Operator-to-tag matcher  │
-                    │     (ops → sourceTextMap     │
-                    │      → semantic → tag tree)  │
-                    │                              │
-                    │  3. Content stream rewriter  │
-                    │     (inject BDC/MCID/EMC)    │
-                    └──────────┬──────────────────┘
-                               │
-                    ┌──────────▼──────────────────┐
-                    │     Writer Mode Dispatch     │
-                    │                              │
-                    │  mode=native:  rewrite ops   │
-                    │  mode=raster:  current path  │
-                    │  mode=auto:    native first,  │
-                    │    fall back to raster/page   │
-                    └─────────────────────────────┘
+```text
+PDF -> parser -> layout analyzer -> semantic engine -> reading order -> tag builder
+ |                                                                      |
+ +---------------------------> writer <---------------------------------+
+                                  |
+                           saved candidate PDF
+                                  |
+             validator + independent font audit + preservation inspection
+                                  |
+                        review candidate and reports
 ```
 
-## Three New Components
+The font-embedder emits an inventory and remediation proposals alongside this flow. Proposed inventory actions are not all executed by the main writer. Explicit qualified repair CLIs apply supported font, link and structure changes and produce saved-object proofs.
 
-### 1. Operator-Level Content Stream Parser (Java)
+Modules exchange JSON through versioned contracts and separate processes. A semantic relationship is an inference result until a writer or qualified repair materializes it in the PDF. The preserved-input path retains authored semantics except for bounded repairs; newly inferred relationships do not silently replace the existing tree.
 
-`NativeContentStreamParser.java` — walks each page's content stream using
-PDFBox's `PDFStreamEngine`, recording every operator with:
+## Writer dispatch
 
-```java
-class ContentOperator {
-    String type;        // "Tj", "TJ", "'", "\"", "Tm", "Td", etc.
-    int streamOffset;   // byte offset in the content stream
-    int sequenceIndex;  // ordinal position among all operators
-    String text;        // extracted text (for text operators)
-    float[] position;   // [x, y] from the text matrix
-    float fontSize;
-    String fontName;
-    // For text operators: the raw bytes that constitute this operator
-    byte[] rawBytes;
-}
+`modules/pdf-writer/index.js` accepts `--mode auto|native|raster`; default is `auto`. Inspect the report's effective `writerMode`, fallback reason and applied-tagging fields for every job.
+
+| Path | Behavior | Important limit |
+| --- | --- | --- |
+| `auto` | Probes native content. Qualifying already-tagged input uses preservation before the native match-rate decision. Otherwise selects native or raster at document level. | It is not a guaranteed per-page or per-region hybrid writer. |
+| `native` | Parses operators, matches them to semantic/tag nodes, and writes native marked content and the structure tree. | Matching measures content assignment, not correctness of inferred roles or reading order. |
+| `passthrough` (selected path) | Copies the input, then applies incremental metadata and enabled bounded repairs to qualifying authored tags. | Existing semantic mistakes remain unless a repair qualifies. Output bytes may change. |
+| `raster` | Reconstructs pages from rendered images and overlays tagged text using an embedded font. | Editable forms, native vectors and original font/text behavior are not guaranteed. |
+| `sidecar-manifest` (fallback) | Copies the PDF and emits a manifest when necessary semantic context is unavailable. | The copied PDF has not acquired the inferred tags. |
+
+The auto native-match threshold defaults to 0.8; the existing-marked-content threshold defaults to 0.5, together with source structure checks. These are routing heuristics, not accuracy promises. `--already-tagged-policy passthrough` is the default; explicit `bailout-to-raster` remains available for callers whose workflow requires reconstruction.
+
+## Native writing
+
+Java helpers use vendored PDFBox 3.0.8:
+
+- `NativeContentStreamParser.java` extracts operator text, geometry and existing marked-content context.
+- `NativeTagMatcher.java` associates operators with semantic content/tag identities and emits a native tag plan.
+- `NativeContentStreamRewriter.java` creates native structure, marked-content references and associated PDF objects.
+
+Conceptually, a matched text operation receives marked-content boundaries:
+
+```text
+Before: BT /F1 12 Tf 72 700 Td (Hello) Tj ET
+After:  BT /F1 12 Tf 72 700 Td /P <</MCID 0>> BDC (Hello) Tj EMC ET
 ```
 
-This is finer-grained than sourceTextMap's run-level extraction. Each
-Tj/TJ call becomes a separate operator record with its exact stream
-position.
+This is an illustration, not the native-plan JSON contract. PDFBox serialization may change stream bytes or compression. Semantic and appearance preservation require inspecting the saved PDF; a matching score alone is insufficient.
 
-### 2. Operator-to-Tag Matcher
+Both native and raster writers serialize table `Headers`, `Scope`, cell spans, structure IDs and list numbering. `StructureIdentifiers.java` creates IDTree entries and rejects duplicate/dangling IDs, non-TH targets, cross-table references and excessive nesting. Tests reopen both writer outputs to check these relationships.
 
-`NativeTagMatcher.java` — connects the three data sources:
+## Qualified incremental repairs
 
-```
-Content operators (from step 1)
-    ↕ match by text content + position
-Source text runs (from sourceTextMap)
-    ↕ match by sourceBlockId
-Semantic nodes (from pipeline)
-    ↕ match by node id
-Tag tree nodes (from tag-builder)
-    → MCID assignment
-```
+The repair entry points are `font-repair.js`, `link-repair.js` and `structure-repair.js` under `modules/pdf-writer/`. They refuse to overwrite inputs or existing outputs. Each has bounded eligibility conditions, emits an audit and verifies saved objects against a fresh replay from its source. Signed/encrypted inputs are outside these repair paths.
 
-The matcher produces a **native tag plan**: for each tag tree leaf that
-carries text, the plan specifies which content stream operators to wrap
-with BDC/MCID/EMC.
+| Family | Qualified behavior | Cases left for review |
+| --- | --- | --- |
+| Fonts | Pinned canonical standard-font programs, observed whitespace-only use, qualified CIDSet completion, checked WinAnsi TrueType ToUnicode, unused Helvetica defaults using a matching authored Arial program. | Custom encoding/metrics, ambiguous donors, incomplete usage scans, arbitrary substitution. |
+| Links | Descriptions from unchanged simple URI actions and uniquely evidenced ownership repairs, with reciprocal ParentTree/OBJR checks. | Compound actions, ambiguous text/geometry, unsupported rotations, inconsistent ownership. |
+| Structure | Qualified list-form containers, wrapped headings, unrelated terminal-field Form splitting, consistent rank compaction, source-bound reviewed role decisions. | Ambiguous ownership, unsupported semantic attributes, stale decisions, unreviewed role changes. |
 
-```json
-{
-  "page": 1,
-  "tagNodeId": "p1",
-  "mcid": 0,
-  "operators": [
-    { "streamOffset": 1234, "length": 56, "text": "Hello World" }
-  ]
-}
-```
+`SavedObjectVerifier.java` compares the saved graph against a fresh permitted replay. This proves the allowed mutation boundary; it does not prove that a human's semantic interpretation is correct. Source-hash-bound decisions and semantic/reader review remain necessary.
 
-Match confidence is tracked per-operator. When confidence is below a
-threshold (e.g., operator text doesn't match expected text), the plan
-marks that region as "unmatched" and the writer falls back to raster
-for that specific content.
+## Validation and publication state
 
-### 3. Content Stream Rewriter (Java)
+The default external validator is veraPDF 1.30.3 Greenfield with `ua1`. Raw results are retained without the discontinued backend's suppressions. PDFBox supplies independent structural diagnostics and the font audit; a required checker failure cannot be interpreted as a pass.
 
-`NativeContentStreamRewriter.java` — takes the original content stream
-bytes and the native tag plan, and produces a new content stream with
-BMC/BDC/EMC sequences injected at the correct positions.
+`scripts/check-pdf-preservation.js` binds validation to candidate bytes and compares source/candidate content, fields, widgets, resources and supported structure identities. Font and structure changes require independent replay proofs when enabled. Full rewrites do not automatically satisfy an incremental-identity gate.
 
-Before:
-```
-BT /F1 12 Tf 72 700 Td (Hello World) Tj ET
-```
+`--production-checks true` enables preservation checking and candidate download gating in the accessibility pipeline. A passing candidate may be downloaded explicitly for review only when its bytes match the inspected hash. It remains `review_required`; the current code does not implement a complete accepted-output promotion process. Ungated legacy jobs do not acquire this policy automatically.
 
-After:
-```
-BT /F1 12 Tf 72 700 Td /P <</MCID 0>> BDC (Hello World) Tj EMC ET
-```
+## Qualification and open work
 
-The rewriter:
-- Preserves all non-text operators verbatim
-- Inserts BDC before matched text operator groups
-- Inserts EMC after them
-- Handles multi-operator spans (e.g., several Tj calls that form one paragraph)
-- Does NOT recompress or re-encode — works on the decompressed stream
-  and lets PDFBox handle re-compression on save
+Run `npm run test:production-baseline` for portable regression suites and `npm run benchmark:semantic` for the 16-case synthetic semantic benchmark. The benchmark covers layout-to-tagging JSON; separate writer tests verify saved structure. Tests include failed preconditions, mutated saved objects, repeat runs and interaction probes.
 
-## Writer Mode
-
-New profile field: `pdfWriter.mode`
-
-| Mode | Behavior |
-|------|----------|
-| `native` | Parse operators, match to tags, rewrite streams. Fail if <80% of text content can be matched. |
-| `raster` | Current behavior (rasterize + overlay). Always works. |
-| `auto` | Try native per-page. Fall back to raster for pages where operator matching confidence is below threshold. Report which pages used which mode. |
-
-Default: `auto` (try native, degrade gracefully).
-
-## What "Provably Capable" Means
-
-The system can produce a **native tagging proof report** per document:
-
-1. **Content preservation score**: percentage of text that remains as
-   native vector operators (not rasterized). 100% = fully native.
-2. **Operator match confidence**: per-page confidence that text operators
-   were correctly identified and wrapped.
-3. **Structure fidelity**: diff the structure tree against the raster-mode
-   tree — same reading order, same roles, same text content?
-4. **veraPDF comparison**: run both modes, diff the findings.
-5. **File size comparison**: native mode should produce smaller files
-   (no raster images).
-6. **Visual comparison**: render both outputs, pixel-diff. Native should
-   be identical to the original; raster may have DPI artifacts.
-
-## Implementation Phases
-
-### Phase 1: Operator Parser + Proof of Concept
-- Build NativeContentStreamParser in Java
-- Run it on one LRBTest PDF, produce operator-level map
-- Match operators to sourceTextMap runs manually
-- Verify the mapping is correct
-
-### Phase 2: Matcher + Rewriter
-- Build NativeTagMatcher connecting operators → tags
-- Build NativeContentStreamRewriter injecting BDC/MCID/EMC
-- Produce a natively-tagged PDF for one document
-- Verify with veraPDF
-
-### Phase 3: Integration + Auto Mode
-- Wire into pdf-writer as a mode option
-- Implement per-page fallback (auto mode)
-- Profile knob + dashboard toggle
-- Native tagging proof report
-
-### Phase 4: Hardening
-- Handle XObject forms (nested content streams)
-- Handle inline images mixed with text
-- Handle content streams with existing (incorrect) marked content
-- Handle encrypted PDFs where content streams are decrypted on read
-
-## Why This Is Not Snake Oil
-
-The difference between "native" and "raster" tagging is measurable:
-
-| Property | Raster (current) | Native (target) |
-|----------|------------------|-----------------|
-| Text rendering | 144 DPI pixels | Vector (infinite resolution) |
-| File size | ~6 MB (10-page doc) | ~200 KB (same doc) |
-| Copy/paste | Overlay text (approximate) | Original text (exact) |
-| Search | Overlay text | Original text |
-| Links | Destroyed | Preserved |
-| Form fields | Destroyed | Preserved |
-| Zoom quality | Degrades | Perfect |
-| Font fidelity | Noto Sans overlay | Original fonts |
-| veraPDF findings | More (synthetic content) | Fewer (native content) |
-
-Every one of these properties is objectively testable. The proof report
-makes the claim verifiable per-document.
+The latest TEST-FORM result passes machine checks while preserving tested form objects, appearance and interactions. Broader real-document accuracy, inferred-to-saved semantic comparison, human reader/keyboard observations, full portable/servlet deployment and unsupported PDF feature families remain open. Choosing native mode alone establishes no fixed file-size reduction, universal font embedding or general conformance guarantee.

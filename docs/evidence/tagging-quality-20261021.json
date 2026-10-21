@@ -1,0 +1,167 @@
+{
+  "recordedAt": "2026-10-21",
+  "implementationCommit": "1b24d87",
+  "scope": "Local regression evidence; source PDFs and raw artifacts are not distributed with this summary.",
+  "tools": {
+    "pdfbox": "3.0.8",
+    "verapdf": "1.30.3",
+    "verapdfBackend": "Greenfield",
+    "validationProfile": "ua1"
+  },
+  "productionBaseline": {
+    "passed": 171,
+    "failed": 0,
+    "skipped": 0,
+    "logSha256": "3fc42b75c275a7b1374d56e82042cb85efdd291407e5301061ab7074d38ec53b",
+    "localLog": "tmp/commit-production-baseline.log"
+  },
+  "semanticBenchmark": {
+    "cases": 16,
+    "passedChecks": 74,
+    "failedChecks": 0,
+    "dimensions": {
+      "headings": {
+        "passed": 2,
+        "failed": 0
+      },
+      "formLabels": {
+        "passed": 3,
+        "failed": 0
+      },
+      "contentOwnership": {
+        "passed": 38,
+        "failed": 0
+      },
+      "ambiguityReview": {
+        "passed": 2,
+        "failed": 0
+      },
+      "formInstructions": {
+        "passed": 1,
+        "failed": 0
+      },
+      "readingOrder": {
+        "passed": 12,
+        "failed": 0
+      },
+      "lists": {
+        "passed": 6,
+        "failed": 0
+      },
+      "listNumbering": {
+        "passed": 3,
+        "failed": 0
+      },
+      "paragraphs": {
+        "passed": 1,
+        "failed": 0
+      },
+      "tagStructure": {
+        "passed": 3,
+        "failed": 0
+      },
+      "tableHeaders": {
+        "passed": 3,
+        "failed": 0
+      }
+    },
+    "manifestSha256": "c68257d140f607abc3b80e57df3863a3e961dab560c6c6c2ee4b0584878443f9",
+    "expertReviewComplete": false,
+    "pipelineScope": "layout JSON through tagging JSON; no PDF parser/writer/reader in this benchmark"
+  },
+  "candidate": {
+    "candidateSha256": "e9fc4c318c7d0b75048c9c3dbe035acb1f376be0f80fb1559b101540b3e3b858",
+    "rawValidation": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 9874,
+      "failedChecks": 0
+    },
+    "fontAuditErrors": 0,
+    "fieldCount": 32,
+    "widgetCount": 33,
+    "linkCount": 9,
+    "headingCount": 5,
+    "reviewedHeadingChange": "576 0 R: Index #: H2 -> P",
+    "allPreservationChecksPassed": true,
+    "pixelComparisons": {
+      "preview-1": {
+        "identical": true,
+        "size": [
+          1275,
+          1650
+        ]
+      },
+      "pdfjs-candidate-1": {
+        "identical": true,
+        "size": [
+          1275,
+          1651
+        ]
+      },
+      "pdfjs-candidate-all-checked-1": {
+        "identical": true,
+        "size": [
+          1275,
+          1651
+        ]
+      },
+      "preview-2": {
+        "identical": true,
+        "size": [
+          1275,
+          1650
+        ]
+      },
+      "pdfjs-candidate-2": {
+        "identical": true,
+        "size": [
+          1275,
+          1651
+        ]
+      },
+      "pdfjs-candidate-all-checked-2": {
+        "identical": true,
+        "size": [
+          1275,
+          1651
+        ]
+      }
+    },
+    "pageTextIdentical": true,
+    "semanticBenchmarkCases": 16,
+    "expertCorpusReview": "pending",
+    "humanReaderQualification": "not performed",
+    "disposition": "review_required",
+    "sha256": "e9fc4c318c7d0b75048c9c3dbe035acb1f376be0f80fb1559b101540b3e3b858",
+    "localPath": "output/TEST-FORM-quality-20261021/06-candidate.pdf"
+  },
+  "artifacts": [
+    {
+      "localPath": "output/TEST-FORM-quality-20261021/07-validation-report.json",
+      "sha256": "58cd9bf73d72754732d56484efd393f323311fc73004022b074f62a5e7ebac01"
+    },
+    {
+      "localPath": "output/TEST-FORM-quality-20261021/08-font-quality.json",
+      "sha256": "4b7a3d413188f3bf69528f76eab26beb6bf266c983e3a64a02dcf7a6c91d0702"
+    },
+    {
+      "localPath": "output/TEST-FORM-quality-20261021/08-quality-report.json",
+      "sha256": "f8e663a76d742898e90cf8cb1ec4f9596e7fd16ef45ecb9e76e1cbdc1ddc39a4"
+    },
+    {
+      "localPath": "output/TEST-FORM-quality-20261021/09-quality-verification.json",
+      "sha256": "d02d68fef525236d9eb304433673fee4acc7b6628ee288ca1fab5f823929554b"
+    },
+    {
+      "localPath": "output/TEST-FORM-quality-20261021/11-semantic-benchmark.json",
+      "sha256": "a801f302e42c86a506b51427c23a49eaf12e14de7ebfb85e92567f43f807ab67"
+    }
+  ],
+  "limitations": [
+    "One reviewed two-page form does not establish general tagging accuracy.",
+    "Pixel comparisons use the preceding candidate, the named renderers and 150 DPI.",
+    "Human screen-reader/keyboard qualification has not been performed.",
+    "Full portable and servlet deployments were not qualified in this delivery."
+  ]
+}

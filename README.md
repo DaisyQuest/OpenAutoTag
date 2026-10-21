@@ -1,19 +1,23 @@
 # PDF Accessibility Engine
 
-This repository is a contract-first scaffold for a horizontally scalable PDF accessibility tagging pipeline. It is designed so Codex agents can implement modules in parallel without touching shared runtime code.
+OpenAutoTag is a contract-first PDF tagging and inspection pipeline. It combines deterministic semantic inference, native PDF writing, bounded repairs to existing tags, and saved-output validation. Modules communicate through JSON contracts and isolated CLIs.
+
+The current measured result is 171 passing production-baseline tests and 74 passing checks across 16 synthetic semantic cases. One reviewed TEST-FORM candidate has zero veraPDF failures and zero independent font-audit findings, with its 32 fields and 33 widgets preserved. These are scoped regression results; general tagging accuracy and human screen-reader usability remain unqualified. See the [claims and evidence register](docs/tagging-quality-claims.md), [current writer design](docs/native-tagging-design.md), and [next accuracy plan](docs/tagging-accuracy-roadmap.md).
 
 ## Current state
 
-- Shared contracts are frozen in [`contracts/`](C:/Users/tabur/Videos/BuildEverything/contracts).
-- Every module has an isolated CLI boundary under [`modules/`](C:/Users/tabur/Videos/BuildEverything/modules).
+- Shared contracts are versioned in [`contracts/`](contracts/); extensions are additive and schema-tested.
+- Every module has an isolated CLI boundary under [`modules/`](modules/).
 - The orchestrator runs modules as separate processes, so modules do not import each other.
 - The orchestrator now routes jobs through a workload registry, so new workloads can reuse the same queue, server, batch UI, and retry model without cloning the orchestration layer.
 - The orchestrator now supports remote worker agents that poll the master server, download assigned inputs, emit heartbeats, upload their full job workspaces, and let the primary server absorb overflow when the remote fleet is undersized.
 - Parser, layout analysis, semantic mapping, reading order, tag tree construction, and font embedding planning are implemented as a working baseline.
-- A new `font-embedder` stage analyzes every font in the source PDF, reconstructs missing ToUnicode maps, and emits a per-font remediation plan. The PDF writer consumes this plan to produce PDF/UA-compliant embedded fonts (Standard 14 fonts are never emitted in output). Noto Sans / Serif / Mono / Symbols fallbacks (SIL-OFL) are vendored under `modules/font-embedder/vendor/fonts/`; Noto Sans CJK installs on demand via `npm run install:fonts`.
+- The `font-embedder` stage emits an inventory and proposed remediation actions. Inventory proposals are not proof of saved-PDF repairs: the writer does not execute every proposed action. The separate `repair:fonts` CLI applies qualified font repairs and verifies the saved objects. Unsupported fonts remain review cases. Noto Sans / Serif / Mono / Symbols fallbacks (SIL-OFL) are vendored under `modules/font-embedder/vendor/fonts/`; Noto Sans CJK installs on demand via `npm run install:fonts`.
 - A font-audit pre-pass in the validator emits actionable structured findings (`FONT_NOT_EMBEDDED`, `TO_UNICODE_INCOMPLETE`, `DA_FONT_NOT_IN_DR`, etc.) before veraPDF runs, so font-related PDF/UA failures surface with location and remediation hints.
 - 🚩 **FLAG — font licensing policy is deliberately advisory**. fsType bits from the OS/2 table are read and surfaced via `license.flag` in the font inventory (`installable` / `restricted` / `preview-print` / `editable`), but embedding is never blocked on license. Future work will design an enforcement policy (warn / substitute / require-override). See contract `contracts/font-inventory.schema.json`.
-- The PDF writer and validator expose stable CLIs and produce deterministic artifacts for integration, but native PDF/UA structure injection remains a later swap-in implementation.
+- The writer implements native operator tagging, preservation of qualifying already-tagged input, and raster reconstruction. Auto mode reports its selected path and fallback reason; raster output is not a form-preservation guarantee. Qualified incremental font, link and structure repairs have independent saved-object replay checks.
+- Heading membership and wrapped titles, contextual form relationships, constrained reading order, paragraph/list continuation, and table headers have bounded rules with explicit review cases. Both native and raster writers emit table IDs, Headers, Scope and list numbering; invalid header references are rejected.
+- `--production-checks true` enables candidate inspection and download gating. A successful preservation result is still `review_required`; actual reader/keyboard qualification and an accepted-output publication workflow remain separate work.
 - The pipeline now records stage timelines, retries retryable failures, preserves partial artifacts on failure, and returns structured stage diagnostics in each job snapshot.
 - Layout and semantic detection now go beyond simple heading detection with stronger column inference, ordered-list metadata, table-cell detection, grouped lists, and richer reading-order handling.
 - The pipeline now also emits a read-only `sourceTextMap` diagnostic that aligns parser blocks with text runs extracted directly from the original PDF content streams.
@@ -34,6 +38,8 @@ This repository is a contract-first scaffold for a horizontally scalable PDF acc
 npm install
 npm run install:verapdf
 npm run test:ci
+npm run test:production-baseline
+npm run benchmark:semantic
 npm test
 npm run test:goldmaster
 npm run goldmaster:update
@@ -45,8 +51,7 @@ npm run map:table-structure -- --pdf tmp/sample.pdf --layout tmp/run/01-layout.j
 npm run inspect:pdf -- --pdf tmp/run/06-tagged.pdf
 ```
 
-Java 21 is required for the native PDFBox-backed writer and validator modules.
-The validator uses veraPDF for PDF/UA validation. `npm run install:verapdf` now installs it cross-platform, and the validator also accepts `VERAPDF_PATH`, `VALIDATOR_JAVA_HOME`, `VALIDATOR_JAVA_PATH`, `VALIDATOR_JAVAC_PATH`, and `VERAPDF_FLAVOUR` overrides when needed.
+Java 21 is required for the PDFBox helpers. Both vendored PDFBox copies are 3.0.8. `npm run install:verapdf` installs pinned veraPDF 1.30.3 Greenfield with a SHA-256-verified installer. The validator defaults to `ua1`, retains raw findings without blanket suppression, and runs an independent font audit. It accepts `VERAPDF_PATH`, `VALIDATOR_JAVA_HOME`, `VALIDATOR_JAVA_PATH`, `VALIDATOR_JAVAC_PATH`, and `VERAPDF_FLAVOUR` overrides; results from an override must identify that tool/profile. A validator pass alone does not establish semantic accuracy or observed assistive-technology behavior.
 On Azure App Service Linux, runtime uploads, job artifacts, OCR cache, and Java helper build outputs should live under a writable runtime root. Set `PIPELINE_DATA_ROOT` if you need to override the default. `GET /health` now reports the active runtime paths.
 The same deployment package can also run as a worker agent. If `AGENT_MASTER_ENDPOINT` is configured, `npm start` launches the App Service-friendly agent runtime instead of the primary UI server and exposes its own lightweight `/health` endpoint.
 The OCR fallback uses `tesseract.js`, which downloads language data on first use and caches it locally.
@@ -107,7 +112,7 @@ Every job snapshot now includes:
 
 ## Workloads
 
-The orchestrator now treats each product flow as a workload definition under [`orchestrator/workloads/`](C:/Users/tabur/Videos/BuildEverything/orchestrator/workloads). Each workload publishes:
+The orchestrator now treats each product flow as a workload definition under [`orchestrator/workloads/`](orchestrator/workloads). Each workload publishes:
 
 - a stable workload id and label for the API and dashboard
 - a processor function that reuses the shared queue, retry, and stage timeline model
@@ -165,7 +170,7 @@ Parser output now records OCR diagnostics under `source.ocr` and `pages[*].ocr`,
 
 ## Goldmasters
 
-The repository now includes a goldmaster suite under [`test/goldmasters/`](C:/Users/tabur/Videos/BuildEverything/test/goldmasters) that locks:
+The repository now includes a goldmaster suite under [`test/goldmasters/`](test/goldmasters) that locks:
 
 - normalized end-to-end pipeline artifacts for the native sample document
 - normalized live OCR parser output for a scanned rasterized sample document
@@ -180,7 +185,7 @@ Use:
 
 ## Testing matrix
 
-Coverage inventory is maintained in [`test/testing-matrix.definition.json`](C:/Users/tabur/Videos/BuildEverything/test/testing-matrix.definition.json) and rendered to [`orchestrator/public/testing-matrix.data.json`](C:/Users/tabur/Videos/BuildEverything/orchestrator/public/testing-matrix.data.json) with:
+Coverage inventory is maintained in [`test/testing-matrix.definition.json`](test/testing-matrix.definition.json) and rendered to [`orchestrator/public/testing-matrix.data.json`](orchestrator/public/testing-matrix.data.json) with:
 
 - `npm run testing-matrix:update`
 
@@ -207,4 +212,4 @@ Each module:
 - may only depend on files in `contracts/` plus third-party packages
 - must expose a CLI entrypoint
 
-See [`SPEC.txt`](C:/Users/tabur/Videos/BuildEverything/SPEC.txt) and [`AGENTS.md`](C:/Users/tabur/Videos/BuildEverything/AGENTS.md) for the executable working agreement.
+See [`SPEC.txt`](SPEC.txt) and [`AGENTS.md`](AGENTS.md) for the executable working agreement.

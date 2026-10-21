@@ -1,5 +1,9 @@
 # Engine Audit — Downloads/pdfs Corpus (2026-04-19)
 
+Historical run: results below apply to the April build, corpus and validator.
+They have not been requalified on the current Greenfield backend and should not
+be presented as current product accuracy. See [current claims and evidence](tagging-quality-claims.md).
+
 ## Methodology
 
 Sample of 11 PDFs from `C:\Users\tabur\Downloads\pdfs\`:

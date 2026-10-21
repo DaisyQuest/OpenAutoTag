@@ -145,7 +145,7 @@ Overrides are applied on top of the resolved profile chain. For example, if `leg
 
 ## Opt-in preservation checks and list-form repair
 
-The accessibility pipeline accepts `--preservation-check` (programmatic option
+The accessibility pipeline accepts `--preservation-check true` (programmatic option
 `options.preservationCheck: true`). It inspects the source and saved candidate,
 then writes `08-quality-report.json` and two inspection sidecars. It compares page
 geometry/content/resources, field properties and hierarchy, widget appearance and
@@ -170,18 +170,30 @@ Example from the repository root in PowerShell:
 
 ```powershell
 $env:PASSTHROUGH_REPAIR_LIST_FORMS = "1"
-node orchestrator/pipeline-runner.js --pdf input.pdf --output-dir output/review --profile forms-heavy --preservation-check
+node orchestrator/pipeline-runner.js --pdf input.pdf --output-dir output/review --profile forms-heavy --preservation-check true
 ```
 
 Use both switches together when qualifying a repair. The saved PDF remains a
-candidate, including after a failed quality stage. Atomic promotion of accepted
-artifacts and corresponding client download policy are future P06 work. The
+candidate, including after a failed quality stage. `--production-checks true`
+also stages an independent input copy, enables bounded list/link repairs and
+candidate download gating, and requires the validator and preservation checks.
+The server requires an explicit `candidate=1` request and matching inspected
+PDF bytes for a passing review candidate. Atomic promotion to an accepted
+artifact remains future work. The
 quality stage is available in the accessibility pipeline; it is not enabled for
 redaction, which intentionally changes content.
 
-The portable regression suite is `npm run test:production-baseline`. Its six test
-files are mandatory in the default CI runner even when external corpora are
-unavailable. Fixtures are generated locally using existing dependencies.
+The portable regression suite is `npm run test:production-baseline`. Its required
+suites are enumerated in `package.json` and `scripts/run-ci-tests.js`, independent
+of optional external corpora. Fixtures are generated with existing dependencies.
+The 2026-10-21 run passed 171 tests with no skips. `npm run benchmark:semantic`
+adds 16 synthetic cases with 74 checks; independent expert reference review and
+human reader testing remain pending. See [claims and evidence](tagging-quality-claims.md).
+
+The installed validator is pinned to veraPDF 1.30.3 Greenfield; PDFBox helpers use
+3.0.8. Raw failures are retained. Changing `VERAPDF_FLAVOUR` selects a validation
+profile; it does not automatically convert the writer output to that PDF version
+or establish PDF/UA-2 support.
 
 ## Creating a Custom Profile
 

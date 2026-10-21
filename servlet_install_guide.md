@@ -84,8 +84,12 @@ npm run test:ci
 ```
 
 If `npm run install:verapdf` cannot be used in the deployment environment, install
-veraPDF separately and set `VERAPDF_PATH` to the `verapdf` executable. On
-Windows this is usually a `.bat` file.
+veraPDF 1.30.3 Greenfield separately and set `VERAPDF_PATH` to its `verapdf`
+executable. On Windows this is usually a `.bat` file. Both PDFBox helper copies
+are pinned to 3.0.8. Configured installer mirrors must provide the same archive
+bytes as the checksum pinned in `scripts/install-verapdf.js`; the retired
+PDFBox-backend installer is incompatible. Engine test results do not qualify a
+complete servlet deployment; record deployment and reader tests separately.
 
 ## Bootstrap from Config
 

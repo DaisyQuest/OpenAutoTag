@@ -1,6 +1,12 @@
 # Native Tagging — 10-Point Improvement Plan
 
-**Current state (build `19g-ocrByteStrip`)**: 23 of 27 corpus docs produce
+**Historical plan:** results below belong to the named earlier builds. The
+PDFBox-backend suppression policy described here has been removed. Current pins
+are PDFBox 3.0.8 and veraPDF 1.30.3 Greenfield; raw findings remain authoritative.
+Use [current claims](tagging-quality-claims.md) and the
+[next accuracy plan](tagging-accuracy-roadmap.md) for present scope and priorities.
+
+**Historical state (build `19g-ocrByteStrip`)**: 23 of 27 corpus docs produce
 zero VeraPDF findings; 4 docs have 10 source-PDF-specific findings.
 Sanity suite: 26/27 docs pass 11 invariants. Pipeline-output regression:
 29/29 tests green.
