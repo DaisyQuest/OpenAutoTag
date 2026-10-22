@@ -402,6 +402,16 @@
       "id": { "type": "string", "minLength": 1 }, "fieldType": { "type": "string" },
       "widgets": { "type": "array", "items": { "type": "object", "required": ["id", "pageNumber", "bbox"], "properties": {
         "id": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
+        "appearanceText": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "appearanceTextSource": { "const": "normal-widget-appearance" },
+        "multiLine": { "type": "boolean" },
+        "labelAssociation": { "type": "object", "required": ["kind", "evidence"], "properties": {
+          "kind": { "enum": ["widget-appearance", "expanded-tooltip", "section-prompt", "compound-date"] },
+          "evidence": { "type": "string", "minLength": 1 },
+          "component": { "enum": ["day", "month", "year"] },
+          "groupWidgetIds": { "type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+        }, "allOf": [{ "if": { "properties": { "kind": { "const": "compound-date" } } },
+          "then": { "required": ["component", "groupWidgetIds"] } }], "additionalProperties": false },
         "bbox": { "$ref": "#/properties/nodes/items/properties/bbox" }
       }, "additionalProperties": true } },
       "labels": { "type": "array", "items": { "type": "string", "minLength": 1 } }

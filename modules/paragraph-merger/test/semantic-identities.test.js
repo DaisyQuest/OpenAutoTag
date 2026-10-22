@@ -6,10 +6,13 @@ for(const strategy of ["pairwise","text-structure"]) {
  test(`${strategy} remaps merged node relationships and retains original text identities`,()=>{
   const source={nodes:[node("a","This line continues",100),node("b","onto this one",114),node("h","Next heading",150,{role:"H2"})],
    relations:[{type:"continues",from:"a",to:"b",evidence:"explicit"},{type:"precedes",from:"b",to:"h",evidence:"explicit"}],
-   orderedNodeIds:["a","b","h"],regions:[{nodeIds:["a","b","h"]}],formRelationships:[{id:"field",labels:["b"],widgets:[{id:"w",labelNodeIds:["b"]}]}],semanticReviewTasks:[{code:"REVIEW",nodeId:"b",candidates:["b"]}]};
+   orderedNodeIds:["a","b","h"],regions:[{nodeIds:["a","b","h"]}],formRelationships:[{id:"field",labels:["b"],widgets:[{id:"w",labelNodeIds:["b"],instructionNodeIds:["a","b"],contextNodeIds:["b"],labelAssociation:{kind:"compound-date",component:"day",groupWidgetIds:["w","m","y"],evidence:"fixture"}}]}],semanticReviewTasks:[{code:"REVIEW",nodeId:"b",candidates:["b"]}]};
   const {document:d}=mergeWithStrategy(source,{strategy});assert.equal(d.nodes.length,2);
   const merged=d.nodes.find(n=>n.id==="a");assert.deepEqual(merged.sourceBlockIds,["source-a","source-b"]);assert.equal(merged.rawText,"This line continues\nonto this one");
   assert.deepEqual(d.orderedNodeIds,["a","h"]);assert.deepEqual(d.relations,[{type:"precedes",from:"a",to:"h",evidence:"explicit"}]);assert.deepEqual(d.regions[0].nodeIds,["a","h"]);assert.deepEqual(d.formRelationships[0].widgets[0].labelNodeIds,["a"]);assert.equal(d.semanticReviewTasks[0].nodeId,"a");
+  assert.deepEqual(d.formRelationships[0].widgets[0].instructionNodeIds,["a"]);
+  assert.deepEqual(d.formRelationships[0].widgets[0].contextNodeIds,["a"]);
+  assert.deepEqual(d.formRelationships[0].widgets[0].labelAssociation.groupWidgetIds,["w","m","y"]);
  });
  test(`${strategy} respects tables, regions, forms, columns, quotes and explicit paragraphs`,()=>{
   for(const patch of [{tableId:"table"},{regionId:"other"},{formFieldIds:["w"]},{columnHint:1},{semanticRole:"Caption"},{blockQuoteGroupId:"quote"},{paragraphGroupId:"other"}]) {

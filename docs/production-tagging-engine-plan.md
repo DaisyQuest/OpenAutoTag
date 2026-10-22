@@ -618,3 +618,7 @@ The saved candidate remains **review_required** for semantic and reader qualific
 ## 23. Accuracy roadmap engineering delivery, 2026-10-21
 
 Bounded A01–A10 implementations, new contracts, real-PDF diagnostics, saved-output list fixes, paragraph identity repair, form association results and remaining qualification work are recorded in [the accuracy delivery](tagging-accuracy-delivery-20261021.md). Multilingual expansion is deprioritized. The new candidate retains zero raw veraPDF failures, 32 terminal fields, 33 widgets, nine links, five saved headings and identical two-renderer pixels. Independent reference adjudication and actual reader/keyboard observations remain pending; production qualification is not claimed.
+
+## 24. Remaining form-label associations, 2026-10-21
+
+The [form-label delivery](form-label-associations-20261021.md) resolves seven of the eight remaining TEST-FORM cases through widget appearance evidence, expanded prompts, section instructions and compound date context. The court selector's authored tooltip remains intact, but its missing printed label remains flagged. Baseline: 213 tests pass; final focused checks: 26 pass. All fields, appearances, saved structure and tested interactions are preserved; zero raw veraPDF failures. This is inference/review evidence, not a generic field-metadata or tab-order rewrite.

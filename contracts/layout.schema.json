@@ -233,6 +233,10 @@
                 "fieldName": { "type": "string" },
                 "fieldType": { "type": "string" },
                 "tooltip": { "type": "string" },
+                "pushButton": { "type": "boolean" },
+                "multiLine": { "type": "boolean" },
+                "appearanceText": { "type": "string", "minLength": 1, "maxLength": 160 },
+                "appearanceTextSource": { "const": "normal-widget-appearance" },
                 "bbox": { "$ref": "#/properties/pages/items/properties/textBlocks/items/properties/bbox" }
               },
               "additionalProperties": true

@@ -4,6 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { getDocument, VerbosityLevel, OPS } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { textEvidence, alignOcrText, imageEvidence } from "./content-evidence.js";
+import { widgetAppearanceText } from "./widget-evidence.js";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import {
   DEFAULT_RECOGNITION_PROFILES,
@@ -675,8 +676,12 @@ export async function parsePdf(filePath, options = {}) {
     // Text extraction emits resource IDs such as g_d0_f1. Resolve the
     // actual font name so downstream heuristics can recognize font style.
     // A broken drawing operator must not invalidate usable extracted text.
-    let figures=[], imageEvidenceError;
-    try { figures=imageEvidence(await page.getOperatorList(),OPS,page.getViewport({scale:1,rotation:0}),pageNumber); }
+    let figures=[], imageEvidenceError, appearanceText = new Map();
+    try {
+      const operators = await page.getOperatorList();
+      appearanceText = widgetAppearanceText(operators, OPS);
+      figures = imageEvidence(operators,OPS,page.getViewport({scale:1,rotation:0}),pageNumber);
+    }
     catch(error) { imageEvidenceError=error.message; }
     const items = textContent.items.map((item) => {
       if (!item.fontName) return item;
@@ -704,6 +709,10 @@ export async function parsePdf(filePath, options = {}) {
         ...(typeof annot.exportValue === "string" ? { exportValue: annot.exportValue } : {}),
         ...(typeof annot.buttonValue === "string" ? { buttonValue: annot.buttonValue } : {}),
         pushButton: Boolean(annot.pushButton),
+        multiLine: Boolean(annot.multiLine),
+        ...(annot.pushButton && !annot.hidden && appearanceText.has(annot.id) ? {
+          appearanceText: appearanceText.get(annot.id), appearanceTextSource: "normal-widget-appearance"
+        } : {}),
         bbox: [annot.rect[0], height - annot.rect[3],
           Math.max(0, annot.rect[2] - annot.rect[0]), Math.max(0, annot.rect[3] - annot.rect[1])]
       }));

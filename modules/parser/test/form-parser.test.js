@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { PDFDocument, PDFName, PDFString, StandardFonts } from "pdf-lib";
@@ -31,4 +31,22 @@ test("parser exposes real font names, existing title and widget label relationsh
   assert.equal(result.formFields[0].tooltip, "County name");
   assert.deepEqual(result.textBlocks.find((block) => block.text === "County").formFieldIds,
     [result.formFields[0].id]);
+});
+
+test("parser extracts button-owned captions and multiline metadata without treating values as labels", async t => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "widget-evidence-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const doc = await PDFDocument.create(), page = doc.addPage([612, 792]), form = doc.getForm();
+  form.createButton("reset").addToPage("Reset form", page, { x: 72, y: 700, width: 90, height: 24 });
+  const text = form.createTextField("notes"); text.enableMultiline(); text.setText("Private field value");
+  text.addToPage(page, { x: 72, y: 400, width: 200, height: 100 });
+  const file = path.join(dir, "source.pdf"), bytes = Buffer.from(await doc.save());
+  await writeFile(file, bytes);
+  const parsed = await parsePdf(file, { ocr: { mode: "off" } });
+  const button = parsed.pages[0].formFields.find(w => w.fieldName === "reset");
+  const notes = parsed.pages[0].formFields.find(w => w.fieldName === "notes");
+  assert.equal(button.appearanceText, "Reset form");
+  assert.equal(button.appearanceTextSource, "normal-widget-appearance");
+  assert.equal(notes.multiLine, true); assert.equal(notes.appearanceText, undefined);
+  assert.deepEqual(await readFile(file), bytes);
 });

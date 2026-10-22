@@ -67,6 +67,8 @@ The repair entry points are `font-repair.js`, `link-repair.js` and `structure-re
 
 ## Validation and publication state
 
+Form association inference now reads button-owned appearance captions and recognizes bounded expanded prompts, multiline section instructions and compound date context. These are typed semantic/review artifacts; the preserved field dictionaries and structure tree are not rewritten. Shared date context is recorded separately from each component's authored name. The [form-label delivery](form-label-associations-20261021.md) documents the seven resolved cases, remaining unlabeled court selector and preservation evidence.
+
 The default external validator is veraPDF 1.30.3 Greenfield with `ua1`. Raw results are retained without the discontinued backend's suppressions. PDFBox supplies independent structural diagnostics and the font audit; a required checker failure cannot be interpreted as a pass.
 
 `scripts/check-pdf-preservation.js` binds validation to candidate bytes and compares source/candidate content, fields, widgets, resources and supported structure identities. Font and structure changes require independent replay proofs when enabled. Full rewrites do not automatically satisfy an incremental-identity gate.

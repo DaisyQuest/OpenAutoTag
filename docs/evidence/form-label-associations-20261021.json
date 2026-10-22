@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-10-21",
+  "baselineCommit": "302b39c",
+  "scope": "bounded form-label association inference; preserved saved forms",
+  "toolPins": {
+    "pdfbox": "3.0.8",
+    "verapdf": "1.30.3 Greenfield",
+    "profile": "ua1"
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 213,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/form-label-baseline.log"
+    },
+    "finalFocused": {
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/form-label-focused.log",
+      "newHelpersCoverage": {
+        "linePercent": 100,
+        "branchPercent": 97.97
+      }
+    },
+    "note": "Suites overlap. Coverage concerns only form-context.js and widget-evidence.js. Final guard changes reproduce saved form relationships and review tasks exactly."
+  },
+  "form": {
+    "candidateSha256": "be29ddbd30b2f456db539a1d403f2f976ae37f6c8fe775571a457cbcde50f00a",
+    "referenceSha256": "ede89479e33638a1adffbda2761d1e323732caeecea6bd0f08350bbe2ced2383",
+    "originalSha256": "c1fb0565c99c4f4be44aba8d8b3636ced2efc5bb1bc2e864c45a497fff1f178c",
+    "inventoriesIdentical": {
+      "pages": true,
+      "fields": true,
+      "widgets": true,
+      "links": true,
+      "headings": true,
+      "structure": true,
+      "contentOrder": true
+    },
+    "fieldObjects": 35,
+    "widgets": 33,
+    "links": 9,
+    "headings": 5,
+    "renders": {
+      "preview-1.png": {
+        "pixelIdentical": true,
+        "dpi": 150
+      },
+      "preview-2.png": {
+        "pixelIdentical": true,
+        "dpi": 150
+      },
+      "pdfjs-candidate-1.png": {
+        "pixelIdentical": true,
+        "dpi": 150
+      },
+      "pdfjs-candidate-2.png": {
+        "pixelIdentical": true,
+        "dpi": 150
+      }
+    },
+    "validation": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 9874,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    },
+    "savedSemantics": {
+      "passed": 1828,
+      "failed": 0
+    },
+    "formAssociations": [
+      {
+        "id": "337R",
+        "fieldName": "ResetForm",
+        "labelStatus": "associated-appearance",
+        "accessibleNameSource": "authored-tooltip",
+        "appearanceText": "Reset Form",
+        "labelAssociation": {
+          "kind": "widget-appearance",
+          "evidence": "decoded-text-owned-by-widget-normal-appearance"
+        }
+      },
+      {
+        "id": "340R",
+        "fieldName": "LocalCourt",
+        "labelStatus": "authored-name-visual-association-unresolved",
+        "accessibleNameSource": "authored-tooltip",
+        "contextNodeIds": [
+          "n-1-3",
+          "n-1-8",
+          "n-1-10"
+        ]
+      },
+      {
+        "id": "343R",
+        "fieldName": "CountyName",
+        "labelStatus": "associated",
+        "accessibleNameSource": "authored-tooltip",
+        "labelAssociation": {
+          "kind": "expanded-tooltip",
+          "evidence": "unique-inline-prompt-contained-in-authored-tooltip"
+        },
+        "labelNodeIds": [
+          "n-1-10"
+        ],
+        "instructionNodeIds": []
+      },
+      {
+        "id": "68R",
+        "fieldName": "Explanations",
+        "labelStatus": "associated",
+        "accessibleNameSource": "authored-tooltip",
+        "labelAssociation": {
+          "kind": "section-prompt",
+          "evidence": "single-multiline-field-and-tooltip-matched-section-instructions"
+        },
+        "labelNodeIds": [
+          "n-2-20"
+        ],
+        "instructionNodeIds": [
+          "n-2-21"
+        ]
+      },
+      {
+        "id": "74R",
+        "fieldName": "AffirmationDay",
+        "labelStatus": "associated-context",
+        "accessibleNameSource": "authored-tooltip",
+        "labelAssociation": {
+          "kind": "compound-date",
+          "evidence": "authored-date-components-and-shared-inline-prompt",
+          "component": "day",
+          "groupWidgetIds": [
+            "74R",
+            "69R",
+            "96R"
+          ]
+        },
+        "contextNodeIds": [
+          "n-2-23",
+          "n-2-24",
+          "n-2-25"
+        ]
+      },
+      {
+        "id": "69R",
+        "fieldName": "AffirmationMonth",
+        "labelStatus": "associated-context",
+        "accessibleNameSource": "authored-tooltip",
+        "labelAssociation": {
+          "kind": "compound-date",
+          "evidence": "authored-date-components-and-shared-inline-prompt",
+          "component": "month",
+          "groupWidgetIds": [
+            "74R",
+            "69R",
+            "96R"
+          ]
+        },
+        "contextNodeIds": [
+          "n-2-23",
+          "n-2-24",
+          "n-2-25"
+        ]
+      },
+      {
+        "id": "96R",
+        "fieldName": "AffirmationYear",
+        "labelStatus": "associated-context",
+        "accessibleNameSource": "authored-tooltip",
+        "labelAssociation": {
+          "kind": "compound-date",
+          "evidence": "authored-date-components-and-shared-inline-prompt",
+          "component": "year",
+          "groupWidgetIds": [
+            "74R",
+            "69R",
+            "96R"
+          ]
+        },
+        "contextNodeIds": [
+          "n-2-23",
+          "n-2-24",
+          "n-2-25"
+        ]
+      },
+      {
+        "id": "94R",
+        "fieldName": "PrintForm",
+        "labelStatus": "associated-appearance",
+        "accessibleNameSource": "authored-tooltip",
+        "appearanceText": "Print Form",
+        "labelAssociation": {
+          "kind": "widget-appearance",
+          "evidence": "decoded-text-owned-by-widget-normal-appearance"
+        }
+      }
+    ],
+    "unresolvedWidgetIds": [
+      "340R"
+    ],
+    "humanReaderQualification": "not performed",
+    "disposition": "review_required",
+    "terminalFields": 32,
+    "fillSaveReopen": "passed text/checkbox, court/county choices, all date components, multiline explanation and accented/Euro probes"
+  },
+  "associations": {
+    "previousUnresolved": 8,
+    "currentUnresolved": 1,
+    "resolved": {
+      "buttonAppearance": 2,
+      "expandedPrompt": 1,
+      "sectionInstructions": 1,
+      "compoundDateContext": 3
+    },
+    "remaining": {
+      "widgetId": "340R",
+      "fieldName": "LocalCourt",
+      "authoredTooltipPresent": true,
+      "reason": "No printed court label; preserve appearance and retain review."
+    }
+  },
+  "artifactHashes": {
+    "output/TEST-FORM-labels-20261021/06-candidate.pdf": "be29ddbd30b2f456db539a1d403f2f976ae37f6c8fe775571a457cbcde50f00a",
+    "output/TEST-FORM-labels-20261021/03-semantic.json": "b2845e7f62e8c9309da3ebc745867e80f7f066a67983ad8988f3f6228727f706",
+    "output/TEST-FORM-labels-20261021/03b-semantic-merged.json": "d4834596f8a3abab3097b3b2dbf3df6881cae29acd04b95753318296d4db08e3",
+    "output/TEST-FORM-labels-20261021/04-semantic-ordered.json": "d248b1112a536be7714f1911505034d67dff657f1c47b6b1cb34859bdae3999b",
+    "output/TEST-FORM-labels-20261021/07-validation-report.json": "fe9d18aebc72da7a08bfc6f62534a70f137cee00611b7493b53722ff445d832d",
+    "output/TEST-FORM-labels-20261021/08-quality-report.json": "55415049505b8605c83755d8ab4a684c3143fc8a5ccce599f5e3e37e41cccdc4",
+    "output/TEST-FORM-labels-20261021/09-saved-semantics.json": "8a3c42b225f217f75550cd7fbe647a32729aa4612a7ca2644c93cedced329cf1",
+    "output/TEST-FORM-labels-20261021/10-form-label-verification.json": "f14cb3efceda628d3a7bbfb16262af6e3ebd0a4603124fba831583457f30ce00",
+    "output/TEST-FORM-labels-20261021/10-interaction-probe.json": "7ea8763bde6ba41715b30aa9bd21338e425fde1b7e89ef960788cf61dcfc554b",
+    "output/TEST-FORM-labels-20261021/10-context-interaction-probe.json": "3018e7475f8958bef4ded6e303b0adb374985d49ee1f44bff1d5447379ae18e2"
+  },
+  "limitations": [
+    "Inference evidence is not a generic saved-tree, field-name, tooltip or tab-order rewrite.",
+    "Actual reader/keyboard observations were not performed.",
+    "No general semantic accuracy rate or multilingual qualification."
+  ]
+}

@@ -371,3 +371,12 @@ Delivery scope and remaining limits: docs/tagging-accuracy-delivery-20261021.md.
 Current evidence: docs/tagging-quality-claims.md. Further proposed work:
 docs/tagging-accuracy-roadmap.md. Delivery history:
 docs/production-tagging-engine-plan.md, sections 21 and 22.
+
+Form-label follow-up (2026-10-21):
+Parser emits typed normal-widget appearance captions for push buttons and multiline
+metadata. Semantic inference supports bounded expanded inline prompts, single-field
+section instructions and authored compound-date context. Captions/context retain
+separate provenance; fields, tooltips, values, appearances and tab order are not
+rewritten. TEST-FORM unresolved associations improve from eight to one; LocalCourt
+has no printed label and stays reviewable. See docs/form-label-associations-20261021.md
+for 213-test baseline, final focused checks, saved comparisons and limitations.
