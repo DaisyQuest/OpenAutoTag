@@ -1,0 +1,2832 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-10-22",
+  "scope": "Exploratory full-pipeline official-source pilot; no engine changes or expert-adjudicated accuracy claim",
+  "engineCommit": "b52856c71082a93ea868dfd23f17ee558b8eee2c",
+  "toolPins": {
+    "node": "22.20.0",
+    "pdfbox": "3.0.8",
+    "veraPDF": "1.30.3 Greenfield",
+    "validationProfile": "ua1",
+    "pdfjs": "4.10.38",
+    "pdfLib": "1.17.1"
+  },
+  "method": {
+    "profile": "default",
+    "productionChecks": true,
+    "parallelDocuments": 2,
+    "pipelineTimeoutSeconds": 600,
+    "javaToolOptions": "-XX:TieredStopAtLevel=1",
+    "ocr": "auto, as resolved by the default profile; PARSER_OCR_MODE=off in launcher was overridden",
+    "baselineValidator": "Use rawSummary/rawFindings and fontAudit only; baseline used an empty manifest, so overall/manifest checks do not measure source conformance",
+    "humanReaderQualification": false,
+    "semanticReview": "Agent visual/structure spot checks only; no independently adjudicated reference labels",
+    "visualReview": "Source and candidate contact sheets inspected; all candidate pages compared in Poppler; PDF.js subset and local PDF-lib form smoke tests",
+    "engineWorktree": "Existing unrelated Studio/UI edits excluded; CLI engine baseline b52856c"
+  },
+  "sourceSelection": {
+    "schemaVersion": "1.0.0",
+    "engineCommit": "b52856c71082a93ea868dfd23f17ee558b8eee2c",
+    "seed": "OpenAutoTag-public-pdf-pilot-2026-10-22-v1",
+    "selection": "One lowest SHA256(seed|url) per publisher, then lowest remaining keys until eight. Curated official-source pool; not an Internet-wide random sample. Draw occurs before pipeline outcomes.",
+    "eligibility": "Official .gov PDF, unencrypted, 1-80 pages, <=20 MiB, downloadable in this session.",
+    "pool": [
+      {
+        "id": "irs-1040",
+        "publisher": "IRS",
+        "title": "Form 1040",
+        "url": "https://www.irs.gov/pub/irs-pdf/f1040.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://www.irs.gov/pub/irs-pdf/f1040.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/irs-1040.pdf",
+        "sha256": "3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982",
+        "bytes": 220237,
+        "pages": 2,
+        "hasStructureTree": true,
+        "formFieldEntries": 229,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "412cec7af101e6f588d67286603fb50b13c1a702f0d6689821f4f1b07a53b684"
+      },
+      {
+        "id": "nasa-3d-sun",
+        "publisher": "NASA",
+        "title": "The 3D Sun",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/3Dsun_web.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://stereo-ssc.nascom.nasa.gov/img/3Dsun_web.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-3d-sun.pdf",
+        "sha256": "1d8de71dc295e0156e5805d09bfd87033ec8a0287aed3f67f69a05bb4584ad00",
+        "bytes": 2698562,
+        "pages": 5,
+        "hasStructureTree": false,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "c83c151ab47cd66b16799987e430a1e2754d78ccdebc28081de325e77ad84b98"
+      },
+      {
+        "id": "nasa-stereo-booklet",
+        "publisher": "NASA",
+        "title": "STEREO booklet",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+        "sha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "bytes": 3209169,
+        "pages": 61,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "a3851d9805c7bc5d15d1817fe6582abe487c8da4736b2a4b41aecc68ec59626b"
+      },
+      {
+        "id": "gao-health-forum",
+        "publisher": "GAO",
+        "title": "Reducing Spending and Enhancing Value in the U.S. Health Care System",
+        "url": "https://www.gao.gov/assets/gao-25-107465.pdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "0bddf6e87e9c016d6cf96e75cae110b96725173667cacace46ef7e50cc887478"
+      },
+      {
+        "id": "osha-generators",
+        "publisher": "OSHA",
+        "title": "Using Portable Generators Safely",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA3286.pdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "b8d7f714db88b4d74f016f0032a369d9c75de897fc03075e4ad308a97f5bd7ae"
+      },
+      {
+        "id": "osha-heat",
+        "publisher": "OSHA",
+        "title": "Protecting Workers from the Effects of Heat",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA3743.pdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "561a37e6beff976c4cdfd4a8609f611281a7e0a60c5109ff10fd00816b12b43a"
+      },
+      {
+        "id": "irs-w9",
+        "publisher": "IRS",
+        "title": "Form W-9",
+        "url": "https://www.irs.gov/pub/irs-pdf/fw9.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://www.irs.gov/pub/irs-pdf/fw9.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/irs-w9.pdf",
+        "sha256": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+        "bytes": 140815,
+        "pages": 6,
+        "hasStructureTree": true,
+        "formFieldEntries": 27,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "122c4564d8dece2c96fdc0d972a7d96af7414c971aee0efc8eae78e5d4a24e03"
+      },
+      {
+        "id": "irs-w4",
+        "publisher": "IRS",
+        "title": "Form W-4",
+        "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://www.irs.gov/pub/irs-pdf/fw4.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/irs-w4.pdf",
+        "sha256": "92444d8856ce55d9e25dca8b6d1420634fc68b11e1ab1f760916ea29ddd312b2",
+        "bytes": 208845,
+        "pages": 5,
+        "hasStructureTree": true,
+        "formFieldEntries": 54,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "fcf810649b160fa028e1184d477572d16e696f4b1327ffe3badc6541fd5bc6b5"
+      },
+      {
+        "id": "nist-1299",
+        "publisher": "NIST",
+        "title": "CSF 2.0 Resource and Overview Guide",
+        "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+        "sha256": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "bytes": 2235190,
+        "pages": 8,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "7076b03ab027e5622ea62aae5a088610b104868080066bf717a8ba3a800452c3"
+      },
+      {
+        "id": "nist-1300",
+        "publisher": "NIST",
+        "title": "CSF 2.0 Small Business Quick-Start Guide",
+        "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+        "sha256": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "bytes": 934230,
+        "pages": 9,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "1a8bb2669bb465a5f43952ea63a8c5d71b0a0ff634910d41772cc1c66b0ba311"
+      },
+      {
+        "id": "cdc-clean-hands",
+        "publisher": "CDC",
+        "title": "Stop Germs! Wash Your Hands",
+        "url": "https://www.cdc.gov/clean-hands/media/pdfs/2024/05/329459-A-p.pdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "a7eeafd69099defb3b6f80d29857c7bd8a221b96c5ed12812d6464c074261b51"
+      },
+      {
+        "id": "cdc-emergency-hands",
+        "publisher": "CDC",
+        "title": "Wash Your Hands emergency fact sheet",
+        "url": "https://www.cdc.gov/water-emergency/media/pdfs/factsheet-wash-your-hands.pdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "15eb0e2f60e730c58e1919c957da8b8c763e24213b49f152ec2e157552a9d520"
+      },
+      {
+        "id": "nasa-hinode",
+        "publisher": "NASA",
+        "title": "Hinode fact sheet",
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "bytes": 113294,
+        "pages": 1,
+        "hasStructureTree": false,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "8fe1756a259665f43de9321614f5432f5e5bd1424d32b6406768102f68d4104f"
+      },
+      {
+        "id": "nasa-stereo",
+        "publisher": "NASA",
+        "title": "STEREO lithograph",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/litho.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://stereo-ssc.nascom.nasa.gov/img/litho.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+        "sha256": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+        "bytes": 12686611,
+        "pages": 2,
+        "hasStructureTree": false,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "0baf7890a223954146481ea6109a9146f6513617527d5ad450928eb271071da5"
+      },
+      {
+        "id": "sec-investor-fees",
+        "publisher": "SEC",
+        "title": "How Fees and Expenses Affect Your Investment Portfolio",
+        "url": "https://www.sec.gov/files/ib_fees_expenses.pdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "e2586e93676e97e6b03c9b2651d0348832a85e8b33ae27f11165bb7ac4a7a0c7"
+      },
+      {
+        "id": "sec-mutual-fees",
+        "publisher": "SEC",
+        "title": "Mutual Fund Fees and Expenses",
+        "url": "https://www.sec.gov/file/ib_mutualfundfeespdf",
+        "retrievedOn": "2026-10-22",
+        "eligible": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden",
+        "drawKey": "865a507320948937e352a1536328ed3d108a615f1af7a07fa9ef69c46ed640ee"
+      },
+      {
+        "id": "census-income-2024",
+        "publisher": "Census Bureau",
+        "title": "Income in the United States: 2024",
+        "url": "https://www2.census.gov/library/publications/2025/demo/p60-286.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://www2.census.gov/library/publications/2025/demo/p60-286.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/census-income-2024.pdf",
+        "sha256": "54cf1adc1f92e0f471803e67637569ecdebf93eec21928a5f9e2b97185eed3d3",
+        "bytes": 1981263,
+        "pages": 58,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "13dcfbb5c25ec59b3511763f9eaab062dc76a0f377712756bbe7de04cd684733"
+      }
+    ],
+    "selectedIds": [
+      "nasa-stereo",
+      "irs-w9",
+      "census-income-2024",
+      "nist-1300",
+      "irs-1040",
+      "nist-1299",
+      "nasa-hinode",
+      "nasa-stereo-booklet"
+    ]
+  },
+  "totals": {
+    "selectedDocuments": 8,
+    "selectedPages": 147,
+    "candidateDocuments": 7,
+    "candidatePages": 86,
+    "pixelIdenticalPopplerPages": 86,
+    "rawVeraPdfZeroFailureCandidates": 2,
+    "productionCheckClearCandidates": 0,
+    "pipelineCompleted": 4,
+    "pipelineFailed": 4,
+    "defaultQualityDispositions": {
+      "rejected": 3,
+      "review_required": 4,
+      "no_candidate": 1
+    }
+  },
+  "documents": [
+    {
+      "id": "nasa-stereo",
+      "pages": 2,
+      "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+      "candidateHash": "df7df2a5022439375dfa8e395a17d0b3e33ba71405bde5b824772e8d4b497a93",
+      "pipelineStatus": "failed",
+      "execution": {
+        "id": "nasa-stereo",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 135.27
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.39
+        },
+        "savedComparison": {
+          "exitCode": 0,
+          "elapsedSeconds": 1.59
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "native",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 100,
+        "failedRules": 6,
+        "passedChecks": 5,
+        "failedChecks": 7
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 371,
+        "failedChecks": 0
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "qualityDisposition": "rejected",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "unknown"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "pass"
+        },
+        {
+          "id": "saved_semantics",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "IDENTITY_MAPPING_REQUIRED": 1,
+        "SAVED_SEMANTICS_MISMATCH": 1
+      },
+      "reviewTaskCounts": {
+        "IDENTITY_MAPPING_REQUIRED": 1,
+        "FIGURE_DESCRIPTION_REQUIRED": 2,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": {
+          "passed": 281,
+          "failed": 30
+        },
+        "failureCounts": {
+          "CONTENT_ATTACHED": 23,
+          "ACTUAL_TEXT": 7
+        }
+      },
+      "visualComparison": {
+        "id": "nasa-stereo",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+        "candidateHash": "df7df2a5022439375dfa8e395a17d0b3e33ba71405bde5b824772e8d4b497a93",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              1688,
+              1313
+            ],
+            "candidateSize": [
+              1688,
+              1313
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 2,
+            "sourceSize": [
+              1688,
+              1313
+            ],
+            "candidateSize": [
+              1688,
+              1313
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 2,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": {
+        "id": "nasa-stereo",
+        "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+        "candidateHash": "df7df2a5022439375dfa8e395a17d0b3e33ba71405bde5b824772e8d4b497a93",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          },
+          {
+            "page": 2,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": []
+      },
+      "artifactSha256": {
+        "pipeline-result.json": "8d94b2ced89e12dc790462b803ebcd35032a46a62e0b29b9d74e89d320e1beb4",
+        "06-candidate.pdf": "df7df2a5022439375dfa8e395a17d0b3e33ba71405bde5b824772e8d4b497a93",
+        "05-tagging.json": "fe54bc1a62ffac5e4a949064ed07f5a28578eacb13fa6dfbd4584863a3907952",
+        "07-validation-report.json": "2a3480951ec998af15ec3f1edd92e7103b8062ce85d3da3faba15f8abcbf5ae7",
+        "00-source-validation.json": "05592a3cbc6de1e8b26f73535053bc4569d1ce7344374534dbd0f2fd08ad04c6",
+        "08-quality-report.json": "3e6b56f1ef8e852f17f490575395d15cadd5c373f09612ec3d74414b566dd877",
+        "09-saved-semantics.json": "2e72af5aa1e285cb6d551e06b8d9f9818b14299b18c4185fb65be466d4098684",
+        "10-utf8-saved.json": "f1e1d0ff53cb3f7747b9bf722e926d2632b61736839cbd61898f9971614ee329"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 2,
+          "fields": 0,
+          "widgets": 0,
+          "links": 0,
+          "headings": 0,
+          "structure": 0,
+          "issues": 0
+        },
+        "candidateCounts": {
+          "pages": 2,
+          "fields": 0,
+          "widgets": 0,
+          "links": 0,
+          "headings": 1,
+          "structure": 48,
+          "issues": 0
+        },
+        "issueArraysEqual": true,
+        "contentStreamHashesEqualPages": 0,
+        "resourcesHashesEqualPages": 2,
+        "candidateRoles": {
+          "Document": 1,
+          "P": 20,
+          "Span": 21,
+          "L": 1,
+          "LI": 1,
+          "Lbl": 1,
+          "LBody": 1,
+          "Sect": 1,
+          "H1": 1
+        }
+      },
+      "diagnostic": {
+        "scope": "Same saved PDF; checker-only UTF-8 JVM stdout/stderr override, not a new pipeline result",
+        "javaToolOptions": "-XX:TieredStopAtLevel=1 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8",
+        "utf8SavedComparison": {
+          "passed": 288,
+          "failed": 23
+        },
+        "remainingFailureCounts": {
+          "CONTENT_ATTACHED": 23
+        },
+        "independentPypdfActualText": [
+          {
+            "target": "oat:tag:n-1-6:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-14:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-19:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-2-4:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-2-5:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-2-12:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-2-13:span",
+            "matchesExpected": true
+          }
+        ],
+        "extractedTextCharacters": 0
+      }
+    },
+    {
+      "id": "irs-w9",
+      "pages": 6,
+      "sourceHash": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+      "candidateHash": "3a6f13845c2573c908e15ec77dccca337bd7a1f3e9a4f547d7e4f58d419820f6",
+      "pipelineStatus": "completed",
+      "execution": {
+        "id": "irs-w9",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 13.45
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.23
+        },
+        "savedComparison": {
+          "exitCode": 0,
+          "elapsedSeconds": 0.92
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "passthrough",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 102,
+        "failedRules": 4,
+        "passedChecks": 49681,
+        "failedChecks": 26
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 102,
+        "failedRules": 4,
+        "passedChecks": 49681,
+        "failedChecks": 26
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 13,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "qualityDisposition": "review_required",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "pass"
+        },
+        {
+          "id": "pageContentAndResources",
+          "status": "pass"
+        },
+        {
+          "id": "fields",
+          "status": "pass"
+        },
+        {
+          "id": "widgets",
+          "status": "pass"
+        },
+        {
+          "id": "headingContent",
+          "status": "pass"
+        },
+        {
+          "id": "links",
+          "status": "pass"
+        },
+        {
+          "id": "observedStructure",
+          "status": "pass"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1
+      },
+      "reviewTaskCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1,
+        "VERAPDF_7_4_2_1": 1,
+        "VERAPDF_7_21_4_1_1": 1,
+        "VERAPDF_7_21_7_1": 1,
+        "VERAPDF_7_18_1_3": 23,
+        "FONT_NOT_EMBEDDED": 1,
+        "FONT_STANDARD_14": 2,
+        "SYMBOLIC_WITHOUT_DIFFERENCES": 1,
+        "TO_UNICODE_MISSING": 9,
+        "LICENSE_RESTRICTED": 1,
+        "FORM_LABEL_AMBIGUOUS": 16,
+        "TABLE_GRID_OVERLAP": 4,
+        "STRUCTURE_REVIEW": 6,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": {
+          "passed": 7790,
+          "failed": 160
+        },
+        "failureCounts": {
+          "STRUCTURE_INTEGRITY": 160
+        }
+      },
+      "visualComparison": {
+        "id": "irs-w9",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+        "candidateHash": "3a6f13845c2573c908e15ec77dccca337bd7a1f3e9a4f547d7e4f58d419820f6",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 2,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 3,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 4,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 5,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 6,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 6,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": {
+        "id": "irs-w9",
+        "sourceHash": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+        "candidateHash": "3a6f13845c2573c908e15ec77dccca337bd7a1f3e9a4f547d7e4f58d419820f6",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": [
+          {
+            "variant": "source",
+            "terminalFields": 23,
+            "widgets": 23,
+            "textField": "topmostSubform[0].Page1[0].f1_01[0]",
+            "checkbox": "topmostSubform[0].Page1[0].Boxes3a-b_ReadOrder[0].c1_1[0]",
+            "fillSaveReopen": true
+          },
+          {
+            "variant": "candidate",
+            "terminalFields": 23,
+            "widgets": 23,
+            "textField": "topmostSubform[0].Page1[0].f1_01[0]",
+            "checkbox": "topmostSubform[0].Page1[0].Boxes3a-b_ReadOrder[0].c1_1[0]",
+            "fillSaveReopen": true
+          }
+        ],
+        "filledPagePixelIdentical": true
+      },
+      "artifactSha256": {
+        "pipeline-result.json": "2d03154c57508db0e04a7ad45613a96930d31e7f1de8dae8da698fced87de5ad",
+        "06-candidate.pdf": "3a6f13845c2573c908e15ec77dccca337bd7a1f3e9a4f547d7e4f58d419820f6",
+        "05-tagging.json": "63dbdcc475b26e792bcac793f2715a02017bd61c11749d30224217d76fc4ca51",
+        "07-validation-report.json": "b12e78127f51394f2e9ecad09a3ae2dfd7df6da04918b63e94d6423889fa04b1",
+        "00-source-validation.json": "343f35c4b44a3b0e86aa3d7cccf50285150213f30703cd6c7d6dfea113f670d3",
+        "08-quality-report.json": "224516e889d98258ba01f3295b04070c12f93847c05cd803c8f1e561b1e50dbf",
+        "09-saved-semantics.json": "6050ca2735436a0242b5e2255fa19ecb3cd8ce3371d68a88d7da3368c63deb55"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 6,
+          "fields": 28,
+          "widgets": 23,
+          "links": 0,
+          "headings": 28,
+          "structure": 708,
+          "issues": 160
+        },
+        "candidateCounts": {
+          "pages": 6,
+          "fields": 28,
+          "widgets": 23,
+          "links": 0,
+          "headings": 28,
+          "structure": 708,
+          "issues": 160
+        },
+        "issueArraysEqual": true,
+        "contentStreamHashesEqualPages": 6,
+        "resourcesHashesEqualPages": 6,
+        "candidateRoles": {
+          "Document": 1,
+          "Part": 6,
+          "Sect": 29,
+          "Div": 189,
+          "H1": 2,
+          "P": 221,
+          "Form": 23,
+          "H2": 6,
+          "L": 11,
+          "LI": 53,
+          "LBody": 53,
+          "H3": 12,
+          "H4": 8,
+          "Table": 4,
+          "TR": 30,
+          "TH": 8,
+          "TD": 52
+        }
+      }
+    },
+    {
+      "id": "census-income-2024",
+      "pages": 58,
+      "sourceHash": "54cf1adc1f92e0f471803e67637569ecdebf93eec21928a5f9e2b97185eed3d3",
+      "candidateHash": "4aeb9205a85fd01aa8046b3df724315eded8ae706c90f3e09f710bb357662079",
+      "pipelineStatus": "failed",
+      "execution": {
+        "id": "census-income-2024",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 264.77
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 9.81
+        },
+        "savedComparison": {
+          "exitCode": 1,
+          "elapsedSeconds": 5.72
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "passthrough",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 98,
+        "failedRules": 8,
+        "passedChecks": 1020308,
+        "failedChecks": 16241
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 99,
+        "failedRules": 7,
+        "passedChecks": 1020405,
+        "failedChecks": 16148
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 12,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "qualityDisposition": "rejected",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "pass"
+        },
+        {
+          "id": "pageContentAndResources",
+          "status": "fail"
+        },
+        {
+          "id": "fields",
+          "status": "pass"
+        },
+        {
+          "id": "widgets",
+          "status": "pass"
+        },
+        {
+          "id": "headingContent",
+          "status": "pass"
+        },
+        {
+          "id": "links",
+          "status": "pass"
+        },
+        {
+          "id": "observedStructure",
+          "status": "pass"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "PAGE_CONTENT_CHANGED": 53,
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1
+      },
+      "reviewTaskCounts": {
+        "PAGE_CONTENT_CHANGED": 53,
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1,
+        "VERAPDF_7_1_3": 100,
+        "VERAPDF_7_18_5_1": 74,
+        "VERAPDF_7_18_5_2": 100,
+        "VERAPDF_7_18_1_2": 100,
+        "VERAPDF_7_9_1": 33,
+        "VERAPDF_7_21_7_1": 89,
+        "VERAPDF_7_5_1": 19,
+        "TO_UNICODE_MISSING": 12,
+        "HEADING_OUTLINE_GAP": 8,
+        "TABLE_GRID_GAP": 13,
+        "TABLE_GRID_OVERLAP": 106,
+        "FIGURE_DESCRIPTION_REQUIRED": 5,
+        "STRUCTURE_REVIEW": 74,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": null,
+        "failureCounts": {}
+      },
+      "visualComparison": {
+        "id": "census-income-2024",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "sourceHash": "54cf1adc1f92e0f471803e67637569ecdebf93eec21928a5f9e2b97185eed3d3",
+        "candidateHash": "4aeb9205a85fd01aa8046b3df724315eded8ae706c90f3e09f710bb357662079",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 2,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 3,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 4,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 5,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 6,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 7,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 8,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 9,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 10,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 11,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 12,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 13,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 14,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 15,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 16,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 17,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 18,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 19,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 20,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 21,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 22,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 23,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 24,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 25,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 26,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 27,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 28,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 29,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 30,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 31,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 32,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 33,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 34,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 35,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 36,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 37,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 38,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 39,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 40,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 41,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 42,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 43,
+            "sourceSize": [
+              1056,
+              816
+            ],
+            "candidateSize": [
+              1056,
+              816
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 44,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 45,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 46,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 47,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 48,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 49,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 50,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 51,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 52,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 53,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 54,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 55,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 56,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 57,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 58,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 58,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": null,
+      "artifactSha256": {
+        "pipeline-result.json": "848bbb4159d2c04e56a690f87fd7afe65d46ee5c4dc46bb0608e816d32730ad0",
+        "06-candidate.pdf": "4aeb9205a85fd01aa8046b3df724315eded8ae706c90f3e09f710bb357662079",
+        "05-tagging.json": "f80d7e660d29f95a57e9aa1de3a89b056b1a04f2120ed9dc8211e7a3333e5300",
+        "07-validation-report.json": "bb6f646869ab9cd2e2a7324b845bd39074e1062853095e95a540a84055242a86",
+        "00-source-validation.json": "1f4f09ce0f88cb45d81670bf7bb83bd476d3186ff7f25f18bae4f891f5c7ffe2",
+        "08-quality-report.json": "6d753b59785877bb5304adc1c00e5df23fb70fe115023e1d39363a0edaa1b602",
+        "10-direct-saved-comparison.json": "e15b8a15854f0bc2eefe66e6724a736c5a159ccff60fdfc1b62c0bafabbfa6f6"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 58,
+          "fields": 0,
+          "widgets": 0,
+          "links": 320,
+          "headings": 3,
+          "structure": 36096,
+          "issues": 74
+        },
+        "candidateCounts": {
+          "pages": 58,
+          "fields": 0,
+          "widgets": 0,
+          "links": 320,
+          "headings": 3,
+          "structure": 36096,
+          "issues": 74
+        },
+        "issueArraysEqual": true,
+        "contentStreamHashesEqualPages": 58,
+        "resourcesHashesEqualPages": 5,
+        "candidateRoles": {
+          "Document": 1,
+          "Art": 4,
+          "Sect": 72,
+          "P": 14676,
+          "Span": 4621,
+          "Figure": 8,
+          "TOC": 2,
+          "TOCI": 51,
+          "Reference": 90,
+          "Link": 189,
+          "H1": 3,
+          "Note": 33,
+          "Table": 28,
+          "TR": 1226,
+          "TH": 497,
+          "TD": 14595
+        }
+      },
+      "diagnostic": {
+        "scope": "Same comparator via file-backed stdout and previously saved inventories; default checker failed its stdout buffer limit",
+        "outputBytes": 39930153,
+        "comparisonSummary": {
+          "passed": 397058,
+          "failed": 74
+        },
+        "failureCounts": {
+          "STRUCTURE_INTEGRITY": 74
+        },
+        "page7ResourceDifferences": [
+          {
+            "path": "page7/Resources//XObject//Fm0//Type",
+            "change": "added"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nist-1300",
+      "pages": 9,
+      "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+      "candidateHash": "f02ae21ebb0c8ce09f88ba012aace1753cba82c0fab394810d10a564a463a303",
+      "pipelineStatus": "completed",
+      "execution": {
+        "id": "nist-1300",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 11.77
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.7
+        },
+        "savedComparison": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.8
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "passthrough",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 96,
+        "failedRules": 10,
+        "passedChecks": 36837,
+        "failedChecks": 99
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 100,
+        "failedRules": 6,
+        "passedChecks": 36933,
+        "failedChecks": 7
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 5,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "qualityDisposition": "review_required",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "pass"
+        },
+        {
+          "id": "pageContentAndResources",
+          "status": "pass"
+        },
+        {
+          "id": "fields",
+          "status": "pass"
+        },
+        {
+          "id": "widgets",
+          "status": "pass"
+        },
+        {
+          "id": "headingContent",
+          "status": "pass"
+        },
+        {
+          "id": "links",
+          "status": "pass"
+        },
+        {
+          "id": "observedStructure",
+          "status": "pass"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1
+      },
+      "reviewTaskCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1,
+        "VERAPDF_7_5_1": 1,
+        "VERAPDF_7_21_4_2_2": 1,
+        "VERAPDF_7_18_5_1": 1,
+        "VERAPDF_7_2_43": 2,
+        "VERAPDF_7_10_2": 1,
+        "VERAPDF_7_1_3": 1,
+        "FONT_STANDARD_14": 2,
+        "SYMBOLIC_WITHOUT_DIFFERENCES": 1,
+        "TO_UNICODE_MISSING": 2,
+        "HEADING_OUTLINE_GAP": 2,
+        "TABLE_GRID_OVERLAP": 5,
+        "TABLE_GRID_GAP": 3,
+        "FIGURE_DESCRIPTION_REQUIRED": 9,
+        "STRUCTURE_REVIEW": 10,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": {
+          "passed": 7471,
+          "failed": 54
+        },
+        "failureCounts": {
+          "STRUCTURE_INTEGRITY": 54
+        }
+      },
+      "visualComparison": {
+        "id": "nist-1300",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "candidateHash": "f02ae21ebb0c8ce09f88ba012aace1753cba82c0fab394810d10a564a463a303",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 2,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 3,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 4,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 5,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 6,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 7,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 8,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 9,
+            "sourceSize": [
+              1280,
+              720
+            ],
+            "candidateSize": [
+              1280,
+              720
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 9,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": null,
+      "artifactSha256": {
+        "pipeline-result.json": "84ac8650a07211bec661fefa64aea543fddde43dbdb2f16dd174a233c80fc2f2",
+        "06-candidate.pdf": "f02ae21ebb0c8ce09f88ba012aace1753cba82c0fab394810d10a564a463a303",
+        "05-tagging.json": "7fba916966d80218fa08342306aad6346e7c3b6c4979142c84c5d914c357f873",
+        "07-validation-report.json": "fa8b3fab80cc3574c719455f110e4ca833aa1e3092656c81823c24046c82dc11",
+        "00-source-validation.json": "fec523c12b1ea33012c73973d297f702c9277053d79ce43c9a6545475672bca8",
+        "08-quality-report.json": "30442c53670fba2ae5ccfae4580e17adb3364a5da2475d5701d13d0471c96fa1",
+        "09-saved-semantics.json": "79f8cb27f1180ab5a950a4f0ace8297d437d21ea430badfb90fb54e7606d1d81"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 9,
+          "fields": 1,
+          "widgets": 0,
+          "links": 45,
+          "headings": 45,
+          "structure": 679,
+          "issues": 54
+        },
+        "candidateCounts": {
+          "pages": 9,
+          "fields": 1,
+          "widgets": 0,
+          "links": 45,
+          "headings": 45,
+          "structure": 679,
+          "issues": 54
+        },
+        "issueArraysEqual": true,
+        "contentStreamHashesEqualPages": 9,
+        "resourcesHashesEqualPages": 9,
+        "candidateRoles": {
+          "Document": 1,
+          "Sect": 9,
+          "Art": 89,
+          "H1": 1,
+          "P": 94,
+          "Link": 44,
+          "H2": 8,
+          "H3": 36,
+          "Figure": 1,
+          "L": 44,
+          "LI": 101,
+          "LBody": 101,
+          "Table": 12,
+          "TR": 41,
+          "TH": 32,
+          "TD": 30,
+          "Lbl": 35
+        }
+      }
+    },
+    {
+      "id": "irs-1040",
+      "pages": 2,
+      "sourceHash": "3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982",
+      "candidateHash": "1f1a595cdfb33093d9656fa150c0e9038205a13bdc6f3de0b0f827fc96855eda",
+      "pipelineStatus": "completed",
+      "execution": {
+        "id": "irs-1040",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 12.58
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.61
+        },
+        "savedComparison": {
+          "exitCode": 0,
+          "elapsedSeconds": 1.17
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "passthrough",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 101,
+        "failedRules": 5,
+        "passedChecks": 41763,
+        "failedChecks": 446
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 101,
+        "failedRules": 5,
+        "passedChecks": 41763,
+        "failedChecks": 446
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 16,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "qualityDisposition": "review_required",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "pass"
+        },
+        {
+          "id": "pageContentAndResources",
+          "status": "pass"
+        },
+        {
+          "id": "fields",
+          "status": "pass"
+        },
+        {
+          "id": "widgets",
+          "status": "pass"
+        },
+        {
+          "id": "headingContent",
+          "status": "pass"
+        },
+        {
+          "id": "links",
+          "status": "pass"
+        },
+        {
+          "id": "observedStructure",
+          "status": "pass"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1
+      },
+      "reviewTaskCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1,
+        "VERAPDF_7_21_4_1_1": 1,
+        "VERAPDF_7_1_3": 100,
+        "VERAPDF_7_18_1_3": 100,
+        "VERAPDF_7_4_2_1": 1,
+        "VERAPDF_7_21_7_1": 1,
+        "FONT_NOT_EMBEDDED": 1,
+        "FONT_STANDARD_14": 2,
+        "SYMBOLIC_WITHOUT_DIFFERENCES": 1,
+        "TO_UNICODE_MISSING": 12,
+        "LICENSE_RESTRICTED": 1,
+        "FORM_LABEL_AMBIGUOUS": 101,
+        "TABLE_GRID_OVERLAP": 4,
+        "TABLE_GRID_GAP": 1,
+        "STRUCTURE_REVIEW": 2,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": {
+          "passed": 13598,
+          "failed": 605
+        },
+        "failureCounts": {
+          "STRUCTURE_INTEGRITY": 605
+        }
+      },
+      "visualComparison": {
+        "id": "irs-1040",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982",
+        "candidateHash": "1f1a595cdfb33093d9656fa150c0e9038205a13bdc6f3de0b0f827fc96855eda",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 2,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 2,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": {
+        "id": "irs-1040",
+        "sourceHash": "3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982",
+        "candidateHash": "1f1a595cdfb33093d9656fa150c0e9038205a13bdc6f3de0b0f827fc96855eda",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": [
+          {
+            "variant": "source",
+            "terminalFields": 199,
+            "widgets": 199,
+            "textField": "topmostSubform[0].Page1[0].f1_01[0]",
+            "checkbox": "topmostSubform[0].Page1[0].c1_1[0]",
+            "fillSaveReopen": true
+          },
+          {
+            "variant": "candidate",
+            "terminalFields": 199,
+            "widgets": 199,
+            "textField": "topmostSubform[0].Page1[0].f1_01[0]",
+            "checkbox": "topmostSubform[0].Page1[0].c1_1[0]",
+            "fillSaveReopen": true
+          }
+        ],
+        "filledPagePixelIdentical": true
+      },
+      "artifactSha256": {
+        "pipeline-result.json": "9f298d603aa69bd4b7e5a2a529d1437accdc50d5618d6b6e793deba660ae1b83",
+        "06-candidate.pdf": "1f1a595cdfb33093d9656fa150c0e9038205a13bdc6f3de0b0f827fc96855eda",
+        "05-tagging.json": "eef44117cb4137e7d8d956e11fdc0e080874f84f89561737f1b311b62ce37d9b",
+        "07-validation-report.json": "c0f934fa58445fb5093f01d4fdace3cb1235955fb042a50efb85b71dba0b39a0",
+        "00-source-validation.json": "fca9fb13fea1b4b2ca21e315051fd5582473ca6cd673018aea95f58beb0bd598",
+        "08-quality-report.json": "07b5eefdb54a9d5c29668a16c956ea7797e4fa838b1539349d8c90089a543eb9",
+        "09-saved-semantics.json": "454feb8f44259f979a894bd43e19a25ad5a0be9ff8443f9b4c976bad0d8b00b2"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 2,
+          "fields": 230,
+          "widgets": 199,
+          "links": 0,
+          "headings": 15,
+          "structure": 1236,
+          "issues": 605
+        },
+        "candidateCounts": {
+          "pages": 2,
+          "fields": 230,
+          "widgets": 199,
+          "links": 0,
+          "headings": 15,
+          "structure": 1236,
+          "issues": 605
+        },
+        "issueArraysEqual": true,
+        "contentStreamHashesEqualPages": 2,
+        "resourcesHashesEqualPages": 2,
+        "candidateRoles": {
+          "Document": 1,
+          "Part": 2,
+          "Sect": 19,
+          "Div": 473,
+          "H1": 3,
+          "P": 469,
+          "Form": 199,
+          "H3": 1,
+          "H2": 11,
+          "Table": 1,
+          "TR": 8,
+          "TH": 5,
+          "TD": 35,
+          "L": 1,
+          "LI": 4,
+          "LBody": 4
+        }
+      }
+    },
+    {
+      "id": "nist-1299",
+      "pages": 8,
+      "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+      "candidateHash": "3ebf4413a2d426d35b5a7dd6470453e1930b674d7fbe1de6e3cbd19dd35ed4e4",
+      "pipelineStatus": "completed",
+      "execution": {
+        "id": "nist-1299",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 16.98
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.86
+        },
+        "savedComparison": {
+          "exitCode": 0,
+          "elapsedSeconds": 6.06
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "passthrough",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 96,
+        "failedRules": 10,
+        "passedChecks": 19945,
+        "failedChecks": 73
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 100,
+        "failedRules": 6,
+        "passedChecks": 19997,
+        "failedChecks": 25
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 5,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "qualityDisposition": "review_required",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "pass"
+        },
+        {
+          "id": "pageContentAndResources",
+          "status": "pass"
+        },
+        {
+          "id": "fields",
+          "status": "pass"
+        },
+        {
+          "id": "widgets",
+          "status": "pass"
+        },
+        {
+          "id": "headingContent",
+          "status": "pass"
+        },
+        {
+          "id": "links",
+          "status": "pass"
+        },
+        {
+          "id": "observedStructure",
+          "status": "pass"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "HEADING_REFERENCE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1
+      },
+      "reviewTaskCounts": {
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW": 1,
+        "HEADING_REFERENCE_REQUIRES_REVIEW": 1,
+        "VALIDATION_REQUIRES_REVIEW": 1,
+        "VERAPDF_7_18_5_1": 1,
+        "VERAPDF_7_1_3": 4,
+        "VERAPDF_7_1_5": 16,
+        "VERAPDF_7_21_4_2_2": 2,
+        "VERAPDF_7_10_2": 1,
+        "VERAPDF_7_5_1": 1,
+        "FONT_STANDARD_14": 2,
+        "SYMBOLIC_WITHOUT_DIFFERENCES": 1,
+        "TO_UNICODE_MISSING": 2,
+        "HEADING_STYLE_LEVEL_CONFLICT": 3,
+        "HEADING_REPEATED_MARGIN_REVIEW": 9,
+        "HEADING_OUTLINE_GAP": 12,
+        "TABLE_GRID_OVERLAP": 2,
+        "FIGURE_DESCRIPTION_REQUIRED": 8,
+        "STRUCTURE_REVIEW": 25,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": {
+          "passed": 2719,
+          "failed": 63
+        },
+        "failureCounts": {
+          "STRUCTURE_INTEGRITY": 63
+        }
+      },
+      "visualComparison": {
+        "id": "nist-1299",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "candidateHash": "3ebf4413a2d426d35b5a7dd6470453e1930b674d7fbe1de6e3cbd19dd35ed4e4",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 2,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 3,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 4,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 5,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 6,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 7,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          },
+          {
+            "page": 8,
+            "sourceSize": [
+              816,
+              1056
+            ],
+            "candidateSize": [
+              816,
+              1056
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 8,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": null,
+      "artifactSha256": {
+        "pipeline-result.json": "ceebbf55b37aea3e8f14bc9149d1954dfbe4f7155964270294925c0c05d4bb09",
+        "06-candidate.pdf": "3ebf4413a2d426d35b5a7dd6470453e1930b674d7fbe1de6e3cbd19dd35ed4e4",
+        "05-tagging.json": "f6aa824edfdb95c165179659b95630bb0344a0c56d0fc75a4e93096e046d7f97",
+        "07-validation-report.json": "81575fd01edc38581d31ce08113014d8ac301216ccee839eea1290cebffb69c8",
+        "00-source-validation.json": "14202e041efabc7f69968de73f65d46385b07f8d678f12936d2ee5a12572170f",
+        "08-quality-report.json": "6d28e7c09ff89d473a39916650ba65e210b25dd1cae43c03181d82c2612320da",
+        "09-saved-semantics.json": "d896928adcd40c966906c63ee2273f4c1ab6aba03fc156320e9d3a38d7299ea4"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 8,
+          "fields": 1,
+          "widgets": 0,
+          "links": 23,
+          "headings": 48,
+          "structure": 247,
+          "issues": 63
+        },
+        "candidateCounts": {
+          "pages": 8,
+          "fields": 1,
+          "widgets": 0,
+          "links": 23,
+          "headings": 48,
+          "structure": 247,
+          "issues": 63
+        },
+        "issueArraysEqual": true,
+        "contentStreamHashesEqualPages": 8,
+        "resourcesHashesEqualPages": 8,
+        "candidateRoles": {
+          "Document": 1,
+          "Sect": 8,
+          "H1": 11,
+          "Art": 36,
+          "P": 82,
+          "Figure": 2,
+          "Artifact": 16,
+          "Link": 22,
+          "L": 1,
+          "LI": 3,
+          "LBody": 3,
+          "Table": 1,
+          "TR": 6,
+          "TH": 3,
+          "TD": 15,
+          "H2": 37
+        }
+      }
+    },
+    {
+      "id": "nasa-hinode",
+      "pages": 1,
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "f800fb60f3caa58c05446f42953271be30a7a9e271f146b67019452f2c7ce5a1",
+      "pipelineStatus": "failed",
+      "execution": {
+        "id": "nasa-hinode",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 9.52
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 2.0
+        },
+        "savedComparison": {
+          "exitCode": 0,
+          "elapsedSeconds": 0.75
+        },
+        "inputUnchanged": true,
+        "candidateExists": true
+      },
+      "writerMode": "native",
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 93,
+        "failedRules": 13,
+        "passedChecks": 881,
+        "failedChecks": 209
+      },
+      "candidateRawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 1705,
+        "failedChecks": 0
+      },
+      "candidateFontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "qualityDisposition": "rejected",
+      "qualityChecks": [
+        {
+          "id": "inspection",
+          "status": "pass"
+        },
+        {
+          "id": "objectIdentity",
+          "status": "unknown"
+        },
+        {
+          "id": "requiredValidation",
+          "status": "pass"
+        },
+        {
+          "id": "saved_semantics",
+          "status": "fail"
+        }
+      ],
+      "qualityFindingCounts": {
+        "IDENTITY_MAPPING_REQUIRED": 1,
+        "SAVED_SEMANTICS_MISMATCH": 1
+      },
+      "reviewTaskCounts": {
+        "IDENTITY_MAPPING_REQUIRED": 1,
+        "FIGURE_DESCRIPTION_REQUIRED": 1,
+        "READER_QUALIFICATION_REQUIRED": 1
+      },
+      "savedComparison": {
+        "summary": {
+          "passed": 525,
+          "failed": 6
+        },
+        "failureCounts": {
+          "ACTUAL_TEXT": 6
+        }
+      },
+      "visualComparison": {
+        "id": "nasa-hinode",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "f800fb60f3caa58c05446f42953271be30a7a9e271f146b67019452f2c7ce5a1",
+        "pages": [
+          {
+            "page": 1,
+            "sourceSize": [
+              1275,
+              1650
+            ],
+            "candidateSize": [
+              1275,
+              1650
+            ],
+            "pixelIdentical": true,
+            "differenceBounds": null
+          }
+        ],
+        "pixelIdenticalPages": 1,
+        "status": "completed"
+      },
+      "interactionAndPdfJs": {
+        "id": "nasa-hinode",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "f800fb60f3caa58c05446f42953271be30a7a9e271f146b67019452f2c7ce5a1",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": []
+      },
+      "artifactSha256": {
+        "pipeline-result.json": "d4f49092d54b0914a440d16cd1098a82eebb30552ae04734a66059e2d691e6ef",
+        "06-candidate.pdf": "f800fb60f3caa58c05446f42953271be30a7a9e271f146b67019452f2c7ce5a1",
+        "05-tagging.json": "a440e24d429aec1db9635f37f01b27db5f814364a8096a0bf726e7c47c9d357f",
+        "07-validation-report.json": "eb6cf9c9abe98525d1e5eec02566bf9b55649ea251d63eeef04486a1bc8b931f",
+        "00-source-validation.json": "238b979a1fb7541c16d665bac0699cd93ce6fc565b3eb09d0e2bbde81b442f94",
+        "08-quality-report.json": "e5a6ea96f3de6dc33edf11097cd974a739b9556f77cdf36aae45e580488d27bd",
+        "09-saved-semantics.json": "f7c5c1b4c14aeaea87d83e901e7aa3141068d78469da4a12dcb8df79735d8114",
+        "10-utf8-saved.json": "2a1fd9d1c2a9cd198c9dcc6da5e775a0812cff9652f521ab707a680c7059bbb4"
+      },
+      "preservationInventory": {
+        "sourceCounts": {
+          "pages": 1,
+          "fields": 0,
+          "widgets": 0,
+          "links": 4,
+          "headings": 0,
+          "structure": 0,
+          "issues": 4
+        },
+        "candidateCounts": {
+          "pages": 1,
+          "fields": 0,
+          "widgets": 0,
+          "links": 4,
+          "headings": 1,
+          "structure": 86,
+          "issues": 0
+        },
+        "issueArraysEqual": false,
+        "contentStreamHashesEqualPages": 0,
+        "resourcesHashesEqualPages": 0,
+        "candidateRoles": {
+          "Document": 1,
+          "P": 39,
+          "Span": 40,
+          "Sect": 1,
+          "H1": 1,
+          "Link": 4
+        }
+      },
+      "diagnostic": {
+        "scope": "Same saved PDF; checker-only UTF-8 JVM stdout/stderr override, not a new pipeline result",
+        "javaToolOptions": "-XX:TieredStopAtLevel=1 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8",
+        "utf8SavedComparison": {
+          "passed": 531,
+          "failed": 0
+        },
+        "remainingFailureCounts": {},
+        "independentPypdfActualText": [
+          {
+            "target": "oat:tag:n-1-10:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-14:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-15:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-17:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-19:span",
+            "matchesExpected": true
+          },
+          {
+            "target": "oat:tag:n-1-31:span",
+            "matchesExpected": true
+          }
+        ],
+        "extractedTextCharacters": 1908
+      }
+    },
+    {
+      "id": "nasa-stereo-booklet",
+      "pages": 61,
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidateHash": null,
+      "pipelineStatus": "failed",
+      "execution": {
+        "id": "nasa-stereo-booklet",
+        "pipeline": {
+          "exitCode": 0,
+          "elapsedSeconds": 67.95
+        },
+        "sourceValidation": {
+          "exitCode": 0,
+          "elapsedSeconds": 3.66
+        },
+        "savedComparison": null,
+        "inputUnchanged": true,
+        "candidateExists": false
+      },
+      "writerMode": null,
+      "resolvedOcrMode": "auto",
+      "sourceRawVeraPdf": {
+        "passedRules": 91,
+        "failedRules": 15,
+        "passedChecks": 74911,
+        "failedChecks": 5703
+      },
+      "candidateRawVeraPdf": null,
+      "candidateFontAudit": null,
+      "qualityDisposition": null,
+      "qualityChecks": [],
+      "qualityFindingCounts": {},
+      "reviewTaskCounts": {},
+      "savedComparison": {
+        "summary": null,
+        "failureCounts": {}
+      },
+      "visualComparison": {
+        "id": "nasa-stereo-booklet",
+        "status": "no_candidate"
+      },
+      "interactionAndPdfJs": null,
+      "artifactSha256": {
+        "pipeline-result.json": "51a1f49d97c112d2e0c6b70fe5607e6ca86b4e16ce0d4b37cc183242cc497b34",
+        "05-tagging.json": "e599daa25e7a02826d883cabdd8474ee4fcd502ca04b58e91916fe38bfbb31fe",
+        "00-source-validation.json": "52147ee52409490f4031325f82d79acbdaa06fbe7fda834f4fe40ff9600ed00a"
+      },
+      "failure": "Duplicate emitted structure ID: oat:tag:table:table:15:2"
+    }
+  ],
+  "limitations": [
+    "Seeded selection from a curated, downloadable official-source pool, not a statistical web sample",
+    "Six inputs already had structure trees; five candidates used passthrough",
+    "Inherited inspector findings are not asserted to be newly introduced or independently confirmed source defects",
+    "No human screen-reader/keyboard observations or general accessibility percentage",
+    "Pixel equality at tested resolution is not universal viewer or semantic equivalence"
+  ]
+}
