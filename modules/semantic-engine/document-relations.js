@@ -31,14 +31,17 @@ export function enrichDocumentRelations(nodes, pages) {
       field.widgets.push({ ...widget, pageNumber: page.pageNumber });
       const candidates = nodes.filter((n) => n.pageNumber === page.pageNumber && n.formFieldIds?.includes(widget.id) && n.role !== "Artifact" && !n.tableId);
       const tooltip = labelKey(widget.tooltip);
-      const pool = tooltip && Array.isArray(widget.bbox) ? nodes.filter((n) => n.pageNumber === page.pageNumber && n.role !== "Artifact" && !n.tableId &&
+      const caption = widget.pushButton && widget.authoredCaptionSource === "widget-MK-CA" ? labelKey(widget.authoredCaption) : "";
+      const authoredName = tooltip || caption;
+      const nameSource = tooltip ? "authored-tooltip" : caption ? "authored-button-caption" : "unresolved";
+      const pool = authoredName && Array.isArray(widget.bbox) ? nodes.filter((n) => n.pageNumber === page.pageNumber && n.role !== "Artifact" && !n.tableId &&
         n.bbox[1] + n.bbox[3] >= widget.bbox[1] - 48 && n.bbox[1] <= widget.bbox[1] + widget.bbox[3] + 12 &&
         Math.max(widget.bbox[0] - n.bbox[0] - n.bbox[2], n.bbox[0] - widget.bbox[0] - widget.bbox[2], 0) <= Math.max(48, (n.fontSize || 12) * 4)) : candidates;
-      const exact = tooltip ? pool.filter((n) => labelKey(n.text) === tooltip) : [];
-      let chosen = exact.length === 1 ? [exact[0]] : !tooltip && candidates.length === 1 ? [candidates[0]] : null;
+      const exact = authoredName ? pool.filter((n) => labelKey(n.text) === authoredName) : [];
+      let chosen = exact.length === 1 ? [exact[0]] : !authoredName && candidates.length === 1 ? [candidates[0]] : null;
       // A short colon-terminated label directly above one widget is an explicit prompt.
       // Do not borrow a section heading or a prompt shared by several widgets.
-      if (!chosen && !tooltip && widget.bbox && candidates.length === 0) {
+      if (!chosen && !authoredName && widget.bbox && candidates.length === 0) {
         const above = nodes.filter(n => n.pageNumber === page.pageNumber && n.role !== "Artifact" && !n.tableId &&
           n.text.trim().length <= 40 && /:\s*$/.test(n.text) && Math.abs(n.bbox[0] - widget.bbox[0]) <= 3 &&
           n.bbox[1] + n.bbox[3] <= widget.bbox[1] && widget.bbox[1] - n.bbox[1] - n.bbox[3] <= 18 &&
@@ -46,8 +49,8 @@ export function enrichDocumentRelations(nodes, pages) {
             w.bbox[1] >= n.bbox[1] + n.bbox[3] && w.bbox[1] - n.bbox[1] - n.bbox[3] <= 18));
         if (above.length === 1) chosen = above;
       }
-      // A tooltip can match a wrapped label, but each fragment must be adjacent and in the same column.
-      if (!chosen && tooltip && pool.length <= 12) {
+      // An authored name can match a wrapped label, but fragments must be adjacent and in the same column.
+      if (!chosen && authoredName && pool.length <= 12) {
         const matches = [], sorted = [...pool].sort((a, b) => a.bbox[1] - b.bbox[1] || a.bbox[0] - b.bbox[0]);
         for (let start = 0; start < sorted.length; start++) for (let size = 2; size <= 4 && start + size <= sorted.length; size++) {
           const group = sorted.slice(start, start + size);
@@ -55,7 +58,7 @@ export function enrichDocumentRelations(nodes, pages) {
             (Math.abs(n.bbox[0] - group[i].bbox[0]) <= 3 ||
               (i === 0 && widget.checkBox && n.bbox[0] > group[i].bbox[0] && n.bbox[0] - group[i].bbox[0] <= 24)) && n.bbox[1] >= group[i].bbox[1] &&
             n.bbox[1] - group[i].bbox[1] - group[i].bbox[3] <= Math.max(6, group[i].fontSize || group[i].bbox[3]));
-          if (adjacent && labelKey(group.map((n) => n.text.trim()).join(" ")) === tooltip) matches.push(group);
+          if (adjacent && labelKey(group.map((n) => n.text.trim()).join(" ")) === authoredName) matches.push(group);
         }
         if (matches.length === 1) chosen = matches[0];
       }
@@ -65,19 +68,23 @@ export function enrichDocumentRelations(nodes, pages) {
       const saved = field.widgets.at(-1);
       if (widget.pushButton && widget.appearanceText?.trim() && widget.appearanceTextSource === "normal-widget-appearance") {
         saved.labelStatus = "associated-appearance";
-        saved.accessibleNameSource = tooltip ? "authored-tooltip" : "widget-appearance-proposal";
+        saved.accessibleNameSource = authoredName ? nameSource : "widget-appearance-proposal";
         saved.labelAssociation = { kind: "widget-appearance", evidence: "decoded-text-owned-by-widget-normal-appearance" };
-        if (!tooltip) reviewTasks.push({ code: "FORM_ACCESSIBLE_NAME_REVIEW", pageNumber: page.pageNumber, widgetId: widget.id });
+        if (!authoredName) reviewTasks.push({ code: "FORM_ACCESSIBLE_NAME_REVIEW", pageNumber: page.pageNumber, widgetId: widget.id });
+        // Stale /CA metadata must not silently certify a different painted caption.
+        const captionKey = value => value.normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase();
+        if (caption && captionKey(widget.authoredCaption) !== captionKey(widget.appearanceText))
+          reviewTasks.push({ code: "FORM_BUTTON_CAPTION_MISMATCH", pageNumber: page.pageNumber, widgetId: widget.id });
       } else if (chosen) {
         field.widgets.at(-1).labelStatus = "associated";
         field.widgets.at(-1).labelNodeIds = chosen.map((n) => n.id);
-        field.widgets.at(-1).accessibleNameSource = tooltip ? "authored-tooltip" : "unique-associated-label";
+        field.widgets.at(-1).accessibleNameSource = authoredName ? nameSource : "unique-associated-label";
         if (contextual) saved.labelAssociation = contextual.association;
         for (const label of chosen) {
           // A section heading retains its section role even when it also labels a field.
           if (contextual?.association.kind !== "section-prompt") label.formFieldIds = [...new Set([...(label.formFieldIds || []), widget.id])];
           if (!field.labels.includes(label.id)) field.labels.push(label.id);
-          add("labels", label.id, `widget:${widget.id}`, contextual?.association.evidence || (chosen.length > 1 ? "authored-tooltip-and-adjacent-label-fragments" : exact.length ? "authored-tooltip-and-proximity" : "unique-proximity-candidate"));
+          add("labels", label.id, `widget:${widget.id}`, contextual?.association.evidence || (chosen.length > 1 ? `${tooltip ? "authored-tooltip" : "authored-button-caption"}-and-adjacent-label-fragments` : exact.length ? `${tooltip ? "authored-tooltip" : "authored-button-caption"}-and-proximity` : "unique-proximity-candidate"));
         }
         const instructions = contextual?.instructions || candidates.filter((n) => !chosen.includes(n) && /\b(required|select|enter|check|provide|choose)\b/i.test(n.text));
         field.widgets.at(-1).instructionNodeIds = instructions.map((n) => n.id);
@@ -90,8 +97,8 @@ export function enrichDocumentRelations(nodes, pages) {
         saved.labelAssociation = dateContext.association;
         for (const context of dateContext.context) add("describes", context.id, `widget:${widget.id}`, dateContext.association.evidence);
       } else {
-        saved.labelStatus = tooltip ? "authored-name-visual-association-unresolved" : "accessible-name-review-required";
-        saved.accessibleNameSource = tooltip ? "authored-tooltip" : "unresolved";
+        saved.labelStatus = authoredName ? "authored-name-visual-association-unresolved" : "accessible-name-review-required";
+        saved.accessibleNameSource = nameSource;
         saved.contextNodeIds = pool.map(n => n.id);
         reviewTasks.push({ code: "FORM_LABEL_AMBIGUOUS", pageNumber: page.pageNumber, widgetId: widget.id, candidates: pool.map((n) => n.id) });
       }

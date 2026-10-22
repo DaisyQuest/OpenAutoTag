@@ -21,7 +21,15 @@ export function scoreSemanticCase(expected, semantic, tagging) {
   const tags = flatten(tagging.root), position = new Map(semantic.orderedNodeIds.map((id, i) => [id, i]));
   const id = (source) => bySource.get(source)?.id;
   const add = (dimension, target, pass) => checks.push({ dimension, target, status: pass ? "pass" : "fail" });
-  const owner = (source) => tags.find((t) => t.sourceNodeIds?.includes(id(source)));
+  const parents = new Map();
+  for (const tag of tags) for (const child of tag.children || []) parents.set(child, tag);
+  const cellOwner = (source) => {
+    const owners = tags.filter(t => t.sourceNodeIds?.includes(id(source)));
+    if (owners.length !== 1) return undefined;
+    let cell = owners[0];
+    while (cell && !["TH", "TD"].includes(cell.type)) cell = parents.get(cell);
+    return cell;
+  };
   for (const [source, role] of Object.entries(expected.roles || {})) add("headings", source, bySource.get(source)?.role === role);
   for (const [a, b] of expected.order || []) add("readingOrder", `${a} -> ${b}`, position.has(id(a)) && position.has(id(b)) && position.get(id(a)) < position.get(id(b)));
   for (const [widget, sources] of Object.entries(expected.labels || {})) {
@@ -42,9 +50,9 @@ export function scoreSemanticCase(expected, semantic, tagging) {
   }
   for (const [type, count] of Object.entries(expected.tagCounts || {})) add("tagStructure", type, tags.filter((t) => t.type === type).length === count);
   for (const [source, sources] of Object.entries(expected.headers || {})) {
-    const actual = owner(source)?.tableAttrs?.Headers || [];
-    const target = sources.map((s) => owner(s)?.headerId);
-    add("tableHeaders", source, target.every(Boolean) && JSON.stringify([...actual].sort()) === JSON.stringify(target.sort()));
+    const cell = cellOwner(source), actual = cell?.tableAttrs?.Headers || [];
+    const target = sources.map(s => { const header = cellOwner(s); return header?.type === "TH" ? header.headerId : undefined; });
+    add("tableHeaders", source, Boolean(cell) && target.every(Boolean) && JSON.stringify([...actual].sort()) === JSON.stringify(target.sort()));
   }
   for (const code of expected.reviewCodes || []) add("ambiguityReview", code, semantic.semanticReviewTasks.some((t) => t.code === code));
   for (const n of semantic.nodes.filter((n) => n.role !== "Artifact"))

@@ -404,6 +404,8 @@
         "id": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
         "appearanceText": { "type": "string", "minLength": 1, "maxLength": 160 },
         "appearanceTextSource": { "const": "normal-widget-appearance" },
+        "authoredCaption": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "authoredCaptionSource": { "const": "widget-MK-CA" },
         "multiLine": { "type": "boolean" },
         "labelAssociation": { "type": "object", "required": ["kind", "evidence"], "properties": {
           "kind": { "enum": ["widget-appearance", "expanded-tooltip", "section-prompt", "compound-date"] },

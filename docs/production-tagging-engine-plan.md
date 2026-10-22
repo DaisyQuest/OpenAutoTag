@@ -622,3 +622,7 @@ Bounded A01–A10 implementations, new contracts, real-PDF diagnostics, saved-ou
 ## 24. Remaining form-label associations, 2026-10-21
 
 The [form-label delivery](form-label-associations-20261021.md) resolves seven of the eight remaining TEST-FORM cases through widget appearance evidence, expanded prompts, section instructions and compound date context. The court selector's authored tooltip remains intact, but its missing printed label remains flagged. Baseline: 213 tests pass; final focused checks: 26 pass. All fields, appearances, saved structure and tested interactions are preserved; zero raw veraPDF failures. This is inference/review evidence, not a generic field-metadata or tab-order rewrite.
+
+## 25. Verified table, saved-text and button-name improvements, 2026-10-21
+
+The [verified follow-up](verified-tagging-improvements-20261021.md) moves new table replacement text to content Spans, detects unintended saved ActualText/Alt, and recognizes authored push-button captions with conflict review. Native/raster saved-output and mutation tests cover the table changes; TEST-FORM retains its original appearance, fields, saved structure and zero raw validator failures. Complete glyph mapping and human reader qualification remain pending.

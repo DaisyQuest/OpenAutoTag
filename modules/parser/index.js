@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { getDocument, VerbosityLevel, OPS } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { textEvidence, alignOcrText, imageEvidence } from "./content-evidence.js";
 import { widgetAppearanceText } from "./widget-evidence.js";
+import { authoredWidgetCaptions } from "./authored-widget-captions.js";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
 import {
   DEFAULT_RECOGNITION_PROFILES,
@@ -661,13 +662,16 @@ async function applyOcrEnhancement(pdfPath, pages, ocrOptions) {
 
 export async function parsePdf(filePath, options = {}) {
   const absolutePath = path.resolve(filePath);
-  const data = new Uint8Array(await readFile(absolutePath));
+  const sourceBytes = await readFile(absolutePath);
+  // PDF.js can transfer its buffer; retain the source for the lazy metadata read.
+  const data = new Uint8Array(sourceBytes);
   const pdf = await getDocument(createPdfDocumentLoadOptions(data)).promise;
   const pageCount = pdf.numPages;
 
   const pages = [];
   const metadata = await pdf.getMetadata();
   const sourceTitle = typeof metadata.info?.Title === "string" ? metadata.info.Title.trim() : "";
+  let captionEvidence;
 
   for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
@@ -693,6 +697,8 @@ export async function parsePdf(filePath, options = {}) {
     });
     const textBlocks = reindexBlocks(pageNumber, groupTextItemsToBlocks(pageNumber, height, items));
     const annotations = await page.getAnnotations();
+    const hasPushButtons = annotations.some(annot => annot.subtype === "Widget" && annot.pushButton);
+    if (hasPushButtons && !captionEvidence) captionEvidence = await authoredWidgetCaptions(sourceBytes);
     const formFields = annotations.filter((annot) => annot.subtype === "Widget" &&
       Array.isArray(annot.rect) && annot.rect.length === 4 && annot.rect.every(Number.isFinite))
       .map((annot) => ({
@@ -710,6 +716,9 @@ export async function parsePdf(filePath, options = {}) {
         ...(typeof annot.buttonValue === "string" ? { buttonValue: annot.buttonValue } : {}),
         pushButton: Boolean(annot.pushButton),
         multiLine: Boolean(annot.multiLine),
+        ...(annot.pushButton && captionEvidence?.captions.has(annot.id) ? {
+          authoredCaption: captionEvidence.captions.get(annot.id), authoredCaptionSource: "widget-MK-CA"
+        } : {}),
         ...(annot.pushButton && !annot.hidden && appearanceText.has(annot.id) ? {
           appearanceText: appearanceText.get(annot.id), appearanceTextSource: "normal-widget-appearance"
         } : {}),
@@ -734,6 +743,7 @@ export async function parsePdf(filePath, options = {}) {
       textBlocks,
       figures,
       ...(imageEvidenceError ? { imageEvidenceError } : {}),
+      ...(hasPushButtons && captionEvidence?.error ? { captionEvidenceError: captionEvidence.error } : {}),
       ...(formFields.length > 0 ? { formFields } : {})
     });
     page.cleanup();

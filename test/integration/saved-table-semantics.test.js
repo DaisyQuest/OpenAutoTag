@@ -44,6 +44,13 @@ test("both writer paths save resolvable complex table headers and Roman list sem
     const saved = await PDFDocument.load(await readFile(outputPath)), all = elements(saved);
     const ids = all.filter((d) => d.get(name("S")) === name("TH")).map((d) => d.lookup(name("ID"), PDFString).decodeText());
     assert.equal(ids.length, 3); assert.equal(new Set(ids).size, 3);
+    for (const cell of all.filter(d => [name("TH"), name("TD")].includes(d.get(name("S"))))) {
+      assert.equal(cell.has(name("ActualText")), false, "Table semantics must not be replaced by ActualText");
+      const kids = cell.lookup(name("K"));
+      const span = kids instanceof PDFArray ? kids.lookup(0) : kids;
+      assert.equal(span.get(name("S")), name("Span"));
+      assert.ok(span.lookup(name("ActualText"), PDFString).decodeText());
+    }
     const data = all.find((d) => d.get(name("S")) === name("TD")), attrs = data.lookup(name("A"));
     const headers = attrs instanceof PDFArray ? attrs.lookup(0).lookup(name("Headers")) : attrs.lookup(name("Headers"));
     assert.deepEqual(Array.from({ length: headers.size() }, (_, i) => headers.lookup(i).decodeText()).sort(), ids.sort());
@@ -65,7 +72,7 @@ test("both writer paths save resolvable complex table headers and Roman list sem
     // Start from the passing writer result, so an unrelated known defect cannot
     // make these mutations pass without detecting the deliberate corruption.
     const source = await readFile(path.join(dir, "raster.pdf"));
-    for (const kind of ["role", "headers", "order", "duplicate-content", "actual-text"]) {
+    for (const kind of ["role", "headers", "order", "duplicate-content", "actual-text", "alternate-text", "missing-replacement"]) {
       const mutated = await PDFDocument.load(source), all = elements(mutated);
       const td = all.find(d => d.get(name("S")) === name("TD"));
       if (kind === "role") td.set(name("S"), name("P"));
@@ -75,6 +82,11 @@ test("both writer paths save resolvable complex table headers and Roman list sem
         else attrs.delete(name("Headers"));
       }
       if (kind === "actual-text") td.set(name("ActualText"), PDFString.of("Wrong replacement"));
+      if (kind === "alternate-text") td.set(name("Alt"), PDFString.of("Unexpected alternate text"));
+      if (kind === "missing-replacement") {
+        const kids = td.lookup(name("K"));
+        (kids instanceof PDFArray ? kids.lookup(0) : kids).delete(name("ActualText"));
+      }
       if (kind === "order") {
         const list = all.find(d => d.get(name("S")) === name("L"));
         const kids = list.lookup(name("K")); const first = kids.get(0); kids.set(0, kids.get(1)); kids.set(1, first);
@@ -85,7 +97,7 @@ test("both writer paths save resolvable complex table headers and Roman list sem
       const file = path.join(dir, `${kind}.pdf`); await writeFile(file, await mutated.save());
       const comparison = await checkSavedSemantics({ pdfPath: file, tagsPath });
       assert.equal(comparison.disposition, "rejected", kind);
-      const code={role:"SAVED_ROLE",headers:"TABLE_HEADERS",order:"CHILD_ORDER","duplicate-content":"STRUCTURE_INTEGRITY","actual-text":"ACTUAL_TEXT"}[kind];
+      const code={role:"SAVED_ROLE",headers:"TABLE_HEADERS",order:"CHILD_ORDER","duplicate-content":"STRUCTURE_INTEGRITY","actual-text":"ACTUAL_TEXT","alternate-text":"ALTERNATE_TEXT","missing-replacement":"ACTUAL_TEXT"}[kind];
       assert.ok(comparison.checks.some(c=>c.code===code&&c.status==="fail"),kind);
     }
   });

@@ -34,6 +34,45 @@ test("a unique short inline prompt may be expanded by its authored tooltip", () 
   assert.equal(widgets(r)[0].accessibleNameSource, "authored-tooltip");
 });
 
+test("authored push-button captions supply names while tooltip precedence and mismatches remain explicit", () => {
+  const source = { id: "button", bbox: [450, 10, 80, 20], fieldType: "Btn", pushButton: true,
+    appearanceText: "Reset form", appearanceTextSource: "normal-widget-appearance",
+    authoredCaption: "  Reset form ", authoredCaptionSource: "widget-MK-CA" };
+  const named = run([], [source]);
+  assert.equal(widgets(named)[0].accessibleNameSource, "authored-button-caption");
+  assert.deepEqual(named.semanticReviewTasks, []);
+  assert.equal(source.labelStatus, undefined); assert.equal(source.tooltip, undefined);
+  const tooltip = run([], [{ ...source, tooltip: "Clear the entered answers." }]);
+  assert.equal(widgets(tooltip)[0].accessibleNameSource, "authored-tooltip");
+  assert.deepEqual(tooltip.semanticReviewTasks, []);
+  const mismatch = run([], [{ ...source, authoredCaption: "Print form" }]);
+  assert.deepEqual(mismatch.semanticReviewTasks.map(r => r.code), ["FORM_BUTTON_CAPTION_MISMATCH"]);
+  assert.equal(widgets(mismatch)[0].authoredCaption, "Print form");
+  assert.equal(widgets(mismatch)[0].appearanceText, "Reset form");
+  for (const patch of [{ authoredCaption: "" }, { authoredCaptionSource: undefined }]) {
+    const r = run([], [{ ...source, ...patch }]);
+    assert.equal(widgets(r)[0].accessibleNameSource, "widget-appearance-proposal");
+    assert.equal(r.semanticReviewTasks[0].code, "FORM_ACCESSIBLE_NAME_REVIEW");
+  }
+  assert.equal(widgets(run([], [{ ...source, pushButton: false }]))[0].accessibleNameSource, "unresolved");
+});
+
+test("a caption without appearance evidence supplies a name but cannot certify an unrelated visual label", () => {
+  const source = { id: "button", bbox: [100, 10, 80, 20], fieldType: "Btn", pushButton: true,
+    authoredCaption: "Print form", authoredCaptionSource: "widget-MK-CA" };
+  const unrelated = node("other", "Account", [20, 10, 60, 12], { formFieldIds: ["button"] });
+  const r = run([unrelated], [source]), w = widgets(r)[0];
+  assert.equal(w.accessibleNameSource, "authored-button-caption");
+  assert.equal(w.labelStatus, "authored-name-visual-association-unresolved");
+  assert.equal(w.labelNodeIds, undefined); assert.deepEqual(r.formNavigation.unresolvedWidgetIds, ["button"]);
+  const exact = run([node("label", "Print form", [20, 10, 60, 12])], [source]);
+  assert.deepEqual(widgets(exact)[0].labelNodeIds, ["label"]);
+  assert.equal(exact.relations[0].evidence, "authored-button-caption-and-proximity");
+  const wrapped = run([node("first", "Print", [20, 10, 60, 12]), node("second", "form", [20, 24, 60, 12])], [source]);
+  assert.deepEqual(widgets(wrapped)[0].labelNodeIds, ["first", "second"]);
+  assert.equal(wrapped.relations[0].evidence, "authored-button-caption-and-adjacent-label-fragments");
+});
+
 test("expanded prompts reject mismatches, duplicate labels, shared targets and distant rows", () => {
   const n = () => node("prompt", "County of", [35, 100, 55, 12]);
   const w = { id: "county", bbox: [94, 99, 100, 14], fieldType: "Ch", tooltip: "Select the county the court is located in." };

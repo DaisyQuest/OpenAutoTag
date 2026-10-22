@@ -53,6 +53,8 @@ This is an illustration, not the native-plan JSON contract. PDFBox serialization
 
 Both native and raster writers serialize table `Headers`, `Scope`, cell spans, structure IDs and list numbering. `StructureIdentifiers.java` creates IDTree entries and rejects duplicate/dangling IDs, non-TH targets, cross-table references and excessive nesting. Tests reopen both writer outputs to check these relationships.
 
+New TH/TD tags retain those attributes on the cell and put text ownership and `ActualText` on an inner Span. The writer reads row/column coordinates from the cell even when its content source lives below it. Saved intent comparison rejects unexpected `ActualText`/`Alt` as well as missing requested values. List replacement-text placement is unchanged. The [verified follow-up](verified-tagging-improvements-20261021.md) records native/raster saved checks and mutation tests.
+
 ## Qualified incremental repairs
 
 The repair entry points are `font-repair.js`, `link-repair.js` and `structure-repair.js` under `modules/pdf-writer/`. They refuse to overwrite inputs or existing outputs. Each has bounded eligibility conditions, emits an audit and verifies saved objects against a fresh replay from its source. Signed/encrypted inputs are outside these repair paths.
@@ -68,6 +70,8 @@ The repair entry points are `font-repair.js`, `link-repair.js` and `structure-re
 ## Validation and publication state
 
 Form association inference now reads button-owned appearance captions and recognizes bounded expanded prompts, multiline section instructions and compound date context. These are typed semantic/review artifacts; the preserved field dictionaries and structure tree are not rewritten. Shared date context is recorded separately from each component's authored name. The [form-label delivery](form-label-associations-20261021.md) documents the seven resolved cases, remaining unlabeled court selector and preservation evidence.
+
+Authored `/MK /CA` captions are now read separately from appearance text, matched by exact widget object/generation and accepted only for confirmed push buttons. Tooltip names retain precedence. Conflicting caption/appearance text stays reviewable, and a caption alone does not certify a visual association. The metadata read reuses pdf-lib, runs only when push buttons exist, and does not save or execute actions.
 
 The default external validator is veraPDF 1.30.3 Greenfield with `ua1`. Raw results are retained without the discontinued backend's suppressions. PDFBox supplies independent structural diagnostics and the font audit; a required checker failure cannot be interpreted as a pass.
 

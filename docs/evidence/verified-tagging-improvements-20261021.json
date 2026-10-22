@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-10-21",
+  "baselineCommit": "9d7637e594c1cc923e54830accf3c7b824e990cd",
+  "scope": [
+    "table-cell replacement text placement",
+    "saved ActualText/Alt presence and absence",
+    "authored push-button caption inference"
+  ],
+  "toolPins": {
+    "pdfbox": "3.0.8",
+    "verapdf": "1.30.3 Greenfield",
+    "profile": "ua1"
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 220,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/verified-production-final.log"
+    },
+    "compatibility": {
+      "passed": 60,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/verified-compatibility-final.log"
+    },
+    "captionHelperCoverage": {
+      "lines": 100,
+      "branches": 100,
+      "functions": 100,
+      "scope": "modules/parser/authored-widget-captions.js",
+      "log": "tmp/verified-caption-coverage.log"
+    }
+  },
+  "testForm": {
+    "candidateHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+    "validation": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 9874,
+      "failedChecks": 0
+    },
+    "preservationChecks": 9,
+    "savedSemantics": {
+      "passed": 1828,
+      "failed": 0
+    },
+    "pixels": {
+      "pages": 2,
+      "dpi": 150,
+      "renderers": [
+        "Poppler",
+        "PDF.js"
+      ],
+      "identicalToPrior": true
+    },
+    "buttons": [
+      {
+        "id": "337R",
+        "authoredCaption": "Reset Form",
+        "authoredCaptionSource": "widget-MK-CA",
+        "appearanceText": "Reset Form",
+        "accessibleNameSource": "authored-tooltip"
+      },
+      {
+        "id": "94R",
+        "authoredCaption": "Print Form",
+        "authoredCaptionSource": "widget-MK-CA",
+        "appearanceText": "Print Form",
+        "accessibleNameSource": "authored-tooltip"
+      }
+    ],
+    "unresolvedWidgets": [
+      "340R"
+    ],
+    "originalAndPriorUnchanged": true,
+    "humanReaderQualification": "not performed",
+    "disposition": "review_required",
+    "terminalFields": 32,
+    "fieldTreeObjects": 35,
+    "widgets": 33,
+    "links": 9,
+    "savedHeadings": 5,
+    "fontAuditFindings": 0,
+    "fillSaveReopen": {
+      "ordinaryTextAndCheckbox": "pass",
+      "accentedEuroAndCheckbox": "pass"
+    },
+    "visualInspection": "both pages inspected"
+  },
+  "generatedTable": {
+    "native": {
+      "passed": 155,
+      "failed": 0
+    },
+    "raster": {
+      "passed": 155,
+      "failed": 0
+    },
+    "nativeGlyphPositionsAnd150DpiPixels": "unchanged",
+    "visualInspection": "native and raster pages inspected",
+    "log": "tmp/verified-table-artifacts.log"
+  },
+  "artifactHashes": {
+    "output/TEST-FORM-verified-20261021/06-candidate.pdf": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+    "output/TEST-FORM-verified-20261021/01-layout.json": "6b36981a8f311c595e99a0fd4a4bd51d4e9cf2d205084e667fb2dfbf456a6788",
+    "output/TEST-FORM-verified-20261021/04-semantic-ordered.json": "aab155311b1cb413d849c49a2c44bd9dc318765317dff1c46cbd17772eb677c8",
+    "output/TEST-FORM-verified-20261021/05-tagging.json": "7ab416c3970d40c323ce0dc0958565d345f0a42c814827632329157cd524ea68",
+    "output/TEST-FORM-verified-20261021/07-validation-report.json": "1d3686e4e9a2187eb0022fa91cc0f8a5da431f1d991c701b8ad49082e5239320",
+    "output/TEST-FORM-verified-20261021/08-quality-report.json": "c29e7669eaa444cd37636d8868fd7be5874cb26d40d9a15911b3c2858b2e8c13",
+    "output/TEST-FORM-verified-20261021/09-saved-semantics.json": "590057e8578c103f99cbd608152337be6bd153f63974e1c94215d2236837cf52",
+    "output/TEST-FORM-verified-20261021/10-verification.json": "1d1e11e6069ce71de4668fe189437c3df784e6d0fac67d532b3f03102cc35c13",
+    "output/TEST-FORM-verified-20261021/10-interaction-probe.json": "7ea8763bde6ba41715b30aa9bd21338e425fde1b7e89ef960788cf61dcfc554b",
+    "output/TEST-FORM-verified-20261021/10-accented-interaction.log": "007201736c370177c167e1fb668fcfde10c63c5c7649473b0a978163faa48a3b",
+    "output/table-spans-20261021/source.pdf": "44a14ac37e56443dd966ea0fee2029b6a445b8edc586ecf3768503340ec612c5",
+    "output/table-spans-20261021/native.pdf": "d8608ecbf069213bb55261315d254bc8d32efadb7a296986fa8e6be615491498",
+    "output/table-spans-20261021/raster.pdf": "fc6f8903c21019287705111163c9a1580dac46ca8535a2337e15eb3f0b19f672",
+    "output/table-spans-20261021/tagging.json": "22ae32e4e8a0d5f4324b4e0c6a0620927e758e36731f7ba714a07a9e3dda011f",
+    "output/table-spans-20261021/native-semantics.json": "317e41099b891458d2d124daebd61aaf15cf4f1010310c05f81d6fc5f76881ab",
+    "output/table-spans-20261021/raster-semantics.json": "1a4424b45deea6cba9f53d81d1fe6a186da4d3d46978dfee08024a0c09508550"
+  },
+  "limitations": [
+    "Automated tests do not establish observed screen-reader behavior or general semantic accuracy.",
+    "TEST-FORM preserves its authored saved structure; separate generated fixtures exercise new table construction.",
+    "Exact source-glyph ownership, nested XObjects, independent references and human reader/keyboard qualification remain open.",
+    "List replacement-text placement remains unchanged.",
+    "Raw PDFs, fields, screenshots and local logs are not distributed with this evidence summary."
+  ]
+}

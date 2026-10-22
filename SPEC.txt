@@ -380,3 +380,12 @@ separate provenance; fields, tooltips, values, appearances and tab order are not
 rewritten. TEST-FORM unresolved associations improve from eight to one; LocalCourt
 has no printed label and stays reviewable. See docs/form-label-associations-20261021.md
 for 213-test baseline, final focused checks, saved comparisons and limitations.
+
+Verified tagging follow-up (2026-10-21):
+New table-cell content and ActualText live on child Spans; TH/TD retain their
+header relationships and layout attributes. Saved intent comparison checks both
+presence and absence of ActualText/Alt. Read-only /MK /CA evidence names qualified
+push buttons by exact widget reference, with tooltip precedence and explicit
+caption/appearance conflict review. No authored field or appearance rewrite.
+See docs/verified-tagging-improvements-20261021.md for saved native/raster tests,
+TEST-FORM preservation, helper coverage and outstanding qualification limits.

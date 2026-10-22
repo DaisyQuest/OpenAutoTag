@@ -12,6 +12,25 @@ async function build(t, nodes, options = {}) {
   return buildTagTree(file, options);
 }
 const all = (node) => [node, ...(node.children || []).flatMap(all)];
+
+test("both merged-value repairs keep replacement text inside synthetic cell Spans", async t => {
+  for (const spanning of [false, true]) {
+    const table = { tableId: "prices", tableSection: "head", tableRowIndex: 0 };
+    const result = await build(t, [
+      n("item", "TH", { ...table, text: "Item", tableColumnIndex: 0 }),
+      n("cost", "TH", { ...table, text: "Cost", tableColumnIndex: 1 }),
+      n("value", "TD", { ...table, tableSection: "body", tableRowIndex: 1, tableColumnIndex: 0, text: "Total savings $20 million", ...(spanning ? { tableColumnSpan: 2 } : {}) })
+    ]);
+    const cells = all(result.root).filter(n => n.type === "TD");
+    assert.deepEqual(cells.map(c => c.label), ["Total savings", "$20 million"]);
+    assert.equal(result.source.mergedTableTextCellRepair[spanning ? "insertedCellCount" : "filledPlaceholderCount"], 1);
+    for (const cell of cells) {
+      assert.equal(cell.actualText, undefined); assert.equal(cell.children[0].type, "Span");
+      assert.equal(cell.children[0].actualText, cell.label);
+    }
+    assert.deepEqual(all(result.root).flatMap(n => n.sourceNodeIds || []).sort(), ["cost", "item", "value"]);
+  }
+});
 test("nested lists are children of the preceding LBody and resume at the root level", async (t) => {
   const result = await build(t, [n("a", "LI", { listLevel: 1, listGroupId: "g" }), n("b", "LI", { listLevel: 2, listGroupId: "g" }), n("c", "LI", { listLevel: 1, listGroupId: "g" })]);
   const list = result.root.children[0]; assert.equal(list.children.length, 2);
@@ -48,4 +67,19 @@ test("multi-level headers link to preceding groups and exclude future repeated r
   assert.ok(!leaf("early").tableAttrs.Headers.includes(leaf("repeat").headerId));
   assert.ok(leaf("late").tableAttrs.Headers.includes(leaf("repeat").headerId));
   assert.ok(!leaf("late").tableAttrs.Headers.includes(leaf("length").headerId));
+});
+
+test("table replacement text is isolated in content Spans with one source owner", async t => {
+  const result = await build(t, [n("head", "TH", { tableGroupId: "t", tableRowIndex: 0, tableColumnIndex: 0, scope: "Column", text: "Heading" }),
+    n("value", "TD", { tableGroupId: "t", tableRowIndex: 1, tableColumnIndex: 0, text: "Value" })]);
+  const flat = all(result.root);
+  for (const cell of flat.filter(n => ["TH", "TD"].includes(n.type))) {
+    assert.equal(cell.actualText, undefined); assert.deepEqual(cell.sourceNodeIds, []);
+    assert.equal(cell.children.length, 1); assert.equal(cell.children[0].type, "Span");
+    assert.equal(cell.children[0].actualText, cell.label);
+    assert.equal(cell.children[0].sourceNodeIds.length, 1);
+  }
+  assert.deepEqual(flat.flatMap(n => n.sourceNodeIds || []).sort(), ["head", "value"]);
+  assert.equal(flat.find(n => n.type === "TH").scope, "Column");
+  assert.deepEqual(flat.find(n => n.type === "TD").tableAttrs.Headers, [flat.find(n => n.type === "TH").headerId]);
 });

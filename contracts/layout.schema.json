@@ -217,6 +217,7 @@
               "additionalProperties": true
             }
           },
+          "captionEvidenceError": { "type": "string", "minLength": 1 },
           "formFields": {
             "type": "array",
             "items": {
@@ -237,6 +238,8 @@
                 "multiLine": { "type": "boolean" },
                 "appearanceText": { "type": "string", "minLength": 1, "maxLength": 160 },
                 "appearanceTextSource": { "const": "normal-widget-appearance" },
+                "authoredCaption": { "type": "string", "minLength": 1, "maxLength": 160 },
+                "authoredCaptionSource": { "const": "widget-MK-CA" },
                 "bbox": { "$ref": "#/properties/pages/items/properties/textBlocks/items/properties/bbox" }
               },
               "additionalProperties": true

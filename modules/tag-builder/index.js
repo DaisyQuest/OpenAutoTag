@@ -172,29 +172,23 @@ function createLeaf(node, headingNormalization) {
     children: []
   };
 
-  // Set /ActualText on the innermost MCID-bearing element (Span child
-  // when wrapping, leaf itself otherwise). Adobe's Accessibility Full
-  // Check flags "Nested alternate text" (PDF/UA Matterhorn 19-003)
-  // when /ActualText appears on both parent and child — the outer
-  // one is never read. For wrapping roles (P/H#/Caption/Title/Code),
-  // /ActualText lives on the Span child below; for direct-MCID roles
-  // (TH/TD/LI/Lbl/LBody) it lives on the leaf itself.
+  // Replacement text belongs on the content Span, not the table cell:
+  // readers may otherwise replace the TH/TD semantics with plain text.
+  // Never duplicate ActualText on both the container and its content.
   const hasTextContent = typeof node.text === "string" && node.text.trim().length > 0;
-  const directMcidLeaf = ["TH", "TD", "LI", "Lbl", "LBody", "Aside"].includes(resolvedRole);
+  const directMcidLeaf = ["LI", "Lbl", "LBody", "Aside"].includes(resolvedRole);
   if (directMcidLeaf && hasTextContent) {
     leaf.actualText = node.text;
   }
 
-  // Block-level structural roles (P, H#, Caption, Title, Code) — wrap
+  // Block-level structural roles and table cells — wrap
   // their MCID content in a Span child. Adobe's Tags panel derives the
   // tag-row preview text from the element's direct marked-content
   // descendants; when the MCID lives under a /Span intermediary, Adobe
   // shows the text, while a bare /P with a direct MCID kid can leave
   // the preview blank (observed on scanned PDFs with invisible-text
-  // layers). Table cells (TH/TD), list items (LI, Lbl, LBody) and
-  // inline roles keep their direct MCID layout — Adobe's table and
-  // list views already render their cell/item text correctly.
-  const wrapInSpan = ["P", "H1", "H2", "H3", "H4", "H5", "H6", "Caption", "Title", "Code"].includes(resolvedRole);
+  // layers). Header IDs, Scope, spans and Headers remain on the TH/TD.
+  const wrapInSpan = ["P", "H1", "H2", "H3", "H4", "H5", "H6", "Caption", "Title", "Code", "TH", "TD"].includes(resolvedRole);
   if (wrapInSpan) {
     leaf.sourceNodeIds = [];
     const spanChild = {
@@ -1133,13 +1127,13 @@ function setCellLabel(cell, label) {
 }
 
 function createSplitValueCell(sourceCell, rowNode, columnIndex, valueText) {
+  const id = `${sourceCell.id}:split:${columnIndex}`;
   return {
-    id: `${sourceCell.id}:split:${columnIndex}`,
+    id,
     type: sourceCell.type,
     label: valueText,
-    actualText: valueText,
     sourceNodeIds: [],
-    children: [],
+    children: [{ id: `${id}:span`, type: "Span", label: valueText, actualText: valueText, sourceNodeIds: [], children: [] }],
     synthetic: true,
     repairReason: "split-merged-table-cell",
     splitFromCellId: sourceCell.id,
@@ -1188,7 +1182,7 @@ function repairMergedTableTextCells(rootNode) {
 
         setCellLabel(previous, split.leftText);
         setCellLabel(cell, split.valueText);
-        cell.actualText = split.valueText;
+        cell.children = [{ id: `${cell.id}:span`, type: "Span", label: split.valueText, actualText: split.valueText, sourceNodeIds: [], children: [] }];
         cell.repairReason = "split-merged-table-cell";
         cell.splitFromCellId = previous.id;
         summary.splitCellCount += 1;

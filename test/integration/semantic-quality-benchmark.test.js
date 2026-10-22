@@ -25,3 +25,22 @@ test("benchmark rejects empty references rather than reporting an empty pass", a
   const manifestPath = path.join(dir, "manifest.json"); await writeFile(manifestPath, JSON.stringify({ cases: [] }));
   await assert.rejects(runSemanticBenchmark({ manifestPath }), /nonempty cases/);
 });
+
+test("table scoring follows unique content owners to cells and rejects misplaced header semantics", () => {
+  const semantic = { nodes: [{ id: "h", sourceBlockId: "header", role: "TH" }, { id: "v", sourceBlockId: "value", role: "TD" }], orderedNodeIds: ["h", "v"] };
+  const header = { type: "TH", headerId: "header-id", children: [{ type: "Span", sourceNodeIds: ["h"] }] };
+  const value = { type: "TD", tableAttrs: { Headers: ["header-id"] }, children: [{ type: "Span", sourceNodeIds: ["v"] }] };
+  const tagging = { root: { type: "Table", children: [{ type: "TR", children: [header, value] }] } };
+  const expected = { headers: { value: ["header"], header: [] } };
+  assert.ok(scoreSemanticCase(expected, semantic, tagging).every(c => c.status === "pass"));
+  for (const mutation of [
+    (h, v) => { v.children[0].tableAttrs = v.tableAttrs; delete v.tableAttrs; },
+    h => { h.type = "TD"; },
+    h => { h.type = "P"; },
+    (h, v) => { v.sourceNodeIds = ["v"]; }
+  ]) {
+    const bad = structuredClone(tagging), [h, v] = bad.root.children[0].children;
+    mutation(h, v);
+    assert.ok(scoreSemanticCase(expected, semantic, bad).some(c => c.dimension === "tableHeaders" && c.status === "fail"));
+  }
+});

@@ -219,8 +219,8 @@ function flattenTagTree(node, semanticById, records, parentId = "", labelSource)
   const bbox = firstSourceNode?.bbox || [];
   const rowSpan = node.rowSpan || firstSourceNode?.tableRowSpan || "";
   const columnSpan = node.columnSpan || firstSourceNode?.tableColumnSpan || "";
-  const tableRowIndex = firstSourceNode?.tableRowIndex ?? "";
-  const tableColumnIndex = firstSourceNode?.tableColumnIndex ?? "";
+  const tableRowIndex = node.tableRowIndex ?? firstSourceNode?.tableRowIndex ?? "";
+  const tableColumnIndex = node.tableColumnIndex ?? firstSourceNode?.tableColumnIndex ?? "";
   const tableSection = node.tableSection || firstSourceNode?.tableSection || "";
   const scope = inferTableScope(node, firstSourceNode, rowSpan, columnSpan);
 
@@ -267,8 +267,8 @@ function inferTableScope(node, sourceNode, rowSpan, columnSpan) {
   }
 
   const section = node.tableSection || sourceNode?.tableSection || "";
-  const rowIdx = sourceNode?.tableRowIndex ?? -1;
-  const colIdx = sourceNode?.tableColumnIndex ?? -1;
+  const rowIdx = node.tableRowIndex ?? sourceNode?.tableRowIndex ?? -1;
+  const colIdx = node.tableColumnIndex ?? sourceNode?.tableColumnIndex ?? -1;
 
   if (section === "head" || rowIdx === 0) {
     return "Column";

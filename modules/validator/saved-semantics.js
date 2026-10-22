@@ -51,8 +51,10 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
         add("COLUMN_SPAN", id, n.columnSpan || 1, saved.columnSpan);
       }
       if (n.listNumbering) add("LIST_NUMBERING", id, n.listNumbering, saved.listNumbering);
-      if (n.actualText) add("ACTUAL_TEXT", id, n.actualText, saved.actualText);
-      if (n.alt) add("ALTERNATE_TEXT", id, n.alt, saved.alt);
+      // Unexpected replacement/alternate text can override valid child semantics.
+      // Check absence too, rather than only verifying properties requested by intent.
+      add("ACTUAL_TEXT", id, n.actualText || "", saved.actualText || "");
+      add("ALTERNATE_TEXT", id, n.alt || "", saved.alt || "");
       if ((n.sourceNodeIds?.length || n.type === "Lbl") && (n.actualText || n.label || "").trim()) {
         const seen = new Set();
         const hasContent = (element) => {
