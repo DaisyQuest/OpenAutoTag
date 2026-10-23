@@ -551,6 +551,11 @@ function analyzePageTables(page, pageVector) {
 
   return {
     pageNumber: page.pageNumber,
+    graphicEvidence: {
+      status: pageVector.obliqueLimitExceeded ? "limit-exceeded" : "available",
+      obliqueSegments: (pageVector.obliqueSegments || []).map(([x1,y1,x2,y2]) =>
+        [x1, round(page.height-y1), x2, round(page.height-y2)])
+    },
     vectorSummary: {
       strokedSegmentCount: normalizedSegments.length,
       horizontalSegmentCount: horizontalSegments.length,

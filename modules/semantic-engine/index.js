@@ -20,6 +20,7 @@ function isHeadingBlock(block) {
 }
 
 function isTableCandidate(block) {
+  if (block.diagramRegionId) return false;
   return (
     block.blockType === "table-cell" ||
     block.blockType === "table" ||
@@ -35,6 +36,7 @@ function isTableCandidate(block) {
 }
 
 function isListItemBlock(block) {
+  if (block.diagramRegionId) return false;
   const text = String(block.text || "").trim();
   return (
     block.blockType === "list-item" ||
@@ -334,6 +336,7 @@ function inferListMetadata(block, pageNumber, index, state) {
 }
 
 function inferRole(block, artifactPlacement, tableMetadata) {
+  if (block.diagramRegionId) return "P";
   if (artifactPlacement) {
     return "Artifact";
   }
@@ -601,6 +604,7 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     ...(block.fontName ? { fontName: block.fontName } : {}),
     ...(["ltr", "rtl"].includes(block.direction) ? { direction: block.direction } : {}),
     ...(block.formFieldIds?.length ? { formFieldIds: [...block.formFieldIds] } : {}),
+    ...(block.diagramRegionId ? { diagramRegionId: block.diagramRegionId } : {}),
     ...(block.listMarker ? { listMarker: block.listMarker } : {}),
     ...(block.writingMode ? { writingMode: block.writingMode } : {}),
     ...Object.fromEntries(["captionForId", "footnoteReferenceId", "asideAnchorId", "scope"].filter((key) => typeof block[key] === "string").map((key) => [key, block[key]])),
@@ -669,6 +673,7 @@ function computeLeftMarginMode(paragraphs) {
 
 function isEligibleForBlockQuote(node) {
   if (!node) return false;
+  if (node.diagramRegionId) return false;
   if (node.role !== "P") return false;
   if (node.listGroupId) return false;
   if (node.tableId) return false;
@@ -933,12 +938,13 @@ export async function buildSemanticDocument(inputPath, options) {
     }
 
     const pageNodes = buildNodesForPage(page, state, effectiveOptions);
-    const pairs = inferLabelValuePairs(pageNodes);
+    const pairs = inferLabelValuePairs(pageNodes.filter(n=>!n.diagramRegionId));
     pairRelations.push(...pairs.relations);
     if(pairs.limited)pairTasks.push({code:"LABEL_VALUE_INFERENCE_LIMIT",pageNumber:page.pageNumber});
     nodes.push(...pageNodes);
   }
-  const running = inferRunningContent(nodes, layoutDocument.pages);
+  const inferenceNodes = nodes.filter(n=>!n.diagramRegionId);
+  const running = inferRunningContent(inferenceNodes, layoutDocument.pages);
   for(const page of layoutDocument.pages) {
     // Determine the body margin after excluding evidenced running content.
     markBlockQuotesForPage(nodes.filter(n=>n.pageNumber===page.pageNumber), {
@@ -952,18 +958,18 @@ export async function buildSemanticDocument(inputPath, options) {
   const sourceIds = new Map(nodes.map((n) => [n.sourceBlockId, n.id]));
   for (const node of nodes) for (const key of ["captionForId", "footnoteReferenceId", "asideAnchorId"])
     if (sourceIds.has(node[key])) node[key] = sourceIds.get(node[key]);
-  const headingReviewTasks = refineHeadingMembership(nodes, layoutDocument.pages);
-  markBibEntries(nodes);
-  markFootnotes(nodes, layoutDocument.pages);
+  const headingReviewTasks = refineHeadingMembership(inferenceNodes, layoutDocument.pages);
+  markBibEntries(inferenceNodes);
+  markFootnotes(inferenceNodes, layoutDocument.pages);
   const headingMerge = mergeHeadingContinuations(nodes);
   const refined = headingMerge.nodes;
   const relationships = enrichDocumentRelations(refined, layoutDocument.pages);
-  headingReviewTasks.push(...refineHeadingMembership(refined, layoutDocument.pages));
+  headingReviewTasks.push(...refineHeadingMembership(refined.filter(n=>!n.diagramRegionId), layoutDocument.pages));
   const headings = inferDocumentHeadings(refined);
   const regions = inferRegionsAndAnchors(refined, layoutDocument.pages);
   const tables = refineTableTopology(refined, layoutDocument.pages);
   const figures = refineFigures(refined, layoutDocument.pages);
-  const boundaries = refineSequenceBoundaries(refined);
+  const boundaries = refineSequenceBoundaries(refined.filter(n=>!n.diagramRegionId));
 
   const semanticDocument = {
     schemaVersion: "1.0.0",
@@ -987,6 +993,10 @@ export async function buildSemanticDocument(inputPath, options) {
   };
   semanticDocument.relations.push(...pairRelations, ...regions.relations, ...figures.relations, ...boundaries.relations);
   semanticDocument.semanticReviewTasks.push(...running.tasks, ...pairTasks, ...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
+  for (const page of layoutDocument.pages) for (const diagram of page.diagramRegions || []) {
+    const members=refined.filter(n=>n.pageNumber===page.pageNumber && n.diagramRegionId===diagram.id);
+    semanticDocument.semanticReviewTasks.push({code:"DIAGRAM_DESCRIPTION_AND_ORDER_REQUIRED",pageNumber:page.pageNumber,candidates:members.map(n=>n.id)});
+  }
   for(const page of layoutDocument.pages) {
     for(const conflict of page.ocr?.alignmentReview||[]) semanticDocument.semanticReviewTasks.push({
       code:conflict.code,pageNumber:page.pageNumber,

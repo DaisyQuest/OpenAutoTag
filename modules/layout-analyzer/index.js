@@ -1,5 +1,6 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { detectProseColumns } from "./prose-columns.js";
+import { detectDiagramRegions, diagramLabel } from "./diagram-regions.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
@@ -544,6 +545,7 @@ function detectVectorTables(page, blocks, tableStructurePage, baselineFontSize) 
   const tables = [];
 
   for (const table of tableStructurePage.tables || []) {
+    if (!(table.cells || []).some(cell => (cell.assignedBlockIds || []).some(id => blockById.has(id)))) continue;
     const headerRows = detectVectorHeaderRows(table, blockById, baselineFontSize);
 
     for (const cell of table.cells || []) {
@@ -1632,12 +1634,16 @@ function adoptOrphanTableBlocks(tableMetaById, tables, page, allBlocks, baseline
 
 function analyzePage(page, baselineFontSize, tableStructurePage = null) {
   const thresholds = readThresholds();
-  const preclassifiedBlocks = page.textBlocks.map((block) => ({
-    ...block,
-    ...classifyBlock(block, baselineFontSize, thresholds, page)
-  }));
-  const vectorTableAnalysis = detectVectorTables(page, preclassifiedBlocks, tableStructurePage, baselineFontSize);
-  const remainingAfterVector = preclassifiedBlocks.filter((block) => !vectorTableAnalysis.tableMetaById.has(block.id));
+  const preclassifiedBlocks = page.textBlocks.map((block) => {
+    const classified={...block,...classifyBlock(block, baselineFontSize, thresholds, page)};
+    delete classified.diagramRegionId; // Recompute proposals from current evidence.
+    return classified;
+  });
+  const diagramRegions = detectDiagramRegions(page, preclassifiedBlocks, tableStructurePage);
+  const diagramByBlock = new Map(diagramRegions.flatMap(r => r.blockIds.map(id => [id, r.id])));
+  const tableCandidates = preclassifiedBlocks.filter(b => !diagramByBlock.has(b.id));
+  const vectorTableAnalysis = detectVectorTables(page, tableCandidates, tableStructurePage, baselineFontSize);
+  const remainingAfterVector = tableCandidates.filter((block) => !vectorTableAnalysis.tableMetaById.has(block.id));
   const sparseNumericTableAnalysis = detectSparseNumericTables(page, remainingAfterVector, baselineFontSize);
   const remainingAfterSparseNumeric = remainingAfterVector.filter(
     (block) => !sparseNumericTableAnalysis.tableMetaById.has(block.id) && !sparseNumericTableAnalysis.suppressedBlockIds.has(block.id)
@@ -1657,13 +1663,14 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
     ...textGridTableAnalysis.tables,
     ...borderlessTableAnalysis.tables
   ];
-  adoptOrphanTableBlocks(tableMetaById, tables, page, preclassifiedBlocks, baselineFontSize);
+  adoptOrphanTableBlocks(tableMetaById, tables, page, tableCandidates, baselineFontSize);
   const columns = detectColumns({ ...page, textBlocks: preclassifiedBlocks }, new Set(tableMetaById.keys()), thresholds);
   const largestTable = [...tables].sort(
     (left, right) => right.rowCount * right.columnCount - left.rowCount * left.columnCount
   )[0];
   const sourceBlocks = preclassifiedBlocks.filter((block) => !sparseNumericTableAnalysis.suppressedBlockIds.has(block.id));
   const textBlocks = [...sourceBlocks, ...sparseNumericTableAnalysis.syntheticBlocks].map((block) => {
+    if (diagramByBlock.has(block.id)) return {...diagramLabel(block, diagramByBlock.get(block.id)),columnHint:0,columnConfidence:0};
     const tableMetadata = tableMetaById.get(block.id);
     const columnHint = columns.count === 1 ? 0 : blockCenterX(block) < columns.splitX ? 0 : 1;
 
@@ -1689,6 +1696,7 @@ function analyzePage(page, baselineFontSize, tableStructurePage = null) {
   return {
     ...page,
     columns: columns.count,
+    diagramRegions,
     columnSplitX: columns.splitX,
     columnGutter: columns.gutter,
     structureSignals: {

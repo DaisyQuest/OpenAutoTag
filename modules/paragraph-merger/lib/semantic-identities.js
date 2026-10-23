@@ -1,5 +1,6 @@
 const unique=values=>[...new Set(values)];
 export function protectedBoundary(a,b) {
+  if(a.diagramRegionId || b.diagramRegionId)return "diagram label boundary";
   if((a.textProvenance === "ocr") !== (b.textProvenance === "ocr"))return "native/OCR boundary";
   if(a.pageNumber!==b.pageNumber || (a.columnHint??0)!==(b.columnHint??0))return "page or column boundary";
   if(a.tableId||b.tableId)return "table boundary";

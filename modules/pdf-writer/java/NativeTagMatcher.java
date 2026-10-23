@@ -448,6 +448,12 @@ public class NativeTagMatcher {
             char c = s.charAt(i);
             if (c == '\u00ad' || c == '\u200b' || c == '\u200c' || c == '\u200d' || c == '\ufeff') continue;
             if (c == '\u00a0') { sb.append(' '); continue; }
+            // PDFBox extraction expands presentation ligatures in the layout.
+            // Compare their text equivalence without changing source glyphs.
+            if (c >= '\ufb00' && c <= '\ufb06') {
+                sb.append(java.text.Normalizer.normalize(String.valueOf(c), java.text.Normalizer.Form.NFKC));
+                continue;
+            }
             if (c < 0x20 && c != '\t' && c != '\n' && c != '\r' && c != ' ') continue;
             sb.append(c);
         }

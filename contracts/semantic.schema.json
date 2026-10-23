@@ -67,6 +67,7 @@
             "type": "integer",
             "minimum": 1
           },
+          "diagramRegionId": {"type":"string","minLength":1},
           "sourceBlockId": {
             "type": "string",
             "minLength": 1

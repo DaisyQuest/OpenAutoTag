@@ -120,6 +120,7 @@
           "imageEvidenceError": {
             "type": "string"
           },
+          "diagramRegions": {"type":"array","maxItems":256,"items":{"type":"object","required":["id","bbox","titleBlockId","blockIds","evidence","status"],"properties":{"id":{"type":"string","minLength":1},"bbox":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"number"}},"titleBlockId":{"type":"string","minLength":1},"blockIds":{"type":"array","minItems":6,"maxItems":4096,"uniqueItems":true,"items":{"type":"string","minLength":1}},"figureId":{"type":"string","minLength":1},"evidence":{"enum":["image-with-diagram-title","connectors-with-diagram-title"]},"status":{"const":"review_required"}},"additionalProperties":false}},
           "columns": {
             "type": "integer",
             "minimum": 1
@@ -142,6 +143,7 @@
                 "text": {
                   "type": "string"
                 },
+                "diagramRegionId": {"type":"string","minLength":1},
                 "rawText": {
                   "type": "string"
                 },

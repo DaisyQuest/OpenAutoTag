@@ -1610,6 +1610,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
   let activeList = null;
   let listStack = [], activeListGroup = null;
   let activeTable = null;
+  let activeDiagram = null;
   let listIndex = 0;
   const listItemsBySource = new Map(), paragraphsByGroup = new Map();
   // Precedence constraints can split a table group around a heading or other
@@ -1644,6 +1645,19 @@ export async function buildTagTree(inputPath, overrides = {}) {
       // Running page furniture does not interrupt a declared semantic table.
       continue;
     }
+
+    if (node.diagramRegionId) {
+      if (node.role !== "P") throw new Error("Diagram label role requires review");
+      if (!activeDiagram || activeDiagram.group !== node.diagramRegionId || activeDiagram.parent !== currentContainer()) {
+        const section={id:`tag:diagram:${node.id}`,type:"Sect",children:[]};
+        currentContainer().children.push(section);
+        activeDiagram={group:node.diagramRegionId,parent:currentContainer(),section};
+      }
+      activeDiagram.section.children.push(createLeaf(node,headingNormalization));
+      activeList=null;activeTable=null;
+      continue;
+    }
+    activeDiagram=null;
 
     const headingLevel = getHeadingLevel(node);
     if (headingLevel) {

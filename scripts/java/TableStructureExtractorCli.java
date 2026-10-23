@@ -66,6 +66,8 @@ public class TableStructureExtractorCli {
         private final PDPage page;
         private final boolean displayPoints;
         private final List<LineSegment> strokedSegments = new ArrayList<>();
+        private final List<LineSegment> obliqueSegments = new ArrayList<>();
+        private boolean obliqueLimitExceeded;
         private final List<LineSegment> currentPathSegments = new ArrayList<>();
         private Point2D currentPoint;
         private Point2D subpathStart;
@@ -200,6 +202,9 @@ public class TableStructureExtractorCli {
             for (LineSegment segment : currentPathSegments) {
                 if (!"other".equals(segment.orientation)) {
                     strokedSegments.add(segment);
+                } else if (length(segment) >= 18) {
+                    if (obliqueSegments.size() < 4096) obliqueSegments.add(segment);
+                    else obliqueLimitExceeded = true;
                 }
             }
             clearCurrentPath();
@@ -240,6 +245,11 @@ public class TableStructureExtractorCli {
             result.put("width", round(displayPoints?(sideways?page.getCropBox().getHeight():page.getCropBox().getWidth())*page.getUserUnit():page.getMediaBox().getWidth()));
             result.put("height", round(displayPoints?(sideways?page.getCropBox().getWidth():page.getCropBox().getHeight())*page.getUserUnit():page.getMediaBox().getHeight()));
             result.put("segments", segments);
+            List<List<Double>> oblique = new ArrayList<>();
+            if (!obliqueLimitExceeded) for (LineSegment s : obliqueSegments)
+                oblique.add(List.of(round(s.x1), round(s.y1), round(s.x2), round(s.y2)));
+            result.put("obliqueSegments", oblique);
+            result.put("obliqueLimitExceeded", obliqueLimitExceeded);
 
             Map<String, Object> summary = new LinkedHashMap<>();
             summary.put("strokedSegmentCount", strokedSegments.size());

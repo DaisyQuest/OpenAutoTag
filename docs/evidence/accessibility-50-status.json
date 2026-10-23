@@ -527,8 +527,11 @@
       "improvement": "Diagram versus table discrimination",
       "requirement": "Prevent diagram label alignments from becoming false tables.",
       "acceptance": "Booklet diagrams and negative fixtures retain meaningful figure/text grouping; genuine aligned tables still work.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch27-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A45",

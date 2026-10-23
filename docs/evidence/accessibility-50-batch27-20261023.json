@@ -1,0 +1,529 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A44"
+  ],
+  "status": "completed",
+  "baselineCommit": "fb8e6d0d68c67fc05dbf0a18bf5075706d5746a0",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a44-baseline.log",
+      "sha256": "3332a6f2c93a111d88253b6fce0c2b5a6e45a9f13bcda948bfca04680fb4461a",
+      "passed": 863,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a44-affected-final.log",
+      "sha256": "2963a1a102e2d49c165ad3040117bc040655e338c538b1032a014779477b7958",
+      "passed": 54,
+      "failed": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 865,
+    "note": "The serial baseline passed 863 tests. It started before the final stale-evidence/label guards and the connector-limit test. The final 54-test affected run covers those paths; the current 865 configured cases are covered across overlapping runs. A single final 865-case run is not claimed.",
+    "coverage": {
+      "file": "modules/layout-analyzer/diagram-regions.js",
+      "lines": 100,
+      "branches": 94.94,
+      "functions": 100
+    }
+  },
+  "fixture": {
+    "pdfPath": "output\\accessibility-50-batch27-20261023\\fixture\\source.pdf",
+    "rawPath": "output\\accessibility-50-batch27-20261023\\fixture\\raw-layout.json",
+    "layoutPath": "output\\accessibility-50-batch27-20261023\\fixture\\layout.json",
+    "mapPath": "output\\accessibility-50-batch27-20261023\\fixture\\table-map.json",
+    "semanticPath": "output\\accessibility-50-batch27-20261023\\fixture\\semantic.json",
+    "tagsPath": "output\\accessibility-50-batch27-20261023\\fixture\\tagging.json",
+    "diagramLabels": [
+      {
+        "id": "n-1-2",
+        "text": "Component 0"
+      },
+      {
+        "id": "n-1-3",
+        "text": "Component 1"
+      },
+      {
+        "id": "n-1-4",
+        "text": "Component 2"
+      },
+      {
+        "id": "n-1-5",
+        "text": "Component 3"
+      },
+      {
+        "id": "n-1-6",
+        "text": "Component 4"
+      },
+      {
+        "id": "n-1-7",
+        "text": "Component 5"
+      },
+      {
+        "id": "n-1-8",
+        "text": "Component 6"
+      },
+      {
+        "id": "n-1-9",
+        "text": "Component 7"
+      }
+    ],
+    "cases": [
+      {
+        "mode": "native",
+        "outputPath": "output\\accessibility-50-batch27-20261023\\fixture\\native.pdf",
+        "saved": {
+          "passed": 526,
+          "failed": 0
+        }
+      },
+      {
+        "mode": "raster",
+        "outputPath": "output\\accessibility-50-batch27-20261023\\fixture\\raster.pdf",
+        "saved": {
+          "passed": 402,
+          "failed": 0
+        }
+      }
+    ],
+    "nativeFillSaveReopen": true,
+    "source": {
+      "path": "output\\accessibility-50-batch27-20261023\\fixture\\source.pdf",
+      "sha256": "b071bcb6e2902138cb16b850707e4e3c0ae5b03d112361cf7e4b05183ad0439c"
+    },
+    "semantic": {
+      "path": "output\\accessibility-50-batch27-20261023\\fixture\\semantic.json",
+      "sha256": "43a49ca50b87690b4d7b2c95f8ceb51495c4ddd20d9d377ea1a1813774d93e84"
+    },
+    "tagging": {
+      "path": "output\\accessibility-50-batch27-20261023\\fixture\\tagging.json",
+      "sha256": "b9801e4dc1582c487f9190c11a64fda530f9fd9cfa96206d4d6a43708566ba86"
+    },
+    "outputs": [
+      {
+        "mode": "native",
+        "pdf": {
+          "path": "output/accessibility-50-batch27-20261023/fixture/native.pdf",
+          "sha256": "cf65c2f18313fa52b9ad2a5b38f1df0118c20d7020dd5cd4388a59db25027df8"
+        },
+        "saved": {
+          "path": "output/accessibility-50-batch27-20261023/fixture/native-saved.json",
+          "sha256": "34927655f668a3b8a52f09375a07a658781b324a9c143a0089cdeff3a03bcfec",
+          "summary": {
+            "passed": 526,
+            "failed": 0
+          }
+        },
+        "validation": {
+          "path": "output/accessibility-50-batch27-20261023/fixture/native-validation.json",
+          "sha256": "37d0344ede1354625a87325ff23dd2cc1d3fa67c80787b62bd5eeedd717b3ade",
+          "raw": {
+            "passedRules": 106,
+            "failedRules": 0,
+            "passedChecks": 1386,
+            "failedChecks": 0
+          },
+          "fontAudit": {
+            "status": "ok",
+            "errorCount": 3,
+            "warningCount": 0,
+            "blockingPreVeraPdf": true
+          }
+        }
+      },
+      {
+        "mode": "raster",
+        "pdf": {
+          "path": "output/accessibility-50-batch27-20261023/fixture/raster.pdf",
+          "sha256": "445b4ec0dcec425dabcf9f017c91bc446333e7c35bcbaf09eda0616444f8acd7"
+        },
+        "saved": {
+          "path": "output/accessibility-50-batch27-20261023/fixture/raster-saved.json",
+          "sha256": "8f0f53f7961ae5d555a0fe77c9efb3abf0082dcfe4c2ec00a893a01217223a76",
+          "summary": {
+            "passed": 402,
+            "failed": 0
+          }
+        },
+        "validation": {
+          "path": "output/accessibility-50-batch27-20261023/fixture/raster-validation.json",
+          "sha256": "86c7755a457dd4b8cce1fd20110d1bdd7b25a0d8abbe605250dd9e72aaa32e81",
+          "raw": {
+            "passedRules": 106,
+            "failedRules": 0,
+            "passedChecks": 1305,
+            "failedChecks": 0
+          },
+          "fontAudit": {
+            "status": "ok",
+            "errorCount": 0,
+            "warningCount": 0,
+            "blockingPreVeraPdf": false
+          }
+        }
+      }
+    ]
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch27-20261023/independent-verification.json",
+    "sha256": "d37716eee3baf795c1c35fc2c037cdbd1426c1dbed6644748903a481466f4efe",
+    "pagePairs": 82,
+    "popplerDpi": 120,
+    "cases": [
+      {
+        "id": "diagram",
+        "sourceHash": "b071bcb6e2902138cb16b850707e4e3c0ae5b03d112361cf7e4b05183ad0439c",
+        "candidateHash": "cf65c2f18313fa52b9ad2a5b38f1df0118c20d7020dd5cd4388a59db25027df8",
+        "pairs": 4,
+        "diagramLabels": 8,
+        "originalTextBytesAndSpacingUnchanged": true,
+        "annotationsAndFieldsPreserved": true,
+        "pageGeometryPreserved": true,
+        "excludedInvisibleOcrStreamsOnPages": []
+      },
+      {
+        "id": "booklet",
+        "sourceHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+        "candidateHash": "1e4e8b8d33ddc4d45a04d174945316183de4902c7ef3df9ee6764e0ac042f785",
+        "pairs": 61,
+        "diagramLabels": 243,
+        "originalTextBytesAndSpacingUnchanged": true,
+        "annotationsAndFieldsPreserved": true,
+        "pageGeometryPreserved": true,
+        "excludedInvisibleOcrStreamsOnPages": [
+          15,
+          38
+        ]
+      },
+      {
+        "id": "nist-1299",
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "candidateHash": "7ce0e6ba51bbf8dcb1a89c6dca79dea0119d247945b859c88d99c196a5da25c5",
+        "pairs": 8,
+        "diagramLabels": 0,
+        "originalTextBytesAndSpacingUnchanged": true,
+        "annotationsAndFieldsPreserved": true,
+        "pageGeometryPreserved": true,
+        "excludedInvisibleOcrStreamsOnPages": []
+      },
+      {
+        "id": "nist-1300",
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "candidateHash": "30e74a0cc7aa70882e6c1fc48ac420b8f24965cfa9dd98d1318c626e8bcc1521",
+        "pairs": 9,
+        "diagramLabels": 0,
+        "originalTextBytesAndSpacingUnchanged": true,
+        "annotationsAndFieldsPreserved": true,
+        "pageGeometryPreserved": true,
+        "excludedInvisibleOcrStreamsOnPages": []
+      }
+    ],
+    "visuallyInspected": [
+      "diagram-filled-1-candidate.png",
+      "booklet-original-51-candidate.png"
+    ]
+  },
+  "real": {
+    "evidence": {
+      "path": "output/accessibility-50-batch27-20261023/real-evidence.json",
+      "sha256": "a9903836d007c06e2d609bf18183777ef6b497ed13d1d3f6742e2ee1e4aeb6fc"
+    },
+    "booklet": {
+      "originalSource": {
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+        "sha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96"
+      },
+      "url": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+      "qualifiedSource": {
+        "path": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+        "sha256": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d"
+      },
+      "layout": {
+        "path": "output/accessibility-50-batch27-20261023/booklet/02-layout.json",
+        "sha256": "56fe7968151520bd9f36ffb3129646b8023e07f3e1cc4f6d31b183a58abf9707"
+      },
+      "vectorMap": {
+        "path": "output/accessibility-50-batch27-20261023/booklet/table-structure.json",
+        "sha256": "2bf57a67afdfa29418660aba2a41b86036d4e63b499e5b5aaeed0efe911b9657"
+      },
+      "regions": [
+        {
+          "id": "diagram:15:1",
+          "pageNumber": 15,
+          "bbox": [
+            200.94002,
+            71.09998000000002,
+            606.12006,
+            460.73999
+          ],
+          "evidence": "image-with-diagram-title",
+          "labels": 146,
+          "status": "review_required"
+        },
+        {
+          "id": "diagram:51:1",
+          "pageNumber": 51,
+          "bbox": [
+            195.12,
+            79.97999999999999,
+            690.06,
+            474.48
+          ],
+          "evidence": "connectors-with-diagram-title",
+          "labels": 42,
+          "status": "review_required"
+        },
+        {
+          "id": "diagram:52:1",
+          "pageNumber": 52,
+          "bbox": [
+            60.599999999999994,
+            45.84,
+            793.68,
+            503.15999999999997
+          ],
+          "evidence": "connectors-with-diagram-title",
+          "labels": 55,
+          "status": "review_required"
+        }
+      ],
+      "falseTablesRemoved": 7,
+      "gridReviewsBefore": 6,
+      "gridReviewsAfter": 0,
+      "remainingDiagramSavedFailures": [
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-4:span",
+          "status": "fail",
+          "expected": "Te",
+          "actual": "TeeTee"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-5:span",
+          "status": "fail",
+          "expected": "lemetr",
+          "actual": "lmetrlmetr"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-19:span",
+          "status": "fail",
+          "expected": "DeepS",
+          "actual": "DeepSpDeeppS"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-20:span",
+          "status": "fail",
+          "expected": "pace",
+          "actual": "aceace"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-27:span",
+          "status": "fail",
+          "expected": "Network",
+          "actual": "twoNerkNerktwo"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-30:span",
+          "status": "fail",
+          "expected": "Telemetry",
+          "actual": "TeleymetrTeleymetr"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-34:span",
+          "status": "fail",
+          "expected": "Telem",
+          "actual": "TelemeTeleme"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-51-35:span",
+          "status": "fail",
+          "expected": "etry",
+          "actual": "trytry"
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-52-30:span",
+          "status": "fail",
+          "expected": "SECCHIHigherLevel",
+          "actual": "SECCHIHigherLevelSECCHIHigherLevelSECCHIHigherLevelSECCHIHigherLevel"
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-52-29:span",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-52-29:span",
+          "status": "fail",
+          "expected": "SECCHIHigherLevel",
+          "actual": ""
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-52-31:span",
+          "status": "fail",
+          "expected": "DSMSSWx",
+          "actual": "DSMSSWxDSMSSWxDSMSSWx"
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-52-32:span",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-52-32:span",
+          "status": "fail",
+          "expected": "DSMSSWx",
+          "actual": ""
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-52-40:span",
+          "status": "fail",
+          "expected": "S/WAVESHigherLevel",
+          "actual": "S/WAVESHigherLevelS/WAVESHigherLevelS/WAVESHigherLevel"
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-52-39:span",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_TEXT_COMPLETE",
+          "target": "oat:tag:n-52-39:span",
+          "status": "fail",
+          "expected": "S/WAVESHigherLevel",
+          "actual": ""
+        }
+      ]
+    },
+    "cases": [
+      {
+        "id": "booklet",
+        "sourcePath": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+        "sourceHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+        "candidatePath": "output/accessibility-50-batch27-20261023/booklet/candidate.pdf",
+        "candidateHash": "1e4e8b8d33ddc4d45a04d174945316183de4902c7ef3df9ee6764e0ac042f785",
+        "saved": {
+          "passed": 51063,
+          "failed": 192
+        },
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 192219,
+          "failedChecks": 6
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 6,
+          "warningCount": 1,
+          "blockingPreVeraPdf": true
+        },
+        "failedByCode": {
+          "CONTENT_TEXT_COMPLETE": 175,
+          "CONTENT_ATTACHED": 17
+        },
+        "ocrPending": 158,
+        "unchangedNistFailureEvidence": false
+      },
+      {
+        "id": "nist-1299",
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "candidatePath": "output/accessibility-50-batch27-20261023/nist-1299/candidate.pdf",
+        "candidateHash": "7ce0e6ba51bbf8dcb1a89c6dca79dea0119d247945b859c88d99c196a5da25c5",
+        "saved": {
+          "passed": 8907,
+          "failed": 15
+        },
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 41572,
+          "failedChecks": 1
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 3,
+          "warningCount": 0,
+          "blockingPreVeraPdf": true
+        },
+        "failedByCode": {
+          "CONTENT_TEXT_COMPLETE": 15
+        },
+        "ocrPending": 0,
+        "unchangedNistFailureEvidence": true
+      },
+      {
+        "id": "nist-1300",
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "candidatePath": "output/accessibility-50-batch27-20261023/nist-1300/candidate.pdf",
+        "candidateHash": "30e74a0cc7aa70882e6c1fc48ac420b8f24965cfa9dd98d1318c626e8bcc1521",
+        "saved": {
+          "passed": 13055,
+          "failed": 28
+        },
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 52000,
+          "failedChecks": 1
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 3,
+          "warningCount": 0,
+          "blockingPreVeraPdf": true
+        },
+        "failedByCode": {
+          "CONTENT_TEXT_COMPLETE": 24,
+          "CONTENT_ATTACHED": 4
+        },
+        "ocrPending": 0,
+        "unchangedNistFailureEvidence": true
+      }
+    ]
+  },
+  "retainedControls": [
+    {
+      "id": "TEST-FORM",
+      "path": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+      "sha256": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+      "rerun": false
+    },
+    {
+      "id": "prior-booklet",
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "rerun": false
+    }
+  ],
+  "limits": [
+    "Diagram title vocabulary is currently English and conservative; mixed illustrations/tables require review.",
+    "Saved text sections do not claim complete vector Figure attachment or a meaningful diagram description.",
+    "Booklet retains 192 saved failures including 17 diagram-label checks, six raw failures, six font findings and 158 pending OCR reviews.",
+    "NIST historical semantic replays remain unqualified with unchanged complete failure evidence.",
+    "Native fixture has three default-font findings; raster form editing is not qualified.",
+    "A45-A50 and authenticated reader/semantic review remain open."
+  ]
+}
