@@ -1,0 +1,449 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A36"
+  ],
+  "status": "completed",
+  "baselineCommit": "a9c8880adf1a7a9e3654f17428442a66d185a9cc",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a36-baseline.log",
+      "sha256": "b60e404e2b0ee5a63e1a1a6271aee7ec89355cb21fc0aa449c3ff9264c99ab4d",
+      "passed": 656,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "path": "tmp/a36-authored-scope.log",
+      "sha256": "b7318ab90705e013f0af40461842e8add5f958ac671033d1e7d6086918fa9732",
+      "passed": 39,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 657,
+    "note": "Overlapping runs. One added authored-source replacement test is covered by the final focused run; no single 657-case run or coverage percentage is claimed."
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch20-20261023/authored-scope/evidence.json",
+    "sha256": "4e3ff0115f53d980c8b831c0bc5a4fce65d23d5da9d9ac8837f4e846bfe9ef46",
+    "savedCases": 20,
+    "boundAnnotations": 12,
+    "reviewAnnotations": 10,
+    "sharedAnnotationRejectedBeforeSave": true,
+    "corruptionsRejected": 17,
+    "raw": {
+      "path": "output/accessibility-50-batch20-20261023/raw-fixtures.json",
+      "sha256": "5ecd7ee38eed6d0551b27406d14797cd3c4e1dffdd3b8c06ff566cd6949c2cc2",
+      "passedChecks": 4708,
+      "failedChecks": 0,
+      "engine": "veraPDF 1.30.3 Greenfield, UA1",
+      "fontAuditRun": false
+    }
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch20-20261023/independent-verification.json",
+    "sha256": "a8e6adc3490d86cde9892d1d2d3ca75f4de2ddcfbcf2d9ec8cf9a9a575c17ecc",
+    "cases": 22,
+    "popplerDpi": 120,
+    "pagePairs": 45,
+    "allPixelIdentical": true,
+    "sourceTextBytesAndAdjustmentsUnchanged": true,
+    "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+    "fieldValuesAndWidgetAppearanceBytesPreserved": true,
+    "notes": "The existing metadata pass may add missing descriptions and font maps; complete resource-dictionary byte equality is not claimed.",
+    "casesWithHashes": [
+      {
+        "id": "partial",
+        "sourceHash": "323a444cd8b61ffc42f347945504e69a0a03aece21dccb4a24b3e307f987f6ec",
+        "candidateHash": "2b30755a07375691743e8c6ea0e543038b2d05aac010f1b7b60babe88ea21558",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "operators",
+        "sourceHash": "7ad8a2162a0ac7549351b90779be04753bf3c32369a37d2242047e7fbeabed97",
+        "candidateHash": "9f6befe7528f8d1461f2b16cb822bac6bb8eb7da16dd48bba12408de01838e0c",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "array",
+        "sourceHash": "75616a0527dfa3c17f10377a1f78d4f201ac036ef464051dbfa34c9f9ab7565e",
+        "candidateHash": "7cc41a7abddb062c3d95fd3fed3c2c2e0676789d852c12f12a5dfa5f283e2910",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "simple",
+        "sourceHash": "7453cc2e80648c88959f14491d463d0e14c14b59b8718a6b50d74672ca4734cb",
+        "candidateHash": "270ec9689e72b2f2652d4392a2dc74e386da8f322bdb12589e107d6c95da171f",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 22,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "nested",
+        "sourceHash": "47311974bc220ae998d8e762aef1e914f77364d95130c46fff3651b66d947e0b",
+        "candidateHash": "2c2a0e0dc5c35bd7a167b3d2a21b65075db241a0c5d87e884561f50875734615",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 88,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "destination",
+        "sourceHash": "977dd509316ddd8ff63effc54799be77640229fe4c765ff6bd4aba5bc8d03ebc",
+        "candidateHash": "38df101adcd9cbe7421234a53eebf0c17088fb08dfbb1b7d2c590a5a476d21f9",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 4
+      },
+      {
+        "id": "authored-contents",
+        "sourceHash": "dcc6e18f99e4754a0bfbe2ef554146206e9de0256e1108961ac6c6f75cf2bd05",
+        "candidateHash": "72d1b41f6a66e733b8aacf2ea8c2a47feee63b16c948d56228691ae704a2a01e",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "appearance",
+        "sourceHash": "b398c934791e1741bfe6add7f0fac7b2bbe09d90f71b28d02fe56bd54ad0789c",
+        "candidateHash": "8208092bdf0d48ae98a25ff60fd419ae84966e5bc858ce950cebde3d31888ab2",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "two-links",
+        "sourceHash": "ddbb4de89e21016f6156edb9c63352cf49d5dfdde000a7e825afc6240515a8b9",
+        "candidateHash": "0b442c7c0a15936f9e05ce6d9294227107271eb020dea117ffdbcff144316940",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "overlap",
+        "sourceHash": "f7c19c388cd9fe60249ac5ff303d591440318d502fd337f4ae2c8e69f86bb973",
+        "candidateHash": "2a400c59bc04f08d2c40b0b978deb822a5f0fecf8e7ed062124972d39cad54a0",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "no-anchor",
+        "sourceHash": "202e701daeab13c326899d5ba6a353a0ba6d8e71822270dae837ab5c14949877",
+        "candidateHash": "bd81b094ad738f5a3da7d9e5e00028d07e9aa1433bbce83d2fe24a379ca850d4",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "hidden",
+        "sourceHash": "beb821aee41cd837fef7c1fbc6e885dc1f597deccaef3d00c67bbd498dde01c3",
+        "candidateHash": "70674a22f82132e00f98031d3810e54833243901192f2c40f90c34d123bd73e6",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "quad-review",
+        "sourceHash": "524c515b3732e517864d213b5bd53711f786dad0e679ec760f320264cd9eb755",
+        "candidateHash": "5862b284c0419b796a0bdf3250a63ce58f61d5d5d2d3b27de5cc863a2ec5420b",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "two-nodes",
+        "sourceHash": "adbcfb0c740975845043f5fc8a9a2727db9db253ea69603c756d29eaaf893569",
+        "candidateHash": "196cb0e68456edf40284219f51fb886c5c5b347f324d2d329971345e87685506",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "existing-link",
+        "sourceHash": "e8c97d7178d359e8fabe284af337a92c66ebf3d8e283fee0f357aef1eedb6563",
+        "candidateHash": "edf245127d77aa2fd007fe19454cf4985bfa38a17dc3787a6c88953af0ca0cae",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 18,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "existing-link-boundary",
+        "sourceHash": "fe59ff058eb0c4fb91a9a2d98e4a5a7d14ac5449e0fa6d77cda26eb2455cfc4e",
+        "candidateHash": "af80b58ffb9d0dad7d983c580be006f855d4055948ef62bf4d468861fba05fb8",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "generated-text",
+        "sourceHash": "8a74f10783ab35b13b0ab00212cbd6f27526a28bb9d1e3abf03711244686c612",
+        "candidateHash": "9cf6cc6fe26714c137a030980eec39a51eb155076a5603b163fa62f0ae4a9d75",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "differing-text",
+        "sourceHash": "bc66c1824e75e1d718b427e9931ee79e8336e899e318463ca858d781f164e9b1",
+        "candidateHash": "133d360446882fbdb7da955d99da173d5d6932a3a12e4ebd49321487dd333e12",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "ancestor-text",
+        "sourceHash": "4b3ecde765c7a2e22ef38fa6b345c2ebd0c8940403aebda77a6b6ba5843a30e3",
+        "candidateHash": "97f94e4e7fb3a02abfceb073466519971c897c9c66ed12c33e8f2d2a925c0a0e",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "authored-scope",
+        "sourceHash": "42cf1245e01fb57b6f48584fad72f953019716dc3756a8c936fa24aa4647e9dd",
+        "candidateHash": "e3cc66eeb47b8cf9bc400aa1256567db19258a00557ed22a68caacc8010e940a",
+        "fields": 1,
+        "widgets": 1,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 44,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      },
+      {
+        "id": "nasa-hinode",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "c02555d4d809fd7abb6cbafbc72b1d8804bfc54cb7fd119757076280bee8e689",
+        "fields": 0,
+        "widgets": 0,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 1859,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 1
+      },
+      {
+        "id": "TEST-FORM",
+        "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+        "candidateHash": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+        "fields": 32,
+        "widgets": 33,
+        "annotationActionsGeometryFlagsAndExistingContentsPreserved": true,
+        "fieldValuesAndPropertiesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "sourceTextByteCount": 4296,
+        "textBytesAndAdjustmentsUnchanged": true,
+        "pagePairs": 2
+      }
+    ]
+  },
+  "nasa": {
+    "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+    "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+    "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+    "candidatePath": "output/accessibility-50-batch20-20261023/real/nasa-hinode/candidate.pdf",
+    "candidateHash": "c02555d4d809fd7abb6cbafbc72b1d8804bfc54cb7fd119757076280bee8e689",
+    "tags": {
+      "path": "output/accessibility-50-batch10-20261023/hinode/05-tagging.json",
+      "sha256": "2203cb5fbf7e20e0dee9a1d8dd0331805f27689d013e8583e8b07696fe928594"
+    },
+    "bound": 4,
+    "pending": 0,
+    "saved": {
+      "passed": 1043,
+      "failed": 0
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 5246,
+      "failedChecks": 0
+    },
+    "savedReport": {
+      "path": "output/accessibility-50-batch20-20261023/real/nasa-hinode/saved.json",
+      "sha256": "1d2ab898e84999519427a1fd8cdfc7e298a54290e423b7470434132581a1531c"
+    },
+    "rawReport": {
+      "path": "output/accessibility-50-batch20-20261023/real/nasa-hinode/validation.json",
+      "sha256": "14fc7a49fc662290dbfbb449424326ef0050cf64d91a2d7c6a6b40bf7b3e83a4"
+    },
+    "pdfboxPixels": {
+      "path": "tmp/a36-hinode-pdfbox.log",
+      "sha256": "60ab25c527f5001a44d29dbbc1890b9eff0aeb6edcb42bd5771f7bace34940ad"
+    },
+    "note": "Uses batch 10 corrected reading-order intent. Earlier pilot-intent replay counts are superseded."
+  },
+  "nistHistoricalIntentReplays": [
+    {
+      "id": "nist-1299",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+      "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+      "reason": "Missing emitted table header ID: tag:table:table:4:1:H_r0c2_2",
+      "candidateSaved": false,
+      "followUp": "A41-A45"
+    },
+    {
+      "id": "nist-1300",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+      "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+      "reason": "Missing emitted table header ID: tag:table:vector-table:3:1:H_r2c2_10",
+      "candidateSaved": false,
+      "followUp": "A41-A45"
+    }
+  ],
+  "testForm": {
+    "sourcePath": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+    "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+    "candidatePath": "output/accessibility-50-batch20-20261023/test-form/candidate.pdf",
+    "candidateHash": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+    "fields": 32,
+    "widgets": 33,
+    "saved": {
+      "passed": 2175,
+      "failed": 0
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 9874,
+      "failedChecks": 0
+    },
+    "details": {
+      "path": "output/accessibility-50-batch20-20261023/test-form/evidence.json",
+      "sha256": "7d349a2a0698e4b0be6e98be178724601bd95d8c951c0e6b3ef28e26d25eaaa1"
+    },
+    "sampledEditProof": {
+      "path": "output/accessibility-50-batch20-20261023/test-form/edit-probes/proof.json",
+      "sha256": "6e4d50dc095369528fd27ec7f10ece6c9abdbe50fd135463586408fbc4ba04e4"
+    },
+    "verifiedSamples": 5,
+    "reviewSamples": 2
+  },
+  "booklet": {
+    "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+    "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+    "changed": false,
+    "priorRawFailures": 6,
+    "priorSavedFailures": 196,
+    "priorPendingOcr": 158,
+    "note": "Prior evidence retained by exact hash; not rerun in this batch."
+  },
+  "references": [
+    "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11",
+    "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html"
+  ],
+  "limitations": [
+    "Supported rectangular anchors must have complete unique source glyph coverage and one intended leaf owner.",
+    "Authored/differing/ancestor replacement text, ambiguous geometry, QuadPoints and cross-node grouping remain explicit reviews.",
+    "Review declarations do not establish complete link tagging even if saved structural or raw conformance checks pass. A50 must retain these unresolved statuses.",
+    "Human link-purpose, reading-order, keyboard and screen-reader qualification remains required. No fully accessible PDF claim."
+  ]
+}

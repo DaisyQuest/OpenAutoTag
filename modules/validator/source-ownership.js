@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { inspectOcrLayer } from "./ocr-layer.js";
+import { inspectNativeLinks } from "./native-links.js";
 
 const address = r => `${r.pageNumber}:${r.streamOrigin}:${r.operatorIndex}`;
 const glyphKey = (page, index) => `${page}:${index}`;
@@ -51,12 +52,14 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
     }
   }
   const contentOwners = new Map();
+  const links = inspectNativeLinks({ source, inspection, ownership, sourceRuns, intendedNodes, add });
+  result.redundantActualText = links.redundantActualText;
   const elements = new Map(inspection.structure.map(n => [n.objectRef, n])), intended = new Set(byTag.values());
   const intendedOwner = node => {
     const seen = new Set();
     while (node && !seen.has(node.objectRef) && seen.size <= 128) {
       if (intended.has(node.identifier)) return node.identifier;
-      if (node.role !== "Span") return null;
+      if (node.role !== "Span" && !(node.role === "Link" && links.transparent.has(node.objectRef))) return null;
       seen.add(node.objectRef); node = elements.get(node.parentRef);
     }
     return null;
@@ -76,7 +79,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
     add("SOURCE_PAINT_OWNER", `${address(run)}:glyphs:${run.glyphStart}-${run.glyphEnd}`, true, valid);
     if (!valid) allOwnersMatch = false;
   }
-  result.sourceVerified = sequenceMatches && allOwnersMatch && ocr.valid;
+  result.sourceVerified = sequenceMatches && allOwnersMatch && ocr.valid && links.valid;
   return result;
 }
 

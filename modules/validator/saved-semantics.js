@@ -73,7 +73,8 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
       if (n.listNumbering) add("LIST_NUMBERING", id, n.listNumbering, saved.listNumbering);
       // Unexpected replacement/alternate text can override valid child semantics.
       // Check absence too, rather than only verifying properties requested by intent.
-      add("ACTUAL_TEXT", id, n.actualText || "", saved.actualText || "");
+      const redundantReplacement = ownership.sourceVerified && ownership.redundantActualText?.has(id);
+      add("ACTUAL_TEXT", id, redundantReplacement ? "" : n.actualText || "", saved.actualText || "");
       // An empty replacement suppresses otherwise valid text; absence is different.
       if (saved.actualTextPresent && !saved.actualText) add("EMPTY_ACTUAL_TEXT", id, false, true);
       add("ALTERNATE_TEXT", id, n.alt || "", saved.alt || "");

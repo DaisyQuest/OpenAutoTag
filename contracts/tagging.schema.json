@@ -77,6 +77,7 @@
             "Aside",
             "BlockQuote",
             "Span",
+            "Link",
             "Form",
             "Table",
             "THead",

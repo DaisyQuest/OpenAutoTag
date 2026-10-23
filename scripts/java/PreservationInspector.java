@@ -50,6 +50,7 @@ public final class PreservationInspector {
             item.put("contentHash", fingerprint(page.getCOSObject().getItem(COSName.CONTENTS), Set.of()));
             item.put("resourcesHash", fingerprint(page.getResources() == null ? null : page.getResources().getCOSObject(), Set.of()));
             List<String> annotations = new ArrayList<>();
+            int annotationIndex=0;
             for (var annotation : page.getAnnotations()) {
                 COSDictionary dict = annotation.getCOSObject();
                 registerParentScope(dict);
@@ -60,6 +61,13 @@ public final class PreservationInspector {
                     String uri = action != null && "URI".equals(action.getNameAsString(COSName.S)) ? action.getString(COSName.URI, "") : "";
                     Map<String, Object> itemLink = new LinkedHashMap<>();
                     itemLink.put("digest", digest); itemLink.put("page", pagesByDict.get(page.getCOSObject()));
+                    itemLink.put("nativeDigest",hash(canonical(dict,Set.of("P","Parent","StructParent","Contents"),Collections.newSetFromMap(new IdentityHashMap<>()),new int[]{0},0,pagesByDict)));
+                    itemLink.put("annotationIndex",annotationIndex);
+                    var rectangle=annotation.getRectangle();
+                    itemLink.put("rectangle",rectangle==null?null:Arrays.asList(rectangle.getLowerLeftX(),rectangle.getLowerLeftY(),rectangle.getUpperRightX(),rectangle.getUpperRightY()));
+                    itemLink.put("visible",!annotation.isHidden()&&!annotation.isInvisible()&&!annotation.isNoView());
+                    itemLink.put("quadPointsPresent",dict.containsKey(COSName.getPDFName("QuadPoints")));
+                    itemLink.put("structParent",dict.getInt(COSName.STRUCT_PARENT,-1));
                     itemLink.put("uri", uri); itemLink.put("contents", dict.getString(COSName.CONTENTS, "")); itemLink.put("owners", new ArrayList<String>());
                     if (links.putIfAbsent(requiredRef(dict), itemLink) != null) throw new IOException("Duplicate link annotation");
                 }
@@ -70,6 +78,7 @@ public final class PreservationInspector {
                     widget.put("digest", digest); widget.put("page", pagesByDict.get(page.getCOSObject()));
                     widget.put("owners", new ArrayList<Map<String, Object>>()); widgets.put(key, widget);
                 } else annotations.add(digest);
+                annotationIndex++;
             }
             item.put("annotationsHash", hash(String.join("|", annotations)));
             pages.add(item);
@@ -373,23 +382,30 @@ public final class PreservationInspector {
         return hash(canonical(value, skip, Collections.newSetFromMap(new IdentityHashMap<>()), new int[]{0}, 0));
     }
     private static String canonical(COSBase raw, Set<String> skip, Set<COSBase> active, int[] count, int depth) throws Exception {
+        return canonical(raw,skip,active,count,depth,null);
+    }
+    private static String canonical(COSBase raw, Set<String> skip, Set<COSBase> active, int[] count, int depth, Map<COSDictionary,Integer> pageRefs) throws Exception {
         if (depth > MAX_DEPTH || ++count[0] > MAX_NODES) throw new IOException("Resource traversal limit exceeded");
         COSBase value = resolve(raw);
         if (value == null || value instanceof COSNull) return "null";
         if (value instanceof COSString) return "string:" + HexFormat.of().formatHex(((COSString) value).getBytes());
         if (!(value instanceof COSArray) && !(value instanceof COSDictionary)) return value.toString();
+        // A local destination points to a page, whose content is intentionally
+        // rewritten by native tagging. Preserve target identity by page ordinal
+        // rather than hashing the entire page graph as part of a link action.
+        if(pageRefs!=null&&value instanceof COSDictionary&&pageRefs.containsKey(value))return "page:"+pageRefs.get(value);
         if (!active.add(value)) return "cycle:" + ref(value);
         try {
             if (value instanceof COSArray) {
                 StringBuilder out = new StringBuilder("[");
-                for (COSBase kid : (COSArray) value) { String item = canonical(kid, Set.of(), active, count, depth + 1); out.append(item.length()).append(':').append(item); }
+                for (COSBase kid : (COSArray) value) { String item = canonical(kid, Set.of(), active, count, depth + 1,pageRefs); out.append(item.length()).append(':').append(item); }
                 return out.append(']').toString();
             }
             COSDictionary dict = (COSDictionary) value; StringBuilder out = new StringBuilder("{");
             List<COSName> keys = new ArrayList<>(dict.keySet()); keys.sort(Comparator.comparing(COSName::getName));
             for (COSName key : keys) {
                 if (skip.contains(key.getName()) || (value instanceof COSStream && Set.of("Length", "Filter", "DecodeParms").contains(key.getName()))) continue;
-                String item = canonical(dict.getItem(key), Set.of(), active, count, depth + 1);
+                String item = canonical(dict.getItem(key), Set.of(), active, count, depth + 1,pageRefs);
                 out.append(key.getName().length()).append(':').append(key.getName()).append(item.length()).append(':').append(item);
             }
             if (value instanceof COSStream) try (InputStream in = ((COSStream) value).createInputStream()) { out.append("stream:").append(streamHash(in, MAX_STREAM_BYTES)); }

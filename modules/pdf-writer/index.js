@@ -166,7 +166,7 @@ async function needsCompilation() {
 }
 
 function collectNativeJavaSources() {
-  const sources = ["EditableFontProof.java", "QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
+  const sources = ["NativeLinkOwnership.java", "EditableFontProof.java", "QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
   sources.push(path.join(nativeJavaDir, "OcrTextLayer.java"));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);
@@ -718,7 +718,7 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
 
   if (!sourceBytes.equals(await readFile(pdfPath)) || !intentBytes.equals(await readFile(tagsPath))) throw new Error("Native source or tagging intent changed while writing");
   const hash = bytes => createHash("sha256").update(bytes).digest("hex");
-  const sourceOwnership = { schemaVersion: "1.0.0", sourceHash: hash(sourceBytes), intentHash: hash(intentBytes), ranges: rewriterReport.sourceOwnership };
+  const sourceOwnership = { schemaVersion: "1.0.0", sourceHash: hash(sourceBytes), intentHash: hash(intentBytes), ranges: rewriterReport.sourceOwnership, nativeLinks: rewriterReport.nativeLinks || [] };
   if (!validateSourceOwnership(sourceOwnership)) throw new Error(`Invalid source ownership evidence: ${ajv.errorsText(validateSourceOwnership.errors)}`);
   const sourceOwnershipPath = `${outputPath}.ownership.json`;
   await writeFile(sourceOwnershipPath, JSON.stringify(sourceOwnership, null, 2));

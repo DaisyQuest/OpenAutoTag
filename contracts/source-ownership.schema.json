@@ -8,6 +8,7 @@
     "schemaVersion": { "const": "1.0.0" },
     "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "intentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nativeLinks": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/nativeLink" } },
     "ranges": { "type": "array", "maxItems": 100000, "items": {
       "type": "object", "required": ["pageNumber", "streamOrigin", "operatorIndex", "glyphStart", "glyphEnd", "tagNodeId"],
       "properties": {
@@ -18,5 +19,24 @@
         "tagNodeId": { "type": "string", "minLength": 1 }
       }, "additionalProperties": false
     } }
+  },
+  "$defs": {
+    "nativeLink": {
+      "type": "object", "required": ["pageNumber", "annotationIndex", "sourceAnnotationRef", "status", "reason"],
+      "properties": {
+        "pageNumber": { "type": "integer", "minimum": 1 }, "annotationIndex": { "type": "integer", "minimum": 0 },
+        "sourceAnnotationRef": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["bound", "review_required"] }, "reason": { "type": "string", "minLength": 1 },
+        "ownerTagId": { "type": "string", "minLength": 1 }, "anchorText": { "type": "string", "minLength": 1 },
+        "linkStructureId": { "type": "string", "minLength": 1 }, "parentTreeKey": { "type": "integer", "minimum": 0 },
+        "suppressedRedundantActualText": { "const": true, "description": "Only a generated leaf replacement exactly equal to the complete source glyph text may be omitted; the saved validator independently verifies this claim." },
+        "ranges": { "type": "array", "minItems": 1, "maxItems": 100000, "items": {
+          "type": "object", "required": ["streamOrigin", "operatorIndex", "glyphStart", "glyphEnd"],
+          "properties": { "streamOrigin": { "type": "string", "pattern": "^page(?:/[0-9]+)*$" }, "operatorIndex": { "type": "integer", "minimum": 0 }, "glyphStart": { "type": "integer", "minimum": 0 }, "glyphEnd": { "type": "integer", "minimum": 1 } }, "additionalProperties": false
+        } }
+      },
+      "allOf": [{ "if": { "properties": { "status": { "const": "bound" } } }, "then": { "required": ["ownerTagId", "anchorText", "linkStructureId", "parentTreeKey", "ranges"] } }],
+      "additionalProperties": false
+    }
   }, "additionalProperties": false
 }

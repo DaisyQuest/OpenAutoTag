@@ -1,6 +1,20 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Native link ownership (A36, 2026-10-23):
+Native rewriting binds unambiguous source glyph ranges, Link elements, annotation
+OBJRs and direct annotation ParentTree entries without changing anchor bytes,
+spacing, actions or rectangles. The source-ownership contract exposes bound and
+review_required nativeLinks. Saved validation independently proves exact source
+coverage, annotation identity, reciprocal ownership and unchanged geometry/actions.
+Only a generated leaf ActualText exactly equal to the complete source text may be
+omitted to expose an inline Link; this exception is independently verified.
+Authored/differing replacements, uncertain geometry and cross-node anchors stay
+for review. Additional Link containers never gain blanket ownership exemptions.
+Existing preservation fingerprints and CLI arguments remain compatible. Dedicated
+quad/rotation qualification, multiline grouping and final eligibility integration
+remain pending. See docs/accessibility-50-batch20-20261023.md.
+
 Sampled editable font qualification (A35, 2026-10-23):
 node modules/pdf-writer/editable-font-proof.js --pdf <candidate.pdf>
   --samples <source-bound-samples.json> --output-dir <fresh-directory>

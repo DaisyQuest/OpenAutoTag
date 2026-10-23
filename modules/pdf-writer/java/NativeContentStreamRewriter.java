@@ -292,6 +292,7 @@ public class NativeContentStreamRewriter {
         boolean partial;
         int glyphStart, glyphEnd, sourceGlyphCount;
         String sourceText, operandSha256;
+        NativeLinkOwnership.Link link;
     }
 
     /** An assignment: a tag node mapped to a set of operators with a given MCID */
@@ -312,6 +313,7 @@ public class NativeContentStreamRewriter {
         int pageNumber;
         final List<String> sourceOwnership = new ArrayList<>();
         List<Assignment> assignments = new ArrayList<>();
+        NativeLinkOwnership links;
         List<Integer> unmatchedOperatorSeqs = new ArrayList<>();
         List<Integer> unmatchedOperatorIndices = new ArrayList<>();
         Map<String, PDFormXObject> forms = new LinkedHashMap<>();
@@ -572,12 +574,40 @@ public class NativeContentStreamRewriter {
         }
     }
 
-    /** Each text operator owns one disjoint marked-content run. A semantic node
-     * can own many MCRs; extending a wrapper between its operators can swallow
-     * other nodes, whitespace artifacts or graphics in the source paint order.
-     * Reject duplicate sequence IDs and scoped lexical addresses. Each stream
-     * starts its own compact MCID numbering; its ParentTree slot disambiguates it.
-     */
+    /** Split source byte ranges at independently discovered annotation boundaries
+     * before assigning MCIDs. No text is decoded and re-encoded for this split. */
+    private static void prepareNativeLinks(PDDocument doc, PagePlan plan) throws IOException {
+        validatePartitions(plan);
+        plan.links=new NativeLinkOwnership(doc,plan.pageNumber);
+        if(plan.links.links.isEmpty())return;
+        for(Assignment assignment:plan.assignments) {
+            List<OpRef> expanded=new ArrayList<>();
+            for(OpRef ref:assignment.operators) {
+                var evidence=plan.links.operators.get(NativeLinkOwnership.address(ref.streamOrigin,ref.opIndexInStream));
+                if(!ref.lexicalIdentity||evidence==null) {expanded.add(ref);continue;}
+                var mapping=evidence.record().mapping;var owners=evidence.glyphLinks();
+                int first=ref.partial?ref.glyphStart:0,end=ref.partial?ref.glyphEnd:owners.length;
+                if(first<0||end>owners.length)throw new IOException("Native link glyph bounds disagree with source");
+                if(ref.partial&&(!mapping.sha256.equals(ref.operandSha256)||!mapping.text.equals(ref.sourceText)||mapping.glyphs.size()!=ref.sourceGlyphCount))
+                    throw new IOException("Native link source partition is stale");
+                boolean hasLink=false;for(int g=first;g<end;g++)if(owners[g]!=null)hasLink=true;
+                if(!hasLink){expanded.add(ref);continue;}
+                for(int start=first;start<end;) {
+                    int stop=start+1;while(stop<end&&owners[stop]==owners[start])stop++;
+                    OpRef part=new OpRef();part.seq=ref.seq;part.opIndexInStream=ref.opIndexInStream;part.streamOrigin=ref.streamOrigin;part.lexicalIdentity=true;
+                    part.x=ref.x;part.y=ref.y;part.sourceText=mapping.text;part.sourceGlyphCount=owners.length;part.operandSha256=mapping.sha256;
+                    part.glyphStart=start;part.glyphEnd=stop;part.partial=ref.partial||start!=0||stop!=owners.length;
+                    part.text=mapping.text.substring(mapping.glyphs.get(start).textStart,mapping.glyphs.get(stop-1).textEnd);part.link=owners[start];
+                    expanded.add(part);start=stop;
+                }
+            }
+            assignment.operators=expanded;
+        }
+    }
+
+    /** Each text operator owns a disjoint marked-content run. A semantic node can
+     * own many MCRs without swallowing unrelated paint between its operators.
+     * Each stream has its own MCID numbering, qualified by its ParentTree slot. */
     private static int splitAssignmentsIntoMarkedRuns(PagePlan plan) throws IOException {
         validatePartitions(plan);
         Map<String, Integer> nextMcids = new HashMap<>();
@@ -1132,10 +1162,7 @@ public class NativeContentStreamRewriter {
     }
 
     private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree) throws IOException {
-        if (tagTree == null) {
-            buildStructureTree(doc, plans);
-            return;
-        }
+        if (tagTree == null) tagTree = flatTagTree(plans);
 
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         PDStructureTreeRoot treeRoot = new PDStructureTreeRoot();
@@ -1150,13 +1177,7 @@ public class NativeContentStreamRewriter {
         // paragraph that wraps across a page break).
         Map<String, List<PageMcRef>> refsByTag = new LinkedHashMap<>();
         Map<Integer, COSArray> parentArraysByPageKey = new LinkedHashMap<>();
-        Map<PDPage, Double> pageDisplayHeight = new LinkedHashMap<>();
-        // Link annotations, grouped by page. Each Link annot maps to
-        // one Link StructElement that'll collect the MCIDs whose
-        // position falls inside the annot rect. StructParent keys are
-        // assigned after the page-level StructParents so every key is
-        // unique within the /ParentTree.
-        List<LinkAnnot> linkAnnots = new ArrayList<>();
+        List<NativeLinkOwnership.Link> linkAnnots = new ArrayList<>();
         int nextPageKey = 0;
 
         for (PagePlan plan : plans) {
@@ -1167,70 +1188,37 @@ public class NativeContentStreamRewriter {
             page.setStructParents(pageKey);
             page.getCOSObject().setItem(COSName.getPDFName("Tabs"), COSName.S);
 
-            PDRectangle cropBox = page.getCropBox();
-            pageDisplayHeight.put(page, cropBox != null ? (double) cropBox.getHeight() : 792.0);
-
-            // Link annotation wrapping is intentionally disabled in
-            // the current cut. A proper implementation needs:
-            //   1. Rotation-aware coordinate transform (annot rects
-            //      are in UN-rotated user space, op positions are in
-            //      rotated display space — they don't align on
-            //      /Rotate 90|270 pages today).
-            //   2. /ParentTree entries for annotations must be direct
-            //      struct-element refs, not COSArrays wrapping them
-            //      (ISO 32000-1 § 14.7.4.4). Our current PDNumberTreeNode
-            //      plumbing treats every slot as a COSArray, which is
-            //      correct for /StructParents on pages but wrong for
-            //      /StructParent on annots.
-            // Shipping the TH /Scope fix and the hierarchical structure
-            // tree as the high-ROI improvements; link wrapping stays
-            // queued for a follow-up when both gaps are resolved.
+            if(plan.links!=null)linkAnnots.addAll(plan.links.links);
 
             COSArray parentArray = new COSArray();
             parentArraysByPageKey.put(pageKey, parentArray);
             nextPageKey = installFormParents(plan, nextPageKey, parentArraysByPageKey);
 
             for (Assignment a : plan.assignments) {
-                // Use the centroid of the assignment's operators as
-                // the representative position for annot-rect tests.
-                // A single-operator assignment falls through cleanly;
-                // multi-op assignments average out in both axes which
-                // is the right behavior for a paragraph that spans a
-                // link's rect — we want the link to "catch" the
-                // assignment if the bulk of its text is inside.
-                double sumX = 0, sumY = 0; int n = 0;
-                for (OpRef op : a.operators) {
-                    if (!Double.isNaN(op.x) && !Double.isNaN(op.y)) { sumX += op.x; sumY += op.y; n++; }
-                }
-                double cx = n > 0 ? sumX / n : Double.NaN;
-                double cy = n > 0 ? sumY / n : Double.NaN;
                 PDFormXObject stream = plan.forms.get(a.operators.get(0).streamOrigin);
                 int ownerKey = stream == null ? pageKey : stream.getCOSObject().getInt(COSName.STRUCT_PARENTS);
                 refsByTag.computeIfAbsent(a.tagNodeId, k -> new ArrayList<>())
-                         .add(new PageMcRef(page, stream, a.mcid, ownerKey, cx, cy, a.authoredText));
+                         .add(new PageMcRef(page, stream, a.mcid, ownerKey, a.authoredText, a.operators));
             }
         }
 
-        // Walk tag tree and create structure elements. The tree's root
-        // is the Document node the tag-builder emits. Ancestor context
-        // threads through so element-specific attributes (e.g. TH
-        // /Scope, List /ListNumbering, /RowSpan on merged cells) can
-        // be derived from local tree position. Link annotations are
-        // matched against operator positions during the walk so
-        // link-covered MCIDs end up under a /Link StructElement.
+        qualifyNativeLinks(linkAnnots,refsByTag,tagTree);
         TreeContext rootContext = new TreeContext();
-        PDStructureElement rootElement = buildStructureSubtree(treeRoot, tagTree, rootContext, refsByTag, parentArraysByPageKey, linkAnnots, pageDisplayHeight);
+        PDStructureElement rootElement = buildStructureSubtree(treeRoot, tagTree, rootContext, refsByTag, parentArraysByPageKey);
         if (rootElement != null) treeRoot.appendKid(rootElement);
         StructureIdentifiers.install(treeRoot);
-
-        // Link annotation wrapping is disabled (see LinkAnnot
-        // comment in the page-collection loop above). No post-walk
-        // annotation bookkeeping to do.
 
         PDNumberTreeNode parentTree = new PDNumberTreeNode(PDParentTreeValue.class);
         Map<Integer, COSObjectable> numbers = new TreeMap<>();
         for (Map.Entry<Integer, COSArray> entry : parentArraysByPageKey.entrySet()) {
             numbers.put(entry.getKey(), new PDParentTreeValue(entry.getValue()));
+        }
+        for(NativeLinkOwnership.Link link:linkAnnots) if(link.element!=null) {
+            COSDictionary objr=new COSDictionary();objr.setItem(COSName.TYPE,COSName.getPDFName("OBJR"));objr.setItem(COSName.PG,link.page.getCOSObject());objr.setItem(COSName.OBJ,link.annotation.getCOSObject());
+            link.element.appendKid(new PDObjectReference(objr));
+            link.parentKey=nextPageKey++;link.annotation.getCOSObject().setInt(COSName.STRUCT_PARENT,link.parentKey);
+            numbers.put(link.parentKey,new PDParentTreeValue(link.element.getCOSObject()));
+            if(link.annotation.getContents()==null||link.annotation.getContents().isBlank())link.annotation.setContents(link.anchorText);
         }
         parentTree.setNumbers(numbers);
         treeRoot.setParentTree(parentTree);
@@ -1259,22 +1247,76 @@ public class NativeContentStreamRewriter {
     /**
      * Page- and stream-qualified marked-content reference for use while building
      * the hierarchical structure tree. Captures the PDF page, optional Form,
-     * MCID, /ParentTree key, and the operator's (x, y) position
-     * so downstream passes (e.g. Link-annotation wrapping) can decide
-     * whether the MCID falls inside a given page annotation rect.
+     * MCID, /ParentTree key and exact source operator ranges. Only a run whose
+     * ranges all identify the same qualified annotation can belong to its Link.
      */
     private static class PageMcRef {
         final PDPage page;
         final PDFormXObject stream;
         final int mcid;
         final int pageKey;
-        final double opX;
-        final double opY;
         final List<AuthoredText.Scope> authoredText;
-        PageMcRef(PDPage page, PDFormXObject stream, int mcid, int pageKey, double opX, double opY, List<AuthoredText.Scope> authoredText) {
-            this.page = page; this.stream = stream; this.mcid = mcid; this.pageKey = pageKey; this.opX = opX; this.opY = opY;
-            this.authoredText = authoredText;
+        final List<OpRef> operators;
+        NativeLinkOwnership.Link link;
+        PageMcRef(PDPage page,PDFormXObject stream,int mcid,int pageKey,List<AuthoredText.Scope> authoredText,List<OpRef> operators) {
+            this.page=page;this.stream=stream;this.mcid=mcid;this.pageKey=pageKey;this.authoredText=authoredText;this.operators=operators;
+            link=operators.get(0).link;
+            if(operators.stream().anyMatch(op->op.link!=link)) {
+                for(OpRef op:operators)if(op.link!=null)op.link.review("Authored replacement scope crosses an anchor boundary");
+                link=null;
+            }
         }
+    }
+
+    private static void qualifyNativeLinks(List<NativeLinkOwnership.Link> links,Map<String,List<PageMcRef>> refs,TagTreeNode tree) {
+        for(var entry:refs.entrySet()) for(PageMcRef ref:entry.getValue()) if(ref.link!=null) {
+            var link=ref.link;
+            if(link.ownerTagId!=null&&!link.ownerTagId.equals(entry.getKey()))link.review("Anchor spans separate semantic nodes; grouping requires review");
+            link.ownerTagId=entry.getKey();
+            if(!ref.authoredText.isEmpty())link.review("Authored replacement/expansion scope requires anchor review");
+            for(OpRef op:ref.operators) {
+                link.anchorText+=op.text;
+                link.ranges.add(Map.of("streamOrigin",op.streamOrigin,"operatorIndex",op.opIndexInStream,"glyphStart",op.glyphStart,"glyphEnd",op.glyphEnd));
+                for(int g=op.glyphStart;g<op.glyphEnd;g++) {
+                    String key=NativeLinkOwnership.glyphKey(op.streamOrigin,op.opIndexInStream,g);
+                    if(link.expected.contains(key)&&!link.assigned.add(key))link.review("Duplicate source anchor glyph ownership");
+                }
+            }
+        }
+        for(var link:links) {
+            if(link.uncertain)continue;
+            if(link.expected.isEmpty()||!link.expected.equals(link.assigned)){link.review("Anchor has missing or untagged source glyphs");continue;}
+            var ownerRefs=refs.get(link.ownerTagId);boolean begun=false,ended=false;
+            for(PageMcRef ref:ownerRefs) {
+                if(ref.link==link){if(ended)link.review("Anchor runs are separated by unrelated semantic content");begun=true;}
+                else if(begun)ended=true;
+            }
+            link.eligible=!link.uncertain;
+        }
+        qualifyLinkContainers(tree,links,refs,false);
+    }
+
+    private static void qualifyLinkContainers(TagTreeNode node,List<NativeLinkOwnership.Link> links,Map<String,List<PageMcRef>> refs,boolean blocked) {
+        for(var link:links)if(node.id.equals(link.ownerTagId)&&link.eligible) {
+            if(blocked||!node.children.isEmpty())link.review("Anchor container or replacement-text ancestry requires review");
+            else if("Link".equals(node.type)&&refs.getOrDefault(node.id,List.of()).stream().anyMatch(ref->ref.link!=link))
+                link.review("Existing Link tag contains text outside this annotation anchor");
+        }
+        // Generated replacement text identical to every original glyph is
+        // redundant and would mask the inline Link. Authored scopes have already
+        // disqualified their links. Keep differing replacements and ancestors.
+        if(!blocked&&node.children.isEmpty()&&node.actualText!=null&&!node.actualText.isEmpty()
+                &&links.stream().anyMatch(link->link.eligible&&node.id.equals(link.ownerTagId))) {
+            StringBuilder raw=new StringBuilder();
+            for(PageMcRef ref:refs.getOrDefault(node.id,List.of()))for(OpRef op:ref.operators)raw.append(op.text);
+            if(node.actualText.contentEquals(raw)) {
+                node.actualText=null;
+                for(var link:links)if(link.eligible&&node.id.equals(link.ownerTagId))link.suppressedRedundantActualText=true;
+            }
+        }
+        boolean replacement=node.actualText!=null&&!node.actualText.isEmpty();
+        for(var link:links)if(node.id.equals(link.ownerTagId)&&link.eligible&&replacement)link.review("Anchor container or replacement-text ancestry requires review");
+        for(TagTreeNode child:node.children)qualifyLinkContainers(child,links,refs,blocked||replacement||"Link".equals(node.type));
     }
 
     /**
@@ -1298,49 +1340,6 @@ public class NativeContentStreamRewriter {
             c.inheritedLang = this.inheritedLang;
             c.openHeadingLevel = this.openHeadingLevel;
             return c;
-        }
-    }
-
-    /**
-     * A link annotation and its page rectangle, used during structure
-     * tree construction to wrap the MCIDs whose text falls inside the
-     * link in a /Link StructElement with an /OBJR kid (Matterhorn
-     * 28-004, PDF/UA-1 §7.18.5). Collected once per doc up front so
-     * the recursive walker can cheap-intersect an operator position
-     * against the set.
-     */
-    private static class LinkAnnot {
-        final PDPage page;
-        final PDAnnotationLink annot;
-        final PDRectangle rect;
-        final int structParent;
-        int parentTreeKey = -1;
-        PDStructureElement emittedElement = null;
-        LinkAnnot(PDPage page, PDAnnotationLink annot, int structParent) {
-            this.page = page;
-            this.annot = annot;
-            this.rect = annot.getRectangle();
-            this.structParent = structParent;
-        }
-
-        /**
-         * PDF annotation rects use bottom-origin y coordinates (like
-         * raw PDF user space). Operator positions captured by our
-         * parser are in top-origin display space (y=0 at page top,
-         * coordinateOrigin="top"). Convert once per query using the
-         * page's cropBox height.
-         */
-        boolean containsDisplay(double opX, double opY, double pageDisplayHeight) {
-            if (rect == null) return false;
-            double llx = rect.getLowerLeftX();
-            double lly = rect.getLowerLeftY();
-            double urx = rect.getUpperRightX();
-            double ury = rect.getUpperRightY();
-            // Flip op y into bottom-origin PDF space.
-            double bottomY = pageDisplayHeight - opY;
-            double pad = 1.0; // 1pt slack for anti-aliasing/rounding
-            return opX >= llx - pad && opX <= urx + pad
-                && bottomY >= lly - pad && bottomY <= ury + pad;
         }
     }
 
@@ -1406,9 +1405,7 @@ public class NativeContentStreamRewriter {
             TagTreeNode node,
             TreeContext ctx,
             Map<String, List<PageMcRef>> refsByTag,
-            Map<Integer, COSArray> parentArraysByPageKey,
-            List<LinkAnnot> linkAnnots,
-            Map<PDPage, Double> pageDisplayHeight) throws IOException {
+            Map<Integer, COSArray> parentArraysByPageKey) throws IOException {
 
         // Derive child context from current — threshold updates to
         // boolean flags happen here before the recursive call so all
@@ -1421,7 +1418,7 @@ public class NativeContentStreamRewriter {
         List<PageMcRef> myRefs = refsByTag.getOrDefault(node.id, java.util.Collections.emptyList());
         List<PDStructureElement> childElements = new ArrayList<>();
         for (TagTreeNode child : node.children) {
-            PDStructureElement childEl = buildStructureSubtree(treeRoot, child, childCtx, refsByTag, parentArraysByPageKey, linkAnnots, pageDisplayHeight);
+            PDStructureElement childEl = buildStructureSubtree(treeRoot, child, childCtx, refsByTag, parentArraysByPageKey);
             if (childEl != null) childElements.add(childEl);
         }
         boolean hasSemanticText = node.actualText != null && !node.actualText.isEmpty();
@@ -1455,44 +1452,18 @@ public class NativeContentStreamRewriter {
             if (ref.stream != null) mcrDict.setItem(COSName.getPDFName("Stm"), ref.stream.getCOSObject());
             PDMarkedContentReference mcr = new PDMarkedContentReference(mcrDict);
 
-            // Link-annotation wrapping (Matterhorn 28-004 / PDF/UA-1
-            // §7.18.5). When the operator position falls inside a
-            // Link annotation's rect on this page, we insert a Link
-            // StructElement under the current element and route the
-            // MCID there. The Link element also gets an /OBJR child
-            // pointing at the annotation dict so assistive tech can
-            // follow the link target (JAWS's Links List, NVDA's "k"
-            // navigation). Multiple MCIDs under the same Link annot
-            // share the same Link StructElement.
-            PDStructureElement containerForMcr = el;
-            LinkAnnot matched = findLinkAnnot(ref, linkAnnots, pageDisplayHeight);
-            if (matched != null && !"Link".equals(node.type)) {
-                if (matched.emittedElement == null) {
-                    PDStructureElement linkEl = new PDStructureElement("Link", treeRoot);
-                    linkEl.setPage(ref.page);
-                    // /Contents is the fallback text the screen reader
-                    // announces if the Link has no text kids (JAWS
-                    // requirement; NVDA and VoiceOver tolerant). Use
-                    // the op text when available; annotation /Contents
-                    // wins when both are present.
-                    String existingContents = matched.annot.getContents();
-                    if (existingContents == null || existingContents.isEmpty()) {
-                        // PDAnnotationLink doesn't emit /Contents by
-                        // default; set one from the representative
-                        // op text so AT has something to speak.
-                        // Intentionally limited to 200 chars.
-                        matched.annot.setContents(truncate(textForLink(matched, myRefs), 200));
+            PDStructureElement containerForMcr=el;
+            NativeLinkOwnership.Link matched=ref.link;
+            if(matched!=null&&matched.eligible) {
+                if(matched.element==null) {
+                    if("Link".equals(node.type))matched.element=el;
+                    else {
+                        matched.element=new PDStructureElement("Link",el);matched.element.setPage(ref.page);
+                        matched.element.getCOSObject().setString(COSName.ID,"oat-native-link:"+matched.pageNumber+":"+matched.index);
+                        el.appendKid(matched.element);
                     }
-                    // Attach OBJR referencing the annotation dict.
-                    COSDictionary objrDict = new COSDictionary();
-                    objrDict.setItem(COSName.TYPE, COSName.getPDFName("OBJR"));
-                    objrDict.setItem(COSName.PG, ref.page.getCOSObject());
-                    objrDict.setItem(COSName.OBJ, matched.annot.getCOSObject());
-                    linkEl.appendKid(new PDObjectReference(objrDict));
-                    el.appendKid(linkEl);
-                    matched.emittedElement = linkEl;
                 }
-                containerForMcr = matched.emittedElement;
+                containerForMcr=matched.element;
             }
 
             containerForMcr = authoredRuns.parent(containerForMcr, ref.authoredText);
@@ -1524,45 +1495,6 @@ public class NativeContentStreamRewriter {
 
     private static String sanitizeNoteIdPart(String raw) {
         return raw == null ? "" : raw.replaceAll("[^A-Za-z0-9_.-]+", "-");
-    }
-
-    /**
-     * Find the first Link annotation on the ref's page whose rect
-     * contains the op's display-space position. A ref that falls
-     * inside two overlapping Link rects matches the first one — rare
-     * in practice (overlapping links are typically an authoring
-     * mistake), and deterministic resolution beats arbitrary.
-     */
-    private static LinkAnnot findLinkAnnot(PageMcRef ref, List<LinkAnnot> linkAnnots, Map<PDPage, Double> pageDisplayHeight) {
-        if (linkAnnots == null || linkAnnots.isEmpty()) return null;
-        if (Double.isNaN(ref.opX) || Double.isNaN(ref.opY)) return null;
-        Double ph = pageDisplayHeight.get(ref.page);
-        if (ph == null) return null;
-        for (LinkAnnot la : linkAnnots) {
-            if (la.page != ref.page) continue;
-            if (la.containsDisplay(ref.opX, ref.opY, ph)) return la;
-        }
-        return null;
-    }
-
-    private static String textForLink(LinkAnnot la, List<PageMcRef> refs) {
-        // Best-effort: prefer the Link annotation's action URI for
-        // /Contents, falling back to a concatenation of the matching
-        // refs' op text. We don't have direct access to op text from
-        // PageMcRef (we store position only), so URI is the practical
-        // fallback.
-        try {
-            if (la.annot.getAction() != null) {
-                String s = la.annot.getAction().toString();
-                if (s != null && !s.isEmpty()) return s;
-            }
-        } catch (Throwable ignore) {}
-        return "Link";
-    }
-
-    private static String truncate(String s, int max) {
-        if (s == null) return "";
-        return s.length() <= max ? s : s.substring(0, max);
     }
 
     private static void buildStructureTree(PDDocument doc, List<PagePlan> plans) {
@@ -1862,6 +1794,7 @@ public class NativeContentStreamRewriter {
                 }
 
                 PDPage page = doc.getPage(pageIndex);
+                prepareNativeLinks(doc,plan);
                 splitMarkedContentRuns += splitAssignmentsIntoMarkedRuns(plan);
                 System.err.println("[rewriter] Rewriting page " + plan.pageNumber
                         + " (" + plan.assignments.size() + " assignments, "
@@ -1915,6 +1848,8 @@ public class NativeContentStreamRewriter {
                 applyMetadata(doc, title, language);
             }
 
+            for(PagePlan plan:plans)if(plan.links!=null)plan.links.restoreAuthoredContents();
+
             // Cleanup can remove empty elements. Rebuild the index from the final reachable tree.
             StructureIdentifiers.install(doc.getDocumentCatalog().getStructureTreeRoot());
             doc.save(outputPath);
@@ -1958,9 +1893,10 @@ public class NativeContentStreamRewriter {
             json.append(",\"readingOrderStrategy\":").append(escapeJson(readingOrderStrategy));
             json.append(",\"title\":").append(escapeJson(title));
             json.append(",\"language\":").append(escapeJson(language));
+            json.append(",\"nativeLinks\":").append(QualifiedStructureRepairs.json(plans.stream().filter(p->p.links!=null).flatMap(p->p.links.links.stream()).map(NativeLinkOwnership.Link::report).toList()));
             json.append(",\"sourceOwnership\":[").append(String.join(",", plans.stream().flatMap(p->p.sourceOwnership.stream()).toList())).append("]");
             json.append("}");
-            System.out.println(json.toString());
+            System.out.write((json.toString()+"\n").getBytes(StandardCharsets.UTF_8));
         }
     }
 }
