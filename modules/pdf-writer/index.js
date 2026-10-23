@@ -646,6 +646,8 @@ async function runNativeRewriter({ pdfPath, tagPlanPath, tagsPath, outputPath, r
   if (tagsPath) {
     args.push("--tags", tagsPath);
     args.push("--ocr-font", path.join(repoRoot, "modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf"));
+    for (const name of ["NotoSansSymbols-Regular.ttf", "NotoSansSymbols2-Regular.ttf"])
+      args.push("--ocr-fallback-font", path.join(repoRoot, "modules/font-embedder/vendor/fonts/noto-symbols", name));
   }
   if (title) {
     args.push("--title", title);

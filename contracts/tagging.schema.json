@@ -90,7 +90,7 @@
           "type": "string"
         },
         "ocrSegments": {
-          "description": "Declared invisible OCR text in display points, bound by the tagging intent hash. Each entry must have its own saved text operator and this tag as its owner. Transcription and reading order still require review.",
+          "description": "Declared invisible OCR text in display points, bound by the tagging intent hash. Each entry must have its own saved marked-content sequence and this tag as its owner; font changes may use multiple text operators. Transcription and reading order still require review.",
           "type": "array", "minItems": 1, "maxItems": 10000,
           "items": {
             "type": "object", "required": ["pageNumber", "sourceBlockId", "text", "quad"],

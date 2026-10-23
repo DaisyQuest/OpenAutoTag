@@ -51,7 +51,20 @@ public class OcrLayerProbe {
                 }
                 System.out.println("pixels, images and editable fields preserved");return;
             }
-            PDPage page=doc.getPage(0);var streams=new ArrayList<PDStream>();page.getContentStreams().forEachRemaining(streams::add);
+            PDPage page=doc.getPage(0);
+            if(args[3].equals("font-glyph")||args[3].equals("font-embedding")) {
+                boolean changed=false;
+                for(COSName name:page.getResources().getFontNames()) {
+                    var font=page.getResources().getFont(name);
+                    if(font instanceof PDType0Font && font.getName().contains("NotoSansSymbols2")) {
+                        if(args[3].equals("font-glyph"))((PDType0Font)font).getDescendantFont().getCOSObject().setItem(COSName.CID_TO_GID_MAP,new PDStream(doc,new ByteArrayInputStream(new byte[131072]),COSName.FLATE_DECODE));
+                        else font.getFontDescriptor().getCOSObject().removeItem(COSName.FONT_FILE2);
+                        changed=true;
+                    }
+                }
+                if(!changed)throw new IOException("Fallback font missing from fixture");doc.save(args[2]);return;
+            }
+            var streams=new ArrayList<PDStream>();page.getContentStreams().forEachRemaining(streams::add);
             PDStream layer=streams.get(streams.size()-1);var tokens=new PDFStreamParser(bytes(layer)).parse();String mode=args[3];
             if(mode.equals("missing")){streams.remove(streams.size()-1);page.setContents(streams);}
             else {

@@ -176,7 +176,8 @@ final class SavedContentInspector {
                         run.put("artifact", frames.stream().anyMatch(Frame::artifact));
                         run.put("fontName", state.font == null ? "" : state.font.getName());
                         run.put("fontEmbedded", state.font != null && state.font.isEmbedded());
-                        List<List<Object>> decoded = new ArrayList<>(); text(args.get(args.size()-1), state.font, owners, decoded);
+                        List<List<Object>> decoded = new ArrayList<>(); boolean[] programs={true};text(args.get(args.size()-1), state.font, owners, decoded, programs);
+                        run.put("glyphProgramsPresent",programs[0]);
                         run.put("glyphs", decoded); run.put("glyphEnd", pageGlyphs);
                         if (textRuns.size() >= 100000) throw new IOException("Saved text run limit exceeded");
                         textRuns.add(run);
@@ -205,8 +206,8 @@ final class SavedContentInspector {
         return frames.stream().map(Frame::item).filter(Objects::nonNull).distinct().toList();
     }
     private static void graphics(List<Frame> frames) { for (Item owner : owners(frames)) owner.graphics++; }
-    private void text(COSBase value, PDFont font, List<Item> owners, List<List<Object>> decoded) throws IOException {
-        if (value instanceof COSArray) { for (COSBase child : (COSArray)value) if (child instanceof COSString) text(child, font, owners, decoded); return; }
+    private void text(COSBase value, PDFont font, List<Item> owners, List<List<Object>> decoded, boolean[] programs) throws IOException {
+        if (value instanceof COSArray) { for (COSBase child : (COSArray)value) if (child instanceof COSString) text(child, font, owners, decoded, programs); return; }
         if (!(value instanceof COSString)) return;
         ByteArrayInputStream bytes = new ByteArrayInputStream(((COSString)value).getBytes());
         while (bytes.available() > 0) {
@@ -214,6 +215,8 @@ final class SavedContentInspector {
             int before = bytes.available(), code = font == null ? bytes.read() : font.readCode(bytes);
             if (bytes.available() >= before) throw new IOException("Saved font decoder made no progress");
             String unicode = font == null ? null : font.toUnicode(code);
+            try { programs[0] &= font instanceof PDVectorFont && ((PDVectorFont)font).hasGlyph(code); }
+            catch(IOException | IllegalArgumentException unavailable) { programs[0]=false; }
             decoded.add(Arrays.asList(code, unicode == null ? "" : unicode)); pageGlyphs++;
             boolean unknown = unicode == null || unicode.isEmpty() || unicode.indexOf('\ufffd') >= 0;
             boolean meaningful = !unknown && unicode.codePoints().anyMatch(c -> !Character.isWhitespace(c) && !Character.isSpaceChar(c) && !Character.isISOControl(c) && Character.getType(c) != Character.FORMAT);

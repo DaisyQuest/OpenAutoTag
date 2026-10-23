@@ -1764,6 +1764,7 @@ public class NativeContentStreamRewriter {
     public static void main(String[] args) throws Exception {
         String pdfPath = null;
         String ocrFontPath = null;
+        List<String> ocrFallbackFonts = new ArrayList<>();
         String planPath = null;
         String outputPath = null;
         String tagsPath = null;
@@ -1783,6 +1784,9 @@ public class NativeContentStreamRewriter {
                     break;
                 case "--ocr-font":
                     if (i + 1 < args.length) ocrFontPath = args[++i];
+                    break;
+                case "--ocr-fallback-font":
+                    if (i + 1 < args.length) ocrFallbackFonts.add(args[++i]);
                     break;
                 case "--plan":
                 case "--tag-plan":
@@ -1826,15 +1830,19 @@ public class NativeContentStreamRewriter {
         // Load and modify the PDF
         try (PDDocument doc = Loader.loadPDF(new File(pdfPath))) {
             List<OcrTextLayer.Line> ocrLines=new ArrayList<>(); collectOcrLines(tagTree,ocrLines);
-            PDFont ocrFont=null;
+            OcrTextLayer.Fonts ocrFonts=null;
             if (!ocrLines.isEmpty()) {
                 if (ocrFontPath==null) throw new IOException("OCR requires an explicit embedded font");
                 if (ocrLines.size()>100000) throw new IOException("OCR line limit exceeded");
-                ocrFont=org.apache.pdfbox.pdmodel.font.PDType0Font.load(doc,new File(ocrFontPath));
+                List<PDFont> available=new ArrayList<>();
+                available.add(org.apache.pdfbox.pdmodel.font.PDType0Font.load(doc,new File(ocrFontPath)));
+                if(ocrFallbackFonts.size()>8)throw new IOException("OCR fallback font limit exceeded");
+                for(String file:ocrFallbackFonts)available.add(org.apache.pdfbox.pdmodel.font.PDType0Font.load(doc,new File(file)));
+                ocrFonts=new OcrTextLayer.Fonts(available);
                 Set<Integer> plannedPages=new HashSet<>();for(PagePlan p:plans)plannedPages.add(p.pageNumber);
                 for(OcrTextLayer.Line line:ocrLines) {
                     if(line.pageNumber()<1 || line.pageNumber()>doc.getNumberOfPages() || !plannedPages.contains(line.pageNumber())) throw new IOException("OCR page is not in the native plan");
-                    OcrTextLayer.validate(doc.getPage(line.pageNumber()-1),line,ocrFont);
+                    OcrTextLayer.validate(doc.getPage(line.pageNumber()-1),line,ocrFonts);
                 }
             }
             AuthoredText authoredText = new AuthoredText(doc);
@@ -1862,7 +1870,7 @@ public class NativeContentStreamRewriter {
                 RewriteResult res = rewritePageContentStream(doc, page, plan, listLabels, authoredText);
                 List<OcrTextLayer.Line> pageLines=ocrLines.stream().filter(l->l.pageNumber()==plan.pageNumber).toList();
                 int ocrMcid=plan.assignments.stream().mapToInt(a->a.mcid).max().orElse(-1)+1;
-                OcrTextLayer.append(doc,page,pageLines,ocrFont,ocrMcid);
+                OcrTextLayer.append(doc,page,pageLines,ocrFonts,ocrMcid);
                 for(OcrTextLayer.Line line:pageLines) {
                     Assignment a=new Assignment();a.tagNodeId=line.tagId();a.tagType=line.type();a.mcid=ocrMcid++;a.emitted=true;
                     OpRef ref=new OpRef();ref.x=line.quad()[6];ref.y=line.quad()[7];ref.text=line.text();a.operators.add(ref);

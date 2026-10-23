@@ -40,7 +40,22 @@ export function inspectOcrLayer({inspection, source, intendedNodes, add}) {
     if(run.glyphStart >= (counts.get(run.pageNumber)||0) && run.glyphs.length)generatedRuns.push(run);
     else nativeRuns.push(run);
   }
-  for(const run of generatedRuns){const page=generated.get(run.pageNumber)||[];page.push(run);generated.set(run.pageNumber,page);}
+  const singleSequences=new Set((inspection.markedContent||[]).filter(c=>c.sequenceCount===1).map(c=>c.contentRef));
+  for(const run of generatedRuns){
+    const page=generated.get(run.pageNumber)||[],previous=page.at(-1);
+    // Font switches may split one line into several Tj operations. Only a
+    // continuous, exclusive marked-content sequence can form one OCR line.
+    if(previous && previous.glyphEnd===run.glyphStart && run.owners?.length===1 && previous.owners?.length===1 && run.owners[0]===previous.owners[0] && singleSequences.has(run.owners[0])) {
+      previous.glyphEnd=run.glyphEnd;
+      for(const glyph of run.glyphs)previous.glyphs.push(glyph);
+      for(const position of run.positions)previous.positions.push(position);
+      previous.fontEmbedded &&= run.fontEmbedded;
+      previous.glyphProgramsPresent &&= run.glyphProgramsPresent;
+      if(previous.renderingMode!==run.renderingMode)previous.renderingMode=null;
+      previous.artifact ||= run.artifact;
+    } else page.push({...run,glyphs:[...run.glyphs],positions:[...run.positions]});
+    generated.set(run.pageNumber,page);
+  }
   let valid=true;const check=(code,target,a,b)=>{add(code,target,a,b);if(JSON.stringify(a)!==JSON.stringify(b))valid=false;};
   const owners=new Map();
   for(const page of new Set([...expected.keys(),...generated.keys()])) {
@@ -55,6 +70,7 @@ export function inspectOcrLayer({inspection, source, intendedNodes, add}) {
       check("OCR_TEXT_EXACT",target,line.text,run.glyphs.map(g=>g[1]).join(""));
       check("OCR_TEXT_INVISIBLE",target,3,run.renderingMode);
       check("OCR_FONT_EMBEDDED",target,true,run.fontEmbedded);
+      check("OCR_FONT_GLYPHS",target,true,run.glyphProgramsPresent);
       check("OCR_LINE_GEOMETRY",target,true,matchesOcrGeometry(run,line.quad,geometry));
       check("OCR_REAL_CONTENT",target,false,run.artifact);
       for(let g=run.glyphStart;g<run.glyphEnd;g++)owners.set(`${page}:${g}`,line.owner);

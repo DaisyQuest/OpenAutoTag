@@ -347,8 +347,11 @@
       "improvement": "OCR Unicode font coverage",
       "requirement": "Embed verified OCR fonts and preserve Unicode for characters outside the first font.",
       "acceptance": "Accents, symbols and missing-glyph cases have correct extracted text or explicit failure, never replacement boxes.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch13-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A30",

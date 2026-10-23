@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "d0f0a94",
+  "completedItems": [
+    "A29"
+  ],
+  "completedTotal": 29,
+  "pendingTotal": 21,
+  "research": [
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/font/PDType0Font.java",
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/PDAbstractContentStream.java"
+  ],
+  "tests": {
+    "productionBaseline": {
+      "tests": 400,
+      "passed": 400,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch13-baseline.log",
+      "sha256": "4ca6d25003a90c1dee1e732415e1031655ba569ba6ade202fa3e23d8f8d4b6f5"
+    },
+    "focused": {
+      "tests": 24,
+      "passed": 24,
+      "log": "tmp/accessibility-50-batch13-focused.log",
+      "sha256": "83d1f568cdd596a80e5e4b132eeaa922cfe20b31e11c987464b3bc4540bde72b"
+    },
+    "newCases": 3,
+    "strengthenedExistingCases": [
+      "mixed-font Unicode line, exact text, one owner and unchanged pixels",
+      "all OCR glyph programs must be present"
+    ],
+    "coverageClaim": null
+  },
+  "fonts": [
+    {
+      "path": "modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf",
+      "sha256": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "path": "modules/font-embedder/vendor/fonts/noto-symbols/NotoSansSymbols-Regular.ttf",
+      "sha256": "8f02f31959bbdf6061547a188248e13f84dc5fdd940326ec494675f453f072bb"
+    },
+    {
+      "path": "modules/font-embedder/vendor/fonts/noto-symbols/NotoSansSymbols2-Regular.ttf",
+      "sha256": "882d142b9a1ef3fd7fa4225dbe95c10fab6664206eb4964c8ff705a4f6d02988"
+    }
+  ],
+  "unicode": {
+    "text": "office first Effects Café € Ω – → ☐ ★",
+    "fontNames": [
+      "NotoSans-Regular",
+      "NotoSansSymbols-Regular",
+      "NotoSansSymbols2-Regular"
+    ],
+    "operators": 6,
+    "owners": [
+      "page:1:stream:page:mcid:0"
+    ],
+    "allEmbedded": true,
+    "allGlyphsPresent": true,
+    "allInvisible": true
+  },
+  "negativeCases": [
+    "fallback font program removed",
+    "fallback CIDToGIDMap maps to missing glyphs",
+    "unknown supplementary character fails before save",
+    "changed rendering mode/embedding/glyph availability in one run",
+    "noncontiguous, foreign or multiply declared MCID cannot coalesce"
+  ],
+  "synthetic": {
+    "candidates": [
+      {
+        "name": "scan",
+        "sourceHash": "a5881da27cc1c1d21acca0204045536c1a415228946b3ee914cb10bf315498da",
+        "candidateHash": "bc9a5d52b838597bdf6774472e721c53488096b7fd35773b8114ef0ef9b2290b",
+        "summary": {
+          "passed": 425,
+          "failed": 0
+        },
+        "ocrLines": 16
+      },
+      {
+        "name": "mixed",
+        "sourceHash": "16a03e8101457cf55572a7a2c2de8b75bdd247fb2fcc06d6d4bdb7904521df50",
+        "candidateHash": "0523c6da58c9ba8279f365b050c82f9656992ffaf15c7ee023c119bb266006eb",
+        "summary": {
+          "passed": 449,
+          "failed": 0
+        },
+        "ocrLines": 16
+      }
+    ],
+    "pdfBoxPixelPageComparisons": 64,
+    "dpi": 120,
+    "sourceImageBytesPreserved": true,
+    "formValueAppearanceAndFillSaveReopen": true
+  },
+  "samples": [
+    {
+      "id": "nasa-stereo",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+      "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+      "candidatePath": "output/accessibility-50-batch13-20261023/nasa-stereo/06-candidate.pdf",
+      "candidateHash": "d32c2556524bb571448381be928e213cc99d8b5b3973f3f03a175118497f465b",
+      "intentHash": "40dc0707a434d4f83bae087d5fcbf279a1b7e8d65cd245ef355bebb6fe706ce1",
+      "saved": {
+        "passed": 1407,
+        "failed": 0
+      },
+      "ownershipStatus": "verified",
+      "ocrChecks": 459,
+      "ocrLines": 65,
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5460,
+        "failedChecks": 0
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedReportPath": "output/accessibility-50-batch13-20261023/nasa-stereo/09-saved-semantics.json",
+      "savedReportHash": "c4fe87dcb23a3b94c2642bf406bede44c5dff5a486f797553b1e569787e5d637",
+      "rawReportPath": "output/accessibility-50-batch13-20261023/nasa-stereo/07-validation.json",
+      "rawReportHash": "1a7b33a1de28c11f826132e5b907ea1ecc5adf3d99d6b3e5274c9ff2cd41acf4",
+      "appearance": {
+        "renderer": "Poppler",
+        "dpi": 150,
+        "pixelIdenticalPages": 2,
+        "sourceImageStreamsPreserved": 2
+      }
+    },
+    {
+      "id": "booklet",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidatePath": "output/accessibility-50-batch13-20261023/booklet/06-candidate.pdf",
+      "candidateHash": "b02ff10d0bbb688d7d3f16087dec1af0322ad47abc0da88435b73d60626ef31c",
+      "intentHash": "93070d771b94a3a5d84367a12755216d184b1fbc6e609c3b6a965d55236dd9e4",
+      "saved": {
+        "passed": 50986,
+        "failed": 248
+      },
+      "ownershipStatus": "verified",
+      "ocrChecks": 1110,
+      "ocrLines": 158,
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 192138,
+        "failedChecks": 31
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedReportPath": "output/accessibility-50-batch13-20261023/booklet/09-saved-semantics.json",
+      "savedReportHash": "b55f973ff52ee471c85cd9a4e90ca8112521822f2da2e99275e26deda7f3034b",
+      "rawReportPath": "output/accessibility-50-batch13-20261023/booklet/07-validation.json",
+      "rawReportHash": "cb2d99a3d2dd0ae281766640d05cf7b7bcdfd4a06ca14d8d43bd46d37ce7eeeb",
+      "appearance": {
+        "renderer": "Poppler",
+        "dpi": 96,
+        "pixelIdenticalPages": 61,
+        "sourceImageStreamsPreserved": 31
+      }
+    },
+    {
+      "id": "unicode-fixture",
+      "sourcePath": "output/accessibility-50-batch13-20261023/synthetic/source.pdf",
+      "sourceHash": "a5881da27cc1c1d21acca0204045536c1a415228946b3ee914cb10bf315498da",
+      "candidatePath": "output/accessibility-50-batch13-20261023/synthetic/unicode.pdf",
+      "candidateHash": "87c8402f9a4bc5bc44b9a2cab3f3088810dc89a38aa6742603d2024baa53dae8",
+      "intentHash": "969f8050758dd23139d1284e03475b957a36994ac5ae7e77f8d73f438519d1ac",
+      "saved": {
+        "passed": 430,
+        "failed": 0
+      },
+      "ownershipStatus": "verified",
+      "ocrChecks": 144,
+      "ocrLines": 16,
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 1417,
+        "failedChecks": 0
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedReportPath": "output/accessibility-50-batch13-20261023/unicode-fixture/09-saved-semantics.json",
+      "savedReportHash": "000891c993ca37c6ed7a547ae3145a916a0871d9b5747fc746a370079f1de291",
+      "rawReportPath": "output/accessibility-50-batch13-20261023/unicode-fixture/07-validation.json",
+      "rawReportHash": "a043428436fa6060a6dbc60e144aab8b95cbde85fb83dbe0404e7dd775e9c902",
+      "appearance": {
+        "renderer": "Poppler",
+        "dpi": 96,
+        "pixelIdenticalPages": 16,
+        "sourceImageStreamsPreserved": 16
+      }
+    }
+  ],
+  "visualEvidence": {
+    "path": "output/accessibility-50-batch13-20261023/visual-comparison.json",
+    "sha256": "592100ecaecc968193c5ec08fb0db3de9c56870027c2aea6e9ef30d08019950f",
+    "pixelIdenticalPages": 79
+  },
+  "limits": [
+    "Three bundled fonts do not provide universal Unicode coverage or complex shaping.",
+    "Glyph presence does not prove arbitrary font-outline equivalence.",
+    "Recognition noise, diagram order, word uncertainty/corrections and human reader qualification remain unresolved.",
+    "Official tagging intent is identical to batch 12; its remaining 248 booklet semantic failures and 31 raw failures are unchanged."
+  ]
+}

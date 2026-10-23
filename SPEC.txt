@@ -475,10 +475,20 @@ with continuous glyph advances (0.02 display-point tolerance). Undeclared,
 missing, visible, shifted, partial and misowned generated text reject. The tagging
 intent hash binds the OCR declaration. Typed PDFBox serialization bypasses GSUB
 ligature substitution for invisible OCR; it does not normalize recognized text.
+OCR font selection uses the bundled Noto Sans, Noto Sans Symbols and Noto Sans
+Symbols 2 programs in that order, with cached code-point coverage and adjacent
+runs sharing a font. Multiple font runs retain one line MCID and one continuous
+text matrix; the total verified font advance fits the declared line envelope.
+Saved validation joins runs only within a continuous, exclusively owned MCID
+declared exactly once. Every run requires embedding, glyph-program coverage,
+invisibility and exact Unicode. Unsupported characters reject; original native
+fonts and editable form fonts are not substituted by this OCR fallback.
 Line envelopes and proportional list splits do not certify tight word/glyph
 selection, transcription accuracy, diagram meaning, reading order, multilingual
-shaping or reader behavior. Low-confidence correction qualification and broader
-Unicode fallback remain separate requirements. Candidates still require review.
+shaping or reader behavior. Unavailable glyph inspection also fails generated
+text qualification. Low-confidence correction qualification remains separate;
+the three bundled programs do not establish universal Unicode coverage.
+Candidates still require review.
 Delivery scope and remaining limits: docs/tagging-accuracy-delivery-20261021.md.
 Current evidence: docs/tagging-quality-claims.md. Further proposed work:
 docs/tagging-accuracy-roadmap.md. Delivery history:

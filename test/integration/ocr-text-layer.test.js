@@ -11,6 +11,7 @@ import {buildSemanticDocument} from "../../modules/semantic-engine/index.js";
 import {buildTagTree} from "../../modules/tag-builder/index.js";
 import {writeTaggedArtifacts} from "../../modules/pdf-writer/index.js";
 import {checkSavedSemantics} from "../../scripts/check-saved-semantics.js";
+import {inspectPdfLowLevel} from "../../scripts/inspect-pdf-low-level.js";
 import {resolveJavaTool,buildJavaExecEnv} from "../../scripts/java-runtime.js";
 
 test("saved invisible OCR preserves scans, native glyphs and editable fields across display geometries",async t=>{
@@ -72,14 +73,24 @@ test("saved invisible OCR preserves scans, native glyphs and editable fields acr
        assert.equal(checked.disposition,"rejected");assert.ok(checked.checks.some(c=>c.code===code&&c.status==="fail"),JSON.stringify(checked.summary));
      });
    }
-   if(name==="scan")await t.test("declared OCR Unicode is preserved without GSUB ligature substitutions",async()=>{
-     const changed=structuredClone(semantic);changed.nodes[0].text="office first Effects Café € Ω –";changed.nodes[0].ocrSegments[0].text=changed.nodes[0].text;
+   if(name==="scan")await t.test("declared OCR Unicode is preserved without GSUB ligature substitutions",async unicodeTest=>{
+     const changed=structuredClone(semantic);changed.nodes[0].text="office first Effects Café € Ω – → ☐ ★";changed.nodes[0].ocrSegments[0].text=changed.nodes[0].text;
      const sp=path.join(dir,"unicode-semantic.json"),tp=path.join(dir,"unicode-tags.json"),out=path.join(dir,"unicode.pdf");
      await writeFile(sp,JSON.stringify(changed));await writeFile(tp,JSON.stringify(await buildTagTree(sp)));
      const written=await writeTaggedArtifacts({pdfPath,semanticPath:sp,tagsPath:tp,outputPath:out,mode:"native"});
      const checked=await checkSavedSemantics({pdfPath:out,tagsPath:tp,sourcePdfPath:pdfPath,ownershipPath:written.sourceOwnershipPath});
      assert.equal(checked.summary.failed,0,JSON.stringify(checked.checks.filter(c=>c.status==="fail")));
      assert.equal(checked.checks.find(c=>c.code==="OCR_TEXT_EXACT").actual,changed.nodes[0].text);
+     const inspection=await inspectPdfLowLevel({pdfPath:out,preservation:true});
+     const runs=inspection.textRuns.filter(r=>r.pageNumber===1);assert.equal(new Set(runs.map(r=>r.fontName.replace(/^[A-Z]{6}\+/,""))).size,3);
+     assert.equal(new Set(runs.flatMap(r=>r.owners)).size,1);assert.ok(runs.every(r=>r.fontEmbedded&&r.glyphProgramsPresent&&r.renderingMode===3));
+     assert.equal(runs.flatMap(r=>r.glyphs.map(g=>g[1])).join(""),changed.nodes[0].text);
+     assert.match((await run(probe,["verify",pdfPath,out])).stdout,/preserved/);
+     for(const [mutation,code] of [["font-glyph","OCR_FONT_GLYPHS"],["font-embedding","OCR_FONT_EMBEDDED"]])await unicodeTest.test(`saved fallback ${mutation} corruption is rejected`,async()=>{
+       const bad=path.join(dir,`${mutation}.pdf`);await run(probe,["mutate",out,bad,mutation]);
+       const checked=await checkSavedSemantics({pdfPath:bad,tagsPath:tp,sourcePdfPath:pdfPath,ownershipPath:written.sourceOwnershipPath});
+       assert.equal(checked.disposition,"rejected");assert.ok(checked.checks.some(c=>c.code===code&&c.status==="fail"));
+     });
    });
    if(name==="scan")await t.test("unsupported OCR glyphs cannot create an apparently successful candidate",async()=>{
      const broken=structuredClone(semantic);broken.nodes[0].text="Unsupported \u{1f9ec}";broken.nodes[0].ocrSegments[0].text=broken.nodes[0].text;
