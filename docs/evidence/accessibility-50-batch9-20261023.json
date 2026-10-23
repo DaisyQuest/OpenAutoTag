@@ -1,0 +1,430 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "422b27e",
+  "completedItems": [
+    "A21",
+    "A22",
+    "A24"
+  ],
+  "completedTotal": 23,
+  "pendingTotal": 27,
+  "research": [
+    {
+      "url": "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html",
+      "usedFor": "Marked-content and reciprocal ParentTree scope relationships; no PDF/UA-2 claim"
+    }
+  ],
+  "tests": {
+    "productionBaseline": {
+      "tests": 348,
+      "passed": 348,
+      "failed": 0,
+      "skipped": 0
+    },
+    "newTests": 36,
+    "mutationCases": 27,
+    "boundedTraversalRejections": [
+      "marked-content-depth",
+      "cyclic-form-invocation"
+    ]
+  },
+  "fixture": {
+    "validHash": "7487bf08c5c1a79beeed60e55e3b43b198f5f20119b97d20510f9e7815545178",
+    "validSaved": {
+      "passed": 70,
+      "failed": 0
+    },
+    "sequences": 8,
+    "mutations": [
+      {
+        "variant": "missing-wrapper",
+        "expected": "MISSING_MARKED_CONTENT_SEQUENCE",
+        "candidateHash": "aeeb87f4eb977d129e9b0288007c3d23aa5a06aef3325179d5a8b03fbd91f9c7",
+        "detected": true
+      },
+      {
+        "variant": "changed-mcid",
+        "expected": "MISSING_MARKED_CONTENT_SEQUENCE",
+        "candidateHash": "fb96e67e6fb5c0725d4c0227279e83fbbbe5e74ecb6fc47c84eb0a01d467d056",
+        "detected": true
+      },
+      {
+        "variant": "empty-wrapper",
+        "expected": "CONTENT_ATTACHED",
+        "candidateHash": "6e883b995526dc49a020525c4323154ab20e032f213f50a6ec31a2e4b552993f",
+        "detected": true
+      },
+      {
+        "variant": "whitespace-wrapper",
+        "expected": "CONTENT_ATTACHED",
+        "candidateHash": "681ca2f71c1eea9fc3c09c545f4e454b1a01c9b434d337d2181058d4fa84187f",
+        "detected": true
+      },
+      {
+        "variant": "replacement-only",
+        "expected": "CONTENT_ATTACHED",
+        "candidateHash": "fe838617a34e341aa79a53fdbbff6ca03f0786be908d3c439a17c8d6fa8aff43",
+        "detected": true
+      },
+      {
+        "variant": "unknown-font",
+        "expected": "CONTENT_ATTACHED",
+        "candidateHash": "3e538c74b51c828b2096508f545f0e793914740b6857a66c8359dc74ea914730",
+        "detected": true
+      },
+      {
+        "variant": "artifact-only",
+        "expected": "CONTENT_ATTACHED",
+        "candidateHash": "4f7891a4fed5b83a234b90f4668668fab899aeae5405285c6d4b74c4fe15a32d",
+        "detected": true
+      },
+      {
+        "variant": "graphic-for-text",
+        "expected": "CONTENT_ATTACHED",
+        "candidateHash": "e4337390e77b7ee6d40037cb80579e29f5f5da0854ca8857e2079b1a89444071",
+        "detected": true
+      },
+      {
+        "variant": "duplicate-sequence",
+        "expected": "DUPLICATE_MARKED_CONTENT_SEQUENCE",
+        "candidateHash": "ee0c021f9bf09bc32b8900d5b9173152602c9c1753cb532d9823c0ae9a6777c2",
+        "detected": true
+      },
+      {
+        "variant": "missing-emc",
+        "expected": "UNBALANCED_MARKED_CONTENT",
+        "candidateHash": "20d6225d2947ad964534ff1ab88a971fed99fbc0d4d2a884f5b7840ef456eb0f",
+        "detected": true
+      },
+      {
+        "variant": "unresolved-property",
+        "expected": "UNRESOLVED_MARKED_CONTENT_PROPERTIES",
+        "candidateHash": "d8858e6c9ce19f7f713e0105bda79134022b7f18457c596e0a19c0fd38e6c1ff",
+        "detected": true
+      },
+      {
+        "variant": "invalid-operator-args",
+        "expected": "INVALID_MARKED_CONTENT_OPERANDS",
+        "candidateHash": "cc4360f5b7fbbc8b0e0f460f7bc72e13247c7e8ed51f327f3e62ffa791bec3bd",
+        "detected": true
+      },
+      {
+        "variant": "fractional-mcid",
+        "expected": "INVALID_MARKED_CONTENT_ID",
+        "candidateHash": "4859945ee111a66e044e46fe3999917cc23f13af6439635ab20080ad0a70a3ab",
+        "detected": true
+      },
+      {
+        "variant": "fractional-mcr",
+        "expected": "INVALID_MCR_IDENTIFIER",
+        "candidateHash": "4ea141e72c3c4a68f7c28b9a47f8114a70717313dea6f14ec47a899271530e53",
+        "detected": true
+      },
+      {
+        "variant": "uninvoked-form",
+        "expected": "MISSING_MARKED_CONTENT_SEQUENCE",
+        "candidateHash": "9b8e4fe1ffba8abc24e3389106046c5489d039ef07d88da8ab9be938093cfcac",
+        "detected": true
+      },
+      {
+        "variant": "wrong-form-ref",
+        "expected": "MCID_PARENT_TREE_MISMATCH",
+        "candidateHash": "9ea97e955c8e2f2ae4be4978bdd69b4ff1be1d6b2721d8d9a527a9a7964207e1",
+        "detected": true
+      },
+      {
+        "variant": "duplicate-form-key",
+        "expected": "DUPLICATE_PARENT_SCOPE_KEY",
+        "candidateHash": "f2905a7670b50ff79a6cc43d5b6e8af7ad29f268bf6a11e710753ddc8e05dfab",
+        "detected": true
+      },
+      {
+        "variant": "page-form-key",
+        "expected": "DUPLICATE_PARENT_SCOPE_KEY",
+        "candidateHash": "3200793ba6ab672c6b8a860193386000d2a753f7771147ee451f4ccfc2bb2d8c",
+        "detected": true
+      },
+      {
+        "variant": "annotation-page-key",
+        "expected": "DUPLICATE_PARENT_SCOPE_KEY",
+        "candidateHash": "38b4a09574679715322d3b111d06760fe1f3c441bb6829a7432ba98003c6d5f3",
+        "detected": true
+      },
+      {
+        "variant": "annotation-wrong-owner",
+        "expected": "OBJR_PARENT_TREE_MISMATCH",
+        "candidateHash": "d7ed577d6cb0aa164c01708dab4eff08b9472c6b50c480ff154445bfcb951d32",
+        "detected": true
+      },
+      {
+        "variant": "orphan-parent-key",
+        "expected": "ORPHAN_PARENT_TREE_KEY",
+        "candidateHash": "a729a4a1d67e07e7c13685f1b8190e3ded4667c30e7c05924cd649519f416963",
+        "detected": true
+      },
+      {
+        "variant": "orphan-array-target",
+        "expected": "PARENT_TREE_REVERSE_MISMATCH",
+        "candidateHash": "bc6439afe7e477686e1ddd4f16b2ed540cecfc186c6fe6162eef7e0baaf17c5c",
+        "detected": true
+      },
+      {
+        "variant": "orphan-annotation-target",
+        "expected": "OBJR_PARENT_TREE_REVERSE_MISMATCH",
+        "candidateHash": "c067f278365946f49f29a27c8557f5e31e8f727f2d19af68c999644827a621be",
+        "detected": true
+      },
+      {
+        "variant": "conflicting-scope-keys",
+        "expected": "CONFLICTING_PARENT_SCOPE_KEYS",
+        "candidateHash": "9fb01c84f41089756c5168f7f814d10efae6c5ecf4a62b3c15b5a18941a917ec",
+        "detected": true
+      },
+      {
+        "variant": "fractional-scope-key",
+        "expected": "INVALID_PARENT_SCOPE_KEY",
+        "candidateHash": "dc5c1d68d28a348d273226134838e0027b2b938efc291bcb43b289978fd7732b",
+        "detected": true
+      },
+      {
+        "variant": "missing-scope-key",
+        "expected": "MCID_PARENT_TREE_MISMATCH",
+        "candidateHash": "7f0446c30b65d5b8c1045fa543da143fd97d7b6ea3b172e87a10cb357d6e0ef0",
+        "detected": true
+      },
+      {
+        "variant": "wrong-annotation-page",
+        "expected": "WIDGET_OBJR_PAGE_MISMATCH",
+        "candidateHash": "3275453f8d66f41d795a831f2306e17baeedb48897388d521e6cc09250f38a0a",
+        "detected": true
+      }
+    ],
+    "sourceUnchanged": true
+  },
+  "mutationPixels": [
+    {
+      "id": "valid",
+      "sha256": "7487bf08c5c1a79beeed60e55e3b43b198f5f20119b97d20510f9e7815545178",
+      "dpi": 150,
+      "pages": []
+    },
+    {
+      "id": "missing-wrapper",
+      "sha256": "aeeb87f4eb977d129e9b0288007c3d23aa5a06aef3325179d5a8b03fbd91f9c7",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        },
+        {
+          "page": 2,
+          "pixelIdentical": true
+        }
+      ]
+    },
+    {
+      "id": "changed-mcid",
+      "sha256": "fb96e67e6fb5c0725d4c0227279e83fbbbe5e74ecb6fc47c84eb0a01d467d056",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        },
+        {
+          "page": 2,
+          "pixelIdentical": true
+        }
+      ]
+    },
+    {
+      "id": "duplicate-form-key",
+      "sha256": "f2905a7670b50ff79a6cc43d5b6e8af7ad29f268bf6a11e710753ddc8e05dfab",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        },
+        {
+          "page": 2,
+          "pixelIdentical": true
+        }
+      ]
+    },
+    {
+      "id": "annotation-page-key",
+      "sha256": "38b4a09574679715322d3b111d06760fe1f3c441bb6829a7432ba98003c6d5f3",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        },
+        {
+          "page": 2,
+          "pixelIdentical": true
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "booklet",
+      "candidate": "output/accessibility-50-batch8-20261023/booklet-final/06-candidate.pdf",
+      "candidateHash": "e3d08f42c3fa1b12f6f5931e9db995f67240c22e0cf5c03e16043f16313d7c2e",
+      "unchanged": true,
+      "previousSaved": {
+        "passed": 14834,
+        "failed": 154
+      },
+      "saved": {
+        "passed": 18969,
+        "failed": 154
+      },
+      "sequences": 4134,
+      "issues": [],
+      "failuresByCode": {
+        "CONTENT_ATTACHED": 154
+      },
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 186049,
+        "failedChecks": 31
+      },
+      "failedTargetsUnchanged": true
+    },
+    {
+      "id": "hinode",
+      "candidate": "output/accessibility-50-batch8-20261023/hinode-final/06-candidate.pdf",
+      "candidateHash": "81b0c56c884c38f3e1a03a617a1d9f686a2106a3dc12649f4fd09e53885431f1",
+      "unchanged": true,
+      "previousSaved": {
+        "passed": 489,
+        "failed": 0
+      },
+      "saved": {
+        "passed": 542,
+        "failed": 0
+      },
+      "sequences": 52,
+      "issues": [],
+      "failuresByCode": {},
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5246,
+        "failedChecks": 0
+      },
+      "failedTargetsUnchanged": true
+    },
+    {
+      "id": "control",
+      "candidate": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "unchanged": true,
+      "previousSaved": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "saved": {
+        "passed": 2008,
+        "failed": 0
+      },
+      "sequences": 89,
+      "issues": [],
+      "failuresByCode": {},
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "failedTargetsUnchanged": true
+    }
+  ],
+  "preservation": {
+    "method": "reuse exact-hash batch-8 evidence; no fresh rendering or interaction claims",
+    "evidence": "docs/evidence/accessibility-50-batch8-20261023.json",
+    "pixels": [
+      {
+        "id": "booklet",
+        "dpi": 96,
+        "pages": 61,
+        "pixelIdenticalPages": 61,
+        "candidateHash": "e3d08f42c3fa1b12f6f5931e9db995f67240c22e0cf5c03e16043f16313d7c2e"
+      },
+      {
+        "id": "nasa-hinode",
+        "dpi": 150,
+        "pages": 1,
+        "pixelIdenticalPages": 1,
+        "candidateHash": "81b0c56c884c38f3e1a03a617a1d9f686a2106a3dc12649f4fd09e53885431f1"
+      },
+      {
+        "id": "test-form-control",
+        "dpi": 150,
+        "pages": 2,
+        "pixelIdenticalPages": 2,
+        "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845"
+      }
+    ],
+    "interactions": [
+      {
+        "id": "nasa-hinode",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "81b0c56c884c38f3e1a03a617a1d9f686a2106a3dc12649f4fd09e53885431f1",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": []
+      },
+      {
+        "id": "test-form-control",
+        "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": [
+          {
+            "variant": "source",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          },
+          {
+            "variant": "candidate",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          }
+        ],
+        "filledPagePixelIdentical": true
+      }
+    ]
+  },
+  "remainingLimits": [
+    "A23 exclusive source-paint ownership and A25 complete source-text coverage remain pending.",
+    "Nonempty decoded content is not a visibility, clipping, annotation-appearance or reader-behavior proof.",
+    "137 prior OCR findings remain among the 154 booklet saved failures; 31 raw font failures remain.",
+    "The booklet remains rejected; successful controls require human review."
+  ]
+}

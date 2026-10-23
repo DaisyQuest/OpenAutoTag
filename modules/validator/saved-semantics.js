@@ -9,6 +9,12 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
   if (!inspection?.sourceHash || !Array.isArray(inspection.structure)) throw new Error("Saved semantic inspection is required");
   if (Boolean(tagging) === Boolean(reference)) throw new Error("Supply tagging intent or a reference inspection, exclusively");
   const checks = [], add = (code, target, expected, actual) => checks.push({ code, target, status: equal(expected, actual) ? "pass" : "fail", expected: expected ?? null, actual: actual ?? null });
+  add("SAVED_CONTENT_INSPECTED", "document", true, Array.isArray(inspection.markedContent));
+  const content = new Map();
+  for (const item of inspection.markedContent || []) {
+    if (content.has(item.contentRef)) add("DUPLICATE_CONTENT_EVIDENCE", item.contentRef, false, true);
+    content.set(item.contentRef, item);
+  }
   const byRef = new Map(inspection.structure.map(n => [n.objectRef, n]));
   const identifiers = new Map();
   for (const n of inspection.structure) if (n.identifier) {
@@ -16,6 +22,8 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
     identifiers.set(n.identifier, n);
   }
   for (const issue of inspection.issues || []) add("STRUCTURE_INTEGRITY", issue, false, true);
+  for (const node of inspection.structure) for (const ref of node.contentRefs) if (!ref.startsWith("obj:"))
+    add("SAVED_SEQUENCE_EXISTS", `${node.objectRef}:${ref}`, 1, content.get(ref)?.sequenceCount || 0);
   if (reference) {
     if (!Array.isArray(reference.structure) || !reference.sourceHash) throw new Error("Reference semantic inspection is required");
     // This mode is for preserved-object changes; a rewrite needs emitted IDs.
@@ -26,6 +34,8 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
         add(`SAVED_${key.toUpperCase()}`, n.objectRef, n[key], saved?.[key]);
     }
     add("CONTENT_ORDER", "document", reference.contentOrder, inspection.contentOrder);
+    add("REFERENCE_CONTENT_INSPECTED", "document", true, Array.isArray(reference.markedContent));
+    for (const item of reference.markedContent || []) add("SAVED_CONTENT_EVIDENCE", item.contentRef, item, content.get(item.contentRef));
   } else {
     const nodes = [], expectedIds = new Set();
     const walk = (n, parent, depth) => {
@@ -57,10 +67,15 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
       add("ALTERNATE_TEXT", id, n.alt || "", saved.alt || "");
       if ((n.sourceNodeIds?.length || n.type === "Lbl") && (n.actualText || n.label || "").trim()) {
         const seen = new Set();
+        const graphical = ["Figure", "Formula", "Form"].includes(n.type);
         const hasContent = (element) => {
           if (!element || seen.has(element.objectRef)) return false;
           seen.add(element.objectRef);
-          return element.contentRefs.length > 0 || element.children.some(ref => hasContent(byRef.get(ref)));
+          return element.contentRefs.some(ref => {
+            if (ref.startsWith("obj:")) return graphical;
+            const evidence = content.get(ref);
+            return evidence?.sequenceCount === 1 && (evidence.meaningfulGlyphCount > 0 || graphical && evidence.graphicsCount > 0);
+          }) || element.children.some(ref => hasContent(byRef.get(ref)));
         };
         add("CONTENT_ATTACHED", id, true, hasContent(saved));
       }
@@ -70,5 +85,5 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
   return { schemaVersion: "1.0.0", candidateHash: inspection.sourceHash, referenceHash: reference?.sourceHash || null,
     scope: reference ? "preserved-structure" : "emitted-tagging-intent", disposition: failed ? "rejected" : "automated_pass",
     summary: { passed: checks.length - failed, failed }, checks,
-    limitations: ["Checks saved structure against intent; intent still requires independent semantic review.", "Content references do not establish rendered visibility or observed screen-reader behavior."] };
+    limitations: ["Checks saved structure against intent; intent still requires independent semantic review.", "Nonempty decoded content does not establish complete text, correct source ownership, rendered visibility or observed screen-reader behavior."] };
 }

@@ -251,8 +251,11 @@
       "improvement": "Existing MCID references",
       "requirement": "Verify that every saved MCR points to a real marked-content sequence.",
       "acceptance": "Deleting or changing a sequence makes saved comparison fail, even when its MCR dictionary remains.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch9-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A22",
@@ -260,8 +263,11 @@
       "improvement": "Nonempty content attachment",
       "requirement": "Require meaningful owned content rather than an empty MCID wrapper.",
       "acceptance": "Empty and whitespace-only wrappers cannot satisfy intended nonempty text attachment.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch9-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A23",
@@ -278,8 +284,11 @@
       "improvement": "Scoped reciprocal ParentTree",
       "requirement": "Verify reciprocal ownership across page, Form and annotation scopes.",
       "acceptance": "Cross-stream and annotation-key mutations fail; valid reused MCIDs in separate scopes pass.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch9-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A25",

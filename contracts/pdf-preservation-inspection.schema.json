@@ -8,6 +8,22 @@
     "schemaVersion": { "const": "1.0.0" },
     "scope": { "const": "preserved-objects-v1" },
     "sourceHash": { "$ref": "#/$defs/hash" },
+    "markedContent": {
+      "description": "Saved executed page/Form sequences, independently parsed from content streams; counts exclude Artifact paint and ignore replacement text.",
+      "type": "array", "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "required": ["contentRef", "sequenceCount", "glyphCount", "meaningfulGlyphCount", "unknownGlyphCount", "graphicsCount"],
+        "properties": {
+          "contentRef": { "type": "string", "minLength": 1 },
+          "sequenceCount": { "type": "integer", "minimum": 1 },
+          "glyphCount": { "type": "integer", "minimum": 0 },
+          "meaningfulGlyphCount": { "type": "integer", "minimum": 0 },
+          "unknownGlyphCount": { "type": "integer", "minimum": 0 },
+          "graphicsCount": { "type": "integer", "minimum": 0 }
+        }, "additionalProperties": false
+      }
+    },
     "structure": {
       "type": "array",
       "items": {

@@ -402,6 +402,22 @@ PDF/UA conformance, WCAG conformance or universal viewer compatibility.
 Typed accuracy-corpus and saved-semantics contracts now support the real-PDF
 pilot and reopened structural comparison. Rebuilt production candidates must
 agree with emitted intent; preserved repairs retain exact replay verification.
+Saved semantic inspection independently parses executed page and Form content.
+The additive markedContent inventory records stream-scoped sequence counts,
+decoded glyph counts, meaningful/unknown glyph counts and graphics operations.
+Named property resources, page content arrays, font state and invoked Forms are
+resolved with bounded bytes, operations, glyphs, state depth and recursion.
+Missing/duplicate/unbalanced sequences reject; structure references alone cannot
+prove attachment. Nonempty intended text requires owned, decoded non-whitespace
+glyphs. ActualText alone, Artifact paint, unknown glyphs and graphics-only content
+cannot satisfy that text check. Graphic roles and blank synthetic cells retain
+separate rules. Legacy inspection JSON remains readable, but saved comparison
+without the new content evidence rejects rather than granting a legacy pass.
+ParentTree entries resolve reciprocally to page, invoked Form and OBJR scopes;
+scope keys must be integral, unique and correctly typed. Extra live entries,
+missing keys, conflicting StructParent/StructParents and wrong owners reject.
+These checks do not establish full source-glyph coverage, correct foreign-content
+ownership, visibility, clipping, annotation appearance text or reader behavior.
 Paragraph merging must retain source identities and rebind semantic references.
 Heuristic evidence is not a calibrated probability. Multilingual expansion is
 lower priority than the preservation and semantic qualification gates.

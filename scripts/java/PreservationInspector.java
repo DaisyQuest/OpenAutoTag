@@ -22,7 +22,10 @@ public final class PreservationInspector {
     private final Set<COSBase> visited = Collections.newSetFromMap(new IdentityHashMap<>());
     private int walked;
     private COSDictionary roleMap, classMap;
+    private SavedContentInspector savedContent;
     private final Map<Integer, COSBase> parentSlots = new TreeMap<>();
+    private final Map<Integer, COSDictionary> parentScopes = new TreeMap<>();
+    private final Set<COSDictionary> registeredScopes = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Map<String, COSBase> idSlots = new TreeMap<>();
     private final Map<String, String> contentOwners = new HashMap<>();
     private final Set<COSDictionary> elements = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -49,6 +52,7 @@ public final class PreservationInspector {
             List<String> annotations = new ArrayList<>();
             for (var annotation : page.getAnnotations()) {
                 COSDictionary dict = annotation.getCOSObject();
+                registerParentScope(dict);
                 boolean link = "Link".equals(annotation.getSubtype());
                 String digest = fingerprint(dict, link ? Set.of("P", "Parent", "StructParent", "Contents") : Set.of("P", "Parent", "StructParent"));
                 if (link) {
@@ -77,6 +81,8 @@ public final class PreservationInspector {
             walkFields(acro.getItem(COSName.FIELDS), new IdentityHashMap<>(), fields, 0);
             fields.put("@AcroForm", hash(fingerprint(acro, Set.of("Fields")) + "|roots:" + fieldRefs(acro.getItem(COSName.FIELDS))));
         }
+        savedContent = new SavedContentInspector(doc, issues);
+        for (COSDictionary scope : savedContent.scopes) registerParentScope(scope);
         var root = doc.getDocumentCatalog().getStructureTreeRoot();
         if (root != null) {
             roleMap = root.getCOSObject().getCOSDictionary(COSName.ROLE_MAP);
@@ -94,7 +100,21 @@ public final class PreservationInspector {
             COSBase slot = resolve(entry.getValue());
             if (slot instanceof COSArray) for (COSBase child : (COSArray) slot) checkReachableParentTarget(child, entry.getKey());
             else checkReachableParentTarget(slot, entry.getKey());
+            COSDictionary scope = parentScopes.get(entry.getKey());
+            if (scope == null) { issues.add("ORPHAN_PARENT_TREE_KEY:" + entry.getKey()); continue; }
+            if (slot instanceof COSArray) {
+                if (!scope.containsKey(COSName.STRUCT_PARENTS)) issues.add("PARENT_TREE_SCOPE_TYPE:" + entry.getKey());
+                COSArray array = (COSArray)slot;
+                for (int i = 0; i < array.size(); i++) {
+                    COSBase owner = array.getObject(i);
+                    if (owner == null || owner instanceof COSNull) continue;
+                    if (!ref(owner).equals(contentOwners.get(ref(scope) + ":" + i)))
+                        issues.add("PARENT_TREE_REVERSE_MISMATCH:" + entry.getKey() + ":" + i);
+                }
+            } else if (!scope.containsKey(COSName.STRUCT_PARENT) || !ref(slot).equals(contentOwners.get("obj:" + ref(scope))))
+                issues.add("OBJR_PARENT_TREE_REVERSE_MISMATCH:" + entry.getKey());
         }
+        for (int key : parentScopes.keySet()) if (!parentSlots.containsKey(key)) issues.add("MISSING_PARENT_TREE_KEY:" + key);
         for (var entry : widgets.entrySet()) {
             Map<?, ?> widget = (Map<?, ?>) entry.getValue();
             if (((List<?>) widget.get("owners")).size() != 1) issues.add("WIDGET_OWNERSHIP:" + entry.getKey());
@@ -106,6 +126,7 @@ public final class PreservationInspector {
         result.put("pages", pages); result.put("fields", fields); result.put("widgets", widgets);
         result.put("links", links);
         result.put("headings", headings); result.put("structure", structure); result.put("contentOrder", contentOrder);
+        result.put("markedContent", savedContent.json());
         result.put("issues", issues); result.put("limitations", limitations);
         return result;
     }
@@ -144,6 +165,9 @@ public final class PreservationInspector {
         String type = dict.getNameAsString(COSName.TYPE, "");
         if ("MCR".equals(type)) {
             COSBase stream = dict.getDictionaryObject(COSName.getPDFName("Stm"));
+            COSBase rawMcid = dict.getDictionaryObject(COSName.MCID);
+            if (!(rawMcid instanceof COSInteger) || ((COSInteger)rawMcid).longValue() < 0 || ((COSInteger)rawMcid).longValue() > Integer.MAX_VALUE)
+                issues.add("INVALID_MCR_IDENTIFIER:" + ref(parent));
             verifyContent(parent, page, stream, dict.getInt(COSName.MCID, -1));
             addContent(ancestors, page, stream, dict.getInt(COSName.MCID, -1)); return;
         }
@@ -152,6 +176,7 @@ public final class PreservationInspector {
             if (page == null && object instanceof COSDictionary) page = ((COSDictionary)object).getCOSDictionary(COSName.P);
             if (!(object instanceof COSDictionary)) issues.add("DANGLING_OBJR:" + ref(parent));
             else {
+                registerParentScope((COSDictionary)object);
                 int slot = ((COSDictionary) object).getInt(COSName.STRUCT_PARENT, -1);
                 if (slot < 0 || resolve(parentSlots.get(slot)) != parent) issues.add("OBJR_PARENT_TREE_MISMATCH:" + ref(object));
                 if (contentOwners.putIfAbsent("obj:" + ref(object), ref(parent)) != null) issues.add("DUPLICATE_OBJR:" + ref(object));
@@ -225,13 +250,31 @@ public final class PreservationInspector {
         return role;
     }
     private void verifyContent(COSDictionary parent, COSDictionary page, COSBase stream, int mcid) {
-        recordContent(parent, "page:" + pagesByDict.getOrDefault(page, 0) + ":stream:" + (stream == null ? "page" : ref(stream)) + ":mcid:" + mcid);
+        String contentRef = SavedContentInspector.key(pagesByDict.getOrDefault(page, 0), stream, mcid);
+        recordContent(parent, contentRef);
+        if (!savedContent.contains(contentRef)) issues.add("MISSING_MARKED_CONTENT_SEQUENCE:" + contentRef);
         COSDictionary owner = stream instanceof COSDictionary ? (COSDictionary) stream : page;
+        if (stream != null && !(stream instanceof COSStream)) issues.add("INVALID_MCR_STREAM:" + ref(parent));
+        if (owner != null) registerParentScope(owner);
         int slot = owner == null ? -1 : owner.getInt(COSName.STRUCT_PARENTS, -1);
         COSBase value = resolve(parentSlots.get(slot));
         if (mcid < 0 || !(value instanceof COSArray) || mcid >= ((COSArray) value).size() || ((COSArray) value).getObject(mcid) != parent) issues.add("MCID_PARENT_TREE_MISMATCH:" + ref(parent) + ":" + mcid);
         String key = ref(owner) + ":" + mcid;
         if (contentOwners.putIfAbsent(key, ref(parent)) != null) issues.add("DUPLICATE_CONTENT_OWNER:" + key);
+    }
+    private void registerParentScope(COSDictionary scope) {
+        if (!registeredScopes.add(scope)) return;
+        if (scope.containsKey(COSName.STRUCT_PARENT) && scope.containsKey(COSName.STRUCT_PARENTS)) issues.add("CONFLICTING_PARENT_SCOPE_KEYS:" + ref(scope));
+        for (COSName name : List.of(COSName.STRUCT_PARENT, COSName.STRUCT_PARENTS)) {
+            COSBase value = scope.getDictionaryObject(name);
+            if (value == null) continue;
+            if (!(value instanceof COSInteger) || ((COSInteger)value).longValue() < 0 || ((COSInteger)value).longValue() > Integer.MAX_VALUE) {
+                issues.add("INVALID_PARENT_SCOPE_KEY:" + ref(scope)); continue;
+            }
+            int key = ((COSInteger)value).intValue();
+            COSDictionary previous = parentScopes.putIfAbsent(key, scope);
+            if (previous != null && previous != scope) issues.add("DUPLICATE_PARENT_SCOPE_KEY:" + key);
+        }
     }
     @SuppressWarnings("unchecked")
     private void recordContent(COSDictionary owner, String key) {
