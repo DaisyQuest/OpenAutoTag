@@ -7,6 +7,9 @@ import java.util.Set;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -53,10 +56,13 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     private StringBuilder currentOpText = new StringBuilder();
     /** Record slot for the currently-dispatching text operator (null between ops). */
     private OperatorRecord currentRecord = null;
-    /** Index of the current operator within the page content stream. */
+    /** Lexical operator index within the current page or Form stream. */
     private int streamOperatorIndex = 0;
     /** Nesting counter for BMC/BDC/EMC detection in the current stream. */
     private int markedContentDepth = 0;
+    private String streamOrigin = "page";
+    private final Set<COSStream> activeForms = new HashSet<>();
+    private int formInvocations = 0;
 
     static class OperatorRecord {
         int page;
@@ -70,9 +76,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         int glyphs;
         /**
          * Path to the content stream this operator lives in. "page" means the
-         * page's top-level content stream; otherwise it is the XObject form
-         * resource name (e.g., "Fm0") — the rewriter uses this to route the
-         * operator back to the right stream.
+         * page's top-level content stream. Each /index component identifies
+         * a lexical Do invocation, so reused and nested Forms remain distinct.
          */
         String streamOrigin;
         /** Index of this operator within its enclosing content stream. */
@@ -91,8 +96,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     /**
      * PDFBox's operator processors use the String overload for synthetic
      * operations (TD sets leading and moves text; quotes advance and show text).
-     * Only the Operator overload is
-     * called by the stream tokenizer. Execute synthetic operations normally,
+     * Only the Operator overload is called by the stream tokenizer.
+     * Execute synthetic operations normally,
      * but keep their glyphs in the enclosing source operator's record and do
      * not advance its lexical index.
      */
@@ -105,6 +110,24 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
         String opName = operator.getName();
         int currentOperatorIndex = streamOperatorIndex++;
+
+        if ("Do".equals(opName) && operands.size() == 1 && operands.get(0) instanceof COSName
+                && getResources() != null && getResources().getXObject((COSName) operands.get(0)) instanceof PDFormXObject) {
+            PDFormXObject form = (PDFormXObject) getResources().getXObject((COSName) operands.get(0));
+            if (activeForms.size() >= 32 || ++formInvocations > 10000 || !activeForms.add(form.getCOSObject()))
+                throw new IllegalStateException("Cyclic or excessive Form XObject traversal");
+            String parentOrigin = streamOrigin;
+            int parentIndex = streamOperatorIndex, parentDepth = markedContentDepth;
+            streamOrigin = parentOrigin + "/" + currentOperatorIndex;
+            streamOperatorIndex = 0;
+            markedContentDepth = 0;
+            try { super.processOperator(operator, operands); }
+            finally {
+                streamOrigin = parentOrigin; streamOperatorIndex = parentIndex; markedContentDepth = parentDepth;
+                activeForms.remove(form.getCOSObject());
+            }
+            return;
+        }
 
         // Track pre-existing marked-content nesting so downstream stages know
         // which operators are already inside a BDC/BMC block in the source.
@@ -133,12 +156,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             rec.seq = sequenceIndex++;
             rec.op = opName;
             rec.opIndexInStream = currentOperatorIndex;
-            // streamOrigin is always "page" today; XObject-form descent will
-            // refine this in a follow-up pass (operators from /Do XObjects
-            // currently inherit the page's stream id, which is structurally
-            // correct for reporting but means the rewriter can't rewrite
-            // those operators yet).
-            rec.streamOrigin = "page";
+            rec.streamOrigin = streamOrigin;
             rec.insideMarkedContent = markedContentDepth > 0;
 
             // Font state captured pre-super (the super-dispatched operator
@@ -233,6 +251,9 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         sequenceIndex = 0;
         streamOperatorIndex = 0;
         markedContentDepth = 0;
+        streamOrigin = "page";
+        activeForms.clear();
+        formInvocations = 0;
         currentPage = pageIndex + 1;
         PDPage page = doc.getPage(pageIndex);
         PDRectangle cropBox = page.getCropBox();

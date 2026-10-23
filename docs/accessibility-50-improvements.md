@@ -68,4 +68,6 @@ Completion requires an actual engine improvement, targeted positive/adversarial 
 
 ## Delivery evidence
 
-**4 / 50 complete:** A01, A02, A06 and A07. [Batch 1](accessibility-50-batch1-20261022.md) records 244 passing baseline tests, saved native ownership and pixel checks, seven newly attached booklet list labels, and preserved controls. Booklet saved failures fall from 267 to 258 while its 31 raw font failures remain. A09 has tested prefix-boundary groundwork but remains in progress; the other 45 items are pending. The ledger remains active until all 50 satisfy their acceptance criteria.
+**7 / 50 complete:** A01–A07. [Batch 2](accessibility-50-batch2-20261022.md) adds nested/reused Form identities, native content tagging and scoped MCR/ParentTree ownership, with 250 passing baseline tests and 29 compatibility tests. All 5,017 booklet text-operation identities now match independent traversal; all 3,994 emitted MCRs own painted content. All 64 replayed pages remain unchanged, with preserved form interactions.
+
+[Batch 1](accessibility-50-batch1-20261022.md) records the earlier four items, including seven newly attached booklet labels. Booklet saved failures remain 258 and raw font failures remain 31. A09 has tested prefix-boundary groundwork but remains in progress; the other 42 items are pending. The ledger remains active until all 50 satisfy their acceptance criteria.

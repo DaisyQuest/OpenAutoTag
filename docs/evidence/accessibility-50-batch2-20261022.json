@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedOn": "2026-10-22",
+  "baseCommit": "777db8f",
+  "completedItems": [
+    "A03",
+    "A04",
+    "A05"
+  ],
+  "scope": "Invocation-specific nested Form text identities, native rewriting and stream-scoped MCR/ParentTree emission. Output-stage replay with unchanged upstream inference.",
+  "tests": {
+    "productionBaseline": {
+      "passed": 250,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch2-tests.log"
+    },
+    "compatibility": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch2-compatibility.log"
+    },
+    "formFixture": {
+      "tests": 6,
+      "includedInProductionBaseline": true,
+      "pages": 2,
+      "textOperations": 15,
+      "ownerScopes": 10,
+      "formScopes": 8,
+      "rawVeraPdfFailedChecks": 0,
+      "pixelDpi": 150,
+      "glyphPositionsUnchanged": true,
+      "adversarial": [
+        "wrong Stm with valid MCID",
+        "duplicate scoped address with different sequence ID",
+        "stale lexical address",
+        "cyclic Forms"
+      ],
+      "flatTreeCliVerified": true
+    },
+    "initialFixtureLimitation": "Direct flat-tree subprocess exceeded the test-only 1 MiB stderr buffer on PDFBox font diagnostics. The test now uses the same bounded 50 MiB cap as the production subprocess wrapper.",
+    "coverage": "No new coverage percentage measured."
+  },
+  "runtimes": {
+    "node": "22.20.0",
+    "java": "21",
+    "pdfbox": "3.0.8",
+    "veraPdf": "1.30.3 Greenfield ua1",
+    "javaOptions": "-XX:TieredStopAtLevel=1 -Xms32m -Xmx512m",
+    "baselineConcurrency": 2,
+    "compatibilityConcurrency": 1
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "source": {
+        "id": "booklet",
+        "publisher": "NASA",
+        "title": "STEREO booklet",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+        "sha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "bytes": 3209169,
+        "pages": 61,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "a3851d9805c7bc5d15d1817fe6582abe487c8da4736b2a4b41aecc68ec59626b",
+        "candidatePath": "output\\accessibility-50-batch2-20261022\\booklet-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch2-20261022/booklet-final/06-candidate.pdf",
+      "candidateHash": "abccc50bef1e27bd9f5cc2026f988efa63838e58c6ad8e743c58fe0e34a4ac53",
+      "writerMode": "native",
+      "matchedOperators": 3994,
+      "markedContentCount": 3994,
+      "rawVeraPdf": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 178248,
+        "failedChecks": 31
+      },
+      "rawFailureCodes": {
+        "VERAPDF_7_21_7_1": 1,
+        "VERAPDF_7_21_3_2_1": 1,
+        "VERAPDF_7_21_4_1_1": 1
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedSemantics": {
+        "passed": 14624,
+        "failed": 258
+      },
+      "savedFailureCodes": {
+        "CONTENT_ATTACHED": 258
+      },
+      "productionDisposition": "rejected",
+      "render": {
+        "id": "booklet",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "candidateHash": "abccc50bef1e27bd9f5cc2026f988efa63838e58c6ad8e743c58fe0e34a4ac53",
+        "pixelIdenticalPages": 61,
+        "status": "completed"
+      },
+      "interaction": null,
+      "sourceBytePrefixRetained": false
+    },
+    {
+      "id": "nasa-hinode",
+      "source": {
+        "id": "nasa-hinode",
+        "publisher": "NASA",
+        "title": "Hinode fact sheet",
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "bytes": 113294,
+        "pages": 1,
+        "hasStructureTree": false,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "8fe1756a259665f43de9321614f5432f5e5bd1424d32b6406768102f68d4104f",
+        "candidatePath": "output\\accessibility-50-batch2-20261022\\hinode-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch2-20261022/hinode-final/06-candidate.pdf",
+      "candidateHash": "53ad9f38f0027f74081de2f0a524297ee70add371c322c2476c6a0048f729ae1",
+      "writerMode": "native",
+      "matchedOperators": 52,
+      "markedContentCount": 52,
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5295,
+        "failedChecks": 0
+      },
+      "rawFailureCodes": {},
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedSemantics": {
+        "passed": 531,
+        "failed": 0
+      },
+      "savedFailureCodes": {},
+      "productionDisposition": "review_required",
+      "render": {
+        "id": "nasa-hinode",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "53ad9f38f0027f74081de2f0a524297ee70add371c322c2476c6a0048f729ae1",
+        "pixelIdenticalPages": 1,
+        "status": "completed"
+      },
+      "interaction": {
+        "id": "nasa-hinode",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "53ad9f38f0027f74081de2f0a524297ee70add371c322c2476c6a0048f729ae1",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": []
+      },
+      "sourceBytePrefixRetained": false
+    },
+    {
+      "id": "test-form-control",
+      "source": {
+        "id": "test-form-control",
+        "pages": 2,
+        "path": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+        "sha256": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidatePath": "output\\accessibility-50-batch2-20261022\\control-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch2-20261022/control-final/06-candidate.pdf",
+      "candidateHash": "bbcbd3be00c63e877dc6a232ee23cbfdf43750aea5adabb9f15e4879eeeb2a45",
+      "writerMode": "passthrough",
+      "matchedOperators": null,
+      "markedContentCount": null,
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "rawFailureCodes": {},
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedSemantics": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "savedFailureCodes": {},
+      "productionDisposition": "review_required",
+      "render": {
+        "id": "test-form-control",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidateHash": "bbcbd3be00c63e877dc6a232ee23cbfdf43750aea5adabb9f15e4879eeeb2a45",
+        "pixelIdenticalPages": 2,
+        "status": "completed"
+      },
+      "interaction": {
+        "id": "test-form-control",
+        "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidateHash": "bbcbd3be00c63e877dc6a232ee23cbfdf43750aea5adabb9f15e4879eeeb2a45",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": [
+          {
+            "variant": "source",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          },
+          {
+            "variant": "candidate",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          }
+        ],
+        "filledPagePixelIdentical": true
+      },
+      "sourceBytePrefixRetained": true
+    }
+  ],
+  "independentOperatorAudit": {
+    "independentParser": "pypdf ContentStream",
+    "sourceTextOperations": 5017,
+    "sourceNestedTextOperations": 1,
+    "identityMismatchedPages": [],
+    "savedContentScopes": 100,
+    "savedMcrs": 3994,
+    "savedPaintedMcrs": 3994,
+    "paintOperatorCounts": {
+      "/Artifact": 3295,
+      "/Span": 3971,
+      "/LBody": 13,
+      "/Lbl": 7,
+      "/Aside": 3
+    },
+    "errors": []
+  },
+  "limitations": [
+    "Seven of fifty selected improvements complete; A09 remains in progress and 42 are pending.",
+    "Form traversal is bounded to depth 32 and 10000 invocations per page; recursive input fails rather than emitting partial ownership.",
+    "Booklet still has 258 saved content-attachment failures and 31 raw font findings. Matching intended source operators does not establish complete intended-node coverage or semantic correctness.",
+    "Optional-content/ActualText preservation, glyph partitioning, OCR attachment, widget reconstruction and human reader qualification remain separate open requirements.",
+    "Local PDFs and rendered proof artifacts are ignored outputs; committed evidence does not distribute them."
+  ],
+  "codeSha256NormalizedLf": {
+    "modules/pdf-writer/java/NativeContentStreamParser.java": "92cac43661caa61efb800434c928aafce9e75ce241595e35c42f08db89340163",
+    "modules/pdf-writer/java/NativeContentStreamRewriter.java": "570e85ff7910661c81deed130d9714752957d8cc88b78dacb5de99bab3fc8a10",
+    "modules/pdf-writer/java/NativeTagMatcher.java": "fcce978c7437e2bb75aa66ae387cf4f1831fdd33146b67ea13bcca77a303010d",
+    "modules/pdf-writer/test/native-form-streams.test.js": "ee5f45e5f85ad9271b44f264f8788fd466d153f3eb8e809489a8a849b83361cb",
+    "modules/pdf-writer/test/fixtures/NativeFormProbe.java": "f3f2a924f7ae576cef9b962b97ec7e48093f3c66221d8ea9d9f96a4a8573c472",
+    "package.json": "2da8df0b4408a185b5eab0366040e3086449d2da6297c6948d223e712c23a241"
+  }
+}

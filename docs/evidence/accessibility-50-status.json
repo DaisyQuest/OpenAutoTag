@@ -35,8 +35,11 @@
       "improvement": "Nested stream identity",
       "requirement": "Report Form XObject invocation paths separately from page text operators.",
       "acceptance": "Nested/reused Forms carry stable invocation identities; no child operator impersonates page text.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch2-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
     },
     {
       "id": "A04",
@@ -44,8 +47,11 @@
       "improvement": "Native Form XObject tagging",
       "requirement": "Tag text in nested and reused Form XObjects with invocation-specific ownership.",
       "acceptance": "Saved text in two differently transformed invocations has correct owners and unchanged pixels.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch2-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
     },
     {
       "id": "A05",
@@ -53,8 +59,11 @@
       "improvement": "Stream-scoped MCR emission",
       "requirement": "Write stream references and scoped ParentTree entries for non-page content.",
       "acceptance": "Identical MCID numbers in different streams resolve to their own structure elements.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch2-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
     },
     {
       "id": "A06",

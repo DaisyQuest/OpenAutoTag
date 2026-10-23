@@ -28,6 +28,10 @@ import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.contentstream.PDContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -280,6 +284,8 @@ public class NativeContentStreamRewriter {
         double x;
         double y;
         String text;
+        String streamOrigin = "page";
+        boolean lexicalIdentity;
     }
 
     /** An assignment: a tag node mapped to a set of operators with a given MCID */
@@ -290,6 +296,7 @@ public class NativeContentStreamRewriter {
         List<OpRef> operators = new ArrayList<>();
         double matchConfidence;
         boolean startsTagGroup;
+        boolean emitted;
     }
 
     /** Per-page plan from the tag plan JSON */
@@ -298,6 +305,7 @@ public class NativeContentStreamRewriter {
         List<Assignment> assignments = new ArrayList<>();
         List<Integer> unmatchedOperatorSeqs = new ArrayList<>();
         List<Integer> unmatchedOperatorIndices = new ArrayList<>();
+        Map<String, PDFormXObject> forms = new LinkedHashMap<>();
     }
 
     /**
@@ -449,6 +457,12 @@ public class NativeContentStreamRewriter {
                     ref.x = om.containsKey("x") ? asDouble(om.get("x")) : Double.NaN;
                     ref.y = om.containsKey("y") ? asDouble(om.get("y")) : Double.NaN;
                     ref.text = asString(om.get("text"));
+                    ref.lexicalIdentity = om.containsKey("streamOrigin") && om.containsKey("opIndexInStream");
+                    if (ref.lexicalIdentity) {
+                        ref.streamOrigin = asString(om.get("streamOrigin"));
+                        if (!ref.streamOrigin.matches("page(?:/[0-9]+)*") || ref.opIndexInStream < 0)
+                            throw new IllegalArgumentException("Invalid native stream identity");
+                    }
                     a.operators.add(ref);
                 }
                 pp.assignments.add(a);
@@ -470,23 +484,27 @@ public class NativeContentStreamRewriter {
     /** Each text operator owns one disjoint marked-content run. A semantic node
      * can own many MCRs; extending a wrapper between its operators can swallow
      * other nodes, whitespace artifacts or graphics in the source paint order.
-     * Use text sequence identity here, not PDFBox's virtual dispatch indices.
+     * Reject duplicate sequence IDs and scoped lexical addresses. Each stream
+     * starts its own compact MCID numbering; its ParentTree slot disambiguates it.
      */
     private static int splitAssignmentsIntoMarkedRuns(PagePlan plan) throws IOException {
-        int nextMcid = 0;
-        for (Assignment a : plan.assignments) nextMcid = Math.max(nextMcid, a.mcid + 1);
+        Map<String, Integer> nextMcids = new HashMap<>();
         List<Assignment> expanded = new ArrayList<>();
         Set<Integer> assignedSequences = new HashSet<>();
+        Set<String> assignedAddresses = new HashSet<>();
         int addedRuns = 0;
         for (Assignment a : plan.assignments) {
             for (int i = 0; i < a.operators.size(); i++) {
                 OpRef ref = a.operators.get(i);
                 if (!assignedSequences.add(ref.seq)) throw new IOException("Text operator has multiple owners: " + ref.seq);
+                if (ref.lexicalIdentity && !assignedAddresses.add(ref.streamOrigin + ":" + ref.opIndexInStream))
+                    throw new IOException("Text operator has multiple owners: " + ref.streamOrigin + ":" + ref.opIndexInStream);
                 Assignment run = new Assignment();
                 run.tagNodeId = a.tagNodeId;
                 run.tagType = a.tagType;
                 run.matchConfidence = a.matchConfidence;
-                run.mcid = i == 0 ? a.mcid : nextMcid++;
+                run.mcid = nextMcids.getOrDefault(ref.streamOrigin, 0);
+                nextMcids.put(ref.streamOrigin, run.mcid + 1);
                 run.startsTagGroup = i == 0;
                 run.operators.add(ref);
                 expanded.add(run);
@@ -518,6 +536,22 @@ public class NativeContentStreamRewriter {
         int taggedWrapped;
         int artifactWrapped;
         int skippedInsideSourceMarkedContent;
+        void add(RewriteResult other) {
+            taggedWrapped += other.taggedWrapped; artifactWrapped += other.artifactWrapped;
+            skippedInsideSourceMarkedContent += other.skippedInsideSourceMarkedContent;
+        }
+    }
+
+    private static class RewriteContext {
+        final Set<COSStream> activeForms = new HashSet<>();
+        int formInvocations;
+    }
+
+    private static PDResources privateResources(PDResources source) {
+        COSDictionary copy = source == null ? new COSDictionary() : new COSDictionary(source.getCOSObject());
+        COSDictionary xobjects = copy.getCOSDictionary(COSName.XOBJECT);
+        if (xobjects != null) copy.setItem(COSName.XOBJECT, new COSDictionary(xobjects));
+        return new PDResources(copy);
     }
 
     private static void collectListLabels(TagTreeNode node, Map<String,TagTreeNode> labels) {
@@ -590,45 +624,82 @@ public class NativeContentStreamRewriter {
     }
 
     private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan, Map<String,TagTreeNode> listLabels) throws IOException {
-        // Build lookup: seq -> assignment (for first/last detection)
-        // and seq -> which assignment it belongs to
-        Map<Integer, Assignment> seqToAssignment = new HashMap<>();
-        Map<Integer, Boolean> seqIsFirst = new HashMap<>();
-        Map<Integer, Boolean> seqIsLast = new HashMap<>();
+        PDResources resources = privateResources(page.getResources());
+        page.setResources(resources);
+        RewriteResult result = rewriteContentStream(doc, page, page, null, resources, plan, "page", listLabels, new RewriteContext(), null);
+        for (Assignment a : plan.assignments) if (!a.emitted)
+            throw new IOException("No source text operator for assigned tag " + a.tagNodeId);
+        return result;
+    }
 
+    private static RewriteResult rewriteContentStream(PDDocument doc, PDPage page, PDContentStream source,
+            PDFormXObject targetForm, PDResources resources, PagePlan plan, String origin,
+            Map<String,TagTreeNode> listLabels, RewriteContext context, PDFont inheritedFont) throws IOException {
+        Map<Integer, Assignment> lexicalAssignments = new HashMap<>();
+        Map<Integer, Assignment> legacyAssignments = new HashMap<>();
         for (Assignment a : plan.assignments) {
             if (a.operators.isEmpty()) continue;
             for (OpRef ref : a.operators) {
-                seqToAssignment.put(ref.seq, a);
+                if (!origin.equals(ref.streamOrigin)) continue;
+                if (ref.lexicalIdentity) lexicalAssignments.put(ref.opIndexInStream, a);
+                else legacyAssignments.put(ref.seq, a);
             }
-            seqIsFirst.put(a.operators.get(0).seq, true);
-            seqIsLast.put(a.operators.get(a.operators.size() - 1).seq, true);
         }
 
-        PDFStreamParser parser = new PDFStreamParser(page);
+        PDFStreamParser parser = new PDFStreamParser(source);
         List<Object> tokens = parser.parse();
 
         List<Object> newTokens = new ArrayList<>();
         int textOpSeq = 0;
+        int operatorIndex = 0;
         boolean inArtifact = false;
         // Every assignment is one text operator, so tagged runs cannot overlap.
         java.util.Deque<Integer> openMcidStack = new java.util.ArrayDeque<>();
 
         List<COSBase> pendingOperands = new ArrayList<>();
         RewriteResult result = new RewriteResult();
-        PDFont currentFont=null;List<PDFont> fontStack=new ArrayList<>();
-        int nextMcid=plan.assignments.stream().mapToInt(a->a.mcid).max().orElse(-1)+1;
+        PDFont currentFont=inheritedFont;List<PDFont> fontStack=new ArrayList<>();
+        int nextMcid=plan.assignments.stream().filter(a -> !a.operators.isEmpty() && origin.equals(a.operators.get(0).streamOrigin))
+            .mapToInt(a->a.mcid).max().orElse(-1)+1;
 
         for (Object token : tokens) {
             if (token instanceof Operator) {
                 Operator op = (Operator) token;
                 String opName = op.getName();
+                int currentOperatorIndex = operatorIndex++;
                 if("q".equals(opName))fontStack.add(currentFont);
                 if("Q".equals(opName) && !fontStack.isEmpty())currentFont=fontStack.remove(fontStack.size()-1);
                 if("Tf".equals(opName)) {
                     currentFont=null;
-                    if(pendingOperands.size()==2 && pendingOperands.get(0) instanceof COSName && page.getResources()!=null)
-                        currentFont=page.getResources().getFont((COSName)pendingOperands.get(0));
+                    if(pendingOperands.size()==2 && pendingOperands.get(0) instanceof COSName)
+                        currentFont=resources.getFont((COSName)pendingOperands.get(0));
+                }
+
+                if ("Do".equals(opName) && pendingOperands.size() == 1 && pendingOperands.get(0) instanceof COSName
+                        && resources.getXObject((COSName) pendingOperands.get(0)) instanceof PDFormXObject) {
+                    PDFormXObject form = (PDFormXObject) resources.getXObject((COSName) pendingOperands.get(0));
+                    if (context.activeForms.size() >= 32 || ++context.formInvocations > 10000 || !context.activeForms.add(form.getCOSObject()))
+                        throw new IOException("Cyclic or excessive Form XObject traversal");
+                    String childOrigin = origin + "/" + currentOperatorIndex;
+                    PDFormXObject copy = new PDFormXObject(doc);
+                    for (COSName key : form.getCOSObject().keySet()) {
+                        if (!COSName.LENGTH.equals(key) && !COSName.FILTER.equals(key) && !COSName.DECODE_PARMS.equals(key)
+                                && !COSName.STRUCT_PARENTS.equals(key)) copy.getCOSObject().setItem(key, form.getCOSObject().getItem(key));
+                    }
+                    copy.setResources(privateResources(form.getResources() == null ? resources : form.getResources()));
+                    plan.forms.put(childOrigin, copy);
+                    try {
+                        result.add(rewriteContentStream(doc, page, form, copy, copy.getResources(), plan, childOrigin, listLabels, context, currentFont));
+                    } finally { context.activeForms.remove(form.getCOSObject()); }
+                    String name = "OTForm" + currentOperatorIndex;
+                    COSDictionary names = resources.getCOSObject().getCOSDictionary(COSName.XOBJECT);
+                    while (names != null && names.containsKey(COSName.getPDFName(name))) name += "_";
+                    COSName alias = COSName.getPDFName(name); resources.put(alias, copy);
+                    // Child streams own their content. An Artifact wrapper on
+                    // this Do would hide otherwise valid nested semantic text.
+                    if (inArtifact) { newTokens.add(Operator.getOperator("EMC")); inArtifact = false; }
+                    newTokens.add(alias); newTokens.add(op); pendingOperands.clear();
+                    continue;
                 }
 
                 // STRIP source marked-content markers entirely. Keeping
@@ -650,7 +721,8 @@ public class NativeContentStreamRewriter {
                     int currentSeq = textOpSeq;
                     textOpSeq++;
 
-                    Assignment assignment = seqToAssignment.get(currentSeq);
+                    Assignment assignment = lexicalAssignments.get(currentOperatorIndex);
+                    if (assignment == null) assignment = legacyAssignments.get(currentSeq);
 
                     if (assignment != null) {
                         if (inArtifact) {
@@ -668,6 +740,7 @@ public class NativeContentStreamRewriter {
                                 pendingOperands.set(0,split.prefix);
                             } else if(split!=null) {
                                 Assignment marker=new Assignment();marker.tagNodeId=label.id;marker.tagType="Lbl";marker.mcid=nextMcid++;
+                                marker.emitted=true;
                                 marker.operators.add(assignment.operators.get(0));plan.assignments.add(marker);
                                 COSDictionary props=new COSDictionary();props.setInt(COSName.MCID,marker.mcid);
                                 newTokens.add(COSName.getPDFName("Lbl"));newTokens.add(props);newTokens.add(Operator.getOperator("BDC"));
@@ -676,7 +749,7 @@ public class NativeContentStreamRewriter {
                             }
                         }
 
-                        if (seqIsFirst.containsKey(currentSeq)) {
+                        {
                             COSDictionary props = new COSDictionary();
                             props.setInt(COSName.MCID, assignment.mcid);
                             newTokens.add(COSName.getPDFName(assignment.tagType));
@@ -688,7 +761,7 @@ public class NativeContentStreamRewriter {
                         newTokens.addAll(pendingOperands);
                         newTokens.add(op);
 
-                        if (seqIsLast.containsKey(currentSeq)) {
+                        {
                             // Close our BDC only if we actually opened one
                             // for this mcid.
                             if (openMcidStack.contains(assignment.mcid)) {
@@ -698,6 +771,7 @@ public class NativeContentStreamRewriter {
                                     if (top == assignment.mcid) break;
                                 }
                                 result.taggedWrapped++;
+                                assignment.emitted = true;
                             }
                         }
                     } else {
@@ -753,13 +827,13 @@ public class NativeContentStreamRewriter {
 
         newTokens.addAll(pendingOperands);
 
-        PDStream newStream = new PDStream(doc);
+        PDStream newStream = targetForm == null ? new PDStream(doc) : new PDStream(targetForm.getCOSObject());
         try (OutputStream out = newStream.createOutputStream()) {
             // PDFBox preserves PDF numeric syntax, escaped names, booleans and
             // inline-image payloads; Java toString is not a PDF serializer.
             new ContentStreamWriter(out).writeTokens(newTokens);
         }
-        page.setContents(newStream);
+        if (targetForm == null) page.setContents(newStream);
         return result;
     }
 
@@ -789,6 +863,17 @@ public class NativeContentStreamRewriter {
      * Fallback: when tagTree is null (caller didn't supply --tags) we
      * fall back to the flat build for backward compatibility.
      */
+    private static int installFormParents(PagePlan plan, int nextKey, Map<Integer, COSArray> arrays) {
+        Set<String> used = new HashSet<>();
+        for (Assignment a : plan.assignments) for (OpRef ref : a.operators) used.add(ref.streamOrigin);
+        for (Map.Entry<String, PDFormXObject> entry : plan.forms.entrySet()) {
+            if (!used.contains(entry.getKey())) continue;
+            entry.getValue().getCOSObject().setInt(COSName.STRUCT_PARENTS, nextKey);
+            arrays.put(nextKey++, new COSArray());
+        }
+        return nextKey;
+    }
+
     private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree) throws IOException {
         if (tagTree == null) {
             buildStructureTree(doc, plans);
@@ -846,6 +931,7 @@ public class NativeContentStreamRewriter {
 
             COSArray parentArray = new COSArray();
             parentArraysByPageKey.put(pageKey, parentArray);
+            nextPageKey = installFormParents(plan, nextPageKey, parentArraysByPageKey);
 
             for (Assignment a : plan.assignments) {
                 // Use the centroid of the assignment's operators as
@@ -861,8 +947,10 @@ public class NativeContentStreamRewriter {
                 }
                 double cx = n > 0 ? sumX / n : Double.NaN;
                 double cy = n > 0 ? sumY / n : Double.NaN;
+                PDFormXObject stream = plan.forms.get(a.operators.get(0).streamOrigin);
+                int ownerKey = stream == null ? pageKey : stream.getCOSObject().getInt(COSName.STRUCT_PARENTS);
                 refsByTag.computeIfAbsent(a.tagNodeId, k -> new ArrayList<>())
-                         .add(new PageMcRef(page, a.mcid, pageKey, cx, cy));
+                         .add(new PageMcRef(page, stream, a.mcid, ownerKey, cx, cy));
             }
         }
 
@@ -912,20 +1000,21 @@ public class NativeContentStreamRewriter {
     }
 
     /**
-     * Page-qualified marked-content reference for use while building
-     * the hierarchical structure tree. Captures the PDF page, the
-     * MCID, the /ParentTree key, and the operator's (x, y) position
+     * Page- and stream-qualified marked-content reference for use while building
+     * the hierarchical structure tree. Captures the PDF page, optional Form,
+     * MCID, /ParentTree key, and the operator's (x, y) position
      * so downstream passes (e.g. Link-annotation wrapping) can decide
      * whether the MCID falls inside a given page annotation rect.
      */
     private static class PageMcRef {
         final PDPage page;
+        final PDFormXObject stream;
         final int mcid;
         final int pageKey;
         final double opX;
         final double opY;
-        PageMcRef(PDPage page, int mcid, int pageKey, double opX, double opY) {
-            this.page = page; this.mcid = mcid; this.pageKey = pageKey; this.opX = opX; this.opY = opY;
+        PageMcRef(PDPage page, PDFormXObject stream, int mcid, int pageKey, double opX, double opY) {
+            this.page = page; this.stream = stream; this.mcid = mcid; this.pageKey = pageKey; this.opX = opX; this.opY = opY;
         }
     }
 
@@ -1103,6 +1192,7 @@ public class NativeContentStreamRewriter {
             mcrDict.setItem(COSName.TYPE, COSName.getPDFName("MCR"));
             mcrDict.setInt(COSName.MCID, ref.mcid);
             mcrDict.setItem(COSName.PG, ref.page.getCOSObject());
+            if (ref.stream != null) mcrDict.setItem(COSName.getPDFName("Stm"), ref.stream.getCOSObject());
             PDMarkedContentReference mcr = new PDMarkedContentReference(mcrDict);
 
             // Link-annotation wrapping (Matterhorn 28-004 / PDF/UA-1
@@ -1229,8 +1319,7 @@ public class NativeContentStreamRewriter {
         PDStructureElement docElement = new PDStructureElement("Document", treeRoot);
         treeRoot.appendKid(docElement);
 
-        // Parent tree: maps (pageKey, mcid) -> structure element
-        // We use one parent tree entry per page
+        // Parent tree: one slot per page or invoked Form content stream.
         Map<Integer, COSArray> parentArraysByPageKey = new LinkedHashMap<>();
         int nextPageKey = 0;
 
@@ -1250,6 +1339,7 @@ public class NativeContentStreamRewriter {
             COSArray parentArray = new COSArray();
             parentArraysByPageKey.put(pageKey, parentArray);
 
+            nextPageKey = installFormParents(plan, nextPageKey, parentArraysByPageKey);
             for (Assignment assignment : plan.assignments) {
                 // Create structure element
                 PDStructureElement element = new PDStructureElement(assignment.tagType, docElement);
@@ -1257,13 +1347,20 @@ public class NativeContentStreamRewriter {
 
                 // Link to page and MCID
                 element.setPage(page);
-                element.appendKid(assignment.mcid);
+                PDFormXObject stream = plan.forms.get(assignment.operators.get(0).streamOrigin);
+                COSDictionary mcr = new COSDictionary();
+                mcr.setItem(COSName.TYPE, COSName.getPDFName("MCR"));
+                mcr.setItem(COSName.PG, page.getCOSObject());
+                mcr.setInt(COSName.MCID, assignment.mcid);
+                if (stream != null) mcr.setItem(COSName.getPDFName("Stm"), stream.getCOSObject());
+                element.appendKid(new PDMarkedContentReference(mcr));
+                COSArray ownerArray = stream == null ? parentArray : parentArraysByPageKey.get(stream.getCOSObject().getInt(COSName.STRUCT_PARENTS));
 
                 // Add to parent array at the MCID index
-                while (parentArray.size() <= assignment.mcid) {
-                    parentArray.add(COSNull.NULL);
+                while (ownerArray.size() <= assignment.mcid) {
+                    ownerArray.add(COSNull.NULL);
                 }
-                parentArray.set(assignment.mcid, element.getCOSObject());
+                ownerArray.set(assignment.mcid, element.getCOSObject());
             }
         }
 

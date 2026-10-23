@@ -234,6 +234,7 @@ public class NativeTagMatcher {
         int glyphs;
         int page;
         int opIndexInStream;
+        String streamOrigin;
     }
 
     static class SemanticNode {
@@ -262,6 +263,7 @@ public class NativeTagMatcher {
         double y;
         double confidence;
         int opIndexInStream;
+        String streamOrigin;
     }
 
     static class Assignment {
@@ -321,6 +323,7 @@ public class NativeTagMatcher {
                 oi.glyphs = asInt(om.get("glyphs"));
                 oi.page = pageNum;
                 oi.opIndexInStream = om.containsKey("opIndexInStream") ? asInt(om.get("opIndexInStream")) : oi.seq;
+                oi.streamOrigin = om.containsKey("streamOrigin") && om.containsKey("opIndexInStream") ? asString(om.get("streamOrigin")) : null;
                 pageOps.add(oi);
             }
             result.add(pageOps);
@@ -803,6 +806,7 @@ public class NativeTagMatcher {
                 oa.y = op.y;
                 oa.confidence = conf;
                 oa.opIndexInStream = op.opIndexInStream;
+                oa.streamOrigin = op.streamOrigin;
                 asgn.operators.add(oa);
                 assigned[i] = true;
                 totalConfidence += conf;
@@ -1084,6 +1088,7 @@ public class NativeTagMatcher {
                     json.append(",\"y\":").append(fmt(oa.y));
                     json.append(",\"confidence\":").append(fmt(oa.confidence));
                     json.append(",\"opIndexInStream\":").append(oa.opIndexInStream);
+                    if (oa.streamOrigin != null) json.append(",\"streamOrigin\":").append(escapeJson(oa.streamOrigin));
                     json.append("}");
                 }
                 json.append("]");
@@ -1101,6 +1106,7 @@ public class NativeTagMatcher {
                 if (u > 0) json.append(",");
                 json.append("{\"seq\":").append(op.seq);
                 json.append(",\"opIndexInStream\":").append(op.opIndexInStream);
+                if (op.streamOrigin != null) json.append(",\"streamOrigin\":").append(escapeJson(op.streamOrigin));
                 json.append(",\"text\":").append(escapeJson(op.text));
                 json.append(",\"x\":").append(fmt(op.x));
                 json.append(",\"y\":").append(fmt(op.y));
