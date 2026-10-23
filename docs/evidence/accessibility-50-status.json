@@ -419,8 +419,11 @@
       "improvement": "Editable font coverage proof",
       "requirement": "Extend form-default font qualification to new input and non-ASCII supported glyphs.",
       "acceptance": "Fill/save/reopen retains field values and appearance for verified repertoire; unsupported glyphs are reported.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch19-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A36",

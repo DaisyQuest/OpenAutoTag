@@ -1,0 +1,1345 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A35"
+  ],
+  "status": "completed",
+  "baselineCommit": "3937108906f2c06e049ac56b0e90453ace623d5e",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a35-baseline.log",
+      "sha256": "2a782ace293c2025bf95b5f39f1f0f3a28aca76c9960b3d4a10a8331fb0db837",
+      "passed": 616,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a35-release-verified.log",
+      "sha256": "20b466b4c5cb6703c0fedd7f5363600e964a9d60287ba227e25cbecbe89fd100",
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "currentConfiguredBaselineCases": 618,
+    "note": "Runs overlap. Final renderer-side-effect and bounded-signature-traversal refinements plus two additional signed/encrypted cases are covered by the final 56-case run. No single final 618-case full run or repository/Java coverage percentage is claimed."
+  },
+  "featureEvidence": {
+    "path": "output/accessibility-50-batch19-20261023/release-verified/evidence.json",
+    "sha256": "9673b1fd8b9dc4d520fb53e8520fac7d9b8a45cacad470531ae329cec872e256"
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch19-20261023/independent-verification.json",
+    "sha256": "c67d4fbed0d0a03c0045d565db4a2da6053ae9b8e678184e58982affbb8a232d",
+    "samples": 19,
+    "popplerDpi": 120,
+    "pagePairs": 26,
+    "allRoundTripPixelsMatch": true,
+    "allSourcePixelsOutsideTargetWidgetsMatch": true,
+    "sourcePixelsMask": "Only requested target widget rectangles, expanded by two pixels for antialiasing; full-page comparison after independent pypdf save/reopen.",
+    "sourceFilesByteIdentical": true,
+    "otherFieldsAndAppearancesPreserved": true,
+    "pageContentsPreserved": true,
+    "visuallyInspected": [
+      "independent/1-1-filled.png",
+      "independent/15-2-filled.png"
+    ]
+  },
+  "testForm": {
+    "source": {
+      "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845"
+    },
+    "proof": {
+      "path": "output/accessibility-50-batch19-20261023/real-final/test-form-probes/proof.json",
+      "sha256": "a82129136fecbbcee94f32dbee664fcc89fb1655129cf957b9994513328f7b60"
+    },
+    "request": {
+      "path": "output/accessibility-50-batch19-20261023/real-final/test-form-samples.json",
+      "sha256": "1f01d9a7f19f0e59125a298d349bea6420a686419d5c569da9509209824813aa"
+    },
+    "fieldCount": 32,
+    "widgetCount": 33,
+    "samples": [
+      {
+        "fieldRef": "98 0 R",
+        "value": "José café € 123",
+        "widgets": [
+          {
+            "characters": [
+              {
+                "codePoint": 74,
+                "code": 74,
+                "gid": 45,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 111,
+                "code": 111,
+                "gid": 82,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 115,
+                "code": 115,
+                "gid": 86,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 233,
+                "code": 233,
+                "gid": 112,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 32,
+                "code": 32,
+                "gid": 3,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 99,
+                "code": 99,
+                "gid": 70,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 97,
+                "code": 97,
+                "gid": 68,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 102,
+                "code": 102,
+                "gid": 73,
+                "width": 333,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 8364,
+                "code": 128,
+                "gid": 188,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 49,
+                "code": 49,
+                "gid": 20,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 50,
+                "code": 50,
+                "gid": 21,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 51,
+                "code": 51,
+                "gid": 22,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "98 0 R"
+          }
+        ],
+        "status": "verified",
+        "fieldName": "Print Name",
+        "reason": "Exact sample survived fill/save/reopen with verified glyphs, unclipped /Tx text and equal PDFBox page pixels",
+        "probeFile": "sample-1.pdf",
+        "probeHash": "baa6b054763cbf7bc4740d7a54b607d934349a743ec0149e288eafa4ca255ca7",
+        "savedPixelsMatch": true
+      },
+      {
+        "fieldRef": "344 0 R",
+        "value": "José Example",
+        "widgets": [
+          {
+            "characters": [
+              {
+                "codePoint": 74,
+                "code": 74,
+                "gid": 45,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 111,
+                "code": 111,
+                "gid": 82,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 115,
+                "code": 115,
+                "gid": 86,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 233,
+                "code": 233,
+                "gid": 112,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 32,
+                "code": 32,
+                "gid": 3,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 69,
+                "code": 69,
+                "gid": 40,
+                "width": 667,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 120,
+                "code": 120,
+                "gid": 91,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 97,
+                "code": 97,
+                "gid": 68,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 109,
+                "code": 109,
+                "gid": 80,
+                "width": 889,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 112,
+                "code": 112,
+                "gid": 83,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 108,
+                "code": 108,
+                "gid": 79,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 101,
+                "code": 101,
+                "gid": 72,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "344 0 R"
+          }
+        ],
+        "status": "verified",
+        "fieldName": "Plaintiff/Petitioner",
+        "reason": "Exact sample survived fill/save/reopen with verified glyphs, unclipped /Tx text and equal PDFBox page pixels",
+        "probeFile": "sample-2.pdf",
+        "probeHash": "aa9d0e92cf2cce64b809b095fddb11945575e1a40166d7ce05c5d00fe954759d",
+        "savedPixelsMatch": true
+      },
+      {
+        "fieldRef": "345 0 R",
+        "value": "Zoë Example",
+        "widgets": [
+          {
+            "characters": [
+              {
+                "codePoint": 90,
+                "code": 90,
+                "gid": 61,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 111,
+                "code": 111,
+                "gid": 82,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 235,
+                "code": 235,
+                "gid": 115,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 32,
+                "code": 32,
+                "gid": 3,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 69,
+                "code": 69,
+                "gid": 40,
+                "width": 667,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 120,
+                "code": 120,
+                "gid": 91,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 97,
+                "code": 97,
+                "gid": 68,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 109,
+                "code": 109,
+                "gid": 80,
+                "width": 889,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 112,
+                "code": 112,
+                "gid": 83,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 108,
+                "code": 108,
+                "gid": 79,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 101,
+                "code": 101,
+                "gid": 72,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "345 0 R"
+          }
+        ],
+        "status": "verified",
+        "fieldName": "Defendant/Respondent",
+        "reason": "Exact sample survived fill/save/reopen with verified glyphs, unclipped /Tx text and equal PDFBox page pixels",
+        "probeFile": "sample-3.pdf",
+        "probeHash": "f953986076aee97707e89419f398c258af55b0cb5515ff6b1e60216c30d1d606",
+        "savedPixelsMatch": true
+      },
+      {
+        "fieldRef": "96 0 R",
+        "value": "2026",
+        "widgets": [],
+        "status": "review_required",
+        "fieldName": "AffirmationYear",
+        "reason": "Field/widget actions require separate behavior review"
+      },
+      {
+        "fieldRef": "100 0 R",
+        "value": "12345",
+        "widgets": [
+          {
+            "characters": [
+              {
+                "codePoint": 49,
+                "code": 49,
+                "gid": 20,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 50,
+                "code": 50,
+                "gid": 21,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 51,
+                "code": 51,
+                "gid": 22,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 52,
+                "code": 52,
+                "gid": 23,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 53,
+                "code": 53,
+                "gid": 24,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "346 0 R"
+          },
+          {
+            "characters": [
+              {
+                "codePoint": 49,
+                "code": 49,
+                "gid": 20,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 50,
+                "code": 50,
+                "gid": 21,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 51,
+                "code": 51,
+                "gid": 22,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 52,
+                "code": 52,
+                "gid": 23,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 53,
+                "code": 53,
+                "gid": 24,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "64 0 R"
+          }
+        ],
+        "status": "verified",
+        "fieldName": "IndexNumber",
+        "reason": "Exact sample survived fill/save/reopen with verified glyphs, unclipped /Tx text and equal PDFBox page pixels",
+        "probeFile": "sample-5.pdf",
+        "probeHash": "f10668ad92bbbd39c054e9064300a5d6f29785166b20060e076ce94de9994d6c",
+        "savedPixelsMatch": true
+      },
+      {
+        "fieldRef": "68 0 R",
+        "value": "Sample explanation: café € 123",
+        "widgets": [
+          {
+            "characters": [
+              {
+                "codePoint": 83,
+                "code": 83,
+                "gid": 54,
+                "width": 667,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 97,
+                "code": 97,
+                "gid": 68,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 109,
+                "code": 109,
+                "gid": 80,
+                "width": 889,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 112,
+                "code": 112,
+                "gid": 83,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 108,
+                "code": 108,
+                "gid": 79,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 101,
+                "code": 101,
+                "gid": 72,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 32,
+                "code": 32,
+                "gid": 3,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 120,
+                "code": 120,
+                "gid": 91,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 110,
+                "code": 110,
+                "gid": 81,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 116,
+                "code": 116,
+                "gid": 87,
+                "width": 333,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 105,
+                "code": 105,
+                "gid": 76,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 111,
+                "code": 111,
+                "gid": 82,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 58,
+                "code": 58,
+                "gid": 29,
+                "width": 333,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 99,
+                "code": 99,
+                "gid": 70,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 102,
+                "code": 102,
+                "gid": 73,
+                "width": 333,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 233,
+                "code": 233,
+                "gid": 112,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 8364,
+                "code": 128,
+                "gid": 188,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 49,
+                "code": 49,
+                "gid": 20,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 50,
+                "code": 50,
+                "gid": 21,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 51,
+                "code": 51,
+                "gid": 22,
+                "width": 556,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "68 0 R"
+          }
+        ],
+        "status": "verified",
+        "fieldName": "Explanations",
+        "reason": "Exact sample survived fill/save/reopen with verified glyphs, unclipped /Tx text and equal PDFBox page pixels",
+        "probeFile": "sample-6.pdf",
+        "probeHash": "b893ed62293416b6e49aedcee9c2266bda819acefde035cc9890a1f7b90aeaeb",
+        "savedPixelsMatch": true
+      },
+      {
+        "fieldRef": "98 0 R",
+        "value": "Łódź 🚀",
+        "widgets": [
+          {
+            "characters": [
+              {
+                "codePoint": 321,
+                "status": "unsupported",
+                "reason": "Font encoder cannot represent this character"
+              },
+              {
+                "codePoint": 243,
+                "code": 243,
+                "gid": 121,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 100,
+                "code": 100,
+                "gid": 71,
+                "width": 611,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 378,
+                "status": "unsupported",
+                "reason": "Font encoder cannot represent this character"
+              },
+              {
+                "codePoint": 32,
+                "code": 32,
+                "gid": 3,
+                "width": 278,
+                "status": "verified",
+                "reason": "Encoder, saved Unicode and embedded cmap agree"
+              },
+              {
+                "codePoint": 128640,
+                "status": "unsupported",
+                "reason": "Font encoder cannot represent this character"
+              }
+            ],
+            "programHash": "b88f47faf60b4ecaf6f6887e099c8fcd68cc964eb9a09cd4bd7f0409d6df90ae",
+            "fontName": "Arial,Bold",
+            "widgetRef": "98 0 R"
+          }
+        ],
+        "status": "review_required",
+        "fieldName": "Print Name",
+        "reason": "One or more requested characters are unsupported or unverified"
+      }
+    ],
+    "outcome": "Five exact sample values verified, including accented/euro text and a two-widget field. The year field has actions and remains for behavior review. The unsupported Łódź/rocket request remains for review. Each sample runs on its own QA copy."
+  },
+  "cases": [
+    {
+      "mode": "unicode",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\unicode.pdf",
+      "sourceHash": "0ebfe89b0731981c3aab1d8f3cfc45e29a46d7511a19899ce6dbdcdcac23083c",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-1\\sample-1.pdf",
+      "probeHash": "a7a7dced82a77dd1976a83056fe67b7a279cbf4073510507633add947ef246c1",
+      "field": "sample",
+      "value": "Łódź café € 2026",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "336c657f6e75f5b5a90217b17990ff35e2644d992193b182214b66c1e05c745a",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "unicode",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\unicode.pdf",
+      "sourceHash": "0ebfe89b0731981c3aab1d8f3cfc45e29a46d7511a19899ce6dbdcdcac23083c",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-1\\sample-2.pdf",
+      "probeHash": "65fdb68bf85b8e72e92ee3b96c1d07d315305eb5faef710aa7a319affe39d85e",
+      "field": "sample",
+      "value": "office fifty 123",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "f83106dd712d1fde4c379137ee9506ea6e8cb0ccf5f208127e9c70397df60817",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "simple",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\simple.pdf",
+      "sourceHash": "2465ccaf33932b39f0d20c344760c06d886c5b3d1ff2a4488a7e836e6db03850",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-2\\sample-1.pdf",
+      "probeHash": "a49152fa8b9be359621319c22e53c99c21b27cf41d04bcc197c0e048f5b36641",
+      "field": "sample",
+      "value": "José café € 987",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "5ed9bdfb43d16c293d20478945028ddab87297c76f11d57b629473123fb3dede",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "simple",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\simple.pdf",
+      "sourceHash": "2465ccaf33932b39f0d20c344760c06d886c5b3d1ff2a4488a7e836e6db03850",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-2\\sample-2.pdf",
+      "probeHash": "b9c0d7d160c188bae683a25e338ffe0bf9400954958b17f85ef0b66af615fbd6",
+      "field": "sample",
+      "value": "office fifty 123",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "f83106dd712d1fde4c379137ee9506ea6e8cb0ccf5f208127e9c70397df60817",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "inherited",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\inherited.pdf",
+      "sourceHash": "51d682abf13c7b371124734b457c7f88c7f5e1140d855314a6c5cbb7196e02f7",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-3\\sample-1.pdf",
+      "probeHash": "66557988e680c17e910ce735ac7af6dcb84b6941b098409a1b854ae1f368b871",
+      "field": "sample",
+      "value": "Łódź café € 2026",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "336c657f6e75f5b5a90217b17990ff35e2644d992193b182214b66c1e05c745a",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "inherited",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\inherited.pdf",
+      "sourceHash": "51d682abf13c7b371124734b457c7f88c7f5e1140d855314a6c5cbb7196e02f7",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-3\\sample-2.pdf",
+      "probeHash": "a617d99a73934c0c0391d857be30fa9a156545b9b9ee4f30ea8f88d7ab50cfb5",
+      "field": "sample",
+      "value": "office fifty 123",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "f83106dd712d1fde4c379137ee9506ea6e8cb0ccf5f208127e9c70397df60817",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "multiwidget",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\multiwidget.pdf",
+      "sourceHash": "4fd1c7c457157b662bf5e1a6c3cf8eb7856d5fec2afb63c2fcb78222c1d2e694",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-4\\sample-1.pdf",
+      "probeHash": "145661582b00b0faed4c43f4c55763e178bee27de1c5cdd40f775144909fbd36",
+      "field": "sample",
+      "value": "Łódź café € 2026",
+      "fields": 2,
+      "widgets": 3,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "336c657f6e75f5b5a90217b17990ff35e2644d992193b182214b66c1e05c745a",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "d96c5b5da7dd2e5cbe08f6c082f81be2f91683aefeda09ce1bad61932f42646d",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "multiwidget",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\multiwidget.pdf",
+      "sourceHash": "4fd1c7c457157b662bf5e1a6c3cf8eb7856d5fec2afb63c2fcb78222c1d2e694",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-4\\sample-2.pdf",
+      "probeHash": "0483607e7a4f7971923b79012e44602e92b995016d48e08dc7269364d40e25c0",
+      "field": "sample",
+      "value": "office fifty 123",
+      "fields": 2,
+      "widgets": 3,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "f83106dd712d1fde4c379137ee9506ea6e8cb0ccf5f208127e9c70397df60817",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "70f1dacc00d19aab67bd77b541baff7bf8eb47e78542ab97c00b21380455af31",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "multiline",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\multiline.pdf",
+      "sourceHash": "aa325dc9da869f7687dcf04028b5c3fe3fa831a3dfba19c9cfa160b3cc04a103",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-5\\sample-1.pdf",
+      "probeHash": "48c739765950f023f63cebed09046ffbb3777f0ccb399944054e6b62056cb76f",
+      "field": "sample",
+      "value": "Łódź café € 2026",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "8e9558304bb0eba20ea8aa052c505c855c27e2a8020f137464a33950af49f26b",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "multiline",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\multiline.pdf",
+      "sourceHash": "aa325dc9da869f7687dcf04028b5c3fe3fa831a3dfba19c9cfa160b3cc04a103",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-5\\sample-2.pdf",
+      "probeHash": "f7cbb2ad23090ee3aff8f6ba10973d01baa2d504b6755652a28ff873d53d5c31",
+      "field": "sample",
+      "value": "office fifty 123",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "a71147d9b6c7fed3559d96a74131e6d4768290fc0b16d07654da3770c1d4fd9d",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "comb",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\comb.pdf",
+      "sourceHash": "2ad9ce6a2fdae5b4b048f9c841354670cb923089c04239ba6a9a6433b8205901",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-6\\sample-1.pdf",
+      "probeHash": "7452c1cee5c9b353a73c5f555f32f94d03917de763942dcf2737b049ab515345",
+      "field": "sample",
+      "value": "Łódź café € 2026",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "5ec4b7d1fdf89475e1b8085d10f22e6bf8b6a03dfc6e8d1559f26ae01dcd10b5",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "comb",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\comb.pdf",
+      "sourceHash": "2ad9ce6a2fdae5b4b048f9c841354670cb923089c04239ba6a9a6433b8205901",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-6\\sample-2.pdf",
+      "probeHash": "81e5ecd598250aeceec3f38666a0de30d3a7c5ab386c65a32ed893ae390a43e6",
+      "field": "sample",
+      "value": "office fifty 123",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "f8193a8f5aea91f3a28be23befe3cb0baed37abd3d59f02ed8b05432c899a60b",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "autosize",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\autosize.pdf",
+      "sourceHash": "249a84c20454f790545cf8dda62c14e1c41331344937dc03c46dd39222c20b68",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-7\\sample-1.pdf",
+      "probeHash": "28b6c87c0752b743ac3eb21573fc6be1c3630fb7e6ace8f93590cc6a61ab2d3a",
+      "field": "sample",
+      "value": "Łódź café € 2026",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "c4fdedff25b7ef284007e157d4a5c3df561ada961f94f4469e7a039b40334c50",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "unicode",
+      "source": "output\\accessibility-50-batch19-20261023\\release-verified\\unicode.pdf",
+      "sourceHash": "0ebfe89b0731981c3aab1d8f3cfc45e29a46d7511a19899ce6dbdcdcac23083c",
+      "probe": "output\\accessibility-50-batch19-20261023\\release-verified\\probe-39\\sample-1.pdf",
+      "probeHash": "bcdb6723578bbed2970dea1b5c49a37c0a6705bbf286db5b2cf40dc4ee9ccf52",
+      "field": "sample",
+      "value": "café",
+      "fields": 2,
+      "widgets": 2,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "ac45a053e4899e0746d12366fe5e5660f407bbd5ad5fbd8bfb61ea8f6016babe",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "TEST-FORM",
+      "source": "output\\accessibility-50-batch8-20261023\\control-final\\06-candidate.pdf",
+      "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "probe": "output\\accessibility-50-batch19-20261023\\real-final\\test-form-probes\\sample-1.pdf",
+      "probeHash": "baa6b054763cbf7bc4740d7a54b607d934349a743ec0149e288eafa4ca255ca7",
+      "field": "Print Name",
+      "value": "José café € 123",
+      "fields": 32,
+      "widgets": 33,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "26cd15526ef5b19d292f8fb3e21aaa1aa2fc15b8bcf0b0c16dfe98e396e474cd",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "TEST-FORM",
+      "source": "output\\accessibility-50-batch8-20261023\\control-final\\06-candidate.pdf",
+      "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "probe": "output\\accessibility-50-batch19-20261023\\real-final\\test-form-probes\\sample-2.pdf",
+      "probeHash": "aa9d0e92cf2cce64b809b095fddb11945575e1a40166d7ce05c5d00fe954759d",
+      "field": "Plaintiff/Petitioner",
+      "value": "José Example",
+      "fields": 32,
+      "widgets": 33,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "4df44df29a451d8233c3fbfa73b229c99ab0ef64c3d2be658770c5192b8425ff",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "TEST-FORM",
+      "source": "output\\accessibility-50-batch8-20261023\\control-final\\06-candidate.pdf",
+      "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "probe": "output\\accessibility-50-batch19-20261023\\real-final\\test-form-probes\\sample-3.pdf",
+      "probeHash": "f953986076aee97707e89419f398c258af55b0cb5515ff6b1e60216c30d1d606",
+      "field": "Defendant/Respondent",
+      "value": "Zoë Example",
+      "fields": 32,
+      "widgets": 33,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "ac099196223f4c926816de5662dd463231aa950ca0afd33658dce6668058e248",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "TEST-FORM",
+      "source": "output\\accessibility-50-batch8-20261023\\control-final\\06-candidate.pdf",
+      "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "probe": "output\\accessibility-50-batch19-20261023\\real-final\\test-form-probes\\sample-5.pdf",
+      "probeHash": "f10668ad92bbbd39c054e9064300a5d6f29785166b20060e076ce94de9994d6c",
+      "field": "IndexNumber",
+      "value": "12345",
+      "fields": 32,
+      "widgets": 33,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "77a67c490712c4d1273ca93209f9bcc0e736a861ca3a4b1c0cce92cb044d8dc1",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "8d25b0d7771182de92329a4960aa85188547147efad13ad4cd9d0448524579a1",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    },
+    {
+      "mode": "TEST-FORM",
+      "source": "output\\accessibility-50-batch8-20261023\\control-final\\06-candidate.pdf",
+      "sourceHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "probe": "output\\accessibility-50-batch19-20261023\\real-final\\test-form-probes\\sample-6.pdf",
+      "probeHash": "b893ed62293416b6e49aedcee9c2266bda819acefde035cc9890a1f7b90aeaeb",
+      "field": "Explanations",
+      "value": "Sample explanation: café € 123",
+      "fields": 32,
+      "widgets": 33,
+      "otherFieldValuesPreserved": true,
+      "otherAppearancesPreserved": true,
+      "pageContentsPreserved": true,
+      "pagePairs": [
+        {
+          "page": 1,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        },
+        {
+          "page": 2,
+          "pixels": [
+            1020,
+            1320
+          ],
+          "sha256": "b6774d270a45d74598663b15a2535897e32d88fcc3eaedc28751d6fe6fbfec4f",
+          "match": true,
+          "sourceOutsideTargetWidgetsMatch": true
+        }
+      ]
+    }
+  ],
+  "unchangedProduction": {
+    "booklet": {
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "rawFailures": 6,
+      "savedSemanticFailures": 196,
+      "pendingOcrSegments": 158,
+      "note": "Prior raw/saved/render evidence reused by exact unchanged candidate hash; this font-input proof does not remediate these findings."
+    },
+    "testForm": {
+      "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845"
+    }
+  },
+  "boundaries": [
+    "Exact supplied samples in PDFBox 3.0.8 only; not unrestricted repertoire or every viewer.",
+    "Printable single-line samples; complex shaping, formatting controls, multiline strings and actions require review.",
+    "No automatic production-gate waiver; human semantic and reader review required.",
+    "Existing extra legacy rich-pdfua-compliance table header-ID assertion remains tracked for table work."
+  ],
+  "primarySources": [
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/interactive/form/PDTextField.java",
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/interactive/form/AppearanceGeneratorHelper.java",
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/font/PDTrueTypeFont.java"
+  ]
+}

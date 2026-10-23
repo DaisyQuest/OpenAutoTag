@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/editable-font-samples.schema.json",
+  "title": "Source-bound editable text samples",
+  "type": "object",
+  "required": ["schemaVersion", "sourceHash", "samples"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "samples": {
+      "type": "array", "minItems": 1, "maxItems": 16,
+      "items": {
+        "type": "object", "required": ["fieldRef", "value"],
+        "properties": {
+          "fieldRef": { "type": "string", "pattern": "^[1-9][0-9]{0,15} [0-9]{1,5} R$" },
+          "value": { "type": "string", "minLength": 1, "maxLength": 256 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

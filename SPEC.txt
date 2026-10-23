@@ -1,6 +1,23 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Sampled editable font qualification (A35, 2026-10-23):
+node modules/pdf-writer/editable-font-proof.js --pdf <candidate.pdf>
+  --samples <source-bound-samples.json> --output-dir <fresh-directory>
+The additive editable-font-samples/proof contracts bind exact source/request
+bytes, field references, proposed values, embedded programs and saved QA copies.
+Embedded simple TrueType and horizontal Type0/CIDFontType2 fonts qualify only
+when encoding, independent embedded cmap, glyphs, Unicode and advances agree.
+Generated /Tx text must match and fit its appearance clip. Fill/save/reopen
+checks exact values, widgets, appearance bytes and PDFBox affected-page pixels.
+Unsupported code points and behavior/layout uncertainty remain explicit. Only
+disposable copies are filled; sources and prior production outputs are unchanged.
+Rendering occurs after saving to keep synthesized unrelated annotation APs out
+of QA files. JSON is UTF-8. Exclusive output creation and traversal/text/stream/
+pixel/memory/time limits apply. These opt-in proofs cover exact supplied samples,
+not unrestricted editing, every viewer or accessibility acceptance. They do not
+waive any production gate. See docs/accessibility-50-batch19-20261023.md.
+
 0. Purpose
 
 Build a contract-first PDF accessibility tagging pipeline with deterministic inference, qualified preservation repairs and independently checked saved outputs.

@@ -166,7 +166,7 @@ async function needsCompilation() {
 }
 
 function collectNativeJavaSources() {
-  const sources = ["QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
+  const sources = ["EditableFontProof.java", "QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
   sources.push(path.join(nativeJavaDir, "OcrTextLayer.java"));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);

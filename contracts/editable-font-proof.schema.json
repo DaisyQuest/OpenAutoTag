@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/editable-font-proof.schema.json",
+  "title": "Sampled PDFBox editable font proof (not general viewer certification)",
+  "type": "object",
+  "required": ["schemaVersion", "engine", "sourceHash", "samplesHash", "status", "samples"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "engine": { "const": "PDFBox 3.0.8" },
+    "sourceHash": { "$ref": "#/$defs/hash" },
+    "samplesHash": { "$ref": "#/$defs/hash" },
+    "status": { "enum": ["verified", "review_required"] },
+    "samples": {
+      "type": "array", "minItems": 1, "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": ["fieldRef", "value", "status", "reason", "widgets"],
+        "properties": {
+          "fieldRef": { "type": "string" },
+          "fieldName": { "type": "string" },
+          "value": { "type": "string" },
+          "status": { "enum": ["verified", "review_required"] },
+          "reason": { "type": "string" },
+          "probeFile": { "type": "string", "pattern": "^sample-[0-9]+\\.pdf$" },
+          "probeHash": { "$ref": "#/$defs/hash" },
+          "savedPixelsMatch": { "const": true },
+          "widgets": {
+            "type": "array", "maxItems": 8,
+            "items": {
+              "type": "object",
+              "required": ["widgetRef", "fontName", "programHash", "characters"],
+              "properties": {
+                "widgetRef": { "type": "string" },
+                "fontName": { "type": "string" },
+                "programHash": { "$ref": "#/$defs/hash" },
+                "characters": {
+                  "type": "array", "maxItems": 256,
+                  "items": {
+                    "type": "object", "required": ["codePoint", "status", "reason"],
+                    "properties": {
+                      "codePoint": { "type": "integer", "minimum": 0, "maximum": 1114111 },
+                      "status": { "enum": ["verified", "unsupported", "unverified"] },
+                      "reason": { "type": "string" },
+                      "code": { "type": "integer", "minimum": 0 },
+                      "gid": { "type": "integer", "minimum": 1 },
+                      "width": { "type": "number" }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "allOf": [{ "if": { "properties": { "status": { "const": "verified" } } }, "then": { "required": ["fieldName", "probeFile", "probeHash", "savedPixelsMatch"], "properties": { "widgets": { "type": "array", "minItems": 1 } } } }],
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": { "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" } },
+  "additionalProperties": false
+}
