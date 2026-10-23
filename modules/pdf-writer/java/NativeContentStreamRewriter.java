@@ -585,7 +585,7 @@ public class NativeContentStreamRewriter {
             for(OpRef ref:assignment.operators) {
                 var evidence=plan.links.operators.get(NativeLinkOwnership.address(ref.streamOrigin,ref.opIndexInStream));
                 if(!ref.lexicalIdentity||evidence==null) {expanded.add(ref);continue;}
-                var mapping=evidence.record().mapping;var owners=evidence.glyphLinks();
+                var mapping=evidence.record().sourceMapping;var owners=evidence.glyphLinks();
                 int first=ref.partial?ref.glyphStart:0,end=ref.partial?ref.glyphEnd:owners.length;
                 if(first<0||end>owners.length)throw new IOException("Native link glyph bounds disagree with source");
                 if(ref.partial&&(!mapping.sha256.equals(ref.operandSha256)||!mapping.text.equals(ref.sourceText)||mapping.glyphs.size()!=ref.sourceGlyphCount))

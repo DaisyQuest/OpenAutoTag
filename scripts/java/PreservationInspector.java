@@ -67,6 +67,18 @@ public final class PreservationInspector {
                     itemLink.put("rectangle",rectangle==null?null:Arrays.asList(rectangle.getLowerLeftX(),rectangle.getLowerLeftY(),rectangle.getUpperRightX(),rectangle.getUpperRightY()));
                     itemLink.put("visible",!annotation.isHidden()&&!annotation.isInvisible()&&!annotation.isNoView());
                     itemLink.put("quadPointsPresent",dict.containsKey(COSName.getPDFName("QuadPoints")));
+                    itemLink.put("linkPathPresent",dict.containsKey(COSName.getPDFName("Path")));
+                    COSBase quadValue=dict.getDictionaryObject(COSName.getPDFName("QuadPoints"));
+                    // Use the same float representation as Rect. Expanding only
+                    // quads to double would put equal decimal edges outside Rect
+                    // after JSON serialization (e.g. 42.9861 vs 42.986099243...).
+                    List<Float> quadPoints=new ArrayList<>();boolean numeric=quadValue instanceof COSArray&&((COSArray)quadValue).size()<=8192;
+                    if(numeric)for(COSBase q:(COSArray)quadValue) {
+                        COSBase v=resolve(q);
+                        if(!(v instanceof COSNumber n)||!Float.isFinite(n.floatValue())){numeric=false;break;}
+                        quadPoints.add(((COSNumber)v).floatValue());
+                    }
+                    itemLink.put("quadPoints",numeric?quadPoints:null);
                     itemLink.put("structParent",dict.getInt(COSName.STRUCT_PARENT,-1));
                     itemLink.put("uri", uri); itemLink.put("contents", dict.getString(COSName.CONTENTS, "")); itemLink.put("owners", new ArrayList<String>());
                     if (links.putIfAbsent(requiredRef(dict), itemLink) != null) throw new IOException("Duplicate link annotation");

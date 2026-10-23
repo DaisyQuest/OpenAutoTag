@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.util.*;
 import org.apache.pdfbox.cos.*;
 import org.apache.pdfbox.pdmodel.*;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement;
 import org.apache.pdfbox.pdmodel.interactive.annotation.*;
 
@@ -11,6 +10,7 @@ final class NativeLinkOwnership {
     static final class Link {
         final PDPage page; final PDAnnotationLink annotation; final int pageNumber, index;
         final String sourceRef; final COSBase originalContents;
+        final NativeLinkGeometry geometry;
         final Set<String> expected = new LinkedHashSet<>();
         final Set<String> assigned = new LinkedHashSet<>();
         final List<Map<String,Object>> ranges = new ArrayList<>();
@@ -22,6 +22,7 @@ final class NativeLinkOwnership {
             this.page=page; this.annotation=annotation; this.pageNumber=pageNumber; this.index=index;
             COSObjectKey key=annotation.getCOSObject().getKey(); sourceRef=key==null?"direct":key.getNumber()+" "+key.getGeneration()+" R";
             originalContents=annotation.getCOSObject().getItem(COSName.CONTENTS);
+            geometry=new NativeLinkGeometry(annotation.getCOSObject(),annotation.getRectangle());
         }
         void review(String why) { uncertain=true;eligible=false;reason=why; }
         Map<String,Object> report() {
@@ -43,15 +44,10 @@ final class NativeLinkOwnership {
         for(int i=0;i<annotations.size();i++) if(annotations.get(i) instanceof PDAnnotationLink annotation) {
             if(links.size()>=4096)throw new IOException("Native link annotation limit exceeded");
             Link link=new Link(page,annotation,pageNumber,i);links.add(link);
-            PDRectangle r=annotation.getRectangle();
-            if(r==null||!Float.isFinite(r.getLowerLeftX())||!Float.isFinite(r.getLowerLeftY())||!Float.isFinite(r.getUpperRightX())||!Float.isFinite(r.getUpperRightY())||r.getWidth()<=0||r.getHeight()<=0)
-                link.review("Missing or invalid link rectangle");
+            if(link.geometry.reviewReason!=null)link.review(link.geometry.reviewReason);
             else if(annotation.isHidden()||annotation.isInvisible()||annotation.isNoView())link.review("Hidden link requires visibility review");
-            else if(annotation.getCOSObject().containsKey(COSName.getPDFName("QuadPoints")))link.review("Quad-point link geometry requires dedicated qualification");
             else if(!Set.of(0,90,180,270).contains(page.getRotation()))link.review("Unsupported page rotation");
-            // Unsupported QuadPoints still create an ambiguous hit for an
-            // overlapping rectangle; they must not make a neighbor seem unique.
-            link.geometrySupported=r!=null&&Float.isFinite(r.getWidth())&&Float.isFinite(r.getHeight())&&r.getWidth()>0&&r.getHeight()>0
+            link.geometrySupported=link.geometry.rectangleValid
                 &&!annotation.isHidden()&&!annotation.isInvisible()&&!annotation.isNoView();
         }
         if(links.isEmpty())return;
@@ -63,21 +59,22 @@ final class NativeLinkOwnership {
             if(wanted.contains(annotation.getCOSObject()))seen++;
         }
         if(seen!=wanted.size())throw new IOException("Link annotation is repeated in page arrays");
-        var parser=new NativeContentStreamParser();long comparisons=0;int glyphs=0;
+        var parser=new NativeContentStreamParser(true);long comparisons=0;int glyphs=0;
         for(var record:parser.parseOnePage(document,pageNumber-1)) {
-            if(record.mapping==null||record.glyphPositions.size()!=record.mapping.glyphs.size()) {
+            if(record.sourceMapping==null||record.sourceGlyphPositions.size()!=record.sourceMapping.glyphs.size()) {
                 if(record.text!=null&&!record.text.isBlank())for(Link link:links)link.review("Page contains source text without complete glyph geometry");
                 continue;
             }
-            if((glyphs+=record.mapping.glyphs.size())>1000000)throw new IOException("Native link glyph limit exceeded");
-            Link[] selected=new Link[record.mapping.glyphs.size()];
+            if((glyphs+=record.sourceMapping.glyphs.size())>1000000)throw new IOException("Native link glyph limit exceeded");
+            Link[] selected=new Link[record.sourceMapping.glyphs.size()];
             for(int g=0;g<selected.length;g++) {
-                float[] point=record.glyphPositions.get(g);List<Link> hits=new ArrayList<>();
+                double[] point=record.sourceGlyphPositions.get(g);List<Link> hits=new ArrayList<>();
                 for(Link link:links) {
-                    if(++comparisons>10000000)throw new IOException("Native link geometry comparison limit exceeded");
-                    if(link.geometrySupported&&contains(link,point[0],point[1]))hits.add(link);
+                    comparisons+=link.geometry.complexity();
+                    if(comparisons>10000000)throw new IOException("Native link geometry comparison limit exceeded");
+                    if(link.geometrySupported&&link.geometry.contains(point[0],point[1]))hits.add(link);
                 }
-                boolean meaningful=!record.mapping.glyphs.get(g).unicode.isBlank();
+                boolean meaningful=!record.sourceMapping.glyphs.get(g).unicode.isBlank();
                 if(hits.size()>1) {
                     if(meaningful)for(Link link:hits)link.review("Overlapping annotations make anchor ownership ambiguous");
                 } else if(hits.size()==1) {
@@ -89,18 +86,6 @@ final class NativeLinkOwnership {
         }
         // Earlier glyphs must not retain a link later found ambiguous.
         for(OperatorEvidence op:operators.values())for(int g=0;g<op.glyphLinks.length;g++)if(op.glyphLinks[g]!=null&&op.glyphLinks[g].uncertain)op.glyphLinks[g]=null;
-    }
-    private static boolean contains(Link link,double x,double y) {
-        PDRectangle crop=link.page.getCropBox(),r=link.annotation.getRectangle();double px,py;
-        // TextPosition supplies crop-relative, rotated display coordinates in
-        // default user units. Convert both axes back, before comparing /Rect.
-        switch(link.page.getRotation()) {
-            case 90:px=crop.getLowerLeftX()+y;py=crop.getLowerLeftY()+x;break;
-            case 180:px=crop.getUpperRightX()-x;py=crop.getLowerLeftY()+y;break;
-            case 270:px=crop.getUpperRightX()-y;py=crop.getUpperRightY()-x;break;
-            default:px=crop.getLowerLeftX()+x;py=crop.getUpperRightY()-y;
-        }
-        return px>=r.getLowerLeftX()-0.25&&px<=r.getUpperRightX()+0.25&&py>=r.getLowerLeftY()-0.25&&py<=r.getUpperRightY()+0.25;
     }
     void restoreAuthoredContents() {
         for(Link link:links) {

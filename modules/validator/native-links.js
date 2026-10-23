@@ -1,5 +1,6 @@
 // Independently qualify writer-declared native links against saved objects and
 // source glyph matrices. Unqualified extra Link containers are never transparent.
+import {inspectLinkGeometry,containsLinkGlyph} from './link-geometry.js';
 export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, intendedNodes, add }) {
   const transparent = new Set(), redundantActualText = new Set(); let valid = true;
   const byTag = new Map(intendedNodes.map(v => [v.n.id, v.id]));
@@ -7,6 +8,7 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
   const structures = new Map(inspection.structure.map(n => [n.objectRef, n]));
   const byId = new Map(inspection.structure.map(n => [n.identifier, n]));
   const declarations = ownership.nativeLinks || [], used = new Set();
+  const regions=new Map(Object.values(source.links || {}).map(link=>[link,inspectLinkGeometry(link)]));
   // Index once. Keep successful reports proportional to annotations, not glyphs.
   const sourceLinksByPage = new Map(), sourceRunsByPage = new Map(), savedByAddress = new Map();
   const append = (map, key, value) => { const values=map.get(key)||[];values.push(value);map.set(key,values); };
@@ -19,14 +21,7 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
     add(code, target, expected, actual);
     const passed = JSON.stringify(expected) === JSON.stringify(actual); valid &&= passed; return passed;
   };
-  const inRect = (rectangle, matrix) => {
-    tick();
-    if (!Array.isArray(rectangle) || rectangle.length !== 4 || !rectangle.every(Number.isFinite) ||
-        rectangle[0]>=rectangle[2] || rectangle[1]>=rectangle[3] ||
-        !Array.isArray(matrix) || matrix.length !== 8 || !matrix.every(Number.isFinite)) return false;
-    const [a,b,c,d,e,f,dx,dy] = matrix, x=e+(a*dx+c*dy)/2, y=f+(b*dx+d*dy)/2;
-    return x>=rectangle[0]-0.25 && x<=rectangle[2]+0.25 && y>=rectangle[1]-0.25 && y<=rectangle[3]+0.25;
-  };
+  const contains = (annotation,matrix) => containsLinkGlyph(regions.get(annotation),matrix,tick);
   for (const link of declarations) {
     const target = `${link.pageNumber}:${link.annotationIndex}`, original = source.links?.[link.sourceAnnotationRef];
     check('NATIVE_LINK_UNIQUE_DECLARATION',target,false,used.has(target));used.add(target);
@@ -37,7 +32,7 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
     const savedEntries=savedByAddress.get(target)||[];
     const [savedRef,saved] = savedEntries.length===1?savedEntries[0]:[];
     const node=byId.get(link.linkStructureId), owner=byId.get(byTag.get(link.ownerTagId));
-    verify('NATIVE_LINK_SOURCE',true,Boolean(original&&original.page===link.pageNumber&&original.annotationIndex===link.annotationIndex&&original.visible&&!original.quadPointsPresent));
+    verify('NATIVE_LINK_SOURCE',true,Boolean(original&&original.page===link.pageNumber&&original.annotationIndex===link.annotationIndex&&original.visible&&regions.get(original).valid));
     verify('NATIVE_LINK_SAVED_ANNOTATION',true,Boolean(saved));
     verify('NATIVE_LINK_ROLE','Link',node?.role);
     verify('NATIVE_LINK_OWNER',true,Boolean(node&&owner&&(node===owner||node.parentRef===owner.objectRef)));
@@ -76,7 +71,7 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
         tick();
         const key=run.glyphStart+g;
         unique &&= !known.has(key);known.add(key);expected.push(key);text.push(run.glyphs[g][1]);
-        if(run.glyphs[g][1].trim()&&!inRect(original.rectangle,run.positions?.[g]))geometryValid=false;
+        if(run.glyphs[g][1].trim()&&!contains(original,run.positions?.[g]))geometryValid=false;
       }
     }
     verify('NATIVE_LINK_SOURCE_RANGE',true,rangesValid);
@@ -95,9 +90,9 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
     let meaningful=0,complete=true,unambiguous=true;
     for(const run of sourceRunsByPage.get(link.pageNumber)||[])for(let g=0;g<run.glyphs.length;g++) {
       tick();
-      if(!run.glyphs[g][1].trim()||!inRect(original.rectangle,run.positions?.[g]))continue;
+      if(!run.glyphs[g][1].trim()||!contains(original,run.positions?.[g]))continue;
       meaningful++;complete &&= known.has(run.glyphStart+g);
-      const overlapping=(sourceLinksByPage.get(link.pageNumber)||[]).filter(v=>v.visible&&inRect(v.rectangle,run.positions?.[g]));
+      const overlapping=(sourceLinksByPage.get(link.pageNumber)||[]).filter(v=>v.visible&&contains(v,run.positions?.[g]));
       unambiguous &&= overlapping.length===1;
     }
     verify('NATIVE_LINK_COMPLETE_ANCHOR',true,complete);

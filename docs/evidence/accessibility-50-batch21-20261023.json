@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A37"
+  ],
+  "status": "completed",
+  "baselineCommit": "183a2a63561c554937ffc7d39a7f99cd9871f147",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a37-baseline.log",
+      "sha256": "961a24d23d615e32f11e92fe4dbcd0b7abbc3689d85192725b3232c75b377f33",
+      "passed": 694,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "path": "tmp/a37-final-verified.log",
+      "sha256": "8dbf4356453d304db7de3f6e1726bdc1e0b56a4933d0c354cf05f4ba99f88457",
+      "passed": 38,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "precedingFocused": {
+      "path": "tmp/a37-focused.log",
+      "sha256": "9703a6d0e600725130202f7de8bb9176b16e622e9b391ff9a3f17919868c0f8d",
+      "passed": 76,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 695,
+    "note": "Overlapping runs. The added exact-boundary case and final concave/float refinements are covered by finalFocused; no single final 695-case run or coverage percentage is claimed."
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch21-20261023/geometry-final-verified/evidence.json",
+    "sha256": "bf2d8efd323c60a7fa64b2457c3855b1105e206274b7f0c59ff1691952b5dd6e",
+    "pages": 30,
+    "boundAnnotations": 22,
+    "reviewAnnotations": 9,
+    "source": {
+      "path": "output\\accessibility-50-batch21-20261023\\geometry-final-verified\\source.pdf",
+      "sha256": "2db08abfa097bb4f9e6316776a027540a87ba312c4d4430f09579d169521ac05"
+    },
+    "candidate": {
+      "path": "output\\accessibility-50-batch21-20261023\\geometry-final-verified\\candidate.pdf",
+      "sha256": "a7f2f45d9a6ef184a51769201620221b4e1c32ce2bc958fcca262a1c9363ad64"
+    },
+    "saved": {
+      "path": "output/accessibility-50-batch21-20261023/geometry-final-verified/saved.json",
+      "sha256": "b61506b638bde08d68147b877837e9ad46b5e37e0eb1a1e4f2661e83afbbffd3",
+      "passed": 1381,
+      "failed": 0
+    },
+    "raw": {
+      "path": "output/accessibility-50-batch21-20261023/geometry-final-verified/raw.json",
+      "sha256": "c308ec82262ba3c450bd00296dff048b1e462a7f48228eef035733ca06aa3d91",
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 4055,
+      "failedChecks": 0,
+      "engine": {
+        "name": "veraPDF",
+        "version": "1.30.3",
+        "backend": "greenfield",
+        "executionError": null
+      },
+      "fontAuditRun": false
+    },
+    "corruptionsRejected": [
+      "changed QuadPoints",
+      "removed QuadPoints",
+      "forged prefix range",
+      "forged nearby gap range"
+    ],
+    "fieldEdit": "José café 987",
+    "fillSaveReopenVerified": true
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch21-20261023/independent-verification.json",
+    "sha256": "07493c44c2842e9e395b31a1950e22f9b86f2652988aafb02cc3d41b61ef3167",
+    "popplerDpi": 120,
+    "pagePairs": 63,
+    "allPixelIdentical": true,
+    "cases": [
+      {
+        "id": "geometry",
+        "sourcePath": "output\\accessibility-50-batch21-20261023\\geometry-final-verified\\source.pdf",
+        "sourceHash": "2db08abfa097bb4f9e6316776a027540a87ba312c4d4430f09579d169521ac05",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\geometry-final-verified\\candidate.pdf",
+        "candidateHash": "a7f2f45d9a6ef184a51769201620221b4e1c32ce2bc958fcca262a1c9363ad64",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 60
+      },
+      {
+        "id": "original",
+        "sourcePath": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\real\\original\\candidate.pdf",
+        "candidateHash": "77d7da2c29991b9550f1d73cc37b71ee93467121a66ab5abad9d41eba5cf257a",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 1
+      },
+      {
+        "id": "rotated-90",
+        "sourcePath": "output\\accessibility-50-batch21-20261023\\real\\rotated-90\\source.pdf",
+        "sourceHash": "caaf3fe4ed2f45e51c36d701f3d750753da90f2d28c4079c7e91c217b0e92da0",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\real\\rotated-90\\candidate.pdf",
+        "candidateHash": "b2941fdf65796e89a9a1218450d852266912ec61742e52014f5bf1faaf5c8a61",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 1
+      },
+      {
+        "id": "crop-unit-quads-270",
+        "sourcePath": "output\\accessibility-50-batch21-20261023\\real\\crop-unit-quads-270\\source.pdf",
+        "sourceHash": "e6d63acea23c32a3b915c663a66fe9b13275229c7b517509876ead477515602a",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\real\\crop-unit-quads-270\\candidate.pdf",
+        "candidateHash": "1ef1bd098832262582d3c12c106d5d65d98a920b65a638fa19ab62aac7cae5b5",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 1
+      }
+    ],
+    "note": "Original text bytes/TJ spacing, page geometry, annotations, field values and widget AP bytes verified. Whole font/resource dictionary byte equality is not claimed."
+  },
+  "real": {
+    "path": "output/accessibility-50-batch21-20261023/real-evidence.json",
+    "sha256": "3fc14235b28356dc102d98510245d23f0775fcfa2bd4b9daf200cb1e92996f4e",
+    "cases": [
+      {
+        "id": "original",
+        "sourcePath": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "semanticPath": "output\\accessibility-50-batch21-20261023\\real\\original\\semantic.json",
+        "tagsPath": "output\\accessibility-50-batch10-20261023\\hinode\\05-tagging.json",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\real\\original\\candidate.pdf",
+        "provenance": {
+          "baseSource": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+          "baseHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+          "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+          "derivedTestVariant": false,
+          "rotation": 0,
+          "crop": [
+            0,
+            0,
+            612,
+            792
+          ],
+          "userUnit": 1,
+          "rectEquivalentQuadPointsAdded": false
+        },
+        "candidateHash": "77d7da2c29991b9550f1d73cc37b71ee93467121a66ab5abad9d41eba5cf257a",
+        "bound": 4,
+        "reviews": [],
+        "saved": {
+          "passed": 1043,
+          "failed": 0
+        },
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 5246,
+          "failedChecks": 0
+        }
+      },
+      {
+        "id": "rotated-90",
+        "sourcePath": "output\\accessibility-50-batch21-20261023\\real\\rotated-90\\source.pdf",
+        "sourceHash": "caaf3fe4ed2f45e51c36d701f3d750753da90f2d28c4079c7e91c217b0e92da0",
+        "semanticPath": "output\\accessibility-50-batch21-20261023\\real\\rotated-90\\semantic.json",
+        "tagsPath": "output\\accessibility-50-batch10-20261023\\hinode\\05-tagging.json",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\real\\rotated-90\\candidate.pdf",
+        "provenance": {
+          "baseSource": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+          "baseHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+          "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+          "derivedTestVariant": true,
+          "rotation": 90,
+          "crop": [
+            0,
+            0,
+            612,
+            792
+          ],
+          "userUnit": 1,
+          "rectEquivalentQuadPointsAdded": false
+        },
+        "candidateHash": "b2941fdf65796e89a9a1218450d852266912ec61742e52014f5bf1faaf5c8a61",
+        "bound": 4,
+        "reviews": [],
+        "saved": {
+          "passed": 1043,
+          "failed": 0
+        },
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 5246,
+          "failedChecks": 0
+        }
+      },
+      {
+        "id": "crop-unit-quads-270",
+        "sourcePath": "output\\accessibility-50-batch21-20261023\\real\\crop-unit-quads-270\\source.pdf",
+        "sourceHash": "e6d63acea23c32a3b915c663a66fe9b13275229c7b517509876ead477515602a",
+        "semanticPath": "output\\accessibility-50-batch21-20261023\\real\\crop-unit-quads-270\\semantic.json",
+        "tagsPath": "output\\accessibility-50-batch10-20261023\\hinode\\05-tagging.json",
+        "candidatePath": "output\\accessibility-50-batch21-20261023\\real\\crop-unit-quads-270\\candidate.pdf",
+        "provenance": {
+          "baseSource": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+          "baseHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+          "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+          "derivedTestVariant": true,
+          "rotation": 270,
+          "crop": [
+            10,
+            20,
+            602,
+            772
+          ],
+          "userUnit": 2,
+          "rectEquivalentQuadPointsAdded": true
+        },
+        "candidateHash": "1ef1bd098832262582d3c12c106d5d65d98a920b65a638fa19ab62aac7cae5b5",
+        "bound": 4,
+        "reviews": [],
+        "saved": {
+          "passed": 1043,
+          "failed": 0
+        },
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 5246,
+          "failedChecks": 0
+        }
+      }
+    ],
+    "note": "Original official NASA source plus two explicitly synthetic geometry transformations, using batch 10 corrected reading-order intent. No new natural corpus examples are claimed."
+  },
+  "unchangedControls": [
+    {
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "rerun": false
+    },
+    {
+      "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "rerun": false
+    },
+    {
+      "path": "output/accessibility-50-batch20-20261023/test-form/candidate.pdf",
+      "sha256": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+      "rerun": false
+    }
+  ],
+  "remaining": [
+    "A38 cross-node grouping and A39-A50 remain pending",
+    "Booklet: six raw failures, 196 saved failures and 158 OCR reviews, retained by exact hash; not rerun",
+    "NIST historical-intent table failures remain for A41-A45",
+    "Source-authored replacement text, vertical fonts, ambiguous geometry and Path activation require review",
+    "No full accessibility or human-reader qualification is claimed"
+  ],
+  "sources": [
+    "https://pdf-issues.pdfa.org/32000-2-2020/clause12.html",
+    "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html",
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/text/LegacyPDFStreamEngine.java"
+  ]
+}

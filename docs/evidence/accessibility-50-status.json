@@ -443,8 +443,11 @@
       "improvement": "Rotated and quad-point links",
       "requirement": "Associate rotated and multiline link geometry in a consistent coordinate frame.",
       "acceptance": "QuadPoints/rotation fixtures bind the correct anchor and preserve actions; nearby text is excluded.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch21-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A38",

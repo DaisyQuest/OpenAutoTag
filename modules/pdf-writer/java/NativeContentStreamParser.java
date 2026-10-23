@@ -57,6 +57,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     private int currentPage = 0;
     private float currentPageHeight = 792f;
     private int currentPageRotation;
+    private final boolean captureLinkGeometry;
+    private int sourceGlyphCount;
 
     /** Buffer for the currently-dispatching text operator. */
     private StringBuilder currentOpText = new StringBuilder();
@@ -93,6 +95,10 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         /** True once we've captured a position from a non-whitespace glyph. */
         boolean positionLocked;
         TextMapping mapping;
+        // Link hit testing uses the unprojected glyph displacement, separately
+        // from the cardinal display geometry published for layout partitioning.
+        TextMapping sourceMapping;
+        final List<double[]> sourceGlyphPositions = new ArrayList<>();
         final List<float[]> glyphPositions = new ArrayList<>();
     }
 
@@ -177,7 +183,11 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     }
 
     public NativeContentStreamParser() throws IOException {
+        this(false);
+    }
+    NativeContentStreamParser(boolean captureLinkGeometry) throws IOException {
         super();
+        this.captureLinkGeometry=captureLinkGeometry;
         setSortByPosition(false);
     }
 
@@ -255,6 +265,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             rec.fontSize = ts.getFontSize();
             rec.mapping = operands.isEmpty() || ts.getFont() == null || ts.getFont().isVertical()
                 ? null : mapOperand(ts.getFont(), operands.get(operands.size()-1));
+            rec.sourceMapping=captureLinkGeometry?rec.mapping:null;
 
             // Position is captured from the FIRST glyph fired during the
             // super-dispatch below (via processTextPosition). TextPosition
@@ -273,6 +284,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             super.processOperator(operator, operands);
 
             rec.text = currentOpText.toString();
+            if(rec.sourceMapping!=null&&(rec.sourceGlyphPositions.size()!=rec.sourceMapping.glyphs.size()||!rec.sourceMapping.text.equals(rec.text)))rec.sourceMapping=null;
             if(rec.mapping!=null && (rec.glyphPositions.size()!=rec.mapping.glyphs.size() || !rec.mapping.text.equals(rec.text)))rec.mapping=null;
             rec.glyphs = rec.text.length();
             // If no glyphs fired (possible for empty string operators), fall
@@ -300,6 +312,21 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         }
 
         super.processOperator(operator, operands);
+    }
+
+    @Override
+    protected void showGlyph(org.apache.pdfbox.util.Matrix matrix, PDFont font, int code, org.apache.pdfbox.util.Vector displacement) throws IOException {
+        if(captureLinkGeometry&&++sourceGlyphCount>1000000)throw new IOException("Native link source glyph limit exceeded");
+        if(currentRecord!=null&&currentRecord.sourceMapping!=null) {
+            int i=currentRecord.sourceGlyphPositions.size();
+            double x=matrix.getTranslateX()+((double)matrix.getScaleX()*displacement.getX()+(double)matrix.getShearX()*displacement.getY())/2;
+            double y=matrix.getTranslateY()+((double)matrix.getShearY()*displacement.getX()+(double)matrix.getScaleY()*displacement.getY())/2;
+            double determinant=(double)matrix.getScaleX()*matrix.getScaleY()-(double)matrix.getShearX()*matrix.getShearY();
+            if(i>=currentRecord.sourceMapping.glyphs.size()||currentRecord.sourceMapping.glyphs.get(i).code!=code
+                    ||!Double.isFinite(x)||!Double.isFinite(y)||!Double.isFinite(determinant)||Math.abs(determinant)<1e-12)currentRecord.sourceMapping=null;
+            else currentRecord.sourceGlyphPositions.add(new double[]{x,y});
+        }
+        super.showGlyph(matrix,font,code,displacement);
     }
 
     @Override
@@ -368,6 +395,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         currentPage = pageIndex + 1;
         PDPage page = doc.getPage(pageIndex);
         currentPageRotation = page.getRotation();
+        sourceGlyphCount=0;
         PDRectangle cropBox = page.getCropBox();
         currentPageHeight = cropBox != null ? cropBox.getHeight() : 792f;
         setStartPage(pageIndex + 1);

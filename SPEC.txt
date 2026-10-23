@@ -1,6 +1,17 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Native link geometry (A37, 2026-10-23):
+Native Link hit testing uses unprojected source glyph displacement in default
+user space. Simple counterclockwise QuadPoints, including concave/disjoint
+regions, preserve original annotation values, actions and appearance. Rotated
+pages, crop origins, UserUnit, rotated/sheared horizontal text and nested Forms
+are qualified. Independent inspection carries additive quadPoints/linkPathPresent
+evidence and uses consistent numeric serialization for exact rectangle edges.
+Malformed/outside/ambiguous geometry stays for review. Quad count, source glyph
+capture and geometry work are bounded. Cross-node anchor grouping remains A38.
+See docs/accessibility-50-batch21-20261023.md.
+
 Native link ownership (A36, 2026-10-23):
 Native rewriting binds unambiguous source glyph ranges, Link elements, annotation
 OBJRs and direct annotation ParentTree entries without changing anchor bytes,

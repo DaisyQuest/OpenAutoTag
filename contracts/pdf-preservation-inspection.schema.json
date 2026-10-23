@@ -142,7 +142,8 @@
       "uri": { "type": "string" }, "contents": { "type": "string" }, "owners": { "type": "array", "items": { "type": "string" } },
       "annotationIndex": { "type": "integer", "minimum": 0 }, "structParent": { "type": "integer", "minimum": -1 }, "nativeDigest": { "$ref": "#/$defs/hash" },
       "rectangle": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
-      "visible": { "type": "boolean" }, "quadPointsPresent": { "type": "boolean" }
+      "visible": { "type": "boolean" }, "quadPointsPresent": { "type": "boolean" },
+      "linkPathPresent": { "type": "boolean" }, "quadPoints": { "type": ["array", "null"], "maxItems": 8192, "items": { "type": "number" } }
     }, "additionalProperties": false } },
     "headings": { "type": "array", "items": { "type": "object", "required": ["id", "role", "contentRefs"], "properties": {
       "id": { "type": "string" }, "role": { "type": "string", "pattern": "^H[1-6]$" },
