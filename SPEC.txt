@@ -230,6 +230,38 @@ provenance or every reader's substitution. See batch 17 and its evidence.
 Preservation replay accepts --font-donors <manifest.json> together with
 --font-repairs true. Donor inputs are protected from report output overwrites.
 
+Optional --repair-unicode true enables direct ToUnicode diagnostics and the
+verified-invalid-unicode rule. The report adds unicodeDiagnostics with each
+font's source state, usage completeness, used-code count, per-code mappings,
+independent expected values where known, reasons and whether a repair applied.
+States distinguish absent, malformed, incomplete, contradictory, valid syntax
+and unsupported syntax. A parsed/valid map is not proof of semantic accuracy.
+The bounded parser supports one-byte simple-font and two-byte Identity CMaps,
+bfchar, scalar/array bfrange and UTF-16BE sequences. Limits: 4 MiB map data,
+200,000 tokens, 65,536 definitions, 512 bytes/destination, 256 diagnostic fonts,
+4,096 observed codes/font and 32,768 observed diagnostic codes/document.
+Later code definitions supersede earlier ones; codespaces are checked per byte.
+Inherited/custom CMaps, ambiguous syntax and limits remain for review. Invalid
+unused entries also require separate evidence.
+Only qualifying embedded TrueType glyphs with unambiguous embedded Unicode
+cmap or the documented symbol fingerprint can supply a replacement. All used
+glyph IDs, widths, displacements, vertical origins and outlines must remain
+equal. Valid authored entries, including unused Unicode sequences, are kept.
+Conflicting valid mappings, editable defaults, incomplete usage and authored
+ActualText prevent automatic replacement. Apply before parsing/tagging.
+Saved-object replay must use the same --repair-unicode true flag; preservation
+verification forwards it only with --font-repairs true. Default calls retain
+existing-map preservation. Source/candidate hashes still bind the proof.
+
+Font audit toUnicodeCoverage/mappedGlyphCount now describe direct CMap coverage,
+not PDFBox fallback extraction. toUnicodeStatus is absent/malformed/parsed;
+parsed is not strict syntax or semantic qualification. unmappedCodes records
+missing direct mappings, and standardFallbackCodes separately reports qualified
+simple-font standard encodings. Missing/incomplete maps with complete observed
+standard fallback produce warnings; missing codes without such evidence remain
+errors even above 99% coverage. Empty/unreadable maps produce an explicit
+TO_UNICODE_MALFORMED error. This audit is not a complete font conformance checker.
+
 3.7b Qualified link repair (opt-in post-processing)
 
 Command:

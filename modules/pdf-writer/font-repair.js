@@ -25,7 +25,8 @@ async function hash(file) {
 }
 
 /** Opt-in, incremental repairs only. Verification replays the qualified rules from the source. */
-export async function repairFonts({ sourcePdf, outputPdf, candidatePdf, donorsPath, fontDir = path.join(root, "node_modules/pdfjs-dist/standard_fonts") } = {}) {
+export async function repairFonts({ sourcePdf, outputPdf, candidatePdf, donorsPath, repairUnicode = false, fontDir = path.join(root, "node_modules/pdfjs-dist/standard_fonts") } = {}) {
+  if (typeof repairUnicode !== "boolean") throw new Error("repairUnicode must be a boolean");
   if (!sourcePdf || Boolean(outputPdf) === Boolean(candidatePdf)) throw new Error("Required: --pdf and exactly one of --output or --verify");
   const target = path.resolve(outputPdf || candidatePdf), source = path.resolve(sourcePdf);
   if (source.toLowerCase() === target.toLowerCase()) throw new Error("Font repair must not overwrite its source");
@@ -58,7 +59,7 @@ export async function repairFonts({ sourcePdf, outputPdf, candidatePdf, donorsPa
   // Type2CharString. This short-lived pass uses tier 1 to avoid that VM fault.
   const { stdout } = await exec(java, ["-XX:TieredStopAtLevel=1", "-cp", [getRuntimeBuildDir("modules-pdf-writer", { repoRoot: root }),
     path.join(root, "modules/pdf-writer/vendor/pdfbox-app-3.0.8.jar")].join(path.delimiter),
-    "QualifiedFontRepairs", outputPdf ? "repair" : "verify", source, target, path.resolve(fontDir), ...donorArgs],
+    "QualifiedFontRepairs", outputPdf ? "repair" : "verify", source, target, path.resolve(fontDir), ...donorArgs, ...(repairUnicode ? ["--repair-unicode"] : [])],
   { env: await buildJavaExecEnv({ bundledJavaHome }), windowsHide: true, maxBuffer: 8 * 1024 * 1024 });
   const candidateHash = await hash(target);
   if (sourceHash !== await hash(source) || (beforeCandidate && beforeCandidate !== candidateHash)) throw new Error("PDF changed during font repair verification");
@@ -72,10 +73,11 @@ export async function repairFonts({ sourcePdf, outputPdf, candidatePdf, donorsPa
 async function main() {
   const args = new Map();
   for (let i = 2; i < process.argv.length; i += 2) {
-    if (!["--pdf", "--output", "--verify", "--font-dir", "--donors"].includes(process.argv[i]) || !process.argv[i + 1] || args.has(process.argv[i])) throw new Error("Invalid font repair arguments");
+    if (!["--pdf", "--output", "--verify", "--font-dir", "--donors", "--repair-unicode"].includes(process.argv[i]) || !process.argv[i + 1] || args.has(process.argv[i])) throw new Error("Invalid font repair arguments");
     args.set(process.argv[i], process.argv[i + 1]);
   }
-  const report = await repairFonts({ sourcePdf: args.get("--pdf"), outputPdf: args.get("--output"), candidatePdf: args.get("--verify"), donorsPath: args.get("--donors"), fontDir: args.get("--font-dir") });
+  if (args.has("--repair-unicode") && !["true", "false"].includes(args.get("--repair-unicode"))) throw new Error("--repair-unicode requires true or false");
+  const report = await repairFonts({ sourcePdf: args.get("--pdf"), outputPdf: args.get("--output"), candidatePdf: args.get("--verify"), donorsPath: args.get("--donors"), repairUnicode: args.get("--repair-unicode") === "true", fontDir: args.get("--font-dir") });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (report.verification.status !== "pass") process.exitCode = 1;
 }

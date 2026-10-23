@@ -554,7 +554,10 @@ function buildMetadataDiagnostics(findings, metadataProbe) {
  *     subtype: string,            // "TrueType", "Type1", "Type0:CIDFontType2", "Type3", ...
  *     embedded: boolean,          // FontFile/FontFile2/FontFile3 present in /FontDescriptor
  *     hasToUnicode: boolean,
- *     toUnicodeCoverage: number,  // fraction in [0, 1] of *used* glyph codes that map to a Unicode string
+ *     toUnicodeCoverage: number,  // direct CMap coverage of observed codes; excludes renderer fallbacks
+ *     toUnicodeStatus: string,    // absent | malformed | parsed (parsed is not semantic validation)
+ *     unmappedCodes: number[],    // observed codes missing from the direct CMap
+ *     standardFallbackCodes: number[], // missing codes with a qualified simple-font fallback
  *     encoding: string,           // e.g. "WinAnsiEncoding", "Identity-H", "Custom+Differences"
  *     isSymbolic: boolean,
  *     standard14: boolean,        // true => unembedded Standard 14 (PDF/UA blocker)
@@ -574,8 +577,9 @@ function buildMetadataDiagnostics(findings, metadataProbe) {
  * Findings appended by the font audit each carry `source: "font-audit"` and use these codes:
  *   FONT_NOT_EMBEDDED            (error)
  *   FONT_STANDARD_14             (error)  -- unembedded Standard 14, forbidden by PDF/UA
- *   TO_UNICODE_MISSING           (error)
- *   TO_UNICODE_INCOMPLETE        (error if coverage < 0.95, warning if 0.95 <= coverage < 0.99)
+ *   TO_UNICODE_MISSING           (warning when standard fallback covers all observed codes, otherwise error)
+ *   TO_UNICODE_INCOMPLETE        (warning when standard fallback covers missing codes, otherwise error)
+ *   TO_UNICODE_MALFORMED         (error; unreadable or empty direct map)
  *   SYMBOLIC_WITHOUT_DIFFERENCES (error)
  *   INVALID_CID_SYSTEM_INFO      (error)
  *   DA_FONT_NOT_IN_DR            (error)  -- form field /DA references a font absent from /AcroForm/DR/Font

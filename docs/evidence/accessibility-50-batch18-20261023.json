@@ -1,0 +1,502 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A34"
+  ],
+  "status": "completed",
+  "baselineCommit": "c5d4a8e84c82304fc58696f1c3df719d2b2cfdc7",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/accessibility-50-batch18-baseline.log",
+      "sha256": "dd7f7d322a0ce90a9363d02f6362d8ad7009cb6ed11e92b2ff8302f7846bc7d3",
+      "passed": 557,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a34-release-final.log",
+      "sha256": "98995a6f2003cc5f6ca4a59c2b932c1f98ad7ee7c99990f476194238abd68583",
+      "passed": 74,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "newFeatureCases": 57,
+    "existingAuditCasesAddedToBaseline": 5,
+    "currentConfiguredBaselineCases": 562,
+    "note": "Runs overlap. Five new cases plus final CMap override/codespace and standard-fallback changes were verified in the final affected run. The complete current 562-case command was not rerun after these scoped changes.",
+    "coverageClaim": null,
+    "extraLegacyCheck": {
+      "path": "tmp/a34-release-check.log",
+      "sha256": "623ee01c028fd3177c57e0afe9474767778c9231dc9c9d824fa8cbb482233be8",
+      "file": "test/integration/rich-pdfua-compliance.test.js",
+      "line": 205,
+      "status": "failed",
+      "expected": "H_r0c0",
+      "actual": "tag:table:rich-table:H_r0c0_0",
+      "context": "Unchanged tag-builder/test assertion fails before font writer or validator execution. Outside required baseline; recorded for remaining table qualification. This log also contains 70 passing overlapping tests."
+    }
+  },
+  "verification": [
+    {
+      "id": "partial",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\partial.pdf",
+      "sourceHash": "60e2718d3b35e3cad15eadd53655f7c7aee091562b8b219262c243905052f15a",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\partial-fixed.pdf",
+      "candidateHash": "cf193abf1791e49311c1499f847328cd8363efb334ebd2b8ced0f9037ce12676"
+    },
+    {
+      "id": "surrogate",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\surrogate.pdf",
+      "sourceHash": "63e491970ebed7cf3234e90ce6414aede8e8924a181a95edf41fdbc76a56f8f0",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\surrogate-fixed.pdf",
+      "candidateHash": "56aaad26df30badc496a9faac3e415a32ca9f93a4d346676c840db8d440b0724"
+    },
+    {
+      "id": "odd",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\odd.pdf",
+      "sourceHash": "0691f44a005ed9c46ded44394ddfb0adbae67dff961c3213815de11094004615",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\odd-fixed.pdf",
+      "candidateHash": "a94a6b23b88c732c685e0379d2728a90711065ac5eb97b50624813b3b82e808b"
+    },
+    {
+      "id": "empty-value",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\empty-value.pdf",
+      "sourceHash": "395413f233539fc35508190d85509f2b45e34b930f76bf9d9ab40de114b39f34",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\empty-value-fixed.pdf",
+      "candidateHash": "aae57ed41bf94afdb05b4ba6f8169c104c4b47d8a7a667374329ffd4c2f2f4f9"
+    },
+    {
+      "id": "null",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\null.pdf",
+      "sourceHash": "160c396bb738f2417232a49946b2e10f9d09a4fe6c5160ab2575673b73d4df24",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\null-fixed.pdf",
+      "candidateHash": "6ce02705bb1fa14fecdf88b037512f7143e43595e04918fffa503195b69083bd"
+    },
+    {
+      "id": "empty-stream",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\empty-stream.pdf",
+      "sourceHash": "7b5a9aa95d9b4f044e1fbe4ecafd7c63ac63833ce851f24594caf09bd10ab09c",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\empty-stream-fixed.pdf",
+      "candidateHash": "a81e1d26198518e8f36b9a0e4f41fba37b2ba1788e2ac27849f3f764badc2b9f"
+    },
+    {
+      "id": "absent",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\absent.pdf",
+      "sourceHash": "262bcda6a2274e572e750ce17a5a5c8c32c2aa62cf5544645dff8df89c7e3e79",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\absent-fixed.pdf",
+      "candidateHash": "46b559349631c34186d9e054c48413a53cd83319ee740b511d00ef60cebb293a"
+    },
+    {
+      "id": "simple",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\simple.pdf",
+      "sourceHash": "df81d56b658c0eaeae9e8723cc13c42ac2e7e022167cc5a5e52a731647850a50",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\simple-fixed.pdf",
+      "candidateHash": "94dc95af102a0c4ff4693a25d6cba59f0b973fb69039e63e5f3f75a2c0e651c0"
+    },
+    {
+      "id": "vertical",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\vertical.pdf",
+      "sourceHash": "77ebd5340e0e53ec92b1dde7d20699a5f05f5aa6ec04aa32f741e5e4390eb906",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\vertical-fixed.pdf",
+      "candidateHash": "1a11418b2e25e3bf7cfcc294174e0b0de89e4f498981982e4d3216bb63b5307d"
+    },
+    {
+      "id": "array",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\array.pdf",
+      "sourceHash": "3980e1c9cd8ef4d4d7eeb6bc14ecadb566da5fb2c57246704177c13b1bb875bc",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\array-fixed.pdf",
+      "candidateHash": "56aa9eac1942914f3472feb2a9e2f2c4f5680f368df322911e084bbbc6ac87ac"
+    },
+    {
+      "id": "form",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\form.pdf",
+      "sourceHash": "07f4264a8180123ce5bf132e92c140b2799a9f43d487cd5f1af3a2718ab6bcbd",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\form-fixed.pdf",
+      "candidateHash": "7a032b715592cea29c178706c7bc1b8e647e976b387deee2e1386cafdb72e9be"
+    },
+    {
+      "id": "pattern",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\pattern.pdf",
+      "sourceHash": "2e2cb535456ca45ed2097e956440c8dffb61bbc8476dc529acdb93f81afc9c6a",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\pattern-fixed.pdf",
+      "candidateHash": "685fb2d34303800ed049ec8257c6de84e47359e614bb2784770a2993bcd1f09a"
+    },
+    {
+      "id": "appearance",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\appearance.pdf",
+      "sourceHash": "1ff63bbd8d903e46db829414b43148e55d7881950395bdcebfa9c01f53a379ce",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\appearance-fixed.pdf",
+      "candidateHash": "934f572792e898f8e5718911310b543348729ee5b07e08afd8d9ad6f78a02607"
+    },
+    {
+      "id": "shared",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\shared.pdf",
+      "sourceHash": "82f3703a16721586b9ba0fdb8a9d2c247505124fff7235627d39843f953cef2d",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\shared-fixed.pdf",
+      "candidateHash": "9728bcdc0ac0da3a7c5dec2325a0413be7c95431e7b8165e4ce078add5d59284"
+    },
+    {
+      "id": "late-invalid",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\release-final\\late-invalid.pdf",
+      "sourceHash": "80b30a152e465a70e0ae9951840cf235f645fe395b3b53890dc41b8730c0185f",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\release-final\\late-invalid-fixed.pdf",
+      "candidateHash": "8ec7dc049b4c9e15b6916377f31317065f027c146aae630bf0b425a640e1286c"
+    },
+    {
+      "id": "booklet-fault",
+      "sourcePath": "output\\accessibility-50-batch18-20261023\\booklet-fault\\source.pdf",
+      "sourceHash": "f8fc9f7d2c0ccdf5ac4205dde9b25171e75a524b206d7e2a17bfe4291af9ffee",
+      "candidatePath": "output\\accessibility-50-batch18-20261023\\booklet-fault\\06-candidate.pdf",
+      "candidateHash": "8716aeceefcb1a654fdff8e1c02cff775a8ddaf08fbfad7f1196083c25ac91e7"
+    }
+  ],
+  "objects": {
+    "path": "output/accessibility-50-batch18-20261023/independent-object-proof.json",
+    "sha256": "755b2f2194fe4de6f1ee9c27a0813f93194f4f8c6ad0e84bc3fd04d88775ebd6",
+    "originalStreamsByteIdentical": 381,
+    "cases": [
+      {
+        "id": "partial",
+        "sourceHash": "60e2718d3b35e3cad15eadd53655f7c7aee091562b8b219262c243905052f15a",
+        "candidateHash": "cf193abf1791e49311c1499f847328cd8363efb334ebd2b8ced0f9037ce12676",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 25,
+        "originalStreamsByteIdentical": 8,
+        "changes": [
+          {
+            "fontRef": "15 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "surrogate",
+        "sourceHash": "63e491970ebed7cf3234e90ce6414aede8e8924a181a95edf41fdbc76a56f8f0",
+        "candidateHash": "56aaad26df30badc496a9faac3e415a32ca9f93a4d346676c840db8d440b0724",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "odd",
+        "sourceHash": "0691f44a005ed9c46ded44394ddfb0adbae67dff961c3213815de11094004615",
+        "candidateHash": "a94a6b23b88c732c685e0379d2728a90711065ac5eb97b50624813b3b82e808b",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "empty-value",
+        "sourceHash": "395413f233539fc35508190d85509f2b45e34b930f76bf9d9ab40de114b39f34",
+        "candidateHash": "aae57ed41bf94afdb05b4ba6f8169c104c4b47d8a7a667374329ffd4c2f2f4f9",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "null",
+        "sourceHash": "160c396bb738f2417232a49946b2e10f9d09a4fe6c5160ab2575673b73d4df24",
+        "candidateHash": "6ce02705bb1fa14fecdf88b037512f7143e43595e04918fffa503195b69083bd",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 4,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "154fa04b5579192dbdfac9b04beb84f4dc9866096bf0f98c9a453254314c729e"
+          }
+        ]
+      },
+      {
+        "id": "empty-stream",
+        "sourceHash": "7b5a9aa95d9b4f044e1fbe4ecafd7c63ac63833ce851f24594caf09bd10ab09c",
+        "candidateHash": "a81e1d26198518e8f36b9a0e4f41fba37b2ba1788e2ac27849f3f764badc2b9f",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "154fa04b5579192dbdfac9b04beb84f4dc9866096bf0f98c9a453254314c729e"
+          }
+        ]
+      },
+      {
+        "id": "absent",
+        "sourceHash": "262bcda6a2274e572e750ce17a5a5c8c32c2aa62cf5544645dff8df89c7e3e79",
+        "candidateHash": "46b559349631c34186d9e054c48413a53cd83319ee740b511d00ef60cebb293a",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 4,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "154fa04b5579192dbdfac9b04beb84f4dc9866096bf0f98c9a453254314c729e"
+          }
+        ]
+      },
+      {
+        "id": "simple",
+        "sourceHash": "df81d56b658c0eaeae9e8723cc13c42ac2e7e022167cc5a5e52a731647850a50",
+        "candidateHash": "94dc95af102a0c4ff4693a25d6cba59f0b973fb69039e63e5f3f75a2c0e651c0",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 9,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "ed4b4ee04c71b18b933fba0bbd325c07374ca0680da094497505a0a6b794b25d"
+          }
+        ]
+      },
+      {
+        "id": "vertical",
+        "sourceHash": "77ebd5340e0e53ec92b1dde7d20699a5f05f5aa6ec04aa32f741e5e4390eb906",
+        "candidateHash": "1a11418b2e25e3bf7cfcc294174e0b0de89e4f498981982e4d3216bb63b5307d",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "array",
+        "sourceHash": "3980e1c9cd8ef4d4d7eeb6bc14ecadb566da5fb2c57246704177c13b1bb875bc",
+        "candidateHash": "56aa9eac1942914f3472feb2a9e2f2c4f5680f368df322911e084bbbc6ac87ac",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "154fa04b5579192dbdfac9b04beb84f4dc9866096bf0f98c9a453254314c729e"
+          }
+        ]
+      },
+      {
+        "id": "form",
+        "sourceHash": "07f4264a8180123ce5bf132e92c140b2799a9f43d487cd5f1af3a2718ab6bcbd",
+        "candidateHash": "7a032b715592cea29c178706c7bc1b8e647e976b387deee2e1386cafdb72e9be",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 15,
+        "originalStreamsByteIdentical": 6,
+        "changes": [
+          {
+            "fontRef": "8 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "pattern",
+        "sourceHash": "2e2cb535456ca45ed2097e956440c8dffb61bbc8476dc529acdb93f81afc9c6a",
+        "candidateHash": "685fb2d34303800ed049ec8257c6de84e47359e614bb2784770a2993bcd1f09a",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 15,
+        "originalStreamsByteIdentical": 6,
+        "changes": [
+          {
+            "fontRef": "8 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "appearance",
+        "sourceHash": "1ff63bbd8d903e46db829414b43148e55d7881950395bdcebfa9c01f53a379ce",
+        "candidateHash": "934f572792e898f8e5718911310b543348729ee5b07e08afd8d9ad6f78a02607",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 16,
+        "originalStreamsByteIdentical": 6,
+        "changes": [
+          {
+            "fontRef": "8 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "shared",
+        "sourceHash": "82f3703a16721586b9ba0fdb8a9d2c247505124fff7235627d39843f953cef2d",
+        "candidateHash": "9728bcdc0ac0da3a7c5dec2325a0413be7c95431e7b8165e4ce078add5d59284",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 13,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "late-invalid",
+        "sourceHash": "80b30a152e465a70e0ae9951840cf235f645fe395b3b53890dc41b8730c0185f",
+        "candidateHash": "8ec7dc049b4c9e15b6916377f31317065f027c146aae630bf0b425a640e1286c",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 11,
+        "originalStreamsByteIdentical": 5,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "newMapSha256": "b6a3b51747f2339f9b19b7d2753e13648fe32aca7099e2c0020a838401df5cf0"
+          }
+        ]
+      },
+      {
+        "id": "booklet-fault",
+        "sourceHash": "f8fc9f7d2c0ccdf5ac4205dde9b25171e75a524b206d7e2a17bfe4291af9ffee",
+        "candidateHash": "8716aeceefcb1a654fdff8e1c02cff775a8ddaf08fbfad7f1196083c25ac91e7",
+        "sourcePrefixPreserved": true,
+        "objectsCompared": 3131,
+        "originalStreamsByteIdentical": 302,
+        "changes": [
+          {
+            "fontRef": "1092 0 R",
+            "newMapSha256": "21005e0a572f2776ccac0c2ad83a4ba5bc933717ab859928fe97ffcd6f06dee3"
+          }
+        ]
+      }
+    ]
+  },
+  "rendering": {
+    "path": "output/accessibility-50-batch18-20261023/visual-comparison.json",
+    "sha256": "9cc77b19c1e2aac5ca15005af9c0ffd36cd6e47c77a9aedc26337c7ad9c3311d",
+    "popplerPagePairs": 76,
+    "pdfboxPagePairs": 77,
+    "allPairsMatch": true,
+    "popplerDpi": {
+      "fixtures": 150,
+      "booklet": 96
+    },
+    "pdfboxDpi": 120,
+    "fieldFillSaveReopen": "José café 987",
+    "bookletPdfbox": {
+      "path": "tmp/a34-booklet-pdfbox.log",
+      "sha256": "60ab25c527f5001a44d29dbbc1890b9eff0aeb6edcb42bd5771f7bace34940ad"
+    },
+    "visualInspection": "partial-candidate-p1.png inspected; ABC and editable value intact"
+  },
+  "faultExperiment": {
+    "source": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-fault/source.pdf",
+      "sha256": "f8fc9f7d2c0ccdf5ac4205dde9b25171e75a524b206d7e2a17bfe4291af9ffee"
+    },
+    "candidate": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-fault/06-candidate.pdf",
+      "sha256": "8716aeceefcb1a654fdff8e1c02cff775a8ddaf08fbfad7f1196083c25ac91e7"
+    },
+    "provenance": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-fault/provenance.json",
+      "sha256": "c1f15ed77e177ad75244abae3069c3bb7101268049d9f747877b62c807d3fba2"
+    },
+    "repair": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-fault/font-repair.json",
+      "sha256": "faa09a0d08e9aba0116bb5bb48b9fb7ac9fb1cc7f1fc038402ab3e57a2a8cd75"
+    },
+    "applied": [
+      {
+        "reason": "Rebuilt malformed ToUnicode; 1 verified used codes; retained 0 valid authored mappings; program sha256:d6259159a256b91009af8319b6ed8243a531e8e210f93f8ce9c86c7a05e43a6d; glyph evidence sha256:fb873e6f9061a5c6ab5a0484556dc7b4c24384def9e20433b2ce53e1a2637b87",
+        "target": "1092 0 R",
+        "ruleId": "verified-invalid-unicode",
+        "decision": "apply",
+        "version": 1
+      }
+    ],
+    "textProof": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-fault/text-proof.json",
+      "sha256": "3d769ac0518d5861081ea7f3c47fab331dca3e237cd73b0bfbf540257ad06765"
+    },
+    "restoredBullets": 79,
+    "all61PagesEqualUncorruptedText": true,
+    "naturallyOccurringDefectClaim": false
+  },
+  "currentBooklet": {
+    "sourcePath": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+    "candidatePath": "output/accessibility-50-batch18-20261023/booklet-current/06-candidate.pdf",
+    "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+    "byteIdentical": true,
+    "repair": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-current/font-repair.json",
+      "sha256": "9f8bd8decd34b71d7dbe03f645b4afeafa050e44d3aa297f9bf9168158271249"
+    },
+    "freshAudit": {
+      "path": "output/accessibility-50-batch18-20261023/booklet-current/font-audit.json",
+      "sha256": "e79a0347870aadd33383e4df7147e0fed9dcbabad5a3f33fd892603b2cf5190d"
+    },
+    "auditSummary": {
+      "errors": 6,
+      "warnings": 1
+    },
+    "validSupportedMapSyntaxCount": 15,
+    "rawFailures": 6,
+    "savedFailures": 196,
+    "pendingOcrSegments": 158,
+    "reusedRawSavedRenderEvidence": "docs/evidence/accessibility-50-batch16-20261023.json"
+  },
+  "control": {
+    "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+    "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+    "unchanged": true,
+    "reusedEvidence": "docs/evidence/accessibility-50-batch8-20261023.json"
+  },
+  "limits": [
+    "Only supported embedded TrueType glyph evidence and bounded ToUnicode syntax qualify.",
+    "Valid contradictory authored mappings and ActualText require review; no intent is fabricated.",
+    "Editable defaults, ambiguous glyph mappings, incomplete usage and invalid unused entries are not automatically repaired.",
+    "Font audit parsed status is not strict syntax or semantic validation; standard fallback evidence is separately reported.",
+    "Current production booklet findings and human/OCR review remain unresolved.",
+    "One extra legacy table assertion is stale; not every repository test passes."
+  ],
+  "research": [
+    {
+      "title": "ISO 32000-1 sections 9.10.2 and 9.10.3",
+      "url": "https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf",
+      "local": {
+        "path": "tmp/PDF32000_2008.pdf",
+        "sha256": "9de0ca9e8570d6209e8bd48a355be8eb6ec376acfc3fc3ae97cd8730351417ff"
+      },
+      "excerpt": {
+        "path": "tmp/a34-spec-unicode.txt",
+        "sha256": "c516aa5de63d65de092ab5c1c4b00a8b7b9d474a621aa8348eca9491d0805ce6"
+      }
+    },
+    {
+      "title": "Adobe CMap specification 5014, mappings override in order",
+      "url": "https://adobe-type-tools.github.io/font-tech-notes/pdfs/5014.CIDFont_Spec.pdf"
+    },
+    {
+      "title": "PDFBox 3.0.8 PDFont fallback behavior",
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/font/PDFont.java"
+    },
+    {
+      "title": "FontBox 3.0.8 CMap parsing",
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/fontbox/src/main/java/org/apache/fontbox/cmap/CMapParser.java"
+    }
+  ]
+}

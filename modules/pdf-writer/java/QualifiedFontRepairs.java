@@ -31,6 +31,9 @@ public final class QualifiedFontRepairs {
     private final Path fontDir;
     private record Donor(String target, String sha256, byte[] program) {}
     private final List<Donor> donors;
+    private final boolean repairUnicode;
+    private final List<Map<String, Object>> unicodeDiagnostics = new ArrayList<>();
+    private int unicodeCodeCount;
     private final List<Map<String, Object>> ledger = new ArrayList<>();
     private final List<COSDictionary> dictionaries = new ArrayList<>();
     private final Set<COSBase> visited = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -44,7 +47,7 @@ public final class QualifiedFontRepairs {
     private int copiedDescriptorNodes;
     private int nodes;
 
-    private QualifiedFontRepairs(PDDocument document, Path fontDir, List<Donor> donors) { this.document = document; this.fontDir = fontDir; this.donors = donors; }
+    private QualifiedFontRepairs(PDDocument document, Path fontDir, List<Donor> donors, boolean repairUnicode) { this.document = document; this.fontDir = fontDir; this.donors = donors; this.repairUnicode = repairUnicode; }
     private static COSBase resolve(COSBase v) { return v instanceof COSObject ? ((COSObject)v).getObject() : v; }
     private static String ref(COSBase v) { return v.getKey() == null ? "direct" : v.getKey().getNumber() + " " + v.getKey().getGeneration() + " R"; }
     private static byte[] bytes(COSStream stream) throws IOException {
@@ -86,16 +89,18 @@ public final class QualifiedFontRepairs {
             COSDictionary dr = d.getCOSDictionary(COSName.DR), fonts = dr == null ? null : dr.getCOSDictionary(COSName.FONT);
             if (fonts != null) for (COSBase raw : fonts.getValues()) if (resolve(raw) instanceof COSDictionary) dynamicFonts.add((COSDictionary)resolve(raw));
         }
-        if (!donors.isEmpty() || dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)) ||
+        if (repairUnicode || !donors.isEmpty() || dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)) ||
             "Type0".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.TO_UNICODE) ||
             "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.CID_TO_GID_MAP))) scanUses();
         // Complete all missing maps before CIDSet qualification examines shared descriptors.
         for (COSDictionary d : dictionaries) if ("Font".equals(d.getNameAsString(COSName.TYPE)) && "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE))) repairMissingCidMap(d);
+        if (repairUnicode) for (COSDictionary d : dictionaries) if ("Font".equals(d.getNameAsString(COSName.TYPE)) &&
+            !d.getNameAsString(COSName.SUBTYPE, "").startsWith("CIDFont")) inspectUnicode(d);
         for (COSDictionary d : dictionaries) {
             if (!"Font".equals(d.getNameAsString(COSName.TYPE))) continue;
             String subtype = d.getNameAsString(COSName.SUBTYPE, ""), base = d.getNameAsString(COSName.BASE_FONT, "");
             if (subtype.equals("CIDFontType2")) repairCidSet(d);
-            if (subtype.equals("Type0")) repairSymbolUnicode(d);
+            if (subtype.equals("Type0") && !repairUnicode) repairSymbolUnicode(d);
             if (subtype.equals("Type1") && (base.equals("ZapfDingbats") || base.equals("Times-Roman"))) repairStandard(d, base);
             if (subtype.equals("TrueType") && dynamicFonts.contains(d)) repairEditableUnicode(d);
             if (subtype.equals("Type1") && base.equals("Helvetica") && dynamicFonts.contains(d)) repairEditableHelvetica(d);
@@ -380,6 +385,113 @@ public final class QualifiedFontRepairs {
         for (long offset : offsets) { if (offset < previous || offset > glyf.getLength()) throw new IOException("Invalid TrueType glyph offsets"); previous = offset; }
         return count;
     }
+    private record GlyphUnicode(String text, String evidence) {}
+    private static GlyphUnicode glyphUnicode(TrueTypeFont ttf, PDVectorFont font, int code, int gid) throws Exception {
+        // Audited geometric fingerprint: Unicode WG2 N4363 Annex A, Wingdings
+        // index 118 -> U+2756. No font name or PDF code is treated as Unicode.
+        String shape = outline(font, code); int advance = ttf.getAdvanceWidth(gid);
+        Integer fingerprint = ttf.getUnitsPerEm() == 2048 && advance == 1825 &&
+            shape.equals("f328c16311f42d7aae4d83d5626acfb9fb0885c9513c2ee9dc1507c6038cf9df") ? 0x2756 : null;
+        Set<Integer> unicode = new TreeSet<>();
+        if (ttf.getCmap() != null) for (var cmap : ttf.getCmap().getCmaps()) {
+            int platform = cmap.getPlatformId(), id = cmap.getPlatformEncodingId();
+            if (!(platform == 0 && Set.of(0, 1, 2, 3, 4, 6).contains(id) || platform == 3 && (id == 1 || id == 10))) continue;
+            List<Integer> values = cmap.getCharCodes(gid);
+            if (values != null) for (int value : values) {
+                if (!usableUnicode(value)) throw new IOException("Private, invalid or non-text Unicode cmap evidence at code " + code);
+                unicode.add(value);
+            }
+        }
+        if (unicode.size() > 1 || fingerprint != null && !unicode.isEmpty() && !unicode.contains(fingerprint))
+            throw new IOException("Ambiguous or conflicting glyph-to-Unicode evidence at code " + code);
+        Integer cp = fingerprint != null ? fingerprint : unicode.stream().findFirst().orElse(null);
+        if (cp == null) throw new IOException("No verified Unicode identity for used glyph at code " + code);
+        return new GlyphUnicode(new String(Character.toChars(cp)), code + ":" + gid + ":" + cp + ":" + advance + ":" + shape +
+            ":" + (fingerprint == null ? "embedded-unicode-cmap" : "wg2-n4363-1118") + "\n");
+    }
+    private static PDFont unicodeFont(COSDictionary dictionary) throws IOException {
+        if ("TrueType".equals(dictionary.getNameAsString(COSName.SUBTYPE))) return new PDTrueTypeFont(dictionary);
+        return new PDType0Font(dictionary);
+    }
+    private static int gid(PDFont font, int code) throws IOException {
+        return font instanceof PDType0Font ? ((PDType0Font)font).codeToGID(code) : ((PDTrueTypeFont)font).codeToGID(code);
+    }
+    private void inspectUnicode(COSDictionary dictionary) throws Exception {
+        String rule = "verified-invalid-unicode", subtype = dictionary.getNameAsString(COSName.SUBTYPE, "");
+        Set<Integer> codes = uses.getOrDefault(dictionary, Set.of());
+        if (unicodeDiagnostics.size() >= 256) throw new IOException("Unicode font diagnostic limit exceeded");
+        Map<String, Object> diagnostic = new LinkedHashMap<>(); List<Map<String, Object>> codeDiagnostics = new ArrayList<>();
+        diagnostic.put("target", ref(dictionary)); diagnostic.put("usedCodeCount", codes.size()); diagnostic.put("usageComplete", cidUsageComplete);
+        diagnostic.put("codes", codeDiagnostics); diagnostic.put("repaired", false); unicodeDiagnostics.add(diagnostic);
+        int width = subtype.equals("Type0") ? 2 : 1;
+        ToUnicodeMap source = ToUnicodeMap.inspect(dictionary, width);
+        String state = source.state, reason = source.reason;
+        COSBase encoding = dictionary.getDictionaryObject(COSName.ENCODING);
+        boolean supported = subtype.equals("TrueType") || subtype.equals("Type0") &&
+            (COSName.IDENTITY_H.equals(encoding) || COSName.IDENTITY_V.equals(encoding));
+        TreeMap<Integer, String> expected = new TreeMap<>(); StringBuilder evidence = new StringBuilder();
+        PDFont before = null; byte[] program = null; String evidenceError = "Unsupported font encoding or program";
+        if (codes.size() > 4096 || (unicodeCodeCount += codes.size()) > 32768) {
+            diagnostic.put("state", "unsupported"); diagnostic.put("reason", "Unicode code diagnostic limit exceeded");
+            record(rule, dictionary, "review", "Unicode code diagnostic limit exceeded"); return;
+        }
+        if (supported && !codes.isEmpty()) try {
+            before = unicodeFont(dictionary);
+            if (!before.isEmbedded() || before.isDamaged() || before.getFontDescriptor() == null || before.getFontDescriptor().getFontFile2() == null)
+                throw new IOException("Requires an undamaged embedded TrueType program");
+            program = bytes(before.getFontDescriptor().getFontFile2().getCOSObject());
+            try (TrueTypeFont ttf = new TTFParser().parseEmbedded(new ByteArrayInputStream(program))) {
+                int count = validateTrueTypeTables(ttf);
+                if (ttf.getTableMap().containsKey("fvar")) throw new IOException("Variable program requires separate qualification");
+                for (int code : codes) {
+                    int glyph = gid(before, code);
+                    if (code < 0 || code >= (width == 1 ? 256 : 65536) || glyph <= 0 || glyph >= count) throw new IOException("Invalid used glyph at code " + code);
+                    GlyphUnicode proof = glyphUnicode(ttf, (PDVectorFont)before, code, glyph);
+                    expected.put(code, proof.text); evidence.append(proof.evidence);
+                }
+                evidenceError = "";
+            }
+        } catch (IOException | IllegalArgumentException e) { evidenceError = e.getMessage(); }
+        boolean conflict = source.state.equals("contradictory"), missing = false;
+        for (int code : codes) {
+            Map<String, Object> entry = new LinkedHashMap<>(); entry.put("code", code);
+            String mapped = source.mappings.get(code), verified = expected.get(code);
+            if (mapped != null) entry.put("mapped", mapped);
+            if (verified != null) entry.put("expected", verified);
+            if (source.problems.containsKey(code)) { entry.put("state", source.state.equals("contradictory") ? "contradictory" : "malformed"); entry.put("reason", source.problems.get(code)); }
+            else if (mapped == null) { entry.put("state", source.state.equals("valid") ? "missing" : source.state); missing = true; }
+            else if (verified != null && !mapped.equals(verified)) { entry.put("state", "contradictory"); entry.put("reason", "Authored Unicode differs from independent glyph evidence; intent requires review"); conflict = true; }
+            else entry.put("state", verified == null ? "unverified" : "verified");
+            codeDiagnostics.add(entry);
+        }
+        if (conflict) { state = "contradictory"; reason = "Conflicting authored mappings are retained for review"; }
+        else if (state.equals("valid") && missing) { state = "incomplete"; reason = "Used codes are absent from the direct ToUnicode map"; }
+        diagnostic.put("state", state); diagnostic.put("reason", reason);
+        if (state.equals("valid")) return;
+        if (conflict || !source.rebuildAllowed || !evidenceError.isEmpty() || codes.isEmpty() || !cidUsageComplete || dynamicFonts.contains(dictionary) || replacementTextPresent) {
+            record(rule, dictionary, "review", !evidenceError.isEmpty() ? reason + "; " + evidenceError : reason + "; requires complete observed evidence outside editable defaults and authored ActualText"); return;
+        }
+        // Retain every valid authored entry, including codes not currently painted.
+        // Invalid unused entries cannot be reconstructed from observed glyph evidence.
+        if (!codes.containsAll(source.problems.keySet())) { record(rule, dictionary, "review", "Invalid unused mappings need separate evidence"); return; }
+        TreeMap<Integer, String> mappings = new TreeMap<>(source.mappings); mappings.putAll(expected);
+        StringBuilder content = new StringBuilder("/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /VerifiedUnicode def\n/CMapType 2 def\n1 begincodespacerange\n");
+        content.append(width == 1 ? "<00> <FF>\n" : "<0000> <FFFF>\n").append("endcodespacerange\n");
+        for (var entry : mappings.entrySet()) content.append("1 beginbfchar\n<").append(String.format(Locale.ROOT, width == 1 ? "%02X" : "%04X", entry.getKey()))
+            .append("> <").append(HexFormat.of().formatHex(entry.getValue().getBytes(StandardCharsets.UTF_16BE))).append(">\nendbfchar\n");
+        content.append("endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend\n");
+        COSStream map = stream(content.toString().getBytes(StandardCharsets.US_ASCII), true);
+        COSDictionary proposed = new COSDictionary(dictionary); proposed.setItem(COSName.TO_UNICODE, map); PDFont after = unicodeFont(proposed);
+        for (int code : codes) if (!expected.get(code).equals(after.toUnicode(code)) || gid(before, code) != gid(after, code) ||
+            !Float.isFinite(before.getWidth(code)) || before.getWidth(code) != after.getWidth(code) || !sameVector(before.getDisplacement(code), after.getDisplacement(code)) ||
+            before.isVertical() && !sameVector(before.getPositionVector(code), after.getPositionVector(code)) ||
+            !outline((PDVectorFont)before, code).equals(outline((PDVectorFont)after, code))) {
+            record(rule, dictionary, "review", "Proposed Unicode changes used glyph selection or geometry"); return;
+        }
+        dictionary.setItem(COSName.TO_UNICODE, map); diagnostic.put("repaired", true);
+        record(rule, dictionary, "apply", "Rebuilt " + state + " ToUnicode; " + codes.size() + " verified used codes; retained " + source.mappings.size() +
+            " valid authored mappings; program sha256:" + hash(program) + "; glyph evidence sha256:" + hash(evidence.toString().getBytes(StandardCharsets.UTF_8)));
+    }
     private void repairSymbolUnicode(COSDictionary dictionary) throws Exception {
         // Existing maps (including empty or malformed streams) belong to a separate repair.
         if (dictionary.containsKey(COSName.TO_UNICODE)) return;
@@ -413,30 +525,8 @@ public final class QualifiedFontRepairs {
                 int gid = before.codeToGID(code);
                 if (code < 1 || code > 65535 || gid < 1 || gid >= glyphCount || before.codeToCID(code) != gid)
                     throw new IOException("Invalid observed code/CID/GID at code " + code);
-                String shape = outline(before, code); int advance = ttf.getAdvanceWidth(gid);
-                // Audited geometric fingerprint, independent of PDF code, GID and font name.
-                // Unicode WG2 N4363 Annex A: Wingdings index 118 -> U+2756.
-                // Confirmed against a full program's 3/0 F076 and 1/0 118 cmaps;
-                // no Microsoft program is bundled or loaded by this repair.
-                Integer fingerprint = ttf.getUnitsPerEm() == 2048 && advance == 1825 &&
-                    shape.equals("f328c16311f42d7aae4d83d5626acfb9fb0885c9513c2ee9dc1507c6038cf9df") ? 0x2756 : null;
-                Set<Integer> unicode = new TreeSet<>();
-                if (ttf.getCmap() != null) for (var cmap : ttf.getCmap().getCmaps()) {
-                    int platform = cmap.getPlatformId(), id = cmap.getPlatformEncodingId();
-                    if (!(platform == 0 && Set.of(0, 1, 2, 3, 4, 6).contains(id) || platform == 3 && (id == 1 || id == 10))) continue;
-                    List<Integer> values = cmap.getCharCodes(gid);
-                    if (values != null) for (int value : values) {
-                        if (!usableUnicode(value)) throw new IOException("Private, invalid or non-text Unicode cmap evidence at code " + code);
-                        unicode.add(value);
-                    }
-                }
-                if (unicode.size() > 1 || fingerprint != null && !unicode.isEmpty() && !unicode.contains(fingerprint))
-                    throw new IOException("Ambiguous or conflicting glyph-to-Unicode evidence at code " + code);
-                Integer cp = fingerprint != null ? fingerprint : unicode.stream().findFirst().orElse(null);
-                if (cp == null) throw new IOException("No verified Unicode identity for used glyph at code " + code);
-                mappings.put(code, new String(Character.toChars(cp)));
-                evidence.append(code).append(':').append(gid).append(':').append(cp).append(':').append(advance).append(':').append(shape)
-                    .append(':').append(fingerprint == null ? "embedded-unicode-cmap" : "wg2-n4363-1118").append('\n');
+                GlyphUnicode proof = glyphUnicode(ttf, before, code, gid);
+                mappings.put(code, proof.text); evidence.append(proof.evidence);
             }
             StringBuilder s = new StringBuilder("/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /VerifiedSymbolUnicode def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n");
             for (var entry : mappings.entrySet()) s.append("1 beginbfchar\n<").append(String.format(Locale.ROOT, "%04X", entry.getKey())).append("> <")
@@ -592,6 +682,8 @@ public final class QualifiedFontRepairs {
     }
 
     public static void main(String[] args) throws Exception {
+        boolean repairUnicode = args.length > 0 && "--repair-unicode".equals(args[args.length - 1]);
+        if (repairUnicode) args = Arrays.copyOf(args, args.length - 1);
         if ((args.length != 4 && (args.length < 8 || (args.length - 5) % 3 != 0)) || !Set.of("repair", "verify").contains(args[0])) throw new IOException("Usage: repair|verify source candidate font-dir [source-hash font-ref program-path program-hash ...]");
         Path source = Path.of(args[1]), target = Path.of(args[2]), fonts = Path.of(args[3]);
         if (source.toAbsolutePath().normalize().equals(target.toAbsolutePath().normalize())) throw new IOException("Output must differ from source");
@@ -611,7 +703,7 @@ public final class QualifiedFontRepairs {
             }
         }
         try (PDDocument doc = Loader.loadPDF(source.toFile())) {
-            QualifiedFontRepairs repairs = new QualifiedFontRepairs(doc, fonts, donors); repairs.apply();
+            QualifiedFontRepairs repairs = new QualifiedFontRepairs(doc, fonts, donors, repairUnicode); repairs.apply();
             Map<String, Object> verification;
             if (args[0].equals("verify")) verification = SavedObjectVerifier.verify(doc, target);
             else {
@@ -621,13 +713,15 @@ public final class QualifiedFontRepairs {
                     else try (OutputStream out = Files.newOutputStream(temp)) { doc.saveIncremental(out); }
                     // Rebuild the expectation from source; save may assign new indirect keys in doc.
                     try (PDDocument original = Loader.loadPDF(source.toFile())) {
-                        QualifiedFontRepairs replay = new QualifiedFontRepairs(original, fonts, donors); replay.apply(); verification = SavedObjectVerifier.verify(original, temp);
+                        QualifiedFontRepairs replay = new QualifiedFontRepairs(original, fonts, donors, repairUnicode); replay.apply(); verification = SavedObjectVerifier.verify(original, temp);
                     }
                     if (!verification.get("status").equals("pass")) throw new IOException(verification.get("reason").toString());
                     Files.move(temp, target);
                 } finally { Files.deleteIfExists(temp); }
             }
-            System.out.println(QualifiedStructureRepairs.json(Map.of("repairLedger", repairs.ledger, "verification", verification)));
+            Map<String, Object> report = new LinkedHashMap<>(); report.put("repairLedger", repairs.ledger); report.put("verification", verification);
+            if (repairUnicode) report.put("unicodeDiagnostics", repairs.unicodeDiagnostics);
+            System.out.println(QualifiedStructureRepairs.json(report));
         }
     }
 }

@@ -37,6 +37,10 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSStream;
+import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.cmap.CMapParser;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
@@ -71,9 +75,6 @@ import org.apache.pdfbox.util.Vector;
  * }
  */
 public class FontAuditCli {
-    private static final double COVERAGE_ERROR_THRESHOLD = 0.95;
-    private static final double COVERAGE_WARNING_THRESHOLD = 0.99;
-
     public static void main(String[] args) throws Exception {
         if (args.length != 2 || !"--pdf".equals(args[0])) {
             throw new IllegalArgumentException("Usage: java FontAuditCli --pdf <tagged.pdf>");
@@ -95,6 +96,10 @@ public class FontAuditCli {
         String subtype;
         boolean embedded;
         boolean hasToUnicode;
+        CMap directUnicode;
+        String toUnicodeStatus;
+        final Set<Integer> unmappedCodes = new java.util.TreeSet<>();
+        final Set<Integer> standardFallbackCodes = new java.util.TreeSet<>();
         String encoding;
         boolean isSymbolic;
         boolean standard14;
@@ -110,7 +115,7 @@ public class FontAuditCli {
 
         double coverage() {
             if (usedCodes.isEmpty()) {
-                return hasToUnicode ? 1.0 : 0.0;
+                return directUnicode != null ? 1.0 : 0.0;
             }
             return (double) mappedCodeCount / (double) usedCodes.size();
         }
@@ -303,6 +308,17 @@ public class FontAuditCli {
             record.subtype = describeSubtype(font);
             record.embedded = font.isEmbedded();
             record.hasToUnicode = font.getCOSObject().getDictionaryObject(COSName.TO_UNICODE) != null;
+            record.toUnicodeStatus = font.getCOSObject().containsKey(COSName.TO_UNICODE) ? "malformed" : "absent";
+            COSBase unicode = font.getCOSObject().getDictionaryObject(COSName.TO_UNICODE);
+            if (unicode instanceof COSStream) try (var in = ((COSStream)unicode).createInputStream()) {
+                byte[] bytes = in.readNBytes(4 * 1024 * 1024 + 1);
+                if (bytes.length > 4 * 1024 * 1024) throw new IOException("ToUnicode byte limit exceeded");
+                try (var data = new RandomAccessReadBuffer(bytes)) {
+                    CMap map = new CMapParser(true).parse(data);
+                    if (map.getType() != 2 || !map.hasUnicodeMappings()) throw new IOException("Missing ToUnicode mappings or CMapType");
+                    record.directUnicode = map; record.toUnicodeStatus = "parsed";
+                }
+            } catch (IOException | RuntimeException ignored) { /* Report malformed, never count a font fallback. */ }
             record.encoding = describeEncoding(font);
             PDFontDescriptor descriptor = font.getFontDescriptor();
             record.isSymbolic = descriptor != null && descriptor.isSymbolic();
@@ -418,19 +434,35 @@ public class FontAuditCli {
                 return;
             }
             if (record.usedCodes.add(code)) {
-                if (codeMapsToUnicode(font, code)) {
+                if (codeMapsToUnicode(record, code)) {
                     record.mappedCodeCount++;
+                } else {
+                    record.unmappedCodes.add(code);
+                    if (hasStandardFallback(font, code)) record.standardFallbackCodes.add(code);
                 }
             }
         }
 
-        private static boolean codeMapsToUnicode(PDFont font, int code) {
+        private static boolean codeMapsToUnicode(FontRecord record, int code) {
             try {
-                String unicode = font.toUnicode(code);
+                String unicode = record.directUnicode == null ? null : record.directUnicode.toUnicode(code);
                 return unicode != null && !unicode.isEmpty();
             } catch (Exception e) {
                 return false;
             }
+        }
+
+        private static boolean hasStandardFallback(PDFont font, int code) {
+            if (!(font instanceof PDSimpleFont)) return false;
+            PDSimpleFont simple = (PDSimpleFont)font;
+            COSBase declared = font.getCOSObject().getDictionaryObject(COSName.ENCODING);
+            boolean named = COSName.WIN_ANSI_ENCODING.equals(declared) || COSName.MAC_ROMAN_ENCODING.equals(declared) || COSName.getPDFName("MacExpertEncoding").equals(declared);
+            if (!named && !(font instanceof org.apache.pdfbox.pdmodel.font.PDTrueTypeFont && !simple.isSymbolic())) return false;
+            try {
+                String name = simple.getEncoding().getName(code);
+                String value = org.apache.pdfbox.pdmodel.font.encoding.GlyphList.getAdobeGlyphList().toUnicode(name);
+                return value != null && !value.isEmpty() && value.codePoints().noneMatch(cp -> cp == 0 || cp == 0xfeff || cp == 0xfffe || cp >= 0xd800 && cp <= 0xdfff);
+            } catch (RuntimeException e) { return false; }
         }
 
         private void evaluateFindings() {
@@ -443,19 +475,19 @@ public class FontAuditCli {
                     addFinding(record.fontKey, "error", "FONT_NOT_EMBEDDED",
                         "Font '" + record.name + "' has no FontFile/FontFile2/FontFile3 program; embed a subset to satisfy PDF/UA.");
                 }
-                if (!record.hasToUnicode) {
-                    addFinding(record.fontKey, "error", "TO_UNICODE_MISSING",
-                        "Font '" + record.name + "' has no /ToUnicode CMap; text extraction and AT readback will fail.");
+                if (record.toUnicodeStatus.equals("absent")) {
+                    boolean fallback = !record.usedCodes.isEmpty() && record.standardFallbackCodes.containsAll(record.usedCodes);
+                    addFinding(record.fontKey, fallback ? "warning" : "error", "TO_UNICODE_MISSING",
+                        "Font '" + record.name + "' has no explicit ToUnicode map; " + (fallback ? "standard encoding fallback covers the observed codes." : "not all observed codes have a qualified standard fallback."));
+                } else if (record.toUnicodeStatus.equals("malformed")) {
+                    addFinding(record.fontKey, "error", "TO_UNICODE_MALFORMED", "Font '" + record.name + "' has an unreadable or empty ToUnicode map; fallback extraction is not map coverage.");
                 } else {
                     double coverage = record.coverage();
-                    if (!record.usedCodes.isEmpty() && coverage < COVERAGE_ERROR_THRESHOLD) {
-                        addFinding(record.fontKey, "error", "TO_UNICODE_INCOMPLETE",
-                            String.format("Font '%s' /ToUnicode covers %.1f%% of %d used glyphs; PDF/UA requires complete coverage.",
-                                record.name, coverage * 100.0, record.usedCodes.size()));
-                    } else if (!record.usedCodes.isEmpty() && coverage < COVERAGE_WARNING_THRESHOLD) {
-                        addFinding(record.fontKey, "warning", "TO_UNICODE_INCOMPLETE",
-                            String.format("Font '%s' /ToUnicode covers %.1f%% of %d used glyphs; consider regenerating the CMap.",
-                                record.name, coverage * 100.0, record.usedCodes.size()));
+                    if (!record.usedCodes.isEmpty() && coverage < 1.0) {
+                        boolean fallback = record.standardFallbackCodes.containsAll(record.unmappedCodes);
+                        addFinding(record.fontKey, fallback ? "warning" : "error", "TO_UNICODE_INCOMPLETE",
+                            String.format(java.util.Locale.ROOT, "Font '%s' direct ToUnicode covers %.1f%% of %d used glyphs; %s",
+                                record.name, coverage * 100.0, record.usedCodes.size(), fallback ? "standard encoding fallback covers the remaining codes." : "missing entries lack a qualified standard fallback."));
                     }
                 }
                 if (record.isSymbolic && !hasDifferencesEncoding(record.font)) {
@@ -562,6 +594,9 @@ public class FontAuditCli {
             appendString(sb, "subtype", r.subtype); sb.append(',');
             appendBool(sb, "embedded", r.embedded); sb.append(',');
             appendBool(sb, "hasToUnicode", r.hasToUnicode); sb.append(',');
+            appendString(sb, "toUnicodeStatus", r.toUnicodeStatus); sb.append(',');
+            sb.append("\"unmappedCodes\":").append(r.unmappedCodes.toString()).append(',');
+            sb.append("\"standardFallbackCodes\":").append(r.standardFallbackCodes.toString()).append(',');
             sb.append("\"toUnicodeCoverage\":").append(formatCoverage(r.coverage())); sb.append(',');
             appendString(sb, "encoding", r.encoding); sb.append(',');
             appendBool(sb, "isSymbolic", r.isSymbolic); sb.append(',');

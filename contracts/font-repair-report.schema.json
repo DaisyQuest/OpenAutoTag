@@ -8,6 +8,28 @@
     "sourceHash": { "$ref": "repair-audit.schema.json#/properties/sourceHash" },
     "candidateHash": { "$ref": "repair-audit.schema.json#/properties/candidateHash" },
     "donorManifestHash": { "$ref": "repair-audit.schema.json#/properties/sourceHash" },
+    "unicodeDiagnostics": {
+      "type": "array", "maxItems": 256,
+      "items": {
+        "type": "object", "required": ["target", "state", "reason", "usedCodeCount", "usageComplete", "codes", "repaired"],
+        "properties": {
+          "target": { "type": "string" },
+          "state": { "enum": ["absent", "malformed", "incomplete", "contradictory", "valid", "unsupported"] },
+          "reason": { "type": "string" },
+          "usedCodeCount": { "type": "integer", "minimum": 0 },
+          "usageComplete": { "type": "boolean" },
+          "repaired": { "type": "boolean" },
+          "codes": { "type": "array", "maxItems": 4096, "items": {
+            "type": "object", "required": ["code", "state"],
+            "properties": {
+              "code": { "type": "integer" },
+              "state": { "enum": ["absent", "malformed", "missing", "contradictory", "unsupported", "unverified", "verified"] },
+              "mapped": { "type": "string" }, "expected": { "type": "string" }, "reason": { "type": "string" }
+            }, "additionalProperties": false
+          } }
+        }, "additionalProperties": false
+      }
+    },
     "repairLedger": { "$ref": "repair-audit.schema.json#/properties/repairLedger" },
     "verification": {
       "type": "object", "required": ["status", "scope", "reason"],

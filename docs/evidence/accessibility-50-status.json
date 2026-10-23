@@ -407,8 +407,11 @@
       "improvement": "Invalid ToUnicode diagnostics and repair",
       "requirement": "Distinguish absent, malformed and contradictory mappings with bounded repair.",
       "acceptance": "Malformed maps are diagnosed per used code; verified replacements preserve glyph selection and extraction.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch18-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A35",

@@ -38,7 +38,8 @@ async function retainsPrefix(sourcePath, candidatePath) {
   } finally { await a.close(); await b?.close(); }
 }
 
-export async function checkPdfPreservation({ sourcePdf, candidatePdf, validationReport, semanticPath, outputPath, fontRepairs = false, fontDonorsPath, structureRepairs = false, structureDecisions }) {
+export async function checkPdfPreservation({ sourcePdf, candidatePdf, validationReport, semanticPath, outputPath, fontRepairs = false, fontDonorsPath, repairUnicode = false, structureRepairs = false, structureDecisions }) {
+  if (typeof repairUnicode !== "boolean") throw new Error("repairUnicode must be a boolean");
   if (!sourcePdf || !candidatePdf || !validationReport || !outputPath) throw new Error("Required: --source-pdf --candidate-pdf --validation-report --output");
   const dir = path.dirname(path.resolve(outputPath));
   const base = path.basename(outputPath, path.extname(outputPath));
@@ -48,6 +49,7 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
   const normalized = (file) => path.resolve(file).toLowerCase();
   if (structureDecisions && !structureRepairs) throw new Error("Structure decisions require structure repair verification");
   if (fontDonorsPath && !fontRepairs) throw new Error("Font donors require font repair verification");
+  if (repairUnicode && !fontRepairs) throw new Error("Unicode repairs require font repair verification");
   const donorInputs = [];
   if (fontDonorsPath) {
     if ((await stat(fontDonorsPath)).size > 256 * 1024) throw new Error("Font donor manifest exceeds limit");
@@ -69,7 +71,7 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
     if (fontRepairs) {
       // Execute against the saved PDFs; never accept an unverified writer ledger as a waiver.
       const { stdout } = await execFileAsync(process.execPath, [path.join(root, "modules/pdf-writer/font-repair.js"),
-        "--pdf", path.resolve(sourcePdf), "--verify", path.resolve(candidatePdf), ...(fontDonorsPath ? ["--donors", path.resolve(fontDonorsPath)] : [])], { cwd: root, windowsHide: true, maxBuffer: 8 * 1024 * 1024 });
+        "--pdf", path.resolve(sourcePdf), "--verify", path.resolve(candidatePdf), ...(fontDonorsPath ? ["--donors", path.resolve(fontDonorsPath)] : []), ...(repairUnicode ? ["--repair-unicode", "true"] : [])], { cwd: root, windowsHide: true, maxBuffer: 8 * 1024 * 1024 });
       const proof = JSON.parse(stdout);
       if (proof.sourceHash !== source.sourceHash || proof.candidateHash !== candidate.sourceHash) throw new Error("PDF changed during font verification");
       await writeFile(fontProofPath, JSON.stringify(proof));
@@ -100,8 +102,9 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
 async function main() {
   const args = new Map();
   for (let i = 2; i < process.argv.length; i += 2) args.set(process.argv[i], process.argv[i + 1]);
+  if (args.has("--repair-unicode") && !["true", "false"].includes(args.get("--repair-unicode"))) throw new Error("--repair-unicode requires true or false");
   const report = await checkPdfPreservation({ sourcePdf: args.get("--source-pdf"), candidatePdf: args.get("--candidate-pdf"),
-    validationReport: args.get("--validation-report"), semanticPath: args.get("--semantic"), outputPath: args.get("--output"), fontRepairs: args.get("--font-repairs") === "true", fontDonorsPath: args.get("--font-donors"), structureRepairs: args.get("--structure-repairs") === "true", structureDecisions: args.get("--structure-decisions") });
+    validationReport: args.get("--validation-report"), semanticPath: args.get("--semantic"), outputPath: args.get("--output"), fontRepairs: args.get("--font-repairs") === "true", fontDonorsPath: args.get("--font-donors"), repairUnicode: args.get("--repair-unicode") === "true", structureRepairs: args.get("--structure-repairs") === "true", structureDecisions: args.get("--structure-decisions") });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((error) => {
