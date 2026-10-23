@@ -47,7 +47,8 @@ test("nested, reused and inherited-resource Forms receive distinct stream-scoped
     expected.map(o => [o.page,o.streamOrigin,o.opIndexInStream,o.text]), "parser paths equal independent lexical traversal");
   const saved = await inspect("verify", outputPath);
   assert.deepEqual(saved.map(o => [o.page,o.text,o.owner]), expected.map((o,i) => [o.page,o.text,`oat:n${i}`]));
-  assert.equal((await checkSavedSemantics({ pdfPath: outputPath, tagsPath })).summary.failed, 0);
+  const proof = await checkSavedSemantics({ pdfPath: outputPath, tagsPath, sourcePdfPath: pdfPath, ownershipPath: report.sourceOwnershipPath });
+  assert.equal(proof.summary.failed, 0, JSON.stringify(proof.checks.filter(c => c.status === "fail")));
   const validation = await promisify(execFile)(process.execPath, [path.resolve("modules/validator/index.js"), "--pdf", outputPath,
     "--manifest", `${outputPath}.tags.json`], { windowsHide: true, env, timeout: 90000, maxBuffer: 4 * 1024 * 1024 });
   assert.equal(JSON.parse(validation.stdout).rawSummary.failedChecks, 0, "saved Form stream ownership passes raw veraPDF");

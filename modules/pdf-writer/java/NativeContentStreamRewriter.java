@@ -307,10 +307,40 @@ public class NativeContentStreamRewriter {
     /** Per-page plan from the tag plan JSON */
     private static class PagePlan {
         int pageNumber;
+        final List<String> sourceOwnership = new ArrayList<>();
         List<Assignment> assignments = new ArrayList<>();
         List<Integer> unmatchedOperatorSeqs = new ArrayList<>();
         List<Integer> unmatchedOperatorIndices = new ArrayList<>();
         Map<String, PDFormXObject> forms = new LinkedHashMap<>();
+    }
+
+    /** Source offsets are captured before serialization, never recovered from
+     * the generated MCIDs. An independent reader checks this proposed intent. */
+    private static class OwnershipCursor {
+        final PagePlan plan; final String origin; final int index; final PDFont font;
+        int offset;
+        OwnershipCursor(PagePlan plan, String origin, int index, PDFont font) {
+            this.plan=plan; this.origin=origin; this.index=index; this.font=font;
+        }
+        void record(String tag, List<COSBase> operands) throws IOException {
+            int count=countGlyphs(operands.get(operands.size()-1));
+            if(count>0) {
+                if(plan.sourceOwnership.size()>=100000)throw new IOException("Source ownership range limit exceeded");
+                plan.sourceOwnership.add("{\"pageNumber\":"+plan.pageNumber+",\"streamOrigin\":"+escapeJson(origin)
+                    +",\"operatorIndex\":"+index+",\"glyphStart\":"+offset+",\"glyphEnd\":"+(offset+count)+",\"tagNodeId\":"+escapeJson(tag)+"}");
+            }
+            offset+=count;
+        }
+        private int countGlyphs(COSBase value) throws IOException {
+            if(value instanceof COSArray) { int count=0; for(COSBase item:(COSArray)value)count+=countGlyphs(item); return count; }
+            if(!(value instanceof COSString))return 0;
+            ByteArrayInputStream in=new ByteArrayInputStream(((COSString)value).getBytes()); int count=0;
+            while(in.available()>0) {
+                int before=in.available(); if(font==null)in.read();else font.readCode(in);
+                if(in.available()>=before||++count>2000000)throw new IOException("Invalid source glyph decoding");
+            }
+            return count;
+        }
     }
 
     /**
@@ -740,7 +770,7 @@ public class NativeContentStreamRewriter {
     }
 
     private static int emitOwnedText(List<Object> tokens, Assignment assignment, List<COSBase> operands, Operator op,
-            PDFont font, Map<String,TagTreeNode> labels, PagePlan plan, RewriteResult result, int nextMcid) throws IOException {
+            PDFont font, Map<String,TagTreeNode> labels, PagePlan plan, RewriteResult result, int nextMcid, OwnershipCursor ownership) throws IOException {
         TagTreeNode label = labels.get(assignment.tagNodeId);
         if (label != null && assignment.startsTagGroup && ("Tj".equals(op.getName()) || "TJ".equals(op.getName())) && operands.size() == 1) {
             TextSplit split = splitTextPrefix(font, operands.get(0), label.actualText);
@@ -751,10 +781,12 @@ public class NativeContentStreamRewriter {
                 Assignment marker = new Assignment(); marker.tagNodeId = label.id; marker.tagType = "Lbl"; marker.mcid = nextMcid++;
                 marker.authoredText = assignment.authoredText;
                 marker.operators.add(assignment.operators.get(0)); plan.assignments.add(marker);
+                ownership.record(marker.tagNodeId, List.of(split.prefix));
                 emitMarkedText(tokens, marker, List.of(split.prefix), op, result);
                 operands.set(0, split.remainder);
             }
         }
+        ownership.record(assignment.tagNodeId, operands);
         emitMarkedText(tokens, assignment, operands, op, result);
         return nextMcid;
     }
@@ -899,6 +931,10 @@ public class NativeContentStreamRewriter {
                     if(pendingOperands.size()==2 && pendingOperands.get(0) instanceof COSName)
                         currentFont=resources.getFont((COSName)pendingOperands.get(0));
                 }
+                if("gs".equals(opName) && pendingOperands.size()==1 && pendingOperands.get(0) instanceof COSName) {
+                    var state=resources.getExtGState((COSName)pendingOperands.get(0));
+                    if(state!=null && state.getFontSetting()!=null)currentFont=state.getFontSetting().getFont();
+                }
 
                 if ("Do".equals(opName) && pendingOperands.size() == 1 && pendingOperands.get(0) instanceof COSName
                         && resources.getXObject((COSName) pendingOperands.get(0)) instanceof PDFormXObject) {
@@ -962,6 +998,7 @@ public class NativeContentStreamRewriter {
                     List<AuthoredText.Scope> authored = authoredPath(inheritedText, sourceMarks);
 
                     if (assignment != null) {
+                        OwnershipCursor ownership = new OwnershipCursor(plan, origin, currentOperatorIndex, currentFont);
                         if (inheritedArtifact) throw new IOException("Assigned text inside a decorative Form invocation");
                         if (inArtifact) {
                             newTokens.add(Operator.getOperator("EMC"));
@@ -982,11 +1019,11 @@ public class NativeContentStreamRewriter {
                                 piece.authoredText = authored;
                                 OpRef ref = piece.operators.get(0);
                                 List<COSBase> sliced = new ArrayList<>(List.of(mapping.slice(ref.glyphStart, ref.glyphEnd)));
-                                nextMcid = emitOwnedText(newTokens, piece, sliced, show, currentFont, listLabels, plan, result, nextMcid);
+                                nextMcid = emitOwnedText(newTokens, piece, sliced, show, currentFont, listLabels, plan, result, nextMcid, ownership);
                             }
                         } else {
                             assignment.authoredText = authored;
-                            nextMcid = emitOwnedText(newTokens, assignment, pendingOperands, op, currentFont, listLabels, plan, result, nextMcid);
+                            nextMcid = emitOwnedText(newTokens, assignment, pendingOperands, op, currentFont, listLabels, plan, result, nextMcid, ownership);
                         }
                     } else {
                         AuthoredText.own(authored, null);
@@ -1864,6 +1901,7 @@ public class NativeContentStreamRewriter {
             json.append(",\"readingOrderStrategy\":").append(escapeJson(readingOrderStrategy));
             json.append(",\"title\":").append(escapeJson(title));
             json.append(",\"language\":").append(escapeJson(language));
+            json.append(",\"sourceOwnership\":[").append(String.join(",", plans.stream().flatMap(p->p.sourceOwnership.stream()).toList())).append("]");
             json.append("}");
             System.out.println(json.toString());
         }

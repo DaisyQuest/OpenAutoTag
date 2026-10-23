@@ -275,8 +275,11 @@
       "improvement": "Exclusive painted ownership",
       "requirement": "Detect duplicate and foreign ownership of painted source content.",
       "acceptance": "Wrong-owner and multiply-owned glyph mutations fail despite unchanged structure IDs.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch10-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A24",
@@ -296,8 +299,11 @@
       "improvement": "Text completeness proof",
       "requirement": "Compare intended source identities against the actual saved glyph coverage.",
       "acceptance": "Partial substring matches cannot pass complete text; bounded replacement-text exceptions carry proof.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch10-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A26",

@@ -40,7 +40,8 @@ test("compound text partitions preserve glyphs, quotes, arrays and nested Forms 
   assert.equal(operators.pages.flatMap(p=>p.operators).filter(o=>o.glyphMap).length,24);
   const plan = JSON.parse(await readFile(`${outputPath}.native-tag-plan.json`,"utf8"));
   assert.equal(plan.pages.flatMap(p=>p.assignments.flatMap(a=>a.operators)).filter(o=>o.sourceGlyphCount).length,48);
-  assert.equal((await checkSavedSemantics({pdfPath:outputPath,tagsPath})).summary.failed,0);
+  const proof = await checkSavedSemantics({pdfPath:outputPath,tagsPath,sourcePdfPath:pdfPath,ownershipPath:`${outputPath}.ownership.json`});
+  assert.equal(proof.summary.failed,0,JSON.stringify(proof.checks.filter(c=>c.status==="fail")));
   assert.match((await run(["-cp",jar,path.resolve("modules/pdf-writer/test/fixtures/ListSplitProbe.java"),pdfPath,outputPath])).stdout,/Glyph positions and 150 DPI pixels unchanged/);
   assert.match((await run(["-cp",jar,path.resolve("modules/pdf-writer/test/fixtures/NativeOperatorProbe.java"),"pixels",pdfPath,outputPath])).stdout,/All pages pixel-identical/);
   const validation = await promisify(execFile)(process.execPath,[path.resolve("modules/validator/index.js"),"--pdf",outputPath,"--manifest",`${outputPath}.tags.json`],{env,windowsHide:true,timeout:90000,maxBuffer:4*1024*1024});

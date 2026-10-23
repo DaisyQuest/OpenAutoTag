@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/source-ownership.schema.json",
+  "title": "Native source glyph ownership intent",
+  "description": "Writer-proposed source ranges, independently verified against source and saved content. This is not proof of semantic classification accuracy.",
+  "type": "object", "required": ["schemaVersion", "sourceHash", "intentHash", "ranges"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "intentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ranges": { "type": "array", "maxItems": 100000, "items": {
+      "type": "object", "required": ["pageNumber", "streamOrigin", "operatorIndex", "glyphStart", "glyphEnd", "tagNodeId"],
+      "properties": {
+        "pageNumber": { "type": "integer", "minimum": 1 },
+        "streamOrigin": { "type": "string", "pattern": "^page(?:/[0-9]+)*$" },
+        "operatorIndex": { "type": "integer", "minimum": 0 },
+        "glyphStart": { "type": "integer", "minimum": 0 }, "glyphEnd": { "type": "integer", "minimum": 1 },
+        "tagNodeId": { "type": "string", "minLength": 1 }
+      }, "additionalProperties": false
+    } }
+  }, "additionalProperties": false
+}

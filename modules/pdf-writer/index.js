@@ -10,6 +10,7 @@ import taggingSchema from "../../contracts/tagging.schema.json" with { type: "js
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import redactionPlanSchema from "../../contracts/redaction-plan.schema.json" with { type: "json" };
 import repairAuditSchema from "../../contracts/repair-audit.schema.json" with { type: "json" };
+import sourceOwnershipSchema from "../../contracts/source-ownership.schema.json" with { type: "json" };
 import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir } from "../../scripts/runtime-paths.js";
 
@@ -18,6 +19,7 @@ const validateTagging = ajv.compile(taggingSchema);
 const validateSemantic = ajv.compile(semanticSchema);
 const validateRedactionPlan = ajv.compile(redactionPlanSchema);
 const validateRepairAudit = ajv.compile(repairAuditSchema);
+const validateSourceOwnership = ajv.compile(sourceOwnershipSchema);
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
@@ -663,6 +665,7 @@ function isNativeRewriterAvailable() {
 
 async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cached, readingOrderStrategy = DEFAULT_READING_ORDER_STRATEGY, title, language }) {
   await ensureJavaHelperCompiled();
+  const sourceBytes = await readFile(pdfPath), intentBytes = await readFile(tagsPath);
 
   const tempBase = `${outputPath}.native`;
   // If the auto-mode probe already parsed + matched, reuse its artifacts.
@@ -709,8 +712,16 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
   const matchedOperators = overall.matchedOperators || 0;
   const matchRate = operatorCount > 0 ? matchedOperators / operatorCount : 0;
 
+  if (!sourceBytes.equals(await readFile(pdfPath)) || !intentBytes.equals(await readFile(tagsPath))) throw new Error("Native source or tagging intent changed while writing");
+  const hash = bytes => createHash("sha256").update(bytes).digest("hex");
+  const sourceOwnership = { schemaVersion: "1.0.0", sourceHash: hash(sourceBytes), intentHash: hash(intentBytes), ranges: rewriterReport.sourceOwnership };
+  if (!validateSourceOwnership(sourceOwnership)) throw new Error(`Invalid source ownership evidence: ${ajv.errorsText(validateSourceOwnership.errors)}`);
+  const sourceOwnershipPath = `${outputPath}.ownership.json`;
+  await writeFile(sourceOwnershipPath, JSON.stringify(sourceOwnership, null, 2));
+
   return {
     writerMode: "native",
+    sourceOwnershipPath: path.resolve(sourceOwnershipPath),
     operatorCount,
     matchedOperators,
     matchRate: Math.round(matchRate * 1000) / 1000,
@@ -1034,6 +1045,7 @@ export async function writeTaggedArtifacts({
     const manifest = {
       schemaVersion: "1.0.0",
       writerMode: "native",
+      sourceOwnershipPath: nativeReport.sourceOwnershipPath,
       nativeTaggingApplied: true,
       sourcePdf: path.resolve(pdfPath),
       outputPdf: path.resolve(outputPath),
@@ -1071,6 +1083,7 @@ export async function writeTaggedArtifacts({
     return {
       status: "completed",
       writerMode: "native",
+      sourceOwnershipPath: nativeReport.sourceOwnershipPath,
       outputPath: path.resolve(outputPath),
       manifestPath: path.resolve(manifestPath),
       nativeTaggingApplied: true,

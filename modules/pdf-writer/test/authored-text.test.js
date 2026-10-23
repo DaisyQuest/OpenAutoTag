@@ -25,7 +25,7 @@ test("native retagging preserves authored replacements and expansion scopes with
   assert.equal(report.preservedAuthoredTextScopes,13);assert.equal(report.shadowedAuthoredTextScopes,1);
   assert.deepEqual(report.suppressedGeneratedActualText,[]);
   assert.match((await run(["-cp",jar,probe,"verify",pdfPath,outputPath])).stdout,/Authored replacement, expansion, neighbors, ownership, glyphs and 150 DPI pixels verified/);
-  const saved=await checkSavedSemantics({pdfPath:outputPath,tagsPath});
+  const saved=await checkSavedSemantics({pdfPath:outputPath,tagsPath,sourcePdfPath:pdfPath,ownershipPath:report.sourceOwnershipPath});
   assert.equal(saved.summary.failed,0,JSON.stringify(saved.checks?.filter(c=>c.status==="fail")));
   const validation=await promisify(execFile)(process.execPath,[path.resolve("modules/validator/index.js"),"--pdf",outputPath,"--manifest",`${outputPath}.tags.json`],{env,windowsHide:true,timeout:90000,maxBuffer:4*1024*1024});
   assert.equal(JSON.parse(validation.stdout).rawSummary.failedChecks,0);

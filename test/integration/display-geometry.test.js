@@ -53,7 +53,7 @@ test("cropped, rotated and scaled pages share display geometry through extractio
   const tags=await buildTagTree(semanticPath);await writeFile(tagsPath,JSON.stringify(tags));
   await writeTaggedArtifacts({pdfPath,outputPath,tagsPath,semanticPath,mode:"native"});
   assert.match((await run(["-cp",jar,probe,"verify",pdfPath,outputPath])).stdout,/28 display geometries.*preserved/);
-  const saved=await checkSavedSemantics({pdfPath:outputPath,tagsPath});
+  const saved=await checkSavedSemantics({pdfPath:outputPath,tagsPath,sourcePdfPath:pdfPath,ownershipPath:`${outputPath}.ownership.json`});
   await writeFile(path.join(dir,"saved-semantics.json"),JSON.stringify(saved));
   assert.equal(saved.summary.failed,0,JSON.stringify(saved.checks?.filter(c=>c.status==="fail")));
   await t.test("source-text and ruled-table diagnostics compare coordinates in the layout frame",async()=>{

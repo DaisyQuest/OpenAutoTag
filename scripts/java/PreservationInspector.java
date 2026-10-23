@@ -127,6 +127,7 @@ public final class PreservationInspector {
         result.put("links", links);
         result.put("headings", headings); result.put("structure", structure); result.put("contentOrder", contentOrder);
         result.put("markedContent", savedContent.json());
+        result.put("textRuns", savedContent.textRuns()); result.put("replacementScopes", savedContent.replacements());
         result.put("issues", issues); result.put("limitations", limitations);
         return result;
     }
@@ -205,6 +206,7 @@ public final class PreservationInspector {
         semantic.put("objectRef", ref(dict)); semantic.put("parentRef", ref(parent)); semantic.put("role", role);
         semantic.put("identifier", dict.getString(COSName.ID, ""));
         semantic.put("actualText", dict.getString(COSName.ACTUAL_TEXT, ""));
+        semantic.put("actualTextPresent", dict.containsKey(COSName.ACTUAL_TEXT));
         semantic.put("alt", dict.getString(COSName.ALT, ""));
         semantic.put("page", pagesByDict.getOrDefault(page, 0)); semantic.put("children", new ArrayList<String>());
         semantic.put("contentRefs", new ArrayList<String>()); semantic.put("headers", new ArrayList<String>());

@@ -8,6 +8,28 @@
     "schemaVersion": { "const": "1.0.0" },
     "scope": { "const": "preserved-objects-v1" },
     "sourceHash": { "$ref": "#/$defs/hash" },
+    "textRuns": {
+      "type": "array", "maxItems": 100000, "items": {
+        "type": "object", "required": ["pageNumber", "streamOrigin", "operatorIndex", "glyphStart", "glyphEnd", "owners", "artifact", "fontName", "glyphs", "positions"],
+        "properties": {
+          "pageNumber": { "type": "integer", "minimum": 1 }, "streamOrigin": { "type": "string", "pattern": "^page(?:/[0-9]+)*$" },
+          "operatorIndex": { "type": "integer", "minimum": 0 }, "glyphStart": { "type": "integer", "minimum": 0 }, "glyphEnd": { "type": "integer", "minimum": 0 },
+          "owners": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "artifact": { "type": "boolean" }, "fontName": { "type": "string" },
+          "positions": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 8, "maxItems": 8 } },
+          "glyphs": { "type": "array", "items": { "type": "array", "prefixItems": [{ "type": "integer" }, { "type": "string" }], "minItems": 2, "maxItems": 2 } }
+        }, "additionalProperties": false
+      }
+    },
+    "replacementScopes": {
+      "type": "array", "maxItems": 100000, "items": {
+        "type": "object", "required": ["pageNumber", "glyphStart", "glyphEnd", "text", "outermost"],
+        "properties": {
+          "pageNumber": { "type": "integer", "minimum": 1 }, "glyphStart": { "type": "integer", "minimum": 0 }, "glyphEnd": { "type": "integer", "minimum": 0 },
+          "text": { "type": "string" }, "outermost": { "type": "boolean" }
+        }, "additionalProperties": false
+      }
+    },
     "markedContent": {
       "description": "Saved executed page/Form sequences, independently parsed from content streams; counts exclude Artifact paint and ignore replacement text.",
       "type": "array", "maxItems": 100000,
@@ -94,6 +116,7 @@
           "actualText": {
             "type": "string"
           },
+          "actualTextPresent": { "type": "boolean" },
           "alt": {
             "type": "string"
           }

@@ -33,7 +33,8 @@ test("native ownership stays disjoint across interleaved text, whitespace and in
   assert.match((await run(probe, [outputPath])).stdout, /Balanced disjoint ownership/);
   const syntax = path.resolve("modules/pdf-writer/test/fixtures/NativeStreamSyntaxProbe.java");
   assert.match((await run(syntax, [pdfPath, outputPath])).stdout, /150 DPI pixels preserved/);
-  assert.equal((await checkSavedSemantics({ pdfPath: outputPath, tagsPath })).summary.failed, 0);
+  const proof = await checkSavedSemantics({ pdfPath: outputPath, tagsPath, sourcePdfPath: pdfPath, ownershipPath: `${outputPath}.ownership.json` });
+  assert.equal(proof.summary.failed, 0, JSON.stringify(proof.checks.filter(c => c.status === "fail")));
   // A contradictory plan must fail before saving, rather than let the last
   // owner silently steal an operator from another structure element.
   const plan = JSON.parse(await readFile(`${outputPath}.native-tag-plan.json`, "utf8"));
@@ -56,6 +57,7 @@ test("native ownership stays disjoint across interleaved text, whitespace and in
     await writeTaggedArtifacts({ pdfPath: source, outputPath: candidate, tagsPath, semanticPath, mode: "native" });
     assert.match((await run(probe, ["verify-list", candidate])).stdout, /Only the first operator/);
     assert.match((await run(path.resolve("modules/pdf-writer/test/fixtures/ListSplitProbe.java"), [source, candidate])).stdout, /pixels unchanged/);
-    assert.equal((await checkSavedSemantics({ pdfPath: candidate, tagsPath })).summary.failed, 0);
+    const proof = await checkSavedSemantics({ pdfPath: candidate, tagsPath, sourcePdfPath: source, ownershipPath: `${candidate}.ownership.json` });
+    assert.equal(proof.summary.failed, 0, JSON.stringify(proof.checks.filter(c => c.status === "fail")));
   });
 });

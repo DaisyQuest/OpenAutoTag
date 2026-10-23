@@ -69,7 +69,9 @@ test("saved validation follows executed sequences and reciprocal page/Form/annot
     const f = await createSavedContentFixture(); f.content += "\nq 1 0 0 1 0 -100 cm /FA Do Q";
     f.doc.getPage(0).node.set(name("Contents"), f.doc.context.register(f.doc.context.flateStream(f.content)));
     const target = path.join(dir, "reuse.pdf"); await writeFile(target, await f.doc.save());
-    assert.equal((await checkSavedSemantics({ pdfPath: target, tagsPath })).summary.failed, 0);
+    const report = await checkSavedSemantics({ pdfPath: target, tagsPath });
+    assert.ok(!report.checks.some(c => c.status === "fail" && (c.code === "SAVED_SEQUENCE_EXISTS" || c.target.startsWith("DUPLICATE_MARKED_CONTENT_SEQUENCE"))));
+    assert.ok(report.checks.some(c => c.status === "fail" && c.code === "CONTENT_TEXT_COMPLETE" && c.target === "oat:form-a"), "repeated paint must not masquerade as one complete intended occurrence");
   });
   await t.test("page stream arrays, quote operators, graphics-state fonts and inherited Form resources resolve", async () => {
     const f = await createSavedContentFixture(), ctx = f.doc.context, page = f.doc.getPage(0);

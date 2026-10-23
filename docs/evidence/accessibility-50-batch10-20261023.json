@@ -1,0 +1,318 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "dced612",
+  "completedItems": [
+    "A23",
+    "A25"
+  ],
+  "completedTotal": 25,
+  "pendingTotal": 25,
+  "research": [
+    {
+      "url": "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html",
+      "usedFor": "Source content ownership and bounded replacement scope rules"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/text/LegacyPDFStreamEngine.java",
+      "usedFor": "Avoid legacy TextPosition heuristics; capture raw showGlyph rendering matrix"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/text/PDFTextStripper.java",
+      "usedFor": "Keep raw glyph evidence independent of ActualText substitution"
+    }
+  ],
+  "tests": {
+    "productionBaseline": {
+      "tests": 363,
+      "passed": 363,
+      "failed": 0,
+      "skipped": 0,
+      "method": "344 baseline passes plus 19 corrected-file rerun passes. Three initial file failures were duplicate test-local variable declarations. Production code unchanged between runs.",
+      "runs": [
+        {
+          "path": "tmp/accessibility-50-batch10-baseline-final.log",
+          "sha256": "c03320c75a25cd51a3f65da4b211ab71caec8e9ee7aab12a0648dd37c339eeb1",
+          "tests": 347,
+          "passed": 344,
+          "failed": 3,
+          "skipped": 0
+        },
+        {
+          "path": "tmp/accessibility-50-batch10-baseline-rerun.log",
+          "sha256": "805d0ac82073d89dfea1ccd5ed5b6236b6d2d070a4f921e56ab361f56523f6a9",
+          "tests": 19,
+          "passed": 19,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    "newTests": 15,
+    "mutationCases": [
+      "identical-text owner swap",
+      "identical-text position swap",
+      "partial text",
+      "generated inline replacement over lost text",
+      "nested MCID owner",
+      "overlapping source ranges",
+      "stale tagging intent hash",
+      "changed authored replacement",
+      "partial authored range",
+      "exact overprint without source proof",
+      "empty structure ActualText"
+    ],
+    "upgradedExistingCoverage": [
+      "quote operators and lexical identity",
+      "compound glyph partitions",
+      "reused and nested Form streams",
+      "named marked-content properties and optional content",
+      "authored inline and structure replacements",
+      "28-page rotation/crop/UserUnit geometry",
+      "list label/body splits"
+    ]
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "candidatePath": "output/accessibility-50-batch10-20261023/booklet/06-candidate.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidateHash": "07c3b6a74f86180fcc70c9c7f21e74f834204a22318b92d9d9ee61b8292f272f",
+      "savedReportPath": "output/accessibility-50-batch10-20261023/booklet/09-saved-semantics.json",
+      "savedReportHash": "0124fd56045564fe7f5f7eb3aa5c1c55b80ce8fe2f61683fc16824d411d81ffc",
+      "saved": {
+        "passed": 50491,
+        "failed": 529
+      },
+      "ownershipStatus": "verified",
+      "failedCodes": {
+        "CONTENT_TEXT_COMPLETE": 375,
+        "CONTENT_ATTACHED": 154
+      },
+      "completeness": {
+        "total": 375,
+        "emptyActual": 154,
+        "expectedContainsC1": 79
+      },
+      "ownershipPath": "output/accessibility-50-batch10-20261023/booklet/06-candidate.pdf.ownership.json",
+      "ownershipHash": "43c50b6908cabce7e6f937f844c6441ed4465f704468c1c1bc8c5ad664b74bd8",
+      "sourceSequencePages": 61,
+      "sourcePositionPages": 61,
+      "sourceOwnerRuns": 5122,
+      "overprintProofs": 120,
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 186049,
+        "failedChecks": 31
+      },
+      "rawReportPath": "output/accessibility-50-batch10-20261023/booklet/07-validation.json",
+      "rawReportHash": "257ca294ea72649b15f3e3aed6f2437f5f2b5f6cc3fa8f407ef67498d999a1cd",
+      "rawReused": false,
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      }
+    },
+    {
+      "id": "test-form-control",
+      "sourcePath": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+      "candidatePath": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "savedReportPath": "output/accessibility-50-batch10-20261023/control/09-saved-semantics.json",
+      "savedReportHash": "bf2f55e1c0545e8aa076686f8741b947ee796246e4c856d1af04c41b5299d170",
+      "saved": {
+        "passed": 2175,
+        "failed": 0
+      },
+      "ownershipStatus": "not_provided",
+      "failedCodes": {},
+      "completeness": {
+        "total": 0,
+        "emptyActual": 0,
+        "expectedContainsC1": 0
+      },
+      "ownershipPath": null,
+      "ownershipHash": null,
+      "sourceSequencePages": 0,
+      "sourcePositionPages": 0,
+      "sourceOwnerRuns": 0,
+      "overprintProofs": 0,
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "rawReportPath": "output/accessibility-50-batch8-20261023/control-final/07-validation-report.json",
+      "rawReportHash": "ffc55995495167190cc99e5d680ba1f113d7f20395a8f1322ada712aecae2b84",
+      "rawReused": true,
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      }
+    },
+    {
+      "id": "nasa-hinode",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "candidatePath": "output/accessibility-50-batch10-20261023/hinode/06-candidate.pdf",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "5e61ff73ca51d0ad9da5f07167b2ac6506e5b1da31b928de7cf11a5bf3787b0c",
+      "savedReportPath": "output/accessibility-50-batch10-20261023/hinode/09-saved-semantics.json",
+      "savedReportHash": "9fa3afcf34bc81926048d373f675d3591c869ae3f4b65bfca5e14bfe8b9c53ac",
+      "saved": {
+        "passed": 939,
+        "failed": 0
+      },
+      "ownershipStatus": "verified",
+      "failedCodes": {},
+      "completeness": {
+        "total": 0,
+        "emptyActual": 0,
+        "expectedContainsC1": 0
+      },
+      "ownershipPath": "output/accessibility-50-batch10-20261023/hinode/06-candidate.pdf.ownership.json",
+      "ownershipHash": "4f5b6e31dfbddf605d647b093a335019637b1264743d5ab34653cf4e88f15c4f",
+      "sourceSequencePages": 1,
+      "sourcePositionPages": 1,
+      "sourceOwnerRuns": 52,
+      "overprintProofs": 0,
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5246,
+        "failedChecks": 0
+      },
+      "rawReportPath": "output/accessibility-50-batch10-20261023/hinode/07-validation.json",
+      "rawReportHash": "4770893562cdf55172b06a5ac0ba7528a2d5077790bef7c2a0b5556e45b974b3",
+      "rawReused": false,
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      }
+    }
+  ],
+  "priorCandidateComparison": {
+    "priorCandidateHash": "e3d08f42c3fa1b12f6f5931e9db995f67240c22e0cf5c03e16043f16313d7c2e",
+    "currentCandidateHash": "07c3b6a74f86180fcc70c9c7f21e74f834204a22318b92d9d9ee61b8292f272f",
+    "priorSummary": {
+      "passed": 50491,
+      "failed": 529
+    },
+    "currentSummary": {
+      "passed": 50491,
+      "failed": 529
+    },
+    "identicalFailures": true,
+    "priorOwnershipStatus": "verified"
+  },
+  "pixels": [
+    {
+      "id": "booklet",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 96,
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidateHash": "07c3b6a74f86180fcc70c9c7f21e74f834204a22318b92d9d9ee61b8292f272f",
+      "pages": 61,
+      "pixelIdenticalPages": 61
+    },
+    {
+      "id": "test-form-control",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "pages": 2,
+      "pixelIdenticalPages": 2
+    },
+    {
+      "id": "nasa-hinode",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "5e61ff73ca51d0ad9da5f07167b2ac6506e5b1da31b928de7cf11a5bf3787b0c",
+      "pages": 1,
+      "pixelIdenticalPages": 1
+    }
+  ],
+  "sourceBytes": {
+    "independentParser": "pypdf ContentStream",
+    "pages": 61,
+    "textBytes": 53667,
+    "tjAdjustments": 615,
+    "partitionedOperators": 104,
+    "verifiedPieces": 209,
+    "proofPath": "output/accessibility-50-batch10-20261023/partition-proof.json",
+    "proofHash": "5200ef6453a76f9b7720ae9e8210714d3dea7345a8d1567032b63b1e7788dfec"
+  },
+  "formInteraction": {
+    "reusedFrom": "docs/evidence/accessibility-50-batch8-20261023.json",
+    "reuseReason": "Exact source and candidate SHA-256 values remain unchanged.",
+    "evidence": {
+      "id": "test-form-control",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": [
+        {
+          "variant": "source",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        },
+        {
+          "variant": "candidate",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        }
+      ],
+      "filledPagePixelIdentical": true
+    }
+  },
+  "remainingLimits": [
+    "A26-A50 remain pending.",
+    "Source ownership is writer-proposed intent, not independent semantic classification proof.",
+    "Font names, character codes and positions do not prove font-program equivalence.",
+    "Normalized complete text does not prove word boundaries, visibility, clipping or reader behavior.",
+    "The booklet has 154 attachment failures and 375 complete-text failures: 154 empty attachments, 79 nonempty expected strings containing C1 controls and 142 other nonempty mismatches. These all predate this writer run.",
+    "The USGS unsupported authored-text rebuild and OCR support remain unresolved.",
+    "Control validation is preserved-reference comparison; it does not claim a new native ownership proof.",
+    "Bounds reject unsupported inventory size/traversal rather than silently truncating."
+  ],
+  "implementationHashes": {
+    "contracts/source-ownership.schema.json": "cf65f01ff0ead3414f9000a92db6550ab7e3e18687c1b6a84cf6c777038e1398",
+    "contracts/pdf-preservation-inspection.schema.json": "8c7a19b44aaa7730c1a37655c2656aacdc9c58bdff41570543e0548543eaf40f",
+    "contracts/saved-semantics.schema.json": "8c0b3d99d8aaa63bdb6897280cdd7130313426a2b727a84f7121b7c2ac8ae7af",
+    "modules/pdf-writer/index.js": "8d04ef73850d867d8eb199d735ac1d872807c2bbb29563181614e438e38fdf76",
+    "modules/pdf-writer/java/NativeContentStreamRewriter.java": "a29b6346ab971b39f2e5e324f2d617fb0cf6da9ff13e9b037889f58c26a8abd6",
+    "modules/validator/source-ownership.js": "177a0e0103deb806b33e9538d013103899f01018a008a23bac1cfdb85bb0bdb9",
+    "modules/validator/saved-semantics.js": "22c8a98c5325b04bc987a1108b56a256dce146fa67574004a20b43bb3137ddf7",
+    "modules/validator/saved-semantics-cli.js": "b0f7878d00a42010ebfd9a20de3dff16edabe71c496e894a7a4c5de6dfd70997",
+    "orchestrator/accessibility-stage-plan.js": "0fa73703f3bb577102ee427785825016ee530ba82b6a8ab74a4fdf3f4e711a1e",
+    "scripts/check-saved-semantics.js": "5b51a7f832916c20cbaaa4140e566c29de51be7f63d733b1d18a170228142f11",
+    "scripts/java/SavedContentInspector.java": "072eb695b6cc3cf2da376667e6277f4326781e3b60eff7fbd26a4f63c38b9068",
+    "scripts/java/PreservationInspector.java": "9153703d57cee7a6ce2bffd455a47f04ca0cc50cc3130b63420abbb81365e565",
+    "test/integration/source-glyph-proof.test.js": "804623ea53e953e90ed70ebe63e2d839b8082c9cbf18c4b51db213b03560fe38",
+    "modules/validator/test/source-ownership.test.js": "262b8c5f08f51837ae22a23f6c43eeb3f029916a7661c8afacaf5814ae5ba33d"
+  }
+}

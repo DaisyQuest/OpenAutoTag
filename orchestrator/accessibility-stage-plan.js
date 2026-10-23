@@ -444,7 +444,9 @@ export function createTaggingOutputStages({
             // Rebuilt trees must additionally agree with the emitted tagging intent.
             if (writer.writerMode !== "passthrough") {
               const savedPath=path.join(resolvedOutputDir,"09-saved-semantics.json");
-              await runJsonStage("scripts/check-saved-semantics.js",["--pdf",artifacts.taggedPdf,"--tags",artifacts.tagging,"--report-only","true"],savedPath);
+              if (writer.writerMode === "native" && !writer.sourceOwnershipPath) throw new Error("Native writer omitted source ownership evidence");
+              await runJsonStage("scripts/check-saved-semantics.js",["--pdf",artifacts.taggedPdf,"--tags",artifacts.tagging,"--report-only","true",
+                ...(writer.writerMode === "native" ? ["--source-pdf", filePath, "--ownership", writer.sourceOwnershipPath] : [])],savedPath);
               artifacts.savedSemantics=savedPath;
               const saved=JSON.parse(await readFile(savedPath,"utf8"));
               const pass=saved.disposition==="automated_pass"&&saved.candidateHash===report.candidateHash;

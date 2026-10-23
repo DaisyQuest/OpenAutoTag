@@ -6,11 +6,17 @@ const key = "page:1:stream:page:mcid:0";
 function fixture(type = "P") {
   const node = { objectRef: "1 0 R", parentRef: "root", identifier: "oat:a", role: type, children: [], contentRefs: [key], headers: [], actualText: "", alt: "" };
   const inspection = { sourceHash: "a".repeat(64), issues: [], structure: [node], contentOrder: [key],
+    textRuns: [{ pageNumber: 1, streamOrigin: "page", operatorIndex: 0, glyphStart: 0, glyphEnd: 4, owners: [key], artifact: false, fontName: "Fixture", glyphs: [..."Text"].map(c => [c.charCodeAt(0), c]) }],
     markedContent: [{ contentRef: key, sequenceCount: 1, glyphCount: 4, meaningfulGlyphCount: 4, unknownGlyphCount: 0, graphicsCount: 0 }] };
   const tagging = { root: { id: "a", type, label: "Text", sourceNodeIds: ["source"], children: [] } };
   return { inspection, tagging };
 }
 const failures = input => compareSavedSemantics(input).checks.filter(c => c.status === "fail");
+
+test("an unexpected empty ActualText cannot silently suppress valid text", () => {
+  const input = fixture(); input.inspection.structure[0].actualTextPresent = true;
+  assert.ok(failures(input).some(c => c.code === "EMPTY_ACTUAL_TEXT"));
+});
 test("saved content evidence is mandatory and cannot be duplicated or absent", () => {
   assert.deepEqual(failures(fixture()), []);
   for (const change of [i => delete i.markedContent, i => i.markedContent = [], i => i.markedContent.push({ ...i.markedContent[0] }), i => i.markedContent[0].sequenceCount = 2]) {

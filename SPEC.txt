@@ -416,8 +416,31 @@ without the new content evidence rejects rather than granting a legacy pass.
 ParentTree entries resolve reciprocally to page, invoked Form and OBJR scopes;
 scope keys must be integral, unique and correctly typed. Extra live entries,
 missing keys, conflicting StructParent/StructParents and wrong owners reject.
-These checks do not establish full source-glyph coverage, correct foreign-content
-ownership, visibility, clipping, annotation appearance text or reader behavior.
+Native output additionally writes <output>.ownership.json under the public
+source-ownership schema. It binds the source PDF and exact tagging intent bytes
+by SHA-256 and records proposed tag owners for original source glyph ranges.
+Ranges use page number, invocation path, lexical operator index and relative
+glyph offsets. List-prefix and compound-operator partitions retain their exact
+source offsets. This intent is not independent semantic classification proof.
+The saved checker accepts additive --source-pdf and --ownership arguments,
+required together with --tags; production native validation requires both.
+Independent source/saved scans compare font names and character-code sequences,
+raw glyph rendering matrices and displacement (0.001 tolerance), and each glyph's
+intended owner. Anonymous authored Span containers resolve to their intended
+ancestor; duplicate, foreign and nested ownership reject. Reports bind source,
+candidate, intent and ownership hashes and expose ownershipStatus. Tag-only
+checks remain available but do not qualify source ownership.
+The additive textRuns, positions, replacementScopes and actualTextPresent
+inspection evidence supports complete normalized text comparison in saved
+structure order. Partial matches cannot pass; an empty ActualText cannot silently
+suppress an intended node. NFKC and whitespace normalization do not establish word
+boundaries. Replacement exceptions require unchanged authored text on the exact
+continuous source range, or complete identical overprints at identical positions
+with the intended saved ActualText and verified source ownership. Arbitrary
+generated replacement text cannot conceal lost glyphs. These checks do not prove
+font-program equivalence, visibility, clipping, annotation appearance text, OCR
+completeness, correct source semantic classification or reader behavior. The
+bounded inspector fails explicitly on unsupported traversal/output limits.
 Paragraph merging must retain source identities and rebind semantic references.
 Heuristic evidence is not a calibrated probability. Multilingual expansion is
 lower priority than the preservation and semantic qualification gates.

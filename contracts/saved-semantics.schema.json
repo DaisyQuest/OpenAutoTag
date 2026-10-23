@@ -13,6 +13,9 @@
     "limitations"
   ],
   "properties": {
+    "ownershipStatus": { "enum": ["not_provided", "verified", "rejected"] },
+    "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ownershipHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "schemaVersion": {
       "const": "1.0.0"
     },

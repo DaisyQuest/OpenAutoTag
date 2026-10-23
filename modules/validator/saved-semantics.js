@@ -1,14 +1,16 @@
 // Compare identities, never match unrelated content by similar text.
+import { canonicalText, inspectSourceOwnership, savedTextIndex, textWithAuthoredReplacements, authoredReplacementIndex, exactOverprintText } from "./source-ownership.js";
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function emittedIdentifier(node) {
   if (node.type === "TH" && node.headerId) return node.headerId;
   if (node.type === "Aside") return `note-${node.id.replace(/[^A-Za-z0-9_.-]+/g, "-") || "unknown"}`;
   return `oat:${node.id}`;
 }
-export function compareSavedSemantics({ inspection, tagging, reference }) {
+export function compareSavedSemantics({ inspection, tagging, reference, sourceInspection, sourceOwnership }) {
   if (!inspection?.sourceHash || !Array.isArray(inspection.structure)) throw new Error("Saved semantic inspection is required");
   if (Boolean(tagging) === Boolean(reference)) throw new Error("Supply tagging intent or a reference inspection, exclusively");
   const checks = [], add = (code, target, expected, actual) => checks.push({ code, target, status: equal(expected, actual) ? "pass" : "fail", expected: expected ?? null, actual: actual ?? null });
+  let ownershipStatus = "not_provided";
   add("SAVED_CONTENT_INSPECTED", "document", true, Array.isArray(inspection.markedContent));
   const content = new Map();
   for (const item of inspection.markedContent || []) {
@@ -16,6 +18,9 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
     content.set(item.contentRef, item);
   }
   const byRef = new Map(inspection.structure.map(n => [n.objectRef, n]));
+  const textIndex = savedTextIndex(inspection);
+  if (Array.isArray(inspection.textRuns)) for (const run of inspection.textRuns) if (run.glyphs.length && run.owners.length > 1)
+    add("EXCLUSIVE_PAINT_OWNER", `page:${run.pageNumber}:glyphs:${run.glyphStart}-${run.glyphEnd}`, 1, run.owners.length);
   const identifiers = new Map();
   for (const n of inspection.structure) if (n.identifier) {
     if (identifiers.has(n.identifier)) add("DUPLICATE_IDENTIFIER", n.identifier, false, true);
@@ -30,12 +35,13 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
     add("STRUCTURE_MEMBERSHIP", "document", reference.structure.map(n => n.objectRef).sort(), [...byRef.keys()].sort());
     for (const n of reference.structure) {
       const saved = byRef.get(n.objectRef);
-      for (const key of ["role", "parentRef", "children", "contentRefs", "headers", "scope", "rowSpan", "columnSpan", "listNumbering", "actualText", "alt"])
+      for (const key of ["role", "parentRef", "children", "contentRefs", "headers", "scope", "rowSpan", "columnSpan", "listNumbering", "actualText", "actualTextPresent", "alt"])
         add(`SAVED_${key.toUpperCase()}`, n.objectRef, n[key], saved?.[key]);
     }
     add("CONTENT_ORDER", "document", reference.contentOrder, inspection.contentOrder);
     add("REFERENCE_CONTENT_INSPECTED", "document", true, Array.isArray(reference.markedContent));
     for (const item of reference.markedContent || []) add("SAVED_CONTENT_EVIDENCE", item.contentRef, item, content.get(item.contentRef));
+    add("SAVED_TEXT_RUNS", "document", reference.textRuns, inspection.textRuns);
   } else {
     const nodes = [], expectedIds = new Set();
     const walk = (n, parent, depth) => {
@@ -46,6 +52,9 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
       for (const child of n.children || []) walk(child, id, depth + 1);
     };
     walk(tagging.root, null, 0);
+    const ownership = inspectSourceOwnership({ inspection, source: sourceInspection, ownership: sourceOwnership, intendedNodes: nodes, add });
+    if (sourceOwnership) ownershipStatus = ownership.sourceVerified ? "verified" : "rejected";
+    const replacements = authoredReplacementIndex(sourceInspection, inspection, ownership.sourceVerified, add, expectedIds);
     for (const { n, parent, id } of nodes) {
       const saved = identifiers.get(id);
       add("EMITTED_NODE", id, true, Boolean(saved));
@@ -64,6 +73,8 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
       // Unexpected replacement/alternate text can override valid child semantics.
       // Check absence too, rather than only verifying properties requested by intent.
       add("ACTUAL_TEXT", id, n.actualText || "", saved.actualText || "");
+      // An empty replacement suppresses otherwise valid text; absence is different.
+      if (saved.actualTextPresent && !saved.actualText) add("EMPTY_ACTUAL_TEXT", id, false, true);
       add("ALTERNATE_TEXT", id, n.alt || "", saved.alt || "");
       if ((n.sourceNodeIds?.length || n.type === "Lbl") && (n.actualText || n.label || "").trim()) {
         const seen = new Set();
@@ -78,12 +89,25 @@ export function compareSavedSemantics({ inspection, tagging, reference }) {
           }) || element.children.some(ref => hasContent(byRef.get(ref)));
         };
         add("CONTENT_ATTACHED", id, true, hasContent(saved));
+        if (!graphical) {
+          add("SAVED_TEXT_INSPECTED", id, true, Array.isArray(inspection.textRuns));
+          const runs = textIndex.collect(saved), expected = canonicalText(n.actualText || n.label);
+          let raw = textWithAuthoredReplacements(runs, replacements, n.actualText || n.label);
+          if (canonicalText(raw) !== expected && ownership.sourceVerified && n.actualText && n.actualText === saved.actualText) {
+            const overprint = exactOverprintText(runs);
+            if (overprint && canonicalText(overprint.text) === expected) {
+              add("OVERPRINT_REPLACEMENT_PROVEN", id, true, true); raw = overprint.text;
+            }
+          }
+          add("CONTENT_TEXT_COMPLETE", id, canonicalText(n.actualText || n.label), canonicalText(raw));
+        }
       }
     }
   }
   const failed = checks.filter(c => c.status === "fail").length;
   return { schemaVersion: "1.0.0", candidateHash: inspection.sourceHash, referenceHash: reference?.sourceHash || null,
+    ownershipStatus,
     scope: reference ? "preserved-structure" : "emitted-tagging-intent", disposition: failed ? "rejected" : "automated_pass",
     summary: { passed: checks.length - failed, failed }, checks,
-    limitations: ["Checks saved structure against intent; intent still requires independent semantic review.", "Nonempty decoded content does not establish complete text, correct source ownership, rendered visibility or observed screen-reader behavior."] };
+    limitations: ["Checks saved structure against intent; intent still requires independent semantic review.", "Source occurrence ownership is qualified only when ownershipStatus is verified and the report carries source and ownership hashes.", "Text comparison normalizes Unicode compatibility forms and whitespace; layout, clipping, visibility, word-boundary interpretation and reader behavior require separate verification."] };
 }

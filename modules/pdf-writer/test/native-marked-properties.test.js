@@ -23,7 +23,8 @@ test("native rebuilding preserves layer visibility and evidenced artifact proper
   await writeFile(tagsPath,JSON.stringify({schemaVersion:"1.0.0",documentId:"tags",source:{semanticDocumentId:"properties"},root:{id:"root",type:"Document",children:nodes.map(n=>({id:n.id,type:"P",sourceNodeIds:[n.id],label:n.text,children:[]}))}}));
   await writeTaggedArtifacts({pdfPath,outputPath,tagsPath,semanticPath,mode:"native"});
   assert.match((await run(["-cp",jar,probe,"verify",pdfPath,outputPath])).stdout,/Layer scopes, artifact properties, semantic ownership and 150 DPI pixels preserved/);
-  assert.equal((await checkSavedSemantics({pdfPath:outputPath,tagsPath})).summary.failed,0);
+  const saved = await checkSavedSemantics({pdfPath:outputPath,tagsPath,sourcePdfPath:pdfPath,ownershipPath:`${outputPath}.ownership.json`});
+  assert.equal(saved.summary.failed,0,JSON.stringify(saved.checks.filter(c=>c.status==="fail")));
   const validation=await promisify(execFile)(process.execPath,[path.resolve("modules/validator/index.js"),"--pdf",outputPath,"--manifest",`${outputPath}.tags.json`],{env,windowsHide:true,timeout:90000,maxBuffer:4*1024*1024});
   assert.equal(JSON.parse(validation.stdout).rawSummary.failedChecks,0);
   const cp=`${getRuntimeBuildDir("modules-pdf-writer",{repoRoot:process.cwd()})}${path.delimiter}${jar}`;

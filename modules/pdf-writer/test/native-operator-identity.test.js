@@ -47,6 +47,7 @@ test("lexical operator identities survive TD and both quote operators across con
   const saved = await inspect(outputPath);
   assert.deepEqual(saved.map(op => [op.page, op.seq, op.op, op.text, op.owner]),
     expected.map(op => [op.page, op.seq, op.op, op.text, `oat:p${op.page}-s${op.seq}`]), "every saved text operation has its intended parent");
-  assert.equal((await checkSavedSemantics({ pdfPath: outputPath, tagsPath })).summary.failed, 0);
+  const proof = await checkSavedSemantics({ pdfPath: outputPath, tagsPath, sourcePdfPath: pdfPath, ownershipPath: `${outputPath}.ownership.json` });
+  assert.equal(proof.summary.failed, 0, JSON.stringify(proof.checks.filter(c => c.status === "fail")));
   assert.match((await run(["-cp", jar, probe, "pixels", pdfPath, outputPath])).stdout, /All pages pixel-identical/);
 });
