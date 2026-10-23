@@ -235,6 +235,13 @@ public class NativeTagMatcher {
         int page;
         int opIndexInStream;
         String streamOrigin;
+        String operandSha256;
+        List<GlyphInfo> glyphMap;
+    }
+
+    static class GlyphInfo {
+        int start, end;
+        double x, y;
     }
 
     static class SemanticNode {
@@ -264,6 +271,8 @@ public class NativeTagMatcher {
         double confidence;
         int opIndexInStream;
         String streamOrigin;
+        int glyphStart, glyphEnd, sourceGlyphCount;
+        String sourceText, operandSha256;
     }
 
     static class Assignment {
@@ -324,11 +333,41 @@ public class NativeTagMatcher {
                 oi.page = pageNum;
                 oi.opIndexInStream = om.containsKey("opIndexInStream") ? asInt(om.get("opIndexInStream")) : oi.seq;
                 oi.streamOrigin = om.containsKey("streamOrigin") && om.containsKey("opIndexInStream") ? asString(om.get("streamOrigin")) : null;
+                readGlyphMap(oi, om.get("glyphMap"));
                 pageOps.add(oi);
             }
             result.add(pageOps);
         }
         return result;
+    }
+
+    // This optional, module-internal map is usable only with lexical identity
+    // and complete UTF-16 coverage. The writer independently rechecks the font
+    // codes, Unicode, operand hash and glyph count against the actual PDF.
+    private static void readGlyphMap(OpInfo op, Object value) {
+        if (op.streamOrigin == null || !(value instanceof Map)) return;
+        Map<String,Object> map = asMap(value);
+        String hash = asString(map.get("sha256"));
+        if (!hash.matches("[0-9a-f]{64}") || !(map.get("glyphs") instanceof List)) return;
+        List<Object> rows = asList(map.get("glyphs"));
+        if (rows.isEmpty() || rows.size() > 4096) return;
+        List<GlyphInfo> glyphs = new ArrayList<>();
+        int offset = 0;
+        for (Object row : rows) {
+            if (!(row instanceof List)) return;
+            List<Object> cols = asList(row);
+            if (cols.size() != 8) return;
+            for (Object col : cols) if (!(col instanceof Number) || !Double.isFinite(asDouble(col))) return;
+            GlyphInfo g = new GlyphInfo();
+            g.start = asInt(cols.get(4)); g.end = asInt(cols.get(5));
+            g.x = asDouble(cols.get(6)); g.y = asDouble(cols.get(7));
+            if (g.start != offset || g.end <= g.start || g.end > op.text.length()
+                    || asDouble(cols.get(4)) != g.start || asDouble(cols.get(5)) != g.end) return;
+            if (g.end < op.text.length() && Character.isLowSurrogate(op.text.charAt(g.end))) return;
+            offset = g.end; glyphs.add(g);
+        }
+        if (offset != op.text.length()) return;
+        op.operandSha256 = hash; op.glyphMap = glyphs;
     }
 
     private static List<SemanticNode> parseSemanticNodes(Object json) {
@@ -626,6 +665,95 @@ public class NativeTagMatcher {
         }
     }
 
+    private static String compactText(String text) {
+        StringBuilder out = new StringBuilder();
+        text.codePoints().filter(c -> !Character.isWhitespace(c) && !Character.isSpaceChar(c)).forEach(out::appendCodePoint);
+        return out.toString();
+    }
+
+    static class TextPiece {
+        String tagId;
+        OperatorAssignment operator;
+    }
+
+    static class Partition {
+        List<TextPiece> pieces = new ArrayList<>();
+        boolean ambiguous;
+    }
+
+    /** Complete, exact-text partition at source font-code boundaries. Geometry
+     * limits candidates to the individual semantic node, never its tag's union
+     * box. Longest matching runs avoid splitting shared word prefixes; equally
+     * supported owners are withheld instead of resolved by reading order. */
+    private static Partition partitionOperator(OpInfo op, List<SemanticNode> nodes,
+            Map<String,TagNode> tags, double width, double height, int rotation) {
+        Partition result = new Partition();
+        if (op.glyphMap == null) return result;
+        int count = op.glyphMap.size();
+        String[] text = new String[count]; double[][] position = new double[count][];
+        for (int i = 0; i < count; i++) {
+            GlyphInfo g = op.glyphMap.get(i);
+            text[i] = compactText(op.text.substring(g.start, g.end));
+            position[i] = unrotateOpToPortrait(g.x, "top".equals(parsedCoordinateOrigin) ? g.y : height-g.y, width, height, rotation);
+        }
+        int start = 0;
+        while (start < count) {
+            int first = start;
+            while (first < count && text[first].isEmpty()) first++;
+            if (first == count) { result.pieces.clear(); return result; }
+            int bestEnd = -1, bestLength = 0, candidates = 0;
+            String bestTag = null;
+            boolean tied = false;
+            for (SemanticNode node : nodes) {
+                TagNode tag = tags.get(node.id);
+                if (tag == null || !glyphInside(position[first], node)) continue;
+                if (++candidates > 64) { result.pieces.clear(); return result; }
+                String target = compactText(node.text);
+                StringBuilder run = new StringBuilder();
+                int end = -1;
+                for (int g = first; g < count; g++) {
+                    if (text[g].isEmpty()) continue;
+                    if (!glyphInside(position[g], node)) break;
+                    String next = run.toString() + text[g];
+                    if (!target.contains(next)) break;
+                    run.append(text[g]); end = g+1;
+                }
+                if (end < 0) continue;
+                if (run.length() > bestLength) {
+                    bestLength = run.length(); bestEnd = end; bestTag = tag.id; tied = false;
+                } else if (run.length() == bestLength && !tag.id.equals(bestTag)) tied = true;
+            }
+            if (tied) {
+                // An entire operation is not a partitioning decision. Leave
+                // existing whole-operation matching unchanged in that case.
+                int remaining = bestEnd;
+                while (remaining < count && text[remaining].isEmpty()) remaining++;
+                result.ambiguous = start > 0 || remaining < count;
+                result.pieces.clear(); return result;
+            }
+            if (bestEnd < 0) { result.pieces.clear(); return result; }
+            // Give inter-node whitespace to the preceding run. It remains
+            // painted exactly once even if the intended text omits spaces.
+            while (bestEnd < count && text[bestEnd].isEmpty()) bestEnd++;
+            OperatorAssignment a = new OperatorAssignment();
+            a.seq = op.seq; a.opIndexInStream = op.opIndexInStream; a.streamOrigin = op.streamOrigin;
+            a.glyphStart = start; a.glyphEnd = bestEnd; a.sourceGlyphCount = count;
+            a.sourceText = op.text; a.operandSha256 = op.operandSha256;
+            a.text = op.text.substring(op.glyphMap.get(start).start, op.glyphMap.get(bestEnd-1).end);
+            a.x = op.glyphMap.get(first).x; a.y = op.glyphMap.get(first).y; a.confidence = 1;
+            TextPiece piece = new TextPiece(); piece.tagId = bestTag; piece.operator = a;
+            result.pieces.add(piece); start = bestEnd;
+            if (result.pieces.size() > 64) { result.pieces.clear(); return result; }
+        }
+        if (result.pieces.stream().map(p -> p.tagId).distinct().count() < 2) result.pieces.clear();
+        return result;
+    }
+
+    private static boolean glyphInside(double[] p, SemanticNode node) {
+        return p[0] >= node.bboxX-0.5 && p[0] <= node.bboxX+node.bboxW+0.5
+            && p[1] >= node.bboxY-2 && p[1] <= node.bboxY+node.bboxH+2;
+    }
+
     private static MatchResult matchPage(
             List<OpInfo> operators,
             List<SemanticNode> pageNodes,
@@ -645,6 +773,16 @@ public class NativeTagMatcher {
 
         // Track which operators have been assigned
         boolean[] assigned = new boolean[operators.size()];
+        boolean[] ambiguous = new boolean[operators.size()];
+        Map<String,List<OperatorAssignment>> partitioned = new HashMap<>();
+        for (int i = 0; i < operators.size(); i++) {
+            Partition partition = partitionOperator(operators.get(i), pageNodes, semanticToTag, pageWidth, pageHeight, rotation);
+            ambiguous[i] = partition.ambiguous;
+            if (partition.pieces.isEmpty()) continue;
+            for (TextPiece piece : partition.pieces)
+                partitioned.computeIfAbsent(piece.tagId, k -> new ArrayList<>()).add(piece.operator);
+            assigned[i] = true;
+        }
         List<String> operatorWritingModes = inferOperatorWritingModes(operators);
 
         // MCID counter for this page
@@ -701,9 +839,12 @@ public class NativeTagMatcher {
             StringBuilder matchedText = new StringBuilder();
             double totalConfidence = 0;
             int matchCount = 0;
+            for (OperatorAssignment piece : partitioned.getOrDefault(tn.id, List.of())) {
+                asgn.operators.add(piece); matchedText.append(piece.text); totalConfidence += piece.confidence; matchCount++;
+            }
 
             for (int i = 0; i < operators.size(); i++) {
-                if (assigned[i]) continue;
+                if (assigned[i] || ambiguous[i]) continue;
                 OpInfo op = operators.get(i);
                 if (op.text.trim().isEmpty()) continue;
 
@@ -820,6 +961,7 @@ public class NativeTagMatcher {
             }
 
             asgn.matchConfidence = matchCount > 0 ? totalConfidence / matchCount : 0;
+            asgn.operators.sort(java.util.Comparator.comparingInt((OperatorAssignment a) -> a.seq).thenComparingInt(a -> a.glyphStart));
             // Text coverage: how much of the node text is covered by matched operators
             String mText = normalizeText(matchedText.toString());
             String nText = normalizeText(nodeText);
@@ -1089,6 +1231,11 @@ public class NativeTagMatcher {
                     json.append(",\"confidence\":").append(fmt(oa.confidence));
                     json.append(",\"opIndexInStream\":").append(oa.opIndexInStream);
                     if (oa.streamOrigin != null) json.append(",\"streamOrigin\":").append(escapeJson(oa.streamOrigin));
+                    if (oa.sourceGlyphCount > 0) {
+                        json.append(",\"glyphStart\":").append(oa.glyphStart).append(",\"glyphEnd\":").append(oa.glyphEnd);
+                        json.append(",\"sourceGlyphCount\":").append(oa.sourceGlyphCount).append(",\"sourceText\":").append(escapeJson(oa.sourceText));
+                        json.append(",\"operandSha256\":").append(escapeJson(oa.operandSha256));
+                    }
                     json.append("}");
                 }
                 json.append("]");

@@ -27,6 +27,7 @@ public class NativeGlyphBoundaryProbe {
                 "1 begincodespacerange <0000> <ffff> endcodespacerange\n");
             var mappings = new LinkedHashMap<String,String>();
             mappings.put("\ufb01", "fi"); mappings.put("\u00e9", "e\u0301");
+            mappings.put("x", "\ud83d\ude00"); mappings.put("z", "\ufffd");
             for (String c : List.of(".", " ", "b", "o", "d", "y")) mappings.put(c, c);
             map.append(mappings.size()).append(" beginbfchar\n");
             for (var entry : mappings.entrySet()) map.append('<').append(hex(original.encode(entry.getKey()))).append("> <")
@@ -57,6 +58,57 @@ public class NativeGlyphBoundaryProbe {
             check(NativeContentStreamRewriter.splitTextPrefix(font, huge, "fi") == null, "Array bound ignored");
             check(NativeContentStreamRewriter.splitTextPrefix(font, new COSString(new byte[1048577]), "fi") == null, "Byte bound ignored");
             check(NativeContentStreamRewriter.splitTextPrefix(font, new COSString(new byte[]{(byte)255,(byte)255}), "fi") == null, "Unknown mapping accepted");
+            // General mapping supports any complete code interval, independently
+            // of list labels. A two-byte code may expand to two Unicode units.
+            var mapped = NativeContentStreamParser.mapOperand(font, source);
+            check(mapped != null && mapped.text.equals("fi.e\u0301 body") && mapped.glyphs.size() == 8, "General map incorrect");
+            check(mapped.glyphs.get(0).byteEnd == 2 && mapped.glyphs.get(0).textEnd == 2, "Ligature code boundary lost");
+            check(mapped.glyphs.get(2).textStart == 3 && mapped.glyphs.get(2).textEnd == 5, "Combining sequence boundary lost");
+            // Every possible contiguous slice preserves its exact source bytes.
+            for (int a=0; a<8; a++) for (int b=a+1; b<=8; b++)
+                check(Arrays.equals(bytes(mapped.slice(a,b)), Arrays.copyOfRange(untouched,a*2,b*2)), "Range re-encoded glyphs");
+            var complex = new COSArray(); complex.add(COSInteger.get(8)); complex.add(new COSString(new byte[0]));
+            for (COSBase part : array) complex.add(part);
+            complex.add(COSInteger.get(-6)); complex.add(new COSString(new byte[0]));
+            var all = NativeContentStreamParser.mapOperand(font, complex);
+            check(all != null && all.glyphs.size() == 8, "Array map missing");
+            for (int cut=1; cut<8; cut++) {
+                var joined = new ByteArrayOutputStream(); var adjustments = new ArrayList<COSBase>(); int empty = 0;
+                for (COSBase section : List.of(all.slice(0,cut),all.slice(cut,8))) for (COSBase part : (COSArray)section) {
+                    if (part instanceof COSString s) { joined.write(s.getBytes()); if (s.getBytes().length == 0) empty++; }
+                    else adjustments.add(part);
+                }
+                check(Arrays.equals(joined.toByteArray(),untouched), "Slice bytes not conserved");
+                check(adjustments.equals(List.of(complex.getObject(0),array.getObject(1),array.getObject(3),complex.getObject(complex.size()-2))), "Array adjustments reordered/lost");
+                check(empty == 2, "Empty strings duplicated/lost");
+            }
+            check(NativeContentStreamParser.mapOperand(font, source).sha256.equals(mapped.sha256), "Operand hash unstable");
+            for (int[] range : List.of(new int[]{-1,1},new int[]{0,0},new int[]{2,1},new int[]{0,9})) {
+                boolean rejected=false; try { mapped.slice(range[0],range[1]); } catch(IllegalArgumentException expected) { rejected=true; }
+                check(rejected,"Invalid slice accepted");
+            }
+            check(NativeContentStreamParser.mapOperand(null, source) == null, "Missing mapping font accepted");
+            check(NativeContentStreamParser.mapOperand(font, invalid) == null, "Invalid mapping operand accepted");
+            check(NativeContentStreamParser.mapOperand(font, huge) == null, "Mapping array limit ignored");
+            check(NativeContentStreamParser.mapOperand(font, new COSString(new byte[1048577])) == null, "Mapping byte limit ignored");
+            check(NativeContentStreamParser.mapOperand(font, str(original,"b".repeat(32769))) == null, "Mapping glyph limit ignored");
+            check(NativeContentStreamParser.mapOperand(font, new COSString(new byte[]{(byte)255,(byte)255})) == null, "Unknown Unicode mapping accepted");
+            var supplementary = NativeContentStreamParser.mapOperand(font,str(original,"x"));
+            check(supplementary != null && supplementary.glyphs.size()==1 && supplementary.glyphs.get(0).textEnd==2, "Supplementary character split");
+            check(NativeContentStreamParser.mapOperand(font,str(original,"z")) == null, "Replacement Unicode accepted");
+            if (args.length > 1) {
+                var page = new PDPage(PDRectangle.LETTER); doc.addPage(page);
+                var resources = new PDResources(); resources.put(COSName.getPDFName("F"),font); page.setResources(resources);
+                var content = new PDStream(doc);
+                try (var out = content.createOutputStream()) {
+                    var writer = new org.apache.pdfbox.pdfwriter.ContentStreamWriter(out);
+                    writer.writeTokens(List.of(org.apache.pdfbox.contentstream.operator.Operator.getOperator("BT"),COSName.getPDFName("F"),COSInteger.get(12),
+                        org.apache.pdfbox.contentstream.operator.Operator.getOperator("Tf"),COSInteger.get(72),COSInteger.get(720),
+                        org.apache.pdfbox.contentstream.operator.Operator.getOperator("Td"),source,org.apache.pdfbox.contentstream.operator.Operator.getOperator("Tj"),
+                        org.apache.pdfbox.contentstream.operator.Operator.getOperator("ET")));
+                }
+                page.setContents(content); doc.save(args[1]);
+            }
             System.out.println("Multibyte codes, ligatures, combining sequences, adjustments, source immutability and rejection bounds verified");
         }
     }

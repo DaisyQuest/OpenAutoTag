@@ -95,8 +95,11 @@
       "improvement": "Compound text-node attachment",
       "requirement": "Partition one source text operation across multiple intended label/value nodes.",
       "acceptance": "Booklet label/value examples attach to exact intended nodes; spacing and geometry are unchanged.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch3-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
     },
     {
       "id": "A09",
@@ -104,11 +107,11 @@
       "improvement": "Glyph-to-byte mapping",
       "requirement": "Expose verified byte boundaries for multibyte codes, ligatures and Unicode sequences.",
       "acceptance": "Splitting never bisects a font code or Unicode mapping; ambiguous boundaries are rejected.",
-      "status": "in_progress",
+      "status": "completed",
       "evidence": [
-        "modules/pdf-writer/test/fixtures/NativeGlyphBoundaryProbe.java"
+        "docs/evidence/accessibility-50-batch3-20261022.json"
       ],
-      "remaining": "General reusable mapping for compound text-node partitioning; current prefix splitter has qualified array/ligature/Unicode boundary tests."
+      "completedOn": "2026-10-22"
     },
     {
       "id": "A10",

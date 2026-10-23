@@ -286,6 +286,9 @@ public class NativeContentStreamRewriter {
         String text;
         String streamOrigin = "page";
         boolean lexicalIdentity;
+        boolean partial;
+        int glyphStart, glyphEnd, sourceGlyphCount;
+        String sourceText, operandSha256;
     }
 
     /** An assignment: a tag node mapped to a set of operators with a given MCID */
@@ -463,6 +466,17 @@ public class NativeContentStreamRewriter {
                         if (!ref.streamOrigin.matches("page(?:/[0-9]+)*") || ref.opIndexInStream < 0)
                             throw new IllegalArgumentException("Invalid native stream identity");
                     }
+                    ref.partial = om.containsKey("glyphStart") || om.containsKey("glyphEnd") || om.containsKey("sourceGlyphCount")
+                        || om.containsKey("sourceText") || om.containsKey("operandSha256");
+                    if (ref.partial) {
+                        ref.glyphStart = requiredInteger(om, "glyphStart"); ref.glyphEnd = requiredInteger(om, "glyphEnd");
+                        ref.sourceGlyphCount = requiredInteger(om, "sourceGlyphCount");
+                        ref.sourceText = asString(om.get("sourceText")); ref.operandSha256 = asString(om.get("operandSha256"));
+                        if (!ref.lexicalIdentity || ref.glyphStart < 0 || ref.glyphEnd <= ref.glyphStart
+                                || ref.glyphEnd > ref.sourceGlyphCount || ref.sourceGlyphCount > NativeContentStreamParser.TextMapping.MAX_GLYPHS
+                                || ref.sourceText.isEmpty() || !ref.operandSha256.matches("[0-9a-f]{64}"))
+                            throw new IllegalArgumentException("Invalid native glyph partition");
+                    }
                     a.operators.add(ref);
                 }
                 pp.assignments.add(a);
@@ -481,6 +495,42 @@ public class NativeContentStreamRewriter {
         return plans;
     }
 
+    private static int requiredInteger(Map<String,Object> map, String key) {
+        Object value = map.get(key);
+        if (!(value instanceof Number) || !Double.isFinite(asDouble(value)) || asDouble(value) != asInt(value))
+            throw new IllegalArgumentException("Invalid native glyph partition field: " + key);
+        return asInt(value);
+    }
+
+    private static void validatePartitions(PagePlan plan) throws IOException {
+        Map<Integer,List<OpRef>> bySeq = new HashMap<>();
+        Map<String,Integer> byAddress = new HashMap<>();
+        for (Assignment a : plan.assignments) for (OpRef ref : a.operators) {
+            bySeq.computeIfAbsent(ref.seq, k -> new ArrayList<>()).add(ref);
+            if (ref.lexicalIdentity) {
+                Integer previous = byAddress.putIfAbsent(ref.streamOrigin+":"+ref.opIndexInStream, ref.seq);
+                if (previous != null && previous != ref.seq) throw new IOException("Text operator has multiple owners at scoped address");
+            }
+        }
+        for (List<OpRef> refs : bySeq.values()) {
+            OpRef first = refs.get(0);
+            if (!first.partial) {
+                if (refs.size() != 1) throw new IOException("Text operator has multiple owners: " + first.seq);
+                continue;
+            }
+            refs.sort(java.util.Comparator.comparingInt(r -> r.glyphStart));
+            int end = 0;
+            for (OpRef ref : refs) {
+                if (!ref.partial || ref.opIndexInStream != first.opIndexInStream || !ref.streamOrigin.equals(first.streamOrigin)
+                        || !ref.operandSha256.equals(first.operandSha256) || !ref.sourceText.equals(first.sourceText)
+                        || ref.sourceGlyphCount != first.sourceGlyphCount || ref.glyphStart != end)
+                    throw new IOException("Incomplete, overlapping or inconsistent native glyph partition");
+                end = ref.glyphEnd;
+            }
+            if (end != first.sourceGlyphCount) throw new IOException("Incomplete native glyph partition");
+        }
+    }
+
     /** Each text operator owns one disjoint marked-content run. A semantic node
      * can own many MCRs; extending a wrapper between its operators can swallow
      * other nodes, whitespace artifacts or graphics in the source paint order.
@@ -488,17 +538,13 @@ public class NativeContentStreamRewriter {
      * starts its own compact MCID numbering; its ParentTree slot disambiguates it.
      */
     private static int splitAssignmentsIntoMarkedRuns(PagePlan plan) throws IOException {
+        validatePartitions(plan);
         Map<String, Integer> nextMcids = new HashMap<>();
         List<Assignment> expanded = new ArrayList<>();
-        Set<Integer> assignedSequences = new HashSet<>();
-        Set<String> assignedAddresses = new HashSet<>();
         int addedRuns = 0;
         for (Assignment a : plan.assignments) {
             for (int i = 0; i < a.operators.size(); i++) {
                 OpRef ref = a.operators.get(i);
-                if (!assignedSequences.add(ref.seq)) throw new IOException("Text operator has multiple owners: " + ref.seq);
-                if (ref.lexicalIdentity && !assignedAddresses.add(ref.streamOrigin + ":" + ref.opIndexInStream))
-                    throw new IOException("Text operator has multiple owners: " + ref.streamOrigin + ":" + ref.opIndexInStream);
                 Assignment run = new Assignment();
                 run.tagNodeId = a.tagNodeId;
                 run.tagType = a.tagType;
@@ -632,19 +678,67 @@ public class NativeContentStreamRewriter {
         return result;
     }
 
+    private static int emitOwnedText(List<Object> tokens, Assignment assignment, List<COSBase> operands, Operator op,
+            PDFont font, Map<String,TagTreeNode> labels, PagePlan plan, RewriteResult result, int nextMcid) {
+        TagTreeNode label = labels.get(assignment.tagNodeId);
+        if (label != null && assignment.startsTagGroup && ("Tj".equals(op.getName()) || "TJ".equals(op.getName())) && operands.size() == 1) {
+            TextSplit split = splitTextPrefix(font, operands.get(0), label.actualText);
+            if (split != null && split.remainder == null) {
+                assignment.tagNodeId = label.id; assignment.tagType = "Lbl";
+                operands.set(0, split.prefix);
+            } else if (split != null) {
+                Assignment marker = new Assignment(); marker.tagNodeId = label.id; marker.tagType = "Lbl"; marker.mcid = nextMcid++;
+                marker.operators.add(assignment.operators.get(0)); plan.assignments.add(marker);
+                emitMarkedText(tokens, marker, List.of(split.prefix), op, result);
+                operands.set(0, split.remainder);
+            }
+        }
+        emitMarkedText(tokens, assignment, operands, op, result);
+        return nextMcid;
+    }
+
+    private static void emitMarkedText(List<Object> tokens, Assignment assignment, List<COSBase> operands, Operator op, RewriteResult result) {
+        COSDictionary props = new COSDictionary(); props.setInt(COSName.MCID, assignment.mcid);
+        tokens.add(COSName.getPDFName(assignment.tagType)); tokens.add(props); tokens.add(Operator.getOperator("BDC"));
+        tokens.addAll(operands); tokens.add(op); tokens.add(Operator.getOperator("EMC"));
+        result.taggedWrapped++; assignment.emitted = true;
+    }
+
+    private static NativeContentStreamParser.TextMapping verifiedMapping(PDFont font, List<COSBase> operands,
+            String operator, List<Assignment> pieces) throws IOException {
+        int arity = "\"".equals(operator) ? 3 : 1;
+        if (operands.size() != arity || (arity == 3 && (!(operands.get(0) instanceof org.apache.pdfbox.cos.COSNumber)
+                || !(operands.get(1) instanceof org.apache.pdfbox.cos.COSNumber))))
+            throw new IOException("Invalid partitioned text operator operands");
+        COSBase operand = operands.get(arity-1);
+        if (!("TJ".equals(operator) ? operand instanceof COSArray : operand instanceof COSString))
+            throw new IOException("Invalid partitioned text operand type");
+        NativeContentStreamParser.TextMapping mapping = NativeContentStreamParser.mapOperand(font, operand);
+        if (mapping == null) throw new IOException("Source glyph mapping cannot be verified");
+        for (Assignment piece : pieces) {
+            OpRef ref = piece.operators.get(0);
+            if (!mapping.sha256.equals(ref.operandSha256) || !mapping.text.equals(ref.sourceText) || mapping.glyphs.size() != ref.sourceGlyphCount
+                    || !mapping.text.substring(mapping.glyphs.get(ref.glyphStart).textStart, mapping.glyphs.get(ref.glyphEnd-1).textEnd).equals(ref.text))
+                throw new IOException("Source glyph partition differs from native plan");
+        }
+        return mapping;
+    }
+
     private static RewriteResult rewriteContentStream(PDDocument doc, PDPage page, PDContentStream source,
             PDFormXObject targetForm, PDResources resources, PagePlan plan, String origin,
             Map<String,TagTreeNode> listLabels, RewriteContext context, PDFont inheritedFont) throws IOException {
-        Map<Integer, Assignment> lexicalAssignments = new HashMap<>();
+        Map<Integer, List<Assignment>> lexicalAssignments = new HashMap<>();
         Map<Integer, Assignment> legacyAssignments = new HashMap<>();
         for (Assignment a : plan.assignments) {
             if (a.operators.isEmpty()) continue;
             for (OpRef ref : a.operators) {
                 if (!origin.equals(ref.streamOrigin)) continue;
-                if (ref.lexicalIdentity) lexicalAssignments.put(ref.opIndexInStream, a);
+                if (ref.lexicalIdentity) lexicalAssignments.computeIfAbsent(ref.opIndexInStream, k -> new ArrayList<>()).add(a);
                 else legacyAssignments.put(ref.seq, a);
             }
         }
+        for (List<Assignment> pieces : lexicalAssignments.values())
+            pieces.sort(java.util.Comparator.comparingInt(a -> a.operators.get(0).glyphStart));
 
         PDFStreamParser parser = new PDFStreamParser(source);
         List<Object> tokens = parser.parse();
@@ -721,8 +815,8 @@ public class NativeContentStreamRewriter {
                     int currentSeq = textOpSeq;
                     textOpSeq++;
 
-                    Assignment assignment = lexicalAssignments.get(currentOperatorIndex);
-                    if (assignment == null) assignment = legacyAssignments.get(currentSeq);
+                    List<Assignment> pieces = lexicalAssignments.get(currentOperatorIndex);
+                    Assignment assignment = pieces == null ? legacyAssignments.get(currentSeq) : pieces.get(0);
 
                     if (assignment != null) {
                         if (inArtifact) {
@@ -730,50 +824,22 @@ public class NativeContentStreamRewriter {
                             inArtifact = false;
                         }
 
-                        TagTreeNode label=listLabels.get(assignment.tagNodeId);
-                        if(label!=null && assignment.startsTagGroup && ("Tj".equals(opName) || "TJ".equals(opName)) && pendingOperands.size()==1) {
-                            TextSplit split=splitTextPrefix(currentFont,pendingOperands.get(0),label.actualText);
-                            if(split!=null && split.remainder==null) {
-                                // A marker-only operator has no body glyphs. Transfer its
-                                // existing MCID rather than emit an empty body reference.
-                                assignment.tagNodeId=label.id;assignment.tagType="Lbl";
-                                pendingOperands.set(0,split.prefix);
-                            } else if(split!=null) {
-                                Assignment marker=new Assignment();marker.tagNodeId=label.id;marker.tagType="Lbl";marker.mcid=nextMcid++;
-                                marker.emitted=true;
-                                marker.operators.add(assignment.operators.get(0));plan.assignments.add(marker);
-                                COSDictionary props=new COSDictionary();props.setInt(COSName.MCID,marker.mcid);
-                                newTokens.add(COSName.getPDFName("Lbl"));newTokens.add(props);newTokens.add(Operator.getOperator("BDC"));
-                                newTokens.add(split.prefix);newTokens.add(op);newTokens.add(Operator.getOperator("EMC"));
-                                pendingOperands.set(0,split.remainder);result.taggedWrapped++;
+                        if (assignment.operators.get(0).partial) {
+                            NativeContentStreamParser.TextMapping mapping = verifiedMapping(currentFont, pendingOperands, opName, pieces);
+                            // Quote operators' spacing/line advance applies once,
+                            // before the first fragment, never once per owner.
+                            if ("\"".equals(opName)) {
+                                newTokens.add(pendingOperands.get(0)); newTokens.add(Operator.getOperator("Tw"));
+                                newTokens.add(pendingOperands.get(1)); newTokens.add(Operator.getOperator("Tc"));
                             }
-                        }
-
-                        {
-                            COSDictionary props = new COSDictionary();
-                            props.setInt(COSName.MCID, assignment.mcid);
-                            newTokens.add(COSName.getPDFName(assignment.tagType));
-                            newTokens.add(props);
-                            newTokens.add(Operator.getOperator("BDC"));
-                            openMcidStack.push(assignment.mcid);
-                        }
-
-                        newTokens.addAll(pendingOperands);
-                        newTokens.add(op);
-
-                        {
-                            // Close our BDC only if we actually opened one
-                            // for this mcid.
-                            if (openMcidStack.contains(assignment.mcid)) {
-                                while (!openMcidStack.isEmpty()) {
-                                    int top = openMcidStack.pop();
-                                    newTokens.add(Operator.getOperator("EMC"));
-                                    if (top == assignment.mcid) break;
-                                }
-                                result.taggedWrapped++;
-                                assignment.emitted = true;
+                            if ("'".equals(opName) || "\"".equals(opName)) newTokens.add(Operator.getOperator("T*"));
+                            Operator show = Operator.getOperator("TJ".equals(opName) ? "TJ" : "Tj");
+                            for (Assignment piece : pieces) {
+                                OpRef ref = piece.operators.get(0);
+                                List<COSBase> sliced = new ArrayList<>(List.of(mapping.slice(ref.glyphStart, ref.glyphEnd)));
+                                nextMcid = emitOwnedText(newTokens, piece, sliced, show, currentFont, listLabels, plan, result, nextMcid);
                             }
-                        }
+                        } else nextMcid = emitOwnedText(newTokens, assignment, pendingOperands, op, currentFont, listLabels, plan, result, nextMcid);
                     } else {
                         // Unmatched text remains explicitly unqualified as an
                         // artifact; it must never sit inside a semantic wrapper.

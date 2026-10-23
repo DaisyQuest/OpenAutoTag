@@ -9,6 +9,11 @@ import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -51,6 +56,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     private int sequenceIndex = 0;
     private int currentPage = 0;
     private float currentPageHeight = 792f;
+    private int currentPageRotation;
 
     /** Buffer for the currently-dispatching text operator. */
     private StringBuilder currentOpText = new StringBuilder();
@@ -86,6 +92,88 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         boolean insideMarkedContent;
         /** True once we've captured a position from a non-whitespace glyph. */
         boolean positionLocked;
+        TextMapping mapping;
+        final List<float[]> glyphPositions = new ArrayList<>();
+    }
+
+    /** A source font code is indivisible even when ToUnicode expands it. */
+    public static final class SourceGlyph {
+        final int part, byteStart, byteEnd, code, textStart, textEnd;
+        final String unicode;
+        SourceGlyph(int part, int from, int to, int code, int start, String unicode) {
+            this.part=part; byteStart=from; byteEnd=to; this.code=code; textStart=start;
+            textEnd=start+unicode.length(); this.unicode=unicode;
+        }
+    }
+
+    /** Immutable mapping and slicing of the original operand; never re-encode text. */
+    public static final class TextMapping {
+        static final int MAX_GLYPHS = 32768;
+        final List<COSBase> parts;
+        final List<SourceGlyph> glyphs;
+        final String text, sha256;
+        final boolean array;
+        TextMapping(List<COSBase> parts, List<SourceGlyph> glyphs, String text, String hash, boolean array) {
+            this.parts=List.copyOf(parts); this.glyphs=List.copyOf(glyphs); this.text=text; sha256=hash; this.array=array;
+        }
+        /** Half-open glyph interval; adjustments after a boundary go to the next interval. */
+        COSBase slice(int first, int end) {
+            if (first < 0 || end <= first || end > glyphs.size()) throw new IllegalArgumentException("Invalid glyph interval");
+            SourceGlyph left=first==0?null:glyphs.get(first-1), right=end==glyphs.size()?null:glyphs.get(end-1);
+            int startPart=left==null?0:left.part, endPart=right==null?parts.size():right.part;
+            COSArray result=new COSArray();
+            for(int p=startPart;p<parts.size() && p<=endPart;p++) {
+                COSBase part=parts.get(p);
+                if(part instanceof COSString) {
+                    byte[] bytes=((COSString)part).getBytes();
+                    int from=left!=null && p==startPart?left.byteEnd:0;
+                    int to=right!=null && p==endPart?right.byteEnd:bytes.length;
+                    if(to>from || bytes.length==0 && (left==null || p>startPart))
+                        result.add(new COSString(java.util.Arrays.copyOfRange(bytes,from,to)));
+                } else if (p<endPart) result.add(part);
+            }
+            return array?result:result.getObject(0);
+        }
+    }
+
+    public static TextMapping mapOperand(PDFont font, COSBase operand) {
+        if(font==null) return null;
+        List<COSBase> parts=new ArrayList<>();
+        if(operand instanceof COSString) parts.add(operand);
+        else if(operand instanceof COSArray) {
+            COSArray a=(COSArray)operand; if(a.size()>4096)return null;
+            for(int i=0;i<a.size();i++)parts.add(a.getObject(i));
+        } else return null;
+        long bytesTotal=0;
+        for(COSBase part:parts) {
+            if(part instanceof COSString)bytesTotal+=((COSString)part).getBytes().length;
+            else if(!(part instanceof COSNumber) || !Float.isFinite(((COSNumber)part).floatValue()))return null;
+        }
+        if(bytesTotal>1048576)return null;
+        List<SourceGlyph> glyphs=new ArrayList<>(); StringBuilder text=new StringBuilder();
+        try {
+            for(int p=0;p<parts.size();p++) {
+                if(!(parts.get(p) instanceof COSString))continue;
+                byte[] bytes=((COSString)parts.get(p)).getBytes();
+                java.io.ByteArrayInputStream in=new java.io.ByteArrayInputStream(bytes);
+                while(in.available()>0) {
+                    int before=in.available(),code=font.readCode(in);
+                    if(in.available()>=before || glyphs.size()>=TextMapping.MAX_GLYPHS)return null;
+                    String unicode=font.toUnicode(code);
+                    if(unicode==null || unicode.isEmpty() || unicode.indexOf('\ufffd')>=0)return null;
+                    for(int u=0;u<unicode.length();u++) {
+                        char c=unicode.charAt(u);
+                        if(Character.isHighSurrogate(c)) { if(++u>=unicode.length() || !Character.isLowSurrogate(unicode.charAt(u)))return null; }
+                        else if(Character.isLowSurrogate(c))return null;
+                    }
+                    glyphs.add(new SourceGlyph(p,bytes.length-before,bytes.length-in.available(),code,text.length(),unicode));
+                    text.append(unicode); if(text.length()>262144)return null;
+                }
+            }
+            var bytes=new java.io.ByteArrayOutputStream(); new ContentStreamWriter(bytes).writeToken(operand);
+            String hash=java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes.toByteArray()));
+            return new TextMapping(parts,glyphs,text.toString(),hash,operand instanceof COSArray);
+        } catch(IOException | java.security.NoSuchAlgorithmException ex) { return null; }
     }
 
     public NativeContentStreamParser() throws IOException {
@@ -165,6 +253,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             PDTextState ts = getGraphicsState().getTextState();
             rec.fontName = ts.getFont() != null ? ts.getFont().getName() : "";
             rec.fontSize = ts.getFontSize();
+            rec.mapping = operands.isEmpty() || ts.getFont() == null || ts.getFont().isVertical()
+                ? null : mapOperand(ts.getFont(), operands.get(operands.size()-1));
 
             // Position is captured from the FIRST glyph fired during the
             // super-dispatch below (via processTextPosition). TextPosition
@@ -183,6 +273,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
             super.processOperator(operator, operands);
 
             rec.text = currentOpText.toString();
+            if(rec.mapping!=null && (rec.glyphPositions.size()!=rec.mapping.glyphs.size() || !rec.mapping.text.equals(rec.text)))rec.mapping=null;
             rec.glyphs = rec.text.length();
             // If no glyphs fired (possible for empty string operators), fall
             // back to the text matrix so we still emit usable coordinates.
@@ -215,6 +306,26 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
     protected void processTextPosition(TextPosition text) {
         if (currentRecord != null) {
             String unicode = text.getUnicode();
+            if(currentRecord.mapping!=null) {
+                int i=currentRecord.glyphPositions.size(); int[] codes=text.getCharacterCodes();
+                if(i>=currentRecord.mapping.glyphs.size() || codes.length!=1 || codes[0]!=currentRecord.mapping.glyphs.get(i).code
+                        || !currentRecord.mapping.glyphs.get(i).unicode.equals(unicode)) currentRecord.mapping=null;
+                else {
+                    // TextPosition's direction-adjusted width is a projection
+                    // onto a cardinal axis. Only publish partition geometry
+                    // when that axis agrees with the actual baseline vector.
+                    // Skewed/mirrored/vertical writing keeps whole-op matching.
+                    var matrix = text.getTextMatrix();
+                    double a = matrix.getScaleX(), b = matrix.getShearY(), length = Math.hypot(a,b);
+                    double direction = Math.toRadians(text.getDir());
+                    double angle = Math.toRadians(currentPageRotation-text.getDir());
+                    float half = text.getWidthDirAdj()/2;
+                    float x = text.getX()+(float)Math.cos(angle)*half, y = text.getY()+(float)Math.sin(angle)*half;
+                    if (!Double.isFinite(length) || length == 0 || Math.abs(a/length-Math.cos(direction))>0.00001
+                            || Math.abs(b/length-Math.sin(direction))>0.00001 || !Float.isFinite(x) || !Float.isFinite(y)) currentRecord.mapping=null;
+                    else currentRecord.glyphPositions.add(new float[]{x,y});
+                }
+            }
             if (unicode != null) {
                 currentOpText.append(unicode);
             }
@@ -256,6 +367,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         formInvocations = 0;
         currentPage = pageIndex + 1;
         PDPage page = doc.getPage(pageIndex);
+        currentPageRotation = page.getRotation();
         PDRectangle cropBox = page.getCropBox();
         currentPageHeight = cropBox != null ? cropBox.getHeight() : 792f;
         setStartPage(pageIndex + 1);
@@ -365,6 +477,19 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
                     json.append(",\"streamOrigin\":\"").append(escapeStr(r.streamOrigin)).append("\"");
                     json.append(",\"opIndexInStream\":").append(r.opIndexInStream);
                     json.append(",\"insideMarkedContent\":").append(r.insideMarkedContent);
+                    if(r.mapping!=null && !r.mapping.glyphs.isEmpty()) {
+                        json.append(",\"glyphMap\":{\"sha256\":").append(escapeJson(r.mapping.sha256)).append(",\"glyphs\":[");
+                        for(int g=0;g<r.mapping.glyphs.size();g++) {
+                            SourceGlyph glyph=r.mapping.glyphs.get(g); float[] pos=r.glyphPositions.get(g);
+                            if(g>0)json.append(',');
+                            // Compact fixed-width rows: part, byteStart, byteEnd,
+                            // code, UTF-16 start/end, display-center x/y.
+                            json.append('[').append(glyph.part).append(',').append(glyph.byteStart).append(',').append(glyph.byteEnd).append(',')
+                                .append(glyph.code).append(',').append(glyph.textStart).append(',').append(glyph.textEnd).append(',')
+                                .append(Float.toString(pos[0])).append(',').append(Float.toString(pos[1])).append(']');
+                        }
+                        json.append("]}");
+                    }
                     json.append("}");
                 }
                 json.append("]}");
