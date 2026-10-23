@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import inspectionSchema from "../../contracts/pdf-preservation-inspection.schema.json" with { type: "json" };
@@ -6,6 +7,7 @@ import reportSchema from "../../contracts/quality-report.schema.json" with { typ
 import auditSchema from "../../contracts/repair-audit.schema.json" with { type: "json" };
 import fontRepairSchema from "../../contracts/font-repair-report.schema.json" with { type: "json" };
 import outlineReportSchema from "../../contracts/reviewed-outline-report.schema.json" with { type: "json" };
+import fieldNameReportSchema from "../../contracts/reviewed-field-names-report.schema.json" with { type: "json" };
 import { buildReviewPlan } from "./review-plan.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -14,11 +16,12 @@ const validReport = ajv.compile(reportSchema);
 const validFontRepair = ajv.addSchema(auditSchema).compile(fontRepairSchema);
 const validStructureRepair = ajv.getSchema(auditSchema.$id);
 const validOutlineReport = ajv.compile(outlineReportSchema);
+const validFieldNameReport = ajv.compile(fieldNameReportSchema);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const safeHash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value) ? value : null;
 
 /** This bounded gate detects regressions; it never certifies overall accessibility. */
-export function evaluatePreservation({ source, candidate, validation, semantic, fontRepair, structureRepair, outlineReport, identityPreserved = false, inspectionError } = {}) {
+export function evaluatePreservation({ source, candidate, validation, semantic, semanticHash, fontRepair, structureRepair, outlineReport, fieldNameReport, identityPreserved = false, inspectionError } = {}) {
   const report = { schemaVersion: "1.0.0", policy: "preservation-v1", disposition: "review_required",
     sourceHash: safeHash(source?.sourceHash), candidateHash: safeHash(candidate?.sourceHash),
     checks: [], findings: [], limitations: [
@@ -28,6 +31,10 @@ export function evaluatePreservation({ source, candidate, validation, semantic, 
   const finding = (code, description, location) => report.findings.push({ code, description, ...(location ? { location } : {}) });
   const check = (id, status) => report.checks.push({ id, status });
   let error = false, regression = false;
+  const qualifiedFieldNames=fieldNameReport&&validFieldNameReport(fieldNameReport)&&fieldNameReport.sourceHash===report.sourceHash&&fieldNameReport.candidateHash===report.candidateHash&&fieldNameReport.intentHash===semanticHash&&
+    new Set(fieldNameReport.changedFields.map(f=>f.fieldRef)).size===fieldNameReport.changedFields.length&&fieldNameReport.changedFields.every(f=>source?.fields?.[f.fieldRef]&&candidate?.fields?.[f.fieldRef]&&f.widgetRefs.every(ref=>source?.widgets?.[ref]?.accessibleName===''&&candidate?.widgets?.[ref]?.accessibleName===f.label));
+  const namedFields=new Set(qualifiedFieldNames?fieldNameReport.changedFields.map(f=>f.fieldRef):[]);
+  if(fieldNameReport){check("qualifiedFieldNameChanges",qualifiedFieldNames?"pass":"fail");if(!qualifiedFieldNames){regression=true;finding("FIELD_NAMES_NOT_VERIFIED","Missing-name replay proof is stale, incomplete or does not match the saved field names and semantic intent.");}}
   const qualifiedOutline=outlineReport&&validOutlineReport(outlineReport)&&outlineReport.sourceHash===report.sourceHash&&outlineReport.candidateHash===report.candidateHash;
   if(outlineReport){check("qualifiedOutlineChanges",qualifiedOutline?"pass":"fail");if(!qualifiedOutline){regression=true;finding("OUTLINE_NOT_VERIFIED","Outline replay proof is malformed or does not match these exact PDFs.");}}
   const qualifiedFonts = fontRepair && validFontRepair(fontRepair) && fontRepair.verification.status === "pass" &&
@@ -79,13 +86,13 @@ export function evaluatePreservation({ source, candidate, validation, semantic, 
       });
       compare("fields", () => {
         for (const id of new Set([...Object.keys(source.fields), ...Object.keys(candidate.fields)])) {
-          if (!source.fields[id] || !candidate.fields[id] || (!qualifiedFonts && source.fields[id] !== candidate.fields[id])) finding("FIELD_CHANGED", "A field, its properties or form resources changed or disappeared.", id);
+          if (!source.fields[id] || !candidate.fields[id] || (!qualifiedFonts && !namedFields.has(id) && source.fields[id] !== candidate.fields[id])) finding("FIELD_CHANGED", "A field, its properties or form resources changed or disappeared.", id);
         }
       });
       compare("widgets", () => {
         for (const id of new Set([...Object.keys(source.widgets), ...Object.keys(candidate.widgets)])) {
           const a = source.widgets[id], b = candidate.widgets[id];
-          if (!a || !b || (!qualifiedFonts && a.digest !== b.digest) || a.page !== b.page) {
+          if (!a || !b || (!qualifiedFonts && !namedFields.has(id) && a.digest !== b.digest) || a.page !== b.page) {
             finding("WIDGET_CHANGED", "A widget, its appearance or its page placement changed or disappeared.", id); continue;
           }
           // A list-body repair may insert LBody, but cannot move a widget to another item or lose its owner.
@@ -158,8 +165,10 @@ async function main() {
   const read = async (key) => args.has(key) ? JSON.parse(await readFile(args.get(key), "utf8")) : undefined;
   let report;
   try {
+    const semanticBytes=args.has("--semantic")?await readFile(args.get("--semantic")):null;
     report = evaluatePreservation({ source: await read("--source"), candidate: await read("--candidate"), validation: await read("--validation"),
-      semantic: await read("--semantic"),
+      semantic: semanticBytes?JSON.parse(semanticBytes):undefined, semanticHash:semanticBytes?createHash('sha256').update(semanticBytes).digest('hex'):undefined,
+      fieldNameReport:await read("--field-name-proof"),
       fontRepair: await read("--font-repair"), structureRepair: await read("--structure-repair"), outlineReport: await read("--outline-proof"),
       identityPreserved: args.get("--identity-preserved") === "true", inspectionError: args.get("--inspection-error") });
   } catch (error) { report = evaluatePreservation({ inspectionError: error.message }); }

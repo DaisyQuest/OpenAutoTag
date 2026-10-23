@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.local/contracts/reviewed-field-names-report.schema.json",
+  "title":"Saved missing-name repair verification",
+  "type":"object","additionalProperties":false,
+  "required":["schemaVersion","sourceHash","candidateHash","intentHash","reviewHash","changedFields","verification"],
+  "properties":{
+    "schemaVersion":{"const":"1.0.0"},"sourceHash":{"$ref":"#/$defs/hash"},"candidateHash":{"$ref":"#/$defs/hash"},"intentHash":{"$ref":"#/$defs/hash"},"reviewHash":{"$ref":"#/$defs/hash"},
+    "changedFields":{"type":"array","minItems":1,"maxItems":1024,"items":{"type":"object","additionalProperties":false,"required":["fieldRef","fieldName","widgetRefs","label"],"properties":{
+      "fieldRef":{"$ref":"#/$defs/ref"},"fieldName":{"type":"string","minLength":1},"label":{"type":"string","minLength":1,"maxLength":4096},
+      "widgetRefs":{"type":"array","minItems":1,"maxItems":10000,"uniqueItems":true,"items":{"$ref":"#/$defs/ref"}}
+    }}},
+    "verification":{"type":"object","additionalProperties":false,"required":["status","scope","reason"],"properties":{"status":{"const":"pass"},"scope":{"const":"catalog-and-info"},"reason":{"type":"string"}}}
+  },
+  "$defs":{"hash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"ref":{"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"}}
+}

@@ -95,11 +95,12 @@ public final class PreservationInspector {
                     widget.put("nativeDigest",hash(canonical(dict,Set.of("Parent","StructParent","AP"),Collections.newSetFromMap(new IdentityHashMap<>()),new int[]{0},0,pagesByDict)));
                     widget.put("appearanceHash",widgetAppearance(dict.getDictionaryObject(COSName.AP)));
                     List<String> names=new ArrayList<>(),states=new ArrayList<>();Set<COSDictionary> lineage=Collections.newSetFromMap(new IdentityHashMap<>());COSDictionary field=dict;
-                    String accessible="";
+                    String accessible="";boolean nameScopeEnded=false;
                     while(field!=null) {
                         if(lineage.size()>=128||!lineage.add(field))throw new IOException("Cyclic or excessive widget field ancestry");
                         if(field.getDictionaryObject(COSName.T) instanceof COSString name&&!name.getString().isEmpty())names.add(name.getString());
-                        if(accessible.isEmpty()&&field.getDictionaryObject(COSName.TU) instanceof COSString tooltip&&!tooltip.getString().isBlank())accessible=tooltip.getString();
+                        if(!nameScopeEnded&&accessible.isEmpty()&&field.getDictionaryObject(COSName.TU) instanceof COSString tooltip&&!tooltip.getString().isBlank())accessible=tooltip.getString();
+                        if(field.containsKey(COSName.T)||field.containsKey(COSName.FT))nameScopeEnded=true;
                         states.add(requiredRef(field)+":"+fieldRefs(field.getItem(COSName.KIDS))+":"+canonical(field,Set.of("Parent","Kids","P","StructParent","AP","DR"),Collections.newSetFromMap(new IdentityHashMap<>()),new int[]{0},0,pagesByDict));
                         COSBase ancestor=field.getDictionaryObject(COSName.PARENT);if(ancestor!=null&&!(ancestor instanceof COSDictionary))throw new IOException("Invalid widget field parent");field=(COSDictionary)ancestor;
                     }

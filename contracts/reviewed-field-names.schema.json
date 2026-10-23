@@ -1,0 +1,19 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.local/contracts/reviewed-field-names.schema.json",
+  "title":"Accepted missing field names bound to source and semantic intent",
+  "type":"object","additionalProperties":false,
+  "required":["schemaVersion","sourceHash","intentHash","decision","reviewer","evidence","fields"],
+  "properties":{
+    "schemaVersion":{"const":"1.0.0"},"sourceHash":{"$ref":"#/$defs/hash"},"intentHash":{"$ref":"#/$defs/hash"},
+    "decision":{"const":"accepted"},"reviewer":{"type":"string","minLength":1,"maxLength":256},"evidence":{"type":"string","minLength":1,"maxLength":4096},
+    "fields":{"type":"array","minItems":1,"maxItems":1024,"items":{"type":"object","additionalProperties":false,
+      "required":["fieldRef","fieldName","widgetRefs","label","labelNodeIds"],"properties":{
+        "fieldRef":{"$ref":"#/$defs/ref"},"fieldName":{"type":"string","minLength":1,"maxLength":4096},
+        "widgetRefs":{"type":"array","minItems":1,"maxItems":10000,"uniqueItems":true,"items":{"$ref":"#/$defs/ref"}},
+        "label":{"type":"string","minLength":1,"maxLength":4096},
+        "labelNodeIds":{"type":"array","maxItems":1024,"uniqueItems":true,"items":{"type":"string","minLength":1,"maxLength":256}}
+      }}}
+  },
+  "$defs":{"hash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"ref":{"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"}}
+}

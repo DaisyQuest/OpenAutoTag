@@ -17,6 +17,9 @@ public class NativeWidgetFixture {
   COSDictionary normal=new COSDictionary();normal.setItem(name("Off"),appearance(doc,font,"",false));normal.setItem(name(value),appearance(doc,font,value,true));COSDictionary ap=new COSDictionary();ap.setItem(COSName.N,normal);w.getCOSObject().setItem(COSName.AP,ap);w.setAppearanceState("Off");
  }
  public static void main(String[]a)throws Exception{
+  if(a[0].equals("encrypt")){
+   try(PDDocument d=Loader.loadPDF(new File(a[1]))){var policy=new org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy("qa-owner","",new org.apache.pdfbox.pdmodel.encryption.AccessPermission());d.protect(policy);d.save(a[2]);}return;
+  }
   if(a[0].equals("edit")){
    try(PDDocument d=Loader.loadPDF(new File(a[1]))){var form=d.getDocumentCatalog().getAcroForm();((PDTextField)form.getField("name")).setValue("José café 987");((PDCheckBox)form.getField("consent")).check();((PDRadioButton)form.getField("contact")).setValue("Phone");((PDComboBox)form.getField("state")).setValue("NY");d.save(a[2]);}
    try(PDDocument d=Loader.loadPDF(new File(a[2]))){var f=d.getDocumentCatalog().getAcroForm();if(!"José café 987".equals(f.getField("name").getValueAsString())||!((PDCheckBox)f.getField("consent")).isChecked()||!"Phone".equals(f.getField("contact").getValueAsString())||!List.of("NY").equals(((PDComboBox)f.getField("state")).getValue()))throw new IOException("Widget interaction did not survive");}

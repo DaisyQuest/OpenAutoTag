@@ -63,6 +63,17 @@ test("only matching saved outline replay proof permits outline changes",()=>{
   for(const patch of [{sourceHash:other},{candidateHash:other},{reviewHash:''},{addedBookmarks:0},{verification:{status:'fail'}}])assert.equal(evaluate({source,candidate,outlineReport:{...outlineReport,...patch}}).disposition,'rejected');
   candidate.navigation.pageLabels.labels[0]='Wrong';assert.ok(codes(evaluate({source,candidate,outlineReport})).includes('PAGE_LABELS_CHANGED'));
 });
+test('field-name changes require matching replay, intent and saved accessible names',()=>{
+  const source=snapshot(),candidate=snapshot();source.fields={'20 0 R':hash};candidate.fields={'20 0 R':other};
+  source.widgets={'21 0 R':{...source.widgets.widget,accessibleName:''}};candidate.widgets={'21 0 R':{...candidate.widgets.widget,accessibleName:'Full name'}};
+  const fieldNameReport={schemaVersion:'1.0.0',sourceHash:hash,candidateHash:hash,intentHash:hash,reviewHash:hash,changedFields:[{fieldRef:'20 0 R',fieldName:'name',widgetRefs:['21 0 R'],label:'Full name'}],verification:{status:'pass',scope:'catalog-and-info',reason:'Unit fixture'}};
+  assert.equal(evaluate({source,candidate,semanticHash:hash,fieldNameReport}).disposition,'review_required');
+  for(const patch of [{sourceHash:other},{candidateHash:other},{intentHash:other},{reviewHash:''},{verification:{status:'fail'}}])assert.equal(evaluate({source,candidate,semanticHash:hash,fieldNameReport:{...fieldNameReport,...patch}}).disposition,'rejected');
+  assert.equal(evaluate({source,candidate,fieldNameReport}).disposition,'rejected');
+  const changed=structuredClone(candidate);changed.widgets['21 0 R'].digest=other;assert.ok(codes(evaluate({source,candidate:changed,semanticHash:hash,fieldNameReport})).includes('WIDGET_CHANGED'));
+  changed.widgets['21 0 R'].accessibleName='Wrong';assert.ok(codes(evaluate({source,candidate:changed,semanticHash:hash,fieldNameReport})).includes('FIELD_NAMES_NOT_VERIFIED'));
+  source.widgets['21 0 R'].accessibleName='Already authored';assert.equal(evaluate({source,candidate,semanticHash:hash,fieldNameReport}).disposition,'rejected');
+});
 
 test("repairs may consolidate headings and place the same form in its existing list body", () => {
   const source = snapshot(), candidate = snapshot();

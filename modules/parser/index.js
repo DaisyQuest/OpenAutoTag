@@ -726,7 +726,7 @@ export async function parsePdf(filePath, options = {}) {
     const textBlocks = reindexBlocks(pageNumber, groupTextItemsToBlocks(pageNumber, height, items.map(item => displayTextItem(item, viewport))));
     const annotations = await page.getAnnotations();
     const hasPushButtons = annotations.some(annot => annot.subtype === "Widget" && annot.pushButton);
-    if (hasPushButtons && !captionEvidence) captionEvidence = await authoredWidgetCaptions(sourceBytes);
+    if (annotations.some(annot => annot.subtype === "Widget") && !captionEvidence) captionEvidence = await authoredWidgetCaptions(sourceBytes);
     const formFields = annotations.filter((annot) => annot.subtype === "Widget" &&
       Array.isArray(annot.rect) && annot.rect.length === 4 && annot.rect.every(Number.isFinite))
       .map((annot) => ({
@@ -740,6 +740,7 @@ export async function parsePdf(filePath, options = {}) {
         readOnly: Boolean(annot.readOnly),
         required: Boolean(annot.required),
         tooltip: annot.alternativeText || "",
+        ...captionEvidence?.fields.get(annot.id),
         ...(typeof annot.exportValue === "string" ? { exportValue: annot.exportValue } : {}),
         ...(typeof annot.buttonValue === "string" ? { buttonValue: annot.buttonValue } : {}),
         pushButton: Boolean(annot.pushButton),

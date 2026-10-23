@@ -438,6 +438,9 @@
     "formRelationships": { "type": "array", "items": { "type": "object", "required": ["id", "widgets", "labels"], "properties": {
       "id": { "type": "string", "minLength": 1 }, "fieldType": { "type": "string" },
       "widgets": { "type": "array", "items": { "type": "object", "required": ["id", "pageNumber", "bbox"], "properties": {
+        "fieldRef": { "type": "string", "pattern": "^[1-9][0-9]* [0-9]+ R$" },
+        "tooltipOwnerRef": { "type": "string", "pattern": "^[1-9][0-9]* [0-9]+ R$" },
+        "tooltipSource": { "enum": ["widget-TU", "field-TU"] },
         "id": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
         "appearanceText": { "type": "string", "minLength": 1, "maxLength": 160 },
         "appearanceTextSource": { "const": "normal-widget-appearance" },

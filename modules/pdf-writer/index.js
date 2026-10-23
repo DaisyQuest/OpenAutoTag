@@ -171,6 +171,7 @@ function collectNativeJavaSources() {
   sources.push(path.join(nativeJavaDir, "OcrTextLayer.java"));
   sources.push(path.join(nativeJavaDir, "NativeLinkGeometry.java"));
   sources.push(path.join(nativeJavaDir, "ReviewedOutlineCli.java"));
+  sources.push(path.join(nativeJavaDir, "ReviewedFieldNamesCli.java"));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);
   }

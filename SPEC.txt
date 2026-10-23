@@ -1,6 +1,15 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Reviewed accessible field names (A47, 2026-10-23):
+Opt-in accepted reviews bind exact source and semantic bytes, field/widget
+identities and complete visible labels. Only missing/blank terminal-field TU
+entries change. Authored names, values, actions and appearances are preserved.
+Fresh Catalog/Info replay verifies saved output; the preservation wrapper
+repeats it before allowing named-field differences. The parser reads terminal
+field names without inheriting unrelated ancestor names. Successful output
+still requires human review. See docs/accessibility-50-batch30-20261023.md.
+
 Native widget ownership (A46, 2026-10-23):
 Native mode binds exact source references to distinct Form/OBJR owners and
 reciprocal ParentTree entries. Label anchors guide placement; unresolved

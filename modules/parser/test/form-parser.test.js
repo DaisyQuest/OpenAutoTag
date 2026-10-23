@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { PDFDocument, PDFName, PDFString, PDFHexString, PDFRef, StandardFonts } from "pdf-lib";
 import { parsePdf } from "../index.js";
-import { authoredWidgetCaptions } from "../authored-widget-captions.js";
+import { authoredWidgetCaptions, widgetFieldMetadata } from "../authored-widget-captions.js";
 
 test("parser exposes real font names, existing title and widget label relationships", async (t) => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "form-parser-"));
@@ -91,4 +91,24 @@ test("caption metadata reader handles indirect strings, generations and invalid 
   assert.deepEqual([...result.captions], [[`${literal.objectNumber}R`, "Reset form"], ["90R3", "Réinitialiser"]]);
   const invalid = await authoredWidgetCaptions(new Uint8Array(Buffer.from("Not a PDF")));
   assert.equal(invalid.captions.size, 0); assert.match(invalid.error, /captions unavailable/);
+});
+test("separate repeated widgets read terminal field names without inheriting unrelated ancestor names", async t => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'field-names-'));t.after(() => rm(dir,{recursive:true,force:true}));
+  const doc = await PDFDocument.create(), form = doc.getForm(), field = form.createTextField('person.name');
+  field.acroField.dict.set(PDFName.of('TU'), PDFHexString.fromText('Full name'));
+  for(let i=0;i<2;i++)field.addToPage(doc.addPage(),{x:100,y:600,width:200,height:25});
+  const file=path.join(dir,'source.pdf'),bytes=await doc.save();await writeFile(file,bytes);
+  const parsed=await parsePdf(file,{ocr:{mode:'off'}}),widgets=parsed.pages.flatMap(p=>p.formFields);
+  assert.equal(widgets.length,2);assert.ok(widgets.every(w=>w.tooltip==='Full name'&&w.tooltipSource==='field-TU'&&w.fieldRef===field.acroField.ref.toString()));
+  field.acroField.dict.delete(PDFName.of('TU'));field.acroField.dict.lookup(PDFName.of('Parent')).set(PDFName.of('TU'),PDFString.of('Person group'));
+  const metadata=await authoredWidgetCaptions(await doc.save());assert.ok([...metadata.fields.values()].every(w=>w.tooltip===undefined));
+  assert.deepEqual(await readFile(file),Buffer.from(bytes));
+});
+test('field metadata rejects cycles, malformed names and ambiguous ancestry',async()=>{
+  const doc=await PDFDocument.create(),ctx=doc.context,key=PDFName.of;
+  const parent=ctx.obj({T:PDFString.of('field'),TU:PDFHexString.fromText('Étiquette')}),widget=ctx.obj({Subtype:'Widget',Parent:parent}),refs=new Map([[parent,'2 0 R'],[widget,'3 0 R']]);
+  assert.equal(widgetFieldMetadata(widget,refs).tooltip,'Étiquette');
+  widget.set(key('TU'),PDFString.of('Local name'));assert.equal(widgetFieldMetadata(widget,refs).tooltipSource,'widget-TU');
+  for(const value of [key('Invalid'),PDFString.of('Bad\u0000name'),PDFString.of('x'.repeat(4097))]){widget.set(key('TU'),value);assert.throws(()=>widgetFieldMetadata(widget,refs),/Invalid field tooltip/);}
+  widget.delete(key('TU'));parent.delete(key('T'));parent.delete(key('TU'));parent.set(key('Parent'),widget);assert.throws(()=>widgetFieldMetadata(widget,refs),/ancestry/);
 });

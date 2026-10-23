@@ -38,7 +38,7 @@ async function retainsPrefix(sourcePath, candidatePath) {
   } finally { await a.close(); await b?.close(); }
 }
 
-export async function checkPdfPreservation({ sourcePdf, candidatePdf, validationReport, semanticPath, outputPath, fontRepairs = false, fontDonorsPath, repairUnicode = false, structureRepairs = false, structureDecisions, outlineReviewPath }) {
+export async function checkPdfPreservation({ sourcePdf, candidatePdf, validationReport, semanticPath, outputPath, fontRepairs = false, fontDonorsPath, repairUnicode = false, structureRepairs = false, structureDecisions, outlineReviewPath, fieldNameReviewPath }) {
   if (typeof repairUnicode !== "boolean") throw new Error("repairUnicode must be a boolean");
   if (!sourcePdf || !candidatePdf || !validationReport || !outputPath) throw new Error("Required: --source-pdf --candidate-pdf --validation-report --output");
   const dir = path.dirname(path.resolve(outputPath));
@@ -47,6 +47,8 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
   const structureProofPath = path.join(dir, `${base}.structure.json`);
   const fontProofPath = path.join(dir, `${base}.fonts.json`);
   const outlineProofPath = path.join(dir, `${base}.outline.json`);
+  const fieldNameProofPath = path.join(dir, `${base}.field-names.json`);
+  if(fieldNameReviewPath&&!semanticPath)throw new Error('Field-name verification requires semantic intent');
   const normalized = (file) => path.resolve(file).toLowerCase();
   if (structureDecisions && !structureRepairs) throw new Error("Structure decisions require structure repair verification");
   if (fontDonorsPath && !fontRepairs) throw new Error("Font donors require font repair verification");
@@ -58,8 +60,8 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
     if (!validateDonors(donors)) throw new Error("Invalid font donor manifest");
     donorInputs.push(fontDonorsPath, ...donors.donors.map(d => path.resolve(path.dirname(path.resolve(fontDonorsPath)), d.programPath)));
   }
-  const inputs = [sourcePdf, candidatePdf, validationReport, ...(semanticPath ? [semanticPath] : []), ...(structureDecisions ? [structureDecisions] : []), ...(outlineReviewPath ? [outlineReviewPath] : []), ...donorInputs].map(normalized);
-  if ([outputPath, sourcePath, candidatePath, ...(fontRepairs ? [fontProofPath] : []), ...(structureRepairs ? [structureProofPath] : []), ...(outlineReviewPath ? [outlineProofPath] : [])].some((file) => inputs.includes(normalized(file)))) throw new Error("Quality output must not overwrite an input");
+  const inputs = [sourcePdf, candidatePdf, validationReport, ...(semanticPath ? [semanticPath] : []), ...(structureDecisions ? [structureDecisions] : []), ...(outlineReviewPath ? [outlineReviewPath] : []), ...(fieldNameReviewPath?[fieldNameReviewPath]:[]), ...donorInputs].map(normalized);
+  if ([outputPath, sourcePath, candidatePath, ...(fontRepairs ? [fontProofPath] : []), ...(structureRepairs ? [structureProofPath] : []), ...(outlineReviewPath ? [outlineProofPath] : []), ...(fieldNameReviewPath?[fieldNameProofPath]:[])].some((file) => inputs.includes(normalized(file)))) throw new Error("Quality output must not overwrite an input");
   await mkdir(dir, { recursive: true });
   let identityPreserved = false, inspectionError;
   try {
@@ -69,6 +71,11 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
     if (source.sourceHash !== await hashFile(sourcePdf) || candidate.sourceHash !== await hashFile(candidatePdf)) throw new Error("PDF changed during inspection");
     await writeFile(sourcePath, JSON.stringify(source));
     await writeFile(candidatePath, JSON.stringify(candidate));
+    if(fieldNameReviewPath){
+      const {stdout}=await execFileAsync(process.execPath,[path.join(root,"modules/pdf-writer/reviewed-field-names.js"),"--pdf",path.resolve(sourcePdf),"--verify",path.resolve(candidatePdf),"--review",path.resolve(fieldNameReviewPath),"--semantic",path.resolve(semanticPath)],{cwd:root,windowsHide:true,maxBuffer:8*1024*1024});
+      const proof=JSON.parse(stdout);if(proof.sourceHash!==source.sourceHash||proof.candidateHash!==candidate.sourceHash)throw Error("PDF changed during field-name verification");
+      await writeFile(fieldNameProofPath,JSON.stringify(proof));
+    }
     if(outlineReviewPath){
       const {stdout}=await execFileAsync(process.execPath,[path.join(root,"modules/pdf-writer/reviewed-outline.js"),"--pdf",path.resolve(sourcePdf),"--verify",path.resolve(candidatePdf),"--review",path.resolve(outlineReviewPath)],{cwd:root,windowsHide:true,maxBuffer:8*1024*1024});
       const proof=JSON.parse(stdout);if(proof.sourceHash!==source.sourceHash||proof.candidateHash!==candidate.sourceHash)throw Error("PDF changed during outline verification");
@@ -96,6 +103,7 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
     }
   } catch (error) { inspectionError = String(error.message).slice(0, 2000); }
   const args = [path.join(root, "modules", "validator", "quality-cli.js"), "--validation", path.resolve(validationReport),
+    ...(!inspectionError && fieldNameReviewPath ? ["--field-name-proof",fieldNameProofPath] : []),
     ...(!inspectionError && outlineReviewPath ? ["--outline-proof",outlineProofPath] : []),
     ...(!inspectionError && structureRepairs ? ["--structure-repair", structureProofPath] : []),
     ...(!inspectionError && fontRepairs ? ["--font-repair", fontProofPath] : []),
@@ -111,7 +119,7 @@ async function main() {
   for (let i = 2; i < process.argv.length; i += 2) args.set(process.argv[i], process.argv[i + 1]);
   if (args.has("--repair-unicode") && !["true", "false"].includes(args.get("--repair-unicode"))) throw new Error("--repair-unicode requires true or false");
   const report = await checkPdfPreservation({ sourcePdf: args.get("--source-pdf"), candidatePdf: args.get("--candidate-pdf"),
-    validationReport: args.get("--validation-report"), semanticPath: args.get("--semantic"), outputPath: args.get("--output"), fontRepairs: args.get("--font-repairs") === "true", fontDonorsPath: args.get("--font-donors"), repairUnicode: args.get("--repair-unicode") === "true", structureRepairs: args.get("--structure-repairs") === "true", structureDecisions: args.get("--structure-decisions"), outlineReviewPath:args.get("--outline-review") });
+    validationReport: args.get("--validation-report"), semanticPath: args.get("--semantic"), outputPath: args.get("--output"), fontRepairs: args.get("--font-repairs") === "true", fontDonorsPath: args.get("--font-donors"), repairUnicode: args.get("--repair-unicode") === "true", structureRepairs: args.get("--structure-repairs") === "true", structureDecisions: args.get("--structure-decisions"), outlineReviewPath:args.get("--outline-review"), fieldNameReviewPath:args.get("--field-name-review") });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((error) => {

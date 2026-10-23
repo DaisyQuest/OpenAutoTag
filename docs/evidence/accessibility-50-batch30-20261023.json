@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A47"
+  ],
+  "status": "completed",
+  "baselineCommit": "0898f78dab8bfc70139276e0e61e1ed639316395",
+  "tests": {
+    "baseline": {
+      "path": "tmp/a47-baseline.log",
+      "sha256": "ce0557f5a6f8d09267283304fd9e711c7e54e08bcfc3f6341b767bf10dc14cc7",
+      "tests": 1017,
+      "pass": 1017,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "focused": {
+      "path": "tmp/a47-coverage-final.log",
+      "sha256": "7f456bda70e89027ea50ef3520d2a30afe4aa160b3b91a7cdbe430ccd7a00809",
+      "tests": 61,
+      "pass": 61,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  },
+  "testNote": "The serial baseline and final focused suite overlap. Two CLI/input-boundary tests were added after the baseline loaded the form-name test file; production code did not change between these runs. No repository-wide or Java coverage is claimed.",
+  "helperCoverage": {
+    "lines": 100,
+    "functions": 100,
+    "branches": 93.1,
+    "scope": [
+      "modules/parser/authored-widget-captions.js",
+      "modules/pdf-writer/field-name-intent.js",
+      "modules/pdf-writer/reviewed-field-names.js"
+    ]
+  },
+  "records": [
+    {
+      "id": "fixture",
+      "source": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/source.pdf",
+        "sha256": "d4f1bd2bc665b4134729abe4be1452ad8258b610d0463c9a7c305a8300de7d36"
+      },
+      "candidate": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/named.pdf",
+        "sha256": "8a858e23d9ac77de05788bfcc247aec6f394876d9c0a6bd90a1d8659cb3d43a1"
+      },
+      "semantic": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/semantic.json",
+        "sha256": "fc9afbe3a1a2c57f296b09c75c72e49f7dd4fbe23d79ea00a89a8b8c980f8933"
+      },
+      "review": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/review.json",
+        "sha256": "8116e8fe6e7358a341e672c88b914f247b1303f71f66a7a24f91a9e91a5cded1"
+      },
+      "proof": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/proof.json",
+        "sha256": "ae27edddfc1ca4c4c3e27440e4cd9ed4af71291a0732721aedfdb3420524e2ef"
+      },
+      "changedFields": [
+        {
+          "widgetRefs": [
+            "21 0 R",
+            "28 0 R"
+          ],
+          "fieldName": "name",
+          "label": "Full name",
+          "fieldRef": "7 0 R"
+        }
+      ]
+    },
+    {
+      "id": "multiple-field-types",
+      "source": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/multi-source.pdf",
+        "sha256": "9047368bfcf25632ba473ca41f06ee9d24cc3b2cfcaf02745472e5a5ed73011d"
+      },
+      "candidate": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/multi-named.pdf",
+        "sha256": "4aaa2fa6f0ef7a2c64973a3a8f565d1d4fd1836aa031661c0cc559417aba734e"
+      },
+      "semantic": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/multi-semantic.json",
+        "sha256": "b6bfbc96f602cd5a61ef005f6008510c7080ff73fd4968ea24dec172a980c985"
+      },
+      "review": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/multi-review.json",
+        "sha256": "d57f99fe41450485ba9a880ae11c7ed75527d089f628401078b008b80ff84277"
+      },
+      "proof": {
+        "path": "output/accessibility-50-batch30-20261023/final-fixture/multi-proof.json",
+        "sha256": "e9641c0e89137b1d0704de907c55da31cb1cc2f9b913832fb67ce82e2649fab2"
+      },
+      "changedFields": [
+        {
+          "widgetRefs": [
+            "21 0 R",
+            "28 0 R"
+          ],
+          "fieldName": "name",
+          "label": "Full name",
+          "fieldRef": "7 0 R"
+        },
+        {
+          "widgetRefs": [
+            "22 0 R"
+          ],
+          "fieldName": "consent",
+          "label": "Consent",
+          "fieldRef": "8 0 R"
+        },
+        {
+          "widgetRefs": [
+            "25 0 R"
+          ],
+          "fieldName": "state",
+          "label": "State",
+          "fieldRef": "10 0 R"
+        },
+        {
+          "widgetRefs": [
+            "26 0 R"
+          ],
+          "fieldName": "reset",
+          "label": "Reset form",
+          "fieldRef": "11 0 R"
+        }
+      ]
+    },
+    {
+      "id": "test-form",
+      "source": {
+        "path": "output/accessibility-50-batch30-20261023/test-form/missing-name-source.pdf",
+        "sha256": "004c64e6854b802886075c85e31a43d4d272edbaa3eda1881aad65ea36a373e7"
+      },
+      "candidate": {
+        "path": "output/accessibility-50-batch30-20261023/test-form/named.pdf",
+        "sha256": "0c31910b9d1e49b9bcc17650b77c09915ecd883e789d93923dd7042303c49281"
+      },
+      "semantic": {
+        "path": "output/accessibility-50-batch30-20261023/test-form/semantic.json",
+        "sha256": "4574f47a6e58472689a7494629485b3a644d84d20cb18020b5c33d5dafe6d0bf"
+      },
+      "review": {
+        "path": "output/accessibility-50-batch30-20261023/test-form/review.json",
+        "sha256": "1e06f460d466e616744ea3fdb6c76f4d4ef4e87f25356b417e61f8af6401fc31"
+      },
+      "proof": {
+        "path": "output/accessibility-50-batch30-20261023/test-form/proof.json",
+        "sha256": "6568d8d43a40eba4463c2eab3bcd67ea700ec700b71de2c6e58ea1db9a5796c2"
+      },
+      "changedFields": [
+        {
+          "fieldName": "Print Name",
+          "widgetRefs": [
+            "98 0 R"
+          ],
+          "fieldRef": "98 0 R",
+          "label": "Print Name"
+        }
+      ]
+    }
+  ],
+  "nativeFixture": {
+    "candidate": {
+      "path": "output/accessibility-50-batch30-20261023/final-fixture/candidate.pdf",
+      "sha256": "381b21a7f5b11714876a1a5511bb17bfbe00edfcbd9736b1ce595c905bfd8791"
+    },
+    "saved": {
+      "passed": 375,
+      "failed": 0
+    },
+    "validation": {
+      "path": "output/accessibility-50-batch30-20261023/final-fixture/validation.json",
+      "sha256": "9550a81e390ea92b69091291c633af5d1a39c0ca5b487fa8632c73e19efc0bf4"
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 966,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    },
+    "fields": 6,
+    "widgets": 8,
+    "editing": [
+      "text",
+      "checkbox",
+      "radio",
+      "choice"
+    ]
+  },
+  "testForm": {
+    "control": {
+      "path": "output/accessibility-50-batch29-20261023/test-form/candidate.pdf",
+      "sha256": "104f069c43a9c723622947806e7631ffa3105beb9d05b517b6a10504303b84fc"
+    },
+    "faultInjection": true,
+    "controlUnchanged": true,
+    "sourceValidation": {
+      "path": "output/accessibility-50-batch30-20261023/test-form/source-validation.json",
+      "sha256": "06ecc723c12144675fe96bfc2be05f38cfe39225746914a6c85c1d240d6da898"
+    },
+    "beforeRaw": {
+      "passedRules": 105,
+      "failedRules": 1,
+      "passedChecks": 15111,
+      "failedChecks": 1
+    },
+    "validation": {
+      "path": "output/accessibility-50-batch30-20261023/test-form/validation.json",
+      "sha256": "15a7a57126dfa854c9e060e8789f3d3926ff95083e96a944eaa08fc1c917fd62"
+    },
+    "afterRaw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 15112,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    },
+    "saved": {
+      "passed": 3312,
+      "failed": 0
+    },
+    "quality": {
+      "path": "output/accessibility-50-batch30-20261023/test-form/quality.json",
+      "sha256": "845cff80e8a5a296721cd3da55ab039ec0f4021cec55681f333c5e0614662909"
+    },
+    "disposition": "review_required",
+    "fields": 32,
+    "widgets": 33,
+    "sourceEditProof": {
+      "path": "output/accessibility-50-batch30-20261023/test-form/source-probes/proof.json",
+      "sha256": "2c376c895750d5408df772991b5551c2b25af9524a179264692d99429488e116"
+    },
+    "candidateEditProof": {
+      "path": "output/accessibility-50-batch30-20261023/test-form/named-probes/proof.json",
+      "sha256": "ddf7ec9b155df4454b77c1da5673f9c48ff5188cb55935c85d116eca91be5a02"
+    }
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch30-20261023/independent-verification.json",
+    "sha256": "b5d0cb751bc2e918a81eb52f9e5b7b9165aa0f7c120deb5f78891144b54e7d95",
+    "script": {
+      "path": "tmp/a47-independent.py",
+      "sha256": "d82f888c2ab83a23d0bd5e3b0c81eced71b0839c58755c283083d12f22c13621"
+    },
+    "records": [
+      {
+        "case": "fixture",
+        "sourceHash": "d4f1bd2bc665b4134729abe4be1452ad8258b610d0463c9a7c305a8300de7d36",
+        "candidateHash": "8a858e23d9ac77de05788bfcc247aec6f394876d9c0a6bd90a1d8659cb3d43a1",
+        "objectsCompared": 77,
+        "streamsCompared": 15,
+        "onlyChanges": [
+          {
+            "ref": "7 0 R",
+            "TU": "Full name"
+          }
+        ],
+        "sourcePrefixPreserved": true,
+        "fields": 6,
+        "widgets": 8
+      },
+      {
+        "case": "multiple-field-types",
+        "sourceHash": "9047368bfcf25632ba473ca41f06ee9d24cc3b2cfcaf02745472e5a5ed73011d",
+        "candidateHash": "4aaa2fa6f0ef7a2c64973a3a8f565d1d4fd1836aa031661c0cc559417aba734e",
+        "objectsCompared": 77,
+        "streamsCompared": 15,
+        "onlyChanges": [
+          {
+            "ref": "7 0 R",
+            "TU": "Full name"
+          },
+          {
+            "ref": "8 0 R",
+            "TU": "Consent"
+          },
+          {
+            "ref": "10 0 R",
+            "TU": "State"
+          },
+          {
+            "ref": "11 0 R",
+            "TU": "Reset form"
+          }
+        ],
+        "sourcePrefixPreserved": true,
+        "fields": 6,
+        "widgets": 8
+      },
+      {
+        "case": "test-form",
+        "sourceHash": "004c64e6854b802886075c85e31a43d4d272edbaa3eda1881aad65ea36a373e7",
+        "candidateHash": "0c31910b9d1e49b9bcc17650b77c09915ecd883e789d93923dd7042303c49281",
+        "objectsCompared": 926,
+        "streamsCompared": 171,
+        "onlyChanges": [
+          {
+            "ref": "98 0 R",
+            "TU": "Print Name"
+          }
+        ],
+        "sourcePrefixPreserved": true,
+        "fields": 32,
+        "widgets": 33
+      }
+    ],
+    "pagePairs": 12,
+    "popplerDpi": 120,
+    "representativePagesVisuallyInspected": true
+  },
+  "limitations": [
+    "The real-document test restores a known authored Print Name value removed in a disposable copy; it is not new human acceptance.",
+    "The eight unresolved TEST-FORM widget placements remain unresolved.",
+    "Review attribution is supplied evidence, not authenticated human identity.",
+    "Existing nonblank or malformed names, XFA, encrypted and signed forms are not rewritten.",
+    "Name repair does not establish radio-choice semantics, keyboard order or screen-reader usability.",
+    "All 50 improvements remain the objective; A48-A50 are pending."
+  ]
+}
