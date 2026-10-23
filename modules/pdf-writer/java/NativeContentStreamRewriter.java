@@ -300,6 +300,8 @@ public class NativeContentStreamRewriter {
         double matchConfidence;
         boolean startsTagGroup;
         boolean emitted;
+        boolean coalesced;
+        List<AuthoredText.Scope> authoredText = List.of();
     }
 
     /** Per-page plan from the tag plan JSON */
@@ -579,6 +581,7 @@ public class NativeContentStreamRewriter {
      */
     /** Result of rewriting one content stream; surfaced in the final report. */
     private static class RewriteResult {
+        final List<TextEmission> textEmissions = new ArrayList<>();
         int taggedWrapped;
         int artifactWrapped;
         int skippedInsideSourceMarkedContent;
@@ -588,9 +591,46 @@ public class NativeContentStreamRewriter {
         }
     }
 
+    private record TextEmission(Assignment assignment, int start, int end) {}
+
+    private static void coalesceAuthoredText(List<Object> tokens, RewriteResult result) throws IOException {
+        Map<AuthoredText.Scope,List<TextEmission>> groups = new LinkedHashMap<>();
+        Object streamIdentity = new Object();
+        for (TextEmission emission : result.textEmissions) for (AuthoredText.Scope scope : emission.assignment.authoredText) {
+            if (!scope.properties.containsKey(AuthoredText.ACTUAL)) continue;
+            if (scope.contentStream != null && scope.contentStream != streamIdentity)
+                throw new IOException("Authored text spans multiple content streams; source-tree preservation is required");
+            scope.contentStream = streamIdentity;
+            groups.computeIfAbsent(scope, k -> new ArrayList<>()).add(emission);
+            break;
+        }
+        for (List<TextEmission> group : groups.values()) {
+            TextEmission first = group.get(0), previous = first;
+            for (int i = 1; i < group.size(); i++) {
+                TextEmission next = group.get(i);
+                if (!first.assignment.authoredText.equals(next.assignment.authoredText))
+                    throw new IOException("Authored text has overlapping expansion scopes");
+                for (int j = previous.end; j < next.start; j++) if (tokens.get(j) instanceof Operator op
+                        && (TEXT_OPS.contains(op.getName()) || PAINT_OPS.contains(op.getName()) || Set.of("BDC", "BMC", "EMC").contains(op.getName())))
+                    throw new IOException("Authored text crosses unrelated paint or visibility scopes");
+                // Keep the first opening and final closing. Every source text
+                // operator and intervening positioning operator stays in place.
+                tokens.set(previous.end - 1, null);
+                for (int j = next.start; j < next.start + 3; j++) tokens.set(j, null);
+                first.assignment.operators.addAll(next.assignment.operators);
+                next.assignment.coalesced = true;
+                result.taggedWrapped--;
+                previous = next;
+            }
+        }
+        tokens.removeIf(java.util.Objects::isNull);
+    }
+
     private static class RewriteContext {
         final Set<COSStream> activeForms = new HashSet<>();
+        final AuthoredText authoredText;
         int formInvocations;
+        RewriteContext(AuthoredText authoredText) { this.authoredText = authoredText; }
     }
 
     private static PDResources privateResources(PDResources source) {
@@ -608,6 +648,26 @@ public class NativeContentStreamRewriter {
             if(label!=null && body!=null && label.actualText!=null && !label.actualText.isEmpty()) labels.put(body.id,label);
         }
         for(TagTreeNode child:node.children)collectListLabels(child,labels);
+    }
+
+    private static boolean clearGeneratedReplacement(TagTreeNode node, Set<String> owners, List<String> suppressed) {
+        boolean affected = owners.contains(node.id);
+        for (TagTreeNode child : node.children) affected |= clearGeneratedReplacement(child, owners, suppressed);
+        // An ancestor ActualText replaces all descendants. Removing only the
+        // leaf's generated text would still mask the author's replacement.
+        if (affected && node.actualText != null) { suppressed.add(node.id); node.actualText = null; }
+        return affected;
+    }
+
+    private static TagTreeNode flatTagTree(List<PagePlan> plans) {
+        TagTreeNode root = new TagTreeNode(); root.id = "document"; root.type = "Document";
+        Map<String,TagTreeNode> leaves = new LinkedHashMap<>();
+        for (PagePlan plan : plans) for (Assignment assignment : plan.assignments) {
+            if (leaves.containsKey(assignment.tagNodeId)) continue;
+            TagTreeNode leaf = new TagTreeNode(); leaf.id = assignment.tagNodeId; leaf.type = assignment.tagType;
+            leaves.put(leaf.id, leaf); root.children.add(leaf);
+        }
+        return root;
     }
 
     static class TextSplit {
@@ -669,17 +729,18 @@ public class NativeContentStreamRewriter {
         return new TextSplit(prefix, hasBody ? remainder : null);
     }
 
-    private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan, Map<String,TagTreeNode> listLabels) throws IOException {
+    private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan, Map<String,TagTreeNode> listLabels, AuthoredText authoredText) throws IOException {
         PDResources resources = privateResources(page.getResources());
         page.setResources(resources);
-        RewriteResult result = rewriteContentStream(doc, page, page, null, resources, plan, "page", listLabels, new RewriteContext(), null, false);
+        RewriteResult result = rewriteContentStream(doc, page, page, null, resources, plan, "page", listLabels, new RewriteContext(authoredText), null, false, List.of());
         for (Assignment a : plan.assignments) if (!a.emitted)
             throw new IOException("No source text operator for assigned tag " + a.tagNodeId);
+        plan.assignments.removeIf(a -> a.coalesced);
         return result;
     }
 
     private static int emitOwnedText(List<Object> tokens, Assignment assignment, List<COSBase> operands, Operator op,
-            PDFont font, Map<String,TagTreeNode> labels, PagePlan plan, RewriteResult result, int nextMcid) {
+            PDFont font, Map<String,TagTreeNode> labels, PagePlan plan, RewriteResult result, int nextMcid) throws IOException {
         TagTreeNode label = labels.get(assignment.tagNodeId);
         if (label != null && assignment.startsTagGroup && ("Tj".equals(op.getName()) || "TJ".equals(op.getName())) && operands.size() == 1) {
             TextSplit split = splitTextPrefix(font, operands.get(0), label.actualText);
@@ -688,6 +749,7 @@ public class NativeContentStreamRewriter {
                 operands.set(0, split.prefix);
             } else if (split != null) {
                 Assignment marker = new Assignment(); marker.tagNodeId = label.id; marker.tagType = "Lbl"; marker.mcid = nextMcid++;
+                marker.authoredText = assignment.authoredText;
                 marker.operators.add(assignment.operators.get(0)); plan.assignments.add(marker);
                 emitMarkedText(tokens, marker, List.of(split.prefix), op, result);
                 operands.set(0, split.remainder);
@@ -697,10 +759,14 @@ public class NativeContentStreamRewriter {
         return nextMcid;
     }
 
-    private static void emitMarkedText(List<Object> tokens, Assignment assignment, List<COSBase> operands, Operator op, RewriteResult result) {
+    private static void emitMarkedText(List<Object> tokens, Assignment assignment, List<COSBase> operands, Operator op, RewriteResult result) throws IOException {
+        AuthoredText.own(assignment.authoredText, assignment.tagNodeId);
+        int start = tokens.size();
         COSDictionary props = new COSDictionary(); props.setInt(COSName.MCID, assignment.mcid);
-        tokens.add(COSName.getPDFName(assignment.tagType)); tokens.add(props); tokens.add(Operator.getOperator("BDC"));
+        AuthoredText.addMarkedReplacement(props, assignment.authoredText);
+        tokens.add(COSName.getPDFName(props.containsKey(AuthoredText.ACTUAL) ? "Span" : assignment.tagType)); tokens.add(props); tokens.add(Operator.getOperator("BDC"));
         tokens.addAll(operands); tokens.add(op); tokens.add(Operator.getOperator("EMC"));
+        result.textEmissions.add(new TextEmission(assignment, start, tokens.size()));
         result.taggedWrapped++; assignment.emitted = true;
     }
 
@@ -732,6 +798,7 @@ public class NativeContentStreamRewriter {
         COSBase propertyOperand;
         COSDictionary properties;
         boolean optionalContent;
+        List<AuthoredText.Scope> authoredText = List.of();
     }
 
     private static SourceMark sourceMark(String operator, List<COSBase> operands, PDResources resources) throws IOException {
@@ -782,9 +849,16 @@ public class NativeContentStreamRewriter {
         else { tokens.add(props); tokens.add(Operator.getOperator("BDC")); }
     }
 
+    private static List<AuthoredText.Scope> authoredPath(List<AuthoredText.Scope> inherited, java.util.Deque<SourceMark> marks) {
+        List<AuthoredText.Scope> path = inherited;
+        for (var iterator = marks.descendingIterator(); iterator.hasNext();) path = AuthoredText.merge(path, iterator.next().authoredText);
+        return AuthoredText.effective(path);
+    }
+
     private static RewriteResult rewriteContentStream(PDDocument doc, PDPage page, PDContentStream source,
             PDFormXObject targetForm, PDResources resources, PagePlan plan, String origin,
-            Map<String,TagTreeNode> listLabels, RewriteContext context, PDFont inheritedFont, boolean inheritedArtifact) throws IOException {
+            Map<String,TagTreeNode> listLabels, RewriteContext context, PDFont inheritedFont, boolean inheritedArtifact,
+            List<AuthoredText.Scope> inheritedText) throws IOException {
         Map<Integer, List<Assignment>> lexicalAssignments = new HashMap<>();
         Map<Integer, Assignment> legacyAssignments = new HashMap<>();
         for (Assignment a : plan.assignments) {
@@ -844,7 +918,7 @@ public class NativeContentStreamRewriter {
                     copy.setResources(privateResources(form.getResources() == null ? resources : form.getResources()));
                     plan.forms.put(childOrigin, copy);
                     try {
-                        result.add(rewriteContentStream(doc, page, form, copy, copy.getResources(), plan, childOrigin, listLabels, context, currentFont, artifactForm));
+                        result.add(rewriteContentStream(doc, page, form, copy, copy.getResources(), plan, childOrigin, listLabels, context, currentFont, artifactForm, authoredPath(inheritedText, sourceMarks)));
                     } finally { context.activeForms.remove(form.getCOSObject()); }
                     String name = "OTForm" + currentOperatorIndex;
                     COSDictionary names = resources.getCOSObject().getCOSDictionary(COSName.XOBJECT);
@@ -861,6 +935,10 @@ public class NativeContentStreamRewriter {
                 if ("BMC".equals(opName) || "BDC".equals(opName)) {
                     if (sourceMarks.size() >= 256) throw new IOException("Excessive source marked-content nesting");
                     SourceMark mark = sourceMark(opName, pendingOperands, resources);
+                    if (!COSName.ARTIFACT.equals(mark.tag)) {
+                        COSDictionary sourceStream = source instanceof PDFormXObject ? ((PDFormXObject)source).getCOSObject() : null;
+                        mark.authoredText = AuthoredText.append(context.authoredText.forContent(page.getCOSObject(), sourceStream, mark.properties), context.authoredText.read(mark.properties));
+                    }
                     if (inArtifact) { newTokens.add(Operator.getOperator("EMC")); inArtifact = false; }
                     sourceMarks.push(mark);
                     if (mark.optionalContent) { newTokens.addAll(pendingOperands); newTokens.add(op); }
@@ -881,6 +959,7 @@ public class NativeContentStreamRewriter {
 
                     List<Assignment> pieces = lexicalAssignments.get(currentOperatorIndex);
                     Assignment assignment = pieces == null ? legacyAssignments.get(currentSeq) : pieces.get(0);
+                    List<AuthoredText.Scope> authored = authoredPath(inheritedText, sourceMarks);
 
                     if (assignment != null) {
                         if (inheritedArtifact) throw new IOException("Assigned text inside a decorative Form invocation");
@@ -900,12 +979,17 @@ public class NativeContentStreamRewriter {
                             if ("'".equals(opName) || "\"".equals(opName)) newTokens.add(Operator.getOperator("T*"));
                             Operator show = Operator.getOperator("TJ".equals(opName) ? "TJ" : "Tj");
                             for (Assignment piece : pieces) {
+                                piece.authoredText = authored;
                                 OpRef ref = piece.operators.get(0);
                                 List<COSBase> sliced = new ArrayList<>(List.of(mapping.slice(ref.glyphStart, ref.glyphEnd)));
                                 nextMcid = emitOwnedText(newTokens, piece, sliced, show, currentFont, listLabels, plan, result, nextMcid);
                             }
-                        } else nextMcid = emitOwnedText(newTokens, assignment, pendingOperands, op, currentFont, listLabels, plan, result, nextMcid);
+                        } else {
+                            assignment.authoredText = authored;
+                            nextMcid = emitOwnedText(newTokens, assignment, pendingOperands, op, currentFont, listLabels, plan, result, nextMcid);
+                        }
                     } else {
+                        AuthoredText.own(authored, null);
                         // Unmatched text remains explicitly unqualified as an
                         // artifact; it must never sit inside a semantic wrapper.
                         if (!inheritedArtifact && !inArtifact) {
@@ -917,6 +1001,7 @@ public class NativeContentStreamRewriter {
                         result.artifactWrapped++;
                     }
                 } else if (PAINT_OPS.contains(opName)) {
+                    AuthoredText.own(authoredPath(inheritedText, sourceMarks), null);
                     // Decorative paths/images/charts are visible page content.
                     // Keep their graphics-state/path setup unchanged, but wrap
                     // the paint operator so Acrobat sees the content as an
@@ -951,6 +1036,7 @@ public class NativeContentStreamRewriter {
         if (!sourceMarks.isEmpty()) throw new IOException("Unclosed source marked content");
 
         newTokens.addAll(pendingOperands);
+        coalesceAuthoredText(newTokens, result);
 
         PDStream newStream = targetForm == null ? new PDStream(doc) : new PDStream(targetForm.getCOSObject());
         try (OutputStream out = newStream.createOutputStream()) {
@@ -1075,7 +1161,7 @@ public class NativeContentStreamRewriter {
                 PDFormXObject stream = plan.forms.get(a.operators.get(0).streamOrigin);
                 int ownerKey = stream == null ? pageKey : stream.getCOSObject().getInt(COSName.STRUCT_PARENTS);
                 refsByTag.computeIfAbsent(a.tagNodeId, k -> new ArrayList<>())
-                         .add(new PageMcRef(page, stream, a.mcid, ownerKey, cx, cy));
+                         .add(new PageMcRef(page, stream, a.mcid, ownerKey, cx, cy, a.authoredText));
             }
         }
 
@@ -1138,8 +1224,10 @@ public class NativeContentStreamRewriter {
         final int pageKey;
         final double opX;
         final double opY;
-        PageMcRef(PDPage page, PDFormXObject stream, int mcid, int pageKey, double opX, double opY) {
+        final List<AuthoredText.Scope> authoredText;
+        PageMcRef(PDPage page, PDFormXObject stream, int mcid, int pageKey, double opX, double opY, List<AuthoredText.Scope> authoredText) {
             this.page = page; this.stream = stream; this.mcid = mcid; this.pageKey = pageKey; this.opX = opX; this.opY = opY;
+            this.authoredText = authoredText;
         }
     }
 
@@ -1274,7 +1362,7 @@ public class NativeContentStreamRewriter {
             Map<String, List<PageMcRef>> refsByTag,
             Map<Integer, COSArray> parentArraysByPageKey,
             List<LinkAnnot> linkAnnots,
-            Map<PDPage, Double> pageDisplayHeight) {
+            Map<PDPage, Double> pageDisplayHeight) throws IOException {
 
         // Derive child context from current — threshold updates to
         // boolean flags happen here before the recursive call so all
@@ -1308,6 +1396,7 @@ public class NativeContentStreamRewriter {
         applyTableAttributes(el, node, ctx);
         if (!el.getCOSObject().containsKey(COSName.ID)) el.getCOSObject().setString(COSName.ID, "oat:" + node.id);
 
+        AuthoredText.StructureRuns authoredRuns = new AuthoredText.StructureRuns();
         for (PageMcRef ref : myRefs) {
             // Emit an MCR dict kid so multi-page elements carry a
             // per-ref /Pg. For single-page elements this is redundant
@@ -1360,6 +1449,7 @@ public class NativeContentStreamRewriter {
                 containerForMcr = matched.emittedElement;
             }
 
+            containerForMcr = authoredRuns.parent(containerForMcr, ref.authoredText);
             containerForMcr.appendKid(mcr);
 
             if (containerForMcr.getPage() == null) containerForMcr.setPage(ref.page);
@@ -1670,6 +1760,8 @@ public class NativeContentStreamRewriter {
 
         // Load and modify the PDF
         try (PDDocument doc = Loader.loadPDF(new File(pdfPath))) {
+            AuthoredText authoredText = new AuthoredText(doc);
+            List<String> suppressedActualText = new ArrayList<>();
             int totalAssignments = 0;
             int totalMcids = 0;
             int totalArtifacts = 0;
@@ -1690,7 +1782,7 @@ public class NativeContentStreamRewriter {
                         + " (" + plan.assignments.size() + " assignments, "
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");
 
-                RewriteResult res = rewritePageContentStream(doc, page, plan, listLabels);
+                RewriteResult res = rewritePageContentStream(doc, page, plan, listLabels, authoredText);
                 totalAssignments += plan.assignments.size();
                 totalMcids += plan.assignments.size();
                 totalArtifacts += res.artifactWrapped;
@@ -1702,6 +1794,13 @@ public class NativeContentStreamRewriter {
             // Hierarchical structure tree when --tags is supplied
             // (normal path). Falls back to flat Document-has-all-leaves
             // when omitted, for backward compat with older callers.
+            authoredText.verify();
+            if (!authoredText.scopes.isEmpty()) {
+                if (tagTree == null) tagTree = flatTagTree(plans);
+                Set<String> owners = new HashSet<>();
+                for (AuthoredText.Scope scope : authoredText.scopes) owners.add(scope.owner);
+                clearGeneratedReplacement(tagTree, owners, suppressedActualText);
+            }
             buildStructureTreeHierarchical(doc, plans, tagTree);
 
             // Retain the shared metadata, structure, Unicode and link handling.
@@ -1748,6 +1847,11 @@ public class NativeContentStreamRewriter {
             json.append(",\"outputPath\":").append(escapeJson(outputPath));
             json.append(",\"pagesRewritten\":").append(pagesRewritten);
             json.append(",\"pagesNative\":").append(pagesRewritten);
+            json.append(",\"preservedAuthoredTextScopes\":").append(authoredText.scopes.stream().filter(s -> !s.shadowed).count());
+            json.append(",\"shadowedAuthoredTextScopes\":").append(authoredText.scopes.stream().filter(s -> s.shadowed).count());
+            json.append(",\"suppressedGeneratedActualText\":[");
+            for (int i = 0; i < suppressedActualText.size(); i++) { if (i > 0) json.append(','); json.append(escapeJson(suppressedActualText.get(i))); }
+            json.append(']');
             json.append(",\"totalAssignments\":").append(totalAssignments);
             json.append(",\"structureElementCount\":").append(originalAssignmentCount);
             json.append(",\"markedContentCount\":").append(totalTaggedWrapped);

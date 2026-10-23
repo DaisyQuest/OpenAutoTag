@@ -164,7 +164,7 @@ async function needsCompilation() {
 }
 
 function collectNativeJavaSources() {
-  const sources = ["QualifiedFontRepairs.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java"].map((file) => path.join(nativeJavaDir, file));
+  const sources = ["QualifiedFontRepairs.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);
   }
@@ -719,6 +719,9 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
     markedContentCount: rewriterReport.markedContentCount || 0,
     totalArtifactWraps: rewriterReport.totalArtifactWraps || 0,
     splitMarkedContentRuns: rewriterReport.splitMarkedContentRuns || 0,
+    preservedAuthoredTextScopes: rewriterReport.preservedAuthoredTextScopes || 0,
+    shadowedAuthoredTextScopes: rewriterReport.shadowedAuthoredTextScopes || 0,
+    suppressedGeneratedActualText: rewriterReport.suppressedGeneratedActualText || [],
     readingOrderStrategy: rewriterReport.readingOrderStrategy || readingOrderStrategy,
     // Surface the matcher's reading-order diagnostics for downstream
     // reporting. pagesWithMonotonicReadingOrder < totalPages is a signal
@@ -1054,6 +1057,9 @@ export async function writeTaggedArtifacts({
         markedContentCount: nativeReport.markedContentCount,
         totalArtifactWraps: nativeReport.totalArtifactWraps || 0,
         splitMarkedContentRuns: nativeReport.splitMarkedContentRuns || 0,
+        preservedAuthoredTextScopes: nativeReport.preservedAuthoredTextScopes || 0,
+        shadowedAuthoredTextScopes: nativeReport.shadowedAuthoredTextScopes || 0,
+        suppressedGeneratedActualText: nativeReport.suppressedGeneratedActualText || [],
         language
       }
     };
@@ -1084,6 +1090,9 @@ export async function writeTaggedArtifacts({
       markedContentCount: nativeReport.markedContentCount,
       totalArtifactWraps: nativeReport.totalArtifactWraps || 0,
       splitMarkedContentRuns: nativeReport.splitMarkedContentRuns || 0,
+      preservedAuthoredTextScopes: nativeReport.preservedAuthoredTextScopes || 0,
+      shadowedAuthoredTextScopes: nativeReport.shadowedAuthoredTextScopes || 0,
+      suppressedGeneratedActualText: nativeReport.suppressedGeneratedActualText || [],
       title,
       requestedMode: mode,
       autoFallbackReason: null

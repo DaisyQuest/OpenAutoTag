@@ -1,0 +1,1168 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedOn": "2026-10-23",
+  "baseCommit": "a2ef2bb",
+  "completedItems": [
+    "A11"
+  ],
+  "scope": "Qualified source ActualText and E preservation in native text rebuilding; no human reader qualification.",
+  "implementationSha256": {
+    "modules/pdf-writer/index.js": "acb198f74fff15b67ce76486f55b391932874bb2e1b10cd0ef85d673e38debc0",
+    "modules/pdf-writer/java/AuthoredText.java": "5f78c15989e74fe2a0d24fba22d003cd75ed056e5afcf7388b59565df9ad36c4",
+    "modules/pdf-writer/java/NativeContentStreamRewriter.java": "0618c478dbdd4c61b05915cf9cb01ea19cbe6daf322da66404712e8c742c694a",
+    "modules/pdf-writer/test/authored-text.test.js": "b3e8c315721ef18eeb2f486bbc4f36ca03d5ea6130ed892048fb2dd46aea8c46",
+    "modules/pdf-writer/test/fixtures/AuthoredTextProbe.java": "edc5bf15fbf6498f1af9c44bd3a25628f92b85a4946b0817cc7d61909c1e3472",
+    "package.json": "33947b93b02433ff6a9969f91439cfd6d3d376fd9d439a8e6a9754339ae15505"
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 282,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch5-tests-final.log"
+    },
+    "compatibility": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch5-compatibility.log"
+    }
+  },
+  "testRuntime": {
+    "java": "Microsoft OpenJDK 21.0.6+7",
+    "options": "-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xms32m -Xmx512m",
+    "concurrency": 1,
+    "initialAttempt": "Two JVM EXCEPTION_ACCESS_VIOLATION crashes; final complete suites pass without suppressed assertions."
+  },
+  "fixture": {
+    "proof": "Authored replacement, expansion, neighbors, ownership, glyphs and 150 DPI pixels verified",
+    "writer": {
+      "status": "completed",
+      "writerMode": "native",
+      "outputPath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\output\\accessibility-50-batch5-20261023\\fixture\\candidate.pdf",
+      "manifestPath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\output\\accessibility-50-batch5-20261023\\fixture\\candidate.pdf.tags.json",
+      "nativeTaggingApplied": true,
+      "language": "en-US",
+      "tagNodeCount": 13,
+      "operatorCount": 33,
+      "matchedOperators": 33,
+      "matchRate": 1,
+      "matchThreshold": 0.8,
+      "alreadyTaggedThreshold": 0.5,
+      "alreadyTaggedPolicy": "passthrough",
+      "readingOrderStrategy": "semantic",
+      "pagesWithMonotonicReadingOrder": 1,
+      "meanReadingOrderCoverage": 0.92,
+      "nativeViable": true,
+      "pagesNative": 1,
+      "pagesRaster": 0,
+      "structureElementCount": 12,
+      "markedContentCount": 27,
+      "totalArtifactWraps": 0,
+      "splitMarkedContentRuns": 21,
+      "preservedAuthoredTextScopes": 13,
+      "shadowedAuthoredTextScopes": 1,
+      "suppressedGeneratedActualText": [],
+      "title": "source",
+      "requestedMode": "native",
+      "autoFallbackReason": null
+    },
+    "saved": {
+      "passed": 89,
+      "failed": 0
+    },
+    "rawVeraPdf": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 927,
+      "failedChecks": 0
+    }
+  },
+  "independentProofs": [
+    {
+      "case": "fixture",
+      "sourceSha256": "a73ad2c4d78ed5fdb1e776d790143a4d71e8b546cd0c0ce00a8c13f393248f5c",
+      "candidateSha256": "fffa8c8e6f90e81c4930ea151c7082e637b6c224a995ae17416f115431cfac17",
+      "pixelIdentical": true,
+      "rgbSha256": "4e11241d1e1c3d40bf126c60654d5557e73e9b5e7c08e0463edee9d707439473",
+      "dpi": 150,
+      "pdfiumExtraction": "Nonempty replacements appear once with no trailing glyph duplication; neighbors retained",
+      "pdfiumEmptyReplacementLimitation": "This installed PDFium build reads noise in both source and candidate despite empty ActualText; the saved property and logical-tree/PDFBox behavior are independently verified. No reader qualification is claimed."
+    },
+    {
+      "case": "census-page-5",
+      "sourceSha256": "44a2daa4066416c6103be2d0ee8bb38a66e4d42185fc394d5ba0bf359bf4ef0b",
+      "candidateSha256": "25f8cffb9b8e8889cfd3f67d63365c40ac953ac209d0fad6d713576be6cb22d9",
+      "pixelIdentical": true,
+      "rgbSha256": "f34549a6c483bda86c9d0693eecf042b87231fbc95fc4ec0a0b94112e97cf55c",
+      "dpi": 150,
+      "nonMarkedOperations": 644,
+      "exactSourceOperandsPreserved": true,
+      "authoredReplacementScopes": 54,
+      "sourceReplacementOrderAndValuesPreserved": true,
+      "pdfiumExtractedTextIdentical": true
+    },
+    {
+      "case": "census-page-6",
+      "sourceSha256": "5b1f136662c0c51572fcc2f72d1a9ac3b39b0d718ac06e14e3491b0b7649e66f",
+      "candidateSha256": "e89a6ef2811af71870f6eb432224887167aef8dfb7aa281baf200facd5b48265",
+      "pixelIdentical": true,
+      "rgbSha256": "c1faf8cdfebdf24db6f4d23a03d5fba8fdd9c6d526f5215e85a52a5cecc1b550",
+      "dpi": 150,
+      "nonMarkedOperations": 651,
+      "exactSourceOperandsPreserved": true,
+      "authoredReplacementScopes": 71,
+      "sourceReplacementOrderAndValuesPreserved": true,
+      "pdfiumExtractedTextIdentical": true
+    }
+  ],
+  "census": {
+    "publisher": "U.S. Census Bureau",
+    "url": "https://www2.census.gov/library/publications/2025/demo/p60-286.pdf",
+    "sourceSha256": "54cf1adc1f92e0f471803e67637569ecdebf93eec21928a5f9e2b97185eed3d3",
+    "pages": [
+      5,
+      6
+    ],
+    "effectiveReplacementScopes": 125,
+    "scope": "Derived exact-page content with a simple manual regression ownership plan; not full-document accessibility qualification.",
+    "results": [
+      {
+        "sourcePage": 5,
+        "operators": 125,
+        "writer": {
+          "success": true,
+          "outputPath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\output\\accessibility-50-batch5-20261023\\census-page-5-candidate.pdf",
+          "pagesRewritten": 1,
+          "pagesNative": 1,
+          "preservedAuthoredTextScopes": 54,
+          "shadowedAuthoredTextScopes": 0,
+          "suppressedGeneratedActualText": [],
+          "totalAssignments": 125,
+          "structureElementCount": 1,
+          "markedContentCount": 125,
+          "totalMcids": 125,
+          "totalArtifactWraps": 7,
+          "splitMarkedContentRuns": 124,
+          "skippedInsideSourceMarkedContent": 0,
+          "structureTreeBuilt": true,
+          "metadataApplied": true,
+          "readingOrderStrategy": "semantic",
+          "title": "Tagged PDF",
+          "language": "en-US"
+        },
+        "rawVeraPdf": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 4918,
+          "failedChecks": 0
+        }
+      },
+      {
+        "sourcePage": 6,
+        "operators": 157,
+        "writer": {
+          "success": true,
+          "outputPath": "C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\output\\accessibility-50-batch5-20261023\\census-page-6-candidate.pdf",
+          "pagesRewritten": 1,
+          "pagesNative": 1,
+          "preservedAuthoredTextScopes": 71,
+          "shadowedAuthoredTextScopes": 0,
+          "suppressedGeneratedActualText": [],
+          "totalAssignments": 157,
+          "structureElementCount": 1,
+          "markedContentCount": 157,
+          "totalMcids": 157,
+          "totalArtifactWraps": 4,
+          "splitMarkedContentRuns": 156,
+          "skippedInsideSourceMarkedContent": 0,
+          "structureTreeBuilt": true,
+          "metadataApplied": true,
+          "readingOrderStrategy": "semantic",
+          "title": "Tagged PDF",
+          "language": "en-US"
+        },
+        "rawVeraPdf": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 7116,
+          "failedChecks": 0
+        }
+      }
+    ]
+  },
+  "controls": [
+    {
+      "id": "booklet-final",
+      "candidatePath": "output/accessibility-50-batch5-20261023/booklet-final/06-candidate.pdf",
+      "candidateSha256": "638de0063e743fbf84ec36605cfbb41c7810b9dfe10ee30636d85073fa06ae05",
+      "saved": {
+        "passed": 14727,
+        "failed": 155
+      },
+      "rawVeraPdf": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 185539,
+        "failedChecks": 31
+      },
+      "disposition": "rejected"
+    },
+    {
+      "id": "hinode-final",
+      "candidatePath": "output/accessibility-50-batch5-20261023/hinode-final/06-candidate.pdf",
+      "candidateSha256": "b7927a8713477ee1d60647d93e5221725e2857dad495a4f3bf337fc1752926a6",
+      "saved": {
+        "passed": 531,
+        "failed": 0
+      },
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5295,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    },
+    {
+      "id": "control-final",
+      "candidatePath": "output/accessibility-50-batch5-20261023/control-final/06-candidate.pdf",
+      "candidateSha256": "3d61bc59bfb16762d39157305e0e5bb5b7233b9a78782a08bf7c6849a047c8bb",
+      "saved": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    }
+  ],
+  "visualComparisons": [
+    {
+      "id": "booklet",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 96,
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidateHash": "638de0063e743fbf84ec36605cfbb41c7810b9dfe10ee30636d85073fa06ae05",
+      "pages": [
+        {
+          "page": 1,
+          "sourceSize": [
+            1632,
+            1056
+          ],
+          "candidateSize": [
+            1632,
+            1056
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 2,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 3,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 4,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 5,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 6,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 7,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 8,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 9,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 10,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 11,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 12,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 13,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 14,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 15,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 16,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 17,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 18,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 19,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 20,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 21,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 22,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 23,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 24,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 25,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 26,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 27,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 28,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 29,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 30,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 31,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 32,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 33,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 34,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 35,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 36,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 37,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 38,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 39,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 40,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 41,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 42,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 43,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 44,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 45,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 46,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 47,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 48,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 49,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 50,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 51,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 52,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 53,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 54,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 55,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 56,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 57,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 58,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 59,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 60,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 61,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        }
+      ],
+      "pixelIdenticalPages": 61,
+      "status": "completed"
+    },
+    {
+      "id": "test-form-control",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "3d61bc59bfb16762d39157305e0e5bb5b7233b9a78782a08bf7c6849a047c8bb",
+      "pages": [
+        {
+          "page": 1,
+          "sourceSize": [
+            1275,
+            1650
+          ],
+          "candidateSize": [
+            1275,
+            1650
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 2,
+          "sourceSize": [
+            1275,
+            1650
+          ],
+          "candidateSize": [
+            1275,
+            1650
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        }
+      ],
+      "pixelIdenticalPages": 2,
+      "status": "completed"
+    },
+    {
+      "id": "nasa-hinode",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "b7927a8713477ee1d60647d93e5221725e2857dad495a4f3bf337fc1752926a6",
+      "pages": [
+        {
+          "page": 1,
+          "sourceSize": [
+            1275,
+            1650
+          ],
+          "candidateSize": [
+            1275,
+            1650
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        }
+      ],
+      "pixelIdenticalPages": 1,
+      "status": "completed"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "nasa-hinode",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "b7927a8713477ee1d60647d93e5221725e2857dad495a4f3bf337fc1752926a6",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": []
+    },
+    {
+      "id": "test-form-control",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "3d61bc59bfb16762d39157305e0e5bb5b7233b9a78782a08bf7c6849a047c8bb",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": [
+        {
+          "variant": "source",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        },
+        {
+          "variant": "candidate",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        }
+      ],
+      "filledPagePixelIdentical": true
+    }
+  ],
+  "controlSourceBytePrefixPreserved": true,
+  "knownLimits": [
+    "One inferred owner per authored scope; ActualText must be continuous in one invoked stream.",
+    "Unmapped content, graphics/object replacements, source cycles, incompatible ownership or visibility changes reject before save.",
+    "Generated ActualText conflicts remain visible to the saved-intent checker; the conflict fixture has 13 expected discrepancies.",
+    "Outermost replacement takes precedence; the fixture reports one shadowed inner scope.",
+    "PDFium 156.0.8076.0 ignores the fixture empty ActualText in both source and output; PDFBox and logical-tree checks pass.",
+    "Booklet retains 155 saved and 31 raw font failures; human qualification remains pending."
+  ]
+}
