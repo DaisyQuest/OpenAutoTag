@@ -1,0 +1,232 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "facf010",
+  "completedItems": [
+    "A27",
+    "A28"
+  ],
+  "completedTotal": 28,
+  "pendingTotal": 22,
+  "research": [
+    {
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7",
+      "usedFor": "OCR transcription and reading-order review requirements"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/graphics/state/RenderingMode.java",
+      "usedFor": "Invisible text uses mode 3, not clipping mode 7"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/PDAbstractContentStream.java",
+      "usedFor": "GSUB substitutions must be bypassed for exact invisible OCR Unicode"
+    }
+  ],
+  "tests": {
+    "productionBaseline": {
+      "tests": 397,
+      "passed": 397,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch12-baseline-final.log",
+      "sha256": "c1793ccc95874a26f3ef1a367f2daf9a75327f7f2c26e241d4fb996a3c6e2c11"
+    },
+    "additionalParserCompatibility": 14,
+    "newCases": 20,
+    "focused": {
+      "log": "tmp/accessibility-50-batch12-final.log",
+      "sha256": "d1890efc9d8e59ce90da14db9f40dfd417c0d4b5b0c441151673956597f57066",
+      "passed": 33,
+      "note": "Earlier focused run; overlaps the final full baseline. Two later cases are included in the final baseline."
+    },
+    "savedMutations": [
+      "visible text",
+      "shifted line",
+      "partial Unicode",
+      "wrong MCID owner",
+      "duplicate line",
+      "missing line"
+    ],
+    "preSaveRejections": [
+      "unsupported glyph",
+      "out-of-page quad",
+      "degenerate quad",
+      "nonrectangular quad"
+    ],
+    "synthetic": [
+      {
+        "name": "scan",
+        "sourceHash": "2215e76d9069484b921a3e9ea59226e0120d32172e72e5befeab30f7b13bcfdd",
+        "candidateHash": "595b456583d357ea7ad2322a3159cc8ca920b1ae807fa8f3b8b1d00b633d52e9",
+        "summary": {
+          "passed": 409,
+          "failed": 0
+        },
+        "ocrLines": 16
+      },
+      {
+        "name": "mixed",
+        "sourceHash": "3e8d34b966111a5de757d4f8014b7049cf4f4a68c40c48bfcfb404d67e9747a5",
+        "candidateHash": "fdbbace1508285b6c531ea84ec0de268b4a9db226f4681e7627dd638e6c57e4b",
+        "summary": {
+          "passed": 433,
+          "failed": 0
+        },
+        "ocrLines": 16
+      }
+    ],
+    "syntheticPreservation": {
+      "candidatePages": 32,
+      "filledPageComparisons": 16,
+      "renderer": "PDFBox",
+      "dpi": 120,
+      "sourceImageBytes": true,
+      "fieldValueAndAppearance": true,
+      "fillSaveReopen": true
+    },
+    "scope": "No repository-wide or Java coverage claim. Mandatory tests use deterministic declared OCR, not live recognition."
+  },
+  "real": [
+    {
+      "id": "nasa-stereo",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+      "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+      "candidatePath": "output/accessibility-50-batch12-20261023/nasa-stereo/06-candidate.pdf",
+      "candidateHash": "5a0b8ac9572eb7ab3a15ca5e9f0b2fecd9e7d5476f6abcad926c9cd5a217ef5b",
+      "ocrEvidenceHash": "8d24f4fe2f48895d5b143ef701b602f28147a26191523d441ca48a34ba095944",
+      "ocrTextLines": 65,
+      "ocrPages": [
+        {
+          "page": 1,
+          "nativeBlocks": 0,
+          "ocrBlocks": 27,
+          "conflicts": 0
+        },
+        {
+          "page": 2,
+          "nativeBlocks": 0,
+          "ocrBlocks": 36,
+          "conflicts": 0
+        }
+      ],
+      "saved": {
+        "passed": 1342,
+        "failed": 0
+      },
+      "ownershipStatus": "verified",
+      "failedCodes": {},
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5460,
+        "failedChecks": 0
+      },
+      "ocrSavedChecks": 394,
+      "nativeSequencePages": 0,
+      "savedReport": {
+        "path": "output/accessibility-50-batch12-20261023/nasa-stereo/09-saved-semantics.json",
+        "sha256": "c102843a703b7afd688e76dc24e91894cc639dcf20768686227ddb5dde8bfa14"
+      },
+      "rawReport": {
+        "path": "output/accessibility-50-batch12-20261023/nasa-stereo/07-validation.json",
+        "sha256": "17c579c8fe93e0dd138d9a769b8eae3d58956a7b6cb3e060a78f50c6322a525d"
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "appearance": {
+        "renderer": "Poppler",
+        "dpi": 150,
+        "pixelIdenticalPages": 2,
+        "sourceImageStreamsPreserved": 2,
+        "fieldCount": 0
+      },
+      "ownedTextRuns": 65
+    },
+    {
+      "id": "booklet",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidatePath": "output/accessibility-50-batch12-20261023/booklet/06-candidate.pdf",
+      "candidateHash": "c5ef6e8b5bcc6dff2ffe7a039163180b0d05a90fcf7b9fa44d8e01742b74c335",
+      "ocrEvidenceHash": "106ba517173d8c3fec97f37c2bc44b90ace5ef63d34da97ae0b141763053d242",
+      "ocrTextLines": 158,
+      "ocrPages": [
+        {
+          "page": 15,
+          "nativeBlocks": 2,
+          "ocrBlocks": 146,
+          "conflicts": 0
+        },
+        {
+          "page": 38,
+          "nativeBlocks": 2,
+          "ocrBlocks": 12,
+          "conflicts": 0
+        }
+      ],
+      "saved": {
+        "passed": 50828,
+        "failed": 248
+      },
+      "ownershipStatus": "verified",
+      "failedCodes": {
+        "CONTENT_TEXT_COMPLETE": 231,
+        "CONTENT_ATTACHED": 17
+      },
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 192138,
+        "failedChecks": 31
+      },
+      "ocrSavedChecks": 952,
+      "nativeSequencePages": 61,
+      "savedReport": {
+        "path": "output/accessibility-50-batch12-20261023/booklet/09-saved-semantics.json",
+        "sha256": "3a092641b869da33112b2a96c548a3661a83b9d61cc3b8f32ca63658627100fd"
+      },
+      "rawReport": {
+        "path": "output/accessibility-50-batch12-20261023/booklet/07-validation.json",
+        "sha256": "d0ef31daba15260e8e88840a31468ac6f3e1f29361b1236bf86a46b93ea8242f"
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "appearance": {
+        "renderer": "Poppler",
+        "dpi": 96,
+        "pixelIdenticalPages": 61,
+        "sourceImageStreamsPreserved": 31,
+        "fieldCount": 0
+      },
+      "ownedTextRuns": 5277
+    }
+  ],
+  "visualEvidence": {
+    "path": "output/accessibility-50-batch12-20261023/visual-comparison.json",
+    "sha256": "03ca07a7d4074ed0bb4a25f48fdd927a2e3460629842dd9bfdc77b4b0d8fde05"
+  },
+  "control": {
+    "candidatePath": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+    "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+    "reusedEvidence": "docs/evidence/accessibility-50-batch8-20261023.json",
+    "fields": 32,
+    "widgets": 33,
+    "newInteractionTest": false
+  },
+  "limits": [
+    "Candidates remain review_required.",
+    "NASA replay reuses batch-11 selected OCR with source/report hashes; fresh native extraction and semantic processing mean earlier failure totals are not a controlled comparison.",
+    "The poster retains substantial recognition noise despite zero saved/raw failures.",
+    "Booklet diagrams and remaining attachment/completeness failures need further work.",
+    "Line envelopes and proportional list splits are not exact word boxes.",
+    "Unicode fallback, word uncertainty/corrections and reader qualification remain pending."
+  ]
+}

@@ -13,6 +13,11 @@ test("native writer requires operators on every intended text page, including mi
   assert.throws(()=>requireNativeTextOperators(plan,{nodes:[node(1),node(2)]}),/page\(s\) 2.*OCR text layer/);
   assert.throws(()=>requireNativeTextOperators({pages:[]},{nodes:[node(3)]}),/page\(s\) 3/);
 });
+test("OCR needs its own declared line even when the page contains native operators",()=>{
+ const semantic={nodes:[{...node(1),id:"ocr",textProvenance:"ocr",ocrSegments:[{sourceBlockId:"scan"}]}]},plan={pages:[{pageNumber:1,summary:{totalOperators:1}}]};
+ assert.throws(()=>requireNativeTextOperators(plan,semantic),/explicit line geometry/);
+ assert.doesNotThrow(()=>requireNativeTextOperators(plan,semantic,{root:{ocrSegments:[{pageNumber:1,sourceBlockId:"scan"}]}}));
+});
 test("auto and explicit native modes refuse empty text attachment without producing a candidate",async t=>{
   const dir=await mkdtemp(path.join(os.tmpdir(),"native-no-text-"));t.after(()=>rm(dir,{recursive:true,force:true}));
   const pdf=await PDFDocument.create();pdf.addPage([612,792]).drawRectangle({x:40,y:100,width:200,height:50});

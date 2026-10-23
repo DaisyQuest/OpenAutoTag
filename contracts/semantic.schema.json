@@ -116,6 +116,30 @@
               "ocr"
             ]
           },
+          "ocrSegments": {
+            "description": "Original OCR lines retained through semantic merges; geometry does not certify transcription accuracy.",
+            "type": "array", "minItems": 1, "maxItems": 10000,
+            "items": {
+              "type": "object", "required": ["sourceBlockId", "text", "geometry"],
+              "properties": {
+                "sourceBlockId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string", "minLength": 1, "maxLength": 32768 },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 100 },
+                "geometry": {
+                  "type": "object", "required": ["coordinateSpace", "imageSize", "recognitionRotationRadians", "pixelBox", "pixelToDisplay", "quad", "clipped"],
+                  "properties": {
+                    "coordinateSpace": { "const": "crop-display-points" },
+                    "imageSize": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 1 } },
+                    "recognitionRotationRadians": { "type": "number", "minimum": -3.141593, "maximum": 3.141593 },
+                    "pixelBox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number", "minimum": 0 } },
+                    "pixelToDisplay": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "number" } },
+                    "quad": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "type": "number" } },
+                    "clipped": { "type": "boolean" }
+                  }, "additionalProperties": false
+                }
+              }, "additionalProperties": false
+            }
+          },
           "referenceMarkers": {
             "type": "array",
             "uniqueItems": true,
@@ -437,6 +461,8 @@
     "semanticReviewTasks": { "type": "array", "items": { "type": "object", "required": ["code"], "properties": {
       "code": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
       "nodeId": { "type": "string" }, "widgetId": { "type": "string" }, "relatedNodeId": { "type": "string" },
+      "nativeText": { "type": "string" }, "ocrText": { "type": "string" },
+      "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } },
       "candidates": { "type": "array", "items": { "type": "string" } }
     }, "additionalProperties": false } },
     "relations": {

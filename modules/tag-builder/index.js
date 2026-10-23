@@ -1,4 +1,5 @@
 import Ajv2020 from "ajv/dist/2020.js";
+import { attachOcrSegments } from "./ocr-segments.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
@@ -2186,6 +2187,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
     applyLayoutAttrsToTree(root, sourceNodesById);
   }
 
+  attachOcrSegments(root, semanticDocument);
   const taggingDocument = {
     schemaVersion: "1.0.0",
     documentId: `${semanticDocument.documentId}:tagging`,

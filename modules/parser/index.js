@@ -536,11 +536,18 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
     (ocrCharacterCount >= nativeSummary.characterCount + ocrOptions.minCharacterGain &&
       ocrCharacterCount >= nativeSummary.characterCount * ocrOptions.characterGainMultiplier);
 
-  if (!shouldReplaceNativeText) {
+  const aligned = forceReplaceViaHybrid ? { blocks: ocrResult.textBlocks.map(b=>textEvidence(b,"ocr")), suppressed: 0,
+    conflicts: [{ code: "OCR_HYBRID_REPLACEMENT_REVIEW" }] } : alignOcrText(page.textBlocks, ocrResult.textBlocks);
+  // A small separate OCR region does not need to exceed the entire page's
+  // native character count. Only explicitly mapped regions qualify here.
+  const hasMappedAddition = aligned.blocks.some(b => b.textProvenance === "ocr" && b.ocrGeometry && !b.ocrGeometry.clipped);
+  if (!shouldReplaceNativeText && !hasMappedAddition) {
     return {
       ...page,
       ocr: {
         status: "retained-native-text",
+        suppressedDuplicates: aligned.suppressed,
+        alignmentReview: aligned.conflicts,
         trigger: nativeSummary,
         selectedCandidate,
         candidates: ocrResult.candidates,
@@ -549,12 +556,14 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
     };
   }
 
-  const aligned = forceReplaceViaHybrid ? { blocks: ocrResult.textBlocks.map(b=>textEvidence(b,"ocr")), suppressed: 0,
-    conflicts: [{ code: "OCR_HYBRID_REPLACEMENT_REVIEW" }] } : alignOcrText(page.textBlocks, ocrResult.textBlocks);
+  const blocks = reindexBlocks(page.pageNumber, aligned.blocks.map(b => ({...b, alignmentOriginalId:b.id})));
+  const remap = new Map(blocks.map(b => [b.alignmentOriginalId,b.id]));
+  for(const b of blocks)delete b.alignmentOriginalId;
+  const conflicts=aligned.conflicts.map(c=>({...c,...(c.nativeBlockIds?{nativeBlockIds:c.nativeBlockIds.map(id=>remap.get(id)||id)}:{})}));
   return {
     ...page,
     nativeTextBlocks: page.textBlocks,
-    textBlocks: reindexBlocks(page.pageNumber, aligned.blocks),
+    textBlocks: blocks,
     // Public flag: downstream consumers (semantic engine, tag-builder)
     // use this to inject /ActualText on struct leaves built from hybrid
     // pages — the content stream still has the garbled source OCR text
@@ -564,7 +573,7 @@ function buildSelectedPageResult(page, nativeSummary, ocrResult, ocrOptions) {
       status: "applied",
       mergeStrategy: forceReplaceViaHybrid ? "replace-suspect-ocr-review-required" : "retain-native-add-nonoverlapping-ocr",
       suppressedDuplicates: aligned.suppressed,
-      alignmentReview: aligned.conflicts,
+      alignmentReview: conflicts,
       trigger: nativeSummary,
       selectedCandidate,
       candidates: ocrResult.candidates,

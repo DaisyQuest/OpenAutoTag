@@ -16,6 +16,8 @@
           "operatorIndex": { "type": "integer", "minimum": 0 }, "glyphStart": { "type": "integer", "minimum": 0 }, "glyphEnd": { "type": "integer", "minimum": 0 },
           "owners": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
           "artifact": { "type": "boolean" }, "fontName": { "type": "string" },
+          "fontEmbedded": { "type": "boolean" },
+          "renderingMode": { "type": "integer", "minimum": 0, "maximum": 7 },
           "positions": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 8, "maxItems": 8 } },
           "glyphs": { "type": "array", "items": { "type": "array", "prefixItems": [{ "type": "integer" }, { "type": "string" }], "minItems": 2, "maxItems": 2 } }
         }, "additionalProperties": false

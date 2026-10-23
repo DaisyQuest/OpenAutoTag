@@ -17,7 +17,7 @@ export function alignOcrText(nativeBlocks, ocrBlocks) {
     if(peers.length) {
       suppressed++;
       const nativeText=peers.map(n=>n.text).join(" ");
-      if(comparisonText(nativeText)!==comparisonText(ocr.text)) conflicts.push({code:"OCR_NATIVE_CONFLICT",nativeBlockIds:peers.map(n=>n.id),ocrText:ocr.text,bbox:ocr.bbox});
+      if(comparisonText(nativeText)!==comparisonText(ocr.text)) conflicts.push({code:"OCR_NATIVE_CONFLICT",nativeBlockIds:peers.map(n=>n.id),nativeText,ocrText:ocr.text,bbox:ocr.bbox});
     } else blocks.push(textEvidence(ocr,"ocr"));
   }
   blocks.sort((a,b)=>a.bbox[1]-b.bbox[1]||a.bbox[0]-b.bbox[0]);

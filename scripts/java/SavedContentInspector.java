@@ -55,6 +55,10 @@ final class SavedContentInspector {
             int start = (Integer)run.get("glyphStart"), end = (Integer)run.get("glyphEnd");
             if (end > page.size()) throw new IOException("Independent glyph-position count mismatch");
             run.put("positions", new ArrayList<>(page.subList(start, end)));
+            List<Integer> modes=positions.modes.getOrDefault((Integer)run.get("pageNumber"),List.of());
+            Set<Integer> used=new HashSet<>(modes.subList(start,end));
+            if(used.size()>1)throw new IOException("Text rendering mode changed within a text operator");
+            if(!used.isEmpty())run.put("renderingMode",used.iterator().next());
         }
         for (var entry : positions.pages.entrySet()) {
             int counted = textRuns.stream().filter(r -> entry.getKey().equals(r.get("pageNumber"))).mapToInt(r -> (Integer)r.get("glyphEnd") - (Integer)r.get("glyphStart")).sum();
@@ -66,10 +70,11 @@ final class SavedContentInspector {
      * legacy TextPosition heuristics and ActualText substitution entirely. */
     private static final class GlyphPositions extends org.apache.pdfbox.text.PDFTextStripper {
         final Map<Integer, List<List<Double>>> pages = new LinkedHashMap<>();
+        final Map<Integer, List<Integer>> modes = new LinkedHashMap<>();
         int pageNumber, count;
-        GlyphPositions() throws IOException { super(); }
+        GlyphPositions() throws IOException { super(); addOperator(new org.apache.pdfbox.contentstream.operator.text.SetTextRenderingMode(this)); }
         @Override public void processPage(PDPage page) throws IOException {
-            pages.put(++pageNumber, new ArrayList<>()); super.processPage(page);
+            pages.put(++pageNumber, new ArrayList<>()); modes.put(pageNumber,new ArrayList<>()); super.processPage(page);
         }
         @Override protected void showGlyph(org.apache.pdfbox.util.Matrix matrix, PDFont font, int code, org.apache.pdfbox.util.Vector displacement) throws IOException {
             if (++count > 2000000) throw new IOException("Glyph-position limit exceeded");
@@ -77,6 +82,7 @@ final class SavedContentInspector {
                 (double)matrix.getScaleY(), (double)matrix.getTranslateX(), (double)matrix.getTranslateY(), (double)displacement.getX(), (double)displacement.getY());
             if (values.stream().anyMatch(v -> !Double.isFinite(v))) throw new IOException("Nonfinite saved glyph position");
             pages.get(pageNumber).add(values);
+            modes.get(pageNumber).add(getGraphicsState().getTextState().getRenderingMode().intValue());
         }
     }
 
@@ -169,6 +175,7 @@ final class SavedContentInspector {
                         run.put("glyphStart", pageGlyphs); run.put("owners", owners.stream().map(i -> i.key).toList());
                         run.put("artifact", frames.stream().anyMatch(Frame::artifact));
                         run.put("fontName", state.font == null ? "" : state.font.getName());
+                        run.put("fontEmbedded", state.font != null && state.font.isEmbedded());
                         List<List<Object>> decoded = new ArrayList<>(); text(args.get(args.size()-1), state.font, owners, decoded);
                         run.put("glyphs", decoded); run.put("glyphEnd", pageGlyphs);
                         if (textRuns.size() >= 100000) throw new IOException("Saved text run limit exceeded");

@@ -10,6 +10,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,6 +29,7 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
+import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.contentstream.PDContentStream;
@@ -356,6 +359,7 @@ public class NativeContentStreamRewriter {
         String id;
         String type;
         List<TagTreeNode> children = new ArrayList<>();
+        List<OcrTextLayer.Line> ocrSegments = new ArrayList<>();
         String lang;
         String alt;
         String actualText;
@@ -380,6 +384,11 @@ public class NativeContentStreamRewriter {
         Map<String, Object> m = asMap(o);
         TagTreeNode n = new TagTreeNode();
         n.id = asString(m.get("id"));
+        for (Object value : asList(m.get("ocrSegments"))) {
+            Map<String,Object> entry=asMap(value); List<Object> quad=asList(entry.get("quad"));
+            double[] points=new double[quad.size()]; for(int i=0;i<points.length;i++)points[i]=asDouble(quad.get(i));
+            n.ocrSegments.add(new OcrTextLayer.Line(n.id,asString(m.get("type")),requiredInteger(entry,"pageNumber"),asString(entry.get("text")),points));
+        }
         // tag-builder uses "type" for the PDF tag role; sourceNode.role
         // is the semantic role. Prefer "type" when present.
         Object type = m.get("type");
@@ -1735,8 +1744,26 @@ public class NativeContentStreamRewriter {
     //  CLI entry point
     // ---------------------------------------------------------------
 
+    private static void collectOcrLines(TagTreeNode node, List<OcrTextLayer.Line> lines) {
+        if(node==null)return;
+        lines.addAll(node.ocrSegments);
+        for(TagTreeNode child:node.children)collectOcrLines(child,lines);
+    }
+
+    private static int countStructureElements(COSBase raw, Set<COSBase> seen, int depth) throws IOException {
+        if(depth>128 || seen.size()>200000)throw new IOException("Structure count limit exceeded");
+        COSBase value=raw instanceof COSObject?((COSObject)raw).getObject():raw;
+        if(value==null || !seen.add(value))return 0;
+        int count=0;
+        if(value instanceof COSArray)for(COSBase child:(COSArray)value)count+=countStructureElements(child,seen,depth+1);
+        else if(value instanceof COSDictionary && "StructElem".equals(((COSDictionary)value).getNameAsString(COSName.TYPE)))
+            count=1+countStructureElements(((COSDictionary)value).getItem(COSName.K),seen,depth+1);
+        return count;
+    }
+
     public static void main(String[] args) throws Exception {
         String pdfPath = null;
+        String ocrFontPath = null;
         String planPath = null;
         String outputPath = null;
         String tagsPath = null;
@@ -1753,6 +1780,9 @@ public class NativeContentStreamRewriter {
             switch (args[i]) {
                 case "--pdf":
                     if (i + 1 < args.length) pdfPath = args[++i];
+                    break;
+                case "--ocr-font":
+                    if (i + 1 < args.length) ocrFontPath = args[++i];
                     break;
                 case "--plan":
                 case "--tag-plan":
@@ -1787,8 +1817,6 @@ public class NativeContentStreamRewriter {
         // Parse the tag plan
         String planJson = readFile(planPath);
         List<PagePlan> plans = parseTagPlan(planJson);
-        int originalAssignmentCount = 0;
-        for (PagePlan plan : plans) originalAssignmentCount += plan.assignments.size();
         int splitMarkedContentRuns = 0;
         TagTreeNode tagTree = tagsPath == null ? null : parseTaggingTree(readFile(tagsPath));
         Map<String,TagTreeNode> listLabels=new HashMap<>();collectListLabels(tagTree,listLabels);
@@ -1797,6 +1825,18 @@ public class NativeContentStreamRewriter {
 
         // Load and modify the PDF
         try (PDDocument doc = Loader.loadPDF(new File(pdfPath))) {
+            List<OcrTextLayer.Line> ocrLines=new ArrayList<>(); collectOcrLines(tagTree,ocrLines);
+            PDFont ocrFont=null;
+            if (!ocrLines.isEmpty()) {
+                if (ocrFontPath==null) throw new IOException("OCR requires an explicit embedded font");
+                if (ocrLines.size()>100000) throw new IOException("OCR line limit exceeded");
+                ocrFont=org.apache.pdfbox.pdmodel.font.PDType0Font.load(doc,new File(ocrFontPath));
+                Set<Integer> plannedPages=new HashSet<>();for(PagePlan p:plans)plannedPages.add(p.pageNumber);
+                for(OcrTextLayer.Line line:ocrLines) {
+                    if(line.pageNumber()<1 || line.pageNumber()>doc.getNumberOfPages() || !plannedPages.contains(line.pageNumber())) throw new IOException("OCR page is not in the native plan");
+                    OcrTextLayer.validate(doc.getPage(line.pageNumber()-1),line,ocrFont);
+                }
+            }
             AuthoredText authoredText = new AuthoredText(doc);
             List<String> suppressedActualText = new ArrayList<>();
             int totalAssignments = 0;
@@ -1820,10 +1860,18 @@ public class NativeContentStreamRewriter {
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");
 
                 RewriteResult res = rewritePageContentStream(doc, page, plan, listLabels, authoredText);
+                List<OcrTextLayer.Line> pageLines=ocrLines.stream().filter(l->l.pageNumber()==plan.pageNumber).toList();
+                int ocrMcid=plan.assignments.stream().mapToInt(a->a.mcid).max().orElse(-1)+1;
+                OcrTextLayer.append(doc,page,pageLines,ocrFont,ocrMcid);
+                for(OcrTextLayer.Line line:pageLines) {
+                    Assignment a=new Assignment();a.tagNodeId=line.tagId();a.tagType=line.type();a.mcid=ocrMcid++;a.emitted=true;
+                    OpRef ref=new OpRef();ref.x=line.quad()[6];ref.y=line.quad()[7];ref.text=line.text();a.operators.add(ref);
+                    plan.assignments.add(a);
+                }
                 totalAssignments += plan.assignments.size();
                 totalMcids += plan.assignments.size();
                 totalArtifacts += res.artifactWrapped;
-                totalTaggedWrapped += res.taggedWrapped;
+                totalTaggedWrapped += res.taggedWrapped + pageLines.size();
                 totalSkippedInsideSourceMC += res.skippedInsideSourceMarkedContent;
                 pagesRewritten++;
             }
@@ -1890,7 +1938,8 @@ public class NativeContentStreamRewriter {
             for (int i = 0; i < suppressedActualText.size(); i++) { if (i > 0) json.append(','); json.append(escapeJson(suppressedActualText.get(i))); }
             json.append(']');
             json.append(",\"totalAssignments\":").append(totalAssignments);
-            json.append(",\"structureElementCount\":").append(originalAssignmentCount);
+            json.append(",\"ocrTextLines\":").append(ocrLines.size());
+            json.append(",\"structureElementCount\":").append(countStructureElements(doc.getDocumentCatalog().getStructureTreeRoot().getCOSObject().getItem(COSName.K),Collections.newSetFromMap(new IdentityHashMap<>()),0));
             json.append(",\"markedContentCount\":").append(totalTaggedWrapped);
             json.append(",\"totalMcids\":").append(totalMcids);
             json.append(",\"totalArtifactWraps\":").append(totalArtifacts);

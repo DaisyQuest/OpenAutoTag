@@ -383,6 +383,8 @@ public class NativeTagMatcher {
         List<SemanticNode> result = new ArrayList<>();
         for (Object nodeObj : nodes) {
             Map<String, Object> nm = asMap(nodeObj);
+            // OCR has no source glyphs. It must never capture nearby native paint.
+            if ("ocr".equals(asString(nm.get("textProvenance")))) continue;
             SemanticNode sn = new SemanticNode();
             sn.id = asString(nm.get("id"));
             sn.pageNumber = asInt(nm.get("pageNumber"));

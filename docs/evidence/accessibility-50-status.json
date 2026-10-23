@@ -323,8 +323,11 @@
       "improvement": "Image-only tagged text layer",
       "requirement": "Insert a tagged invisible text layer for accepted OCR on image-only pages.",
       "acceptance": "Official poster and synthetic scans expose saved text with complete ownership and unchanged images.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch12-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A28",
@@ -332,8 +335,11 @@
       "improvement": "Mixed-page OCR attachment",
       "requirement": "Attach OCR-only regions without duplicating native text or losing conflicts.",
       "acceptance": "Booklet mixed page gains OCR attachments; overlapping native/OCR conflicts remain explicit review tasks.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch12-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A29",

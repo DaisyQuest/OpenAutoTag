@@ -3,6 +3,13 @@ import assert from "node:assert/strict";
 import { mergeWithStrategy } from "../index.js";
 const node=(id,text,y,extra={})=>({id,sourceBlockId:`source-${id}`,text,rawText:text,comparisonText:text,role:"P",pageNumber:1,bbox:[72,y,240,12],fontSize:12,...extra});
 for(const strategy of ["pairwise","text-structure"]) {
+ test(`${strategy} preserves OCR lines and cannot merge them with native text`,()=>{
+  const a=node("a","This line continues",100,{textProvenance:"ocr",ocrSegments:[{sourceBlockId:"a",text:"This line continues",geometry:{quad:[1,2,3,4,5,6,7,8]}}]}),
+    b=node("b","onto this one",114,{textProvenance:"ocr",ocrSegments:[{sourceBlockId:"b",text:"onto this one",geometry:{quad:[11,12,13,14,15,16,17,18]}}]});
+  const merged=mergeWithStrategy({nodes:[a,b]},{strategy}).document.nodes;assert.equal(merged.length,1);
+  assert.deepEqual(merged[0].ocrSegments,[...a.ocrSegments,...b.ocrSegments]);
+  assert.equal(mergeWithStrategy({nodes:[a,{...b,textProvenance:"native",ocrSegments:undefined}]},{strategy}).document.nodes.length,2);
+ });
  test(`${strategy} remaps merged node relationships and retains original text identities`,()=>{
   const source={nodes:[node("a","This line continues",100),node("b","onto this one",114),node("h","Next heading",150,{role:"H2"})],
    relations:[{type:"continues",from:"a",to:"b",evidence:"explicit"},{type:"precedes",from:"b",to:"h",evidence:"explicit"}],

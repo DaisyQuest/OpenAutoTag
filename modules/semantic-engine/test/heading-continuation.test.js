@@ -8,6 +8,13 @@ const line = (id, text, y, overrides = {}) => ({
   confidence: 0.98, columnHint: 0, ...overrides
 });
 
+test("OCR heading merges retain line geometry and cannot absorb native heading text",()=>{
+ const a=line("a","Supplemental Affirmation in",35,{textProvenance:"ocr",ocrSegments:[{sourceBlockId:"a",text:"Supplemental Affirmation in",geometry:{quad:[1,2,3,4,5,6,7,8]}}]}),
+ b=line("b","Support of Order to Show Cause",55.7,{textProvenance:"ocr",ocrSegments:[{sourceBlockId:"b",text:"Support of Order to Show Cause",geometry:{quad:[11,12,13,14,15,16,17,18]}}]});
+ assert.deepEqual(mergeHeadingContinuations([a,b]).nodes[0].ocrSegments,[...a.ocrSegments,...b.ocrSegments]);
+ assert.equal(mergeHeadingContinuations([a,{...b,textProvenance:"native"}]).nodes.length,2);
+});
+
 test("wrapped heading lines merge while side metadata and other pages stay separate", () => {
   const nodes = [line("a", "Supplemental Affirmation in", 35),
     line("code", "UCS-CC-5 (07/2026)", 44, { role: "P", bbox: [458, 44, 112, 12], fontSize: 12 }),

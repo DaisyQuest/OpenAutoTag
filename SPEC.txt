@@ -454,8 +454,31 @@ quadrilateral and clipping flag. Missing/mismatched frames or invalid boxes fail
 the recognition candidate. Clipped geometry is explicit and is not acceptance.
 Raster variants are bounded to 36-1200 DPI, 40 million pixels and 32768 pixels
 per side. Oversized pages reject rather than silently changing the requested DPI.
-Geometry evidence does not certify recognized words. Tagged OCR layers, mixed
-native/OCR ownership and correction qualification remain separate requirements.
+Geometry evidence does not certify recognized words. Semantic ocrSegments retain
+the original recognized lines and geometry through paragraph/heading merges;
+native and OCR nodes cannot merge across their provenance boundary. Tagging
+ocrSegments declare each emitted line's page, source identity, exact text and
+display quadrilateral. List labels and bodies receive disjoint line portions.
+The native writer appends embedded, invisible (Tr=3) OCR text to original pages,
+with a real MCID owner and reset graphics context. It never matches OCR nodes
+against native operators. Image-only pages can use native mode when explicit OCR
+geometry is available; missing geometry, invalid quads or unsupported font glyphs
+reject before save. Source images, native paint and form appearances remain in
+place. OCR-only regions may be added without exceeding the native character
+count; overlaps retain native text and preserve both transcriptions, geometry and
+semantic-node references in review tasks, including retained-native decisions.
+Saved ownership checks treat generated OCR as a separately verified page suffix.
+Every original source glyph still requires its original code, position and owner.
+Each declared OCR segment requires exact decoded Unicode, an embedded font,
+invisible rendering mode, exclusive tag ownership and the intended line envelope
+with continuous glyph advances (0.02 display-point tolerance). Undeclared,
+missing, visible, shifted, partial and misowned generated text reject. The tagging
+intent hash binds the OCR declaration. Typed PDFBox serialization bypasses GSUB
+ligature substitution for invisible OCR; it does not normalize recognized text.
+Line envelopes and proportional list splits do not certify tight word/glyph
+selection, transcription accuracy, diagram meaning, reading order, multilingual
+shaping or reader behavior. Low-confidence correction qualification and broader
+Unicode fallback remain separate requirements. Candidates still require review.
 Delivery scope and remaining limits: docs/tagging-accuracy-delivery-20261021.md.
 Current evidence: docs/tagging-quality-claims.md. Further proposed work:
 docs/tagging-accuracy-roadmap.md. Delivery history:

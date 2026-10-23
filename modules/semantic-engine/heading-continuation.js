@@ -13,6 +13,7 @@ function continuesText(previous, next) {
 }
 
 function compatible(previous, next, pageNodes) {
+  if ((previous.textProvenance === "ocr") !== (next.textProvenance === "ocr")) return false;
   if (!isHeading(previous) || previous.role !== next.role || previous.pageNumber !== next.pageNumber ||
     !horizontal(previous) || !horizontal(next) || previous.formFieldIds?.length || next.formFieldIds?.length ||
     !fontKey(previous) || !fontKey(next) || !continuesText(previous, next)) return false;
@@ -68,6 +69,7 @@ export function mergeHeadingContinuations(nodes) {
     const top = Math.min(...lines.map((n) => n.bbox[1]));
     return { ...node,
       text: lines.map((n) => n.text.trim()).join(" "),
+      ...(lines.some(n => n.ocrSegments) ? { ocrSegments: lines.flatMap(n => n.ocrSegments || []) } : {}),
       ...(lines.some(n => typeof n.rawText === "string") ? { rawText: lines.map(n => n.rawText ?? n.text).join("\n") } : {}),
       ...(lines.some(n => typeof n.comparisonText === "string") ? { comparisonText: lines.map(n => n.text.trim()).join(" ").normalize("NFKC").replace(/\s+/g," ") } : {}),
       bbox: [left, top,

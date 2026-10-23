@@ -1,5 +1,6 @@
 const unique=values=>[...new Set(values)];
 export function protectedBoundary(a,b) {
+  if((a.textProvenance === "ocr") !== (b.textProvenance === "ocr"))return "native/OCR boundary";
   if(a.pageNumber!==b.pageNumber || (a.columnHint??0)!==(b.columnHint??0))return "page or column boundary";
   if(a.tableId||b.tableId)return "table boundary";
   if(a.regionId&&b.regionId&&a.regionId!==b.regionId)return "region boundary";
@@ -26,6 +27,7 @@ export function preserveSemanticIdentities(source, output) {
       if(parts.some(p=>typeof p.rawText==="string"))n.rawText=parts.map(p=>p.rawText??p.text).join("\n");
       if(parts.some(p=>typeof p.comparisonText==="string"))n.comparisonText=n.text.normalize("NFKC").replace(/\s+/g," ").trim();
       if(parts.some(p=>p.referenceMarkers))n.referenceMarkers=unique(parts.flatMap(p=>p.referenceMarkers||[]));
+      if(parts.some(p=>p.ocrSegments))n.ocrSegments=parts.flatMap(p=>p.ocrSegments||[]);
     }
   }
   const resolve=id=>mapping.get(id)||id,resolveAll=ids=>unique(ids.map(resolve));

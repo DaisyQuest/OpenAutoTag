@@ -167,6 +167,7 @@ async function needsCompilation() {
 
 function collectNativeJavaSources() {
   const sources = ["QualifiedFontRepairs.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
+  sources.push(path.join(nativeJavaDir, "OcrTextLayer.java"));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);
   }
@@ -644,6 +645,7 @@ async function runNativeRewriter({ pdfPath, tagPlanPath, tagsPath, outputPath, r
   // instead of the legacy flat Document-has-all-leaves shape.
   if (tagsPath) {
     args.push("--tags", tagsPath);
+    args.push("--ocr-font", path.join(repoRoot, "modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf"));
   }
   if (title) {
     args.push("--title", title);
@@ -688,7 +690,7 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
   }
 
   const tagPlan = cached?.plan ?? JSON.parse(await readFile(tagPlanPath, "utf8"));
-  requireNativeTextOperators(tagPlan, JSON.parse(await readFile(semanticPath, "utf8")));
+  requireNativeTextOperators(tagPlan, JSON.parse(await readFile(semanticPath, "utf8")), JSON.parse(intentBytes));
 
   const rewriterStdout = await runNativeRewriter({
     pdfPath: path.resolve(pdfPath),
@@ -732,6 +734,7 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
     markedContentCount: rewriterReport.markedContentCount || 0,
     totalArtifactWraps: rewriterReport.totalArtifactWraps || 0,
     splitMarkedContentRuns: rewriterReport.splitMarkedContentRuns || 0,
+    ocrTextLines: rewriterReport.ocrTextLines || 0,
     preservedAuthoredTextScopes: rewriterReport.preservedAuthoredTextScopes || 0,
     shadowedAuthoredTextScopes: rewriterReport.shadowedAuthoredTextScopes || 0,
     suppressedGeneratedActualText: rewriterReport.suppressedGeneratedActualText || [],
@@ -844,7 +847,11 @@ async function resolveWriterMode({
         sourceLanguage
       };
     }
-    if (meanMatchRate >= nativeMatchThreshold) {
+    const semantic = JSON.parse(await readFile(semanticPath, "utf8"));
+    const tagging = JSON.parse(await readFile(tagsPath, "utf8"));
+    const hasOcr = semantic.nodes.some(n => n.textProvenance === "ocr" && n.ocrSegments?.length);
+    if (hasOcr) requireNativeTextOperators(tagPlan, semantic, tagging);
+    if (meanMatchRate >= nativeMatchThreshold || operatorCount === 0 && hasOcr) {
       return {
         effectiveMode: "native",
         probeMatchRate: meanMatchRate,
@@ -1071,6 +1078,7 @@ export async function writeTaggedArtifacts({
         markedContentCount: nativeReport.markedContentCount,
         totalArtifactWraps: nativeReport.totalArtifactWraps || 0,
         splitMarkedContentRuns: nativeReport.splitMarkedContentRuns || 0,
+        ocrTextLines: nativeReport.ocrTextLines || 0,
         preservedAuthoredTextScopes: nativeReport.preservedAuthoredTextScopes || 0,
         shadowedAuthoredTextScopes: nativeReport.shadowedAuthoredTextScopes || 0,
         suppressedGeneratedActualText: nativeReport.suppressedGeneratedActualText || [],
@@ -1105,6 +1113,7 @@ export async function writeTaggedArtifacts({
       markedContentCount: nativeReport.markedContentCount,
       totalArtifactWraps: nativeReport.totalArtifactWraps || 0,
       splitMarkedContentRuns: nativeReport.splitMarkedContentRuns || 0,
+      ocrTextLines: nativeReport.ocrTextLines || 0,
       preservedAuthoredTextScopes: nativeReport.preservedAuthoredTextScopes || 0,
       shadowedAuthoredTextScopes: nativeReport.shadowedAuthoredTextScopes || 0,
       suppressedGeneratedActualText: nativeReport.suppressedGeneratedActualText || [],

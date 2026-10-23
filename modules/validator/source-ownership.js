@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { inspectOcrLayer } from "./ocr-layer.js";
 
 const address = r => `${r.pageNumber}:${r.streamOrigin}:${r.operatorIndex}`;
 const glyphKey = (page, index) => `${page}:${index}`;
@@ -11,6 +12,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
   add("SOURCE_OWNERSHIP_HASH", "document", source.sourceHash, ownership.sourceHash);
   add("SOURCE_TEXT_INSPECTED", "document", true, Array.isArray(source.textRuns));
   add("SAVED_TEXT_INSPECTED", "document", true, Array.isArray(inspection.textRuns));
+  const ocr = inspectOcrLayer({inspection,source,intendedNodes,add});
   const sourceRuns = new Map(), sourcePages = new Map(), actualPages = new Map(), sourcePositions = new Map(), actualPositions = new Map();
   const group = (runs, pages) => {
     for (const run of runs || []) {
@@ -22,7 +24,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
       for (const point of run.positions || []) points.push(point); positions.set(run.pageNumber, points);
     }
   };
-  group(source.textRuns, sourcePages); group(inspection.textRuns, actualPages);
+  group(source.textRuns, sourcePages); group(ocr.nativeRuns, actualPages);
   for (const run of source.textRuns || []) {
     if (sourceRuns.has(address(run))) add("DUPLICATE_SOURCE_ADDRESS", address(run), false, true);
     sourceRuns.set(address(run), run);
@@ -36,7 +38,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
       a.every((point, i) => point.length === 8 && b[i]?.length === 8 && point.every((v, j) => Math.abs(v - b[i][j]) <= 0.001));
     add("SOURCE_GLYPH_POSITIONS", `page:${page}`, true, positionsMatch); sequenceMatches &&= positionsMatch;
   }
-  const expectedOwners = new Map(), byTag = new Map(intendedNodes.map(v => [v.n.id, v.id]));
+  const expectedOwners = new Map(ocr.owners), byTag = new Map(intendedNodes.map(v => [v.n.id, v.id]));
   for (const range of ownership.ranges) {
     const run = sourceRuns.get(address(range)), owner = byTag.get(range.tagNodeId);
     const valid = Boolean(run && owner && range.glyphStart >= 0 && range.glyphEnd > range.glyphStart && range.glyphEnd <= run.glyphs.length);
@@ -74,7 +76,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
     add("SOURCE_PAINT_OWNER", `${address(run)}:glyphs:${run.glyphStart}-${run.glyphEnd}`, true, valid);
     if (!valid) allOwnersMatch = false;
   }
-  result.sourceVerified = sequenceMatches && allOwnersMatch;
+  result.sourceVerified = sequenceMatches && allOwnersMatch && ocr.valid;
   return result;
 }
 

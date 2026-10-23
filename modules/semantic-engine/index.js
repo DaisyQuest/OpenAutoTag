@@ -579,6 +579,10 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     ...(typeof block.rawText === "string" ? { rawText: block.rawText } : {}),
     ...(typeof block.comparisonText === "string" ? { comparisonText: block.comparisonText } : {}),
     ...(block.textProvenance ? { textProvenance: block.textProvenance } : {}),
+    ...(block.textProvenance === "ocr" && block.ocrGeometry ? { ocrSegments: [{
+      sourceBlockId: block.id, text: block.text, geometry: block.ocrGeometry,
+      ...(Number.isFinite(block.ocrConfidence) ? { confidence: block.ocrConfidence } : {})
+    }] } : {}),
     ...(block.referenceMarkers ? { referenceMarkers: [...block.referenceMarkers] } : {}),
     bbox: block.bbox,
     ...(Number.isFinite(block.fontSize) ? { fontSize: block.fontSize } : {}),
@@ -972,7 +976,13 @@ export async function buildSemanticDocument(inputPath, options) {
   semanticDocument.relations.push(...pairRelations, ...regions.relations, ...figures.relations, ...boundaries.relations);
   semanticDocument.semanticReviewTasks.push(...running.tasks, ...pairTasks, ...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
   for(const page of layoutDocument.pages) {
-    for(const conflict of page.ocr?.alignmentReview||[]) semanticDocument.semanticReviewTasks.push({code:conflict.code,pageNumber:page.pageNumber,candidates:conflict.nativeBlockIds||[]});
+    for(const conflict of page.ocr?.alignmentReview||[]) semanticDocument.semanticReviewTasks.push({
+      code:conflict.code,pageNumber:page.pageNumber,
+      candidates:semanticDocument.nodes.filter(n=>n.pageNumber===page.pageNumber&&(n.sourceBlockIds||[n.sourceBlockId]).some(id=>conflict.nativeBlockIds?.includes(id))).map(n=>n.id),
+      ...(typeof conflict.nativeText==="string"?{nativeText:conflict.nativeText}:{}),
+      ...(typeof conflict.ocrText==="string"?{ocrText:conflict.ocrText}:{}),
+      ...(conflict.bbox?{bbox:conflict.bbox}:{})
+    });
     if(page.imageEvidenceError)semanticDocument.semanticReviewTasks.push({code:"FIGURE_EVIDENCE_INCOMPLETE",pageNumber:page.pageNumber});
   }
   semanticDocument.semanticReviewTasks = [...new Map(semanticDocument.semanticReviewTasks.map(t => [JSON.stringify(t),t])).values()];
