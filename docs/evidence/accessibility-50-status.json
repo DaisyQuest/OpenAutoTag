@@ -203,8 +203,11 @@
       "improvement": "Running-text discrimination",
       "requirement": "Distinguish repeated headers/footers from repeated meaningful body text.",
       "acceptance": "Location-varying pagination is recognized; body repetitions and section titles are retained.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch8-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A18",
@@ -212,8 +215,11 @@
       "improvement": "Numbered heading false positives",
       "requirement": "Separate section numbering from decimals, dates and numbered list items.",
       "acceptance": "Adversarial numeric examples keep their correct roles while evidenced numbered headings remain headings.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch8-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A19",
@@ -221,8 +227,11 @@
       "improvement": "Wrapped heading style boundaries",
       "requirement": "Improve heading continuation across mixed fonts and adjacent subtitles.",
       "acceptance": "A heading wraps completely without swallowing a differently ranked subtitle or body line.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch8-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A20",
@@ -230,8 +239,11 @@
       "improvement": "Section hierarchy consistency",
       "requirement": "Keep section containers consistent with corrected heading ranks and membership.",
       "acceptance": "Saved nested sections agree with the approved outline after heading demotion and rank refinement.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch8-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A21",

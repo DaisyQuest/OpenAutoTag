@@ -1,4 +1,5 @@
 // Bounded semantic refinements. Content identities and text are never discarded.
+import { numericContentKind } from "./numbered-headings.js";
 const heading = (n) => /^H[1-6]$/.test(n.role);
 const clean = (s) => String(s || "").normalize("NFKC").replace(/\s+/g, " ").trim();
 const column = (a, b) => (a.columnHint ?? 0) === (b.columnHint ?? 0);
@@ -8,9 +9,22 @@ const eligible = (n) => !n.tableId && !n.formFieldIds?.length && !n.artifactType
 
 export function refineHeadingMembership(nodes, pages) {
   const tasks = [], pageById = new Map(pages.map((p) => [p.pageNumber, p]));
+  const bodyFonts = new Map();
+  for(const page of pages) {
+    const sizes=nodes.filter(n=>n.pageNumber===page.pageNumber&&n.role==="P"&&eligible(n)&&Number.isFinite(n.fontSize)).map(n=>n.fontSize).sort((a,b)=>a-b);
+    bodyFonts.set(page.pageNumber,sizes[Math.floor(sizes.length/2)]||0);
+  }
   const repeats = new Map();
   for (const n of nodes.filter(heading)) {
     const text = clean(n.text), page = pageById.get(n.pageNumber);
+    if(n.listGroupId||n.listMarker) {
+      n.role="LI";delete n.headingLevel;n.headingEvidence="explicit-list-membership";continue;
+    }
+    const numericKind=numericContentKind(text),bodySize=bodyFonts.get(n.pageNumber);
+    if(numericKind&&bodySize>0&&n.fontSize<=bodySize*1.25&&!n.formFieldIds?.length) {
+      n.role="P";delete n.headingLevel;n.headingEvidence=`body-size-${numericKind}`;
+      tasks.push({code:"NUMERIC_HEADING_DEMOTED",pageNumber:n.pageNumber,nodeId:n.id});continue;
+    }
     // A short colon/hash label attached to a widget is stronger evidence than typography.
     if (n.formFieldIds?.length && text.length <= 60 && /[:#]\s*$/.test(text) && !/^\d+(?:\.\d+)*[.)]?\s/.test(text)) {
       n.role = "P"; delete n.headingLevel; n.headingEvidence = "short-widget-label";

@@ -1,4 +1,5 @@
 // Document-level evidence refinements. Heuristic scores remain uncalibrated.
+import { numberedSectionLevel } from "./numbered-headings.js";
 const heading = n => /^H[1-6]$/.test(n.role);
 const style = n => n.fontName && Number.isFinite(n.fontSize) ? `${n.fontName.replace(/^[A-Z]{6}\+/, "")}:${Math.round(n.fontSize * 2)}` : null;
 const eligible = n => !n.tableId && !n.formFieldIds?.length && !n.footnoteGroupId && !n.artifactType && !n.semanticRole && !n.labelValuePairId;
@@ -9,9 +10,9 @@ const clean = text => String(text || "").normalize("NFKC").replace(/\s+/g," ").t
 export function inferDocumentHeadings(nodes) {
   const tasks=[], anchors=new Map();
   for(const n of nodes.filter(heading)) {
-    const number=/^\s*(\d+(?:\.\d+){1,5})[.)]?\s+\S/.exec(n.text||"");
+    const number=numberedSectionLevel(n.text);
     const key=style(n); if(!key || !number || !eligible(n)) continue;
-    const group=anchors.get(key)||[]; group.push({node:n,level:number[1].split(".").length}); anchors.set(key,group);
+    const group=anchors.get(key)||[]; group.push({node:n,level:number}); anchors.set(key,group);
   }
   for(const n of nodes.filter(heading)) {
     const group=anchors.get(style(n))||[];

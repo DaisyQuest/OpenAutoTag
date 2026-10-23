@@ -60,3 +60,14 @@ test("independent headings and incompatible layout boundaries are not joined", (
     line("body", "Intervening instructions", 45, { role: "P" }), line("b", "Temporary Relief", 55.7)];
   assert.equal(mergeHeadingContinuations(blocked).nodes.length, 3);
 });
+
+test("mixed bold faces and uppercase connector lines form one heading while subtitle rank is retained",()=>{
+ for(const text of ["An overview","THE BIG PICTURE","For applicants"])assert.equal(mergeHeadingContinuations([line("a","Introduction",35),line("b",text,55.7)]).nodes.length,2,text);
+ for(const fontName of ["ABCDEF+Arial-BoldItalicMT","TimesNewRoman-Bold","Helvetica-Bold"]) {
+  const result=mergeHeadingContinuations([line("a","SUPPLEMENTAL AFFIRMATION",35),
+   line("b","IN SUPPORT OF ORDER TO SHOW CAUSE",55.7,{fontName}),line("subtitle","Instructions for applicants",83,{role:"H3",headingLevel:3,fontSize:14})]);
+  assert.equal(result.nodes.length,2,fontName);assert.equal(result.nodes[0].headingLineCount,2);
+  assert.equal(result.nodes[0].text,"SUPPLEMENTAL AFFIRMATION IN SUPPORT OF ORDER TO SHOW CAUSE");
+  assert.equal(result.nodes[1].role,"H3");assert.deepEqual(result.nodes[0].sourceBlockIds,["b-a","b-b"]);
+ }
+});

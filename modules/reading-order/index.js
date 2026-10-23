@@ -368,6 +368,8 @@ export async function assignReadingOrder(inputPath) {
   const constrainedNodes = applyPrecedence(orderedNodes, semanticDocument.relations);
   const orderedNodeIds = constrainedNodes.map((node, index) => {
     node.readingOrder = index;
+    if(/^H[1-6]$/.test(node.role))node.headingLevel=Number(node.role.slice(1));
+    else delete node.headingLevel;
     return node.id;
   });
 
@@ -379,6 +381,19 @@ export async function assignReadingOrder(inputPath) {
     nodes,
     orderedNodeIds
   };
+  if(semanticDocument.outline) {
+    const previous=new Map(semanticDocument.outline.map(h=>[h.nodeId,h])),stack=[],outline=[],tasks=[];
+    for(const node of constrainedNodes.filter(n=>/^H[1-6]$/.test(n.role))) {
+      const level=Number(node.role.slice(1));
+      while(stack.length&&stack.at(-1).level>=level)stack.pop();
+      const parent=stack.at(-1);
+      outline.push({nodeId:node.id,parentNodeId:parent?.id||null,level,evidence:node.headingEvidence||previous.get(node.id)?.evidence||"final-reading-order",status:"requires-review"});
+      if(level>(parent?.level||0)+1)tasks.push({code:"HEADING_OUTLINE_GAP",nodeId:node.id,...(parent?{relatedNodeId:parent.id}:{})});
+      stack.push({id:node.id,level});
+    }
+    output.outline=outline;
+    output.semanticReviewTasks=[...(semanticDocument.semanticReviewTasks||[]).filter(t=>t.code!=="HEADING_OUTLINE_GAP"),...tasks];
+  }
 
   if (!validateSemantic(output)) {
     throw new Error(`Reading-order output failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);

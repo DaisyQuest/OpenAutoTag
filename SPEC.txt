@@ -86,6 +86,18 @@ task. Both paragraph-merger strategies retain the identities and reconstruct
 qualified touching fragments without adding spaces inside words. These are
 reviewable inferences, not a declaration of correct semantics for every row.
 
+Running-content inference requires cross-page sequence or repeated detached-margin
+evidence and emits artifactEvidence plus review tasks. It protects meaningful
+headings, body text, explicit semantic groups, OCR and nearby form prompts. A
+numbered blank separator may inherit an established pagination sequence; a set
+of number-only cards is not automatically discarded as running content.
+
+Numeric prefixes shared by heading-rank and style-anchor inference distinguish
+supported section numbers from dates, measurements and versions. Body-sized
+numeric content and explicit list membership retain their appropriate roles.
+Qualified heading continuation may cross bold faces while preserving subtitle,
+rank, size, alignment and intervening-content boundaries.
+
 3.4 Reading order
 
 Command:
@@ -93,6 +105,12 @@ Command:
 
 Output:
 `contracts/semantic.schema.json`
+
+Reading order synchronizes headingLevel to final H1-H6 roles and rebuilds outline
+parents in final reading order. Non-headings lose stale headingLevel metadata.
+Tag construction likewise treats the final role as authoritative even when an
+imported correction still carries old detection metadata. Existing heading
+normalization and clamp adjustments remain explicit review information.
 
 3.5 Tag builder
 

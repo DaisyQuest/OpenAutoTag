@@ -1,0 +1,562 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "cd8b221",
+  "completedItems": [
+    "A17",
+    "A18",
+    "A19",
+    "A20"
+  ],
+  "completedTotal": 20,
+  "pendingTotal": 30,
+  "research": [
+    {
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF14",
+      "usedFor": "Running content and pagination artifact distinction"
+    },
+    {
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9",
+      "usedFor": "Heading roles and logical hierarchy"
+    }
+  ],
+  "tests": {
+    "productionBaseline": {
+      "tests": 312,
+      "passed": 312,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "tests": 206,
+      "passed": 206,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalSavedFixture": {
+      "tests": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "overlap": true
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidate": "output/accessibility-50-batch8-20261023/booklet-final/06-candidate.pdf",
+      "candidateHash": "e3d08f42c3fa1b12f6f5931e9db995f67240c22e0cf5c03e16043f16313d7c2e",
+      "layoutHash": "72f226b9517f7b6ff8fddcee8e00a061a6f8d64ca5f334ea497275787f6ba7bb",
+      "finalSemanticRegenerationMatches": true,
+      "saved": {
+        "passed": 14834,
+        "failed": 154
+      },
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 186049,
+        "failedChecks": 31
+      },
+      "disposition": "rejected"
+    },
+    {
+      "id": "hinode",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidate": "output/accessibility-50-batch8-20261023/hinode-final/06-candidate.pdf",
+      "candidateHash": "81b0c56c884c38f3e1a03a617a1d9f686a2106a3dc12649f4fd09e53885431f1",
+      "layoutHash": "e33fd1a30e0d096ff9346f9162023ad0039c2a23ea4f657c537f8d41b95184b5",
+      "finalSemanticRegenerationMatches": true,
+      "saved": {
+        "passed": 489,
+        "failed": 0
+      },
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5246,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    },
+    {
+      "id": "control",
+      "source": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidate": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "layoutHash": "2338295698f37a39221cdf5fc4a157b645226768d2f2ffeb00bc669c8f4f8c5a",
+      "finalSemanticRegenerationMatches": true,
+      "saved": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    }
+  ],
+  "fixture": {
+    "saved": {
+      "passed": 497,
+      "failed": 0
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 3142,
+      "failedChecks": 0
+    },
+    "artifactText": 8,
+    "bodyText": 4,
+    "verifiedSectionTrees": 4,
+    "pixelIdenticalPages": 4,
+    "sourceHash": "d0b95e72953ee552f082b57480f75d20e3bafb9036d4c10f8e182b0394ac3715",
+    "candidateHash": "044b40856199125baf826a15016a4ec8c609b1ada2731afa992596874a57ffab"
+  },
+  "runningContent": {
+    "candidateHash": "e3d08f42c3fa1b12f6f5931e9db995f67240c22e0cf5c03e16043f16313d7c2e",
+    "reader": "PDF.js 4.10.38 marked text content",
+    "verifiedCounters": [
+      {
+        "page": 2,
+        "text": "i",
+        "nodeId": "n-2-40",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 3,
+        "text": "ii",
+        "nodeId": "n-3-23",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 4,
+        "text": "iii",
+        "nodeId": "n-4-43",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 5,
+        "text": "iv",
+        "nodeId": "n-5-1",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 6,
+        "text": "1",
+        "nodeId": "n-6-34",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 7,
+        "text": "2",
+        "nodeId": "n-7-28",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 8,
+        "text": "3",
+        "nodeId": "n-8-38",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 9,
+        "text": "4",
+        "nodeId": "n-9-10",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 10,
+        "text": "5",
+        "nodeId": "n-10-32",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 13,
+        "text": "8",
+        "nodeId": "n-13-24",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 16,
+        "text": "11",
+        "nodeId": "n-16-35",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 17,
+        "text": "12",
+        "nodeId": "n-17-8",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 18,
+        "text": "13",
+        "nodeId": "n-18-8",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 19,
+        "text": "14",
+        "nodeId": "n-19-33",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 20,
+        "text": "15",
+        "nodeId": "n-20-30",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 21,
+        "text": "16",
+        "nodeId": "n-21-30",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 22,
+        "text": "17",
+        "nodeId": "n-22-32",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 23,
+        "text": "18",
+        "nodeId": "n-23-33",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 24,
+        "text": "19",
+        "nodeId": "n-24-12",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 26,
+        "text": "21",
+        "nodeId": "n-26-38",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 27,
+        "text": "22",
+        "nodeId": "n-27-37",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 29,
+        "text": "24",
+        "nodeId": "n-29-34",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 30,
+        "text": "25",
+        "nodeId": "n-30-43",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 31,
+        "text": "26",
+        "nodeId": "n-31-3",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 32,
+        "text": "27",
+        "nodeId": "n-32-31",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 34,
+        "text": "29",
+        "nodeId": "n-34-38",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 35,
+        "text": "30",
+        "nodeId": "n-35-47",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 36,
+        "text": "31",
+        "nodeId": "n-36-38",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 37,
+        "text": "32",
+        "nodeId": "n-37-40",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 39,
+        "text": "34",
+        "nodeId": "n-39-39",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 40,
+        "text": "35",
+        "nodeId": "n-40-43",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 42,
+        "text": "37",
+        "nodeId": "n-42-23",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 44,
+        "text": "39",
+        "nodeId": "n-44-19",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 45,
+        "text": "40",
+        "nodeId": "n-45-20",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 47,
+        "text": "42",
+        "nodeId": "n-47-4",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 48,
+        "text": "43",
+        "nodeId": "n-48-37",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 49,
+        "text": "44",
+        "nodeId": "n-49-44",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 50,
+        "text": "45",
+        "nodeId": "n-50-10",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 53,
+        "text": "48",
+        "nodeId": "n-53-35",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 54,
+        "text": "49",
+        "nodeId": "n-54-18",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 55,
+        "text": "50",
+        "nodeId": "n-55-27",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 56,
+        "text": "51",
+        "nodeId": "n-56-78",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 57,
+        "text": "52",
+        "nodeId": "n-57-72",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 58,
+        "text": "53",
+        "nodeId": "n-58-67",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 59,
+        "text": "54",
+        "nodeId": "n-59-2",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 60,
+        "text": "55",
+        "nodeId": "n-60-2",
+        "paintedAsArtifact": true
+      },
+      {
+        "page": 61,
+        "text": "56",
+        "nodeId": "n-61-2",
+        "paintedAsArtifact": true
+      }
+    ],
+    "retainedSectionTitles": [
+      {
+        "page": 23,
+        "textPrefix": "OBJECTIVES",
+        "contentRefs": [
+          "page:23:stream:page:mcid:0",
+          "page:23:stream:page:mcid:1"
+        ],
+        "paintedAsRealContent": true
+      },
+      {
+        "page": 27,
+        "textPrefix": "OBJECTIVES",
+        "contentRefs": [
+          "page:27:stream:page:mcid:0",
+          "page:27:stream:page:mcid:1"
+        ],
+        "paintedAsRealContent": true
+      },
+      {
+        "page": 30,
+        "textPrefix": "OBJECTIVES",
+        "contentRefs": [
+          "page:30:stream:page:mcid:0",
+          "page:30:stream:page:mcid:1",
+          "page:30:stream:page:mcid:2"
+        ],
+        "paintedAsRealContent": true
+      },
+      {
+        "page": 56,
+        "textPrefix": "ACRONYMS AND ABBREVIATIONS",
+        "contentRefs": [
+          "page:56:stream:page:mcid:0"
+        ],
+        "paintedAsRealContent": true
+      },
+      {
+        "page": 57,
+        "textPrefix": "ACRONYMS AND ABBREVIATIONS",
+        "contentRefs": [
+          "page:57:stream:page:mcid:0"
+        ],
+        "paintedAsRealContent": true
+      },
+      {
+        "page": 58,
+        "textPrefix": "ACRONYMS AND ABBREVIATIONS",
+        "contentRefs": [
+          "page:58:stream:page:mcid:0"
+        ],
+        "paintedAsRealContent": true
+      }
+    ]
+  },
+  "preservedPairs": {
+    "count": 101,
+    "manualSourceOracles": 16,
+    "proofHash": "c593959cb808eea3b901d3beff429f96f716469594bd8343b6aaf059b84e4c36"
+  },
+  "sourceOwnership": {
+    "partitionedOperators": 104,
+    "verifiedPieces": 209,
+    "textBytes": 53667,
+    "tjAdjustments": 615,
+    "allUnchanged": true,
+    "proofHash": "5200ef6453a76f9b7720ae9e8210714d3dea7345a8d1567032b63b1e7788dfec"
+  },
+  "pixels": [
+    {
+      "id": "booklet",
+      "dpi": 96,
+      "pages": 61,
+      "pixelIdenticalPages": 61,
+      "candidateHash": "e3d08f42c3fa1b12f6f5931e9db995f67240c22e0cf5c03e16043f16313d7c2e"
+    },
+    {
+      "id": "nasa-hinode",
+      "dpi": 150,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "candidateHash": "81b0c56c884c38f3e1a03a617a1d9f686a2106a3dc12649f4fd09e53885431f1"
+    },
+    {
+      "id": "test-form-control",
+      "dpi": 150,
+      "pages": 2,
+      "pixelIdenticalPages": 2,
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845"
+    },
+    {
+      "id": "headings-fixture",
+      "dpi": 150,
+      "pages": 4,
+      "pixelIdenticalPages": 4,
+      "candidateHash": "044b40856199125baf826a15016a4ec8c609b1ada2731afa992596874a57ffab"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "nasa-hinode",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "81b0c56c884c38f3e1a03a617a1d9f686a2106a3dc12649f4fd09e53885431f1",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": []
+    },
+    {
+      "id": "test-form-control",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": [
+        {
+          "variant": "source",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        },
+        {
+          "variant": "candidate",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        }
+      ],
+      "filledPagePixelIdentical": true
+    }
+  ],
+  "remainingLimits": [
+    "Human review remains required for all inferences; pixel preservation and machine conformance do not establish reader usability.",
+    "Booklet has unchanged 154 saved failure targets and 31 raw font failures; previous OCR findings remain.",
+    "Ambiguous running text, numeric syntax, ordinary versus subtitle typography and configured heading normalization require review.",
+    "Source coverage, OCR, tables, navigation and forms continue under A21-A50."
+  ]
+}

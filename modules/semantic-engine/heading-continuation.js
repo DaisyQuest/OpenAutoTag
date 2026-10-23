@@ -7,13 +7,18 @@ const horizontal = (node) => (node.writingMode || "horizontal") === "horizontal"
 
 function continuesText(previous, next) {
   const word = String(previous.text || "").trim().match(/([\p{L}\p{M}]+)$/u)?.[1]?.toLowerCase();
-  return CONNECTORS.has(word) || /^\p{Ll}/u.test(String(next.text || "").trim());
+  const nextText=String(next.text||"").trim(),first=nextText.match(/^([\p{L}\p{M}]+)/u)?.[1]?.toLowerCase();
+  const leadingConnector=CONNECTORS.has(first)&&!["a","an","the"].includes(first)&&!/[\p{Ll}]/u.test(nextText);
+  return CONNECTORS.has(word) || leadingConnector || /^\p{Ll}/u.test(nextText);
 }
 
 function compatible(previous, next, pageNodes) {
   if (!isHeading(previous) || previous.role !== next.role || previous.pageNumber !== next.pageNumber ||
     !horizontal(previous) || !horizontal(next) || previous.formFieldIds?.length || next.formFieldIds?.length ||
-    !fontKey(previous) || fontKey(previous) !== fontKey(next) || !continuesText(previous, next)) return false;
+    !fontKey(previous) || !fontKey(next) || !continuesText(previous, next)) return false;
+  // Mixed bold faces can continue one heading. A change to regular text remains
+  // a subtitle boundary unless both lines already use that same face.
+  if(fontKey(previous)!==fontKey(next)&&!([previous,next].every(n=>/bold|semibold|demi|heavy|black/.test(fontKey(n)))))return false;
   if (!Number.isFinite(previous.fontSize) || !Number.isFinite(next.fontSize) ||
     Math.abs(previous.fontSize - next.fontSize) > Math.max(previous.fontSize, next.fontSize) * 0.05 ||
     (previous.columnHint != null && next.columnHint != null && previous.columnHint !== next.columnHint)) return false;

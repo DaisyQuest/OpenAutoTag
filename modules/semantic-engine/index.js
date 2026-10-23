@@ -1,6 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { enrichDocumentRelations } from "./document-relations.js";
 import { inferLabelValuePairs } from "./label-value-pairs.js";
+import { inferRunningContent } from "./running-content.js";
 import { refineHeadingMembership } from "./semantic-quality.js";
 import { listOrdinal } from "./semantic-quality.js";
 import { readFile } from "node:fs/promises";
@@ -919,13 +920,15 @@ export async function buildSemanticDocument(inputPath, options) {
     const pairs = inferLabelValuePairs(pageNodes);
     pairRelations.push(...pairs.relations);
     if(pairs.limited)pairTasks.push({code:"LABEL_VALUE_INFERENCE_LIMIT",pageNumber:page.pageNumber});
-    // A4 BlockQuote is a page-level pass; run it before cross-page passes so
-    // left-margin mode is computed from a single page's paragraphs.
-    markBlockQuotesForPage(pageNodes, {
+    nodes.push(...pageNodes);
+  }
+  const running = inferRunningContent(nodes, layoutDocument.pages);
+  for(const page of layoutDocument.pages) {
+    // Determine the body margin after excluding evidenced running content.
+    markBlockQuotesForPage(nodes.filter(n=>n.pageNumber===page.pageNumber), {
       pageNumber: page.pageNumber,
       thresholdRatio: effectiveOptions.blockQuoteThresholdRatio
     });
-    nodes.push(...pageNodes);
   }
 
   // A9 BibEntry is a document-level pass; it needs headings from all pages
@@ -967,7 +970,7 @@ export async function buildSemanticDocument(inputPath, options) {
     headingMergeSummary: headingMerge.summary
   };
   semanticDocument.relations.push(...pairRelations, ...regions.relations, ...figures.relations, ...boundaries.relations);
-  semanticDocument.semanticReviewTasks.push(...pairTasks, ...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
+  semanticDocument.semanticReviewTasks.push(...running.tasks, ...pairTasks, ...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
   for(const page of layoutDocument.pages) {
     for(const conflict of page.ocr?.alignmentReview||[]) semanticDocument.semanticReviewTasks.push({code:conflict.code,pageNumber:page.pageNumber,candidates:conflict.nativeBlockIds||[]});
     if(page.imageEvidenceError)semanticDocument.semanticReviewTasks.push({code:"FIGURE_EVIDENCE_INCOMPLETE",pageNumber:page.pageNumber});

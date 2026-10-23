@@ -57,11 +57,9 @@ function clampHeadingLevel(level) {
 }
 
 function getDetectedHeadingLevel(node) {
-  if (Number.isInteger(node.headingLevel)) {
-    return clampHeadingLevel(node.headingLevel);
-  }
-
-  if (!String(node.role || "").startsWith("H")) {
+  // Final semantic membership and rank are authoritative. Old detection metadata
+  // must not resurrect demoted headings or undo a corrected rank.
+  if (!/^H[1-6]$/.test(node.role || "")) {
     return null;
   }
 

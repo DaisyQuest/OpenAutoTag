@@ -1,4 +1,5 @@
 import { refineContinuations, contextOrderRelations } from "./semantic-quality.js";
+import { numberedSectionLevel } from "./numbered-headings.js";
 import { contextualFormLabel, compoundDateContexts } from "./form-context.js";
 const labelKey = (value) => String(value || "").normalize("NFKC").replace(/^\s*[☐☑☒]\s*/, "")
   .replace(/\s*\(\s*explain\b[^)]*\)\s*[.:]?\s*$/i, "").replace(/[\s_.:]+$/, "").replace(/\)$/, "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -9,9 +10,9 @@ export function enrichDocumentRelations(nodes, pages) {
   const ordered = [...nodes].sort((a, b) => a.pageNumber - b.pageNumber || a.bbox[1] - b.bbox[1] || a.bbox[0] - b.bbox[0] || a.id.localeCompare(b.id));
   const headingStyles = new Map();
   for (const node of ordered.filter((n) => /^H[1-6]$/.test(n.role))) {
-    const numbered = /^\s*(\d+(?:\.\d+){1,5})[.)]?\s+\S/.exec(node.text || "");
+    const numbered = numberedSectionLevel(node.text);
     if (numbered) {
-      const level = numbered[1].split(".").length;
+      const level = numbered;
       node.role = `H${level}`; node.headingLevel = level;
       node.headingEvidence = "explicit-section-number-depth";
     }
