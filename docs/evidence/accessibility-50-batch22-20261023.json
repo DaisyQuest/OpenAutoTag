@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A38"
+  ],
+  "status": "completed",
+  "baselineCommit": "134d8f51ce7653591ae312cf4810b33489ff600b",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a38-baseline.log",
+      "sha256": "6085462dfbdade2b80b80b023f236f1e033551fb95e3311735bdce619340dbb2",
+      "passed": 722,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "precedingFocused": {
+      "path": "tmp/a38-focused-verified.log",
+      "sha256": "a535dfeb4b578814c31f946ba2cefefe913b054997e78d04709f304480a771f6",
+      "passed": 104,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "path": "tmp/a38-final.log",
+      "sha256": "16d07c7817f15cc682b0ef81e0e0232a3d13dbbd397276a94ead57352759db77",
+      "passed": 27,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 722,
+    "note": "The final full baseline and focused runs overlap. No coverage percentage or human-reader qualification is claimed."
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch22-20261023/groups-final/evidence.json",
+    "sha256": "892f11fc75f8e9423e4803ae7a825253cfe4b630f386cf5d58c8178ac439bd8a",
+    "pages": 16,
+    "boundAnnotations": 8,
+    "reviewAnnotations": 9,
+    "source": {
+      "path": "output\\accessibility-50-batch22-20261023\\groups-final\\source.pdf",
+      "sha256": "9457d4805072421fbf5fe8100d4d24bb1903b50b5db378af5877292d7c3c40f3"
+    },
+    "candidate": {
+      "path": "output\\accessibility-50-batch22-20261023\\groups-final\\candidate.pdf",
+      "sha256": "6c66d139ac37a4227a946b6ab274f42450d6b3597d62db74e88c49c2d56d7646"
+    },
+    "saved": {
+      "path": "output/accessibility-50-batch22-20261023/groups-final/saved.json",
+      "sha256": "b853cbf94ba3b091d23131c5606b4b9ff6736b642ea114378fa70d7d7014bd34",
+      "passed": 1793,
+      "failed": 0
+    },
+    "raw": {
+      "path": "output/accessibility-50-batch22-20261023/groups-final/raw.json",
+      "sha256": "dda73582f6149a299eab2dcbad4ee889c500e9ae036ff3593f03108a20b3a52f",
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 3875,
+      "failedChecks": 0,
+      "engine": {
+        "name": "veraPDF",
+        "version": "1.30.3",
+        "backend": "greenfield",
+        "executionError": null
+      },
+      "fontAuditRun": false
+    },
+    "corruptionsRejected": [
+      "child order",
+      "stolen neighboring span",
+      "incorrect parent pointer",
+      "missing group proof",
+      "forged members",
+      "forged source range order",
+      "group replacement",
+      "extra direct content",
+      "member replacement",
+      "member role"
+    ],
+    "unchangedResaveControlVerified": true,
+    "fieldEdit": "José café 987",
+    "fillSaveReopenVerified": true
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch22-20261023/independent-verification.json",
+    "sha256": "2a70fa1bfe5b04bd97c33a47ea67d8a4568e5466f42915baf3260c10ce50111f",
+    "popplerDpi": 120,
+    "pagePairs": 34,
+    "allPixelIdentical": true,
+    "cases": [
+      {
+        "id": "groups",
+        "sourcePath": "output\\accessibility-50-batch22-20261023\\groups-final\\source.pdf",
+        "sourceHash": "9457d4805072421fbf5fe8100d4d24bb1903b50b5db378af5877292d7c3c40f3",
+        "candidatePath": "output\\accessibility-50-batch22-20261023\\groups-final\\candidate.pdf",
+        "candidateHash": "6c66d139ac37a4227a946b6ab274f42450d6b3597d62db74e88c49c2d56d7646",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 32
+      },
+      {
+        "id": "original-intent",
+        "sourcePath": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidatePath": "output\\accessibility-50-batch22-20261023\\original-intent\\candidate.pdf",
+        "candidateHash": "307253fe4addc6dc4c5fab6f2e711380f6b92196c0b01f47567d65518bb155dd",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 1
+      },
+      {
+        "id": "split-url-intent",
+        "sourcePath": "output\\public-pdf-pilot-20261022\\inputs\\nasa-hinode.pdf",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidatePath": "output\\accessibility-50-batch22-20261023\\split-url-intent\\candidate.pdf",
+        "candidateHash": "5cd0ffffdff2e38f43c97c337f8e67963db0b73a5b621e02ef44077204aa1e1b",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "pagePairs": 1
+      }
+    ],
+    "note": "Original text bytes/TJ spacing, page geometry, annotations, field values and widget AP bytes verified. Whole resource dictionary byte equality is not claimed."
+  },
+  "real": {
+    "path": "output/accessibility-50-batch22-20261023/real-evidence.json",
+    "sha256": "dc5ae06d2343c820f20082e45d975f9e2f2c76c3852b40c1545206d83a76e877",
+    "cases": [
+      {
+        "id": "original-intent",
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidatePath": "output/accessibility-50-batch22-20261023/original-intent/candidate.pdf",
+        "candidateHash": "307253fe4addc6dc4c5fab6f2e711380f6b92196c0b01f47567d65518bb155dd",
+        "tagsPath": "output/accessibility-50-batch22-20261023/original-intent/tags.json",
+        "semanticPath": "output/accessibility-50-batch22-20261023/original-intent/semantic.json",
+        "provenance": {
+          "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+          "sourcePdfUnchanged": true,
+          "controlledIntentVariant": false,
+          "description": "Batch 10 corrected reading-order intent."
+        },
+        "bound": 4,
+        "grouped": 0,
+        "saved": {
+          "passed": 1043,
+          "failed": 0
+        },
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 5246,
+          "failedChecks": 0
+        }
+      },
+      {
+        "id": "split-url-intent",
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidatePath": "output/accessibility-50-batch22-20261023/split-url-intent/candidate.pdf",
+        "candidateHash": "5cd0ffffdff2e38f43c97c337f8e67963db0b73a5b621e02ef44077204aa1e1b",
+        "tagsPath": "output/accessibility-50-batch22-20261023/split-url-intent/tags.json",
+        "semanticPath": "output/accessibility-50-batch22-20261023/split-url-intent/semantic.json",
+        "provenance": {
+          "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+          "sourcePdfUnchanged": true,
+          "controlledIntentVariant": true,
+          "description": "One URL split into two consecutive Span intents using exact source glyph geometry; synthetic intent variation, not a new natural corpus example."
+        },
+        "bound": 4,
+        "grouped": 1,
+        "saved": {
+          "passed": 1062,
+          "failed": 0
+        },
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 5265,
+          "failedChecks": 0
+        }
+      }
+    ],
+    "note": "Unchanged official NASA source with batch 10 intent and a separately disclosed two-span URL intent variation; no new natural corpus example."
+  },
+  "unchangedControls": [
+    {
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "rerun": false
+    },
+    {
+      "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+      "rerun": false
+    },
+    {
+      "path": "output/accessibility-50-batch20-20261023/test-form/candidate.pdf",
+      "sha256": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+      "rerun": false
+    }
+  ],
+  "remaining": [
+    "A39-A50 remain pending",
+    "Booklet: six raw failures, 196 saved failures and 158 OCR reviews, retained by exact hash; not rerun",
+    "NIST historical-intent table failures remain for A41-A45",
+    "Cross-paragraph, partial-span, authored replacement and ambiguous relationships require review",
+    "No full accessibility or human-reader qualification is claimed"
+  ],
+  "sources": [
+    "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html"
+  ]
+}

@@ -2,12 +2,14 @@
 // source glyph matrices. Unqualified extra Link containers are never transparent.
 import {inspectLinkGeometry,containsLinkGlyph} from './link-geometry.js';
 export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, intendedNodes, add }) {
-  const transparent = new Set(), redundantActualText = new Set(); let valid = true;
+  const transparent = new Set(), grouped = new Set(), redundantActualText = new Set(); let valid = true;
   const byTag = new Map(intendedNodes.map(v => [v.n.id, v.id]));
   const intents = new Map(intendedNodes.map(v => [v.n.id, v.n]));
   const structures = new Map(inspection.structure.map(n => [n.objectRef, n]));
   const byId = new Map(inspection.structure.map(n => [n.identifier, n]));
   const declarations = ownership.nativeLinks || [], used = new Set();
+  const rangesByTag = new Map();
+  for (const range of ownership.ranges) { const list=rangesByTag.get(range.tagNodeId)||[];list.push(range);rangesByTag.set(range.tagNodeId,list); }
   const regions=new Map(Object.values(source.links || {}).map(link=>[link,inspectLinkGeometry(link)]));
   // Index once. Keep successful reports proportional to annotations, not glyphs.
   const sourceLinksByPage = new Map(), sourceRunsByPage = new Map(), savedByAddress = new Map();
@@ -43,7 +45,8 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
     if(original.contents?.trim())verify('NATIVE_LINK_AUTHORED_CONTENTS',original.contents,saved.contents);
     verify('NATIVE_LINK_OBJR',[node.objectRef],saved.owners);
     verify('NATIVE_LINK_PARENT_KEY',link.parentTreeKey,saved.structParent);
-    verify('NATIVE_LINK_CHILDREN',[],node.children);
+    const groupIds=link.groupedOwnerTagIds, members=groupIds?.map(id=>byId.get(byTag.get(id)));
+    verify('NATIVE_LINK_CHILDREN',members?members.map(m=>m?.objectRef):[],node.children);
     verify('NATIVE_LINK_REPLACEMENT',false,Boolean(node.actualTextPresent||node.actualText));
     verify('NATIVE_LINK_OBJECT_REFERENCE',[`obj:${savedRef}`],node.contentRefs.filter(r=>r.startsWith('obj:')));
     let ancestor=structures.get(node.parentRef),depth=0,unmasked=true;
@@ -79,6 +82,33 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
     verify('NATIVE_LINK_GLYPH_GEOMETRY',true,geometryValid);
     verify('NATIVE_LINK_ANCHOR_TEXT',text.join(''),link.anchorText);
     const content=new Set(node.contentRefs.filter(r=>!r.startsWith('obj:'))),actual=[];
+    if(groupIds) {
+      const parentIntent=intents.get(link.ownerTagId), siblings=parentIntent?.children||[];
+      const first=siblings.findIndex(c=>c.id===groupIds[0]), logical=[];
+      verify('NATIVE_LINK_GROUP_SIBLINGS',true,Boolean(groupIds.length>=2&&groupIds.length<=4096&&new Set(groupIds).size===groupIds.length&&
+        ['P','H1','H2','H3','H4','H5','H6','Caption','LBody','TH','TD'].includes(parentIntent?.type)&&
+        first>=0&&groupIds.every((id,i)=>siblings[first+i]?.id===id)&&!(rangesByTag.get(link.ownerTagId)?.length)));
+      verify('NATIVE_LINK_GROUP_CONTENT',[],[...content]);
+      verify('NATIVE_LINK_GROUP_SUPPRESSION',false,Boolean(link.suppressedRedundantActualText));
+      for(let i=0;i<groupIds.length;i++) {
+        tick();const id=groupIds[i], intent=intents.get(id),member=members[i],glyphs=[];let resolves=true;
+        for(const range of rangesByTag.get(id)||[]) {
+          tick();const run=sourceRuns.get(`${range.pageNumber}:${range.streamOrigin}:${range.operatorIndex}`);
+          if(!run||range.pageNumber!==link.pageNumber||range.glyphStart<0||range.glyphEnd>run.glyphs.length||range.glyphEnd<=range.glyphStart){resolves=false;continue;}
+          for(let g=range.glyphStart;g<range.glyphEnd;g++){tick();glyphs.push({index:run.glyphStart+g,text:run.glyphs[g][1]});}
+        }
+        glyphs.sort((a,b)=>a.index-b.index);for(const glyph of glyphs)logical.push(glyph.index);
+        const raw=glyphs.map(g=>g.text).join('');
+        verify('NATIVE_LINK_GROUP_MEMBER',true,Boolean(resolves&&glyphs.length&&intent?.type==='Span'&&!intent.children?.length&&!intent.ocrSegments?.length&&
+          !intent.alt&&(!intent.actualText||intent.actualText===raw)&&member?.role==='Span'&&member.parentRef===node.objectRef&&
+          !member.children.length&&!member.alt&&(!member.actualTextPresent||member.actualText===raw)));
+        for(const ref of member?.contentRefs||[]){tick();if(ref.startsWith('obj:'))verify('NATIVE_LINK_GROUP_MEMBER_OBJR',false,true);else content.add(ref);}
+      }
+      verify('NATIVE_LINK_GROUP_SOURCE_ORDER',logical,expected);
+      // The logical sibling order may differ from source paint order. Both are
+      // verified independently: /K above, physical glyph membership below.
+      expected.sort((a,b)=>a-b);
+    }
     for(const run of inspection.textRuns || []) {
       tick();
       if(!run.owners.some(r=>content.has(r)))continue;
@@ -98,8 +128,8 @@ export function inspectNativeLinks({ source, inspection, ownership, sourceRuns, 
     verify('NATIVE_LINK_COMPLETE_ANCHOR',true,complete);
     verify('NATIVE_LINK_UNAMBIGUOUS_GEOMETRY',true,unambiguous);
     verify('NATIVE_LINK_MEANINGFUL_ANCHOR',true,meaningful>0);
-    if(local){transparent.add(node.objectRef);if(link.suppressedRedundantActualText)redundantActualText.add(owner.identifier);}
+    if(local){transparent.add(node.objectRef);if(groupIds)grouped.add(node.objectRef);if(link.suppressedRedundantActualText)redundantActualText.add(owner.identifier);}
   }
   if (ownership.nativeLinks) for(const original of Object.values(source.links || {}))check('NATIVE_LINK_DECLARATION_COMPLETE',`${original.page}:${original.annotationIndex}`,true,used.has(`${original.page}:${original.annotationIndex}`));
-  return {valid,transparent,redundantActualText};
+  return {valid,transparent,grouped,redundantActualText};
 }

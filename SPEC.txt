@@ -1,6 +1,17 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Native link grouping (A38, 2026-10-23):
+Complete consecutive Span siblings belonging to one native annotation may be
+grouped under one Link while retaining source ownership and each original ID.
+One OBJR and reciprocal ParentTree entry associate the annotation. Logical child
+order is verified independently of paint order. The additive groupedOwnerTagIds
+field lists original members; ownerTagId identifies their common parent. Only
+independently verified groups are transparent to intent parent/order comparison.
+Partial spans, separate paragraphs, intervening content, authored replacements
+and masking ancestors require review. Original content, controls and annotation
+values are preserved. See docs/accessibility-50-batch22-20261023.md.
+
 Native link geometry (A37, 2026-10-23):
 Native Link hit testing uses unprojected source glyph displacement in default
 user space. Simple counterclockwise QuadPoints, including concave/disjoint

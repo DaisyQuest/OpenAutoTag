@@ -62,8 +62,11 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
       if (!saved) continue;
       const role = ({ Aside: "Note" })[n.type] || n.type;
       add("SAVED_ROLE", id, role, saved.role);
-      if (parent) add("SAVED_PARENT", id, parent, byRef.get(saved.parentRef)?.identifier);
-      add("CHILD_ORDER", id, (n.children || []).map(emittedIdentifier), saved.children.map(ref => byRef.get(ref)?.identifier).filter(v => expectedIds.has(v)));
+      const qualifiedGroup = ref => ownership.sourceVerified && ownership.linkGroups?.has(ref);
+      const savedParent=byRef.get(saved.parentRef);
+      if (parent) add("SAVED_PARENT", id, parent, (qualifiedGroup(saved.parentRef)?byRef.get(savedParent.parentRef):savedParent)?.identifier);
+      const intendedChildren=saved.children.flatMap(ref=>qualifiedGroup(ref)?byRef.get(ref).children:[ref]);
+      add("CHILD_ORDER", id, (n.children || []).map(emittedIdentifier), intendedChildren.map(ref => byRef.get(ref)?.identifier).filter(v => expectedIds.has(v)));
       if (["TH", "TD"].includes(n.type)) {
         add("TABLE_HEADERS", id, [...(n.tableAttrs?.Headers || [])].sort(), [...saved.headers].sort());
         if (n.scope || n.tableAttrs?.Scope) add("TABLE_SCOPE", id, n.scope || n.tableAttrs.Scope, saved.scope);

@@ -14,6 +14,8 @@ final class NativeLinkOwnership {
         final Set<String> expected = new LinkedHashSet<>();
         final Set<String> assigned = new LinkedHashSet<>();
         final List<Map<String,Object>> ranges = new ArrayList<>();
+        final Set<String> anchorOwners = new LinkedHashSet<>();
+        final List<String> groupedOwnerTagIds = new ArrayList<>();
         String reason = "No unambiguous tagged anchor text", ownerTagId, anchorText = "";
         boolean uncertain, eligible, geometrySupported, suppressedRedundantActualText;
         PDStructureElement element;
@@ -30,6 +32,7 @@ final class NativeLinkOwnership {
             out.put("status",element==null?"review_required":"bound");out.put("reason",element==null?reason:"Source anchor glyphs, Link, OBJR and annotation ParentTree entry are connected");
             if(element!=null) {out.put("ownerTagId",ownerTagId);out.put("anchorText",anchorText);out.put("linkStructureId",element.getElementIdentifier());out.put("parentTreeKey",parentKey);out.put("ranges",ranges);}
             if(element!=null&&suppressedRedundantActualText)out.put("suppressedRedundantActualText",true);
+            if(element!=null&&!groupedOwnerTagIds.isEmpty())out.put("groupedOwnerTagIds",groupedOwnerTagIds);
             return out;
         }
     }

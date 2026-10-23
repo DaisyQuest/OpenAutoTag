@@ -365,6 +365,7 @@ public class NativeContentStreamRewriter {
         String lang;
         String alt;
         String actualText;
+        NativeLinkOwnership.Link nativeLinkGroup;
         boolean intentionallyEmptyDataCell;
         String footnoteGroupId;
         String headerId;
@@ -1269,9 +1270,11 @@ public class NativeContentStreamRewriter {
     }
 
     private static void qualifyNativeLinks(List<NativeLinkOwnership.Link> links,Map<String,List<PageMcRef>> refs,TagTreeNode tree) {
+        Map<String,TagTreeNode> parents=new HashMap<>();
+        if(!links.isEmpty())indexLinkParents(tree,null,parents,0);
         for(var entry:refs.entrySet()) for(PageMcRef ref:entry.getValue()) if(ref.link!=null) {
             var link=ref.link;
-            if(link.ownerTagId!=null&&!link.ownerTagId.equals(entry.getKey()))link.review("Anchor spans separate semantic nodes; grouping requires review");
+            link.anchorOwners.add(entry.getKey());
             link.ownerTagId=entry.getKey();
             if(!ref.authoredText.isEmpty())link.review("Authored replacement/expansion scope requires anchor review");
             for(OpRef op:ref.operators) {
@@ -1286,6 +1289,12 @@ public class NativeContentStreamRewriter {
         for(var link:links) {
             if(link.uncertain)continue;
             if(link.expected.isEmpty()||!link.expected.equals(link.assigned)){link.review("Anchor has missing or untagged source glyphs");continue;}
+            if(link.anchorOwners.size()>1) {
+                TagTreeNode parent=parents.get(link.anchorOwners.iterator().next());
+                if(parent==null||link.anchorOwners.stream().anyMatch(id->parents.get(id)!=parent))link.review("Anchor spans separate semantic containers; grouping requires review");
+                else qualifyLinkGroup(link,parent,refs);
+                continue;
+            }
             var ownerRefs=refs.get(link.ownerTagId);boolean begun=false,ended=false;
             for(PageMcRef ref:ownerRefs) {
                 if(ref.link==link){if(ended)link.review("Anchor runs are separated by unrelated semantic content");begun=true;}
@@ -1294,11 +1303,64 @@ public class NativeContentStreamRewriter {
             link.eligible=!link.uncertain;
         }
         qualifyLinkContainers(tree,links,refs,false);
+        installLinkGroups(tree,links);
+    }
+
+    private static void indexLinkParents(TagTreeNode node,TagTreeNode parent,Map<String,TagTreeNode> parents,int depth) {
+        if(depth>128||parents.size()>=100000||parents.containsKey(node.id))throw new IllegalArgumentException("Invalid or excessive native link intent tree");
+        parents.put(node.id,parent);
+        for(TagTreeNode child:node.children)indexLinkParents(child,node,parents,depth+1);
+    }
+
+    // Group only complete consecutive inline siblings. Never reclassify paragraphs
+    // or split semantic IDs to make an annotation appear qualified.
+    private static void qualifyLinkGroup(NativeLinkOwnership.Link link,TagTreeNode node,Map<String,List<PageMcRef>> refs) {
+        List<TagTreeNode> members=node.children.stream().filter(c->link.anchorOwners.contains(c.id)).toList();
+        if(members.size()==link.anchorOwners.size()) {
+            boolean valid=members.size()<=4096 && Set.of("P","H1","H2","H3","H4","H5","H6","Caption","LBody","TH","TD").contains(node.type)
+                &&refs.getOrDefault(node.id,List.of()).isEmpty();
+            int first=node.children.indexOf(members.get(0));
+            for(int i=0;i<members.size();i++) {
+                TagTreeNode child=members.get(i);List<PageMcRef> childRefs=refs.getOrDefault(child.id,List.of());
+                valid &= node.children.get(first+i)==child && "Span".equals(child.type) && child.children.isEmpty()
+                    &&child.ocrSegments.isEmpty() && (child.alt==null||child.alt.isEmpty()) && !childRefs.isEmpty();
+                StringBuilder raw=new StringBuilder();
+                for(PageMcRef ref:childRefs) {
+                    valid &= ref.link==link && ref.page.getCOSObject()==link.page.getCOSObject() && ref.authoredText.isEmpty();
+                    for(OpRef op:ref.operators)raw.append(op.text);
+                }
+                valid &= child.actualText==null||child.actualText.isEmpty()||child.actualText.contentEquals(raw);
+            }
+            if(!valid){link.review("Cross-node anchor requires complete consecutive inline siblings with equivalent text");return;}
+            link.ownerTagId=node.id;
+            link.anchorText="";link.ranges.clear();
+            for(TagTreeNode child:members) {
+                link.groupedOwnerTagIds.add(child.id);
+                for(PageMcRef ref:refs.get(child.id))for(OpRef op:ref.operators) {
+                    link.anchorText+=op.text;
+                    link.ranges.add(Map.of("streamOrigin",op.streamOrigin,"operatorIndex",op.opIndexInStream,"glyphStart",op.glyphStart,"glyphEnd",op.glyphEnd));
+                }
+            }
+            link.eligible=true;return;
+        }
+        link.review("Anchor spans separate semantic containers; grouping requires review");
+    }
+
+    private static void installLinkGroups(TagTreeNode node,List<NativeLinkOwnership.Link> links) {
+        for(TagTreeNode child:node.children)installLinkGroups(child,links);
+        for(var link:links)if(link.eligible&&!link.groupedOwnerTagIds.isEmpty()&&node.id.equals(link.ownerTagId)) {
+            int first=-1;
+            for(int i=0;i<node.children.size();i++)if(node.children.get(i).id.equals(link.groupedOwnerTagIds.get(0))){first=i;break;}
+            if(first<0)throw new IllegalStateException("Qualified link group lost its anchor siblings");
+            TagTreeNode group=new TagTreeNode();group.id="native-link:"+link.pageNumber+":"+link.index;group.type="Link";group.nativeLinkGroup=link;
+            group.children.addAll(node.children.subList(first,first+link.groupedOwnerTagIds.size()));
+            node.children.subList(first,first+group.children.size()).clear();node.children.add(first,group);
+        }
     }
 
     private static void qualifyLinkContainers(TagTreeNode node,List<NativeLinkOwnership.Link> links,Map<String,List<PageMcRef>> refs,boolean blocked) {
         for(var link:links)if(node.id.equals(link.ownerTagId)&&link.eligible) {
-            if(blocked||!node.children.isEmpty())link.review("Anchor container or replacement-text ancestry requires review");
+            if(blocked||(!node.children.isEmpty()&&link.groupedOwnerTagIds.isEmpty()))link.review("Anchor container or replacement-text ancestry requires review");
             else if("Link".equals(node.type)&&refs.getOrDefault(node.id,List.of()).stream().anyMatch(ref->ref.link!=link))
                 link.review("Existing Link tag contains text outside this annotation anchor");
         }
@@ -1438,6 +1500,10 @@ public class NativeContentStreamRewriter {
 
         applyTableAttributes(el, node, ctx);
         if (!el.getCOSObject().containsKey(COSName.ID)) el.getCOSObject().setString(COSName.ID, "oat:" + node.id);
+        if(node.nativeLinkGroup!=null) {
+            node.nativeLinkGroup.element=el;el.setPage(node.nativeLinkGroup.page);
+            el.getCOSObject().setString(COSName.ID,"oat-native-link:"+node.nativeLinkGroup.pageNumber+":"+node.nativeLinkGroup.index);
+        }
 
         AuthoredText.StructureRuns authoredRuns = new AuthoredText.StructureRuns();
         for (PageMcRef ref : myRefs) {
@@ -1454,7 +1520,7 @@ public class NativeContentStreamRewriter {
 
             PDStructureElement containerForMcr=el;
             NativeLinkOwnership.Link matched=ref.link;
-            if(matched!=null&&matched.eligible) {
+            if(matched!=null&&matched.eligible&&matched.groupedOwnerTagIds.isEmpty()) {
                 if(matched.element==null) {
                     if("Link".equals(node.type))matched.element=el;
                     else {

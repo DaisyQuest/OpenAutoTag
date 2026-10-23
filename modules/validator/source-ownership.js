@@ -54,6 +54,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
   const contentOwners = new Map();
   const links = inspectNativeLinks({ source, inspection, ownership, sourceRuns, intendedNodes, add });
   result.redundantActualText = links.redundantActualText;
+  result.linkGroups = links.grouped;
   const elements = new Map(inspection.structure.map(n => [n.objectRef, n])), intended = new Set(byTag.values());
   const intendedOwner = node => {
     const seen = new Set();

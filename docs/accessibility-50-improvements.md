@@ -68,6 +68,8 @@ Completion requires an actual engine improvement, targeted positive/adversarial 
 
 ## Delivery evidence
 
+[Batch 22](accessibility-50-batch22-20261023.md) completes A38: exact cross-node grouping for consecutive inline spans, preserving logical order, original IDs and one annotation reference. All 722 baseline cases pass. The 16-page fixture binds eight grouped annotations, retains nine reviews and passes 1,793 saved/3,875 raw checks. NASA original intent and a disclosed split-URL intent variation retain all four links. All 34 independent page pairs match, including field fill/save/reopen. **A01-A38 complete; A39-A50 pending.**
+
 [Batch 21](accessibility-50-batch21-20261023.md) completes A37: default-user-space link geometry for rotation, crop, UserUnit, nested transforms and valid QuadPoints. The 694-case baseline and final 38-case suite pass, covering 695 configured cases across overlapping runs. The 30-page fixture binds 22 annotations and retains nine reviews; 1,381 saved and 4,055 raw checks pass. Original NASA Hinode and two disclosed transformed copies bind all four links each. All 63 independent page pairs match, including edited/reopened fields. **A01-A37 complete; A38-A50 pending.**
 
 [Batch 20](accessibility-50-batch20-20261023.md) completes A36: exact native anchor glyph ownership, Link/OBJR/ParentTree reciprocity and independent saved proof. The 656-case baseline and final 39-case suite pass, covering 657 configured cases across overlapping runs. All four NASA Hinode links bind with 1,043 saved and 5,246 raw checks passing; 45 independent page pairs match. TEST-FORM retains 32 fields/33 widgets and five verified edit samples. NIST historical-intent table failures remain open. **A01-A36 complete; A37-A50 pending.**
