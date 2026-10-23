@@ -61,6 +61,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
       for (const child of n.children || []) walk(child, id, depth + 1);
     };
     walk(tagging.root, null, 0);
+    for (const { n, id } of nodes) if (n.tableGridReview) add("TABLE_GRID_REVIEW", id, null, n.tableGridReview);
     const ownership = inspectSourceOwnership({ inspection, source: sourceInspection, ownership: sourceOwnership, intendedNodes: nodes, add });
     if (sourceOwnership) ownershipStatus = ownership.sourceVerified ? "verified" : "rejected";
     const replacements = authoredReplacementIndex(sourceInspection, inspection, ownership.sourceVerified, add, expectedIds);

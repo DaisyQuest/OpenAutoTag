@@ -491,8 +491,11 @@
       "improvement": "Overlapping span detection",
       "requirement": "Detect and resolve inconsistent row/column spans before inventing grid positions.",
       "acceptance": "Overlapping spans generate a bounded repair/review result; valid merged grids serialize unchanged.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch24-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A42",

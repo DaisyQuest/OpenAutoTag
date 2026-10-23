@@ -1,5 +1,6 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { attachOcrSegments } from "./ocr-segments.js";
+import { planTableGrid, tableGridReview, mergeDeclaredCellFragments } from "./table-grid.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
@@ -221,10 +222,10 @@ function createLeaf(node, headingNormalization) {
     const tableRowIndex = getTableRowIndex(node);
     const tableColumnIndex = getTableColumnIndex(node);
 
-    if ((node.tableRowSpan || 1) > 1) {
+    if (node.tableRowSpan !== undefined && node.tableRowSpan !== 1) {
       leaf.rowSpan = node.tableRowSpan;
     }
-    if ((node.tableColumnSpan || 1) > 1) {
+    if (node.tableColumnSpan !== undefined && node.tableColumnSpan !== 1) {
       leaf.columnSpan = node.tableColumnSpan;
     }
     if (node.tableSection) {
@@ -233,10 +234,10 @@ function createLeaf(node, headingNormalization) {
     if (node.tableSource) {
       leaf.tableSource = node.tableSource;
     }
-    if (Number.isInteger(tableRowIndex) && tableRowIndex >= 0) {
+    if (tableRowIndex != null) {
       leaf.tableRowIndex = tableRowIndex;
     }
-    if (Number.isInteger(tableColumnIndex) && tableColumnIndex >= 0) {
+    if (tableColumnIndex != null) {
       leaf.tableColumnIndex = tableColumnIndex;
     }
   }
@@ -431,6 +432,7 @@ function isTableCellNode(node) {
 }
 
 function toTableCoordinate(value) {
+  if (value == null) return null;
   const coordinate = Number(value);
   return Number.isInteger(coordinate) && coordinate >= 0 ? coordinate : null;
 }
@@ -444,41 +446,6 @@ function getSectionKeyFromNode(sectionNode) {
     default:
       return "body";
   }
-}
-
-function getMaxOccupiedColumn(occupiedColumns) {
-  let maxColumn = -1;
-  for (const column of occupiedColumns) {
-    if (column > maxColumn) {
-      maxColumn = column;
-    }
-  }
-  return maxColumn;
-}
-
-function getOccupiedColumnCount(occupiedColumns) {
-  return getMaxOccupiedColumn(occupiedColumns) + 1;
-}
-
-function findNextAvailableColumn(occupiedColumns, startColumn = 0) {
-  let column = Math.max(0, Number(startColumn) || 0);
-  while (occupiedColumns.has(column)) {
-    column += 1;
-  }
-  return column;
-}
-
-function isRangeAvailable(occupiedColumns, startColumn, span) {
-  for (let column = startColumn; column < startColumn + span; column += 1) {
-    if (occupiedColumns.has(column)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function sumDeclaredColumnWidths(cells) {
-  return cells.reduce((total, cell) => total + Math.max(1, Number(cell.columnSpan || 1)), 0);
 }
 
 function createPlaceholderCell(rowNode, sectionNode, rowIndex, columnIndex) {
@@ -735,7 +702,7 @@ function normalizeTableSections(rootNode) {
       visit(child);
     }
 
-    if (node.type !== "Table") {
+    if (node.type !== "Table" || node.tableGridReview) {
       return;
     }
 
@@ -810,90 +777,6 @@ function normalizeTableSections(rootNode) {
   visit(rootNode);
 }
 
-function buildRowPlacementPlan(rowDescriptors, targetColumnCount = null) {
-  const plans = [];
-  let requiredColumnCount = Math.max(0, Number(targetColumnCount) || 0);
-  let carry = [];
-
-  for (const descriptor of rowDescriptors) {
-    const carryColumns = new Set();
-    for (let column = 0; column < carry.length; column += 1) {
-      if ((carry[column] || 0) > 0) {
-        carryColumns.add(column);
-      }
-    }
-
-    const occupiedColumns = new Set(carryColumns);
-    const rowCells = (descriptor.rowNode.children || []).filter(isTableCellNode);
-    const placements = [];
-    let nextAvailableColumn = findNextAvailableColumn(occupiedColumns, 0);
-
-    for (let cellIndex = 0; cellIndex < rowCells.length; cellIndex += 1) {
-      const cell = rowCells[cellIndex];
-      const columnSpan = Math.max(1, Number(cell.columnSpan || 1));
-      const remainingDeclaredWidth = sumDeclaredColumnWidths(rowCells.slice(cellIndex));
-      const hintedColumn = toTableCoordinate(cell.tableColumnIndex);
-      const maxReasonableStart = getOccupiedColumnCount(occupiedColumns) + remainingDeclaredWidth + 2;
-
-      let startColumn =
-        hintedColumn != null && hintedColumn <= maxReasonableStart ? hintedColumn : nextAvailableColumn;
-      startColumn = findNextAvailableColumn(occupiedColumns, startColumn);
-
-      while (!isRangeAvailable(occupiedColumns, startColumn, columnSpan)) {
-        startColumn = findNextAvailableColumn(occupiedColumns, startColumn + 1);
-      }
-
-      placements.push({
-        cell,
-        startColumn,
-        columnSpan
-      });
-
-      for (let column = startColumn; column < startColumn + columnSpan; column += 1) {
-        occupiedColumns.add(column);
-      }
-
-      nextAvailableColumn = findNextAvailableColumn(occupiedColumns, startColumn + columnSpan);
-    }
-
-    requiredColumnCount = Math.max(requiredColumnCount, getOccupiedColumnCount(occupiedColumns));
-
-    plans.push({
-      ...descriptor,
-      carryColumns,
-      placements
-    });
-
-    const nextCarry = [];
-    for (let column = 0; column < carry.length; column += 1) {
-      const remainingRows = (carry[column] || 0) - 1;
-      if (remainingRows > 0) {
-        nextCarry[column] = remainingRows;
-      }
-    }
-
-    for (const placement of placements) {
-      const rowSpan = Math.max(1, Number(placement.cell.rowSpan || 1));
-      const remainingRows = rowSpan - 1;
-      if (remainingRows <= 0) {
-        continue;
-      }
-
-      for (let column = placement.startColumn; column < placement.startColumn + placement.columnSpan; column += 1) {
-        nextCarry[column] = Math.max(nextCarry[column] || 0, remainingRows);
-      }
-    }
-
-    carry = nextCarry;
-  }
-
-  return {
-    plans,
-    requiredColumnCount,
-    remainingCarry: carry
-  };
-}
-
 function normalizeTableNode(tableNode) {
   const rowDescriptors = collectTableRowDescriptors(tableNode);
   if (rowDescriptors.length === 0) {
@@ -908,9 +791,13 @@ function normalizeTableNode(tableNode) {
     return tableNode.tableRegularity;
   }
 
-  const initialPlan = buildRowPlacementPlan(rowDescriptors);
-  const expectedColumnCount = Math.max(1, initialPlan.requiredColumnCount);
-  const normalizedPlan = buildRowPlacementPlan(rowDescriptors, expectedColumnCount);
+  const normalizedPlan = planTableGrid(rowDescriptors);
+  if (normalizedPlan.issues.length) {
+    tableNode.tableGridReview = tableGridReview(tableNode.id, normalizedPlan.issues);
+    return { applied: false, expectedColumnCount: 0, repairedRowCount: 0,
+      insertedPlaceholderCellCount: 0, insertedSyntheticRowCount: 0, shiftedCellCount: 0 };
+  }
+  const expectedColumnCount = Math.max(1, normalizedPlan.requiredColumnCount);
 
   let repairedRowCount = 0;
   let insertedPlaceholderCellCount = 0;
@@ -981,7 +868,7 @@ function normalizeTableNode(tableNode) {
   let nextSyntheticRowIndex = (lastRow?.rowIndex ?? -1) + 1;
 
   while (trailingCarry.some((remainingRows) => Number(remainingRows || 0) > 0)) {
-    const targetSectionNode = lastRow?.sectionNode || tableNode.children.at(-1);
+    const targetSectionNode = lastRow?.sectionNode || tableNode;
     if (!targetSectionNode) {
       break;
     }
@@ -1049,6 +936,7 @@ function normalizeTableRegularity(rootNode) {
     if (node.type === "Table") {
       const tableSummary = normalizeTableNode(node);
       summary.tablesInspected += 1;
+      if (node.tableGridReview) (summary.reviews ||= []).push(node.tableGridReview);
       summary.repairedRowCount += tableSummary.repairedRowCount;
       summary.insertedPlaceholderCellCount += tableSummary.insertedPlaceholderCellCount;
       summary.insertedSyntheticRowCount += tableSummary.insertedSyntheticRowCount;
@@ -1147,7 +1035,7 @@ function repairMergedTableTextCells(rootNode) {
     const children = rowNode.children || [];
     for (let index = 0; index < children.length; index += 1) {
       const cell = children[index];
-      if (!isTableCellNode(cell) || cell.type !== "TD") {
+      if (!isTableCellNode(cell) || cell.type !== "TD" || cell.mergedCellIds) {
         continue;
       }
 
@@ -1198,7 +1086,7 @@ function repairMergedTableTextCells(rootNode) {
   };
 
   const visit = (node) => {
-    if (!node) {
+    if (!node || node.tableGridReview) {
       return;
     }
 
@@ -1228,7 +1116,7 @@ function validateTableSections(rootNode) {
       visit(child);
     }
 
-    if (node.type !== "Table") {
+    if (node.type !== "Table" || node.tableGridReview) {
       return;
     }
 
@@ -1281,7 +1169,7 @@ function detectRepeatedHeaders(rootNode) {
       visit(child);
     }
 
-    if (node.type !== "Table") {
+    if (node.type !== "Table" || node.tableGridReview) {
       return;
     }
 
@@ -1355,7 +1243,7 @@ function flattenRedundantTableBodySections(rootNode) {
       visit(child);
     }
 
-    if (node.type !== "Table") {
+    if (node.type !== "Table" || node.tableGridReview) {
       return;
     }
 
@@ -1494,6 +1382,7 @@ function applyLayoutAttrsToTree(node, sourceNodesById) {
 // ---- A15: Table /Headers + ColSpan/RowSpan ----------------------------
 function assignHeaderIdsAndTableAttrs(rootNode) {
   const decorateTable = (tableNode) => {
+    if (tableNode.tableGridReview) return;
     // Step 1: walk the table subtree, marking which TH/TD cells
     // live inside a THead ancestor — they act as column headers.
     const thCells = [];
@@ -1674,7 +1563,7 @@ function demoteSpuriousTables(rootNode) {
   ];
 
   function shouldDemote(tableNode) {
-    if (!tableNode || tableNode.type !== "Table") return false;
+    if (!tableNode || tableNode.type !== "Table" || tableNode.tableGridReview) return false;
     // Gather rows (TR children), skipping THead/TBody wrappers.
     const rows = [];
     const rowStack = [...(tableNode.children || [])];
@@ -2135,6 +2024,13 @@ export async function buildTagTree(inputPath, overrides = {}) {
     currentContainer().children.push(leaf);
   }
 
+  const tableCellMerges = [], sourceNodes = new Map(orderedNodes.map(n => [n.id, n]));
+  const tableStack = [root];
+  while (tableStack.length) {
+    const item = tableStack.pop();
+    if (item.type === "Table") tableCellMerges.push(...mergeDeclaredCellFragments(collectTableRowDescriptors(item), sourceNodes));
+    for (const child of item.children || []) tableStack.push(child);
+  }
   normalizeTableSections(root);
   const tableRegularityCorrection = normalizeTableRegularity(root);
   const mergedTableTextCellRepair = repairMergedTableTextCells(root);
@@ -2196,6 +2092,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
       ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
       headingNormalization: headingNormalization.summary,
       tableRegularityCorrection,
+      ...(tableCellMerges.length ? { tableCellMerges } : {}),
       mergedTableTextCellRepair,
       tableStructureRepairs,
       repeatedHeaderRows,

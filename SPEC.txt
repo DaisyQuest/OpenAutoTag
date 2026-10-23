@@ -1,6 +1,20 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Declared table grids (A41, 2026-10-23):
+Table planning reserves explicit cell rectangles before assigning missing column
+positions. Valid spans and sparse hints are retained; conflicting rectangles,
+invalid spans/rows and excessive grids produce typed tableGridReview evidence
+without shifting cells. Subsequent table transformations skip unresolved grids;
+native/raster writes refuse them, and saved validation retains their review.
+Aligned nonoverlapping horizontal native lines in one identical declared cell
+can share a TH/TD while retaining every original content Span/source identity.
+Original cell IDs are recorded in mergedCellIds and the source merge ledger.
+OCR, rotation, inconsistent metadata and distant/cross-page fragments are not
+merged. Synthetic continuation rows remain direct table/section children,
+including header-only tables. Work and grid dimensions are bounded. See
+docs/accessibility-50-batch24-20261023.md for evidence and remaining failures.
+
 Reviewed bookmarks and navigation preservation (A39-A40, 2026-10-23):
 The additive reviewed-outline API/CLI accepts explicit source-hash-bound outline
 decisions and appends Unicode hierarchical bookmarks with physical page targets.

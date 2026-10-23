@@ -1034,6 +1034,17 @@ export async function writeTaggedArtifacts({
     };
   }
 
+  // A pending grid decision cannot be converted into apparently regular saved
+  // table semantics. Passthrough above preserves authored tags independently.
+  const gridStack = [taggingDocument.root];
+  let gridNodes = 0;
+  while (gridStack.length) {
+    const node = gridStack.pop();
+    if (++gridNodes > 100000) throw new Error("Table grid review traversal limit exceeded");
+    if (node.tableGridReview) throw new Error(`Table grid requires review: ${node.id}: ${node.tableGridReview.issues.map(i => `${i.code} (${i.cellId})`).join(", ")}`);
+    for (const child of node.children || []) gridStack.push(child);
+  }
+
   // --- Native flow ---
   if (modeDecision.effectiveMode === "native") {
     const nativeReport = await runNativeFlow({

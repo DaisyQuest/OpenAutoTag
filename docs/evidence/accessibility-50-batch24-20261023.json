@@ -1,0 +1,1261 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A41"
+  ],
+  "status": "completed",
+  "baselineCommit": "0401bafa4b18418bcce96a30ef119eb00b7340d7",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a41-baseline.log",
+      "sha256": "faa20d3547e1832455056974829f3fbde232674347551c6c3d85c17301f76fc8",
+      "passed": 795,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "savedAffected": {
+      "path": "tmp/a41-saved.log",
+      "sha256": "29a57b8376f7e2ddada0d60acf9af58e2ea02c2cd9168f1b5e0421f21285691a",
+      "passed": 42,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "builderCompatibility": {
+      "path": "tmp/a41-final-unit.log",
+      "sha256": "686da2f54a919c6aae3d079ed3b287f392111fa38116f67550d360aafaf65073",
+      "passed": 49,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a41-final-affected.log",
+      "sha256": "07dfb45161a581e026f36ceeb31e57aa8f7ff08d871028007ca3369a2a713df1",
+      "passed": 66,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 797,
+    "finalGridUnit": {
+      "path": "tmp/a41-coverage-final2.log",
+      "sha256": "2a0fb824f4b826d288c8237542063b448b523c9add65275e535d7960750052ae",
+      "passed": 30,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "coverage": {
+      "file": "modules/tag-builder/table-grid.js",
+      "lines": 100,
+      "functions": 100,
+      "branches": 90.48
+    },
+    "note": "The 795-case baseline preceded the final header-only row-parent fix; 66 final affected cases include both new regressions and cover the changed paths. The current 797 configured baseline cases are covered across overlapping runs. Coverage is for the new table-grid module only."
+  },
+  "headerOnlyRegression": {
+    "candidate": {
+      "path": "output/accessibility-50-batch24-20261023/grids-final/header-only.pdf",
+      "sha256": "4c6ad71f65b2640ba6c994612f03c4177ae9b161d45cfa9be245d72cf763b67b"
+    },
+    "saved": {
+      "path": "output/accessibility-50-batch24-20261023/grids-final/header-only-saved.json",
+      "sha256": "c73c24da55f11957f18cba82126993648aa2ba11d31d5e4cd99500c3b6ff4341",
+      "summary": {
+        "passed": 617,
+        "failed": 0
+      }
+    },
+    "raw": {
+      "path": "output/accessibility-50-batch24-20261023/grids-final/header-only-validation.json",
+      "sha256": "d9833370fa81efedc88e9aa28f114546bb3d8fde6897de70cd9611422c0538ec",
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 1175,
+      "failedChecks": 0
+    }
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch24-20261023/grids-final/evidence.json",
+    "sha256": "1cfc418136259d08d1862c9fba5273bfff0463e64e38969498120f576fdeeefa",
+    "pdfPath": "output\\accessibility-50-batch24-20261023\\grids-final\\source.pdf",
+    "outputPath": "output\\accessibility-50-batch24-20261023\\grids-final\\candidate.pdf",
+    "tagsPath": "output\\accessibility-50-batch24-20261023\\grids-final\\tagging.json",
+    "semanticPath": "output\\accessibility-50-batch24-20261023\\grids-final\\semantic.json",
+    "summary": {
+      "passed": 616,
+      "failed": 0
+    },
+    "merges": [
+      {
+        "cellId": "tag:cell0",
+        "sourceCellIds": [
+          "tag:cell0",
+          "tag:cell1"
+        ],
+        "pageNumber": 1,
+        "reason": "Matching declared cell rectangle and role with aligned, nonoverlapping native text lines."
+      }
+    ],
+    "regularity": {
+      "applied": true,
+      "algorithm": "grid-normalization-v1",
+      "tablesInspected": 4,
+      "correctedTables": 3,
+      "repairedRowCount": 4,
+      "insertedPlaceholderCellCount": 10,
+      "insertedSyntheticRowCount": 1,
+      "shiftedCellCount": 0
+    },
+    "fieldFillSaveReopen": true,
+    "source": {
+      "path": "output\\accessibility-50-batch24-20261023\\grids-final\\source.pdf",
+      "sha256": "3a6554cbda3cbf77091ae8e362a8894dcd3f7dd3159ed6c9ed2e318ced8b0fea"
+    },
+    "candidate": {
+      "path": "output\\accessibility-50-batch24-20261023\\grids-final\\candidate.pdf",
+      "sha256": "bc34c73262cc40e2f9c84f483573ceb4d05d06e2a3e0acb770bc5823bc4f5f3d"
+    },
+    "raw": {
+      "path": "output/accessibility-50-batch24-20261023/grids-final/candidate-validation.json",
+      "sha256": "8e16be8c16baa05691ee49f0fdd2c1f0bc2f28967e0c3db967e71e7002858a30",
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 1177,
+      "failedChecks": 0,
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 3,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "engine": {
+        "name": "veraPDF",
+        "version": "1.30.3",
+        "backend": "greenfield",
+        "executionError": null
+      }
+    },
+    "fieldValue": "José café 987",
+    "positiveGridCases": [
+      "mixed row/column spans",
+      "two-line native header",
+      "future row reservation",
+      "sparse six-column grid",
+      "trailing row span"
+    ],
+    "refusalModes": [
+      "native",
+      "raster"
+    ],
+    "corruptionsRejected": [
+      "RowSpan",
+      "ColSpan",
+      "pending review on otherwise valid PDF"
+    ]
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch24-20261023/independent-verification.json",
+    "sha256": "36462623002db69f0ed05881622300d797519c7dbfee17f3389df9142d5e3fd0",
+    "popplerDpi": 120,
+    "pagePairs": 33,
+    "allPixelIdentical": true,
+    "cases": [
+      {
+        "id": "grids",
+        "sourcePath": "output\\accessibility-50-batch24-20261023\\grids-final\\source.pdf",
+        "sourceHash": "3a6554cbda3cbf77091ae8e362a8894dcd3f7dd3159ed6c9ed2e318ced8b0fea",
+        "candidatePath": "output\\accessibility-50-batch24-20261023\\grids-final\\candidate.pdf",
+        "candidateHash": "bc34c73262cc40e2f9c84f483573ceb4d05d06e2a3e0acb770bc5823bc4f5f3d",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "fieldCount": 1,
+        "savedMerges": [
+          {
+            "cellId": "tag:table:grid1:H_r0c0_0",
+            "originalCells": [
+              "tag:cell0",
+              "tag:cell1"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:cell0:span",
+              "oat:tag:cell1:span"
+            ]
+          }
+        ],
+        "pagePairs": 8
+      },
+      {
+        "id": "header-only",
+        "sourcePath": "output\\accessibility-50-batch24-20261023\\grids-final\\source.pdf",
+        "sourceHash": "3a6554cbda3cbf77091ae8e362a8894dcd3f7dd3159ed6c9ed2e318ced8b0fea",
+        "candidatePath": "output\\accessibility-50-batch24-20261023\\grids-final\\header-only.pdf",
+        "candidateHash": "4c6ad71f65b2640ba6c994612f03c4177ae9b161d45cfa9be245d72cf763b67b",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "fieldCount": 1,
+        "savedMerges": [
+          {
+            "cellId": "tag:table:grid1:H_r0c0_0",
+            "originalCells": [
+              "tag:cell0",
+              "tag:cell1"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:cell0:span",
+              "oat:tag:cell1:span"
+            ]
+          }
+        ],
+        "pagePairs": 8
+      },
+      {
+        "id": "nist-1299",
+        "sourcePath": "output\\public-pdf-pilot-20261022\\inputs\\nist-1299.pdf",
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "candidatePath": "output\\accessibility-50-batch24-20261023\\nist-1299\\candidate.pdf",
+        "candidateHash": "7e44a0d467956f70f1a4b9702a4157d690d265f81d28d8dd580af7f3fad0c893",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "fieldCount": 0,
+        "savedMerges": [
+          {
+            "cellId": "oat:tag:n-4-8",
+            "originalCells": [
+              "tag:n-4-8",
+              "tag:n-4-10"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-8:span",
+              "oat:tag:n-4-10:span"
+            ]
+          },
+          {
+            "cellId": "oat:tag:n-5-53",
+            "originalCells": [
+              "tag:n-5-53",
+              "tag:n-5-54"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-5-53:span",
+              "oat:tag:n-5-54:span"
+            ]
+          }
+        ],
+        "pagePairs": 8
+      },
+      {
+        "id": "nist-1300",
+        "sourcePath": "output\\public-pdf-pilot-20261022\\inputs\\nist-1300.pdf",
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "candidatePath": "output\\accessibility-50-batch24-20261023\\nist-1300\\candidate.pdf",
+        "candidateHash": "13924e9912559a5ef3b897abb7c0b6d91e08ced6cf6e5f5803da9000d4980425",
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "fieldCount": 0,
+        "savedMerges": [
+          {
+            "cellId": "tag:table:vector-table:3:1:H_r3c0_4",
+            "originalCells": [
+              "tag:n-3-10",
+              "tag:n-3-11"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-3-10:span",
+              "oat:tag:n-3-11:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:3:1:H_r3c3_5",
+            "originalCells": [
+              "tag:n-3-12",
+              "tag:n-3-14"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-3-12:span",
+              "oat:tag:n-3-14:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:3:1:H_r4c3_6",
+            "originalCells": [
+              "tag:n-3-16",
+              "tag:n-3-17"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-3-16:span",
+              "oat:tag:n-3-17:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:3:1:H_r5c0_7",
+            "originalCells": [
+              "tag:n-3-18",
+              "tag:n-3-20",
+              "tag:n-3-22"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-3-18:span",
+              "oat:tag:n-3-20:span",
+              "oat:tag:n-3-22:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:3:1:H_r6c3_8",
+            "originalCells": [
+              "tag:n-3-23",
+              "tag:n-3-24"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-3-23:span",
+              "oat:tag:n-3-24:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:4:1:H_r0c0_0",
+            "originalCells": [
+              "tag:n-4-13",
+              "tag:n-4-14",
+              "tag:n-4-15",
+              "tag:n-4-16"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-13:span",
+              "oat:tag:n-4-14:span",
+              "oat:tag:n-4-15:span",
+              "oat:tag:n-4-16:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:4:1:H_r0c1_1",
+            "originalCells": [
+              "tag:n-4-17",
+              "tag:n-4-18",
+              "tag:n-4-19"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-17:span",
+              "oat:tag:n-4-18:span",
+              "oat:tag:n-4-19:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:4:1:H_r0c2_2",
+            "originalCells": [
+              "tag:n-4-20",
+              "tag:n-4-21",
+              "tag:n-4-22"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-20:span",
+              "oat:tag:n-4-21:span",
+              "oat:tag:n-4-22:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:4:1:H_r0c3_3",
+            "originalCells": [
+              "tag:n-4-23",
+              "tag:n-4-24",
+              "tag:n-4-25",
+              "tag:n-4-29"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-23:span",
+              "oat:tag:n-4-24:span",
+              "oat:tag:n-4-25:span",
+              "oat:tag:n-4-29:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:4:1:H_r0c4_4",
+            "originalCells": [
+              "tag:n-4-26",
+              "tag:n-4-30",
+              "tag:n-4-31",
+              "tag:n-4-36",
+              "tag:n-4-37"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-26:span",
+              "oat:tag:n-4-30:span",
+              "oat:tag:n-4-31:span",
+              "oat:tag:n-4-36:span",
+              "oat:tag:n-4-37:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:4:1:H_r0c5_5",
+            "originalCells": [
+              "tag:n-4-27",
+              "tag:n-4-32",
+              "tag:n-4-34",
+              "tag:n-4-38",
+              "tag:n-4-39"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-27:span",
+              "oat:tag:n-4-32:span",
+              "oat:tag:n-4-34:span",
+              "oat:tag:n-4-38:span",
+              "oat:tag:n-4-39:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:table:4:1:H_r1c1_2",
+            "originalCells": [
+              "tag:n-4-49",
+              "tag:n-4-50"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-4-49:span",
+              "oat:tag:n-4-50:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:7:1:H_r1c0_2",
+            "originalCells": [
+              "tag:n-7-7",
+              "tag:n-7-9"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-7-7:span",
+              "oat:tag:n-7-9:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:7:1:H_r2c0_3",
+            "originalCells": [
+              "tag:n-7-12",
+              "tag:n-7-15"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-7-12:span",
+              "oat:tag:n-7-15:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:vector-table:7:1:H_r3c0_4",
+            "originalCells": [
+              "tag:n-7-19",
+              "tag:n-7-22"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-7-19:span",
+              "oat:tag:n-7-22:span"
+            ]
+          },
+          {
+            "cellId": "tag:table:table:8:2:H_r0c1_1",
+            "originalCells": [
+              "tag:n-8-25",
+              "tag:n-8-26"
+            ],
+            "retainedContentSpans": [
+              "oat:tag:n-8-25:span",
+              "oat:tag:n-8-26:span"
+            ]
+          }
+        ],
+        "pagePairs": 9
+      }
+    ],
+    "visuallyInspected": [
+      "grids-filled-1-candidate.png",
+      "nist-1299-original-4-candidate.png",
+      "nist-1300-original-3-candidate.png",
+      "header-only-filled-4-candidate.png"
+    ]
+  },
+  "real": {
+    "path": "output/accessibility-50-batch24-20261023/real-evidence.json",
+    "sha256": "6b27cd316a7b883c7f434d23cf0951ccd127c72b590e9680b2e2a7bd74bb564c",
+    "cases": [
+      {
+        "id": "nist-1299",
+        "semanticPath": "output/public-pdf-pilot-20261022/nist-1299/04-semantic-ordered.json",
+        "tagsPath": "output/accessibility-50-batch24-20261023/nist-1299/tagging.json",
+        "regularity": {
+          "applied": false,
+          "algorithm": "grid-normalization-v1",
+          "tablesInspected": 5,
+          "correctedTables": 0,
+          "repairedRowCount": 0,
+          "insertedPlaceholderCellCount": 0,
+          "insertedSyntheticRowCount": 0,
+          "shiftedCellCount": 0
+        },
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+        "candidatePath": "output/accessibility-50-batch24-20261023/nist-1299/candidate.pdf",
+        "candidateHash": "7e44a0d467956f70f1a4b9702a4157d690d265f81d28d8dd580af7f3fad0c893",
+        "saved": {
+          "passed": 8771,
+          "failed": 15
+        },
+        "failedSaved": [
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-3-4:span",
+            "status": "fail",
+            "expected": "ViewandcreatemappingsbetweenCSF2.0andotherdocuments.InformativeDoyouwanttosubmityourmappingstoNISTdocumentsandhaveReferencesthemdisplayedonoursite?Pleasefollowthelinktotheleftoremailolir@nist.govifyouhaveanyquestions.",
+            "actual": "InformativeReferencesViewandcreatemappingsbetweenCSF2.0andotherdocuments.DoyouwanttosubmityourmappingstoNISTdocumentsandhavethemdisplayedonoursite?Pleasefollowthelinktotheleftoremailolir@nist.govifyouhaveanyquestions."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-3-19:span",
+            "status": "fail",
+            "expected": "Viewanddownloadnotionalexamplesofconcise,action-orientedstepsImplementationtohelpachievetheoutcomesoftheCSF2.0SubcategoriesinadditiontoExamplestheguidanceprovidedintheInformativeReferences.",
+            "actual": "ImplementationExamplesViewanddownloadnotionalexamplesofconcise,action-orientedstepstohelpachievetheoutcomesoftheCSF2.0SubcategoriesinadditiontotheguidanceprovidedintheInformativeReferences."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-3-24:span",
+            "status": "fail",
+            "expected": "Accesshumanandmachine-readableversionsoftheCore(inJSONandCSF2.0Excel).YoucanalsoviewandexportportionsoftheCoreusingkeyReferenceToolsearchterms.",
+            "actual": "CSF2.0ReferenceToolAccesshumanandmachine-readableversionsoftheCore(inJSONandExcel).YoucanalsoviewandexportportionsoftheCoreusingkeysearchterms."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-15:span",
+            "status": "fail",
+            "expected": "CreatingandUsingProvidesallorganizationswithconsiderationsOrganizationalforcreatingandusingCurrentand/orTarget",
+            "actual": "CreatingandUsingOrganizationalProvidesallorganizationswithconsiderationsforcreatingandusingCurrentand/orTarget"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-19:span",
+            "status": "fail",
+            "expected": "ProfilestoimplementtheCSF2.0.Profiles",
+            "actual": "ProfilesProfilestoimplementtheCSF2.0.​"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-21:span",
+            "status": "fail",
+            "expected": "ExplainshowanyorganizationcanapplytheCSFTierstoOrganizationalProfilestocharacterizeUsingtheCSFTiers",
+            "actual": "UsingtheCSFTiersExplainshowanyorganizationcanapplytheCSFTierstoOrganizationalProfilestocharacterize"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-27:span",
+            "status": "fail",
+            "expected": "DraftCybersecurityHelpsallorganizationstobecomesmartSupplyChainRiskacquirersandsuppliersoftechnologyproducts",
+            "actual": "DraftCybersecuritySupplyChainRiskHelpsallorganizationstobecomesmartacquirersandsuppliersoftechnologyproducts"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-32:span",
+            "status": "fail",
+            "expected": "ManagementandservicesbyimprovingtheirC-SCRM(C-SCRM)processes.",
+            "actual": "Management(C-SCRM)andservicesbyimprovingtheirC-SCRMprocesses."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-36:span",
+            "status": "fail",
+            "expected": "DetailshowEnterpriseRiskManagementDraftEnterprisepractitionerscanutilizetheoutcomesprovidedRiskManagement",
+            "actual": "DraftEnterpriseRiskManagementDetailshowEnterpriseRiskManagementpractitionerscanutilizetheoutcomesprovided"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-41:span",
+            "status": "fail",
+            "expected": "inCSF2.0toimproveorganizational(ERM)Practitionerscybersecurityriskmanagement.",
+            "actual": "(ERM)PractitionersinCSF2.0toimproveorganizationalcybersecurityriskmanagement."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-5-7:span",
+            "status": "fail",
+            "expected": "cybersecurityrisksareunderstood.communicated,andmonitored.",
+            "actual": "communicated,andmonitored.cybersecurityrisksareunderstood."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-6-5:span",
+            "status": "fail",
+            "expected": "Possiblecybersecurityattacksorganization’scybersecurity",
+            "actual": "organization’scybersecurityPossiblecybersecurityattacks"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-6-7:span",
+            "status": "fail",
+            "expected": "andcompromisesarerisksareused.",
+            "actual": "risksareused.andcompromisesare"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-21:span",
+            "status": "fail",
+            "expected": "availabilityofaffectedsystemsandservices;and",
+            "actual": "Eavailabilityofaffectedsystemsandservices;and"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-19:span",
+            "status": "fail",
+            "expected": "Executeyourrecoveryplan.Ensureoperational",
+            "actual": "Executeyourrecoveryplan.nsureoperational"
+          }
+        ],
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 41572,
+          "failedChecks": 1
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 3,
+          "warningCount": 0,
+          "blockingPreVeraPdf": true
+        },
+        "links": {
+          "bound": 8,
+          "review": 15
+        },
+        "mergedGroups": 2,
+        "savedReport": {
+          "path": "output/accessibility-50-batch24-20261023/nist-1299/saved.json",
+          "sha256": "fc2d83546f9784d2f0907b9601e82607de3f5af779b098c4cc68a95f469922ba"
+        },
+        "rawReport": {
+          "path": "output/accessibility-50-batch24-20261023/nist-1299/validation.json",
+          "sha256": "cf603c5ddc685d4307c708bb3192979731a7826b0a9b689686a4661b9cc2fae4"
+        },
+        "sourceAudit": {
+          "path": "output/accessibility-50-batch24-20261023/nist-1299/source-validation.json",
+          "sha256": "f1b968e2f6c258d817d42eec0b28ecdf01baca28ef44748213962d982edd4c20",
+          "raw": {
+            "passedRules": 96,
+            "failedRules": 10,
+            "passedChecks": 19945,
+            "failedChecks": 73
+          },
+          "fontAudit": {
+            "status": "ok",
+            "errorCount": 5,
+            "warningCount": 0,
+            "blockingPreVeraPdf": true
+          }
+        },
+        "remainingRawFindings": [
+          {
+            "severity": "error",
+            "code": "VERAPDF_7_10_2",
+            "clause": "7.10",
+            "specification": "ISO 14289-1:2014",
+            "description": "The AS key shall not appear in any optional content configuration dictionary",
+            "object": "PDOCConfig",
+            "test": "AS == null",
+            "failedChecks": 1,
+            "tags": [
+              "syntax"
+            ],
+            "checks": [
+              {
+                "status": "failed",
+                "errorMessage": "AS key is present in the optional content configuration dictionary",
+                "context": "root/document[0]/OCProperties[0]/D[0]",
+                "errorArguments": []
+              }
+            ]
+          }
+        ],
+        "failedTableChecks": [],
+        "failedMergedContent": []
+      },
+      {
+        "id": "nist-1300",
+        "semanticPath": "output/public-pdf-pilot-20261022/nist-1300/04-semantic-ordered.json",
+        "tagsPath": "output/accessibility-50-batch24-20261023/nist-1300/tagging.json",
+        "regularity": {
+          "applied": true,
+          "algorithm": "grid-normalization-v1",
+          "tablesInspected": 9,
+          "correctedTables": 5,
+          "repairedRowCount": 24,
+          "insertedPlaceholderCellCount": 32,
+          "insertedSyntheticRowCount": 0,
+          "shiftedCellCount": 0
+        },
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+        "candidatePath": "output/accessibility-50-batch24-20261023/nist-1300/candidate.pdf",
+        "candidateHash": "13924e9912559a5ef3b897abb7c0b6d91e08ced6cf6e5f5803da9000d4980425",
+        "saved": {
+          "passed": 13011,
+          "failed": 28
+        },
+        "failedSaved": [
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-2-30:span",
+            "status": "fail",
+            "expected": "orientedexamplesofhowtoachievethelistedactivities,referencetheCSF2.0ImplementationExamples",
+            "actual": "orientedexamplesofhowtoachievethelistedactivities,referencetheCSF2.0ImplementationExamples."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-2-29:span",
+            "status": "fail",
+            "expected": ".Ifthereare",
+            "actual": "Ifthereare"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-5:span",
+            "status": "fail",
+            "expected": "Beforeyoucanprotectyourassets,youneedtoidentifythem.ThenyoucandeterminetheappropriatelevelofprotectionforeachassetbaseduponitssensitivityandcriticalitytoyourUnderstandbusinessmission.Youcanusethissampletabletogetstartedonyourinformationtechnology(IT)assetinventory.Asyourbusinessmatures,youmightconsiderusinganautomatedassetinventory",
+            "actual": "UnderstandUnderstandBeforeyoucanprotectyourassets,youneedtoidentifythem.Thenyoucandeterminetheappropriatelevelofprotectionforeachassetbaseduponitssensitivityandcriticalitytoyourbusinessmission.Youcanusethissampletabletogetstartedonyourinformationtechnology(IT)assetinventory.Asyourbusinessmatures,youmightconsiderusinganautomatedassetinventory"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-10:lbody",
+            "status": "fail",
+            "expected": "Understandwhatassetsyourbusinessreliesuponbycreatingandmaintainingan",
+            "actual": "whatassetsyourbusinessreliesuponbycreatingandmaintainingan"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-11:span",
+            "status": "fail",
+            "expected": "solutionoramanagedsecurityserviceprovidertohelpyoumanageallyourbusinessassets.inventoryofhardware,software,systems,andservices.(ID.AM-01/02/04)",
+            "actual": "inventoryofhardware,software,systems,andservices.(ID.AM-01/02/04)solutionoramanagedsecurityserviceprovidertohelpyoumanageallyourbusinessassets."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-49:span",
+            "status": "fail",
+            "expected": "services,people,etc.)weneedtoprotect?",
+            "actual": "Wservices,people,etc.)weneedtoprotect?"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-47:lbody",
+            "status": "fail",
+            "expected": "Whatareourmostcriticalbusinessassets(data,hardware,software,systems,facilities,",
+            "actual": "hatareourmostcriticalbusinessassets(data,hardware,software,systems,facilities,"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-10:span",
+            "status": "fail",
+            "expected": "plan.Thiswillbecustomizedbasedonthebusinessbutshouldinclude:Understand",
+            "actual": "Understandplan.Thiswillbecustomizedbasedonthebusinessbutshouldinclude:"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-18:span",
+            "status": "fail",
+            "expected": "Whotocall:Listalltheindividualswhomaybepartofyour",
+            "actual": "dWhotocall:Listalltheindividualswhomaybepartofyour"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-30:span",
+            "status": "fail",
+            "expected": "communications/reportingresponsibilitiesasrequiredbylaws,",
+            "actual": "Licommunications/reportingresponsibilitiesasrequiredbylaws,"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-16:span",
+            "status": "fail",
+            "expected": "andmaintainingyourincidentresponseplan.responsibilityforimplementingvariousaspectsoftheplan.(RS.MA-01)",
+            "actual": "responsibilityforimplementingvariousaspectsoftheplan.(RS.MA-01)anmaintainingyourincidentresponseplan."
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-26:span",
+            "status": "fail",
+            "expected": "What/when/howtoreport:Listyourbusiness's",
+            "actual": "What/when/howtoreport:styourbusiness's"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-33:span",
+            "status": "fail",
+            "expected": "TechnicalDeepDive:NISTComputerSecurityIncidentHandlingGuidePrioritize",
+            "actual": "PrioritizeTechnicalDeepDive:NISTComputerSecurityIncidentHandlingGuide"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-36:span",
+            "status": "fail",
+            "expected": "QuestionstoConsiderdamage.(RS.MI)",
+            "actual": "damage.(RS.MI)QuestionstoConsider"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-43:span",
+            "status": "fail",
+            "expected": "willassistifwehaveaconfirmedcybersecurityincident?stakeholders(e.g.,customers,businesspartners,lawenforcementagencies,regulatorybodies)asrequiredbylaws,regulations,contracts,orpolicies.",
+            "actual": "stakeholders(e.g.,customers,businesspartners,lawenforcementagencies,regulatorybodies)asrequiredbylaws,regulations,contracts,orpolicies.willassistifwehaveaconfirmedcybersecurityincident?"
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-7-46:span",
+            "status": "fail",
+            "expected": "RelatedResources(RS.CO-02/03)",
+            "actual": "(RS.CO-02/03)RelatedResources"
+          },
+          {
+            "code": "CONTENT_ATTACHED",
+            "target": "oat:tag:n-9-5:lbl",
+            "status": "fail",
+            "expected": true,
+            "actual": false
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-5:lbl",
+            "status": "fail",
+            "expected": "1.",
+            "actual": ""
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-5:lbody:first:span",
+            "status": "fail",
+            "expected": "ACurrentProfilespecifiesthedesiredoutcomesanorganizationiscurrentlyachieving(orattemptingtoachieve)andcharacterizeshowortowhatextenteachoutcomeisbeing",
+            "actual": "1.ACurrentProfilespecifiesthedesiredoutcomesanorganizationiscurrentlyachieving(orattemptingtoachieve)andcharacterizeshowortowhatextenteachoutcomeisbeing"
+          },
+          {
+            "code": "CONTENT_ATTACHED",
+            "target": "oat:tag:n-9-8:lbl",
+            "status": "fail",
+            "expected": true,
+            "actual": false
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-8:lbl",
+            "status": "fail",
+            "expected": "•",
+            "actual": ""
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-8:lbody:first:span",
+            "status": "fail",
+            "expected": "YoucanalsouseaCommunityProfileasthebasisforyourTargetProfile.ACommunityProfileisabaselineoftargetedoutcomesforaparticularsector,technology,threat",
+            "actual": "•YoucanalsouseaCommunityProfileasthebasisforyourTargetProfile.ACommunityProfileisabaselineoftargetedoutcomesforaparticularsector,technology,threat"
+          },
+          {
+            "code": "CONTENT_ATTACHED",
+            "target": "oat:tag:n-9-16:lbl",
+            "status": "fail",
+            "expected": true,
+            "actual": false
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-16:lbl",
+            "status": "fail",
+            "expected": "•",
+            "actual": ""
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-16:lbody:first:span",
+            "status": "fail",
+            "expected": "Mapping:InformativereferencesaremappingsindicatingrelationshipsbetweentheCSF2.0andvariousstandards,guidelines,regulations,andothercontent.Theyhelpinform",
+            "actual": "•Mapping:InformativereferencesaremappingsindicatingrelationshipsbetweentheCSF2.0andvariousstandards,guidelines,regulations,andothercontent.Theyhelpinform"
+          },
+          {
+            "code": "CONTENT_ATTACHED",
+            "target": "oat:tag:n-9-18:lbl",
+            "status": "fail",
+            "expected": true,
+            "actual": false
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-18:lbl",
+            "status": "fail",
+            "expected": "•",
+            "actual": ""
+          },
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-9-18:lbody:first:span",
+            "status": "fail",
+            "expected": "Implementationexamplesprovideillustrationsofconcise,action-orientedstepstoguideorganizationsinachievingtheCSFoutcomes.Theexamplesarenotacomprehensive",
+            "actual": "•Implementationexamplesprovideillustrationsofconcise,action-orientedstepstoguideorganizationsinachievingtheCSFoutcomes.Theexamplesarenotacomprehensive"
+          }
+        ],
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 52000,
+          "failedChecks": 1
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 3,
+          "warningCount": 0,
+          "blockingPreVeraPdf": true
+        },
+        "links": {
+          "bound": 12,
+          "review": 33
+        },
+        "mergedGroups": 16,
+        "savedReport": {
+          "path": "output/accessibility-50-batch24-20261023/nist-1300/saved.json",
+          "sha256": "58f8dbd6c6ddc1421bbf353187844ee17e5c31157b8b967c4b06d66ddb22266d"
+        },
+        "rawReport": {
+          "path": "output/accessibility-50-batch24-20261023/nist-1300/validation.json",
+          "sha256": "56556272f52e710ba134efb5fab64c4b3d6922a37adb61db0b16179954f2b443"
+        },
+        "sourceAudit": {
+          "path": "output/accessibility-50-batch24-20261023/nist-1300/source-validation.json",
+          "sha256": "945428c17d5f18dd2cf96d6c2b47e0fcd5ef1383977325d13104db7c99ab87d6",
+          "raw": {
+            "passedRules": 96,
+            "failedRules": 10,
+            "passedChecks": 36837,
+            "failedChecks": 99
+          },
+          "fontAudit": {
+            "status": "ok",
+            "errorCount": 5,
+            "warningCount": 0,
+            "blockingPreVeraPdf": true
+          }
+        },
+        "remainingRawFindings": [
+          {
+            "severity": "error",
+            "code": "VERAPDF_7_10_2",
+            "clause": "7.10",
+            "specification": "ISO 14289-1:2014",
+            "description": "The AS key shall not appear in any optional content configuration dictionary",
+            "object": "PDOCConfig",
+            "test": "AS == null",
+            "failedChecks": 1,
+            "tags": [
+              "syntax"
+            ],
+            "checks": [
+              {
+                "status": "failed",
+                "errorMessage": "AS key is present in the optional content configuration dictionary",
+                "context": "root/document[0]/OCProperties[0]/D[0]",
+                "errorArguments": []
+              }
+            ]
+          }
+        ],
+        "failedTableChecks": [],
+        "failedMergedContent": [
+          {
+            "code": "CONTENT_TEXT_COMPLETE",
+            "target": "oat:tag:n-4-49:span",
+            "status": "fail",
+            "expected": "services,people,etc.)weneedtoprotect?",
+            "actual": "Wservices,people,etc.)weneedtoprotect?"
+          }
+        ]
+      },
+      {
+        "id": "booklet",
+        "semanticPath": "output/accessibility-50-batch16-20261023/booklet/04-semantic.json",
+        "tagsPath": "output/accessibility-50-batch24-20261023/booklet/tagging.json",
+        "regularity": {
+          "applied": true,
+          "algorithm": "grid-normalization-v1",
+          "tablesInspected": 10,
+          "correctedTables": 2,
+          "repairedRowCount": 3,
+          "insertedPlaceholderCellCount": 4,
+          "insertedSyntheticRowCount": 0,
+          "shiftedCellCount": 0,
+          "reviews": [
+            {
+              "algorithm": "declared-grid-v1",
+              "status": "review_required",
+              "tableId": "tag:table:table:15:1",
+              "issues": [
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-9",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-8"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-10",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-8"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-12",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-11"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-15",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-14"
+                }
+              ]
+            },
+            {
+              "algorithm": "declared-grid-v1",
+              "status": "review_required",
+              "tableId": "tag:table:table:15:2",
+              "issues": [
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-88",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-87"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-92",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-91"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-94",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-93"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-96",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-95"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-100",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-99"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-101",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-99"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-102",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-99"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-105",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-104"
+                }
+              ]
+            },
+            {
+              "algorithm": "declared-grid-v1",
+              "status": "review_required",
+              "tableId": "tag:table:table:15:borderless:1",
+              "issues": [
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-131",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-133"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-134",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-136"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-15-145",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-15-143"
+                }
+              ]
+            },
+            {
+              "algorithm": "declared-grid-v1",
+              "status": "review_required",
+              "tableId": "tag:table:table:51:borderless:1",
+              "issues": [
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-51-13",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-51-12"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-51-16",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-51-15"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-51-22",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-51-21"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-51-23",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-51-21"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-51-25",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-51-24"
+                }
+              ]
+            },
+            {
+              "algorithm": "declared-grid-v1",
+              "status": "review_required",
+              "tableId": "tag:table:table:52:borderless:1",
+              "issues": [
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-52-29",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-52-28"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-52-32",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-52-31"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-52-37",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-52-36"
+                },
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-52-40",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-52-39"
+                }
+              ]
+            },
+            {
+              "algorithm": "declared-grid-v1",
+              "status": "review_required",
+              "tableId": "tag:table:table:52:2",
+              "issues": [
+                {
+                  "code": "OVERLAPPING_SPANS",
+                  "cellId": "tag:n-52-50",
+                  "message": "Declared cell rectangles overlap; no cell was shifted.",
+                  "conflictingCellId": "tag:n-52-49"
+                }
+              ]
+            }
+          ]
+        },
+        "sourcePath": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+        "sourceHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+        "refused": true,
+        "reason": "Unresolved cell overlaps",
+        "candidateCreated": false,
+        "source": {
+          "path": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+          "sha256": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d"
+        }
+      }
+    ],
+    "qualification": "Both NIST candidates remain rejected by unresolved complete-text/attachment failures, one optional-content raw failure each and three font findings each. One merged SP 1300 fragment has a detected extra W. Semantic inputs are historical pilot plans, not new human-approved table interpretations."
+  },
+  "controls": {
+    "booklet": {
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71"
+    },
+    "testForm": {
+      "path": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+      "sha256": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c"
+    },
+    "retainedBookletRawFailures": 6,
+    "retainedBookletSavedFailures": 196,
+    "pendingBookletOcrSegments": 158,
+    "testFormFields": 32,
+    "testFormWidgets": 33,
+    "note": "Existing production candidate hashes and prior evidence retained; the new booklet replay is refused."
+  },
+  "limits": {
+    "rows": 4096,
+    "columns": 1024,
+    "cells": 10000,
+    "completedSlots": 65536,
+    "placementWork": 5000000,
+    "reportedConflicts": 100
+  },
+  "primarySources": [
+    "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF6",
+    "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html"
+  ],
+  "limitations": [
+    "Grid evidence does not establish correct table recognition or header scope.",
+    "Only aligned, nonoverlapping horizontal native lines in an identical declared cell merge.",
+    "OCR, rotation, inconsistent roles/spans/scope, cross-page and distant lines require review.",
+    "The fixture retains three default-font audit findings despite raw conformance.",
+    "Legacy rich-table test still has an old header-ID assertion; its unembedded Standard 14 source is also incompatible with a full-conformance expectation.",
+    "Human reader/keyboard qualification remains outstanding."
+  ],
+  "reproduction": {
+    "tests": "node --test --test-concurrency=1 modules/tag-builder/test/table-grid.test.js modules/pdf-writer/test/table-grid.test.js",
+    "artifacts": "TABLE_GRID_EVIDENCE_DIR must name a fresh directory.",
+    "scripts": [
+      {
+        "path": "tmp/a41-real-plan.mjs",
+        "sha256": "1e082974b3d260bdfa3bb60d6ce9fbc4bdc86465072e5673de7074d083bb2a20"
+      },
+      {
+        "path": "tmp/a41-real.mjs",
+        "sha256": "5309c6fea76405ee02fb14239c6430cbfd823ade33110a9724848228c6664a16"
+      },
+      {
+        "path": "tmp/a41-independent.py",
+        "sha256": "e03aea443c19f9a4db311e6fb03e9f1ba06b7f2292ce933df6913658dbca5b72"
+      },
+      {
+        "path": "tmp/a41-source-audit.mjs",
+        "sha256": "db55688e3b31cd5fdfb7b9872fe0189c16e615db92828fd90bccb0b9926b2b77"
+      },
+      {
+        "path": "tmp/a41-final-audit.mjs",
+        "sha256": "3a286a3d1ffa9f858f4803e6de71e4976588031fd7277beac905e431014aebf4"
+      }
+    ]
+  }
+}
