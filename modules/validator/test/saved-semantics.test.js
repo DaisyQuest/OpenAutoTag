@@ -40,6 +40,17 @@ test("graphical roles and intentionally blank cells retain appropriate attachmen
   const blank = fixture(); blank.tagging.root.label = ""; blank.inspection.structure[0].contentRefs = []; blank.inspection.markedContent = [];
   assert.deepEqual(failures(blank), []);
 });
+test('native Figure intent requires source ownership and an independently supplied description',()=>{
+  const input=fixture('Figure');input.tagging.root.nativeFigure={pageNumber:1,bbox:[10,10,100,80],sourceId:'image'};
+  const codes=failures(input).map(c=>c.code);assert.ok(codes.includes('FIGURE_SOURCE_VERIFIED'));assert.ok(codes.includes('FIGURE_DESCRIPTION_REVIEW'));
+  input.tagging.root.alt='Reviewed image description';input.inspection.structure[0].alt=input.tagging.root.alt;
+  assert.ok(!failures(input).some(c=>c.code==='FIGURE_DESCRIPTION_REVIEW'));
+});
+test('unresolved caption decisions and missing saved targets remain visible failures',()=>{
+  const input=fixture('Caption');input.tagging.source={captionAssociation:{reviews:[{captionId:'a',code:'CAPTION_TARGET_UNRESOLVED'}]}};
+  input.tagging.root.captionAssociation={targetId:'missing',targetType:'Figure',position:'after',evidence:'explicit-target-and-geometry'};
+  const codes=failures(input).map(c=>c.code);assert.ok(codes.includes('CAPTION_RELATION_REVIEW'));assert.ok(codes.includes('CAPTION_RELATION_SAVED'));
+});
 test("preserved reference comparison checks saved sequence evidence in both inputs", () => {
   const { inspection } = fixture(), reference = structuredClone(inspection);
   assert.deepEqual(failures({ inspection, reference }), []);

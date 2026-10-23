@@ -1,0 +1,307 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A45"
+  ],
+  "status": "completed",
+  "baselineCommit": "8d70ec7046850f98c72b06dbd3f4df2838f32747",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a45-baseline.log",
+      "sha256": "560aaabbd35bcee82c701aa8b6bb17db3613a5b66798101245c59b3ed76a9d7d",
+      "passed": 916,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a45-affected-final.log",
+      "sha256": "0c54bbcb4585d46c6f3ddc49bdbebcf555bc8b3099dbb98ed0058d4cc6c1eec7",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0
+    },
+    "note": "The serial baseline passed 916 cases. It began before the final image-presentation/matrix checks and continued-table caption guards. The final 82-case affected run covers those changes; no single run of the final revision is claimed.",
+    "coverage": [
+      {
+        "file": "modules/tag-builder/captions.js",
+        "lines": 100,
+        "branches": 91.43,
+        "functions": 100
+      },
+      {
+        "file": "modules/validator/native-figures.js",
+        "lines": 100,
+        "branches": 95.24,
+        "functions": 100
+      }
+    ]
+  },
+  "fixture": {
+    "pdfPath": "output\\accessibility-50-batch28-20261023\\fixture\\source.pdf",
+    "outputPath": "output\\accessibility-50-batch28-20261023\\fixture\\native.pdf",
+    "semanticPath": "output\\accessibility-50-batch28-20261023\\fixture\\semantic.json",
+    "tagsPath": "output\\accessibility-50-batch28-20261023\\fixture\\tagging.json",
+    "saved": {
+      "passed": 656,
+      "failed": 0
+    },
+    "figures": 4,
+    "captionRelationships": 6,
+    "nativePixelMatch": true,
+    "fillSaveReopen": true,
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 2064,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 3,
+      "warningCount": 0,
+      "blockingPreVeraPdf": true
+    }
+  },
+  "independent": {
+    "sourceHash": "2f63f6a25e4be91b36c4500676545a14d44d6195c22d1d0c3fa05713847e1672",
+    "candidateHash": "01d5818650f151fa59581f273011f3838926788561cde20a1ffcd924269afff8",
+    "pagePairs": [
+      {
+        "state": "original",
+        "page": 1,
+        "pixels": [
+          1000,
+          1334
+        ],
+        "pixelHash": "4f9278c911cb900ba98ec5e761fefdc31af80d42ef2df9f41af43dbd79318449"
+      },
+      {
+        "state": "original",
+        "page": 2,
+        "pixels": [
+          1334,
+          1000
+        ],
+        "pixelHash": "13524de640103bcbe8b5a0fbc4b2a602ba89bbab60a345327eafc184ecd66e10"
+      },
+      {
+        "state": "original",
+        "page": 3,
+        "pixels": [
+          1000,
+          1334
+        ],
+        "pixelHash": "eb96cd1f0b6f58376c17c13d4f7ed51436a6b0b64e0516c36c76f12da12a2728"
+      },
+      {
+        "state": "original",
+        "page": 4,
+        "pixels": [
+          1334,
+          1000
+        ],
+        "pixelHash": "ece2c11634355f6bd820e35b2722b399b672ce4742b4a3850ad6fd191fc26647"
+      },
+      {
+        "state": "filled",
+        "page": 1,
+        "pixels": [
+          1000,
+          1334
+        ],
+        "pixelHash": "2d22dc2a5cee134a291669c910da8768ed1a27822baca2e6a78452c6a5603113"
+      },
+      {
+        "state": "filled",
+        "page": 2,
+        "pixels": [
+          1334,
+          1000
+        ],
+        "pixelHash": "13524de640103bcbe8b5a0fbc4b2a602ba89bbab60a345327eafc184ecd66e10"
+      },
+      {
+        "state": "filled",
+        "page": 3,
+        "pixels": [
+          1000,
+          1334
+        ],
+        "pixelHash": "eb96cd1f0b6f58376c17c13d4f7ed51436a6b0b64e0516c36c76f12da12a2728"
+      },
+      {
+        "state": "filled",
+        "page": 4,
+        "pixels": [
+          1334,
+          1000
+        ],
+        "pixelHash": "ece2c11634355f6bd820e35b2722b399b672ce4742b4a3850ad6fd191fc26647"
+      }
+    ],
+    "popplerDpi": 120,
+    "imageOccurrences": 6,
+    "originalImageResourcesUnchanged": true,
+    "originalTextAndSpacingUnchanged": true,
+    "fieldsAnnotationsAndAppearanceBytesUnchanged": true,
+    "pageGeometryUnchanged": true,
+    "relations": [
+      {
+        "caption": "tag:n:p1-b2",
+        "targetId": "tag:figure:image:1:9",
+        "targetType": "Figure",
+        "position": "after",
+        "evidence": "explicit-target-and-geometry"
+      },
+      {
+        "caption": "tag:n:p1-b4",
+        "targetId": "tag:table:table1",
+        "targetType": "Table",
+        "position": "before",
+        "evidence": "explicit-target-and-geometry"
+      },
+      {
+        "caption": "tag:n:p2-b2",
+        "targetId": "tag:figure:image:2:14",
+        "targetType": "Figure",
+        "position": "before",
+        "evidence": "explicit-target-and-geometry"
+      },
+      {
+        "caption": "tag:n:p2-b8",
+        "targetId": "tag:table:table2",
+        "targetType": "Table",
+        "position": "after",
+        "evidence": "explicit-target-and-geometry"
+      },
+      {
+        "caption": "tag:n:p3-b2",
+        "targetId": "tag:figure:image:3:13",
+        "targetType": "Figure",
+        "position": "after",
+        "evidence": "explicit-target-and-geometry"
+      },
+      {
+        "caption": "tag:n:p4-b2",
+        "targetId": "tag:figure:image:4:18",
+        "targetType": "Figure",
+        "position": "before",
+        "evidence": "explicit-target-and-geometry"
+      }
+    ]
+  },
+  "real": [
+    {
+      "id": "booklet",
+      "sourcePath": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+      "sourceHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+      "candidatePath": "output/accessibility-50-batch27-20261023/booklet/candidate.pdf",
+      "candidateHash": "1e4e8b8d33ddc4d45a04d174945316183de4902c7ef3df9ee6764e0ac042f785",
+      "saved": {
+        "passed": 51063,
+        "failed": 192
+      },
+      "failureObjectsUnchanged": true,
+      "taggingIntentUnchanged": true,
+      "scope": "Reinspection of unchanged A44 candidate and fresh tag-builder replay of retained semantics; no new candidate or recognition run."
+    },
+    {
+      "id": "nist-1299",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+      "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+      "candidatePath": "output/accessibility-50-batch27-20261023/nist-1299/candidate.pdf",
+      "candidateHash": "7ce0e6ba51bbf8dcb1a89c6dca79dea0119d247945b859c88d99c196a5da25c5",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+      "saved": {
+        "passed": 8907,
+        "failed": 15
+      },
+      "failureObjectsUnchanged": true,
+      "taggingIntentUnchanged": true,
+      "scope": "Reinspection of unchanged A44 candidate and fresh tag-builder replay of retained semantics; no new candidate or recognition run."
+    },
+    {
+      "id": "nist-1300",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+      "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+      "candidatePath": "output/accessibility-50-batch27-20261023/nist-1300/candidate.pdf",
+      "candidateHash": "30e74a0cc7aa70882e6c1fc48ac420b8f24965cfa9dd98d1318c626e8bcc1521",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+      "saved": {
+        "passed": 13055,
+        "failed": 28
+      },
+      "failureObjectsUnchanged": true,
+      "taggingIntentUnchanged": true,
+      "scope": "Reinspection of unchanged A44 candidate and fresh tag-builder replay of retained semantics; no new candidate or recognition run."
+    }
+  ],
+  "controls": [
+    {
+      "path": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+      "sha256": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c"
+    },
+    {
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "output\\accessibility-50-batch28-20261023\\fixture\\source.pdf",
+      "sha256": "2f63f6a25e4be91b36c4500676545a14d44d6195c22d1d0c3fa05713847e1672"
+    },
+    {
+      "path": "output\\accessibility-50-batch28-20261023\\fixture\\native.pdf",
+      "sha256": "01d5818650f151fa59581f273011f3838926788561cde20a1ffcd924269afff8"
+    },
+    {
+      "path": "output\\accessibility-50-batch28-20261023\\fixture\\semantic.json",
+      "sha256": "3c94fea705af2ac72fc3e2c664fb3426d8fc3abb9a56ee8f30a610c560b2c691"
+    },
+    {
+      "path": "output\\accessibility-50-batch28-20261023\\fixture\\tagging.json",
+      "sha256": "53c1345d839af8c32c4c89a6c9e0440317051925d19cd1f9065ac2091093e274"
+    },
+    {
+      "path": "output\\accessibility-50-batch28-20261023\\fixture\\native.pdf.ownership.json",
+      "sha256": "3abffc4718b52fb6338a27928b92c29993fe6d9d816d2fca40a8410b6209a9bf"
+    },
+    {
+      "path": "output/accessibility-50-batch28-20261023/fixture/saved.json",
+      "sha256": "f61abc700856708b9661a3758c9241b6f499ea4ef7268d03bd419fb4e7bc0987"
+    },
+    {
+      "path": "output/accessibility-50-batch28-20261023/fixture/validation.json",
+      "sha256": "0543455d15cef923c1c724afec2300ea939aef18b403fef94339343017d717a3"
+    },
+    {
+      "path": "output/accessibility-50-batch28-20261023/independent-verification.json",
+      "sha256": "401a4b45c7cf66f7d8be2d88bed4449a73b40971c3b5a2f1f8c960b1527d06df"
+    },
+    {
+      "path": "output/accessibility-50-batch28-20261023/real-evidence.json",
+      "sha256": "3b9df578722e1ee07272ea8f4074d72bc2dd24a431e01a0b52c342a1c9bbde0c"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://pdfa.org/download-area/publications/Tagged-PDF-Best-Practice-Guide.pdf",
+      "version": "1.0.1",
+      "pages": [
+        13,
+        14,
+        47
+      ],
+      "relevance": "Table caption first/last child; Figure caption adjacent sibling sharing its parent; Figure owns actual graphical content."
+    }
+  ],
+  "limitations": [
+    "Image XObjects only; ambiguous, inline, vector/composite, authored artifact/replacement and optional-content cases require review.",
+    "Native figure ownership requires native mode. Raster requests refuse before writing an unsupported image intent.",
+    "Descriptions are never invented from captions; missing alternate descriptions remain failures and supplied descriptions still require human semantic review.",
+    "The source-independent image scan verifies payload, presentation resources, invocation order and full matrices; human visibility, clipping, interpretation and reader usability remain separate.",
+    "Existing NASA and NIST candidate failures remain; the synthetic fixture has three separate default-font audit errors despite zero raw veraPDF failures."
+  ]
+}

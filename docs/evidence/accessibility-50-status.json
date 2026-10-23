@@ -539,8 +539,11 @@
       "improvement": "Caption relationships",
       "requirement": "Save evidence-backed Table/Figure caption relationships in correct reading order.",
       "acceptance": "Caption association survives output and does not attach neighboring unrelated prose.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/accessibility-50-batch28-20261023.md",
+        "docs/evidence/accessibility-50-batch28-20261023.json"
+      ]
     },
     {
       "id": "A46",

@@ -166,7 +166,7 @@ async function needsCompilation() {
 }
 
 function collectNativeJavaSources() {
-  const sources = ["NativeLinkOwnership.java", "EditableFontProof.java", "QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
+  const sources = ["NativeFigures.java", "NativeLinkOwnership.java", "EditableFontProof.java", "QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
   sources.push(path.join(nativeJavaDir, "OcrTextLayer.java"));
   sources.push(path.join(nativeJavaDir, "NativeLinkGeometry.java"));
   sources.push(path.join(nativeJavaDir, "ReviewedOutlineCli.java"));
@@ -720,7 +720,7 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
 
   if (!sourceBytes.equals(await readFile(pdfPath)) || !intentBytes.equals(await readFile(tagsPath))) throw new Error("Native source or tagging intent changed while writing");
   const hash = bytes => createHash("sha256").update(bytes).digest("hex");
-  const sourceOwnership = { schemaVersion: "1.0.0", sourceHash: hash(sourceBytes), intentHash: hash(intentBytes), ranges: rewriterReport.sourceOwnership, nativeLinks: rewriterReport.nativeLinks || [] };
+  const sourceOwnership = { schemaVersion: "1.0.0", sourceHash: hash(sourceBytes), intentHash: hash(intentBytes), ranges: rewriterReport.sourceOwnership, nativeLinks: rewriterReport.nativeLinks || [], nativeFigures: rewriterReport.nativeFigures || [] };
   if (!validateSourceOwnership(sourceOwnership)) throw new Error(`Invalid source ownership evidence: ${ajv.errorsText(validateSourceOwnership.errors)}`);
   const sourceOwnershipPath = `${outputPath}.ownership.json`;
   await writeFile(sourceOwnershipPath, JSON.stringify(sourceOwnership, null, 2));
@@ -1041,6 +1041,7 @@ export async function writeTaggedArtifacts({
   while (gridStack.length) {
     const node = gridStack.pop();
     if (++gridNodes > 100000) throw new Error("Table grid review traversal limit exceeded");
+    if (node.nativeFigure && modeDecision.effectiveMode !== "native") throw new Error("Native figure ownership requires native writer mode");
     if (node.tableGridReview) throw new Error(`Table grid requires review: ${node.id}: ${node.tableGridReview.issues.map(i => `${i.code} (${i.cellId})`).join(", ")}`);
     for (const child of node.children || []) gridStack.push(child);
   }

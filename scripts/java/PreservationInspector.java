@@ -149,7 +149,7 @@ public final class PreservationInspector {
         result.put("navigation",NavigationInspector.inspect(doc));
         result.put("headings", headings); result.put("structure", structure); result.put("contentOrder", contentOrder);
         result.put("markedContent", savedContent.json());
-        result.put("textRuns", savedContent.textRuns()); result.put("replacementScopes", savedContent.replacements());
+        result.put("imageRuns",savedContent.imageRuns()); result.put("textRuns", savedContent.textRuns()); result.put("replacementScopes", savedContent.replacements());
         result.put("issues", issues); result.put("limitations", limitations);
         return result;
     }
@@ -391,7 +391,7 @@ public final class PreservationInspector {
         while ((n = in.read(buffer)) != -1) { total += n; if (total > limit) throw new IOException("Inspection stream limit exceeded"); digest.update(buffer, 0, n); }
         return HexFormat.of().formatHex(digest.digest());
     }
-    private static String fingerprint(COSBase value, Set<String> skip) throws Exception {
+    static String fingerprint(COSBase value, Set<String> skip) throws Exception {
         return hash(canonical(value, skip, Collections.newSetFromMap(new IdentityHashMap<>()), new int[]{0}, 0));
     }
     static String navigationFingerprint(COSBase value,Set<String> skip,Map<COSDictionary,Integer> pages,int[] work)throws Exception {

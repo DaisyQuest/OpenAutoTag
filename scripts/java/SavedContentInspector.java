@@ -21,6 +21,10 @@ final class SavedContentInspector {
     private final List<Map<String, Object>> textRuns = new ArrayList<>();
     private final List<Map<String, Object>> replacements = new ArrayList<>();
     private int pageGlyphs;
+    private final List<Map<String,Object>> imageRuns=new ArrayList<>();
+    private final Map<COSStream,String> imageHashes=new IdentityHashMap<>(),imageAppearances=new IdentityHashMap<>();
+    private final Map<Integer,PDPage> pageObjects=new HashMap<>();
+
 
     private static final class Item {
         final String key;
@@ -35,16 +39,19 @@ final class SavedContentInspector {
         }
     }
     private record Frame(Item item, boolean artifact, Map<String, Object> replacement) {}
-    private static final class State { PDFont font; State(PDFont font) { this.font = font; } }
+    private static final class State {
+        PDFont font; java.awt.geom.AffineTransform matrix;
+        State(PDFont font,java.awt.geom.AffineTransform matrix) {this.font=font;this.matrix=new java.awt.geom.AffineTransform(matrix);}
+    }
 
     SavedContentInspector(PDDocument document, List<String> issues) throws IOException {
         this.issues = issues;
         int pageNumber = 0;
         for (PDPage page : document.getPages()) {
-            pageGlyphs = 0;
+            pageGlyphs = 0;pageObjects.put(pageNumber+1,page);
             scope(page.getCOSObject());
             try (InputStream in = page.getContents()) {
-                scan(read(in), page.getResources(), ++pageNumber, null, "page", new ArrayList<>(), null, 0);
+                scan(read(in), page.getResources(), ++pageNumber, null, "page", new ArrayList<>(), null, new java.awt.geom.AffineTransform(), 0);
             }
         }
         for (Item item : items.values()) if (item.declarations.size() != 1)
@@ -87,6 +94,7 @@ final class SavedContentInspector {
     }
 
     List<Map<String, Object>> json() { return items.values().stream().map(Item::json).toList(); }
+    List<Map<String,Object>> imageRuns() {return imageRuns;}
     List<Map<String, Object>> textRuns() { return textRuns; }
     List<Map<String, Object>> replacements() { return replacements; }
     private void scope(COSDictionary dict) { if (seenScopes.add(dict)) scopes.add(dict); }
@@ -104,11 +112,11 @@ final class SavedContentInspector {
         return bytes;
     }
     private void scan(byte[] bytes, PDResources resources, int page, COSStream stream, String origin,
-        List<Frame> inherited, PDFont inheritedFont, int depth) throws IOException {
+        List<Frame> inherited, PDFont inheritedFont, java.awt.geom.AffineTransform inheritedMatrix, int depth) throws IOException {
         if (depth > MAX_DEPTH) throw new IOException("Saved content invocation depth exceeded");
         List<Frame> frames = new ArrayList<>(inherited);
         int base = frames.size(), index = 0;
-        Deque<State> states = new ArrayDeque<>(); State state = new State(inheritedFont);
+        Deque<State> states = new ArrayDeque<>(); State state = new State(inheritedFont,inheritedMatrix);
         PDFStreamParser parser = new PDFStreamParser(bytes);
         List<COSBase> args = new ArrayList<>(); Object token;
         while ((token = parser.parseNextToken()) != null) {
@@ -156,8 +164,14 @@ final class SavedContentInspector {
                     if (frames.size() <= base) issues.add("UNBALANCED_MARKED_CONTENT:page:" + page);
                     else { Frame closed = frames.remove(frames.size() - 1); if (closed.replacement != null) closed.replacement.put("glyphEnd", pageGlyphs); }
                 }
-                case "q" -> { if (states.size() >= MAX_DEPTH) throw new IOException("Saved graphics-state depth exceeded"); states.push(new State(state.font)); }
+                case "q" -> { if (states.size() >= MAX_DEPTH) throw new IOException("Saved graphics-state depth exceeded"); states.push(new State(state.font,state.matrix)); }
                 case "Q" -> { if (!states.isEmpty()) state = states.pop(); }
+                case "cm" -> {
+                    if(args.size()!=6 || args.stream().anyMatch(a->!(a instanceof COSNumber)))throw new IOException("Invalid saved transformation");
+                    double[] values=args.stream().mapToDouble(a->((COSNumber)a).floatValue()).toArray();
+                    if(Arrays.stream(values).anyMatch(v->!Double.isFinite(v)))throw new IOException("Nonfinite saved transformation");
+                    state.matrix.concatenate(new java.awt.geom.AffineTransform(values));
+                }
                 case "Tf" -> {
                     state.font = resources != null && args.size() == 2 && args.get(0) instanceof COSName ? resources.getFont((COSName)args.get(0)) : null;
                 }
@@ -189,9 +203,12 @@ final class SavedContentInspector {
                         PDFormXObject form = (PDFormXObject)object; COSStream dict = form.getCOSObject(); scope(dict);
                         if (!active.add(dict)) throw new IOException("Cyclic saved Form invocation");
                         try (InputStream in = dict.createInputStream()) {
-                            scan(read(in), form.getResources() == null ? resources : form.getResources(), page, dict, origin + "/" + (index - 1), frames, state.font, depth + 1);
+                            var formMatrix=new java.awt.geom.AffineTransform(state.matrix);formMatrix.concatenate(form.getMatrix().createAffineTransform());
+                            scan(read(in), form.getResources() == null ? resources : form.getResources(), page, dict, origin + "/" + (index - 1), frames, state.font, formMatrix, depth + 1);
                         } finally { active.remove(dict); }
-                    } else if (object instanceof PDImageXObject) graphics(frames);
+                    } else if (object instanceof PDImageXObject image) {
+                        graphics(frames);image(image,frames,page,origin,index-1,state.matrix);
+                    }
                 }
                 case "BI", "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "sh" -> graphics(frames);
                 default -> { }
@@ -199,6 +216,42 @@ final class SavedContentInspector {
             args.clear();
         }
         if (frames.size() != base) issues.add("UNBALANCED_MARKED_CONTENT:page:" + page);
+    }
+    private void image(PDImageXObject image,List<Frame> frames,int page,String origin,int index,java.awt.geom.AffineTransform matrix) throws IOException {
+        if(imageRuns.size()>=100000)throw new IOException("Saved image occurrence limit exceeded");
+        String hash=imageHashes.get(image.getCOSObject());
+        if(hash==null)try(InputStream in=image.getCOSObject().createRawInputStream()) {
+            byte[] bytes=read(in);
+            try {hash=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));}
+            catch(java.security.NoSuchAlgorithmException e){throw new IOException(e);}
+            imageHashes.put(image.getCOSObject(),hash);
+        }
+        String appearance=imageAppearances.get(image.getCOSObject());
+        if(appearance==null) {
+            try {appearance=PreservationInspector.fingerprint(image.getCOSObject(),Set.of("StructParent"));}
+            catch(Exception e){throw new IOException("Cannot inspect image presentation",e);}
+            imageAppearances.put(image.getCOSObject(),appearance);
+        }
+        PDPage p=pageObjects.get(page);var crop=p.getCropBox();double u=p.getUserUnit();
+        double minX=Double.POSITIVE_INFINITY,minY=minX,maxX=Double.NEGATIVE_INFINITY,maxY=maxX;
+        for(int x=0;x<=1;x++)for(int y=0;y<=1;y++) {
+            var point=matrix.transform(new java.awt.geom.Point2D.Double(x,y),null);
+            double px=point.getX()-crop.getLowerLeftX(),py=point.getY()-crop.getLowerLeftY(),dx,dy;
+            switch(p.getRotation()) {
+                case 0 -> {dx=px;dy=crop.getHeight()-py;}
+                case 90 -> {dx=py;dy=px;}
+                case 180 -> {dx=crop.getWidth()-px;dy=py;}
+                case 270 -> {dx=crop.getHeight()-py;dy=crop.getWidth()-px;}
+                default -> throw new IOException("Unsupported saved image rotation");
+            }
+            dx*=u;dy*=u;if(!Double.isFinite(dx)||!Double.isFinite(dy))throw new IOException("Nonfinite saved image geometry");
+            minX=Math.min(minX,dx);maxX=Math.max(maxX,dx);minY=Math.min(minY,dy);maxY=Math.max(maxY,dy);
+        }
+        Map<String,Object> run=new LinkedHashMap<>();run.put("pageNumber",page);run.put("streamOrigin",origin);run.put("operatorIndex",index);
+        run.put("imageSha256",hash);run.put("appearanceHash",appearance);run.put("width",image.getWidth());run.put("height",image.getHeight());run.put("bitsPerComponent",image.getBitsPerComponent());
+        double[] transform=new double[6];matrix.getMatrix(transform);run.put("matrix",Arrays.stream(transform).boxed().toList());
+        run.put("bbox",List.of(minX,minY,maxX-minX,maxY-minY));run.put("owners",owners(frames).stream().map(i->i.key).toList());
+        run.put("artifact",frames.stream().anyMatch(Frame::artifact));imageRuns.add(run);
     }
     private static List<Item> owners(List<Frame> frames) {
         // Artifact paint cannot make a nested or enclosing real-content tag nonempty.

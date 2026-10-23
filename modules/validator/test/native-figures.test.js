@@ -1,0 +1,25 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {inspectNativeFigures} from '../native-figures.js';
+const fixture=()=>({source:{imageRuns:[{pageNumber:1,streamOrigin:'page/3',operatorIndex:2,imageSha256:'a'.repeat(64),appearanceHash:'c'.repeat(64),width:10,height:10,bitsPerComponent:8,bbox:[10,10,100,80],matrix:[100,0,0,80,10,10],artifact:false,owners:[]}]},inspection:{imageRuns:[{pageNumber:1,streamOrigin:'page/6',operatorIndex:4,imageSha256:'a'.repeat(64),appearanceHash:'c'.repeat(64),width:10,height:10,bitsPerComponent:8,bbox:[10,10,100,80],matrix:[100,0,0,80,10,10],artifact:false,owners:['m1']}],structure:[{identifier:'oat:fig',contentRefs:['m1']}]},ownership:{nativeFigures:[{pageNumber:1,streamOrigin:'page/3',operatorIndex:2,tagNodeId:'fig'}]},intendedNodes:[{id:'oat:fig',n:{id:'fig',nativeFigure:{pageNumber:1,bbox:[10,10,100,80]}}}]});
+test('source image identity, order, geometry and unique saved owner qualify together',()=>{assert.equal(inspectNativeFigures({...fixture(),add(){}}),true);});
+for(const mutation of ['missing-inspection','extra-image','changed-payload','changed-decode','mirrored-image','moved-image','changed-source-box','wrong-page','source-artifact','saved-artifact','wrong-owner','unresolved-owner','duplicate-owner','unknown-target','missing-declaration','duplicate-declaration','wrong-address'])test(`native figure verification rejects ${mutation}`,()=>{
+ const d=fixture();
+ if(mutation==='missing-inspection')delete d.source.imageRuns;
+ if(mutation==='extra-image')d.inspection.imageRuns.push(structuredClone(d.inspection.imageRuns[0]));
+ if(mutation==='changed-payload')d.inspection.imageRuns[0].imageSha256='b'.repeat(64);
+ if(mutation==='changed-decode')d.inspection.imageRuns[0].appearanceHash='d'.repeat(64);
+ if(mutation==='mirrored-image')d.inspection.imageRuns[0].matrix[0]*=-1;
+ if(mutation==='moved-image')d.inspection.imageRuns[0].bbox[0]+=2;
+ if(mutation==='changed-source-box')d.intendedNodes[0].n.nativeFigure.bbox[1]+=2;
+ if(mutation==='wrong-page')d.intendedNodes[0].n.nativeFigure.pageNumber=2;
+ if(mutation==='source-artifact')d.source.imageRuns[0].artifact=true;
+ if(mutation==='saved-artifact')d.inspection.imageRuns[0].artifact=true;
+ if(mutation==='wrong-owner')d.inspection.structure[0].identifier='oat:other';
+ if(mutation==='unresolved-owner')d.inspection.structure=[];
+ if(mutation==='duplicate-owner')d.inspection.structure.push(structuredClone(d.inspection.structure[0]));
+ if(mutation==='unknown-target')d.ownership.nativeFigures[0].tagNodeId='missing';
+ if(mutation==='missing-declaration')delete d.ownership.nativeFigures;
+ if(mutation==='duplicate-declaration')d.ownership.nativeFigures.push(structuredClone(d.ownership.nativeFigures[0]));
+ if(mutation==='wrong-address')d.ownership.nativeFigures[0].operatorIndex++;
+ const checks=[];assert.equal(inspectNativeFigures({...d,add:(...args)=>checks.push(args)}),false);assert.ok(checks.some(c=>c[3]===false));
+});
+test('documents without figure requests keep existing ownership scope',()=>{assert.equal(inspectNativeFigures({intendedNodes:[],ownership:{},add(){throw Error('unexpected check');}}),true);});

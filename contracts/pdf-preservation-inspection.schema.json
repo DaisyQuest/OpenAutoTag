@@ -9,6 +9,7 @@
     "scope": { "const": "preserved-objects-v1" },
     "sourceHash": { "$ref": "#/$defs/hash" },
     "navigation": { "$ref": "#/$defs/navigation" },
+    "imageRuns": {"type":"array","maxItems":100000,"items":{"type":"object","required":["pageNumber","streamOrigin","operatorIndex","imageSha256","appearanceHash","width","height","bitsPerComponent","bbox","matrix","owners","artifact"],"properties":{"pageNumber":{"type":"integer","minimum":1},"streamOrigin":{"type":"string","pattern":"^page(?:/[0-9]+)*$"},"operatorIndex":{"type":"integer","minimum":0},"imageSha256":{"$ref":"#/$defs/hash"},"appearanceHash":{"$ref":"#/$defs/hash"},"width":{"type":"integer","minimum":1},"height":{"type":"integer","minimum":1},"bitsPerComponent":{"type":"integer","minimum":-1},"matrix":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"number"}},"bbox":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"number"}},"owners":{"type":"array","items":{"type":"string"},"uniqueItems":true},"artifact":{"type":"boolean"}},"additionalProperties":false}},
     "textRuns": {
       "type": "array", "maxItems": 100000, "items": {
         "type": "object", "required": ["pageNumber", "streamOrigin", "operatorIndex", "glyphStart", "glyphEnd", "owners", "artifact", "fontName", "glyphs", "positions"],

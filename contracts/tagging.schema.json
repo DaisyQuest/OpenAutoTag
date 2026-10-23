@@ -107,6 +107,8 @@
             }, "additionalProperties": false
           }
         },
+        "nativeFigure": {"type": "object", "required": ["pageNumber", "bbox", "sourceId"], "properties": {"pageNumber": {"type": "integer", "minimum": 1}, "bbox": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}}, "sourceId": {"type": "string", "minLength": 1}}, "additionalProperties": false},
+        "captionAssociation": {"type": "object", "required": ["targetId", "targetType", "position", "evidence"], "properties": {"targetId": {"type": "string", "minLength": 1}, "targetType": {"enum": ["Figure", "Table"]}, "position": {"enum": ["before", "after"]}, "evidence": {"enum": ["explicit-target-and-geometry", "adjacent-table-and-geometry"]}}, "additionalProperties": false},
         "tableGridReview": { "$ref": "#/$defs/tableGridReview" },
         "mergedCellIds": { "type": "array", "minItems": 2, "maxItems": 10000, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "tableRowOrigin": {"type":"object","required":["pageNumber","rowIndex"],"properties":{"pageNumber":{"type":"integer","minimum":1},"rowIndex":{"type":"integer","minimum":0}},"additionalProperties":false},

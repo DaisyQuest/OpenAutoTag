@@ -38,7 +38,8 @@
       "Aside",
       "BlockQuote",
       "Form",
-      "Table"
+      "Table",
+      "Caption"
     ],
     "Sect": [
       "Sect",
@@ -55,7 +56,8 @@
       "Aside",
       "BlockQuote",
       "Form",
-      "Table"
+      "Table",
+      "Caption"
     ],
     "Aside": [
       "Sect",
@@ -72,7 +74,8 @@
       "Aside",
       "BlockQuote",
       "Form",
-      "Table"
+      "Table",
+      "Caption"
     ],
     "BlockQuote": [
       "Sect",
@@ -89,7 +92,8 @@
       "Aside",
       "BlockQuote",
       "Form",
-      "Table"
+      "Table",
+      "Caption"
     ],
     "Form": [
       "Sect",
@@ -291,6 +295,9 @@
         },
         {
           "$ref": "#/$defs/tableNode"
+        },
+        {
+          "$ref": "#/$defs/captionNode"
         }
       ]
     },

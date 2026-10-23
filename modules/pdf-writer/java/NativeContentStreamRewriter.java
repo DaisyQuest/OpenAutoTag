@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -305,6 +307,7 @@ public class NativeContentStreamRewriter {
         boolean startsTagGroup;
         boolean emitted;
         boolean coalesced;
+        boolean image;
         List<AuthoredText.Scope> authoredText = List.of();
     }
 
@@ -312,11 +315,33 @@ public class NativeContentStreamRewriter {
     private static class PagePlan {
         int pageNumber;
         final List<String> sourceOwnership = new ArrayList<>();
+        final List<String> figureOwnership = new ArrayList<>();
         List<Assignment> assignments = new ArrayList<>();
         NativeLinkOwnership links;
         List<Integer> unmatchedOperatorSeqs = new ArrayList<>();
         List<Integer> unmatchedOperatorIndices = new ArrayList<>();
         Map<String, PDFormXObject> forms = new LinkedHashMap<>();
+    }
+
+    private static void prepareFigures(PDDocument doc,PagePlan plan,TagTreeNode root) throws IOException {
+        if(root==null)return;
+        List<TagTreeNode> requested=new ArrayList<>();Deque<TagTreeNode> stack=new ArrayDeque<>();stack.push(root);int count=0;
+        while(!stack.isEmpty()) {TagTreeNode node=stack.pop();if(++count>100000)throw new IOException("Figure intent traversal limit exceeded");
+            if(node.figureBox!=null) {if(node.figurePage<1||node.figurePage>doc.getNumberOfPages())throw new IOException("Figure page out of range");if(node.figurePage==plan.pageNumber)requested.add(node);}
+            stack.addAll(node.children);
+        }
+        if(requested.isEmpty())return;
+        NativeFigures extractor=new NativeFigures(doc.getPage(plan.pageNumber-1));extractor.processPage(doc.getPage(plan.pageNumber-1));
+        Set<NativeFigures.Image> claimed=new HashSet<>();int mcid=plan.assignments.stream().mapToInt(a->a.mcid).max().orElse(-1)+1;
+        for(TagTreeNode node:requested) {
+            List<NativeFigures.Image> matches=extractor.images.stream().filter(i->NativeFigures.matches(node.figureBox,i.bbox())).toList();
+            if(matches.size()!=1||!claimed.add(matches.get(0)))throw new IOException("Native figure requires one unique image occurrence: "+node.id);
+            NativeFigures.Image found=matches.get(0);
+            if(!found.addressable()||found.protectedContent())throw new IOException("Native figure requires an unprotected image XObject occurrence: "+node.id);
+            Assignment assignment=new Assignment();assignment.image=true;assignment.tagNodeId=node.id;assignment.tagType="Figure";assignment.mcid=mcid++;
+            OpRef ref=new OpRef();ref.streamOrigin=found.origin();ref.opIndexInStream=found.index();ref.lexicalIdentity=true;ref.text="";assignment.operators.add(ref);plan.assignments.add(assignment);
+            plan.figureOwnership.add("{\"tagNodeId\":"+escapeJson(node.id)+",\"pageNumber\":"+plan.pageNumber+",\"streamOrigin\":"+escapeJson(found.origin())+",\"operatorIndex\":"+found.index()+"}");
+        }
     }
 
     /** Source offsets are captured before serialization, never recovered from
@@ -365,6 +390,7 @@ public class NativeContentStreamRewriter {
         String lang;
         String alt;
         String actualText;
+        int figurePage; double[] figureBox;
         NativeLinkOwnership.Link nativeLinkGroup;
         boolean intentionallyEmptyDataCell;
         String footnoteGroupId;
@@ -398,6 +424,12 @@ public class NativeContentStreamRewriter {
         if (type == null) type = m.get("role");
         n.type = asString(type);
         if (n.type == null || n.type.isEmpty()) n.type = "NonStruct";
+        if(m.get("nativeFigure") instanceof Map) {
+            if(!"Figure".equals(n.type))throw new IllegalArgumentException("nativeFigure requires Figure role");
+            Map<String,Object> figure=asMap(m.get("nativeFigure"));n.figurePage=requiredInteger(figure,"pageNumber");
+            List<Object> box=asList(figure.get("bbox"));n.figureBox=new double[box.size()];
+            for(int i=0;i<box.size();i++)n.figureBox[i]=asDouble(box.get(i));
+        }
         Object lang = m.get("lang");
         if (lang != null) n.lang = asString(lang);
         Object alt = m.get("alt");
@@ -933,8 +965,10 @@ public class NativeContentStreamRewriter {
             List<AuthoredText.Scope> inheritedText) throws IOException {
         Map<Integer, List<Assignment>> lexicalAssignments = new HashMap<>();
         Map<Integer, Assignment> legacyAssignments = new HashMap<>();
+        Map<Integer, Assignment> imageAssignments = new HashMap<>();
         for (Assignment a : plan.assignments) {
             if (a.operators.isEmpty()) continue;
+            if(a.image) {OpRef ref=a.operators.get(0);if(origin.equals(ref.streamOrigin)&&imageAssignments.put(ref.opIndexInStream,a)!=null)throw new IOException("Duplicate native image owner");continue;}
             for (OpRef ref : a.operators) {
                 if (!origin.equals(ref.streamOrigin)) continue;
                 if (ref.lexicalIdentity) lexicalAssignments.computeIfAbsent(ref.opIndexInStream, k -> new ArrayList<>()).add(a);
@@ -1077,6 +1111,17 @@ public class NativeContentStreamRewriter {
                         newTokens.add(op);
                         result.artifactWrapped++;
                     }
+                } else if ("Do".equals(opName) && imageAssignments.containsKey(currentOperatorIndex)) {
+                    Assignment image=imageAssignments.get(currentOperatorIndex);
+                    if(inheritedArtifact||hasArtifactScope(sourceMarks)||!authoredPath(inheritedText,sourceMarks).isEmpty()||sourceMarks.stream().anyMatch(m->m.optionalContent))
+                        throw new IOException("Native figure conflicts with authored artifact, replacement or optional content");
+                    if(pendingOperands.size()!=1 || !(pendingOperands.get(0) instanceof COSName) || !(resources.getXObject((COSName)pendingOperands.get(0)) instanceof org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject))
+                        throw new IOException("Native figure image occurrence changed");
+                    if(inArtifact){newTokens.add(Operator.getOperator("EMC"));inArtifact=false;}
+                    COSDictionary props=new COSDictionary();props.setInt(COSName.MCID,image.mcid);
+                    newTokens.add(COSName.getPDFName("Figure"));newTokens.add(props);newTokens.add(Operator.getOperator("BDC"));
+                    newTokens.addAll(pendingOperands);newTokens.add(op);newTokens.add(Operator.getOperator("EMC"));
+                    image.emitted=true;result.taggedWrapped++;
                 } else if (PAINT_OPS.contains(opName)) {
                     AuthoredText.own(authoredPath(inheritedText, sourceMarks), null);
                     // Decorative paths/images/charts are visible page content.
@@ -1862,6 +1907,7 @@ public class NativeContentStreamRewriter {
                 PDPage page = doc.getPage(pageIndex);
                 prepareNativeLinks(doc,plan);
                 splitMarkedContentRuns += splitAssignmentsIntoMarkedRuns(plan);
+                prepareFigures(doc,plan,tagTree);
                 System.err.println("[rewriter] Rewriting page " + plan.pageNumber
                         + " (" + plan.assignments.size() + " assignments, "
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");
@@ -1882,6 +1928,8 @@ public class NativeContentStreamRewriter {
                 totalSkippedInsideSourceMC += res.skippedInsideSourceMarkedContent;
                 pagesRewritten++;
             }
+
+            for(PagePlan plan:plans)for(Assignment a:plan.assignments)if(a.image&&!a.emitted)throw new IOException("Native figure was not emitted: "+a.tagNodeId);
 
             // Hierarchical structure tree when --tags is supplied
             // (normal path). Falls back to flat Document-has-all-leaves
@@ -1960,6 +2008,7 @@ public class NativeContentStreamRewriter {
             json.append(",\"title\":").append(escapeJson(title));
             json.append(",\"language\":").append(escapeJson(language));
             json.append(",\"nativeLinks\":").append(QualifiedStructureRepairs.json(plans.stream().filter(p->p.links!=null).flatMap(p->p.links.links.stream()).map(NativeLinkOwnership.Link::report).toList()));
+            json.append(",\"nativeFigures\":[").append(String.join(",",plans.stream().flatMap(p->p.figureOwnership.stream()).toList())).append("]");
             json.append(",\"sourceOwnership\":[").append(String.join(",", plans.stream().flatMap(p->p.sourceOwnership.stream()).toList())).append("]");
             json.append("}");
             System.out.write((json.toString()+"\n").getBytes(StandardCharsets.UTF_8));

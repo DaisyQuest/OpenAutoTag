@@ -114,7 +114,7 @@ test("A6: Figure/Table caption paragraphs are promoted to /Caption", async () =>
       { id: "n3", pageNumber: 1, sourceBlockId: "b3", role: "TH", text: "Qty", bbox: [200, 0, 200, 20], confidence: 0.95, readingOrder: 1, tableGroupId: "t1", tableRowIndex: 0, tableColumnIndex: 1 },
       { id: "n4", pageNumber: 1, sourceBlockId: "b4", role: "TD", text: "A", bbox: [0, 20, 200, 20], confidence: 0.95, readingOrder: 2, tableGroupId: "t1", tableRowIndex: 1, tableColumnIndex: 0 },
       { id: "n5", pageNumber: 1, sourceBlockId: "b5", role: "TD", text: "10", bbox: [200, 20, 200, 20], confidence: 0.95, readingOrder: 3, tableGroupId: "t1", tableRowIndex: 1, tableColumnIndex: 1 },
-      { id: "n6", pageNumber: 1, sourceBlockId: "b6", role: "P", text: "Table 1: Inventory totals.", bbox: [0, 110, 400, 20], confidence: 0.95, readingOrder: 4 }
+      { id: "n6", pageNumber: 1, sourceBlockId: "b6", role: "P", text: "Table 1: Inventory totals.", bbox: [0, 50, 400, 20], confidence: 0.95, readingOrder: 4 }
     ],
     orderedNodeIds: ["n2", "n3", "n4", "n5", "n6"]
   });
@@ -129,7 +129,7 @@ test("A6: Figure/Table caption paragraphs are promoted to /Caption", async () =>
   assert.equal(tagging.source.captionAssociation.associated, 1);
 });
 
-test("A6: caption beyond lookback window stays as plain P", async () => {
+test("A6: caption with intervening text stays a standalone Caption", async () => {
   const fillers = [];
   for (let i = 1; i <= 5; i += 1) {
     fillers.push({

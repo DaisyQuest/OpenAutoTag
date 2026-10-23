@@ -65,6 +65,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
     const ownership = inspectSourceOwnership({ inspection, source: sourceInspection, ownership: sourceOwnership, intendedNodes: nodes, add });
     if (sourceOwnership) ownershipStatus = ownership.sourceVerified ? "verified" : "rejected";
     const replacements = authoredReplacementIndex(sourceInspection, inspection, ownership.sourceVerified, add, expectedIds);
+    for(const review of tagging.source?.captionAssociation?.reviews||[])add('CAPTION_RELATION_REVIEW',review.captionId,null,review.code);
     for (const { n, parent, id } of nodes) {
       const saved = identifiers.get(id);
       add("EMITTED_NODE", id, true, Boolean(saved));
@@ -90,6 +91,20 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
       // An empty replacement suppresses otherwise valid text; absence is different.
       if (saved.actualTextPresent && !saved.actualText) add("EMPTY_ACTUAL_TEXT", id, false, true);
       add("ALTERNATE_TEXT", id, n.alt || "", saved.alt || "");
+      if(n.nativeFigure) {
+        add('FIGURE_SOURCE_VERIFIED',id,true,ownership.sourceVerified);
+        add('FIGURE_DESCRIPTION_REVIEW',id,true,Boolean(n.alt?.trim()));
+      }
+      if(n.captionAssociation) {
+        const relation=n.captionAssociation,target=nodes.find(v=>v.n.id===relation.targetId),savedTarget=target&&identifiers.get(target.id);
+        let correct=Boolean(savedTarget&&savedTarget.role===relation.targetType);
+        if(correct&&relation.targetType==='Table')correct=saved.parentRef===savedTarget.objectRef&&savedTarget.children[relation.position==='before'?0:savedTarget.children.length-1]===saved.objectRef;
+        else if(correct) {
+          const siblings=byRef.get(saved.parentRef)?.children||[],i=siblings.indexOf(saved.objectRef);
+          correct=savedTarget.parentRef===saved.parentRef&&siblings[i+(relation.position==='before'?1:-1)]===savedTarget.objectRef;
+        }
+        add('CAPTION_RELATION_SAVED',id,true,correct);
+      }
       if ((n.sourceNodeIds?.length || n.type === "Lbl") && (n.actualText || n.label || "").trim()) {
         const seen = new Set();
         const graphical = ["Figure", "Formula", "Form"].includes(n.type);

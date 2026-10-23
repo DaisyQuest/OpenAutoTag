@@ -1,6 +1,16 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Caption relationships (A45, 2026-10-23):
+Explicit targets, boundary geometry and adjacency govern captions; unresolved
+targets cannot fall back or move across prose. Table captions are first/last
+children; Figure captions are adjacent siblings owning a unique native image
+XObject invocation. Continued tables use their boundary pages. Source/intent
+hashes and independent saved image/resource/transform/owner checks qualify
+supported output. Native-only image requests reject in raster mode; descriptions,
+ambiguous figures and unsupported paint remain review work. See
+docs/accessibility-50-batch28-20261023.md for evidence and limitations.
+
 Diagram discrimination (A44, 2026-10-23):
 An illustration title plus image/connector geometry and short-label evidence
 can exclude a bounded region from table inference. Dense regular grids and

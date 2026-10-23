@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { inspectOcrLayer } from "./ocr-layer.js";
 import { inspectNativeLinks } from "./native-links.js";
+import { inspectNativeFigures } from "./native-figures.js";
 
 const address = r => `${r.pageNumber}:${r.streamOrigin}:${r.operatorIndex}`;
 const glyphKey = (page, index) => `${page}:${index}`;
@@ -80,7 +81,8 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
     add("SOURCE_PAINT_OWNER", `${address(run)}:glyphs:${run.glyphStart}-${run.glyphEnd}`, true, valid);
     if (!valid) allOwnersMatch = false;
   }
-  result.sourceVerified = sequenceMatches && allOwnersMatch && ocr.valid && links.valid;
+  const figuresValid = inspectNativeFigures({source,inspection,ownership,intendedNodes,add});
+  result.sourceVerified = sequenceMatches && allOwnersMatch && ocr.valid && links.valid && figuresValid;
   return result;
 }
 

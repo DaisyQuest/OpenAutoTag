@@ -30,3 +30,9 @@ for(const strategy of ["pairwise","text-structure"]) {
   assert.equal(mergeWithStrategy({nodes:[node("a","Page 1 of 2",100),node("b","Other text",114)]},{strategy}).document.nodes.length,2);
  });
 }
+
+test('different explicit caption targets are protected semantic boundaries', async () => {
+  const {protectedBoundary}=await import('../lib/semantic-identities.js');
+  assert.equal(protectedBoundary({captionForId:'table1'},{captionForId:'table2'}),'caption target boundary');
+  assert.equal(protectedBoundary({captionForId:'table1'},{}),'caption target boundary');
+});

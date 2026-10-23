@@ -1,6 +1,6 @@
 # Tagging quality: claims, evidence and limits
 
-Updated 2026-10-23 for [diagram/table discrimination](accessibility-50-batch27-20261023.md), following continued tables, mixed headers and navigation preservation. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
+Updated 2026-10-23 for [caption relationships](accessibility-50-batch28-20261023.md), following diagram discrimination and continued tables. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
 
 ## Supported description
 
@@ -32,8 +32,11 @@ OpenAutoTag performs deterministic PDF semantic inference, native operator taggi
 | C20 | Evidenced diagram labels can remain text instead of false table cells. | Illustration titles plus image/connector evidence remove seven false booklet tables, retain 243 labels in text sections and preserve genuine parameter/value tables. Native/raster fixture checks pass; all 82 independent page pairs match, including native form editing. Comparison also handles presentation ligatures without changing source glyphs. | English title vocabulary and bounded geometric rules are heuristic. Text sections do not establish complete Figure attachment, description or reading order. The booklet retains 192 saved failures, including 17 diagram-label checks, six raw failures and 158 pending OCR reviews. Human diagram review remains required. |
 
 Implementation filenames without a path in this table live under `modules/semantic-engine/`, `modules/tag-builder/` or `modules/pdf-writer/java/` as appropriate. Exact delivery details and reproduction commands are in [the production plan, section 22](production-tagging-engine-plan.md#22-semantic-quality-improvements-16-and-benchmark-delivery-2026-10-21) and the linked batch reports.
+| C21 | Supported table and image captions retain evidenced identity and saved reading-order placement. | Six native relationships, original image ownership, independent source/presentation/transform checks, negative corruptions and eight preserved page pairs. | Native image XObjects only. Ambiguous relationships, unsupported paint and missing descriptions stay explicit; captions do not prove description quality or reader usability. |
 
 ## Latest accuracy evidence
+
+[Batch 28](accessibility-50-batch28-20261023.md) completes A45: explicit caption identities, safe table boundaries and adjacent Figure captions with real native image ownership. The 916-case baseline and final 82-case affected run pass across overlapping revisions. Six saved relationships pass 656 saved/2,064 raw checks; all eight independent page pairs match and native field editing remains intact. Three fixture font findings and unchanged NASA/NIST failures remain explicit. **A01–A45 complete; A46–A50 pending.**
 
 The [diagram-discrimination delivery](accessibility-50-batch27-20261023.md) and [evidence](evidence/accessibility-50-batch27-20261023.json) bring the ledger to **44 completed items, six pending**. The 863-case baseline and final 54-case affected run cover the current 865 configured cases across overlapping runs. Seven false booklet tables and six grid review failures clear; 243 diagram labels retain text grouping. All 82 independent page pairs match. The booklet remains unqualified with 192 saved failures, six raw failures and 158 pending OCR reviews; NIST failure evidence is unchanged. Existing controls retain their hashes. Human semantic and reader qualification remains required.
 

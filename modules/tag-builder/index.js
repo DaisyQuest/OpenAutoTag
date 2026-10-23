@@ -1,3 +1,4 @@
+import { associateCaptions } from "./captions.js";
 import Ajv2020 from "ajv/dist/2020.js";
 import { attachOcrSegments } from "./ocr-segments.js";
 import { planTableGrid, tableGridReview, mergeDeclaredCellFragments } from "./table-grid.js";
@@ -1506,56 +1507,6 @@ export function promoteFlatHeadingsIntoSections(rootNode) {
   return { applied: sectionsInserted > 0, sectionsInserted };
 }
 
-// ---- A6: Caption association with Figure/Table ------------------------
-// Walks the tree in order, identifies Caption nodes, and associates
-// them with the nearest preceding Figure/Table within a configurable
-// paragraph lookback. Association = move the Caption to be the first
-// or last child of the semantic parent. Per the PDF Association cheat
-// sheet, Caption MUST be first or last child of its semantic parent.
-function associateCaptionsWithFiguresOrTables(rootNode, opts) {
-  const lookback = Math.max(1, Number(opts?.captionLookbackParagraphs ?? 3));
-  let associated = 0;
-  let detected = 0;
-
-  const visit = (parent) => {
-    if (!parent || !Array.isArray(parent.children)) return;
-    for (const child of parent.children) visit(child);
-    const newChildren = [];
-    for (let index = 0; index < parent.children.length; index += 1) {
-      const child = parent.children[index];
-      if (child?.type !== "Caption") {
-        newChildren.push(child);
-        continue;
-      }
-      detected += 1;
-      // Look back through already-placed siblings for the nearest
-      // Figure or Table, within the lookback window (counted over P
-      // and other text-level nodes).
-      let steps = 0;
-      let target = null;
-      for (let i = newChildren.length - 1; i >= 0 && steps < lookback; i -= 1) {
-        const prior = newChildren[i];
-        if (prior?.type === "Figure" || prior?.type === "Table") {
-          target = prior;
-          break;
-        }
-        if (prior?.type === "P") steps += 1;
-      }
-      if (!target) {
-        newChildren.push(child);
-        continue;
-      }
-      // Attach as last child of the semantic parent.
-      target.children = Array.isArray(target.children) ? target.children : [];
-      target.children.push(child);
-      associated += 1;
-    }
-    parent.children = newChildren;
-  };
-  visit(rootNode);
-  return { detected, associated };
-}
-
 // ---- A16: PrintField attribute owner for widgets ----------------------
 export function buildPrintFieldAttrs(widget) {
   if (!widget) return null;
@@ -1632,7 +1583,6 @@ export async function buildTagTree(inputPath, overrides = {}) {
   // A5: identify which heading should be emitted as Title (if any).
   const titleNodeId = options.enableTitleDetection ? detectTitleNodeId(orderedNodes) : null;
   let titleEmitted = false;
-  let captionCandidatesDetected = 0;
 
   const currentContainer = () => sectionStack.at(-1)?.node || root;
 
@@ -1793,7 +1743,6 @@ export async function buildTagTree(inputPath, overrides = {}) {
     }
     // A6: promote Figure/Table caption-like paragraphs to /Caption.
     if (options.enableCaptionDetection && isCaptionCandidate(node)) {
-      captionCandidatesDetected += 1;
       leaf.type = "Caption";
       leaf.detectedType = leaf.detectedType || "P";
     }
@@ -1816,16 +1765,6 @@ export async function buildTagTree(inputPath, overrides = {}) {
   const repeatedHeaderRows = detectRepeatedHeaders(root);
   flattenRedundantTableBodySections(root);
 
-  // A6: associate captions with nearest preceding Figure/Table.
-  let captionAssociation = { detected: captionCandidatesDetected, associated: 0 };
-  if (options.enableCaptionDetection) {
-    const association = associateCaptionsWithFiguresOrTables(root, options);
-    captionAssociation = {
-      detected: Math.max(captionCandidatesDetected, association.detected),
-      associated: association.associated
-    };
-  }
-
   // Demote spurious tables before further post-processing. Scanned
   // cover pages and rubber-stamp overlays produce TDs whose "rows"
   // are fragments with no columnar structure (date stamps, letter-
@@ -1838,6 +1777,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
   // text. Always-on — never demotes real tables because real tables
   // have multiple rows OR numeric/unit cells OR long cell text.
   const tableDemotion = demoteSpuriousTables(root);
+  const captionAssociation = associateCaptions(root, semanticDocument, options);
 
   // #16: promote flat H# children under Document into Sect wrappers.
   const sectionPromotion = options.enableSectionPromotion
@@ -1874,7 +1814,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
       tableStructureRepairs,
       repeatedHeaderRows,
       ...(options.enableTitleDetection ? { titleDetection: { applied: titleEmitted, nodeId: titleEmitted ? titleNodeId : null } } : {}),
-      ...(options.enableCaptionDetection ? { captionAssociation } : {}),
+      ...(captionAssociation.detected ? { captionAssociation } : {}),
       ...(options.enableSectionPromotion ? { sectionPromotion } : {}),
       ...(options.enableLayoutAttrs ? { layoutAttrs: { applied: true } } : {}),
       ...(options.enableTableHeaders ? { tableHeadersAttrs: { applied: true } } : {}),
