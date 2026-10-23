@@ -1,6 +1,6 @@
 # Tagging quality: claims, evidence and limits
 
-Updated 2026-10-22 for [compound text attachment and glyph boundaries](accessibility-50-batch3-20261022.md), following [nested Form ownership](accessibility-50-batch2-20261022.md). This register governs current OpenAutoTag capability statements. Older design notes and corpus runs are historical evidence for their named builds. Proposed roadmap targets are not achieved accuracy.
+Updated 2026-10-23 for [PDF layers and artifact properties](accessibility-50-batch4-20261022.md), following [compound text attachment and glyph boundaries](accessibility-50-batch3-20261022.md). This register governs current OpenAutoTag capability statements. Older design notes and corpus runs are historical evidence for their named builds. Proposed roadmap targets are not achieved accuracy.
 
 ## Supported description
 
@@ -24,6 +24,8 @@ OpenAutoTag performs deterministic PDF semantic inference, native operator taggi
 Implementation filenames without a path in this table live under `modules/semantic-engine/` or `modules/pdf-writer/java/` as appropriate. Exact delivery details and reproduction commands are in [the production plan, section 22](production-tagging-engine-plan.md#22-semantic-quality-improvements-16-and-benchmark-delivery-2026-10-21).
 
 ## Latest accuracy evidence
+
+The [layer/artifact delivery](accessibility-50-batch4-20261022.md) and [evidence](evidence/accessibility-50-batch4-20261022.json) bring the ledger to eleven completed items, with 39 open. The writer retains optional-content scopes and source artifact properties while keeping explicitly assigned text outside artifacts. Both PDFBox and Poppler verify the default and all four alternate states of the two-layer fixture. The booklet's HeaderFooter-off render now matches the source on all eight affected pages; the preceding candidate visibly differed on seven. All 64 default-state pages, bounded form interactions, 4,158 painted MCRs and verified compound fragments are preserved. The 269 baseline and 29 compatibility tests pass. Booklet failures remain 155 saved attachment and 31 raw font checks. A11 replacement-text preservation and human qualification remain open.
 
 The [compound text delivery](accessibility-50-batch3-20261022.md) and [evidence](evidence/accessibility-50-batch3-20261022.json) bring the ledger to nine completed items, with 41 open. Verified font-code boundaries allow 87 booklet operations to become 175 exact intended fragments, including label/value and acronym/definition pairs. Independent traversal verifies every fragment's byte ownership while preserving all 53,667 text bytes and 615 TJ adjustments. Saved attachment failures decrease from 258 to 155; 137 concern OCR nodes and 31 raw font failures persist. Two compound operations with competing upstream owners remain unresolved. All 64 pages match in Poppler, and bounded form interactions remain intact. The 262 baseline and 29 compatibility tests pass. This does not establish complete semantic accuracy or human usability; the booklet still rejects, and controls still require review.
 

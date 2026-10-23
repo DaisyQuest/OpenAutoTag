@@ -119,8 +119,11 @@
       "improvement": "Optional-content preservation",
       "requirement": "Retain optional-content wrappers during retagging.",
       "acceptance": "Default visibility and alternate layer states render identically; generated MCIDs remain balanced.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch4-20261022.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A11",
@@ -137,8 +140,11 @@
       "improvement": "Artifact subtype preservation",
       "requirement": "Retain evidenced pagination/background artifact properties without hiding meaningful content.",
       "acceptance": "Saved pagination/artifact metadata survives, while identically styled body text remains semantic.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch4-20261022.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A13",

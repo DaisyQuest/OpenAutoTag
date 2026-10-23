@@ -1,0 +1,519 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedOn": "2026-10-23",
+  "baseCommit": "d70c875",
+  "completedItems": [
+    "A10",
+    "A12"
+  ],
+  "scope": "Preserve optional-content visibility and evidenced source artifact properties through native retagging, independently of semantic ownership.",
+  "tests": {
+    "productionBaseline": {
+      "passed": 269,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch4-tests.log"
+    },
+    "compatibility": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch4-compatibility.log"
+    },
+    "markedPropertiesFixture": {
+      "tests": 7,
+      "includedInProductionBaseline": true,
+      "pages": 1,
+      "layers": 2,
+      "statesCompared": 5,
+      "distinctAlternateRenders": 4,
+      "pdfboxDpi": 150,
+      "poppler": [
+        {
+          "state": -1,
+          "meaning": "default",
+          "pixelIdentical": true,
+          "rgbSha256": "11bfa8e1cd5f840a1b70543e1c1ad69ef0a442aa670c0cdf75c812671b5b3eb5",
+          "dpi": 150
+        },
+        {
+          "state": 0,
+          "meaning": "A=False, B=False",
+          "pixelIdentical": true,
+          "rgbSha256": "da9cf1c92f295d6337763b29b845d8ef097aebc05fd0fd1187b9d2b0a668d297",
+          "dpi": 150
+        },
+        {
+          "state": 1,
+          "meaning": "A=True, B=False",
+          "pixelIdentical": true,
+          "rgbSha256": "11bfa8e1cd5f840a1b70543e1c1ad69ef0a442aa670c0cdf75c812671b5b3eb5",
+          "dpi": 150
+        },
+        {
+          "state": 2,
+          "meaning": "A=False, B=True",
+          "pixelIdentical": true,
+          "rgbSha256": "674a543860a6801b79ecac543ab32b35bcdd83947d6852a4fc92d25a29ec81f4",
+          "dpi": 150
+        },
+        {
+          "state": 3,
+          "meaning": "A=True, B=True",
+          "pixelIdentical": true,
+          "rgbSha256": "4ed2125390ab75988a074a6240d089329a29285b2925d7c300c91ff87fce6913",
+          "dpi": 150
+        }
+      ],
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 639,
+        "failedChecks": 0
+      },
+      "savedSemantics": {
+        "passed": 54,
+        "failed": 0
+      },
+      "scope": [
+        "named optional groups",
+        "AllOn membership dictionary",
+        "nested optional scopes",
+        "page/Form property name collision",
+        "source scope across page stream array",
+        "named Header and inline Footer/Background/Watermark properties",
+        "explicit semantic text inside former source artifact",
+        "decorative Form under original artifact box",
+        "shared source resource dictionaries unchanged",
+        "obsolete MCIDs removed from emitted ownership",
+        "ordinary application OC tag without visibility properties"
+      ],
+      "adversarial": [
+        "unclosed scope",
+        "unbalanced EMC",
+        "unresolved named property",
+        "invalid property operand",
+        "inline OCG instead of named resource",
+        "257 nested source scopes"
+      ],
+      "sourceHash": "f9880bb484b6dcbc0a9a831f20e68645b236f68806b6c07d6400a796b311fab9",
+      "candidateHash": "65eff0ed5ca790f3ccfa49e68a7eab4b35225900ab245c829f8e23d9b5c95e49"
+    },
+    "testHarnessCorrection": "Independent Poppler comparison detected overlapping ON/OFF entries after repeated PDFBox state toggles on reloaded PDFs. The harness now replaces those arrays explicitly. Final focused tests and both renderer proofs use disjoint states.",
+    "coverage": "No new coverage percentage measured."
+  },
+  "runtimes": {
+    "node": "22.20.0",
+    "java": "21",
+    "pdfbox": "3.0.8",
+    "veraPdf": "1.30.3 Greenfield ua1",
+    "javaOptions": "-XX:TieredStopAtLevel=1 -Xms32m -Xmx512m",
+    "baselineConcurrency": 2,
+    "compatibilityConcurrency": 1
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "source": {
+        "id": "booklet",
+        "publisher": "NASA",
+        "title": "STEREO booklet",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+        "sha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "bytes": 3209169,
+        "pages": 61,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "a3851d9805c7bc5d15d1817fe6582abe487c8da4736b2a4b41aecc68ec59626b",
+        "candidatePath": "output\\accessibility-50-batch4-20261022\\booklet-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch4-20261022/booklet-final/06-candidate.pdf",
+      "candidateHash": "29fea2c9c6c956d16d75873bdd28707a5b248780a1a43856b0b727357ddf22b0",
+      "writerMode": "native",
+      "matchedOperators": 4070,
+      "markedContentCount": 4158,
+      "rawVeraPdf": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 185539,
+        "failedChecks": 31
+      },
+      "savedSemantics": {
+        "passed": 14727,
+        "failed": 155
+      },
+      "productionDisposition": "rejected",
+      "render": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "pixelIdenticalPages": 61,
+        "status": "completed"
+      }
+    },
+    {
+      "id": "test-form-control",
+      "source": {
+        "id": "test-form-control",
+        "pages": 2,
+        "path": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+        "sha256": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidatePath": "output\\accessibility-50-batch4-20261022\\control-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch4-20261022/control-final/06-candidate.pdf",
+      "candidateHash": "90db3855fd43d0e63f89a926da36e0b0f6a4ac9e75aa01707d7d59c162252554",
+      "writerMode": "passthrough",
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "savedSemantics": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "productionDisposition": "review_required",
+      "render": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 2,
+        "status": "completed"
+      },
+      "interaction": {
+        "id": "test-form-control",
+        "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidateHash": "90db3855fd43d0e63f89a926da36e0b0f6a4ac9e75aa01707d7d59c162252554",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": [
+          {
+            "variant": "source",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          },
+          {
+            "variant": "candidate",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          }
+        ],
+        "filledPagePixelIdentical": true
+      },
+      "sourceBytePrefixRetained": true
+    },
+    {
+      "id": "nasa-hinode",
+      "source": {
+        "id": "nasa-hinode",
+        "publisher": "NASA",
+        "title": "Hinode fact sheet",
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "bytes": 113294,
+        "pages": 1,
+        "hasStructureTree": false,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "8fe1756a259665f43de9321614f5432f5e5bd1424d32b6406768102f68d4104f",
+        "candidatePath": "output\\accessibility-50-batch4-20261022\\hinode-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch4-20261022/hinode-final/06-candidate.pdf",
+      "candidateHash": "b61091771691891ebc332fdeea1e0f8a8b478deb0ea674adf6df4daef894718c",
+      "writerMode": "native",
+      "matchedOperators": 52,
+      "markedContentCount": 52,
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5295,
+        "failedChecks": 0
+      },
+      "savedSemantics": {
+        "passed": 531,
+        "failed": 0
+      },
+      "productionDisposition": "review_required",
+      "render": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 1,
+        "status": "completed"
+      },
+      "interaction": {
+        "id": "nasa-hinode",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "b61091771691891ebc332fdeea1e0f8a8b478deb0ea674adf6df4daef894718c",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": []
+      }
+    }
+  ],
+  "bookletLayerAudit": {
+    "layer": "HeaderFooter",
+    "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+    "candidateHash": "29fea2c9c6c956d16d75873bdd28707a5b248780a1a43856b0b727357ddf22b0",
+    "previousCandidateHash": "4e24f83b244012d6bfa5b0ee7080be93eb1a068c9b6f75c17a16c1c41d9a677f",
+    "renderer": "Poppler",
+    "dpi": 96,
+    "state": "OFF",
+    "sourceScopes": {
+      "optionalScopes": 9,
+      "paginationScopes": 9
+    },
+    "candidateScopes": {
+      "optionalScopes": 9,
+      "paginationScopes": 5
+    },
+    "previousScopes": {
+      "optionalScopes": 0,
+      "paginationScopes": 0
+    },
+    "optionalScopesEquivalent": true,
+    "pages": [
+      {
+        "page": 11,
+        "pixelIdentical": true,
+        "rgbSha256": "048dc049fa078b8a266378b7bdf6a4e8a77fccef5c4f46e0fe2c86772e680c0a",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          667,
+          750,
+          677,
+          765
+        ]
+      },
+      {
+        "page": 12,
+        "pixelIdentical": true,
+        "rgbSha256": "c50a5c7617c8354a419b8a8804f0bfec85e0bcc8473bd22d420d03eecc9cdb4b",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          667,
+          750,
+          677,
+          764
+        ]
+      },
+      {
+        "page": 14,
+        "pixelIdentical": true,
+        "rgbSha256": "4a5ec56062b1b0a911b213e7944fb77c0815e5fd496ffc308323a6df762b3408",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          667,
+          750,
+          677,
+          765
+        ]
+      },
+      {
+        "page": 15,
+        "pixelIdentical": true,
+        "rgbSha256": "f13343b4c6f9a59e93838046f6aeda091dbb583097855de064c03176cb87f310",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          662,
+          750,
+          683,
+          765
+        ]
+      },
+      {
+        "page": 16,
+        "pixelIdentical": true,
+        "rgbSha256": "addf75c8242f00d5d2d0bbf684382d8d7554c57dde438fff1a109f9c61b961c3",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          57,
+          142,
+          760,
+          487
+        ]
+      },
+      {
+        "page": 42,
+        "pixelIdentical": true,
+        "rgbSha256": "b24d3a4a31362f3292e4f4f5d07bf74074f8a8658a0cc0625c4d7a259716c998",
+        "previousCandidateDiffers": false,
+        "previousDifferenceBounds": null
+      },
+      {
+        "page": 52,
+        "pixelIdentical": true,
+        "rgbSha256": "487fc249415fd28ad7486e2765cd02a6f35de9ba36c6a6d91622513255e3e1a0",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          660,
+          750,
+          683,
+          764
+        ]
+      },
+      {
+        "page": 53,
+        "pixelIdentical": true,
+        "rgbSha256": "faff0f85585b6ad3c0b32386ed39b557cf80a8fab9652b6036804e306f3381e8",
+        "previousCandidateDiffers": true,
+        "previousDifferenceBounds": [
+          57,
+          146,
+          759,
+          316
+        ]
+      }
+    ]
+  },
+  "artifactPropertiesAudit": {
+    "sourcePaginationScopes": 9,
+    "savedPaginationScopes": 5,
+    "allSavedPaginationPropertiesMatchSource": true,
+    "savedProperties": [
+      {
+        "page": 16,
+        "properties": {
+          "/Type": "/Pagination",
+          "/BBox": [
+            43.2,
+            642.17059,
+            595.19843,
+            926.45996
+          ],
+          "/Attached": [
+            "/Top"
+          ]
+        }
+      },
+      {
+        "page": 16,
+        "properties": {
+          "/Type": "/Pagination",
+          "/BBox": [
+            43.2,
+            642.17059,
+            595.19843,
+            926.45996
+          ],
+          "/Attached": [
+            "/Top"
+          ]
+        }
+      },
+      {
+        "page": 16,
+        "properties": {
+          "/Type": "/Pagination",
+          "/BBox": [
+            568.9137,
+            860.93256,
+            585.96167,
+            882.65857
+          ],
+          "/Attached": [
+            "/Bottom"
+          ]
+        }
+      },
+      {
+        "page": 42,
+        "properties": {
+          "/Type": "/Pagination",
+          "/BBox": [
+            43.2,
+            907.12372,
+            48.83911,
+            926.4599
+          ],
+          "/Attached": [
+            "/Top"
+          ]
+        }
+      },
+      {
+        "page": 53,
+        "properties": {
+          "/Type": "/Pagination",
+          "/BBox": [
+            43.2,
+            770.45227,
+            580.99725,
+            923.45996
+          ],
+          "/Attached": [
+            "/Top"
+          ]
+        }
+      }
+    ]
+  },
+  "independentOperatorAudit": {
+    "independentParser": "pypdf ContentStream",
+    "sourceTextOperations": 5017,
+    "sourceNestedTextOperations": 1,
+    "identityMismatchedPages": [],
+    "savedContentScopes": 100,
+    "savedMcrs": 4158,
+    "savedPaintedMcrs": 4158,
+    "paintOperatorCounts": {
+      "/Artifact": 3219,
+      "/Span": 4135,
+      "/LBody": 13,
+      "/Lbl": 7,
+      "/Aside": 3
+    },
+    "errors": []
+  },
+  "independentPartitionAudit": {
+    "parser": "pypdf ContentStream",
+    "pages": 61,
+    "textBytes": 53667,
+    "tjAdjustments": 615,
+    "partitionedOperators": 87,
+    "verifiedFragments": 175,
+    "allBytesAndAdjustmentsUnchanged": true,
+    "reportPath": "output/accessibility-50-batch4-20261022/partition-proof.json",
+    "reportHash": "44dc50ccd310b2cdafe2f85ca88ab86c8c06f3d6d0135b9f398821bdec9a6282"
+  },
+  "limitations": [
+    "Eleven of fifty improvements completed; 39 remain open including A11 authored replacement text.",
+    "Source artifact properties are retained only for content unassigned by the intended semantic plan. This does not prove the upstream semantic plan is correct.",
+    "Source marked-content nesting is bounded to 256. Malformed/unresolved property lists or unbalanced/unclosed scopes fail before saving.",
+    "Booklet retains 155 saved attachment failures (137 OCR nodes) and 31 raw font failures; controls remain review_required.",
+    "Default-state comparisons cover 64 real pages; alternate-state comparisons cover eight layer-bearing booklet pages plus the synthetic fixture, not every possible layer configuration in arbitrary PDFs."
+  ],
+  "codeSha256NormalizedLf": {
+    "modules/pdf-writer/java/NativeContentStreamRewriter.java": "73c890510ee72500b284583008d1f1ebc8e0939832453bebfefa354e275d866d",
+    "modules/pdf-writer/test/native-marked-properties.test.js": "bef4ff954d69a151b38b2f048d0cefe1070204b5bfd1e6b28d3dbf182a39c3f0",
+    "modules/pdf-writer/test/fixtures/NativeMarkedPropertiesProbe.java": "da3f41e0b8ecd1b17f3a3a80624e3fec3252ec8d2a753cc983c85d41bcc3c640",
+    "package.json": "372ed6b6aa7e1531264f7af5128f14c2d12111e9c1ee126d90941d02437a3d9d"
+  }
+}

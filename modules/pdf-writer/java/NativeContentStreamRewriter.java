@@ -672,7 +672,7 @@ public class NativeContentStreamRewriter {
     private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan, Map<String,TagTreeNode> listLabels) throws IOException {
         PDResources resources = privateResources(page.getResources());
         page.setResources(resources);
-        RewriteResult result = rewriteContentStream(doc, page, page, null, resources, plan, "page", listLabels, new RewriteContext(), null);
+        RewriteResult result = rewriteContentStream(doc, page, page, null, resources, plan, "page", listLabels, new RewriteContext(), null, false);
         for (Assignment a : plan.assignments) if (!a.emitted)
             throw new IOException("No source text operator for assigned tag " + a.tagNodeId);
         return result;
@@ -724,9 +724,67 @@ public class NativeContentStreamRewriter {
         return mapping;
     }
 
+    /** Source scopes and generated ownership scopes have independent lifetimes.
+     * OC is a visibility condition, not an owner. Source Artifact properties
+     * apply only to content which remains unassigned by the semantic plan. */
+    private static class SourceMark {
+        COSName tag;
+        COSBase propertyOperand;
+        COSDictionary properties;
+        boolean optionalContent;
+    }
+
+    private static SourceMark sourceMark(String operator, List<COSBase> operands, PDResources resources) throws IOException {
+        boolean dictionary = "BDC".equals(operator);
+        if (operands.size() != (dictionary ? 2 : 1) || !(operands.get(0) instanceof COSName))
+            throw new IOException("Malformed source marked-content opening");
+        SourceMark mark = new SourceMark(); mark.tag = (COSName) operands.get(0);
+        if (dictionary) {
+            mark.propertyOperand = operands.get(1);
+            if (mark.propertyOperand instanceof COSDictionary) mark.properties = (COSDictionary) mark.propertyOperand;
+            else if (mark.propertyOperand instanceof COSName) {
+                COSDictionary properties = resources.getCOSObject().getCOSDictionary(COSName.PROPERTIES);
+                if (properties != null) mark.properties = properties.getCOSDictionary((COSName) mark.propertyOperand);
+            }
+            if (mark.properties == null) throw new IOException("Unresolved source marked-content properties");
+        }
+        // OC can also be an application's ordinary marked-content tag. It is
+        // a visibility scope only when its properties identify an OCG/OCMD.
+        mark.optionalContent = COSName.OC.equals(mark.tag) && mark.properties != null
+            && (COSName.OCG.equals(mark.properties.getCOSName(COSName.TYPE)) || COSName.OCMD.equals(mark.properties.getCOSName(COSName.TYPE)));
+        if (mark.optionalContent) {
+            // PDF Reference 4.10.2 requires named resources here: group
+            // identity depends on indirect objects, forbidden inline in streams.
+            if (!(mark.propertyOperand instanceof COSName)) throw new IOException("Optional-content properties require a named resource");
+            if (mark.properties.containsKey(COSName.MCID)) throw new IOException("Optional-content group cannot own an MCID");
+        }
+        return mark;
+    }
+
+    private static COSDictionary artifactProperties(java.util.Deque<SourceMark> sourceMarks) {
+        for (SourceMark mark : sourceMarks) if (COSName.ARTIFACT.equals(mark.tag)) {
+            if (mark.properties == null) return null;
+            COSDictionary copy = new COSDictionary(mark.properties);
+            copy.removeItem(COSName.MCID);
+            return copy.size() == 0 ? null : copy;
+        }
+        return null;
+    }
+
+    private static boolean hasArtifactScope(java.util.Deque<SourceMark> sourceMarks) {
+        return sourceMarks.stream().anyMatch(m -> COSName.ARTIFACT.equals(m.tag));
+    }
+
+    private static void beginArtifact(List<Object> tokens, java.util.Deque<SourceMark> sourceMarks) {
+        tokens.add(COSName.ARTIFACT);
+        COSDictionary props = artifactProperties(sourceMarks);
+        if (props == null) tokens.add(Operator.getOperator("BMC"));
+        else { tokens.add(props); tokens.add(Operator.getOperator("BDC")); }
+    }
+
     private static RewriteResult rewriteContentStream(PDDocument doc, PDPage page, PDContentStream source,
             PDFormXObject targetForm, PDResources resources, PagePlan plan, String origin,
-            Map<String,TagTreeNode> listLabels, RewriteContext context, PDFont inheritedFont) throws IOException {
+            Map<String,TagTreeNode> listLabels, RewriteContext context, PDFont inheritedFont, boolean inheritedArtifact) throws IOException {
         Map<Integer, List<Assignment>> lexicalAssignments = new HashMap<>();
         Map<Integer, Assignment> legacyAssignments = new HashMap<>();
         for (Assignment a : plan.assignments) {
@@ -747,8 +805,7 @@ public class NativeContentStreamRewriter {
         int textOpSeq = 0;
         int operatorIndex = 0;
         boolean inArtifact = false;
-        // Every assignment is one text operator, so tagged runs cannot overlap.
-        java.util.Deque<Integer> openMcidStack = new java.util.ArrayDeque<>();
+        java.util.Deque<SourceMark> sourceMarks = new java.util.ArrayDeque<>();
 
         List<COSBase> pendingOperands = new ArrayList<>();
         RewriteResult result = new RewriteResult();
@@ -772,9 +829,13 @@ public class NativeContentStreamRewriter {
                 if ("Do".equals(opName) && pendingOperands.size() == 1 && pendingOperands.get(0) instanceof COSName
                         && resources.getXObject((COSName) pendingOperands.get(0)) instanceof PDFormXObject) {
                     PDFormXObject form = (PDFormXObject) resources.getXObject((COSName) pendingOperands.get(0));
+                    String childOrigin = origin + "/" + currentOperatorIndex;
+                    boolean artifactForm = inheritedArtifact || hasArtifactScope(sourceMarks)
+                        && plan.assignments.stream().flatMap(a -> a.operators.stream())
+                            .noneMatch(r -> r.streamOrigin.equals(childOrigin) || r.streamOrigin.startsWith(childOrigin+"/"));
+                    if (artifactForm && !inheritedArtifact && !inArtifact) { beginArtifact(newTokens, sourceMarks); inArtifact = true; }
                     if (context.activeForms.size() >= 32 || ++context.formInvocations > 10000 || !context.activeForms.add(form.getCOSObject()))
                         throw new IOException("Cyclic or excessive Form XObject traversal");
-                    String childOrigin = origin + "/" + currentOperatorIndex;
                     PDFormXObject copy = new PDFormXObject(doc);
                     for (COSName key : form.getCOSObject().keySet()) {
                         if (!COSName.LENGTH.equals(key) && !COSName.FILTER.equals(key) && !COSName.DECODE_PARMS.equals(key)
@@ -783,30 +844,33 @@ public class NativeContentStreamRewriter {
                     copy.setResources(privateResources(form.getResources() == null ? resources : form.getResources()));
                     plan.forms.put(childOrigin, copy);
                     try {
-                        result.add(rewriteContentStream(doc, page, form, copy, copy.getResources(), plan, childOrigin, listLabels, context, currentFont));
+                        result.add(rewriteContentStream(doc, page, form, copy, copy.getResources(), plan, childOrigin, listLabels, context, currentFont, artifactForm));
                     } finally { context.activeForms.remove(form.getCOSObject()); }
                     String name = "OTForm" + currentOperatorIndex;
                     COSDictionary names = resources.getCOSObject().getCOSDictionary(COSName.XOBJECT);
                     while (names != null && names.containsKey(COSName.getPDFName(name))) name += "_";
                     COSName alias = COSName.getPDFName(name); resources.put(alias, copy);
-                    // Child streams own their content. An Artifact wrapper on
-                    // this Do would hide otherwise valid nested semantic text.
-                    if (inArtifact) { newTokens.add(Operator.getOperator("EMC")); inArtifact = false; }
+                    // An unassigned decorative Form keeps its artifact box in
+                    // the invoking coordinate space. An invocation with owned
+                    // text must be outside any surrounding artifact wrapper.
+                    if (inArtifact && !artifactForm) { newTokens.add(Operator.getOperator("EMC")); inArtifact = false; }
                     newTokens.add(alias); newTokens.add(op); pendingOperands.clear();
                     continue;
                 }
 
-                // STRIP source marked-content markers entirely. Keeping
-                // them causes MCID collisions with OUR matcher-assigned
-                // MCIDs — the source's numbering is independent from
-                // ours. When the source /Article <</MCID 0>> BDC ... EMC
-                // wraps zero text, and our matcher assigns MCID 0 to a
-                // real text run elsewhere, Adobe resolves the struct
-                // leaf to the EMPTY source wrapper → "blank tag".
-                // Dropping source MC removes that ambiguity; our
-                // struct tree is owned end-to-end by our pipeline.
-                if ("BMC".equals(opName) || "BDC".equals(opName) || "EMC".equals(opName)) {
-                    // Source markers never close wrappers owned by this rewrite.
+                if ("BMC".equals(opName) || "BDC".equals(opName)) {
+                    if (sourceMarks.size() >= 256) throw new IOException("Excessive source marked-content nesting");
+                    SourceMark mark = sourceMark(opName, pendingOperands, resources);
+                    if (inArtifact) { newTokens.add(Operator.getOperator("EMC")); inArtifact = false; }
+                    sourceMarks.push(mark);
+                    if (mark.optionalContent) { newTokens.addAll(pendingOperands); newTokens.add(op); }
+                    pendingOperands.clear();
+                    continue;
+                }
+                if ("EMC".equals(opName)) {
+                    if (!pendingOperands.isEmpty() || sourceMarks.isEmpty()) throw new IOException("Unbalanced source marked content");
+                    if (inArtifact) { newTokens.add(Operator.getOperator("EMC")); inArtifact = false; }
+                    if (sourceMarks.pop().optionalContent) newTokens.add(op);
                     pendingOperands.clear();
                     continue;
                 }
@@ -819,6 +883,7 @@ public class NativeContentStreamRewriter {
                     Assignment assignment = pieces == null ? legacyAssignments.get(currentSeq) : pieces.get(0);
 
                     if (assignment != null) {
+                        if (inheritedArtifact) throw new IOException("Assigned text inside a decorative Form invocation");
                         if (inArtifact) {
                             newTokens.add(Operator.getOperator("EMC"));
                             inArtifact = false;
@@ -843,23 +908,21 @@ public class NativeContentStreamRewriter {
                     } else {
                         // Unmatched text remains explicitly unqualified as an
                         // artifact; it must never sit inside a semantic wrapper.
-                        if (!inArtifact) {
-                            newTokens.add(COSName.ARTIFACT);
-                            newTokens.add(Operator.getOperator("BMC"));
+                        if (!inheritedArtifact && !inArtifact) {
+                            beginArtifact(newTokens, sourceMarks);
                             inArtifact = true;
                         }
                         newTokens.addAll(pendingOperands);
                         newTokens.add(op);
                         result.artifactWrapped++;
                     }
-                } else if (PAINT_OPS.contains(opName) && openMcidStack.isEmpty()) {
+                } else if (PAINT_OPS.contains(opName)) {
                     // Decorative paths/images/charts are visible page content.
                     // Keep their graphics-state/path setup unchanged, but wrap
                     // the paint operator so Acrobat sees the content as an
                     // artifact instead of an untagged element.
-                    if (!inArtifact) {
-                        newTokens.add(COSName.ARTIFACT);
-                        newTokens.add(Operator.getOperator("BMC"));
+                    if (!inheritedArtifact && !inArtifact) {
+                        beginArtifact(newTokens, sourceMarks);
                         inArtifact = true;
                     }
                     newTokens.addAll(pendingOperands);
@@ -885,11 +948,7 @@ public class NativeContentStreamRewriter {
             newTokens.add(Operator.getOperator("EMC"));
             inArtifact = false;
         }
-        // Defensive balance for a truncated source stream.
-        while (!openMcidStack.isEmpty()) {
-            openMcidStack.pop();
-            newTokens.add(Operator.getOperator("EMC"));
-        }
+        if (!sourceMarks.isEmpty()) throw new IOException("Unclosed source marked content");
 
         newTokens.addAll(pendingOperands);
 
