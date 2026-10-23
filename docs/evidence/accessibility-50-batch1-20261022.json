@@ -1,0 +1,427 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedOn": "2026-10-22",
+  "baseCommit": "eff2da8",
+  "completedItems": [
+    "A01",
+    "A02",
+    "A06",
+    "A07"
+  ],
+  "scope": "Native lexical identity and qualified list operands; output-stage replay of unchanged upstream extraction/inference for three development documents.",
+  "tests": {
+    "productionBaseline": {
+      "passed": 244,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch1-tests.log"
+    },
+    "finalFocused": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch1-focused.log"
+    },
+    "countsOverlap": true,
+    "coverage": "No new coverage percentage measured."
+  },
+  "runtimes": {
+    "node": "22.20.0",
+    "java": "21",
+    "pdfbox": "3.0.8",
+    "veraPdf": "1.30.3 Greenfield ua1",
+    "javaOptions": "-XX:TieredStopAtLevel=1 -Xms32m -Xmx512m",
+    "testConcurrency": 2
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "source": {
+        "id": "booklet",
+        "publisher": "NASA",
+        "title": "STEREO booklet",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+        "sha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "bytes": 3209169,
+        "pages": 61,
+        "hasStructureTree": true,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "a3851d9805c7bc5d15d1817fe6582abe487c8da4736b2a4b41aecc68ec59626b",
+        "candidatePath": "output\\accessibility-50-batch1-20261022\\booklet-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch1-20261022/booklet-final/06-candidate.pdf",
+      "candidateHash": "258d6cb7c8a60ce3b9c99fd880a9d305fbf811788a8a856aa805e5cd3be96e09",
+      "writerMode": "native",
+      "rawVeraPdf": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 178078,
+        "failedChecks": 31
+      },
+      "rawFailureCodes": {
+        "VERAPDF_7_21_4_1_1": 1,
+        "VERAPDF_7_21_3_2_1": 1,
+        "VERAPDF_7_21_7_1": 1
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedSemantics": {
+        "passed": 14624,
+        "failed": 258
+      },
+      "savedFailureCodes": {
+        "CONTENT_ATTACHED": 258
+      },
+      "resolvedSavedChecks": [
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-40-25:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-40-27:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-40-29:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CHILD_ORDER",
+          "target": "oat:tag:n-40-31",
+          "status": "fail",
+          "expected": [
+            "oat:tag:n-40-31:lbl",
+            "oat:tag:n-40-31:lbody"
+          ],
+          "actual": [
+            "oat:tag:n-40-31:lbody"
+          ]
+        },
+        {
+          "code": "EMITTED_NODE",
+          "target": "oat:tag:n-40-31:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CHILD_ORDER",
+          "target": "oat:tag:n-40-32",
+          "status": "fail",
+          "expected": [
+            "oat:tag:n-40-32:lbl",
+            "oat:tag:n-40-32:lbody"
+          ],
+          "actual": [
+            "oat:tag:n-40-32:lbody"
+          ]
+        },
+        {
+          "code": "EMITTED_NODE",
+          "target": "oat:tag:n-40-32:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-40-36:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "code": "CONTENT_ATTACHED",
+          "target": "oat:tag:n-40-38:lbl",
+          "status": "fail",
+          "expected": true,
+          "actual": false
+        }
+      ],
+      "productionDisposition": "rejected",
+      "render": {
+        "id": "booklet",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "candidateHash": "258d6cb7c8a60ce3b9c99fd880a9d305fbf811788a8a856aa805e5cd3be96e09",
+        "pixelIdenticalPages": 61,
+        "status": "completed"
+      },
+      "interaction": null,
+      "sourceBytePrefixRetained": false
+    },
+    {
+      "id": "nasa-hinode",
+      "source": {
+        "id": "nasa-hinode",
+        "publisher": "NASA",
+        "title": "Hinode fact sheet",
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "retrievedOn": "2026-10-22",
+        "finalUrl": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+        "contentType": "application/pdf",
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "bytes": 113294,
+        "pages": 1,
+        "hasStructureTree": false,
+        "formFieldEntries": 0,
+        "encrypted": false,
+        "eligible": true,
+        "drawKey": "8fe1756a259665f43de9321614f5432f5e5bd1424d32b6406768102f68d4104f",
+        "candidatePath": "output\\accessibility-50-batch1-20261022\\hinode-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch1-20261022/hinode-final/06-candidate.pdf",
+      "candidateHash": "9837f8ab35c6461808235ad1fc7f01dca8a14f5960596ad9cab3a2f4b11e9137",
+      "writerMode": "native",
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 1705,
+        "failedChecks": 0
+      },
+      "rawFailureCodes": {},
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedSemantics": {
+        "passed": 531,
+        "failed": 0
+      },
+      "savedFailureCodes": {},
+      "resolvedSavedChecks": [],
+      "productionDisposition": "review_required",
+      "render": {
+        "id": "nasa-hinode",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "9837f8ab35c6461808235ad1fc7f01dca8a14f5960596ad9cab3a2f4b11e9137",
+        "pixelIdenticalPages": 1,
+        "status": "completed"
+      },
+      "interaction": {
+        "id": "nasa-hinode",
+        "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "candidateHash": "9837f8ab35c6461808235ad1fc7f01dca8a14f5960596ad9cab3a2f4b11e9137",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": []
+      },
+      "sourceBytePrefixRetained": false
+    },
+    {
+      "id": "test-form-control",
+      "source": {
+        "id": "test-form-control",
+        "pages": 2,
+        "path": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+        "sha256": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidatePath": "output\\accessibility-50-batch1-20261022\\control-final\\06-candidate.pdf"
+      },
+      "candidatePath": "output/accessibility-50-batch1-20261022/control-final/06-candidate.pdf",
+      "candidateHash": "63b2e7e440ba3707e544602b28c13e178f45c5cfcd12da8a082f6900f6e38a63",
+      "writerMode": "passthrough",
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "rawFailureCodes": {},
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedSemantics": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "savedFailureCodes": {},
+      "resolvedSavedChecks": [],
+      "productionDisposition": "review_required",
+      "render": {
+        "id": "test-form-control",
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidateHash": "63b2e7e440ba3707e544602b28c13e178f45c5cfcd12da8a082f6900f6e38a63",
+        "pixelIdenticalPages": 2,
+        "status": "completed"
+      },
+      "interaction": {
+        "id": "test-form-control",
+        "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "candidateHash": "63b2e7e440ba3707e544602b28c13e178f45c5cfcd12da8a082f6900f6e38a63",
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ],
+        "formSmoke": [
+          {
+            "variant": "source",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          },
+          {
+            "variant": "candidate",
+            "terminalFields": 32,
+            "widgets": 33,
+            "textField": "Plaintiff/Petitioner",
+            "checkbox": "Not the person described",
+            "fillSaveReopen": true
+          }
+        ],
+        "filledPagePixelIdentical": true
+      },
+      "sourceBytePrefixRetained": true
+    }
+  ],
+  "independentOperatorAudit": {
+    "sourceOperatorIdentity": {
+      "independentParser": "pypdf ContentStream",
+      "textOperations": 5016,
+      "mismatchedPages": [
+        {
+          "page": 1,
+          "expected": 30,
+          "actual": 31,
+          "different": 23
+        }
+      ]
+    },
+    "savedTextOwnership": {
+      "errors": [],
+      "textOperatorCounts": {
+        "/Span": 3970,
+        "/Artifact": 1023,
+        "/LBody": 13,
+        "/Lbl": 7,
+        "/Aside": 3
+      },
+      "labels": [
+        {
+          "id": "oat:tag:n-14-44:lbl",
+          "textPaintByteLengths": []
+        },
+        {
+          "id": "oat:tag:n-14-47:lbl",
+          "textPaintByteLengths": []
+        },
+        {
+          "id": "oat:tag:n-14-48:lbl",
+          "textPaintByteLengths": []
+        },
+        {
+          "id": "oat:tag:n-22-25:lbl",
+          "textPaintByteLengths": []
+        },
+        {
+          "id": "oat:tag:n-40-25:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        },
+        {
+          "id": "oat:tag:n-40-27:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        },
+        {
+          "id": "oat:tag:n-40-29:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        },
+        {
+          "id": "oat:tag:n-40-31:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        },
+        {
+          "id": "oat:tag:n-40-32:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        },
+        {
+          "id": "oat:tag:n-40-36:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        },
+        {
+          "id": "oat:tag:n-40-38:lbl",
+          "textPaintByteLengths": [
+            1
+          ]
+        }
+      ]
+    },
+    "before": {
+      "mismatchedPages": 30,
+      "mismatchedIndices": 1135
+    },
+    "after": {
+      "mismatchedPages": 1,
+      "mismatchedIndices": 23,
+      "remainingCause": "Nested Form XObject text on page 1; A03-A05 remain open."
+    }
+  },
+  "limitations": [
+    "Four of fifty selected improvements complete. A09 prefix-boundary support and tests are groundwork; its general reusable mapping is not credited as complete.",
+    "Booklet remains rejected with 258 saved semantic failures and 31 raw font findings.",
+    "No OCR layer, nested Form ownership, general accuracy or human usability qualification established.",
+    "PDF.js comparison excludes booklet because source font rendering is not qualified.",
+    "Local PDFs, full inspections and screenshots are ignored output artifacts; this committed summary does not distribute them."
+  ],
+  "codeSha256NormalizedLf": {
+    "modules/pdf-writer/java/NativeContentStreamParser.java": "9a724187ccc780ce6a10e1280b817b72c83688423f5933144d631edf8b2a06a0",
+    "modules/pdf-writer/java/NativeContentStreamRewriter.java": "15b2b9a1c677bfba3dc8095bb8e40591a696b07e9f9a26d1e935940d08104e65",
+    "modules/pdf-writer/test/native-operator-identity.test.js": "90fb8dc45cffb1813a1c9c42bdba48703eccf6f19ee7dd9bff9fb16061a781ea",
+    "modules/pdf-writer/test/native-list-operands.test.js": "a76d9b9e50f47696bec330fff3e4f382705a7049abe13ab914bfa1780ca87752",
+    "modules/pdf-writer/test/fixtures/NativeOperatorProbe.java": "f4debd8d7695dcfb1a4dcb8f66665e8d46a29a07cef0fa922c81567a40069540",
+    "modules/pdf-writer/test/fixtures/NativeGlyphBoundaryProbe.java": "74cb32939c774eda22304a90336a29c87fdf901f929deeb958a6a0f55d853def",
+    "package.json": "b0d7f8ca1f0dd8d140a36bd8996719c1aa6f0d352a3f392ca27f2b98754885f1"
+  }
+}

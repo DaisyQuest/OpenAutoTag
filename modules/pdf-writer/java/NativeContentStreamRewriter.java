@@ -530,21 +530,63 @@ public class NativeContentStreamRewriter {
         for(TagTreeNode child:node.children)collectListLabels(child,labels);
     }
 
-    // Split only at an exact decoded glyph boundary. Concatenating the two byte
-    // strings reproduces the original operand, and consecutive Tj operations keep
-    // the same text advance, spacing and graphics state. Unsupported runs abstain.
-    private static int markerByteBoundary(PDFont font, byte[] bytes, String marker) {
-        if(font==null || bytes.length>1048576 || marker.length()>128)return -1;
+    static class TextSplit {
+        final COSBase prefix;
+        final COSBase remainder; // null when the entire operand belongs to the label
+        TextSplit(COSBase prefix, COSBase remainder) { this.prefix = prefix; this.remainder = remainder; }
+    }
+
+    // Decode source font codes, never re-encode Unicode. A ligature or multi-code
+    // Unicode sequence is indivisible. For TJ, retain every adjustment in order,
+    // including adjustments between strings and after a standalone marker.
+    static TextSplit splitTextPrefix(PDFont font, COSBase operand, String marker) {
+        if (font == null || marker == null || marker.isEmpty() || marker.length() > 128) return null;
+        List<COSBase> parts = new ArrayList<>();
+        if (operand instanceof COSString) parts.add(operand);
+        else if (operand instanceof COSArray) {
+            COSArray array = (COSArray) operand;
+            if (array.size() > 4096) return null;
+            for (int i = 0; i < array.size(); i++) parts.add(array.getObject(i));
+        } else return null;
+        long byteCount = 0;
+        for (COSBase part : parts) {
+            if (part instanceof COSString) byteCount += ((COSString) part).getBytes().length;
+            else if (!(part instanceof org.apache.pdfbox.cos.COSNumber)) return null;
+        }
+        if (byteCount > 1048576) return null;
+        COSArray prefix = new COSArray(), remainder = new COSArray();
+        StringBuilder decoded = new StringBuilder();
+        boolean found = false;
         try {
-            ByteArrayInputStream in=new ByteArrayInputStream(bytes);StringBuilder decoded=new StringBuilder();
-            while(in.available()>0 && decoded.length()<=marker.length()) {
-                int before=in.available(),code=font.readCode(in);if(in.available()>=before)return -1;
-                String unicode=font.toUnicode(code);if(unicode==null)return -1;decoded.append(unicode);
-                if(decoded.toString().equals(marker))return in.available()>0 ? bytes.length-in.available() : -1;
-                if(!marker.startsWith(decoded.toString()))return -1;
+            for (COSBase part : parts) {
+                if (found) { remainder.add(part); continue; }
+                if (!(part instanceof COSString)) { prefix.add(part); continue; }
+                byte[] bytes = ((COSString) part).getBytes();
+                ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+                while (in.available() > 0) {
+                    int before = in.available(), code = font.readCode(in);
+                    if (in.available() >= before) return null;
+                    String unicode = font.toUnicode(code);
+                    if (unicode == null || unicode.isEmpty()) return null;
+                    decoded.append(unicode);
+                    if (!marker.startsWith(decoded.toString())) return null;
+                    if (decoded.toString().equals(marker)) {
+                        int boundary = bytes.length - in.available();
+                        prefix.add(new COSString(java.util.Arrays.copyOfRange(bytes, 0, boundary)));
+                        if (boundary < bytes.length) remainder.add(new COSString(java.util.Arrays.copyOfRange(bytes, boundary, bytes.length)));
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) prefix.add(part);
             }
-        } catch(IOException ignored) { return -1; }
-        return -1;
+        } catch (IOException ignored) { return null; }
+        if (!found) return null;
+        boolean hasBody = false;
+        for (COSBase part : remainder) if (part instanceof COSString && ((COSString) part).getBytes().length > 0) hasBody = true;
+        if (!hasBody) { for (COSBase part : remainder) prefix.add(part); }
+        if (operand instanceof COSString) return new TextSplit(prefix.getObject(0), hasBody ? remainder.getObject(0) : null);
+        return new TextSplit(prefix, hasBody ? remainder : null);
     }
 
     private static RewriteResult rewritePageContentStream(PDDocument doc, PDPage page, PagePlan plan, Map<String,TagTreeNode> listLabels) throws IOException {
@@ -617,16 +659,20 @@ public class NativeContentStreamRewriter {
                         }
 
                         TagTreeNode label=listLabels.get(assignment.tagNodeId);
-                        if(label!=null && assignment.startsTagGroup && "Tj".equals(opName) && pendingOperands.size()==1 && pendingOperands.get(0) instanceof COSString) {
-                            byte[] bytes=((COSString)pendingOperands.get(0)).getBytes();
-                            int boundary=markerByteBoundary(currentFont,bytes,label.actualText);
-                            if(boundary>0) {
+                        if(label!=null && assignment.startsTagGroup && ("Tj".equals(opName) || "TJ".equals(opName)) && pendingOperands.size()==1) {
+                            TextSplit split=splitTextPrefix(currentFont,pendingOperands.get(0),label.actualText);
+                            if(split!=null && split.remainder==null) {
+                                // A marker-only operator has no body glyphs. Transfer its
+                                // existing MCID rather than emit an empty body reference.
+                                assignment.tagNodeId=label.id;assignment.tagType="Lbl";
+                                pendingOperands.set(0,split.prefix);
+                            } else if(split!=null) {
                                 Assignment marker=new Assignment();marker.tagNodeId=label.id;marker.tagType="Lbl";marker.mcid=nextMcid++;
                                 marker.operators.add(assignment.operators.get(0));plan.assignments.add(marker);
                                 COSDictionary props=new COSDictionary();props.setInt(COSName.MCID,marker.mcid);
                                 newTokens.add(COSName.getPDFName("Lbl"));newTokens.add(props);newTokens.add(Operator.getOperator("BDC"));
-                                newTokens.add(new COSString(java.util.Arrays.copyOfRange(bytes,0,boundary)));newTokens.add(op);newTokens.add(Operator.getOperator("EMC"));
-                                pendingOperands.set(0,new COSString(java.util.Arrays.copyOfRange(bytes,boundary,bytes.length)));result.taggedWrapped++;
+                                newTokens.add(split.prefix);newTokens.add(op);newTokens.add(Operator.getOperator("EMC"));
+                                pendingOperands.set(0,split.remainder);result.taggedWrapped++;
                             }
                         }
 

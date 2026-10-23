@@ -1,0 +1,474 @@
+{
+  "schemaVersion": "1.0.0",
+  "objective": "Research accessibility tagging and PDF specifications, select 50 improvements, and implement and verify all 50.",
+  "baselineCommit": "eff2da8",
+  "createdOn": "2026-10-22",
+  "completionRule": "All 50 independently implemented and verified against their acceptance criteria. Existing features, planning, abstention alone for a requested supported case, and validator-count reductions alone do not establish completion.",
+  "items": [
+    {
+      "id": "A01",
+      "area": "Native operators",
+      "improvement": "Lexical operator indices",
+      "requirement": "Keep source operator indices exact when PDFBox dispatches virtual TD/TL operations.",
+      "acceptance": "Mixed positioning/text fixture indices equal an independent PDFStreamParser token walk.",
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch1-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
+    },
+    {
+      "id": "A02",
+      "area": "Native operators",
+      "improvement": "Quoted text operators",
+      "requirement": "Treat single-quote and double-quote text showing as one source operation each.",
+      "acceptance": "Quote operators decode complete text once and subsequent native tags own the correct glyphs.",
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch1-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
+    },
+    {
+      "id": "A03",
+      "area": "Native operators",
+      "improvement": "Nested stream identity",
+      "requirement": "Report Form XObject invocation paths separately from page text operators.",
+      "acceptance": "Nested/reused Forms carry stable invocation identities; no child operator impersonates page text.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A04",
+      "area": "Native operators",
+      "improvement": "Native Form XObject tagging",
+      "requirement": "Tag text in nested and reused Form XObjects with invocation-specific ownership.",
+      "acceptance": "Saved text in two differently transformed invocations has correct owners and unchanged pixels.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A05",
+      "area": "Native operators",
+      "improvement": "Stream-scoped MCR emission",
+      "requirement": "Write stream references and scoped ParentTree entries for non-page content.",
+      "acceptance": "Identical MCID numbers in different streams resolve to their own structure elements.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A06",
+      "area": "Native operators",
+      "improvement": "Standalone list marker attachment",
+      "requirement": "Attach a marker-only source operator to Lbl and following content to LBody.",
+      "acceptance": "Separate marker/body operands yield nonempty saved Lbl and LBody without moving glyphs.",
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch1-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
+    },
+    {
+      "id": "A07",
+      "area": "Native operators",
+      "improvement": "Array-based list marker splitting",
+      "requirement": "Split qualified TJ list markers while retaining all positioning adjustments.",
+      "acceptance": "Mixed string/number TJ arrays preserve advances, bytes and distinct label/body ownership.",
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch1-20261022.json"
+      ],
+      "completedOn": "2026-10-22"
+    },
+    {
+      "id": "A08",
+      "area": "Native operators",
+      "improvement": "Compound text-node attachment",
+      "requirement": "Partition one source text operation across multiple intended label/value nodes.",
+      "acceptance": "Booklet label/value examples attach to exact intended nodes; spacing and geometry are unchanged.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A09",
+      "area": "Native operators",
+      "improvement": "Glyph-to-byte mapping",
+      "requirement": "Expose verified byte boundaries for multibyte codes, ligatures and Unicode sequences.",
+      "acceptance": "Splitting never bisects a font code or Unicode mapping; ambiguous boundaries are rejected.",
+      "status": "in_progress",
+      "evidence": [
+        "modules/pdf-writer/test/fixtures/NativeGlyphBoundaryProbe.java"
+      ],
+      "remaining": "General reusable mapping for compound text-node partitioning; current prefix splitter has qualified array/ligature/Unicode boundary tests."
+    },
+    {
+      "id": "A10",
+      "area": "Native operators",
+      "improvement": "Optional-content preservation",
+      "requirement": "Retain optional-content wrappers during retagging.",
+      "acceptance": "Default visibility and alternate layer states render identically; generated MCIDs remain balanced.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A11",
+      "area": "Semantic content",
+      "improvement": "Authored replacement text",
+      "requirement": "Carry valid source ActualText/expansion semantics through native rebuilding.",
+      "acceptance": "Authored ligature and abbreviation replacement survives without duplicating or suppressing unrelated text.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A12",
+      "area": "Semantic content",
+      "improvement": "Artifact subtype preservation",
+      "requirement": "Retain evidenced pagination/background artifact properties without hiding meaningful content.",
+      "acceptance": "Saved pagination/artifact metadata survives, while identically styled body text remains semantic.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A13",
+      "area": "Geometry",
+      "improvement": "CropBox origin handling",
+      "requirement": "Normalize extraction, matching and saved geometry for nonzero/negative crop origins.",
+      "acceptance": "Shifted-crop fixtures attach all intended text and retain page geometry and pixels.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A14",
+      "area": "Geometry",
+      "improvement": "UserUnit handling",
+      "requirement": "Use a consistent coordinate convention for PDFs with non-default UserUnit.",
+      "acceptance": "Scaled-unit fixtures preserve coordinates across text, annotations and matching without double scaling.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A15",
+      "area": "Geometry",
+      "improvement": "Rotated-page reading order",
+      "requirement": "Order semantic content in the actual display frame across page rotations.",
+      "acceptance": "Rotated multicolumn pages have expected saved order at 0/90/180/270 degrees.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A16",
+      "area": "Semantic content",
+      "improvement": "Label/value paragraph boundaries",
+      "requirement": "Prevent paragraph merging across adjacent label/value columns.",
+      "acceptance": "Booklet launch details and acronym rows retain distinct identities and logical pair order.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A17",
+      "area": "Semantic content",
+      "improvement": "Running-text discrimination",
+      "requirement": "Distinguish repeated headers/footers from repeated meaningful body text.",
+      "acceptance": "Location-varying pagination is recognized; body repetitions and section titles are retained.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A18",
+      "area": "Headings",
+      "improvement": "Numbered heading false positives",
+      "requirement": "Separate section numbering from decimals, dates and numbered list items.",
+      "acceptance": "Adversarial numeric examples keep their correct roles while evidenced numbered headings remain headings.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A19",
+      "area": "Headings",
+      "improvement": "Wrapped heading style boundaries",
+      "requirement": "Improve heading continuation across mixed fonts and adjacent subtitles.",
+      "acceptance": "A heading wraps completely without swallowing a differently ranked subtitle or body line.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A20",
+      "area": "Headings",
+      "improvement": "Section hierarchy consistency",
+      "requirement": "Keep section containers consistent with corrected heading ranks and membership.",
+      "acceptance": "Saved nested sections agree with the approved outline after heading demotion and rank refinement.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A21",
+      "area": "Saved validation",
+      "improvement": "Existing MCID references",
+      "requirement": "Verify that every saved MCR points to a real marked-content sequence.",
+      "acceptance": "Deleting or changing a sequence makes saved comparison fail, even when its MCR dictionary remains.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A22",
+      "area": "Saved validation",
+      "improvement": "Nonempty content attachment",
+      "requirement": "Require meaningful owned content rather than an empty MCID wrapper.",
+      "acceptance": "Empty and whitespace-only wrappers cannot satisfy intended nonempty text attachment.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A23",
+      "area": "Saved validation",
+      "improvement": "Exclusive painted ownership",
+      "requirement": "Detect duplicate and foreign ownership of painted source content.",
+      "acceptance": "Wrong-owner and multiply-owned glyph mutations fail despite unchanged structure IDs.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A24",
+      "area": "Saved validation",
+      "improvement": "Scoped reciprocal ParentTree",
+      "requirement": "Verify reciprocal ownership across page, Form and annotation scopes.",
+      "acceptance": "Cross-stream and annotation-key mutations fail; valid reused MCIDs in separate scopes pass.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A25",
+      "area": "Saved validation",
+      "improvement": "Text completeness proof",
+      "requirement": "Compare intended source identities against the actual saved glyph coverage.",
+      "acceptance": "Partial substring matches cannot pass complete text; bounded replacement-text exceptions carry proof.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A26",
+      "area": "OCR",
+      "improvement": "OCR coordinate transforms",
+      "requirement": "Map OCR coordinates through crop, rotation and render scale exactly once.",
+      "acceptance": "Known image text boxes land correctly on rotated/cropped pages at multiple render resolutions.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A27",
+      "area": "OCR",
+      "improvement": "Image-only tagged text layer",
+      "requirement": "Insert a tagged invisible text layer for accepted OCR on image-only pages.",
+      "acceptance": "Official poster and synthetic scans expose saved text with complete ownership and unchanged images.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A28",
+      "area": "OCR",
+      "improvement": "Mixed-page OCR attachment",
+      "requirement": "Attach OCR-only regions without duplicating native text or losing conflicts.",
+      "acceptance": "Booklet mixed page gains OCR attachments; overlapping native/OCR conflicts remain explicit review tasks.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A29",
+      "area": "OCR",
+      "improvement": "OCR Unicode font coverage",
+      "requirement": "Embed verified OCR fonts and preserve Unicode for characters outside the first font.",
+      "acceptance": "Accents, symbols and missing-glyph cases have correct extracted text or explicit failure, never replacement boxes.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A30",
+      "area": "OCR",
+      "improvement": "OCR uncertainty workflow",
+      "requirement": "Carry word-level uncertainty and corrections through to saved output qualification.",
+      "acceptance": "Low-confidence text cannot be silently accepted; hash-bound corrections change only intended text metadata/layer.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A31",
+      "area": "Fonts",
+      "improvement": "Missing CIDToGIDMap repair",
+      "requirement": "Qualify missing mappings using the existing embedded TrueType program.",
+      "acceptance": "Booklet mapping failures reduce only with proven used-code/GID equivalence and pixel preservation.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A32",
+      "area": "Fonts",
+      "improvement": "Symbol Unicode repair",
+      "requirement": "Repair supported symbolic-font Unicode mappings using verified glyph evidence.",
+      "acceptance": "Wingdings-like cases produce correct Unicode for observed glyphs; unsupported ambiguity stays unresolved.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A33",
+      "area": "Fonts",
+      "improvement": "Exact font program recovery",
+      "requirement": "Recover missing programs only from verified matching donor programs and metrics.",
+      "acceptance": "Exact-donor fixtures embed correctly; similar-family substitutions and mismatched advances are refused.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A34",
+      "area": "Fonts",
+      "improvement": "Invalid ToUnicode diagnostics and repair",
+      "requirement": "Distinguish absent, malformed and contradictory mappings with bounded repair.",
+      "acceptance": "Malformed maps are diagnosed per used code; verified replacements preserve glyph selection and extraction.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A35",
+      "area": "Fonts",
+      "improvement": "Editable font coverage proof",
+      "requirement": "Extend form-default font qualification to new input and non-ASCII supported glyphs.",
+      "acceptance": "Fill/save/reopen retains field values and appearance for verified repertoire; unsupported glyphs are reported.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A36",
+      "area": "Navigation",
+      "improvement": "Native link ownership",
+      "requirement": "Bind native Link tags, annotation OBJRs and ParentTree entries to source anchor text.",
+      "acceptance": "New native output has reciprocal link ownership with unchanged action, rectangle and appearance.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A37",
+      "area": "Navigation",
+      "improvement": "Rotated and quad-point links",
+      "requirement": "Associate rotated and multiline link geometry in a consistent coordinate frame.",
+      "acceptance": "QuadPoints/rotation fixtures bind the correct anchor and preserve actions; nearby text is excluded.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A38",
+      "area": "Navigation",
+      "improvement": "Multiline link grouping",
+      "requirement": "Group multiple anchor text runs under one appropriate Link structure element.",
+      "acceptance": "Wrapped anchors retain ordered text and one annotation reference without stealing neighboring runs.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A39",
+      "area": "Navigation",
+      "improvement": "Reviewed outline bookmarks",
+      "requirement": "Create hierarchical bookmarks from an accepted document outline.",
+      "acceptance": "Unicode titles, page targets and hierarchy round-trip correctly; existing authored bookmarks are preserved.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A40",
+      "area": "Navigation",
+      "improvement": "Logical page-label verification",
+      "requirement": "Include page labels and outline destinations in saved preservation qualification.",
+      "acceptance": "Mutated Roman/decimal labels or bookmark destinations fail preservation; unchanged labels pass.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A41",
+      "area": "Tables",
+      "improvement": "Overlapping span detection",
+      "requirement": "Detect and resolve inconsistent row/column spans before inventing grid positions.",
+      "acceptance": "Overlapping spans generate a bounded repair/review result; valid merged grids serialize unchanged.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A42",
+      "area": "Tables",
+      "improvement": "Mixed row and column headers",
+      "requirement": "Improve corner and multirow header association with explicit scope evidence.",
+      "acceptance": "Reviewed mixed-header fixtures expose correct Headers relations with no unrelated header targets.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A43",
+      "area": "Tables",
+      "improvement": "Repeated cross-page headers",
+      "requirement": "Keep repeated header occurrences and continuation references scoped correctly.",
+      "acceptance": "A continued table retains all page header occurrences and associates each body cell with the correct headers.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A44",
+      "area": "Tables",
+      "improvement": "Diagram versus table discrimination",
+      "requirement": "Prevent diagram label alignments from becoming false tables.",
+      "acceptance": "Booklet diagrams and negative fixtures retain meaningful figure/text grouping; genuine aligned tables still work.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A45",
+      "area": "Tables",
+      "improvement": "Caption relationships",
+      "requirement": "Save evidence-backed Table/Figure caption relationships in correct reading order.",
+      "acceptance": "Caption association survives output and does not attach neighboring unrelated prose.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A46",
+      "area": "Forms",
+      "improvement": "Native widget structure ownership",
+      "requirement": "Attach every native form widget to the intended Form structure without rebuilding controls.",
+      "acceptance": "Multiwidget fields have reciprocal OBJRs and unchanged names, values, actions and appearance streams.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A47",
+      "area": "Forms",
+      "improvement": "Reviewed accessible field names",
+      "requirement": "Apply accepted missing-name associations through a hash-bound qualified repair.",
+      "acceptance": "Only reviewed missing TU names change; existing names and form behavior remain intact.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A48",
+      "area": "Forms",
+      "improvement": "Radio group and choice semantics",
+      "requirement": "Preserve group identity while exposing distinct choice labels and export states.",
+      "acceptance": "Radio groups expose reviewed names/choices and still select, save and reopen correctly.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A49",
+      "area": "Forms",
+      "improvement": "Widget navigation ordering",
+      "requirement": "Qualify structure-based form navigation across multiline, repeated and hidden widgets.",
+      "acceptance": "All eligible widgets occur once in expected order; hidden widgets and noninteractive labels are handled explicitly.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A50",
+      "area": "Qualification",
+      "improvement": "Hash-bound completion gate",
+      "requirement": "Integrate source coverage, semantic failures and preservation into final candidate eligibility.",
+      "acceptance": "Stale, partial or failed evidence cannot publish a qualified result; complete machine evidence still requires human review.",
+      "status": "pending",
+      "evidence": []
+    }
+  ]
+}

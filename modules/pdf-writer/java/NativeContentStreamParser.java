@@ -88,6 +88,19 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
         setSortByPosition(false);
     }
 
+    /**
+     * PDFBox's operator processors use the String overload for synthetic
+     * operations (TD sets leading and moves text; quotes advance and show text).
+     * Only the Operator overload is
+     * called by the stream tokenizer. Execute synthetic operations normally,
+     * but keep their glyphs in the enclosing source operator's record and do
+     * not advance its lexical index.
+     */
+    @Override
+    public void processOperator(String operation, List<COSBase> operands) throws IOException {
+        super.processOperator(Operator.getOperator(operation), operands);
+    }
+
     @Override
     protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
         String opName = operator.getName();
@@ -321,7 +334,7 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
                     if (i > 0) json.append(",");
                     json.append("{");
                     json.append("\"seq\":").append(r.seq);
-                    json.append(",\"op\":\"").append(r.op).append("\"");
+                    json.append(",\"op\":").append(escapeJson(r.op));
                     json.append(",\"text\":").append(escapeJson(r.text));
                     json.append(",\"x\":").append(String.format("%.1f", r.x));
                     json.append(",\"y\":").append(String.format("%.1f", r.y));
