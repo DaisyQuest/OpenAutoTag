@@ -6,6 +6,7 @@ import { planTableGrid, tableGridReview, mergeDeclaredCellFragments } from "./ta
 import { assignTableHeaders } from "./table-headers.js";
 import { appendTableCell, partitionTableSections, markRepeatedTableHeaders } from "./table-continuation.js";
 import { readFile } from "node:fs/promises";
+import {createHash} from 'node:crypto';
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
@@ -1549,6 +1550,8 @@ export async function buildTagTree(inputPath, overrides = {}) {
     throw new Error(`Tag builder input failed schema validation: ${ajv.errorsText(validateSemantic.errors)}`);
   }
 
+  if(semanticDocument.formChoiceReview){const {formChoiceReview,...content}=semanticDocument;if(createHash('sha256').update(JSON.stringify(content)).digest('hex')!==formChoiceReview.contentHash)throw new Error('Reviewed choice intent changed after acceptance');}
+
   const options = resolveTagBuilderOptions(overrides);
   const orderedNodes = resolveOrderedNodes(semanticDocument);
 
@@ -1808,6 +1811,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
     documentId: `${semanticDocument.documentId}:tagging`,
     source: {
       semanticDocumentId: semanticDocument.documentId,
+      ...(semanticDocument.formChoiceReview?{formChoiceReview:semanticDocument.formChoiceReview}:{}),
       ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
       ...(widgetOwnership.widgets.length || widgetOwnership.reviews.length ? {widgetOwnership} : {}),
       headingNormalization: headingNormalization.summary,

@@ -9,7 +9,7 @@ const glyphKey = (page, index) => `${page}:${index}`;
 const digest = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 export const canonicalText = text => String(text || "").normalize("NFKC").replace(/\p{White_Space}/gu, "");
 
-export function inspectSourceOwnership({ inspection, source, ownership, intendedNodes, add }) {
+export function inspectSourceOwnership({ inspection, source, ownership, intendedNodes, choiceReview, add }) {
   const result = { sourceVerified: false };
   if (!source || !ownership) return result;
   add("SOURCE_OWNERSHIP_HASH", "document", source.sourceHash, ownership.sourceHash);
@@ -83,7 +83,7 @@ export function inspectSourceOwnership({ inspection, source, ownership, intended
     if (!valid) allOwnersMatch = false;
   }
   const figuresValid = inspectNativeFigures({source,inspection,ownership,intendedNodes,add});
-  const widgets = inspectNativeWidgets({source,inspection,ownership,intendedNodes,add});
+  const widgets = inspectNativeWidgets({source,inspection,ownership,intendedNodes,choiceReview,add});
   result.widgetsVerified=widgets.verified;
   result.sourceVerified = sequenceMatches && allOwnersMatch && ocr.valid && links.valid && figuresValid && widgets.valid;
   return result;

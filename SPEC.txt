@@ -1,6 +1,13 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Reviewed radio/choice semantics (A48, 2026-10-23):
+Native field identities, radio exports/states and choice display/export pairs
+remain distinct. Hash-bound complete-group reviews change logical labels only.
+Saved verification compares independent source and candidate option/state
+metadata; native names, values, flags, actions and appearances remain intact.
+Uncertain choices remain review work. See docs/accessibility-50-batch31-20261023.md.
+
 Reviewed accessible field names (A47, 2026-10-23):
 Opt-in accepted reviews bind exact source and semantic bytes, field/widget
 identities and complete visible labels. Only missing/blank terminal-field TU

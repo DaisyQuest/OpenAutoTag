@@ -29,8 +29,9 @@ export function attachWidgetOwnership(root, semantic) {
       });
       if(new Set(containers).size===1&&containers[0]!==root)container=containers[0];
     }
+    if(widget.choiceLabelStatus==='accepted'&&(!container||!semantic.formChoiceReview?.fieldRefs.includes(widget.fieldRef)))throw new Error('Accepted choice label lacks a unique structural anchor or review');
     const form={id,type:'Form',children:[],nativeWidget:{widgetId:widget.id,sourceRef,pageNumber:widget.pageNumber,
-      fieldName:widget.fieldName||'',placement:container?'label-context':'unresolved',anchorNodeIds:container?labelIds:[]}};
+      fieldName:widget.fieldName||'',placement:container?'label-context':'unresolved',anchorNodeIds:container?labelIds:[],...(widget.choiceControl?{choiceControl:structuredClone(widget.choiceControl),choiceLabelStatus:widget.choiceLabelStatus||'requires-review',...(widget.choiceLabel?{choiceLabel:widget.choiceLabel}:{})}:{})}};
     if(container&&/^H[1-6]$/.test(container.type)) {
       const parent=parents.get(container);let index=parent.children.indexOf(container)+1;
       while(parent.children[index]?.nativeWidget?.anchorNodeIds.some(a=>labelIds.includes(a)))index++;

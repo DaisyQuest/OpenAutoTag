@@ -10,6 +10,7 @@
     "nodes"
   ],
   "properties": {
+    "formChoiceReview": {"type":"object","additionalProperties":false,"required":["schemaVersion","sourceHash","originalIntentHash","reviewHash","contentHash","reviewer","evidence","fieldRefs"],"properties":{"schemaVersion":{"const":"1.0.0"},"sourceHash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"originalIntentHash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"reviewHash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"contentHash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"reviewer":{"type":"string","minLength":1,"maxLength":256},"evidence":{"type":"string","minLength":1,"maxLength":4096},"fieldRefs":{"type":"array","minItems":1,"maxItems":1024,"uniqueItems":true,"items":{"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"}}}},
     "schemaVersion": {
       "const": "1.0.0"
     },
@@ -436,11 +437,13 @@
       "additionalProperties": false
     },
     "formRelationships": { "type": "array", "items": { "type": "object", "required": ["id", "widgets", "labels"], "properties": {
-      "id": { "type": "string", "minLength": 1 }, "fieldType": { "type": "string" },
+      "id": { "type": "string", "minLength": 1 }, "fieldType": { "type": "string" }, "fieldRef": {"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"},
       "widgets": { "type": "array", "items": { "type": "object", "required": ["id", "pageNumber", "bbox"], "properties": {
         "fieldRef": { "type": "string", "pattern": "^[1-9][0-9]* [0-9]+ R$" },
         "tooltipOwnerRef": { "type": "string", "pattern": "^[1-9][0-9]* [0-9]+ R$" },
         "tooltipSource": { "enum": ["widget-TU", "field-TU"] },
+        "choiceControl": {"type":"object","additionalProperties":false,"required":["kind","fieldRef","groupName","flags","widgetCount","widgetIndex","stateIssues"],"properties":{"kind":{"enum":["radio","choice"]},"fieldRef":{"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"},"groupName":{"type":"string","maxLength":4096},"flags":{"type":"integer","minimum":0,"maximum":2147483647},"widgetCount":{"type":"integer","minimum":1,"maximum":1024},"widgetIndex":{"type":"integer","minimum":0,"maximum":1023},"stateIssues":{"type":"array","uniqueItems":true,"items":{"enum":["MISSING_APPEARANCE_STATE","UNKNOWN_APPEARANCE_STATE","UNKNOWN_GROUP_VALUE","VALUE_APPEARANCE_MISMATCH","MULTIPLE_RADIO_SELECTIONS","UNISON_STATE_MISMATCH","VALUE_INDEX_MISMATCH","AMBIGUOUS_EXPORT_VALUE","UNKNOWN_CHOICE_VALUE","MULTIPLE_SINGLE_CHOICE_VALUES"]}},"onState":{"type":"string","minLength":1,"maxLength":256},"appearanceState":{"type":"string","minLength":1,"maxLength":256},"value":{"type":"string","minLength":1,"maxLength":256},"exportValue":{"type":"string","maxLength":4096},"exportSource":{"enum":["Opt","AP-N"]},"selected":{"type":"boolean"},"options":{"type":"array","maxItems":4096,"items":{"type":"object","additionalProperties":false,"required":["exportValue","displayValue"],"properties":{"exportValue":{"type":"string","maxLength":4096},"displayValue":{"type":"string","maxLength":4096}}}},"values":{"type":"array","maxItems":4096,"items":{"type":"string","maxLength":4096}},"selectedIndices":{"type":"array","maxItems":4096,"uniqueItems":true,"items":{"type":"integer","minimum":0,"maximum":4095}}},"oneOf":[{"properties":{"kind":{"const":"radio"},"options":false,"values":false,"selectedIndices":false},"required":["onState","appearanceState","value","exportValue","exportSource","selected"]},{"properties":{"kind":{"const":"choice"},"onState":false,"appearanceState":false,"value":false,"exportValue":false,"exportSource":false,"selected":false},"required":["options","values","selectedIndices"]}]},
+        "choiceMetadataError": {"type":"string","minLength":1,"maxLength":256},
         "id": { "type": "string", "minLength": 1 }, "pageNumber": { "type": "integer", "minimum": 1 },
         "appearanceText": { "type": "string", "minLength": 1, "maxLength": 160 },
         "appearanceTextSource": { "const": "normal-widget-appearance" },
@@ -448,7 +451,7 @@
         "authoredCaptionSource": { "const": "widget-MK-CA" },
         "multiLine": { "type": "boolean" },
         "labelAssociation": { "type": "object", "required": ["kind", "evidence"], "properties": {
-          "kind": { "enum": ["widget-appearance", "expanded-tooltip", "section-prompt", "compound-date"] },
+          "kind": { "enum": ["widget-appearance", "expanded-tooltip", "section-prompt", "compound-date", "radio-choice", "reviewed-choice"] },
           "evidence": { "type": "string", "minLength": 1 },
           "component": { "enum": ["day", "month", "year"] },
           "groupWidgetIds": { "type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }

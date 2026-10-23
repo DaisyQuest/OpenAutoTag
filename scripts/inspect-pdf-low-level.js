@@ -12,6 +12,7 @@ const javaSourcePath = path.join(scriptDir, "java", "LowLevelPdfInspectorCli.jav
 const preservationSourcePath = path.join(scriptDir, "java", "PreservationInspector.java");
 const contentSourcePath = path.join(scriptDir, "java", "SavedContentInspector.java");
 const navigationSourcePath = path.join(scriptDir, "java", "NavigationInspector.java");
+const choiceSourcePath = path.join(scriptDir, "java", "ChoiceControlInspector.java");
 const javaClassPath = path.join(buildDir, "LowLevelPdfInspectorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
@@ -43,9 +44,9 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, preservationStats, contentStats, navigationStats, classStats, helperStats, contentClass, navigationClass] = await Promise.all([
-      stat(javaSourcePath), stat(preservationSourcePath), stat(contentSourcePath),stat(navigationSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class")), stat(path.join(buildDir, "SavedContentInspector.class")),stat(path.join(buildDir,"NavigationInspector.class"))]);
-    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs, contentStats.mtimeMs,navigationStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs, contentClass.mtimeMs,navigationClass.mtimeMs);
+    const [sourceStats, preservationStats, contentStats, navigationStats, choiceStats, classStats, helperStats, contentClass, navigationClass, choiceClass] = await Promise.all([
+      stat(javaSourcePath), stat(preservationSourcePath), stat(contentSourcePath),stat(navigationSourcePath),stat(choiceSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class")), stat(path.join(buildDir, "SavedContentInspector.class")),stat(path.join(buildDir,"NavigationInspector.class")),stat(path.join(buildDir,'ChoiceControlInspector.class'))]);
+    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs, contentStats.mtimeMs,navigationStats.mtimeMs,choiceStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs, contentClass.mtimeMs,navigationClass.mtimeMs,choiceClass.mtimeMs);
   } catch {
     return true;
   }
@@ -67,7 +68,7 @@ async function ensureJavaHelperCompiled() {
             pdfboxJarPath,
             "-d",
             buildDir,
-            javaSourcePath, preservationSourcePath, contentSourcePath, navigationSourcePath
+            javaSourcePath, preservationSourcePath, contentSourcePath, navigationSourcePath,choiceSourcePath
           ],
           {
             env: await buildJavaExecEnv({ bundledJavaHome })

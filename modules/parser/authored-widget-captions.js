@@ -1,4 +1,5 @@
 import { PDFDocument, PDFDict, PDFName, PDFString, PDFHexString } from "pdf-lib";
+import {choiceMetadata} from './choice-metadata.js';
 
 // Read only: /MK /CA is authored metadata, distinct from text painted by /AP.
 // Match exact indirect references, never field names shared by several widgets.
@@ -8,11 +9,11 @@ export async function authoredWidgetCaptions(bytes) {
   const captions = new Map(), fields = new Map(), nameErrors = [];
   try {
     const document = await PDFDocument.load(bytes, { updateMetadata: false, throwOnInvalidObject: true });
-    const references = new Map(document.context.enumerateIndirectObjects().map(([ref, object]) => [object, ref.toString()]));
+    const references = new Map(document.context.enumerateIndirectObjects().map(([ref, object]) => [object, ref.toString()])),choiceCache=new Map();
     for (const [ref, object] of document.context.enumerateIndirectObjects()) {
       if (!(object instanceof PDFDict) || object.lookup(PDFName.of("Subtype")) !== PDFName.of("Widget")) continue;
       const widgetId = `${ref.objectNumber}R${ref.generationNumber || ""}`;
-      try { const field = widgetFieldMetadata(object, references); if (field) fields.set(widgetId, field); }
+      try { const field = widgetFieldMetadata(object, references,choiceCache); if (field) fields.set(widgetId, field); }
       catch { nameErrors.push(widgetId); }
       const mk = object.lookup(PDFName.of("MK"));
       if (!(mk instanceof PDFDict)) continue;
@@ -34,7 +35,7 @@ export async function authoredWidgetCaptions(bytes) {
 
 // A separate widget gets its field metadata from its terminal parent. TU is
 // not inherited from arbitrary nonterminal ancestors of a named field.
-export function widgetFieldMetadata(widget, references) {
+export function widgetFieldMetadata(widget, references,choiceCache) {
   const seen = new Set();let node = widget, tooltip, tooltipOwnerRef, tooltipSource;
   while (node) {
     if (!(node instanceof PDFDict) || seen.size >= 128 || seen.has(node)) throw new Error('Invalid widget field ancestry');
@@ -49,7 +50,7 @@ export function widgetFieldMetadata(widget, references) {
     if (node.has(PDFName.of('T')) || node.has(PDFName.of('FT'))) {
       const fieldRef = references.get(node);
       if (!fieldRef) throw new Error('Field has no indirect identity');
-      return { fieldRef, ...(tooltip ? { tooltip, tooltipOwnerRef, tooltipSource } : {}) };
+      return { fieldRef, ...(tooltip ? { tooltip, tooltipOwnerRef, tooltipSource } : {}),...choiceMetadata(widget,node,references,choiceCache) };
     }
     node = node.lookup(PDFName.of('Parent'));
   }

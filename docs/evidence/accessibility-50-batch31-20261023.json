@@ -1,0 +1,2038 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A48"
+  ],
+  "status": "completed",
+  "baselineCommit": "1035b138050a4d3e8fb6e1bd7569c5a6e03bdaaa",
+  "tests": {
+    "baseline": {
+      "path": "tmp/a48-baseline.log",
+      "sha256": "8c791f94e9d2d76ffa7dbc60bce63f23d5fff1fece5797e2635166453afd8397",
+      "tests": 1070,
+      "pass": 1070,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "path": "tmp/a48-final-focused.log",
+      "sha256": "321d87dec88a7e2e5a94d5771d8cf5a2eb603d3b33ba1382497b5c595bbfbe09",
+      "tests": 85,
+      "pass": 85,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "scope": "Overlapping runs. Final affected suite covers late Index number normalization, raw indirect option verification and ten added proof rejection tests.",
+    "coverage": {
+      "scope": "Three new JavaScript helpers only",
+      "line": 100,
+      "branch": 94.74,
+      "function": 98.39
+    },
+    "embeddedContractsConsistent": 6
+  },
+  "fixture": {
+    "sourcePdf": "output\\accessibility-50-batch31-20261023\\fixture\\source.pdf",
+    "outputPath": "output\\accessibility-50-batch31-20261023\\fixture\\candidate.pdf",
+    "sourceHash": "3bee158d7660093cf4f876689d2a1d8964f310fee634861534d2680623bc2063",
+    "candidateHash": "d4b10f1673ce57c66778d86401234686f4e411d5e8cdb1d5d338aea99c9120ed",
+    "semanticPath": "output\\accessibility-50-batch31-20261023\\fixture\\semantic.json",
+    "reviewPath": "output\\accessibility-50-batch31-20261023\\fixture\\review.json",
+    "reviewedPath": "output\\accessibility-50-batch31-20261023\\fixture\\reviewed-semantic.json",
+    "tagsPath": "output\\accessibility-50-batch31-20261023\\fixture\\tags.json",
+    "saved": {
+      "passed": 434,
+      "failed": 0
+    },
+    "fields": 7,
+    "widgets": 9,
+    "reviewedGroups": 3,
+    "reviewedChoices": 4,
+    "probes": [
+      {
+        "field": "contact",
+        "index": "0",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\contact-0-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\contact-0-candidate.pdf"
+      },
+      {
+        "field": "contact",
+        "index": "1",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\contact-1-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\contact-1-candidate.pdf"
+      },
+      {
+        "field": "state",
+        "index": "0",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\state-0-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\state-0-candidate.pdf"
+      },
+      {
+        "field": "state",
+        "index": "1",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\state-1-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\state-1-candidate.pdf"
+      },
+      {
+        "field": "topics",
+        "index": "0",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\topics-0-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\topics-0-candidate.pdf"
+      },
+      {
+        "field": "topics",
+        "index": "1",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\topics-1-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\topics-1-candidate.pdf"
+      },
+      {
+        "field": "topics",
+        "index": "2",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\topics-2-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\topics-2-candidate.pdf"
+      },
+      {
+        "field": "topics",
+        "index": "0,2",
+        "source": "output\\accessibility-50-batch31-20261023\\fixture\\topics-0,2-source.pdf",
+        "candidate": "output\\accessibility-50-batch31-20261023\\fixture\\topics-0,2-candidate.pdf"
+      }
+    ],
+    "sourceUnchanged": true,
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 1033,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    }
+  },
+  "real": {
+    "sourcePdf": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+    "candidate": "output/accessibility-50-batch31-20261023/test-form-final/candidate.pdf",
+    "sourceHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+    "candidateHash": "5b88bb3851523b488d31c88e37dd28c0e81f35dc9ce46362156912b237d2db0b",
+    "semanticPath": "output/accessibility-50-batch31-20261023/test-form-final/semantic.json",
+    "reviewedPath": "output/accessibility-50-batch31-20261023/test-form-final/reviewed-semantic.json",
+    "reviewPath": "output/accessibility-50-batch31-20261023/test-form-final/review.json",
+    "tagsPath": "output/accessibility-50-batch31-20261023/test-form-final/tags.json",
+    "saved": {
+      "passed": 5600,
+      "failed": 0
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 15112,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    },
+    "reviewedGroups": 1,
+    "choicesReviewed": 63,
+    "nativeChoiceWidgets": 4,
+    "optionsPreserved": 173,
+    "unresolvedPlacementWidgets": 8,
+    "probes": [
+      {
+        "field": "LocalCourt",
+        "index": "1",
+        "source": "output/accessibility-50-batch31-20261023/test-form-final/LocalCourt-source.pdf",
+        "candidate": "output/accessibility-50-batch31-20261023/test-form-final/LocalCourt-candidate.pdf"
+      },
+      {
+        "field": "CountyName",
+        "index": "1",
+        "source": "output/accessibility-50-batch31-20261023/test-form-final/CountyName-source.pdf",
+        "candidate": "output/accessibility-50-batch31-20261023/test-form-final/CountyName-candidate.pdf"
+      },
+      {
+        "field": "AffirmationDay",
+        "index": "31",
+        "source": "output/accessibility-50-batch31-20261023/test-form-final/AffirmationDay-source.pdf",
+        "candidate": "output/accessibility-50-batch31-20261023/test-form-final/AffirmationDay-candidate.pdf"
+      },
+      {
+        "field": "AffirmationMonth",
+        "index": "12",
+        "source": "output/accessibility-50-batch31-20261023/test-form-final/AffirmationMonth-source.pdf",
+        "candidate": "output/accessibility-50-batch31-20261023/test-form-final/AffirmationMonth-candidate.pdf"
+      }
+    ],
+    "originalUnchanged": true
+  },
+  "independent": {
+    "records": [
+      {
+        "case": "fixture",
+        "sourceHash": "3bee158d7660093cf4f876689d2a1d8964f310fee634861534d2680623bc2063",
+        "candidateHash": "d4b10f1673ce57c66778d86401234686f4e411d5e8cdb1d5d338aea99c9120ed",
+        "fields": 7,
+        "widgets": 9,
+        "selectionCases": 8,
+        "fieldAndWidgetPropertiesPreservedExceptAuditedFontMaps": true,
+        "exportsAndDisplayOptionsPreserved": true,
+        "appearanceStreamsPreserved": true,
+        "fontMapAudit": "Widget appearance glyph indices preserved; NUL/BOM mappings replaced by U+FFFD and missing control-code mappings added as U+FFFD. Other widget resources exact.",
+        "sourceParserStrict": true,
+        "candidateAndProbeParsersStrict": true,
+        "pageGeometryAndPaintedTextPreserved": true
+      },
+      {
+        "case": "test-form-final",
+        "sourceHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+        "candidateHash": "5b88bb3851523b488d31c88e37dd28c0e81f35dc9ce46362156912b237d2db0b",
+        "fields": 32,
+        "widgets": 33,
+        "selectionCases": 4,
+        "fieldAndWidgetPropertiesPreservedExceptAuditedFontMaps": true,
+        "exportsAndDisplayOptionsPreserved": true,
+        "appearanceStreamsPreserved": true,
+        "fontMapAudit": "Widget appearance glyph indices preserved; NUL/BOM mappings replaced by U+FFFD and missing control-code mappings added as U+FFFD. Other widget resources exact.",
+        "sourceParserStrict": false,
+        "candidateAndProbeParsersStrict": true,
+        "pageGeometryAndPaintedTextPreserved": true
+      }
+    ],
+    "fontAudits": [
+      {
+        "case": "fixture original",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture contact 0",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture contact 1",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture state 0",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture state 1",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture topics 0",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture topics 1",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture topics 2",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "fixture topics 0,2",
+        "fontRef": [
+          19,
+          0
+        ],
+        "unicodeChanges": [
+          [
+            1,
+            0,
+            65533
+          ],
+          [
+            566,
+            65279,
+            65533
+          ]
+        ],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          338,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          341,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          348,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          350,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          352,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          354,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          356,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          358,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          360,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          362,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          364,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          62,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          75,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          83,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          71,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          78,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          84,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          72,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          81,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          82,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          87,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final original",
+        "fontRef": [
+          73,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          338,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          341,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          348,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          350,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          352,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          354,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          356,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          358,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          360,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          362,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          364,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          62,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          75,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          83,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          71,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          78,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          84,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          72,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          81,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          82,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          87,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final LocalCourt 1",
+        "fontRef": [
+          73,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          338,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          341,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          348,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          350,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          352,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          354,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          356,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          358,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          360,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          362,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          364,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          62,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          75,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          83,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          71,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          78,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          84,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          72,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          81,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          82,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          87,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final CountyName 1",
+        "fontRef": [
+          73,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          338,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          341,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          348,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          350,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          352,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          354,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          356,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          358,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          360,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          362,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          364,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          62,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          75,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          83,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          71,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          78,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          84,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          72,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          81,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          82,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          87,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationDay 31",
+        "fontRef": [
+          73,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          338,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          341,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          348,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          350,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          352,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          354,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          356,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          358,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          360,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          362,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          364,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          62,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          75,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          83,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          71,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          78,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          84,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          72,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          81,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          82,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          87,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      },
+      {
+        "case": "test-form-final AffirmationMonth 12",
+        "fontRef": [
+          73,
+          0
+        ],
+        "unicodeChanges": [],
+        "replacementMappingsAddedForControlCodes": [],
+        "glyphMappingPreserved": true
+      }
+    ],
+    "pagePairs": [
+      {
+        "case": "fixture",
+        "state": "original",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "original",
+        "page": 2,
+        "pixelHash": "3385440da9b6770e24486d9626c89292c66a25fcdab1a3f358bf3410abeff81a"
+      },
+      {
+        "case": "fixture",
+        "state": "contact-0",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "contact-0",
+        "page": 2,
+        "pixelHash": "3385440da9b6770e24486d9626c89292c66a25fcdab1a3f358bf3410abeff81a"
+      },
+      {
+        "case": "fixture",
+        "state": "contact-1",
+        "page": 1,
+        "pixelHash": "762648916d711a1e7c3bb834012dc5d1eeae95fdce676009e14994c60bced03a"
+      },
+      {
+        "case": "fixture",
+        "state": "contact-1",
+        "page": 2,
+        "pixelHash": "3385440da9b6770e24486d9626c89292c66a25fcdab1a3f358bf3410abeff81a"
+      },
+      {
+        "case": "fixture",
+        "state": "state-0",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "state-0",
+        "page": 2,
+        "pixelHash": "3385440da9b6770e24486d9626c89292c66a25fcdab1a3f358bf3410abeff81a"
+      },
+      {
+        "case": "fixture",
+        "state": "state-1",
+        "page": 1,
+        "pixelHash": "d0d528ac0516de940d5ae82de900d86a23e0dc6c783488b84f343f1d02bd5871"
+      },
+      {
+        "case": "fixture",
+        "state": "state-1",
+        "page": 2,
+        "pixelHash": "3385440da9b6770e24486d9626c89292c66a25fcdab1a3f358bf3410abeff81a"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-0",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-0",
+        "page": 2,
+        "pixelHash": "13ed33badd3a7ed3387ad8b3997697fa605ad1bc5b93af3307f7c55efe430b00"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-1",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-1",
+        "page": 2,
+        "pixelHash": "80fc3716e8c3f69cdf17b83584ab11804a1b90501df760eff6102fad33306e29"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-2",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-2",
+        "page": 2,
+        "pixelHash": "7e11c19bb074adccabe26c4a5649a222b4d0f93bcf6f989d42b41f63d3acea9c"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-0,2",
+        "page": 1,
+        "pixelHash": "0213c946436dae4dc8c1e165b4e3f1e65c5f517525959d301ccff14d0b0e2918"
+      },
+      {
+        "case": "fixture",
+        "state": "topics-0,2",
+        "page": 2,
+        "pixelHash": "3385440da9b6770e24486d9626c89292c66a25fcdab1a3f358bf3410abeff81a"
+      },
+      {
+        "case": "test-form-final",
+        "state": "original",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form-final",
+        "state": "original",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form-final",
+        "state": "LocalCourt-1",
+        "page": 1,
+        "pixelHash": "a617f2316a1078c97189920973d8546a0c3b74311de92acd6fe9cc05e36c7525"
+      },
+      {
+        "case": "test-form-final",
+        "state": "LocalCourt-1",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form-final",
+        "state": "CountyName-1",
+        "page": 1,
+        "pixelHash": "acdc270e312ccd551d2dbf69d2db84cd548a3461cedb11558d24ca965fd33a65"
+      },
+      {
+        "case": "test-form-final",
+        "state": "CountyName-1",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationDay-31",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationDay-31",
+        "page": 2,
+        "pixelHash": "f54c14780885f5277a93e16741c4add756058d1f575d418c3d79c76dbbb85d02"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationMonth-12",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationMonth-12",
+        "page": 2,
+        "pixelHash": "7165b9c0712ca7bf0483c8dab75c4598da29e03a7e6958a7e335d96c2b455aa6"
+      }
+    ],
+    "popplerDpi": 120,
+    "representativePagesVisuallyInspected": true
+  },
+  "artifacts": [
+    {
+      "path": "output/accessibility-50-batch31-20261023/fixture/evidence.json",
+      "sha256": "50f93d209335ccc25d1b963f544c0dedf8cfa002a8c6a3fd70fc78386cb1ffb0"
+    },
+    {
+      "path": "output/accessibility-50-batch31-20261023/fixture/validation.json",
+      "sha256": "909ec6733fd276bf26238b62383a92c7411ff9059954d0b961cb545af310814b"
+    },
+    {
+      "path": "output/accessibility-50-batch31-20261023/test-form-final/evidence.json",
+      "sha256": "343affc9997c9e92a237939bdfe8b0b9ebfdeedf8b93a7982f6c018b78ec1d55"
+    },
+    {
+      "path": "output/accessibility-50-batch31-20261023/test-form-final/validation.json",
+      "sha256": "6358ca131c6b0e993ce092697ea9f0494f3bebe5b0cb23942257f6d1495eec32"
+    },
+    {
+      "path": "output/accessibility-50-batch31-20261023/independent-verification.json",
+      "sha256": "eeadfae51e227f5cd37f1983dd95b6473e59191dc1be30f416528af771bae2c7"
+    },
+    {
+      "path": "tmp/a48-independent.py",
+      "sha256": "7c7f197ea6df48a402666ca302b6f2e7e9ee62d67596dde834218bb22462a9dc"
+    }
+  ],
+  "limitations": [
+    "Regression reviews are automated known-label oracles, not human acceptance.",
+    "TEST-FORM retains eight unresolved placements and three unaccepted choice groups.",
+    "Batch-29 rebuild declines authored text spanning an OBJR; the real replay uses the qualified batch-23 source.",
+    "Earlier TEST-FORM source needs non-strict pypdf cross-reference recovery; candidate and edited probes load strictly.",
+    "The existing font pass changes audited widget font maps; whole resource byte identity is not claimed.",
+    "Reader/keyboard observations and final human acceptance remain separate.",
+    "A49 and A50 remain pending."
+  ]
+}

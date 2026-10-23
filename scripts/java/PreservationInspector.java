@@ -23,6 +23,7 @@ public final class PreservationInspector {
     private int walked;
     private COSDictionary roleMap, classMap;
     private SavedContentInspector savedContent;
+    private final ChoiceControlInspector choiceInspector=new ChoiceControlInspector();
     private final Map<Integer, COSBase> parentSlots = new TreeMap<>();
     private final Map<Integer, COSDictionary> parentScopes = new TreeMap<>();
     private final Set<COSDictionary> registeredScopes = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -105,6 +106,7 @@ public final class PreservationInspector {
                         COSBase ancestor=field.getDictionaryObject(COSName.PARENT);if(ancestor!=null&&!(ancestor instanceof COSDictionary))throw new IOException("Invalid widget field parent");field=(COSDictionary)ancestor;
                     }
                     Collections.reverse(names);widget.put("fieldName",String.join(".",names));widget.put("fieldStateHash",hash(formState+"|"+String.join("|",states)));widget.put("accessibleName",accessible);
+                    choiceInspector.append(dict,widget);
                     widget.put("owners", new ArrayList<Map<String, Object>>()); widgets.put(key, widget);
                 } else annotations.add(digest);
                 annotationIndex++;

@@ -4,6 +4,10 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;import org.apache.pdfbox.pdm
 import org.apache.pdfbox.pdmodel.interactive.annotation.*;import org.apache.pdfbox.pdmodel.interactive.form.*;
 public class NativeWidgetFixture {
  static COSName name(String value){return COSName.getPDFName(value);}
+ static List<String> rawExports(PDChoice field)throws IOException{
+  COSArray options=field.getCOSObject().getCOSArray(COSName.OPT);List<String> values=new ArrayList<>();if(options==null)throw new IOException("Missing options");
+  for(int i=0;i<options.size();i++){COSBase entry=options.getObject(i);if(entry instanceof COSArray pair)entry=pair.getObject(0);if(!(entry instanceof COSString))throw new IOException("Invalid export value");values.add(((COSString)entry).getString());}return values;
+ }
  static void label(PDPageContentStream c,PDFont f,int y,String text)throws Exception{c.beginText();c.setFont(f,12);c.newLineAtOffset(72,y);c.showText(text);c.endText();}
  static PDAppearanceStream appearance(PDDocument d,PDFont f,String text,boolean checked)throws Exception{
   var ap=new PDAppearanceStream(d);ap.setBBox(new PDRectangle(140,24));ap.setResources(new PDResources());
@@ -17,6 +21,17 @@ public class NativeWidgetFixture {
   COSDictionary normal=new COSDictionary();normal.setItem(name("Off"),appearance(doc,font,"",false));normal.setItem(name(value),appearance(doc,font,value,true));COSDictionary ap=new COSDictionary();ap.setItem(COSName.N,normal);w.getCOSObject().setItem(COSName.AP,ap);w.setAppearanceState("Off");
  }
  public static void main(String[]a)throws Exception{
+  if(a[0].equals("select")){
+   List<String> expected=new ArrayList<>();String state=null;List<String> exports;
+   try(PDDocument d=Loader.loadPDF(new File(a[1]))){var form=d.getDocumentCatalog().getAcroForm(null);var field=form.getField(a[3]);
+    if(field instanceof PDRadioButton radio){exports=radio.getExportValues();int index=Integer.parseInt(a[4]);radio.setValue(index);state=radio.getCOSObject().getNameAsString(COSName.V);expected.add(exports.get(index));}
+    else{PDChoice choice=(PDChoice)field;exports=rawExports(choice);for(String index:a[4].split(","))expected.add(exports.get(Integer.parseInt(index)));if(choice.isMultiSelect())choice.setValue(expected);else choice.setValue(expected.get(0));}d.save(a[2]);
+   }
+   try(PDDocument d=Loader.loadPDF(new File(a[2]))){var field=d.getDocumentCatalog().getAcroForm(null).getField(a[3]);
+    if(field instanceof PDRadioButton radio){if(!exports.equals(radio.getExportValues())||!state.equals(radio.getCOSObject().getNameAsString(COSName.V)))throw new IOException("Radio values changed during reopen");int checked=0;for(var w:radio.getWidgets()){String on=w.getCOSObject().getNameAsString(COSName.AS);if(!"Off".equals(on)){if(!state.equals(on))throw new IOException("Radio appearance/value mismatch");checked++;}}if(checked!=1)throw new IOException("Radio selection is not unique");}
+    else{PDChoice choice=(PDChoice)field;if(!expected.equals(choice.getValue())||!exports.equals(rawExports(choice)))throw new IOException("Choice selection/export changed during reopen");}
+   }System.out.println("Selected values and original exports survived save/reopen");return;
+  }
   if(a[0].equals("encrypt")){
    try(PDDocument d=Loader.loadPDF(new File(a[1]))){var policy=new org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy("qa-owner","",new org.apache.pdfbox.pdmodel.encryption.AccessPermission());d.protect(policy);d.save(a[2]);}return;
   }
@@ -32,8 +47,10 @@ public class NativeWidgetFixture {
    PDAcroForm form=new PDAcroForm(d);d.getDocumentCatalog().setAcroForm(form);PDResources resources=new PDResources();resources.put(name("F1"),font);form.setDefaultResources(resources);form.setDefaultAppearance("/F1 12 Tf 0 g");
    PDTextField text=new PDTextField(form);text.setPartialName("name");text.setAlternateFieldName("Full name");var w1=widget(text,p,700);var w2=widget(text,q,700);text.setWidgets(List.of(w1,w2));form.getFields().add(text);text.setValue("Original café");
    PDCheckBox check=new PDCheckBox(form);check.setPartialName("consent");check.setAlternateFieldName("Consent");var wc=widget(check,p,640);check.setWidgets(List.of(wc));states(d,font,wc,"Yes");form.getFields().add(check);check.unCheck();
-   PDRadioButton radio=new PDRadioButton(form);radio.setPartialName("contact");radio.setAlternateFieldName("Preferred contact method");var email=widget(radio,p,580);var phone=widget(radio,p,520);radio.setWidgets(List.of(email,phone));states(d,font,email,"Email");states(d,font,phone,"Phone");form.getFields().add(radio);radio.setValue("Email");
-   PDComboBox combo=new PDComboBox(form);combo.setPartialName("state");combo.setAlternateFieldName("State");var ws=widget(combo,p,460);combo.setWidgets(List.of(ws));combo.setOptions(List.of("CA","NY"));form.getFields().add(combo);combo.setValue("CA");
+   boolean choiceMode=a.length>3&&a[3].equals("choice-semantics");
+   PDRadioButton radio=new PDRadioButton(form);radio.setPartialName("contact");radio.setAlternateFieldName("Preferred contact method");var email=widget(radio,p,580);var phone=widget(radio,p,520);radio.setWidgets(List.of(email,phone));states(d,font,email,choiceMode?"0":"Email");states(d,font,phone,choiceMode?"1":"Phone");form.getFields().add(radio);if(choiceMode){radio.setExportValues(List.of("notify.email","notify.phone"));radio.setValue(0);}else radio.setValue("Email");
+   PDComboBox combo=new PDComboBox(form);combo.setPartialName("state");combo.setAlternateFieldName("State");var ws=widget(combo,p,460);combo.setWidgets(List.of(ws));if(choiceMode)combo.setOptions(List.of("CA","NY"),List.of("California","New York"));else combo.setOptions(List.of("CA","NY"));form.getFields().add(combo);combo.setValue("CA");
+   if(choiceMode){try(var c=new PDPageContentStream(d,q,PDPageContentStream.AppendMode.APPEND,true)){label(c,font,500,"Topics:");}PDListBox topics=new PDListBox(form);topics.setPartialName("topics");topics.setAlternateFieldName("Topics");topics.setMultiSelect(true);var wt=widget(topics,q,500);wt.setRectangle(new PDRectangle(175,410,140,100));topics.setWidgets(List.of(wt));topics.setOptions(List.of("SCI","ART","TECH"),List.of("Science","Arts","Technology"));form.getFields().add(topics);topics.setValue(List.of("SCI","TECH"));}
    PDPushButton button=new PDPushButton(form);button.setPartialName("reset");button.setAlternateFieldName("Reset form");var wb=widget(button,p,400);button.setWidgets(List.of(wb));var ap=new PDAppearanceDictionary();ap.setNormalAppearance(appearance(d,font,"Reset",false));wb.setAppearance(ap);COSDictionary action=new COSDictionary();action.setName(COSName.S,"ResetForm");COSArray targets=new COSArray();targets.add(new COSString("name"));action.setItem(COSName.FIELDS,targets);wb.getCOSObject().setItem(COSName.A,action);form.getFields().add(button);
    PDTextField hidden=new PDTextField(form);hidden.setPartialName("hidden");hidden.setAlternateFieldName("Internal identifier");var wh=widget(hidden,q,600);wh.setHidden(true);hidden.setWidgets(List.of(wh));form.getFields().add(hidden);hidden.setValue("Keep unchanged");
    COSDictionary aa=new COSDictionary(),validation=new COSDictionary();validation.setName(COSName.S,"JavaScript");validation.setString(name("JS"),"event.rc = true;");aa.setItem(name("V"),validation);text.getCOSObject().setItem(COSName.AA,aa);

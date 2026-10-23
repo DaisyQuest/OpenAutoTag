@@ -577,8 +577,12 @@
       "improvement": "Radio group and choice semantics",
       "requirement": "Preserve group identity while exposing distinct choice labels and export states.",
       "acceptance": "Radio groups expose reviewed names/choices and still select, save and reopen correctly.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/accessibility-50-batch31-20261023.md",
+        "docs/evidence/accessibility-50-batch31-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A49",

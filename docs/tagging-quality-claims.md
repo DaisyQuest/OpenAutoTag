@@ -1,6 +1,8 @@
 # Tagging quality: claims, evidence and limits
 
-Updated 2026-10-23 for [reviewed accessible field names](accessibility-50-batch30-20261023.md), following native widget ownership. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
+Updated 2026-10-23 for [reviewed radio and choice semantics](accessibility-50-batch31-20261023.md), following reviewed names and native widget ownership. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
+
+Reviewed choices preserve native group names, export/display options and selected values while binding complete visible labels to exact widgets. Independent saved checks and twelve selection/save/reopen cases support this bounded claim. TEST-FORM retains eight unresolved placements. This does not establish observed screen-reader or keyboard usability. See [A48 evidence and limits](accessibility-50-batch31-20261023.md).
 
 ## Supported description
 

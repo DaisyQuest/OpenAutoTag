@@ -1,0 +1,13 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.local/contracts/form-choice-review.schema.json",
+ "title":"Accepted native radio and choice label associations","type":"object","additionalProperties":false,
+ "required":["schemaVersion","sourceHash","intentHash","decision","reviewer","evidence","groups"],
+ "properties":{
+  "schemaVersion":{"const":"1.0.0"},"sourceHash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"intentHash":{"type":"string","pattern":"^[a-f0-9]{64}$"},"decision":{"const":"accepted"},"reviewer":{"type":"string","minLength":1,"maxLength":256},"evidence":{"type":"string","minLength":1,"maxLength":4096},
+  "groups":{"type":"array","minItems":1,"maxItems":1024,"items":{"type":"object","additionalProperties":false,"required":["fieldRef","kind","groupName","widgets"],"properties":{
+   "fieldRef":{"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"},"kind":{"enum":["radio","choice"]},"groupName":{"type":"string","minLength":1,"maxLength":4096},
+   "widgets":{"type":"array","minItems":1,"maxItems":1024,"items":{"type":"object","additionalProperties":false,"required":["widgetId","label","labelNodeIds"],"properties":{"widgetId":{"type":"string","minLength":1},"label":{"type":"string","minLength":1,"maxLength":4096},"labelNodeIds":{"type":"array","minItems":1,"maxItems":100,"uniqueItems":true,"items":{"type":"string","minLength":1}}}}},
+   "options":{"type":"array","maxItems":4096,"items":{"type":"object","additionalProperties":false,"required":["exportValue","displayValue"],"properties":{"exportValue":{"type":"string","maxLength":4096},"displayValue":{"type":"string","maxLength":4096}}}}
+  },"oneOf":[{"properties":{"kind":{"const":"radio"},"options":false}},{"properties":{"kind":{"const":"choice"}},"required":["options"]}]}}
+ }
+}

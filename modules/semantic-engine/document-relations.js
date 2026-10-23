@@ -1,8 +1,9 @@
 import { refineContinuations, contextOrderRelations } from "./semantic-quality.js";
 import { numberedSectionLevel } from "./numbered-headings.js";
 import { contextualFormLabel, compoundDateContexts } from "./form-context.js";
+import { radioChoiceLabel } from './radio-labels.js';
 const labelKey = (value) => String(value || "").normalize("NFKC").replace(/^\s*[☐☑☒]\s*/, "")
-  .replace(/\s*\(\s*explain\b[^)]*\)\s*[.:]?\s*$/i, "").replace(/[\s_.:]+$/, "").replace(/\)$/, "").replace(/\s+/g, " ").trim().toLowerCase();
+  .replace(/\s*\(\s*explain\b[^)]*\)\s*[.:]?\s*$/i, "").replace(/[\s_.:]+$/, "").replace(/\s+#$/, " number").replace(/\)$/, "").replace(/\s+/g, " ").trim().toLowerCase();
 // Conservative, evidence-carrying relationships; uncertain associations stay reviewable.
 export function enrichDocumentRelations(nodes, pages) {
   const relations = [], reviewTasks = [], fields = new Map();
@@ -27,22 +28,24 @@ export function enrichDocumentRelations(nodes, pages) {
     const dateContexts = compoundDateContexts(pageNodes, page.formFields || []);
     for (const widget of page.formFields || []) {
       const id = widget.fieldId || widget.fieldName || widget.id;
-      if (!fields.has(id)) fields.set(id, { id, fieldType: widget.fieldType, widgets: [], labels: [] });
-      const field = fields.get(id);
+      const identity=widget.fieldRef||id;
+      if (!fields.has(identity)) fields.set(identity, { id, fieldType: widget.fieldType, ...(widget.fieldRef?{fieldRef:widget.fieldRef}:{}), widgets: [], labels: [] });
+      const field = fields.get(identity);
       field.widgets.push({ ...widget, pageNumber: page.pageNumber });
       const candidates = nodes.filter((n) => n.pageNumber === page.pageNumber && n.formFieldIds?.includes(widget.id) && n.role !== "Artifact" && !n.tableId);
       const tooltip = labelKey(widget.tooltip);
       const caption = widget.pushButton && widget.authoredCaptionSource === "widget-MK-CA" ? labelKey(widget.authoredCaption) : "";
-      const authoredName = tooltip || caption;
+      const authoredName = widget.radioButton ? '' : tooltip || caption;
       const nameSource = tooltip ? "authored-tooltip" : caption ? "authored-button-caption" : "unresolved";
       const pool = authoredName && Array.isArray(widget.bbox) ? nodes.filter((n) => n.pageNumber === page.pageNumber && n.role !== "Artifact" && !n.tableId &&
         n.bbox[1] + n.bbox[3] >= widget.bbox[1] - 48 && n.bbox[1] <= widget.bbox[1] + widget.bbox[3] + 12 &&
         Math.max(widget.bbox[0] - n.bbox[0] - n.bbox[2], n.bbox[0] - widget.bbox[0] - widget.bbox[2], 0) <= Math.max(48, (n.fontSize || 12) * 4)) : candidates;
       const exact = authoredName ? pool.filter((n) => labelKey(n.text) === authoredName) : [];
-      let chosen = exact.length === 1 ? [exact[0]] : !authoredName && candidates.length === 1 ? [candidates[0]] : null;
+      const radioLabel=widget.radioButton?radioChoiceLabel({...widget,pageNumber:page.pageNumber},pageNodes):null;
+      let chosen = widget.radioButton ? radioLabel?.labels : exact.length === 1 ? [exact[0]] : !authoredName && candidates.length === 1 ? [candidates[0]] : null;
       // A short colon-terminated label directly above one widget is an explicit prompt.
       // Do not borrow a section heading or a prompt shared by several widgets.
-      if (!chosen && !authoredName && widget.bbox && candidates.length === 0) {
+      if (!chosen && !widget.radioButton && !authoredName && widget.bbox && candidates.length === 0) {
         const above = nodes.filter(n => n.pageNumber === page.pageNumber && n.role !== "Artifact" && !n.tableId &&
           n.text.trim().length <= 40 && /:\s*$/.test(n.text) && Math.abs(n.bbox[0] - widget.bbox[0]) <= 3 &&
           n.bbox[1] + n.bbox[3] <= widget.bbox[1] && widget.bbox[1] - n.bbox[1] - n.bbox[3] <= 18 &&
@@ -67,6 +70,12 @@ export function enrichDocumentRelations(nodes, pages) {
       const contextual = !chosen && !dateContext ? contextualFormLabel(widget, pageNodes, page.formFields || []) : null;
       if (contextual) chosen = contextual.labels;
       const saved = field.widgets.at(-1);
+      if(widget.choiceMetadataError)reviewTasks.push({code:'FORM_CHOICE_METADATA_REVIEW',pageNumber:page.pageNumber,widgetId:widget.id});
+      if(widget.choiceControl){
+        saved.choiceLabelStatus='requires-review';
+        if(radioLabel){saved.choiceLabel=radioLabel.label;saved.labelAssociation=radioLabel.association;}
+        reviewTasks.push({code:widget.choiceControl.stateIssues.length?'FORM_CHOICE_STATE_REVIEW':'FORM_CHOICE_LABEL_REVIEW',pageNumber:page.pageNumber,widgetId:widget.id});
+      }
       if (widget.pushButton && widget.appearanceText?.trim() && widget.appearanceTextSource === "normal-widget-appearance") {
         saved.labelStatus = "associated-appearance";
         saved.accessibleNameSource = authoredName ? nameSource : "widget-appearance-proposal";
@@ -79,7 +88,7 @@ export function enrichDocumentRelations(nodes, pages) {
       } else if (chosen) {
         field.widgets.at(-1).labelStatus = "associated";
         field.widgets.at(-1).labelNodeIds = chosen.map((n) => n.id);
-        field.widgets.at(-1).accessibleNameSource = authoredName ? nameSource : "unique-associated-label";
+        field.widgets.at(-1).accessibleNameSource = widget.radioButton&&tooltip ? nameSource : authoredName ? nameSource : "unique-associated-label";
         if (contextual) saved.labelAssociation = contextual.association;
         for (const label of chosen) {
           // A section heading retains its section role even when it also labels a field.

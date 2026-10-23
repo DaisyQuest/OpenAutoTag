@@ -30,6 +30,29 @@ test('legacy source-derived fallback Forms are verified without certifying place
  assert.equal(inspectNativeWidgets({...d,add(){}}).verified,true);
 });
 test('older reports do not gain new widget qualification',()=>{assert.deepEqual(inspectNativeWidgets({intendedNodes:[],ownership:{},add(){}}),{valid:true,verified:false});});
+const reviewedChoice=()=>{
+ const d=fixture(),choice={fieldRef:'9 0 R',kind:'radio',groupName:'Contact',flags:32768,widgetCount:1,widgetIndex:0,onState:'email',appearanceState:'email',value:'email',exportValue:'notify.email',exportSource:'Opt',selected:true,stateIssues:[]};
+ d.source.sourceHash='d'.repeat(64);d.source.widgets['10 0 R'].choiceControl=structuredClone(choice);d.inspection.widgets['10 0 R'].choiceControl=structuredClone(choice);
+ Object.assign(d.intendedNodes[0].n.nativeWidget,{choiceControl:choice,choiceLabel:'Email',choiceLabelStatus:'accepted'});
+ d.choiceReview={sourceHash:d.source.sourceHash,fieldRefs:['9 0 R']};return d;
+};
+test('reviewed choice metadata is independently bound to source and saved objects',()=>{
+ const d=reviewedChoice(),codes=[];assert.equal(inspectNativeWidgets({...d,add(code){codes.push(code);}}).verified,true);
+ for(const code of ['NATIVE_CHOICE_REVIEW_SOURCE','NATIVE_CHOICE_REVIEW_COVERAGE','NATIVE_CHOICE_SOURCE','NATIVE_CHOICE_SAVED','NATIVE_CHOICE_STATE'])assert.ok(codes.includes(code));
+});
+for(const [mutation,expectedCode]of [['missing-proof','NATIVE_CHOICE_REVIEW_SOURCE'],['stale-source','NATIVE_CHOICE_REVIEW_SOURCE'],['omitted-group','NATIVE_CHOICE_REVIEW_GROUPS'],['partial-group','NATIVE_CHOICE_REVIEW_COVERAGE'],['blank-label','NATIVE_CHOICE_REVIEW_COVERAGE'],['unresolved-placement','NATIVE_CHOICE_REVIEW_COVERAGE'],['changed-export','NATIVE_CHOICE_SAVED'],['missing-source-metadata','NATIVE_CHOICE_SOURCE'],['invalid-state','NATIVE_CHOICE_STATE']])test(`choice qualification rejects ${mutation}`,()=>{
+ const d=reviewedChoice(),w=d.intendedNodes[0].n.nativeWidget;
+ if(mutation==='missing-proof')delete d.choiceReview;
+ if(mutation==='stale-source')d.choiceReview.sourceHash='e'.repeat(64);
+ if(mutation==='omitted-group')d.choiceReview.fieldRefs=[];
+ if(mutation==='partial-group')d.source.widgets['11 0 R']={...structuredClone(d.source.widgets['10 0 R']),annotationIndex:3};
+ if(mutation==='blank-label')w.choiceLabel=' ';
+ if(mutation==='unresolved-placement')w.placement='unresolved';
+ if(mutation==='changed-export')d.inspection.widgets['10 0 R'].choiceControl.exportValue='other';
+ if(mutation==='missing-source-metadata')delete d.source.widgets['10 0 R'].choiceControl;
+ if(mutation==='invalid-state')for(const c of [w.choiceControl,d.source.widgets['10 0 R'].choiceControl,d.inspection.widgets['10 0 R'].choiceControl])c.stateIssues=['VALUE_APPEARANCE_MISMATCH'];
+ const failed=[];assert.equal(inspectNativeWidgets({...d,add(code,id,a,b){if(JSON.stringify(a)!==JSON.stringify(b))failed.push(code);}}).verified,false);assert.ok(failed.includes(expectedCode),failed.join(','));
+});
 for(const mutation of ['missing-saved','missing-state','missing-owner','missing-report','unbound-fallback'])test(`incomplete widget evidence rejects ${mutation}`,()=>{
  const d=fixture();
  if(mutation==='missing-saved')d.inspection.widgets={};

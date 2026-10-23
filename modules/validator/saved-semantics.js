@@ -62,7 +62,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
     };
     walk(tagging.root, null, 0);
     for (const { n, id } of nodes) if (n.tableGridReview) add("TABLE_GRID_REVIEW", id, null, n.tableGridReview);
-    const ownership = inspectSourceOwnership({ inspection, source: sourceInspection, ownership: sourceOwnership, intendedNodes: nodes, add });
+    const ownership = inspectSourceOwnership({ inspection, source: sourceInspection, ownership: sourceOwnership, intendedNodes: nodes, choiceReview:tagging.source?.formChoiceReview, add });
     if (sourceOwnership) ownershipStatus = ownership.sourceVerified ? "verified" : "rejected";
     const replacements = authoredReplacementIndex(sourceInspection, inspection, ownership.sourceVerified, add, expectedIds);
     for(const review of tagging.source?.captionAssociation?.reviews||[])add('CAPTION_RELATION_REVIEW',review.captionId,null,review.code);
