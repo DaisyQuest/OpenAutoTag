@@ -8,6 +8,7 @@
     "schemaVersion": { "const": "1.0.0" },
     "scope": { "const": "preserved-objects-v1" },
     "sourceHash": { "$ref": "#/$defs/hash" },
+    "navigation": { "$ref": "#/$defs/navigation" },
     "textRuns": {
       "type": "array", "maxItems": 100000, "items": {
         "type": "object", "required": ["pageNumber", "streamOrigin", "operatorIndex", "glyphStart", "glyphEnd", "owners", "artifact", "fontName", "glyphs", "positions"],
@@ -153,6 +154,8 @@
     "limitations": { "type": "array", "items": { "type": "string" } }
   },
   "$defs": {
+    "navigation": {"type":"object","required":["pageLabels","outlines","namedDestinationsHash","issues"],"properties":{"pageLabels":{"type":"object","required":["present","treeHash","ranges","labels"],"properties":{"present":{"type":"boolean"},"treeHash":{"$ref":"#/$defs/hash"},"ranges":{"type":"array","maxItems":100000,"items":{"type":"object","required":["index","style","prefix","start","propertiesHash"],"properties":{"index":{"type":"integer","minimum":0},"style":{"enum":["","D","R","r","A","a"]},"prefix":{"type":"string"},"start":{"type":"integer","minimum":1},"propertiesHash":{"$ref":"#/$defs/hash"}},"additionalProperties":false}},"labels":{"type":"array","maxItems":100000,"items":{"type":"string"}}},"additionalProperties":false},"outlines":{"type":"object","required":["present","count","propertiesHash","items","graphHash"],"properties":{"present":{"type":"boolean"},"count":{"type":"integer"},"propertiesHash":{"$ref":"#/$defs/hash"},"items":{"type":"array","maxItems":100000,"items":{"$ref":"#/$defs/outlineItem"}},"graphHash":{"$ref":"#/$defs/hash"}},"additionalProperties":false},"namedDestinationsHash":{"$ref":"#/$defs/hash"},"issues":{"type":"array","maxItems":100000,"items":{"type":"string"}}},"additionalProperties":false},
+    "outlineItem": {"type":"object","required":["title","count","propertiesHash","destination","children"],"properties":{"title":{"type":"string"},"count":{"type":"integer"},"propertiesHash":{"$ref":"#/$defs/hash"},"destination":{"oneOf":[{"type":"object","required":["kind"],"properties":{"kind":{"const":"none"}},"additionalProperties":false},{"type":"object","required":["kind","name","pageNumber","fit","values"],"properties":{"kind":{"const":"local"},"name":{"type":"string"},"pageNumber":{"type":"integer","minimum":1},"fit":{"enum":["Fit","FitB","FitH","FitV","FitBH","FitBV","XYZ","FitR"]},"values":{"type":"array","maxItems":100000,"items":{"type":["number","null"]}}},"additionalProperties":false}]},"children":{"type":"array","maxItems":100000,"items":{"$ref":"#/$defs/outlineItem"}}},"additionalProperties":false},
     "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "page": { "type": "object", "required": ["geometry", "contentHash", "resourcesHash", "annotationsHash"], "properties": {
       "geometry": { "type": "array", "items": { "type": "number" }, "minItems": 10, "maxItems": 10 },

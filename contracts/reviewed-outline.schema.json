@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/reviewed-outline.schema.json",
+  "title": "Accepted outline bound to an exact source PDF",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "sourceHash",
+    "decision",
+    "reviewer",
+    "evidence",
+    "bookmarks"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "sourceHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "decision": {
+      "const": "accepted"
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "bookmarks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/bookmark"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "bookmark": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "pageNumber",
+        "open",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "pageNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "open": {
+          "type": "boolean"
+        },
+        "children": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/bookmark"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

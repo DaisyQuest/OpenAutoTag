@@ -169,6 +169,7 @@ function collectNativeJavaSources() {
   const sources = ["NativeLinkOwnership.java", "EditableFontProof.java", "QualifiedFontRepairs.java", "ToUnicodeMap.java", "QualifiedLinkRepairCli.java", "QualifiedSemanticRepairCli.java", "QualifiedSemanticRepairs.java", "SavedObjectVerifier.java", "StructureIdentifiers.java", "AuthoredText.java"].map((file) => path.join(nativeJavaDir, file));
   sources.push(path.join(nativeJavaDir, "OcrTextLayer.java"));
   sources.push(path.join(nativeJavaDir, "NativeLinkGeometry.java"));
+  sources.push(path.join(nativeJavaDir, "ReviewedOutlineCli.java"));
   if (existsSync(nativeParserSource)) {
     sources.push(nativeParserSource);
   }

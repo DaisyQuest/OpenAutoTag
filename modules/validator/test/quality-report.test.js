@@ -10,6 +10,7 @@ import { evaluatePreservation } from "../quality-cli.js";
 
 const hash = "a".repeat(64), other = "b".repeat(64);
 const snapshot = () => ({ schemaVersion: "1.0.0", scope: "preserved-objects-v1", sourceHash: hash,
+  navigation:{pageLabels:{present:false,treeHash:hash,ranges:[],labels:['1']},outlines:{present:false,count:0,propertiesHash:hash,graphHash:hash,items:[]},namedDestinationsHash:hash,issues:[]},
   pages: [{ geometry: [0, 0, 612, 792, 0, 0, 612, 792, 0, 1], contentHash: hash, resourcesHash: hash, annotationsHash: hash }],
   fields: { field: hash }, widgets: { widget: { digest: hash, page: 1, owners: [{ form: "form", listItem: "item", inBody: false }] } },
   headings: [{ id: "heading", role: "H2", contentRefs: ["page:1:mcid:0"] }], issues: [], limitations: [] });
@@ -45,6 +46,22 @@ test("successful bounded checks never certify overall accessibility", () => {
   assert.equal(report.disposition, "review_required");
   assert.ok(report.checks.every((c) => c.status === "pass"));
   assert.deepEqual(report.findings, []);
+});
+
+test("missing navigation evidence fails closed and changed labels/destinations are rejected",()=>{
+  const source=snapshot(),candidate=snapshot();delete candidate.navigation;
+  assert.equal(evaluate({source,candidate}).disposition,'error');assert.ok(codes(evaluate({source,candidate})).includes('NAVIGATION_NOT_INSPECTED'));
+  for(const [change,code] of [[n=>n.pageLabels.labels[0]='i','PAGE_LABELS_CHANGED'],[n=>n.namedDestinationsHash=other,'NAMED_DESTINATIONS_CHANGED'],[n=>n.outlines.graphHash=other,'OUTLINE_CHANGED']]){
+    const changed=snapshot();change(changed.navigation);assert.ok(codes(evaluate({source,candidate:changed})).includes(code));
+  }
+});
+
+test("only matching saved outline replay proof permits outline changes",()=>{
+  const source=snapshot(),candidate=snapshot();candidate.navigation.outlines.graphHash=other;
+  const outlineReport={schemaVersion:'1.0.0',sourceHash:hash,candidateHash:hash,reviewHash:hash,addedBookmarks:1,verification:{status:'pass',scope:'catalog-and-info',reason:'Explicit unit fixture'}};
+  assert.equal(evaluate({source,candidate,outlineReport}).disposition,'review_required');
+  for(const patch of [{sourceHash:other},{candidateHash:other},{reviewHash:''},{addedBookmarks:0},{verification:{status:'fail'}}])assert.equal(evaluate({source,candidate,outlineReport:{...outlineReport,...patch}}).disposition,'rejected');
+  candidate.navigation.pageLabels.labels[0]='Wrong';assert.ok(codes(evaluate({source,candidate,outlineReport})).includes('PAGE_LABELS_CHANGED'));
 });
 
 test("repairs may consolidate headings and place the same form in its existing list body", () => {

@@ -146,6 +146,7 @@ public final class PreservationInspector {
         limitations.add("Heading coverage resolves RoleMap to H1-H6; generic H hierarchy still requires review.");
         result.put("pages", pages); result.put("fields", fields); result.put("widgets", widgets);
         result.put("links", links);
+        result.put("navigation",NavigationInspector.inspect(doc));
         result.put("headings", headings); result.put("structure", structure); result.put("contentOrder", contentOrder);
         result.put("markedContent", savedContent.json());
         result.put("textRuns", savedContent.textRuns()); result.put("replacementScopes", savedContent.replacements());
@@ -392,6 +393,24 @@ public final class PreservationInspector {
     }
     private static String fingerprint(COSBase value, Set<String> skip) throws Exception {
         return hash(canonical(value, skip, Collections.newSetFromMap(new IdentityHashMap<>()), new int[]{0}, 0));
+    }
+    static String navigationFingerprint(COSBase value,Set<String> skip,Map<COSDictionary,Integer> pages,int[] work)throws Exception {
+        return hash(navigationCanonical(value,skip,pages,new IdentityHashMap<>(),work,0));
+    }
+    private static String navigationCanonical(COSBase raw,Set<String> skip,Map<COSDictionary,Integer> pages,Map<COSBase,Integer> seen,int[] work,int depth)throws Exception {
+        if(depth>MAX_DEPTH||++work[0]>1000000)throw new IOException("Navigation fingerprint limit exceeded");
+        COSBase v=resolve(raw);
+        if(v==null||v instanceof COSNull)return "null";
+        if(v instanceof COSString s){if(s.getBytes().length>1024*1024)throw new IOException("Navigation string limit exceeded");return "string:"+HexFormat.of().formatHex(s.getBytes());}
+        if(!(v instanceof COSArray)&&!(v instanceof COSDictionary))return v.toString();
+        if(v instanceof COSDictionary&&pages.containsKey(v))return "page:"+pages.get(v);
+        if(seen.containsKey(v))return "shared:"+seen.get(v);
+        seen.put(v,seen.size());StringBuilder out=new StringBuilder();
+        if(v instanceof COSArray a){out.append('[');for(COSBase c:a){String item=navigationCanonical(c,Set.of(),pages,seen,work,depth+1);out.append(item.length()).append(':').append(item);if(out.length()>16*1024*1024)throw new IOException("Navigation fingerprint byte limit exceeded");}return out.append(']').toString();}
+        COSDictionary d=(COSDictionary)v;out.append('{');List<COSName> keys=new ArrayList<>(d.keySet());keys.sort(Comparator.comparing(COSName::getName));
+        for(COSName key:keys){if(skip.contains(key.getName())||(v instanceof COSStream&&Set.of(COSName.LENGTH,COSName.FILTER,COSName.DECODE_PARMS).contains(key)))continue;String item=navigationCanonical(d.getItem(key),Set.of(),pages,seen,work,depth+1);out.append(key.getName().length()).append(':').append(key.getName()).append(item.length()).append(':').append(item);if(out.length()>16*1024*1024)throw new IOException("Navigation fingerprint byte limit exceeded");}
+        if(v instanceof COSStream s)try(InputStream in=s.createInputStream()){out.append("stream:").append(streamHash(in,MAX_STREAM_BYTES));}
+        return out.append('}').toString();
     }
     private static String canonical(COSBase raw, Set<String> skip, Set<COSBase> active, int[] count, int depth) throws Exception {
         return canonical(raw,skip,active,count,depth,null);

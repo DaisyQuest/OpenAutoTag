@@ -6,6 +6,7 @@ const key = "page:1:stream:page:mcid:0";
 function fixture(type = "P") {
   const node = { objectRef: "1 0 R", parentRef: "root", identifier: "oat:a", role: type, children: [], contentRefs: [key], headers: [], actualText: "", alt: "" };
   const inspection = { sourceHash: "a".repeat(64), issues: [], structure: [node], contentOrder: [key],
+    navigation:{pageLabels:{present:false,treeHash:'a'.repeat(64),ranges:[],labels:['1']},outlines:{present:false,count:0,propertiesHash:'a'.repeat(64),graphHash:'a'.repeat(64),items:[]},namedDestinationsHash:'a'.repeat(64),issues:[]},
     textRuns: [{ pageNumber: 1, streamOrigin: "page", operatorIndex: 0, glyphStart: 0, glyphEnd: 4, owners: [key], artifact: false, fontName: "Fixture", glyphs: [..."Text"].map(c => [c.charCodeAt(0), c]) }],
     markedContent: [{ contentRef: key, sequenceCount: 1, glyphCount: 4, meaningfulGlyphCount: 4, unknownGlyphCount: 0, graphicsCount: 0 }] };
   const tagging = { root: { id: "a", type, label: "Text", sourceNodeIds: ["source"], children: [] } };
@@ -46,4 +47,11 @@ test("preserved reference comparison checks saved sequence evidence in both inpu
   assert.ok(failures({ inspection, reference }).some(c => c.code === "SAVED_CONTENT_EVIDENCE"));
   delete reference.markedContent;
   assert.ok(failures({ inspection, reference }).some(c => c.code === "REFERENCE_CONTENT_INSPECTED"));
+});
+
+test("saved semantic comparison requires unchanged, well-formed navigation evidence",()=>{
+  const {inspection}=fixture(),reference=structuredClone(inspection);
+  inspection.navigation.pageLabels.labels[0]='i';assert.ok(failures({inspection,reference}).some(c=>c.code==='NAVIGATION_PRESERVED'));
+  inspection.navigation=structuredClone(reference.navigation);inspection.navigation.issues=['OUTLINE_PARENT:1'];assert.ok(failures({inspection,reference}).some(c=>c.code==='NAVIGATION_WELL_FORMED'));
+  delete inspection.navigation;assert.ok(failures({inspection,reference}).some(c=>c.code==='NAVIGATION_INSPECTED'));
 });

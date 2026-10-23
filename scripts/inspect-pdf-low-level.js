@@ -11,6 +11,7 @@ const buildDir = getRuntimeBuildDir("scripts-low-level-inspector", { repoRoot })
 const javaSourcePath = path.join(scriptDir, "java", "LowLevelPdfInspectorCli.java");
 const preservationSourcePath = path.join(scriptDir, "java", "PreservationInspector.java");
 const contentSourcePath = path.join(scriptDir, "java", "SavedContentInspector.java");
+const navigationSourcePath = path.join(scriptDir, "java", "NavigationInspector.java");
 const javaClassPath = path.join(buildDir, "LowLevelPdfInspectorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
@@ -42,9 +43,9 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, preservationStats, contentStats, classStats, helperStats, contentClass] = await Promise.all([
-      stat(javaSourcePath), stat(preservationSourcePath), stat(contentSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class")), stat(path.join(buildDir, "SavedContentInspector.class"))]);
-    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs, contentStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs, contentClass.mtimeMs);
+    const [sourceStats, preservationStats, contentStats, navigationStats, classStats, helperStats, contentClass, navigationClass] = await Promise.all([
+      stat(javaSourcePath), stat(preservationSourcePath), stat(contentSourcePath),stat(navigationSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class")), stat(path.join(buildDir, "SavedContentInspector.class")),stat(path.join(buildDir,"NavigationInspector.class"))]);
+    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs, contentStats.mtimeMs,navigationStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs, contentClass.mtimeMs,navigationClass.mtimeMs);
   } catch {
     return true;
   }
@@ -66,7 +67,7 @@ async function ensureJavaHelperCompiled() {
             pdfboxJarPath,
             "-d",
             buildDir,
-            javaSourcePath, preservationSourcePath, contentSourcePath
+            javaSourcePath, preservationSourcePath, contentSourcePath, navigationSourcePath
           ],
           {
             env: await buildJavaExecEnv({ bundledJavaHome })

@@ -5,6 +5,7 @@ import inspectionSchema from "../../contracts/pdf-preservation-inspection.schema
 import reportSchema from "../../contracts/quality-report.schema.json" with { type: "json" };
 import auditSchema from "../../contracts/repair-audit.schema.json" with { type: "json" };
 import fontRepairSchema from "../../contracts/font-repair-report.schema.json" with { type: "json" };
+import outlineReportSchema from "../../contracts/reviewed-outline-report.schema.json" with { type: "json" };
 import { buildReviewPlan } from "./review-plan.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -12,11 +13,12 @@ const validInspection = ajv.compile(inspectionSchema);
 const validReport = ajv.compile(reportSchema);
 const validFontRepair = ajv.addSchema(auditSchema).compile(fontRepairSchema);
 const validStructureRepair = ajv.getSchema(auditSchema.$id);
+const validOutlineReport = ajv.compile(outlineReportSchema);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const safeHash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value) ? value : null;
 
 /** This bounded gate detects regressions; it never certifies overall accessibility. */
-export function evaluatePreservation({ source, candidate, validation, semantic, fontRepair, structureRepair, identityPreserved = false, inspectionError } = {}) {
+export function evaluatePreservation({ source, candidate, validation, semantic, fontRepair, structureRepair, outlineReport, identityPreserved = false, inspectionError } = {}) {
   const report = { schemaVersion: "1.0.0", policy: "preservation-v1", disposition: "review_required",
     sourceHash: safeHash(source?.sourceHash), candidateHash: safeHash(candidate?.sourceHash),
     checks: [], findings: [], limitations: [
@@ -26,6 +28,8 @@ export function evaluatePreservation({ source, candidate, validation, semantic, 
   const finding = (code, description, location) => report.findings.push({ code, description, ...(location ? { location } : {}) });
   const check = (id, status) => report.checks.push({ id, status });
   let error = false, regression = false;
+  const qualifiedOutline=outlineReport&&validOutlineReport(outlineReport)&&outlineReport.sourceHash===report.sourceHash&&outlineReport.candidateHash===report.candidateHash;
+  if(outlineReport){check("qualifiedOutlineChanges",qualifiedOutline?"pass":"fail");if(!qualifiedOutline){regression=true;finding("OUTLINE_NOT_VERIFIED","Outline replay proof is malformed or does not match these exact PDFs.");}}
   const qualifiedFonts = fontRepair && validFontRepair(fontRepair) && fontRepair.verification.status === "pass" &&
     fontRepair.sourceHash === report.sourceHash && fontRepair.candidateHash === report.candidateHash;
   const qualifiedStructure = structureRepair && validStructureRepair(structureRepair) &&
@@ -58,6 +62,14 @@ export function evaluatePreservation({ source, candidate, validation, semantic, 
         const failed = report.findings.length !== before;
         check(id, failed ? "fail" : "pass"); regression ||= failed;
       };
+      if(!source.navigation||!candidate.navigation){error=true;check("navigation","unknown");finding("NAVIGATION_NOT_INSPECTED","Saved bookmark, destination and page-label evidence is missing.");}
+      else compare("navigation",()=>{
+        if(!same(source.navigation.pageLabels,candidate.navigation.pageLabels))finding("PAGE_LABELS_CHANGED","Logical page labels or their ranges changed.");
+        if(!same(source.navigation.namedDestinationsHash,candidate.navigation.namedDestinationsHash))finding("NAMED_DESTINATIONS_CHANGED","Named destination definitions changed.");
+        if(!qualifiedOutline&&!same(source.navigation.outlines,candidate.navigation.outlines))finding("OUTLINE_CHANGED","Bookmark hierarchy, titles, properties or destinations changed without a verified reviewed outline.");
+        if(!same(source.navigation.issues,candidate.navigation.issues))finding("NAVIGATION_REGRESSION","Observed navigation defects changed.");
+      });
+      if(candidate.navigation?.issues.length)finding("NAVIGATION_REQUIRES_REVIEW","Existing navigation relationships require review.");
       compare("pageContentAndResources", () => {
         if (source.pages.length !== candidate.pages.length) finding("PAGE_COUNT_CHANGED", "Page count changed.");
         const protectedPage = (p) => qualifiedFonts && p ? { geometry: p.geometry, contentHash: p.contentHash } : p;
@@ -148,7 +160,7 @@ async function main() {
   try {
     report = evaluatePreservation({ source: await read("--source"), candidate: await read("--candidate"), validation: await read("--validation"),
       semantic: await read("--semantic"),
-      fontRepair: await read("--font-repair"), structureRepair: await read("--structure-repair"),
+      fontRepair: await read("--font-repair"), structureRepair: await read("--structure-repair"), outlineReport: await read("--outline-proof"),
       identityPreserved: args.get("--identity-preserved") === "true", inspectionError: args.get("--inspection-error") });
   } catch (error) { report = evaluatePreservation({ inspectionError: error.message }); }
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);

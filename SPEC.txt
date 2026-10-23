@@ -1,6 +1,19 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Reviewed bookmarks and navigation preservation (A39-A40, 2026-10-23):
+The additive reviewed-outline API/CLI accepts explicit source-hash-bound outline
+decisions and appends Unicode hierarchical bookmarks with physical page targets.
+It preserves existing authored navigation and verifies the complete saved
+catalog/info graph against a fresh source replay before releasing a new output.
+Independent inspection inventories outline graph relationships, explicit/named
+destinations and logical page labels. Missing navigation evidence cannot pass;
+only verified reviewed additions may change outlines, never labels or named
+destinations. Invalid existing trees require review. Work and manifests are
+bounded; signed/encrypted inputs are refused. The main pipeline does not infer
+human acceptance. See docs/accessibility-50-batch23-20261023.md and the two
+reviewed-outline contracts. Existing CLI arguments retain their behavior.
+
 Native link grouping (A38, 2026-10-23):
 Complete consecutive Span siblings belonging to one native annotation may be
 grouped under one Link while retaining source ownership and each original ID.

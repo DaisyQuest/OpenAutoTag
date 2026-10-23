@@ -1,0 +1,512 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A39",
+    "A40"
+  ],
+  "status": "completed",
+  "baselineCommit": "91705caf25f88132024848f8e5a3b66e94e71476",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a39-baseline.log",
+      "sha256": "f05897ed1ba3aad336744859317df38db4767a8f26df2bac6408385cfc7dd013",
+      "passed": 760,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "path": "tmp/a39-verified.log",
+      "sha256": "fdf9266499a61e670e6cc4a15686950e93edc2918462ad1bc81cff6ae340487e",
+      "passed": 53,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 760,
+    "note": "Runs overlap. No coverage percentage or human-reader qualification is claimed."
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch23-20261023/navigation-verified/evidence.json",
+    "sha256": "2b34c6ad122c8bda60fd451c5ea477e400c6a064924487e8a515b749b0a8b50b",
+    "pages": 6,
+    "authoredBookmarks": 4,
+    "addedBookmarks": 6,
+    "source": {
+      "path": "output\\accessibility-50-batch23-20261023\\navigation-verified\\source.pdf",
+      "sha256": "4eed9cbd9dd5682c4794280763ff0f62350d1f6e7ab639294ff04bd085e111ac"
+    },
+    "candidate": {
+      "path": "output\\accessibility-50-batch23-20261023\\navigation-verified\\candidate.pdf",
+      "sha256": "687c4058384098f3454d38472c21d16c9c9bb8b1aa2ef48e7e7c7d69d81be4f8"
+    },
+    "review": {
+      "path": "output\\accessibility-50-batch23-20261023\\navigation-verified\\review.json",
+      "sha256": "d0b0029d4f71b558b0d878409465af8c49a20640393d610bb95d5e2ca9bb7633"
+    },
+    "savedNative": {
+      "path": "output/accessibility-50-batch23-20261023/navigation-verified/saved-native.json",
+      "sha256": "2c93df5dfb65676bdba57282fa3e73cda884ac26d2e47d18d0107724b5fd5806",
+      "passed": 120,
+      "failed": 0
+    },
+    "sourceRaw": {
+      "path": "output/accessibility-50-batch23-20261023/navigation-verified/source-validation.json",
+      "sha256": "2748319db651e027024fd8a1cd63bc6903bb53c7a183062e73ad6d5e4f9e0c05",
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 553,
+      "failedChecks": 0,
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 3,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      }
+    },
+    "candidateRaw": {
+      "path": "output/accessibility-50-batch23-20261023/navigation-verified/candidate-validation.json",
+      "sha256": "5d8e506c12ad974c85063893646f32a0dc70270f37e05f0e8903bb00f69ef620",
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 559,
+      "failedChecks": 0,
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 3,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "engine": {
+        "name": "veraPDF",
+        "version": "1.30.3",
+        "backend": "greenfield",
+        "executionError": null
+      }
+    },
+    "retainedFontFindings": [
+      {
+        "fontKey": "Helvetica",
+        "severity": "error",
+        "code": "FONT_STANDARD_14",
+        "message": "Font 'Helvetica' is an unembedded Standard 14 font; PDF/UA forbids relying on viewer-built-in fonts.",
+        "source": "font-audit"
+      },
+      {
+        "fontKey": "ZapfDingbats",
+        "severity": "error",
+        "code": "FONT_STANDARD_14",
+        "message": "Font 'ZapfDingbats' is an unembedded Standard 14 font; PDF/UA forbids relying on viewer-built-in fonts.",
+        "source": "font-audit"
+      },
+      {
+        "fontKey": "ZapfDingbats",
+        "severity": "error",
+        "code": "SYMBOLIC_WITHOUT_DIFFERENCES",
+        "message": "Symbolic font 'ZapfDingbats' lacks an /Encoding /Differences mapping; glyph codes are unreachable to ATs.",
+        "source": "font-audit"
+      }
+    ],
+    "corruptionsRejected": [
+      "title",
+      "destination",
+      "remote-destination",
+      "named-destination",
+      "parent",
+      "cycle",
+      "count",
+      "reviewed-title",
+      "label-prefix",
+      "label-start",
+      "label-style",
+      "label-remove",
+      "field",
+      "label-cycle",
+      "label-zero",
+      "label-limits",
+      "label-kid-order"
+    ],
+    "invalidReviewCasesRejected": 7,
+    "invalidSourceTreesRejected": 3,
+    "additionalPositiveOutlineCases": [
+      "fresh",
+      "empty-outline"
+    ],
+    "fieldEdit": "José café 987",
+    "fillSaveReopenVerified": true,
+    "validationStubBoundary": "Focused preservation tests isolate navigation with validation-stub.json. Separately saved full validation retains three pre-existing synthetic font findings; this fixture is not fully qualified."
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch23-20261023/independent-verification.json",
+    "sha256": "adad575ec45e99b08928dc13b53e30e8346ba784e0705f8692651b0ee67da17c",
+    "popplerDpi": 120,
+    "pagePairs": 40,
+    "allPixelIdentical": true,
+    "originalStreamsPreserved": 268,
+    "cases": [
+      {
+        "id": "navigation",
+        "sourcePath": "output\\accessibility-50-batch23-20261023\\navigation-verified\\source.pdf",
+        "sourceHash": "4eed9cbd9dd5682c4794280763ff0f62350d1f6e7ab639294ff04bd085e111ac",
+        "candidatePath": "output\\accessibility-50-batch23-20261023\\navigation-verified\\candidate.pdf",
+        "candidateHash": "687c4058384098f3454d38472c21d16c9c9bb8b1aa2ef48e7e7c7d69d81be4f8",
+        "originalStreamsPreserved": 15,
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "authoredBookmarksPreserved": true,
+        "reviewedBookmarkHierarchyVerified": true,
+        "pageLabels": [
+          "i",
+          "ii",
+          "Sec-1",
+          "Sec-2",
+          "AA",
+          "BB"
+        ],
+        "pagePairs": 12,
+        "pageLabelsVerifiedFromRawNumberTree": true
+      },
+      {
+        "id": "fresh",
+        "sourcePath": "output\\accessibility-50-batch23-20261023\\navigation-verified\\fresh.pdf",
+        "sourceHash": "f76262f9d1149b37e2979875ed353df1ead61933c6043b80e8e02159fd25fff5",
+        "candidatePath": "output\\accessibility-50-batch23-20261023\\navigation-verified\\fresh-candidate.pdf",
+        "candidateHash": "2a9c424dd76c4a74b4e27119129ecf8f42562802d35c35202450efc822253875",
+        "originalStreamsPreserved": 11,
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "authoredBookmarksPreserved": true,
+        "reviewedBookmarkHierarchyVerified": true,
+        "pageLabels": [
+          "i",
+          "ii",
+          "Sec-1",
+          "Sec-2",
+          "AA",
+          "BB"
+        ],
+        "pagePairs": 12,
+        "pageLabelsVerifiedFromRawNumberTree": true
+      },
+      {
+        "id": "empty-outline",
+        "sourcePath": "output\\accessibility-50-batch23-20261023\\navigation-verified\\empty-outline.pdf",
+        "sourceHash": "8ed4202e282b77627643c577fb0261cdf7f076cbc0add4ee56a571c6d94f4e39",
+        "candidatePath": "output\\accessibility-50-batch23-20261023\\navigation-verified\\empty-outline-candidate.pdf",
+        "candidateHash": "8d49977741b7211362c07ecedc4eb9dc8684ead246d2b05af1bf136ed6b08c88",
+        "originalStreamsPreserved": 11,
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "authoredBookmarksPreserved": true,
+        "reviewedBookmarkHierarchyVerified": true,
+        "pageLabels": [
+          "i",
+          "ii",
+          "Sec-1",
+          "Sec-2",
+          "AA",
+          "BB"
+        ],
+        "pagePairs": 12,
+        "pageLabelsVerifiedFromRawNumberTree": true
+      },
+      {
+        "id": "test-form",
+        "sourcePath": "output\\accessibility-50-batch20-20261023\\test-form\\candidate.pdf",
+        "sourceHash": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+        "candidatePath": "output\\accessibility-50-batch23-20261023\\test-form\\candidate.pdf",
+        "candidateHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+        "originalStreamsPreserved": 212,
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "authoredBookmarksPreserved": true,
+        "reviewedBookmarkHierarchyVerified": true,
+        "pageLabels": [
+          "1",
+          "2"
+        ],
+        "pagePairs": 2,
+        "pageLabelsVerifiedFromRawNumberTree": true
+      },
+      {
+        "id": "nasa-stereo",
+        "sourcePath": "output\\accessibility-50-batch13-20261023\\nasa-stereo\\06-candidate.pdf",
+        "sourceHash": "d32c2556524bb571448381be928e213cc99d8b5b3973f3f03a175118497f465b",
+        "candidatePath": "output\\accessibility-50-batch23-20261023\\nasa-stereo\\candidate.pdf",
+        "candidateHash": "11076d8cd1106e00d203fa28e35a2ce9d3dcba50740637cba167f8a304f47bf0",
+        "originalStreamsPreserved": 19,
+        "textBytesAndSpacingUnchanged": true,
+        "annotationPropertiesAndFieldValuesPreserved": true,
+        "widgetAppearanceBytesPreserved": true,
+        "pageGeometryPreserved": true,
+        "authoredBookmarksPreserved": true,
+        "reviewedBookmarkHierarchyVerified": true,
+        "pageLabels": [
+          "1",
+          "2"
+        ],
+        "pagePairs": 2,
+        "pageLabelsVerifiedFromRawNumberTree": true
+      }
+    ],
+    "labels": {
+      "path": "output/accessibility-50-batch23-20261023/independent-labels.json",
+      "sha256": "3511ac4bf4b86813fa594944addaa905cdf39efec0ec52ec2665f2fd8dd252cf"
+    },
+    "labelReaderNote": "pypdf page_labels warns and falls back between number-tree leaf limits. Independent raw number-tree decoding verifies inherited label ranges across those boundaries instead.",
+    "visuallyInspected": [
+      "navigation-filled-1-candidate.png",
+      "test-form-original-1-candidate.png",
+      "nasa-stereo-original-2-candidate.png"
+    ]
+  },
+  "real": {
+    "path": "output/accessibility-50-batch23-20261023/real-evidence.json",
+    "sha256": "7e9d8622b93f4da14b8a543369d8d0106e808ebe8b1466dcf9153f34eb786a5d",
+    "cases": [
+      {
+        "id": "test-form",
+        "sourcePath": "output/accessibility-50-batch20-20261023/test-form/candidate.pdf",
+        "expectedHash": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+        "title": "Supplemental Affirmation in Support of Order to Show Cause",
+        "provenance": "User-supplied TEST-FORM, previously tagged and verified in batch 20.",
+        "sourceHash": "42a8062d96bb75e1968ee186843ad068f95ff357de1de5530fb8d4c7e13c2173",
+        "candidatePath": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+        "candidateHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+        "reviewPath": "output/accessibility-50-batch23-20261023/test-form/review.json",
+        "proofPath": "output/accessibility-50-batch23-20261023/test-form/outline-proof.json",
+        "added": 2,
+        "pages": 2,
+        "widgets": 33,
+        "structureAndSourceContentIdentical": true,
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 9876,
+          "failedChecks": 0
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 0,
+          "warningCount": 0,
+          "blockingPreVeraPdf": false
+        },
+        "quality": {
+          "disposition": "review_required",
+          "checks": [
+            {
+              "id": "qualifiedOutlineChanges",
+              "status": "pass"
+            },
+            {
+              "id": "inspection",
+              "status": "pass"
+            },
+            {
+              "id": "objectIdentity",
+              "status": "pass"
+            },
+            {
+              "id": "navigation",
+              "status": "pass"
+            },
+            {
+              "id": "pageContentAndResources",
+              "status": "pass"
+            },
+            {
+              "id": "fields",
+              "status": "pass"
+            },
+            {
+              "id": "widgets",
+              "status": "pass"
+            },
+            {
+              "id": "headingContent",
+              "status": "pass"
+            },
+            {
+              "id": "links",
+              "status": "pass"
+            },
+            {
+              "id": "observedStructure",
+              "status": "pass"
+            },
+            {
+              "id": "requiredValidation",
+              "status": "pass"
+            }
+          ],
+          "findings": []
+        },
+        "humanOutlineReviewClaimed": false
+      },
+      {
+        "id": "nasa-stereo",
+        "sourcePath": "output/accessibility-50-batch13-20261023/nasa-stereo/06-candidate.pdf",
+        "expectedHash": "d32c2556524bb571448381be928e213cc99d8b5b3973f3f03a175118497f465b",
+        "title": "STEREO solar observatory",
+        "provenance": "Previously tagged official NASA STEREO lithograph. Existing OCR review remains pending.",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/litho.pdf",
+        "sourceHash": "d32c2556524bb571448381be928e213cc99d8b5b3973f3f03a175118497f465b",
+        "candidatePath": "output/accessibility-50-batch23-20261023/nasa-stereo/candidate.pdf",
+        "candidateHash": "11076d8cd1106e00d203fa28e35a2ce9d3dcba50740637cba167f8a304f47bf0",
+        "reviewPath": "output/accessibility-50-batch23-20261023/nasa-stereo/review.json",
+        "proofPath": "output/accessibility-50-batch23-20261023/nasa-stereo/outline-proof.json",
+        "added": 2,
+        "pages": 2,
+        "widgets": 0,
+        "structureAndSourceContentIdentical": true,
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 5462,
+          "failedChecks": 0
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 0,
+          "warningCount": 0,
+          "blockingPreVeraPdf": false
+        },
+        "quality": {
+          "disposition": "review_required",
+          "checks": [
+            {
+              "id": "qualifiedOutlineChanges",
+              "status": "pass"
+            },
+            {
+              "id": "inspection",
+              "status": "pass"
+            },
+            {
+              "id": "objectIdentity",
+              "status": "pass"
+            },
+            {
+              "id": "navigation",
+              "status": "pass"
+            },
+            {
+              "id": "pageContentAndResources",
+              "status": "pass"
+            },
+            {
+              "id": "fields",
+              "status": "pass"
+            },
+            {
+              "id": "widgets",
+              "status": "pass"
+            },
+            {
+              "id": "headingContent",
+              "status": "pass"
+            },
+            {
+              "id": "links",
+              "status": "pass"
+            },
+            {
+              "id": "observedStructure",
+              "status": "pass"
+            },
+            {
+              "id": "requiredValidation",
+              "status": "pass"
+            }
+          ],
+          "findings": []
+        },
+        "humanOutlineReviewClaimed": false
+      }
+    ],
+    "officialStereoSource": {
+      "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+      "sha256": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc"
+    },
+    "testForm": {
+      "fields": 32,
+      "widgets": 33
+    },
+    "humanOutlineReviewClaimed": false
+  },
+  "newlyExposedSourceDefect": {
+    "path": "output/accessibility-50-batch23-20261023/hinode-navigation.json",
+    "sha256": "4b900aee666573bc0d33577be2e17805e78fe276e8c56d1125ed6e422c773185",
+    "source": {
+      "path": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "sha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6"
+    },
+    "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+    "issues": [
+      "OUTLINE_PARENT:1",
+      "OUTLINE_PARENT:2",
+      "OUTLINE_PREVIOUS:2",
+      "OUTLINE_PARENT:3",
+      "OUTLINE_PREVIOUS:3",
+      "OUTLINE_PARENT:4",
+      "OUTLINE_PREVIOUS:4",
+      "OUTLINE_PARENT:5",
+      "OUTLINE_PREVIOUS:5",
+      "OUTLINE_LAST:6"
+    ],
+    "appendRefused": true,
+    "candidateCreated": false,
+    "priorGreenReportsPredateNavigationChecks": true
+  },
+  "controls": {
+    "booklet": {
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "rerun": false,
+      "retainedPriorRawFailures": 6,
+      "retainedPriorSavedFailures": 196,
+      "pendingOcrSegments": 158
+    },
+    "stereoPendingOcrSegments": 65
+  },
+  "primarySources": [
+    "https://opensource.adobe.com/dc-acrobat-sdk-docs/standards/pdfstandards/pdf/PDF32000_2008.pdf",
+    "https://pdf-issues.pdfa.org/32000-2-2020/clause12.html",
+    "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/interactive/documentnavigation/outline/PDOutlineNode.java"
+  ],
+  "limitations": [
+    "Accepted test inputs are synthetic; they do not claim authenticated human review.",
+    "New destinations use physical page numbers and Fit; existing richer actions are preserved.",
+    "Signed/encrypted PDFs and inconsistent existing outlines are refused.",
+    "Missing saved navigation evidence cannot pass; older cached snapshots need regeneration.",
+    "NIST table relationships, booklet semantic failures and OCR review remain open.",
+    "Full accessibility and every-viewer navigation/keyboard behavior remain unqualified."
+  ],
+  "reproduction": {
+    "focused": "node --test --test-concurrency=1 modules/pdf-writer/test/reviewed-outline.test.js",
+    "retainArtifacts": "Set NAVIGATION_EVIDENCE_DIR to a fresh directory.",
+    "scripts": [
+      {
+        "path": "tmp/a39-real.mjs",
+        "sha256": "356672a1df0508036a1588571d9927b793a867d5723ac97f37a21871c330f60f"
+      },
+      {
+        "path": "tmp/a39-independent.py",
+        "sha256": "66ef6fa9a9bc42e958c50736acd83a965ba7a7b31317af9a81d127a621ef3290"
+      },
+      {
+        "path": "tmp/a39-label-audit.py",
+        "sha256": "8ba4e6a2e14bab48059d4e06eedca95236f718d147e438cbf67da72620bfe14f"
+      }
+    ]
+  }
+}

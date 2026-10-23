@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/reviewed-outline-report.schema.json",
+  "title": "Saved reviewed-outline verification",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "sourceHash",
+    "candidateHash",
+    "reviewHash",
+    "addedBookmarks",
+    "verification"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "sourceHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "candidateHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "addedBookmarks": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "status",
+        "scope",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "const": "pass"
+        },
+        "scope": {
+          "const": "catalog-and-info"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

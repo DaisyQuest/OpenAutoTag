@@ -19,6 +19,14 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
     content.set(item.contentRef, item);
   }
   const byRef = new Map(inspection.structure.map(n => [n.objectRef, n]));
+  const original=reference||sourceInspection;
+  if(original){
+    add("NAVIGATION_INSPECTED","document",true,Boolean(original.navigation&&inspection.navigation));
+    if(original.navigation&&inspection.navigation){
+      add("NAVIGATION_PRESERVED","document",original.navigation,inspection.navigation);
+      add("NAVIGATION_WELL_FORMED","document",[],inspection.navigation.issues);
+    }
+  }
   const textIndex = savedTextIndex(inspection);
   if (Array.isArray(inspection.textRuns)) for (const run of inspection.textRuns) if (run.glyphs.length && run.owners.length > 1)
     add("EXCLUSIVE_PAINT_OWNER", `page:${run.pageNumber}:glyphs:${run.glyphStart}-${run.glyphEnd}`, 1, run.owners.length);

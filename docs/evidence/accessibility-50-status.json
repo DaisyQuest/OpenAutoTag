@@ -467,8 +467,11 @@
       "improvement": "Reviewed outline bookmarks",
       "requirement": "Create hierarchical bookmarks from an accepted document outline.",
       "acceptance": "Unicode titles, page targets and hierarchy round-trip correctly; existing authored bookmarks are preserved.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch23-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A40",
@@ -476,8 +479,11 @@
       "improvement": "Logical page-label verification",
       "requirement": "Include page labels and outline destinations in saved preservation qualification.",
       "acceptance": "Mutated Roman/decimal labels or bookmark destinations fail preservation; unchanged labels pass.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch23-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A41",
