@@ -109,6 +109,11 @@ function isRepeatedHeaderRow(activeTable, rowCellTexts) {
   return rowCellTexts.every((t, i) => t === activeTable.headerTexts[i]);
 }
 
+function tableHeaderSignature(block) {
+  return JSON.stringify([String(block.text || "").trim(), block.tableColumnIndex ?? block.columnIndex ?? null,
+    block.tableRowSpan ?? block.rowSpan ?? 1, block.tableColumnSpan ?? block.columnSpan ?? 1, block.scope || "Column"]);
+}
+
 function inferTableMetadata(block, pageNumber, index, state, options) {
   const tableContinuationAcrossPages = options?.tableContinuationAcrossPages !== false;
 
@@ -163,7 +168,8 @@ function inferTableMetadata(block, pageNumber, index, state, options) {
     }
     const anchors = state.activeTable.columnAnchors || [];
     const positions = [...new Set(newPageXPositions)].sort((a,b)=>a-b);
-    crossPageContinuation = state.pendingContinuationEvidence === true && anchors.length === positions.length &&
+    crossPageContinuation = (!explicitTableId || String(explicitTableId) === state.activeTable.tableId) &&
+      state.pendingContinuationEvidence === true && anchors.length === positions.length &&
       anchors.length >= 2 && [...anchors].sort((a,b)=>a-b).every((x,i)=>Math.abs(x-positions[i])<=3);
   }
 
@@ -178,6 +184,8 @@ function inferTableMetadata(block, pageNumber, index, state, options) {
         lastPage: pageNumber,
         columnAnchors: [currentX],
         headerTexts: [],
+        headerSignatures: [],
+        headerPage: pageNumber,
         maxRowIndex: 0,
         rowCount: 0
       };
@@ -198,6 +206,8 @@ function inferTableMetadata(block, pageNumber, index, state, options) {
       lastPage: pageNumber,
       columnAnchors: [currentX],
       headerTexts: [],
+      headerSignatures: [],
+      headerPage: pageNumber,
       maxRowIndex: 0,
       rowCount: 0
     };
@@ -213,8 +223,9 @@ function inferTableMetadata(block, pageNumber, index, state, options) {
   // Track header texts for repeated-header detection
   const tableRole = block.tableRole || block.cellRole || (block.blockType === "table" ? "table" : "cell");
   const isHeader = String(tableRole).toLowerCase() === "header";
-  if (isHeader && state.activeTable.headerTexts.length < 20) {
+  if (isHeader && pageNumber === state.activeTable.headerPage && state.activeTable.headerTexts.length < 20) {
     state.activeTable.headerTexts.push(String(block.text || "").trim());
+    state.activeTable.headerSignatures.push(tableHeaderSignature(block));
   }
 
   // Track row indices for cross-page row continuation
@@ -232,7 +243,7 @@ function inferTableMetadata(block, pageNumber, index, state, options) {
   // and to subsequent cells on the same page that are part of the same header row)
   const onCrossPageRow =
     crossPageContinuation ||
-    (samePageAnchorContinuation && state.activeTable.crossPageStartedOnPage === pageNumber);
+    ((samePageContinuation || samePageAnchorContinuation) && state.activeTable.crossPageStartedOnPage === pageNumber);
   if (onCrossPageRow && isHeader) {
     const cellText = String(block.text || "").trim();
     if (state.activeTable.headerTexts.includes(cellText)) {
@@ -908,10 +919,10 @@ export async function buildSemanticDocument(inputPath, options) {
   const nodes = [], pairRelations = [], pairTasks = [];
   for (let i = 0; i < layoutDocument.pages.length; i++) {
     const page = layoutDocument.pages[i];
-    const leadingHeaders = page.textBlocks.filter(b => isTableCandidate(b) && String(b.tableRole || b.cellRole).toLowerCase() === "header" && b.bbox[1] <= page.height * .25).map(b => String(b.text || "").trim());
+    const leadingHeaders = page.textBlocks.filter(b => isTableCandidate(b) && String(b.tableRole || b.cellRole).toLowerCase() === "header" && b.bbox[1] <= page.height * .25);
     state.pendingContinuationEvidence = Boolean(state.activeTable && i > 0 &&
       state.activeTable.lastY >= layoutDocument.pages[i-1].height * .7 && leadingHeaders.length >= 2 &&
-      JSON.stringify(leadingHeaders) === JSON.stringify(state.activeTable.headerTexts));
+      JSON.stringify(leadingHeaders.map(tableHeaderSignature)) === JSON.stringify(state.activeTable.headerSignatures));
 
     // Pre-collect x-positions of this page's leading table cells
     // so cross-page column anchor matching works on the first cell of a new page

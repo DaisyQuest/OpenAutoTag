@@ -16,10 +16,11 @@ export function assignTableHeaders(table, rows) {
     for (const placement of row.placements) {
       const cell = placement.cell, rs = cell.rowSpan || 1;
       const explicit = ["Row", "Column", "Both"].includes(cell.scope);
-      const inHead = row.sectionNode?.type === "THead" || cell.tableSection === "head";
+      const continuedHead = row.rowNode.tableSectionOrigin === "head";
+      const inHead = row.sectionNode?.type === "THead" || cell.tableSection === "head" || continuedHead;
       const entry = { cell, row: ordinal, rowIdentity: row.rowIndex, col: placement.startColumn, rs, cs: placement.columnSpan,
         scope: explicit ? cell.scope : inHead ? "Column" : "Row",
-        scopeSource: explicit ? "explicit" : inHead ? "thead" : "body-default", order: entries.length };
+        scopeSource: explicit ? "explicit" : continuedHead ? "continued-head" : inHead ? "thead" : "body-default", order: entries.length };
       if (cell.type === "TH") entry.headerId = `${table.id}:H_r${row.rowIndex}c${entry.col}_${headerNumber++}`;
       entries.push(entry);
       for (let r = ordinal; r < ordinal + rs; r++) {
@@ -31,7 +32,8 @@ export function assignTableHeaders(table, rows) {
   }
   let work = 0;
   const search = (entry, direction) => {
-    const vertical = direction === "Column", found = new Map();
+    const vertical = direction === "Column", found = new Map(), occurrences = new Set();
+    const ownHeader = entry.cell.repeatedHeaderOf || entry.cell.id;
     const start = vertical ? entry.row : entry.col;
     const laneStart = vertical ? entry.col : entry.row;
     const laneEnd = laneStart + (vertical ? entry.cs : entry.rs);
@@ -48,7 +50,10 @@ export function assignTableHeaders(table, rows) {
           // A header for the other axis neither contributes nor ends the search.
           if (other.scope !== direction && other.scope !== "Both") continue;
           seenHeader = true;
-          if (!found.has(other)) found.set(other, start - pos);
+          const identity = other.cell.repeatedHeaderOf || other.cell.id;
+          if (identity === ownHeader || occurrences.has(identity)) continue;
+          occurrences.add(identity);
+          found.set(other, start - pos);
         // A TH after data starts a new header band, not a child of an older band.
         } else if (seenHeader || entry.cell.type === "TH") break;
       }

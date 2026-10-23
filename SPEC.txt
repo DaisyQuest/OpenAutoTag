@@ -1,6 +1,18 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Continued tables (A43, 2026-10-23):
+Page-local row identities remain distinct; restarted indices are rebased with
+tableRowOrigin evidence. Sections preserve row order with a leading THead and
+trailing TFoot only. Later header/footer intent uses tableSectionOrigin in TBody.
+Complete matching header bands retain distinct IDs and content, linked through
+repeatedHeaderOf. Headers select the nearest proven equivalent occurrence.
+The semantic engine retains original header signatures, compares text/spans/
+columns/scope, and respects distinct explicit table identities. Running artifacts
+do not split a declared table. Reversed/unsafe rows and excessive work reject.
+Layout-only repeated-header artifacting remains a review decision. See
+docs/accessibility-50-batch26-20261023.md for exact evidence and limits.
+
 Mixed table headers (A42, 2026-10-23):
 Header association uses bounded directional searches over validated cell spans.
 Explicit Row/Column/Both scope overrides section defaults; tableHeaderEvidence

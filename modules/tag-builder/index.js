@@ -2,6 +2,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { attachOcrSegments } from "./ocr-segments.js";
 import { planTableGrid, tableGridReview, mergeDeclaredCellFragments } from "./table-grid.js";
 import { assignTableHeaders } from "./table-headers.js";
+import { appendTableCell, partitionTableSections, markRepeatedTableHeaders } from "./table-continuation.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
@@ -741,9 +742,7 @@ function normalizeTableSections(rootNode) {
       }
     }
 
-    const headRows = rowEntries.filter((entry) => entry.assignedSectionKey === "head");
-    const bodyRows = rowEntries.filter((entry) => entry.assignedSectionKey === "body");
-    const footRows = rowEntries.filter((entry) => entry.assignedSectionKey === "foot");
+    const { headRows, bodyRows, footRows } = partitionTableSections(rowEntries);
 
     // PDF/UA § 7.2.14 (Matterhorn 14-003): a Table with /THead kid
     // must also have /TBody. If we end up with THead but no TBody
@@ -1105,88 +1104,14 @@ function repairMergedTableTextCells(rootNode) {
   return summary;
 }
 
-function getRowCellSignature(rowNode) {
-  const cells = (rowNode?.children || []).filter(isTableCellNode);
-  return cells.map((cell) => {
-    const span = Math.max(1, Number(cell.columnSpan || 1));
-    return `${cell.type}:${span}`;
-  }).join("|");
-}
-
 function detectRepeatedHeaders(rootNode) {
-  let repeatedHeaderRows = 0;
-
-  const visit = (node) => {
-    if (!node) {
-      return;
-    }
-
-    for (const child of node.children || []) {
-      visit(child);
-    }
-
-    if (node.type !== "Table" || node.tableGridReview) {
-      return;
-    }
-
-    let headSection = null;
-    let bodySection = null;
-
-    for (const section of node.children || []) {
-      if (section.type === "THead" && !headSection) {
-        headSection = section;
-      }
-
-      if (section.type === "TBody" && !bodySection) {
-        bodySection = section;
-      }
-    }
-
-    if (!headSection || !bodySection) {
-      return;
-    }
-
-    const headRows = (headSection.children || []).filter((row) => row.type === "TR");
-    const bodyRows = (bodySection.children || []).filter((row) => row.type === "TR");
-    if (headRows.length === 0 || bodyRows.length < headRows.length) {
-      return;
-    }
-
-    const headSignatures = headRows.map(getRowCellSignature);
-
-    for (let offset = 0; offset <= bodyRows.length - headRows.length; offset += 1) {
-      const candidateSignatures = bodyRows
-        .slice(offset, offset + headRows.length)
-        .map(getRowCellSignature);
-
-      const isMatch = headSignatures.every((sig, index) => sig === candidateSignatures[index]);
-      if (!isMatch) {
-        continue;
-      }
-
-      const headLabels = headRows.flatMap((row) =>
-        (row.children || []).filter(isTableCellNode).map((cell) => String(cell.label || "").trim())
-      );
-      const candidateLabels = bodyRows
-        .slice(offset, offset + headRows.length)
-        .flatMap((row) =>
-          (row.children || []).filter(isTableCellNode).map((cell) => String(cell.label || "").trim())
-        );
-
-      const labelsMatch = headLabels.length === candidateLabels.length &&
-        headLabels.every((label, index) => label === candidateLabels[index]);
-
-      if (labelsMatch) {
-        for (let rowIndex = offset; rowIndex < offset + headRows.length; rowIndex += 1) {
-          bodyRows[rowIndex].repeatedHeader = true;
-          repeatedHeaderRows += 1;
-        }
-      }
-    }
+  let count = 0;
+  const visit = node => {
+    if (node.type === "Table" && !node.tableGridReview) count += markRepeatedTableHeaders(collectTableRowDescriptors(node));
+    for (const child of node.children || []) visit(child);
   };
-
   visit(rootNode);
-  return repeatedHeaderRows;
+  return count;
 }
 
 function flattenRedundantTableBodySections(rootNode) {
@@ -1716,7 +1641,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
     }
 
     if (node.role === "Artifact") {
-      activeTable = null;
+      // Running page furniture does not interrupt a declared semantic table.
       continue;
     }
 
@@ -1836,14 +1761,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
         };
       }
 
-      const rowIndex = getTableRowIndex(node);
-      let rowNode = activeTable.rows.get(rowIndex);
-      if (!rowNode) {
-        rowNode = createTableRowNode(activeTable.node, rowIndex);
-        activeTable.rows.set(rowIndex, rowNode);
-      }
-
-      rowNode.children.push(createLeaf(node, headingNormalization));
+      appendTableCell(activeTable, createLeaf(node, headingNormalization), node.pageNumber, getTableRowIndex(node));
       continue;
     }
 
