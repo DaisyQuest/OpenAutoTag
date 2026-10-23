@@ -118,6 +118,7 @@ async function main() {
   const result = await runPipeline({ filePath, outputDir, options });
   if (autoDetection) result.autoProfile = autoDetection;
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  if (result.status === "failed") process.exitCode = 1;
 }
 
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;

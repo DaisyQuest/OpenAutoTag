@@ -6,6 +6,25 @@ import path from "node:path";
 import { PDFDocument, PDFName, PDFString, PDFDict, PDFArray, PDFOperator, StandardFonts } from "pdf-lib";
 import { writeTaggedArtifacts } from "../index.js";
 
+test("metadata passthrough does not add Type while reading a Form XObject", async t => {
+  const dir=await mkdtemp(path.join(os.tmpdir(),"form-xobject-type-"));
+  t.after(()=>rm(dir,{recursive:true,force:true}));
+  const input=await createTaggedForm(dir), doc=await PDFDocument.load(await readFile(input.pdfPath));
+  const page=doc.getPages()[0], name=PDFName.of;
+  const form=doc.context.flateStream("q 1 0 0 rg 5 5 20 20 re f Q",{Subtype:"Form",BBox:[0,0,100,100],Resources:{}});
+  const ref=doc.context.register(form);
+  page.node.Resources().set(name("XObject"),doc.context.obj({Probe:ref}));
+  page.pushOperators(PDFOperator.of("BMC",[name("Artifact")]),PDFOperator.of("Do",[name("Probe")]),PDFOperator.of("EMC"));
+  await writeFile(input.pdfPath,await doc.save());
+  const outputPath=path.join(dir,"candidate.pdf");
+  assert.equal((await writeTaggedArtifacts({...input,outputPath,mode:"auto"})).writerMode,"passthrough");
+  const output=await PDFDocument.load(await readFile(outputPath));
+  const saved=output.context.lookup(ref);
+  assert.equal(saved.dict.has(name("Type")),false);
+  assert.deepEqual(Buffer.from(saved.getContents()),Buffer.from(form.getContents()));
+  assert.equal(output.getForm().getFields().length,1);
+});
+
 async function createTaggedForm(dir) {
   const doc = await PDFDocument.create();
   doc.setTitle("Existing authored form title");

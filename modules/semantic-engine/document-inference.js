@@ -39,8 +39,29 @@ export function inferRegionsAndAnchors(nodes,pages) {
     const columns=[...new Set(content.filter(n=>!heading(n)&&!n.tableId&&!n.footnoteGroupId).map(n=>n.columnHint??0))].sort((a,b)=>a-b);
     const root=`region:${page.pageNumber}`;
     regions.push({id:root,pageNumber:page.pageNumber,parentId:null,kind:"page",nodeIds:content.map(n=>n.id)});
-    const spans=content.filter(n=>!n.tableId&&!n.footnoteGroupId&&n.bbox[2]>=page.width*.62 &&
-      columns.length>1 && (heading(n)||n.captionForId)).sort((a,b)=>a.bbox[1]-b.bbox[1]);
+    const splitX=page.columns===2 && Number.isFinite(page.columnSplitX) ? page.columnSplitX : null;
+    const spans=content.filter(n=>!n.tableId&&!n.footnoteGroupId&&columns.length>1 &&
+      ((n.bbox[2]>=page.width*.62 && (heading(n)||n.captionForId)) ||
+       (splitX!==null && n.bbox[0]<splitX && n.bbox[0]+n.bbox[2]>splitX)))
+      .sort((a,b)=>a.bbox[1]-b.bbox[1] || a.id.localeCompare(b.id));
+    // Keep a detached footer band after both prose columns without hiding its
+    // text as Artifact. Require a URL/page-number anchor and a clear vertical
+    // gap; ordinary bottom-of-column prose must keep its column position.
+    const footer=columns.length>1 && !page.formFields?.length ? content.filter(n=>
+      !n.tableId && !n.footnoteGroupId && n.bbox[1]>=page.height*.9 && n.bbox[3]<=12 && n.text.length<=80) : [];
+    if(footer.length>0 && footer.length<=4 &&
+      Math.max(...footer.map(n=>n.bbox[1]))-Math.min(...footer.map(n=>n.bbox[1]))<=Math.max(...footer.map(n=>n.bbox[3])) &&
+      footer.some(n=>/^(?:(?:https?:\/\/|www\.)\S+|\d+(?:\s*\/\s*\d+)?)$/i.test(n.text.trim()))) {
+      const before=content.filter(n=>!footer.includes(n));
+      const bottom=before.reduce((y,n)=>Math.max(y,n.bbox[1]+n.bbox[3]),0);
+      if(Math.min(...footer.map(n=>n.bbox[1]))-bottom>=Math.max(18,...footer.map(n=>n.bbox[3]*2))) {
+        for(const f of footer) {
+          if(!spans.includes(f)) spans.push(f);
+          for(const n of before) relations.push({type:"precedes",from:n.id,to:f.id,evidence:"detached-footer-after-columns"});
+        }
+        spans.sort((a,b)=>a.bbox[1]-b.bbox[1] || a.id.localeCompare(b.id));
+      }
+    }
     for(const n of content) n.regionId=spans.includes(n) ? `${root}:span:${n.id}` : n.footnoteGroupId ? `${root}:notes` : `${root}:band:${spans.filter(h=>h!==n&&h.bbox[1]+h.bbox[3]<=n.bbox[1]).length}:column:${n.columnHint??0}`;
     const groups=new Map();
     for(const n of content) {

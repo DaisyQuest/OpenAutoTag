@@ -13,6 +13,20 @@ async function build(t, nodes, options = {}) {
 }
 const all = (node) => [node, ...(node.children || []).flatMap(all)];
 
+test("interrupted table groups have collision-free fragment IDs and retain every cell", async t => {
+  const cell=(id,group,row)=>n(id,"TD",{text:`${id} 123`,tableId:group,tableRowIndex:row,tableColumnIndex:0});
+  const nodes=[cell("a","measurements",0),cell("b","measurements",1),n("heading","H1"),
+    cell("c","measurements",1),n("break","P"),cell("d","measurements",2),
+    n("next","H1"),cell("reserved","measurements:fragment:2",0)];
+  const result=await build(t,nodes), flat=all(result.root);
+  assert.equal(new Set(flat.map(n=>n.id)).size,flat.length);
+  assert.deepEqual(flat.flatMap(n=>n.sourceNodeIds||[]).sort(),nodes.map(n=>n.id).sort());
+  assert.deepEqual(flat.filter(n=>n.type==="Table").map(n=>n.id),[
+    "tag:table:measurements","tag:table:measurements:fragment:3",
+    "tag:table:measurements:fragment:4","tag:table:measurements:fragment:2"]);
+  assert.deepEqual(await build(t,nodes),result,"fragment allocation is deterministic");
+});
+
 test("both merged-value repairs keep replacement text inside synthetic cell Spans", async t => {
   for (const spanning of [false, true]) {
     const table = { tableId: "prices", tableSection: "head", tableRowIndex: 0 };

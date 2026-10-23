@@ -8,6 +8,16 @@ import path from "node:path";
 import os from "node:os";
 const n=(id,extra={})=>({id,text:id,role:"P",pageNumber:1,bbox:[50,100,180,12],fontName:"Helvetica",fontSize:12,columnHint:0,...extra});
 const page=(pageNumber=1)=>({pageNumber,width:600,height:800});
+
+test("footer ordering requires a detached anchored band and never drops footer text",()=>{
+ const doc=[n("left"),n("right",{columnHint:1,bbox:[320,100,180,12]}),n("footer",{text:"www.example.gov",bbox:[50,750,100,10]})];
+ assert.ok(inferRegionsAndAnchors(doc,[page()]).relations.some(r=>r.from==="right"&&r.to==="footer"));
+ assert.equal(doc[2].role,"P");
+ doc[0].bbox=[50,730,180,12];
+ assert.equal(inferRegionsAndAnchors(doc,[page()]).relations.some(r=>r.evidence==="detached-footer-after-columns"),false);
+ doc[0].bbox=[50,100,180,12];doc[2].text="An ordinary final prose line";
+ assert.equal(inferRegionsAndAnchors(doc,[page()]).relations.some(r=>r.evidence==="detached-footer-after-columns"),false);
+});
 test("heading style anchors require independent pages and retain membership",()=>{
  const nodes=[n("a",{role:"H2",text:"1.1 First"}),n("b",{role:"H2",text:"2.1 Second",pageNumber:2}),n("c",{role:"H3",text:"Unnumbered",pageNumber:3}),n("body")];
  const result=inferDocumentHeadings(nodes);assert.equal(nodes[2].role,"H2");assert.equal(nodes[3].role,"P");assert.ok(result.tasks.some(t=>t.code==="HEADING_OUTLINE_GAP"));

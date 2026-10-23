@@ -1,0 +1,761 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedLocalDate": "2026-10-22",
+  "timeZone": "America/New_York",
+  "scope": "Bounded fixes and frozen official-source pilot replay; no expert-adjudicated accuracy or human-reader qualification",
+  "baselineEvidence": {
+    "path": "docs/evidence/public-pdf-pilot-20261022.json",
+    "sha256": "ada9788bb73aa478ecb14c8b61dce7a5611b39f435d29ab0423aa33c30eb9be8"
+  },
+  "baselineEngineCommit": "b52856c71082a93ea868dfd23f17ee558b8eee2c",
+  "toolPins": {
+    "node": "22.20.0",
+    "pdfbox": "3.0.8",
+    "veraPDF": "1.30.3 Greenfield",
+    "validationProfile": "ua1",
+    "pdfjs": "4.10.38",
+    "pdfLib": "1.17.1"
+  },
+  "implementationSha256NormalizedLF": {
+    "modules/layout-analyzer/index.js": "1bf1151828bf1ddfbb6fd669c47e8408d5825d1bcb7dc05b3b4529d8c7b507ad",
+    "modules/layout-analyzer/prose-columns.js": "d75aca5a6d1c03c0ee6b8d2769adf628164fa7efa10ad0dbcd63064412fae15a",
+    "modules/pdf-writer/index.js": "3354f4ed3b63613eb7468406b111c2e48ba148ce3b1f7b9f46d7f965017216ce",
+    "modules/pdf-writer/native-content-guard.js": "033ba65c27ad32d10cca716d1d204796fc4e7c01dbf48f10d37087f9207e6003",
+    "modules/pdf-writer/java/PassthroughMetadataCli.java": "c7505fec29162af909e9dbc9eb090ffdae3f4d7db22b0a82953d8589da1aa820",
+    "modules/semantic-engine/document-inference.js": "a05b30f70253c0552281bf6da01b45d7ccf18d8e555fd7bf7331ee17ca379d5a",
+    "modules/tag-builder/index.js": "df50cdab6605a6fa9ff1066a93b20de90743ff55df3b975045a5a94223e935a9",
+    "orchestrator/pipeline-runner.js": "4467c6120b801f314aac8c22cc335fa85aec2993d67fe2b33896b2e52cdf26c0",
+    "scripts/check-saved-semantics.js": "2da77848e3b05d023105916bf8cc9465e46d36ba4681154929e2ec2df2e557d9",
+    "scripts/java/LowLevelPdfInspectorCli.java": "af37227e52fec988215c3b6e06f206a550ea14c4003866d7211f51d720817d3d",
+    "scripts/run-json-command.js": "5ee9904f3519aad50591491ae10514eb9ed1a52101a467312bca439ffabff455",
+    "package.json": "b588d3dcf31fb6b9eb9c7e5100906c88b60f5a506af26444d24cb58701164cbc"
+  },
+  "method": {
+    "frozenSelectionSeed": "OpenAutoTag-public-pdf-pilot-2026-10-22-v1",
+    "selectedInputs": 8,
+    "selectedInputPages": 147,
+    "profile": "default",
+    "productionChecks": true,
+    "parallelDocuments": 2,
+    "pipelineTimeoutSeconds": 600,
+    "javaToolOptions": "-XX:TieredStopAtLevel=1",
+    "sourceValidation": "Reused original hash-bound source baselines; candidate validation rerun",
+    "finalHinodeReplay": "nasa-hinode-final replaces the intermediate nasa-hinode run after detached-footer refinement; other seven batch outcomes precede that refinement",
+    "controlSource": "Previously qualified TEST-FORM candidate, not the original download",
+    "localArtifacts": "PDFs, full inventories, logs and screenshots remain outside Git"
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 232,
+      "failed": 0,
+      "skipped": 0
+    },
+    "layoutReadingOrderTagBuilderCompatibility": {
+      "passed": 76,
+      "failed": 0,
+      "skipped": 0
+    },
+    "coverage": {
+      "scope": "Only prose-columns.js, native-content-guard.js, run-json-command.js",
+      "linePercent": 100,
+      "branchPercent": 94.74,
+      "functionPercent": 95.45
+    },
+    "limits": "Suites overlap; no repository-wide or Java coverage claim"
+  },
+  "totals": {
+    "candidates": 6,
+    "reviewRequired": 6,
+    "writerFailures": 2,
+    "pilotPopplerIdenticalPages": 84,
+    "additionalControlPopplerIdenticalPages": 2,
+    "pdfjsIdenticalSampledPages": 4,
+    "formFillSaveReopenPairs": 3,
+    "filledFirstPageIdenticalPairs": 3
+  },
+  "documents": [
+    {
+      "id": "nasa-stereo",
+      "pages": 2,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+      "sourceUrl": "https://stereo-ssc.nascom.nasa.gov/img/litho.pdf",
+      "sourceSha256": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/nasa-stereo",
+      "pipelineStatus": "failed",
+      "candidateProduced": false,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/nasa-stereo/pipeline-result.json": "8ef3dbb2d0de064f0102e0bfde6629172389cc967db932bec425b8fa26bf2832",
+        "output/public-pdf-fixes-20261022/nasa-stereo/05-tagging.json": "b2ecb147d713602a06ac8dc212e23a0cb81b7c8b1b9890781657d6343bf6dbed"
+      },
+      "previousQualityDisposition": "rejected",
+      "exitCode": 1,
+      "blocker": "Native text attachment unavailable: OCR intent has no source text operators; tagged OCR text layer required."
+    },
+    {
+      "id": "irs-w9",
+      "pages": 6,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/irs-w9.pdf",
+      "sourceUrl": "https://www.irs.gov/pub/irs-pdf/fw9.pdf",
+      "sourceSha256": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/irs-w9",
+      "pipelineStatus": "completed",
+      "candidateProduced": true,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/irs-w9/pipeline-result.json": "31b15e1fe4c8dbca89ad459363ba4874b9ec3ebc918852fcbed56f2ae3c6f2e6",
+        "output/public-pdf-fixes-20261022/irs-w9/05-tagging.json": "3e8d043688ebce8fd9b4724eef36afd0db8b6be92f7d94252232af1f0e30d1b4",
+        "output/public-pdf-fixes-20261022/irs-w9/06-writer-report.json": "e6dfb459e6eb91c323559f1dc0216c61ce4ce31db5eb86775e8ee91afb982c02",
+        "output/public-pdf-fixes-20261022/irs-w9/07-validation-report.json": "a23aee59d5c83032148643967c25ced3c69f926f1d1570d42022fada6c3b7907",
+        "output/public-pdf-fixes-20261022/irs-w9/08-quality-report.json": "4e93202373c1d8c370358fac19f47726ac3780c69e227c59f52a716a2d0f0050",
+        "output/public-pdf-fixes-20261022/irs-w9/08-quality-report.source.json": "3da9cf6141c7b66cfba0337e0f19533491c2be5cabe6bf82883bdade61b0aca1",
+        "output/public-pdf-fixes-20261022/irs-w9/08-quality-report.candidate.json": "699ac1d83804b1d3f9e2d7c7b949feb6909c674bd21119446538d5300d73f77c",
+        "output/public-pdf-fixes-20261022/irs-w9/09-saved-semantics.json": "ff80f7ee115e9583e2613ceb867a9a4831572369f148651885b78936818a748b"
+      },
+      "previousQualityDisposition": "review_required",
+      "candidateSha256": "d34c5dd7b7501e72afe917f49528a20ad0e1b8cec09ac377b51af3015716927d",
+      "writerMode": "passthrough",
+      "qualityDisposition": "review_required",
+      "qualityFindingCodes": [
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW",
+        "VALIDATION_REQUIRES_REVIEW"
+      ],
+      "rawVeraPdf": {
+        "passedRules": 102,
+        "failedRules": 4,
+        "passedChecks": 49681,
+        "failedChecks": 26
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 13,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedComparison": {
+        "scope": "preserved-structure",
+        "passed": 7790,
+        "failed": 160
+      },
+      "rawVeraPdfUnchangedFromPreviousCandidate": true,
+      "preservation": {
+        "sourceBytePrefixRetained": true,
+        "identicalPageInventories": {
+          "contentHash": 6,
+          "resourcesHash": 6,
+          "annotationsHash": 6,
+          "geometry": 6
+        },
+        "identicalInventories": {
+          "fields": true,
+          "widgets": true,
+          "headings": true,
+          "structure": true,
+          "contentOrder": true,
+          "issues": true
+        },
+        "terminalFields": 28,
+        "widgets": 23,
+        "links": 0,
+        "linkChanges": {
+          "blankDescriptionsFilledFromUnchangedUri": 0,
+          "allOtherInspectedPropertiesIdentical": true,
+          "scope": "Existing passthrough behavior, not a new repair in this delivery"
+        },
+        "inheritedInspectorFindings": 160,
+        "savedFailuresAllMatchSourceInspectorFindings": true
+      },
+      "poppler": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 6
+      },
+      "pdfjs": {
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ]
+      },
+      "formProbe": {
+        "sourceAndCandidateFillSaveReopen": true,
+        "filledFirstPagePixelIdentical": true,
+        "terminalFields": 23,
+        "widgets": 23,
+        "scope": "One text field and one checkbox per source/candidate; not every field or keyboard/AT testing"
+      }
+    },
+    {
+      "id": "census-income-2024",
+      "pages": 58,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/census-income-2024.pdf",
+      "sourceUrl": "https://www2.census.gov/library/publications/2025/demo/p60-286.pdf",
+      "sourceSha256": "54cf1adc1f92e0f471803e67637569ecdebf93eec21928a5f9e2b97185eed3d3",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/census-income-2024",
+      "pipelineStatus": "completed",
+      "candidateProduced": true,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/census-income-2024/pipeline-result.json": "d027a6830a31ba0fe9baf21d2d9cfb11a0552e37385ed16c8e25fad1fbb3b33c",
+        "output/public-pdf-fixes-20261022/census-income-2024/05-tagging.json": "fc1aef8c89ffdcd110867985d68601c9b19669f418f9e9d9342425731667f619",
+        "output/public-pdf-fixes-20261022/census-income-2024/06-writer-report.json": "3ffc43084ba1803eb4d17422f17c677f1a2731bd7a632c583d24141b5627674c",
+        "output/public-pdf-fixes-20261022/census-income-2024/07-validation-report.json": "90600470333ca94b6a23f9267b5ce96f52d41b78a273639376ddabc8b0aec73b",
+        "output/public-pdf-fixes-20261022/census-income-2024/08-quality-report.json": "dd31a2fa7535ea2c1970efb19ceb1c5443e6f09e5610c8bab4bb973169699f3a",
+        "output/public-pdf-fixes-20261022/census-income-2024/08-quality-report.source.json": "f3bbfe564b33dd43837817bbf8341a24d91976b03a4de9bd59fef0b533f358a6",
+        "output/public-pdf-fixes-20261022/census-income-2024/08-quality-report.candidate.json": "ceb9cdfba33973a6fc7ecd8c83cb9de55f229a74f042b5ca199aee1ac45c0204",
+        "output/public-pdf-fixes-20261022/census-income-2024/09-saved-semantics.json": "d51b3c9536270d680d4e631386b3bb6ce93ff853e6810e4f2a521ba4e8b98730"
+      },
+      "previousQualityDisposition": "rejected",
+      "candidateSha256": "7420c64f054ef2ae26ab508024f3cd710614c2a2e3b126abc6982a4e655570ca",
+      "writerMode": "passthrough",
+      "qualityDisposition": "review_required",
+      "qualityFindingCodes": [
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW",
+        "VALIDATION_REQUIRES_REVIEW"
+      ],
+      "rawVeraPdf": {
+        "passedRules": 99,
+        "failedRules": 7,
+        "passedChecks": 1020405,
+        "failedChecks": 16148
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 12,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "savedComparison": {
+        "scope": "preserved-structure",
+        "passed": 397058,
+        "failed": 74
+      },
+      "rawVeraPdfUnchangedFromPreviousCandidate": true,
+      "preservation": {
+        "sourceBytePrefixRetained": true,
+        "identicalPageInventories": {
+          "contentHash": 58,
+          "resourcesHash": 58,
+          "annotationsHash": 58,
+          "geometry": 58
+        },
+        "identicalInventories": {
+          "fields": true,
+          "widgets": true,
+          "headings": true,
+          "structure": true,
+          "contentOrder": true,
+          "issues": true
+        },
+        "terminalFields": 0,
+        "widgets": 0,
+        "links": 320,
+        "linkChanges": {
+          "blankDescriptionsFilledFromUnchangedUri": 46,
+          "allOtherInspectedPropertiesIdentical": true,
+          "scope": "Existing passthrough behavior, not a new repair in this delivery"
+        },
+        "inheritedInspectorFindings": 74,
+        "savedFailuresAllMatchSourceInspectorFindings": true
+      },
+      "poppler": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "pixelIdenticalPages": 58
+      }
+    },
+    {
+      "id": "nist-1300",
+      "pages": 9,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+      "sourceUrl": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+      "sourceSha256": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/nist-1300",
+      "pipelineStatus": "completed",
+      "candidateProduced": true,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/nist-1300/pipeline-result.json": "80b9f9cbcb1d591a0f0acb478c88bd3cce24a89fd1134ad48571de8fbde9ec98",
+        "output/public-pdf-fixes-20261022/nist-1300/05-tagging.json": "89af5e73228f7e877fef181b13e9f05d5fbcd746c5c74f8a5ad50825f54482c7",
+        "output/public-pdf-fixes-20261022/nist-1300/06-writer-report.json": "9983644463ed9341d7e08e849e4a05527352733998804a33936aa449058a6191",
+        "output/public-pdf-fixes-20261022/nist-1300/07-validation-report.json": "12694bacfd2d0ba3e9ac9cd15584dbb1e73424b7074b5f15b2dcc375a3cfaa72",
+        "output/public-pdf-fixes-20261022/nist-1300/08-quality-report.json": "e56661c6c66499ee5a7e6323fd62d81639fe74cd4395c4dea30d80030e59022e",
+        "output/public-pdf-fixes-20261022/nist-1300/08-quality-report.source.json": "79250d6e6df98ed7caea717ccb02d0bb1b62db7b5c4dd171d38812d37e5afd6a",
+        "output/public-pdf-fixes-20261022/nist-1300/08-quality-report.candidate.json": "2488ee2d328622f5f4b5e35b6d4079ae8e1df461edc83977e352d3dfed24b521",
+        "output/public-pdf-fixes-20261022/nist-1300/09-saved-semantics.json": "ce8e35039ab231e04efaea35e189ca3b6f563dd697b401e13f5b1d844ea7ff8b"
+      },
+      "previousQualityDisposition": "review_required",
+      "candidateSha256": "f17c9e3207361b41a270eb0b8190230a112f6bcf734e5ce47ad0771894a68bbd",
+      "writerMode": "passthrough",
+      "qualityDisposition": "review_required",
+      "qualityFindingCodes": [
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW",
+        "VALIDATION_REQUIRES_REVIEW"
+      ],
+      "rawVeraPdf": {
+        "passedRules": 100,
+        "failedRules": 6,
+        "passedChecks": 36933,
+        "failedChecks": 7
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 5,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "savedComparison": {
+        "scope": "preserved-structure",
+        "passed": 7471,
+        "failed": 54
+      },
+      "rawVeraPdfUnchangedFromPreviousCandidate": true,
+      "preservation": {
+        "sourceBytePrefixRetained": true,
+        "identicalPageInventories": {
+          "contentHash": 9,
+          "resourcesHash": 9,
+          "annotationsHash": 9,
+          "geometry": 9
+        },
+        "identicalInventories": {
+          "fields": true,
+          "widgets": true,
+          "headings": true,
+          "structure": true,
+          "contentOrder": true,
+          "issues": true
+        },
+        "terminalFields": 1,
+        "widgets": 0,
+        "links": 45,
+        "linkChanges": {
+          "blankDescriptionsFilledFromUnchangedUri": 45,
+          "allOtherInspectedPropertiesIdentical": true,
+          "scope": "Existing passthrough behavior, not a new repair in this delivery"
+        },
+        "inheritedInspectorFindings": 54,
+        "savedFailuresAllMatchSourceInspectorFindings": true
+      },
+      "poppler": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "pixelIdenticalPages": 9
+      }
+    },
+    {
+      "id": "irs-1040",
+      "pages": 2,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/irs-1040.pdf",
+      "sourceUrl": "https://www.irs.gov/pub/irs-pdf/f1040.pdf",
+      "sourceSha256": "3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/irs-1040",
+      "pipelineStatus": "completed",
+      "candidateProduced": true,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/irs-1040/pipeline-result.json": "28056ca7a93ee97626270aead8176ac78f6353ef856e9f1238c0b66267f943ed",
+        "output/public-pdf-fixes-20261022/irs-1040/05-tagging.json": "9c2aa7082419f21d2d579705b848b77ef4d275bf7e65bad9102f83b3148915fc",
+        "output/public-pdf-fixes-20261022/irs-1040/06-writer-report.json": "1db07e05c515568a16d86b83a0c2994136c7be2e084cac323739eee477227e55",
+        "output/public-pdf-fixes-20261022/irs-1040/07-validation-report.json": "48dfe4e55786e2f0017cac9f2d19c665c3550bafbaacadb0f20a5e77c82fbd1e",
+        "output/public-pdf-fixes-20261022/irs-1040/08-quality-report.json": "cb0bb0fbefaf0c58540c723c0f0b8e1bd61326eb7554cd56b5c6bfa07f0cc5e1",
+        "output/public-pdf-fixes-20261022/irs-1040/08-quality-report.source.json": "d553a8dcfd53076888312b9c6b8caf0c0a8e1c587fca892045f1d361a8e1d78f",
+        "output/public-pdf-fixes-20261022/irs-1040/08-quality-report.candidate.json": "22b6344a758c55a7d392f30b4cfacb99c1c55f89177c095e6ba218c0f9588a47",
+        "output/public-pdf-fixes-20261022/irs-1040/09-saved-semantics.json": "cb4f41d7b098a78a09a16c968b59f988b85ef14233ad981a210ae16496470dda"
+      },
+      "previousQualityDisposition": "review_required",
+      "candidateSha256": "8df60ef2c69780bc4bc5b3e5d8b36e280a05af64ab2916be791f37de94780110",
+      "writerMode": "passthrough",
+      "qualityDisposition": "review_required",
+      "qualityFindingCodes": [
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW",
+        "VALIDATION_REQUIRES_REVIEW"
+      ],
+      "rawVeraPdf": {
+        "passedRules": 101,
+        "failedRules": 5,
+        "passedChecks": 41763,
+        "failedChecks": 446
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 16,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedComparison": {
+        "scope": "preserved-structure",
+        "passed": 13598,
+        "failed": 605
+      },
+      "rawVeraPdfUnchangedFromPreviousCandidate": true,
+      "preservation": {
+        "sourceBytePrefixRetained": true,
+        "identicalPageInventories": {
+          "contentHash": 2,
+          "resourcesHash": 2,
+          "annotationsHash": 2,
+          "geometry": 2
+        },
+        "identicalInventories": {
+          "fields": true,
+          "widgets": true,
+          "headings": true,
+          "structure": true,
+          "contentOrder": true,
+          "issues": true
+        },
+        "terminalFields": 230,
+        "widgets": 199,
+        "links": 0,
+        "linkChanges": {
+          "blankDescriptionsFilledFromUnchangedUri": 0,
+          "allOtherInspectedPropertiesIdentical": true,
+          "scope": "Existing passthrough behavior, not a new repair in this delivery"
+        },
+        "inheritedInspectorFindings": 605,
+        "savedFailuresAllMatchSourceInspectorFindings": true
+      },
+      "poppler": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 2
+      },
+      "pdfjs": {
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ]
+      },
+      "formProbe": {
+        "sourceAndCandidateFillSaveReopen": true,
+        "filledFirstPagePixelIdentical": true,
+        "terminalFields": 199,
+        "widgets": 199,
+        "scope": "One text field and one checkbox per source/candidate; not every field or keyboard/AT testing"
+      }
+    },
+    {
+      "id": "nist-1299",
+      "pages": 8,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+      "sourceUrl": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+      "sourceSha256": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/nist-1299",
+      "pipelineStatus": "completed",
+      "candidateProduced": true,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/nist-1299/pipeline-result.json": "467a3a895ea4c53aee734e781969c397b406d0e68eb39f9cfdfd859d87bcbb85",
+        "output/public-pdf-fixes-20261022/nist-1299/05-tagging.json": "d989b622b9199ed150356c5dac735404540f25335c3183c98ae8e567ad55843f",
+        "output/public-pdf-fixes-20261022/nist-1299/06-writer-report.json": "ee8669e824e1c18af7af02f7d26a4e8b33e44f3ef244a702b68fb6ae98da22ef",
+        "output/public-pdf-fixes-20261022/nist-1299/07-validation-report.json": "b32c3bd7aff249d2623e272331b43413af629f22d69d502ceac31963f9c4b5d0",
+        "output/public-pdf-fixes-20261022/nist-1299/08-quality-report.json": "4b8d45e08385c8d1f5fc03258295d2d138f0e42819dc36f9a21206942064754c",
+        "output/public-pdf-fixes-20261022/nist-1299/08-quality-report.source.json": "8113f3ba5a1a3ca982f6b715cd11967ff09e2e18b25d11c695e472f099c8e33e",
+        "output/public-pdf-fixes-20261022/nist-1299/08-quality-report.candidate.json": "8926a5783ca4a09f7715566f076d66490a703f8569d0f2fea33195b3634df11a",
+        "output/public-pdf-fixes-20261022/nist-1299/09-saved-semantics.json": "643c36e858663a16503608df538a33d2210f614b35d332f0358c9c4ba374a846"
+      },
+      "previousQualityDisposition": "review_required",
+      "candidateSha256": "b9a149c110f604d6858353c7bff22783d46619f87d4df98e1605159afbb9be30",
+      "writerMode": "passthrough",
+      "qualityDisposition": "review_required",
+      "qualityFindingCodes": [
+        "EXISTING_STRUCTURE_REQUIRES_REVIEW",
+        "HEADING_REFERENCE_REQUIRES_REVIEW",
+        "VALIDATION_REQUIRES_REVIEW"
+      ],
+      "rawVeraPdf": {
+        "passedRules": 100,
+        "failedRules": 6,
+        "passedChecks": 19997,
+        "failedChecks": 25
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 5,
+        "warningCount": 0,
+        "blockingPreVeraPdf": true
+      },
+      "savedComparison": {
+        "scope": "preserved-structure",
+        "passed": 2719,
+        "failed": 63
+      },
+      "rawVeraPdfUnchangedFromPreviousCandidate": true,
+      "preservation": {
+        "sourceBytePrefixRetained": true,
+        "identicalPageInventories": {
+          "contentHash": 8,
+          "resourcesHash": 8,
+          "annotationsHash": 8,
+          "geometry": 8
+        },
+        "identicalInventories": {
+          "fields": true,
+          "widgets": true,
+          "headings": true,
+          "structure": true,
+          "contentOrder": true,
+          "issues": true
+        },
+        "terminalFields": 1,
+        "widgets": 0,
+        "links": 23,
+        "linkChanges": {
+          "blankDescriptionsFilledFromUnchangedUri": 23,
+          "allOtherInspectedPropertiesIdentical": true,
+          "scope": "Existing passthrough behavior, not a new repair in this delivery"
+        },
+        "inheritedInspectorFindings": 63,
+        "savedFailuresAllMatchSourceInspectorFindings": true
+      },
+      "poppler": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "pixelIdenticalPages": 8
+      }
+    },
+    {
+      "id": "nasa-hinode",
+      "pages": 1,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "sourceUrl": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf",
+      "sourceSha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/nasa-hinode-final",
+      "pipelineStatus": "completed",
+      "candidateProduced": true,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/nasa-hinode-final-result.json": "7c2070ad6aed9a5e5dae916b6df13b7ed43e7f420a8b6d6a6ec5af7b95c05803",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/05-tagging.json": "8615a5a4ab68fab09511ca03e4173967dabffff0ac4d6cabc45dda31cc2d3cb3",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/06-writer-report.json": "fbfb559cfd1ad90f24a48859811e0a571651c82568df044ef86929cbaf85f064",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/07-validation-report.json": "630386781b3159607c1af6ddbdd06e0b19aa01d3efe74f6d02fcc0d72732aa9a",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/08-quality-report.json": "710130fea76acb03dd2f619ea777b6541b411f41fc172d3fc6f9ecd4fa6b8d51",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/08-quality-report.source.json": "0658e092fef4de8a83eac2a75850f45aa1014e0621508c22f2ae44aec5b13e26",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/08-quality-report.candidate.json": "e6c03e0eeba09d3865b553839c9efacf0425e7ff611c3e2061e3ec52abb7b06c",
+        "output/public-pdf-fixes-20261022/nasa-hinode-final/09-saved-semantics.json": "3f7b770ea055fd6f7f81e5ae6cafb6ea9915d20aed9604039e8ab97a12f8f571"
+      },
+      "previousQualityDisposition": "rejected",
+      "candidateSha256": "8ffe33d557a2325819a185e58a29794c93184dda98844ba720bf34601f97c6a0",
+      "writerMode": "native",
+      "qualityDisposition": "review_required",
+      "qualityFindingCodes": [
+        "IDENTITY_MAPPING_REQUIRED"
+      ],
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 1705,
+        "failedChecks": 0
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedComparison": {
+        "scope": "emitted-tagging-intent",
+        "passed": 531,
+        "failed": 0
+      },
+      "rawVeraPdfUnchangedFromPreviousCandidate": true,
+      "preservationLimit": "Native rewriting does not retain source object identities; IDENTITY_MAPPING_REQUIRED remains. Pixel checks are separate.",
+      "poppler": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 1
+      },
+      "pdfjs": {
+        "renderer": "PDF.js 4.10.38",
+        "dpi": 150,
+        "pages": [
+          {
+            "page": 1,
+            "pixelIdentical": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "nasa-stereo-booklet",
+      "pages": 61,
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceUrl": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf",
+      "sourceSha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "sourceUnchanged": true,
+      "outputDirectory": "output/public-pdf-fixes-20261022/nasa-stereo-booklet",
+      "pipelineStatus": "failed",
+      "candidateProduced": false,
+      "artifactSha256": {
+        "output/public-pdf-fixes-20261022/nasa-stereo-booklet/pipeline-result.json": "208ee77b0be9dd035d1e85f37c2161373d031409515d063357a24c4ce5f817b1",
+        "output/public-pdf-fixes-20261022/nasa-stereo-booklet/05-tagging.json": "ab6dc79f70a9562c1d84af82dc122acb647f384270f3d664c6d3287ec72f4e28"
+      },
+      "previousQualityDisposition": null,
+      "exitCode": 1,
+      "blocker": "Missing emitted table header ID: tag:table:table:2:1:H_r1c0_2",
+      "taggingTree": {
+        "nodes": 2443,
+        "duplicateIds": []
+      }
+    }
+  ],
+  "testFormControl": {
+    "id": "test-form-control",
+    "pages": 2,
+    "sourcePath": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+    "sourceUrl": null,
+    "sourceSha256": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+    "sourceUnchanged": true,
+    "outputDirectory": "output/public-pdf-fixes-20261022/test-form-control",
+    "pipelineStatus": "completed",
+    "candidateProduced": true,
+    "artifactSha256": {
+      "output/public-pdf-fixes-20261022/test-form-control-result.json": "720460965b353ae1adeeeaf0148dab20cb94d11b54b7ca714e2c9d9ea7f861be",
+      "output/public-pdf-fixes-20261022/test-form-control/05-tagging.json": "df889c69e66881348ab3d5076faecabd91367216be01ded317c6d9ecb9525ed1",
+      "output/public-pdf-fixes-20261022/test-form-control/06-writer-report.json": "b8b43d396506ad99907248b07d46b667fe042821951535a10107f04b9b19bec2",
+      "output/public-pdf-fixes-20261022/test-form-control/07-validation-report.json": "406adfb6d6420f4634c72fa7b99c9bc817330701782fc94253dcdacd5ceea466",
+      "output/public-pdf-fixes-20261022/test-form-control/08-quality-report.json": "50a8d7b8382a9fd26127694f14aa3271340181f8819bfca5fbc30124f13c84a3",
+      "output/public-pdf-fixes-20261022/test-form-control/08-quality-report.source.json": "83101ee9ce81ad9a8025f24f52b3bbbeb142b8a840d5e4b624c4955cccf2e61f",
+      "output/public-pdf-fixes-20261022/test-form-control/08-quality-report.candidate.json": "d3429b4c891ade050f9208980791484e243add7765b1d63cc165280f8afa6ae2",
+      "output/public-pdf-fixes-20261022/test-form-control/09-saved-semantics.json": "7fd891710e873a8a5c9a4e8802f73a609790a5e99754c0d992004fa7c6f90400"
+    },
+    "candidateSha256": "95670a8b893a4490ea31e5030398fc03ec7c79e39688e6971535d35b1fafd2aa",
+    "writerMode": "passthrough",
+    "qualityDisposition": "review_required",
+    "qualityFindingCodes": [],
+    "rawVeraPdf": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 9874,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    },
+    "savedComparison": {
+      "scope": "preserved-structure",
+      "passed": 1828,
+      "failed": 0
+    },
+    "preservation": {
+      "sourceBytePrefixRetained": true,
+      "identicalPageInventories": {
+        "contentHash": 2,
+        "resourcesHash": 2,
+        "annotationsHash": 2,
+        "geometry": 2
+      },
+      "identicalInventories": {
+        "fields": true,
+        "widgets": true,
+        "headings": true,
+        "structure": true,
+        "contentOrder": true,
+        "issues": true
+      },
+      "terminalFields": 35,
+      "widgets": 33,
+      "links": 9,
+      "linkChanges": {
+        "blankDescriptionsFilledFromUnchangedUri": 0,
+        "allOtherInspectedPropertiesIdentical": true,
+        "scope": "Existing passthrough behavior, not a new repair in this delivery"
+      },
+      "inheritedInspectorFindings": 0,
+      "savedFailuresAllMatchSourceInspectorFindings": true
+    },
+    "poppler": {
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "pixelIdenticalPages": 2
+    },
+    "pdfjs": {
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ]
+    },
+    "formProbe": {
+      "sourceAndCandidateFillSaveReopen": true,
+      "filledFirstPagePixelIdentical": true,
+      "terminalFields": 32,
+      "widgets": 33,
+      "scope": "One text field and one checkbox per source/candidate; not every field or keyboard/AT testing"
+    }
+  },
+  "hinodeSavedOrderProof": {
+    "candidateHash": "8ffe33d557a2325819a185e58a29794c93184dda98844ba720bf34601f97c6a0",
+    "independentReader": "pypdf",
+    "leftBodyNodeIds": [
+      "n-1-4",
+      "n-1-6",
+      "n-1-8",
+      "n-1-10",
+      "n-1-12",
+      "n-1-14",
+      "n-1-16",
+      "n-1-18",
+      "n-1-20",
+      "n-1-22",
+      "n-1-25",
+      "n-1-27",
+      "n-1-29"
+    ],
+    "rightBodyNodeIds": [
+      "n-1-5",
+      "n-1-7",
+      "n-1-9",
+      "n-1-11",
+      "n-1-13",
+      "n-1-15",
+      "n-1-17",
+      "n-1-19",
+      "n-1-21",
+      "n-1-24",
+      "n-1-26",
+      "n-1-28",
+      "n-1-30"
+    ],
+    "allLeftBodyBeforeAllRightBody": true,
+    "footersAfterBothColumns": true,
+    "savedActualTextNodes": 40,
+    "scope": "Agent-checked source layout and independent saved-tree spot checks; not human screen-reader qualification"
+  },
+  "remainingWork": [
+    "Attach and qualify an OCR text layer before accepting native tagging of image-only text pages.",
+    "Resolve booklet missing emitted table-header attachment without removing the header-reference guard.",
+    "Qualify native source-to-candidate identity mapping and intended content coverage.",
+    "Improve paragraph granularity, figure descriptions and broader semantic accuracy using reviewed references.",
+    "Remediate inherited conformance/font/structure findings with separately qualified repairs.",
+    "Perform human reader/keyboard qualification; no output is automatically accepted."
+  ],
+  "supportingArtifactSha256": {
+    "output/public-pdf-fixes-20261022/source-manifest.json": "6671d7fad7f848315dfb4389a8b58f5c5a125de51565ae8ec68100501037bf67",
+    "output/public-pdf-fixes-20261022/execution-status.json": "434aecb137c5b7a50f9439289cd1a1e5049a1da2fa735c75beb1252971fcd631",
+    "output/public-pdf-fixes-20261022/visual-comparison.json": "6ac9677ed600625b60e4ad3be5c7a145f015f97117cd93c96931fde3a4c4f97d",
+    "output/public-pdf-fixes-20261022/visual-comparison/test-form-control.json": "d7c001d1846d22fb4488a8ecbbc3c4bc637efd4d532becf96546120ec9ec8afc",
+    "output/public-pdf-fixes-20261022/interaction-and-pdfjs.json": "088b7fb7e8bf02971db8a48ed70663c8a35474750a463ebebda956081512a371",
+    "output/public-pdf-fixes-20261022/hinode-order-proof.json": "5384f83652545d429a72079b7d054d36c1255aacb9679b5b289b75305335159a",
+    "output/public-pdf-fixes-20261022/run-pilot.py": "dc63075b1f64017c77573d79d46e80033e3bee71ad5171a654f257c3e834e409",
+    "output/public-pdf-fixes-20261022/compare-renders.py": "35f5864211ddd7e8bde4545ddbbcbd6319d2c1c31edbde97dbb0eda9d99d9ab8",
+    "output/public-pdf-fixes-20261022/check-forms-and-pdfjs.mjs": "3ccf595a753c08bd851fc6c9900f725ef966e65a94cbc0cbc09298b2b827f24c",
+    "tmp/pilot-fixes-production-final.log": "388ce1dfb51984cf6f56c19efba9163bbb7f21b530a54fe5db8ae57196beca82",
+    "tmp/pilot-fixes-compatibility.log": "277140045afb27719c38ee5847d6ccccc08496b340056592b02952b144b27a0f",
+    "tmp/pilot-fixes-coverage.log": "34f63243cde2cbfd4823d133decfd2dad8e3109a108f9f2ef2bf79f4dcf2e18a"
+  }
+}

@@ -16,6 +16,7 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdfwriter.compress.CompressParameters;
@@ -275,6 +276,7 @@ public class PassthroughMetadataCli {
         cal.setTimeInMillis(now.toEpochMilli());
 
         try (PDDocument doc = Loader.loadPDF(target)) {
+            var untypedXObjects = findUntypedXObjects(doc.getDocumentCatalog().getCOSObject());
             PDDocumentCatalog catalog = doc.getDocumentCatalog();
 
             PDDocumentInformation info = doc.getDocumentInformation();
@@ -528,6 +530,11 @@ public class PassthroughMetadataCli {
             // streams and font programs via FlateDecode, just not at
             // the object-table level).
             boolean encrypted = doc.isEncrypted();
+            if (minimal) for (COSDictionary object : untypedXObjects) {
+                // PDFTextStripper and resource accessors can insert this optional
+                // key while reading. Undo only that known constructor side effect.
+                if (COSName.XOBJECT.equals(object.getDictionaryObject(COSName.TYPE))) object.removeItem(COSName.TYPE);
+            }
             try (OutputStream os = new FileOutputStream(incremental)) {
                 if (encrypted || minimal) {
                     doc.saveIncremental(os);
@@ -1625,6 +1632,28 @@ public class PassthroughMetadataCli {
             }
         }
         return count;
+    }
+
+    private static java.util.List<COSDictionary> findUntypedXObjects(COSBase root) {
+        var result = new java.util.ArrayList<COSDictionary>();
+        var seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<COSBase, Boolean>());
+        var pending = new java.util.ArrayDeque<COSBase>(); pending.add(root);
+        while (!pending.isEmpty()) {
+            COSBase value = pending.removeLast();
+            if (!seen.add(value)) continue;
+            if (value instanceof COSObject) {
+                COSBase item = ((COSObject) value).getObject(); if (item != null) pending.add(item);
+            } else if (value instanceof COSDictionary) {
+                COSDictionary dictionary = (COSDictionary) value;
+                COSBase subtype = dictionary.getDictionaryObject(COSName.SUBTYPE);
+                if (value instanceof COSStream && !dictionary.containsKey(COSName.TYPE) &&
+                    (COSName.FORM.equals(subtype) || COSName.IMAGE.equals(subtype))) result.add(dictionary);
+                for (COSBase item : dictionary.getValues()) if (item != null) pending.add(item);
+            } else if (value instanceof COSArray) {
+                for (COSBase item : (COSArray) value) if (item != null) pending.add(item);
+            }
+        }
+        return result;
     }
 
     private static <T> java.util.List<T> toList(Iterable<T> it) {

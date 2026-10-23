@@ -3,10 +3,29 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { PDFDocument, PDFDict, PDFArray, PDFName, PDFString } from "pdf-lib";
+import { PDFDocument, PDFDict, PDFArray, PDFName, PDFString, PDFHexString } from "pdf-lib";
 import { createListFormFixture } from "../../modules/pdf-writer/test/fixtures/list-form-fixture.js";
 import { inspectPdfLowLevel } from "../../scripts/inspect-pdf-low-level.js";
 const name = PDFName.of;
+
+test("inspector transports saved Unicode independently of JVM stdout encoding", async (t) => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "inspector-unicode-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const fixture = await createListFormFixture(dir);
+  const doc = await PDFDocument.load(await readFile(fixture.pdfPath));
+  const value = "Hinode’s ‘eclipse’ — café € 日本語";
+  doc.context.lookup(fixture.refs.heading, PDFDict).set(name("ActualText"), PDFHexString.fromText(value));
+  await writeFile(fixture.pdfPath, await doc.save());
+  const previous = process.env.JAVA_TOOL_OPTIONS;
+  process.env.JAVA_TOOL_OPTIONS = `${previous || ""} -Dstdout.encoding=windows-1252`;
+  try {
+    const inspected = await inspectPdfLowLevel({pdfPath:fixture.pdfPath,preservation:true});
+    assert.ok(inspected.structure.some(n => n.actualText === value));
+  } finally {
+    if (previous === undefined) delete process.env.JAVA_TOOL_OPTIONS;
+    else process.env.JAVA_TOOL_OPTIONS = previous;
+  }
+});
 test("saved-PDF inspector resolves RoleMap chains and detects invalid ownership indexes", async (t) => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "structure-inspect-")); t.after(() => rm(dir, { recursive: true, force: true }));
   const variants = ["mapped-heading", "role-cycle", "unmapped-role", "parent-slot", "id-slot", "duplicate-mcid", "duplicate-objr"];

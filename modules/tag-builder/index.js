@@ -1968,6 +1968,21 @@ export async function buildTagTree(inputPath, overrides = {}) {
   let activeTable = null;
   let listIndex = 0;
   const listItemsBySource = new Map(), paragraphsByGroup = new Map();
+  // Precedence constraints can split a table group around a heading or other
+  // content. Preserve that order and every cell, but give each emitted fragment
+  // its own identity. Reserve all source group names before allocating suffixes.
+  const reservedTableIds = new Set(orderedNodes.filter(n => ["Table", "TH", "TD"].includes(n.role))
+    .map(n => `tag:table:${getTableGroupId(n) || `page-${n.pageNumber}-table`}`));
+  const emittedTableIds = new Set();
+  const newTable = (node, groupId) => {
+    const table = createTableNode(node, groupId), base = table.id;
+    let fragment = 2;
+    while (emittedTableIds.has(table.id)) {
+      do { table.id = `${base}:fragment:${fragment++}`; } while (reservedTableIds.has(table.id));
+    }
+    emittedTableIds.add(table.id);
+    return table;
+  };
 
   // A5: identify which heading should be emitted as Title (if any).
   const titleNodeId = options.enableTitleDetection ? detectTitleNodeId(orderedNodes) : null;
@@ -2080,7 +2095,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
 
     if (node.role === "Table") {
       const groupId = getTableGroupId(node) || node.id;
-      const tableNode = createTableNode(node, groupId);
+      const tableNode = newTable(node, groupId);
       currentContainer().children.push(tableNode);
       activeTable = {
         groupId,
@@ -2093,7 +2108,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
     if (node.role === "TH" || node.role === "TD") {
       const groupId = getTableGroupId(node) || `page-${node.pageNumber}-table`;
       if (!activeTable || activeTable.groupId !== groupId) {
-        const tableNode = createTableNode(null, groupId);
+        const tableNode = newTable(null, groupId);
         currentContainer().children.push(tableNode);
         activeTable = {
           groupId,

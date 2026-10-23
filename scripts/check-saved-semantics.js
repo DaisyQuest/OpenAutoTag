@@ -3,10 +3,8 @@ import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
 import os from "node:os";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { inspectPdfLowLevel } from "./inspect-pdf-low-level.js";
-const exec = promisify(execFile);
+import { runJsonCommand } from "./run-json-command.js";
 // Module boundaries stay CLI-based; validator owns the comparison implementation.
 export async function checkSavedSemantics({ pdfPath, tagsPath, referencePath, outputPath }) {
   if (!pdfPath || Boolean(tagsPath) === Boolean(referencePath)) throw new Error("Required: --pdf and exactly one of --tags or --reference");
@@ -20,9 +18,7 @@ export async function checkSavedSemantics({ pdfPath, tagsPath, referencePath, ou
   let report;
   try {
     const file = path.join(temp, "comparison.json"); await writeFile(file, JSON.stringify(payload));
-    const { stdout } = await exec(process.execPath, [path.resolve(import.meta.dirname, "../modules/validator/saved-semantics-cli.js"), file],
-      { windowsHide: true, timeout: 60000, maxBuffer: 32 * 1024 * 1024 });
-    report = JSON.parse(stdout);
+    report = await runJsonCommand(process.execPath, [path.resolve(import.meta.dirname, "../modules/validator/saved-semantics-cli.js"), file]);
   } finally { await rm(temp, { recursive: true, force: true }); }
   const hash = bytes => createHash("sha256").update(bytes).digest("hex");
   const candidateBytes=await readFile(pdfPath), referenceBytes=referencePath?await readFile(referencePath):null;

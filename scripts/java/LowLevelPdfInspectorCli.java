@@ -1,4 +1,5 @@
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -32,7 +33,7 @@ public class LowLevelPdfInspectorCli {
 
         try (PDDocument document = Loader.loadPDF(new File(pdfPath))) {
             if ("true".equals(options.get("--preservation"))) {
-                System.out.println(toJson(PreservationInspector.inspect(document, new File(pdfPath))));
+                writeJson(PreservationInspector.inspect(document, new File(pdfPath)));
                 return;
             }
             Map<String, Object> result = new LinkedHashMap<>();
@@ -41,8 +42,15 @@ public class LowLevelPdfInspectorCli {
             result.put("catalog", inspectCatalog(document));
             result.put("structureTree", inspectStructureTree(document));
             result.put("pages", inspectPages(document));
-            System.out.println(toJson(result));
+            writeJson(result);
         }
+    }
+
+    private static void writeJson(Object value) throws java.io.IOException {
+        // Node decodes stdout as UTF-8. PrintStream's platform encoding can be
+        // Windows-1252 even when Java's file.encoding is UTF-8.
+        System.out.write((toJson(value) + "\n").getBytes(StandardCharsets.UTF_8));
+        System.out.flush();
     }
 
     private static Map<String, String> parseArgs(String[] args) {

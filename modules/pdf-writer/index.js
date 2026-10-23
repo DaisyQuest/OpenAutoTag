@@ -1,4 +1,5 @@
 import Ajv2020 from "ajv/dist/2020.js";
+import { requireNativeTextOperators } from "./native-content-guard.js";
 import { execFile } from "node:child_process";
 import { copyFile, mkdir, readFile, stat, writeFile, access as fsAccess } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -682,6 +683,7 @@ async function runNativeFlow({ pdfPath, tagsPath, semanticPath, outputPath, cach
   }
 
   const tagPlan = cached?.plan ?? JSON.parse(await readFile(tagPlanPath, "utf8"));
+  requireNativeTextOperators(tagPlan, JSON.parse(await readFile(semanticPath, "utf8")));
 
   const rewriterStdout = await runNativeRewriter({
     pdfPath: path.resolve(pdfPath),

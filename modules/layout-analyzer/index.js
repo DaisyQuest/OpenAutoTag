@@ -1,4 +1,5 @@
 import Ajv2020 from "ajv/dist/2020.js";
+import { detectProseColumns } from "./prose-columns.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import layoutSchema from "../../contracts/layout.schema.json" with { type: "json" };
@@ -156,6 +157,8 @@ function detectColumns(page, ignoredBlockIds = new Set(), thresholds = readThres
   const blocks = page.textBlocks.filter(
     (block) => normalizeText(block.text).length > 0 && !ignoredBlockIds.has(block.id)
   );
+  const proseColumns = detectProseColumns(page, blocks);
+  if (proseColumns) return proseColumns;
 
   if (blocks.length < 4) {
     return {

@@ -1,5 +1,7 @@
 # Official-source PDF pilot — 2026-10-22
 
+Historical baseline. The subsequent [verified engine fixes and frozen replay](public-pdf-pilot-fixes-20261022.md) correct several problems below and record the remaining blockers.
+
 Seven of eight inputs produced candidate PDFs. All 86 candidate pages were pixel-identical to their sources in the tested Poppler renders, and the two IRS forms retained 222 terminal fields/widgets and passed bounded fill/save/reopen probes. Semantic inspection nevertheless found substantial problems. Neither a visually unchanged PDF nor a zero-failure veraPDF result establishes usable tagging.
 
 No engine implementation changed during this pilot. The baseline is `b52856c71082a93ea868dfd23f17ee558b8eee2c`; existing unrelated Studio/UI changes were excluded. The [machine-readable evidence](evidence/public-pdf-pilot-20261022.json) records source and output hashes, selection, results, diagnostics, and artifact hashes. Local PDFs and detailed artifacts are under `output/public-pdf-pilot-20261022/` and are not distributed in Git.
