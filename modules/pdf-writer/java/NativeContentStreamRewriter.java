@@ -344,6 +344,22 @@ public class NativeContentStreamRewriter {
         }
     }
 
+    private static void bindNativeWidgets(TagTreeNode root,NativeWidgets widgets) throws IOException {
+        Deque<TagTreeNode> stack=new ArrayDeque<>();stack.push(root);Set<String> ids=new HashSet<>();
+        while(!stack.isEmpty()) {
+            TagTreeNode n=stack.pop();if(ids.size()>=100000||!ids.add(n.id))throw new IOException("Duplicate or excessive native tag identities");
+            if(n.widgetRef!=null)n.widget=widgets.bind(n.widgetRef,n.widgetPage,n.widgetFieldName,n.id,n.widgetPlacement,false);
+            stack.addAll(n.children);
+        }
+        // Old plans may omit widget metadata. Every real source widget still
+        // receives its own source-derived Form; placement remains review work.
+        for(NativeWidgets.Widget w:widgets.widgets)if(w.tagId==null) {
+            TagTreeNode n=new TagTreeNode();n.id="native-widget:"+w.pageNumber+":"+w.index;n.type="Form";
+            if(!ids.add(n.id))throw new IOException("Generated native widget ID conflicts with intent");
+            n.widget=widgets.bind(w.sourceRef,w.pageNumber,w.fieldName,n.id,"unresolved",true);root.children.add(n);
+        }
+    }
+
     /** Source offsets are captured before serialization, never recovered from
      * the generated MCIDs. An independent reader checks this proposed intent. */
     private static class OwnershipCursor {
@@ -391,6 +407,7 @@ public class NativeContentStreamRewriter {
         String alt;
         String actualText;
         int figurePage; double[] figureBox;
+        String widgetRef,widgetFieldName,widgetPlacement;int widgetPage;NativeWidgets.Widget widget;
         NativeLinkOwnership.Link nativeLinkGroup;
         boolean intentionallyEmptyDataCell;
         String footnoteGroupId;
@@ -430,6 +447,11 @@ public class NativeContentStreamRewriter {
             List<Object> box=asList(figure.get("bbox"));n.figureBox=new double[box.size()];
             for(int i=0;i<box.size();i++)n.figureBox[i]=asDouble(box.get(i));
         }
+        if(m.get("nativeWidget") instanceof Map) {
+            if(!"Form".equals(n.type))throw new IllegalArgumentException("nativeWidget requires Form role");
+            Map<String,Object> widget=asMap(m.get("nativeWidget"));n.widgetRef=asString(widget.get("sourceRef"));n.widgetPage=requiredInteger(widget,"pageNumber");
+            n.widgetFieldName=asString(widget.get("fieldName"));n.widgetPlacement=asString(widget.get("placement"));
+        }
         Object lang = m.get("lang");
         if (lang != null) n.lang = asString(lang);
         Object alt = m.get("alt");
@@ -460,6 +482,7 @@ public class NativeContentStreamRewriter {
         }
         List<Object> children = asList(m.get("children"));
         for (Object c : children) n.children.add(parseTagNode(c));
+        if(n.widgetRef!=null&&!n.children.isEmpty())throw new IllegalArgumentException("Native widget Form must own only one widget");
         n.intentionallyEmptyDataCell = "TD".equals(n.type) && children.isEmpty()
             && asList(m.get("sourceNodeIds")).isEmpty() && asString(m.get("label")).isBlank()
             && asString(m.get("actualText")).isBlank() && asString(m.get("alt")).isBlank();
@@ -1207,7 +1230,7 @@ public class NativeContentStreamRewriter {
         return nextKey;
     }
 
-    private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree) throws IOException {
+    private static void buildStructureTreeHierarchical(PDDocument doc, List<PagePlan> plans, TagTreeNode tagTree, NativeWidgets widgets) throws IOException {
         if (tagTree == null) tagTree = flatTagTree(plans);
 
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
@@ -1265,6 +1288,11 @@ public class NativeContentStreamRewriter {
             link.parentKey=nextPageKey++;link.annotation.getCOSObject().setInt(COSName.STRUCT_PARENT,link.parentKey);
             numbers.put(link.parentKey,new PDParentTreeValue(link.element.getCOSObject()));
             if(link.annotation.getContents()==null||link.annotation.getContents().isBlank())link.annotation.setContents(link.anchorText);
+        }
+        for(NativeWidgets.Widget widget:widgets.widgets) {
+            if(widget.element==null)throw new IOException("Native widget Form was not emitted: "+widget.sourceRef);
+            widget.parentKey=nextPageKey++;widget.annotation.getCOSObject().setInt(COSName.STRUCT_PARENT,widget.parentKey);
+            numbers.put(widget.parentKey,new PDParentTreeValue(widget.element.getCOSObject()));
         }
         parentTree.setNumbers(numbers);
         treeRoot.setParentTree(parentTree);
@@ -1533,7 +1561,7 @@ public class NativeContentStreamRewriter {
         // Empty TDs carry grid position without painted content. Do not extend
         // this exception to unmatched source text, empty headers or orphan cells.
         boolean keepEmptyCell = node.intentionallyEmptyDataCell && "TR".equals(ctx.parentType);
-        if (myRefs.isEmpty() && childElements.isEmpty() && !hasSemanticText && !hasAltText && !keepEmptyCell) return null;
+        if (myRefs.isEmpty() && childElements.isEmpty() && !hasSemanticText && !hasAltText && !keepEmptyCell && node.widget==null) return null;
 
         PDStructureElement el = new PDStructureElement(node.type, treeRoot);
         if (node.lang != null && !node.lang.isEmpty()) el.setLanguage(node.lang);
@@ -1550,6 +1578,11 @@ public class NativeContentStreamRewriter {
             el.getCOSObject().setString(COSName.ID,"oat-native-link:"+node.nativeLinkGroup.pageNumber+":"+node.nativeLinkGroup.index);
         }
 
+        if(node.widget!=null) {
+            if(!myRefs.isEmpty())throw new IOException("Native widget Form cannot also own source text: "+node.id);
+            node.widget.element=el;el.setPage(node.widget.page);
+            COSDictionary objr=new COSDictionary();objr.setItem(COSName.TYPE,COSName.getPDFName("OBJR"));objr.setItem(COSName.PG,node.widget.page.getCOSObject());objr.setItem(COSName.OBJ,node.widget.annotation.getCOSObject());el.appendKid(new PDObjectReference(objr));
+        }
         AuthoredText.StructureRuns authoredRuns = new AuthoredText.StructureRuns();
         for (PageMcRef ref : myRefs) {
             // Emit an MCR dict kid so multi-page elements carry a
@@ -1941,7 +1974,10 @@ public class NativeContentStreamRewriter {
                 for (AuthoredText.Scope scope : authoredText.scopes) owners.add(scope.owner);
                 clearGeneratedReplacement(tagTree, owners, suppressedActualText);
             }
-            buildStructureTreeHierarchical(doc, plans, tagTree);
+            NativeWidgets widgets=new NativeWidgets(doc);
+            if(tagTree==null)tagTree=flatTagTree(plans);
+            bindNativeWidgets(tagTree,widgets);
+            buildStructureTreeHierarchical(doc, plans, tagTree, widgets);
 
             // Retain the shared metadata, structure, Unicode and link handling.
             // Native mode must not substitute source font families merely to
@@ -1955,7 +1991,7 @@ public class NativeContentStreamRewriter {
             // auto-generates ToUnicode CMaps, and backfills
             // /Contents on Link annotations.
             try {
-                String summary = PassthroughMetadataCli.applyPdfUaAccessibilityPass(doc, title, language, false, false);
+                String summary = PassthroughMetadataCli.applyPdfUaAccessibilityPass(doc, title, language, false, false, true);
                 System.err.println("[rewriter] accessibility pass: " + summary);
             } catch (IOException e) {
                 System.err.println("[rewriter] WARNING: accessibility pass failed, falling back to legacy metadata: " + e.getMessage());
@@ -2008,6 +2044,7 @@ public class NativeContentStreamRewriter {
             json.append(",\"title\":").append(escapeJson(title));
             json.append(",\"language\":").append(escapeJson(language));
             json.append(",\"nativeLinks\":").append(QualifiedStructureRepairs.json(plans.stream().filter(p->p.links!=null).flatMap(p->p.links.links.stream()).map(NativeLinkOwnership.Link::report).toList()));
+            json.append(",\"nativeWidgets\":").append(QualifiedStructureRepairs.json(widgets.widgets.stream().map(NativeWidgets.Widget::report).toList()));
             json.append(",\"nativeFigures\":[").append(String.join(",",plans.stream().flatMap(p->p.figureOwnership.stream()).toList())).append("]");
             json.append(",\"sourceOwnership\":[").append(String.join(",", plans.stream().flatMap(p->p.sourceOwnership.stream()).toList())).append("]");
             json.append("}");

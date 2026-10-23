@@ -1,3 +1,4 @@
+import { attachWidgetOwnership } from "./widget-ownership.js";
 import { associateCaptions } from "./captions.js";
 import Ajv2020 from "ajv/dist/2020.js";
 import { attachOcrSegments } from "./ocr-segments.js";
@@ -1801,12 +1802,14 @@ export async function buildTagTree(inputPath, overrides = {}) {
   }
 
   attachOcrSegments(root, semanticDocument);
+  const widgetOwnership=attachWidgetOwnership(root,semanticDocument);
   const taggingDocument = {
     schemaVersion: "1.0.0",
     documentId: `${semanticDocument.documentId}:tagging`,
     source: {
       semanticDocumentId: semanticDocument.documentId,
       ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
+      ...(widgetOwnership.widgets.length || widgetOwnership.reviews.length ? {widgetOwnership} : {}),
       headingNormalization: headingNormalization.summary,
       tableRegularityCorrection,
       ...(tableCellMerges.length ? { tableCellMerges } : {}),

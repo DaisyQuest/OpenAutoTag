@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFName, StandardFonts } from "pdf-lib";
 import { runFontAuditCli } from "../index.js";
 import {
   buildPdfWithIncompleteToUnicode,
@@ -36,6 +36,15 @@ test("font-audit flags Standard 14 unembedded fonts", async () => {
   const std14Findings = result.findings.filter((f) => f.code === "FONT_STANDARD_14");
   assert.equal(std14Findings.length, 1);
   assert.equal(std14Findings[0].severity, "error");
+});
+test("font audit does not invent fallback fonts for an authored AcroForm", async () => {
+  const dir = await tmp("font-audit-no-fixups-"), pdfPath = path.join(dir, "form.pdf");
+  const doc = await PDFDocument.create();doc.addPage();
+  doc.catalog.set(PDFName.of("AcroForm"), doc.context.obj({ Fields: [], DR: {} }));
+  await writeFile(pdfPath, await doc.save({ updateFieldAppearances: false }));
+  const result = await runFontAuditCli(pdfPath);
+  assert.deepEqual(result.fonts, []);
+  assert.deepEqual(result.findings, []);
 });
 
 test("font-audit flags incomplete /ToUnicode coverage as error", async () => {

@@ -8,6 +8,7 @@
     "schemaVersion": { "const": "1.0.0" },
     "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "intentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nativeWidgets": {"type":"array","maxItems":10000,"items":{"type":"object","required":["pageNumber","annotationIndex","sourceRef","fieldName","tagId","generated","placement","parentTreeKey"],"properties":{"pageNumber":{"type":"integer","minimum":1},"annotationIndex":{"type":"integer","minimum":0},"sourceRef":{"type":"string","pattern":"^[1-9][0-9]* [0-9]+ R$"},"fieldName":{"type":"string"},"tagId":{"type":"string","minLength":1},"generated":{"type":"boolean"},"placement":{"enum":["label-context","unresolved"]},"parentTreeKey":{"type":"integer","minimum":0}},"additionalProperties":false}},
     "nativeFigures": {"type":"array","maxItems":10000,"items":{"type":"object","required":["tagNodeId","pageNumber","streamOrigin","operatorIndex"],"properties":{"tagNodeId":{"type":"string","minLength":1},"pageNumber":{"type":"integer","minimum":1},"streamOrigin":{"type":"string","pattern":"^page(?:/[0-9]+)*$"},"operatorIndex":{"type":"integer","minimum":0}},"additionalProperties":false}},
     "nativeLinks": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/nativeLink" } },
     "ranges": { "type": "array", "maxItems": 100000, "items": {

@@ -26,7 +26,12 @@ test("mixed headers save exact ordered relations and preserve native editable ap
   const before=await readFile(pdfPath),tagging=await buildTagTree(semanticPath);await writeFile(tagsPath,JSON.stringify(tagging));
   const intended=new Map(all(tagging.root).map(n=>[n.id,n])),cases=[];
   for(const mode of ["native","raster"])await t.test(`${mode} relationships match the independent oracle`,async()=>{
-    const outputPath=path.join(dir,`${mode}.pdf`);await writeTaggedArtifacts({pdfPath,outputPath,tagsPath,semanticPath,mode});
+    let modeSource=pdfPath;
+    if(mode==='raster') {
+      await assert.rejects(writeTaggedArtifacts({pdfPath,outputPath:path.join(dir,'flattened.pdf'),tagsPath,semanticPath,mode}),/Raster output would flatten native form widgets/);
+      modeSource=path.join(dir,'plain.pdf');await run('TableGridFixture',modeSource,textPath,path.resolve('modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf'),'no-form');
+    }
+    const outputPath=path.join(dir,`${mode}.pdf`);await writeTaggedArtifacts({pdfPath:modeSource,outputPath,tagsPath,semanticPath,mode});
     const doc=await PDFDocument.load(await readFile(outputPath)),objects=new Map(doc.context.enumerateIndirectObjects().filter(([,o])=>o.get?.(key("ID"))?.decodeText).map(([,o])=>[o.get(key("ID")).decodeText(),o]));
     const emitted=id=>{const n=intended.get(`tag:${id}`);return n.headerId || `oat:${n.id}`;};
     for(const table of fixture.tables)for(const [id,expected]of Object.entries(table.headers)){

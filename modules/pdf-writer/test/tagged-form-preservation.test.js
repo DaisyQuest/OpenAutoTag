@@ -144,11 +144,13 @@ test("marked content without both catalog tagging signals does not trigger prese
   }
 });
 
-test("the explicit raster bailout policy is honored even for a high-match tagged form", async (t) => {
+test("raster bailout refuses to flatten an authored form", async (t) => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "tagged-form-raster-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const inputs = await createTaggedForm(dir);
-  const result = await writeTaggedArtifacts({ ...inputs, outputPath: path.join(dir, "result.pdf"),
-    mode: "auto", alreadyTaggedPolicy: "bailout-to-raster" });
-  assert.equal(result.writerMode, "raster");
+  const original = await readFile(inputs.pdfPath), outputPath = path.join(dir, "result.pdf");
+  await assert.rejects(writeTaggedArtifacts({ ...inputs, outputPath,
+    mode: "auto", alreadyTaggedPolicy: "bailout-to-raster" }), /Raster output would flatten native form widgets/);
+  assert.deepEqual(await readFile(inputs.pdfPath), original);
+  await assert.rejects(readFile(outputPath), { code: "ENOENT" });
 });

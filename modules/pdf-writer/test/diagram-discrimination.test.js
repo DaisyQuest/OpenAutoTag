@@ -27,8 +27,20 @@ test('diagram discrimination preserves label ownership, genuine tables and edita
  await writeFile(semanticPath,JSON.stringify(mergeWithStrategy(semantic,{strategy:'text-structure'}).document));await writeFile(semanticPath,JSON.stringify(await assignReadingOrder(semanticPath)));const tags=await buildTagTree(semanticPath);await writeFile(tagsPath,JSON.stringify(tags));
  const sections=all(tags.root).filter(n=>n.id.startsWith('tag:diagram:'));assert.equal(sections.length,1);assert.equal(sections[0].type,'Sect');assert.deepEqual(sections[0].children.map(n=>n.label),labels.map(n=>n.text));assert.equal(all(tags.root).filter(n=>n.type==='Table').length,1);assert.ok(!all(sections[0]).some(n=>n.label?.startsWith('Ordinary')));
  const cases=[];
- for(const mode of ['native','raster'])await t.test(`${mode} saves diagram text and independent table roles`,async()=>{
+ for(const mode of ['native'])await t.test(`${mode} saves diagram text and independent table roles`,async()=>{
   const outputPath=path.join(dir,`${mode}.pdf`);await writeTaggedArtifacts({pdfPath,outputPath,semanticPath,tagsPath,mode});const saved=await checkSavedSemantics({pdfPath:outputPath,tagsPath,outputPath:path.join(dir,`${mode}-saved.json`),...(mode==='native'?{sourcePdfPath:pdfPath,ownershipPath:outputPath+'.ownership.json'}:{})});assert.equal(saved.summary.failed,0,JSON.stringify(saved.checks.filter(c=>c.status==='fail')));if(mode==='native')assert.match((await run('CidMapFixture','verify',pdfPath,outputPath)).stdout,/preserved/);cases.push({mode,outputPath,saved:saved.summary});assert.deepEqual(await readFile(pdfPath),before);
+ });
+ await t.test('raster refuses editable forms and preserves diagram roles in a form-free source',async()=>{
+  await assert.rejects(writeTaggedArtifacts({pdfPath,outputPath:path.join(dir,'flattened.pdf'),semanticPath,tagsPath,mode:'raster'}),/Native widget ownership requires native writer mode/);
+  const plain=path.join(dir,'plain.pdf'),raw=path.join(dir,'plain-raw.json'),layoutFile=path.join(dir,'plain-layout.json'),semanticFile=path.join(dir,'plain-semantic.json'),tagsFile=path.join(dir,'plain-tags.json');
+  await run('DiagramFixture',plain,path.resolve('modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf'),'no-form');
+  await writeFile(raw,JSON.stringify(await parsePdf(plain)));
+  const tablePath=path.join(dir,'plain-table.json');await buildTableStructureMap({pdfPath:plain,layoutPath:raw,outputPath:tablePath});
+  await writeFile(layoutFile,JSON.stringify(await analyzeLayout(raw,{tableStructurePath:tablePath})));
+  await writeFile(semanticFile,JSON.stringify(await buildSemanticDocument(layoutFile)));
+  const plainTags=await buildTagTree(semanticFile);assert.equal(all(plainTags.root).filter(n=>n.id.startsWith('tag:diagram:')).length,1);assert.equal(all(plainTags.root).filter(n=>n.type==='Table').length,1);await writeFile(tagsFile,JSON.stringify(plainTags));
+  const outputPath=path.join(dir,'raster.pdf');await writeTaggedArtifacts({pdfPath:plain,outputPath,semanticPath:semanticFile,tagsPath:tagsFile,mode:'raster'});
+  const saved=await checkSavedSemantics({pdfPath:outputPath,tagsPath:tagsFile});assert.equal(saved.summary.failed,0,JSON.stringify(saved.checks.filter(c=>c.status==='fail')));cases.push({mode:'raster',source:plain,outputPath,saved:saved.summary});
  });
  await t.test('saved diagram-to-table corruption rejects',async()=>{
   const doc=await PDFDocument.load(await readFile(path.join(dir,'native.pdf'))),section=doc.context.enumerateIndirectObjects().map(([,v])=>v).find(v=>v.get?.(key('ID'))?.decodeText?.()==='oat:'+sections[0].id);assert.ok(section);section.set(key('S'),key('Table'));const bad=path.join(dir,'bad-role.pdf');await writeFile(bad,await doc.save());const saved=await checkSavedSemantics({pdfPath:bad,tagsPath,outputPath:path.join(dir,'bad-role.json')});assert.ok(saved.checks.some(c=>c.code==='SAVED_ROLE'&&c.status==='fail'));

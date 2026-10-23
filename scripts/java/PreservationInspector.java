@@ -42,6 +42,9 @@ public final class PreservationInspector {
         List<Object> pages = new ArrayList<>();
         int number = 0;
         for (PDPage page : doc.getPages()) pagesByDict.put(page.getCOSObject(), ++number);
+        COSDictionary sourceForm=doc.getDocumentCatalog().getCOSObject().getCOSDictionary(COSName.ACRO_FORM);
+        String formState=sourceForm==null?"absent":fieldRefs(sourceForm.getItem(COSName.FIELDS))+"|calculation:"+fieldRefs(sourceForm.getItem(COSName.CO))+"|"+
+            canonical(sourceForm,Set.of("Fields","DR","CO"),Collections.newSetFromMap(new IdentityHashMap<>()),new int[]{0},0,pagesByDict);
         for (PDPage page : doc.getPages()) {
             var media = page.getMediaBox(); var crop = page.getCropBox();
             Map<String, Object> item = new LinkedHashMap<>();
@@ -88,6 +91,19 @@ public final class PreservationInspector {
                     if (widgets.containsKey(key)) throw new IOException("Widget appears more than once: " + key);
                     Map<String, Object> widget = new LinkedHashMap<>();
                     widget.put("digest", digest); widget.put("page", pagesByDict.get(page.getCOSObject()));
+                    widget.put("annotationIndex",annotationIndex);widget.put("structParent",dict.getInt(COSName.STRUCT_PARENT,-1));
+                    widget.put("nativeDigest",hash(canonical(dict,Set.of("Parent","StructParent","AP"),Collections.newSetFromMap(new IdentityHashMap<>()),new int[]{0},0,pagesByDict)));
+                    widget.put("appearanceHash",widgetAppearance(dict.getDictionaryObject(COSName.AP)));
+                    List<String> names=new ArrayList<>(),states=new ArrayList<>();Set<COSDictionary> lineage=Collections.newSetFromMap(new IdentityHashMap<>());COSDictionary field=dict;
+                    String accessible="";
+                    while(field!=null) {
+                        if(lineage.size()>=128||!lineage.add(field))throw new IOException("Cyclic or excessive widget field ancestry");
+                        if(field.getDictionaryObject(COSName.T) instanceof COSString name&&!name.getString().isEmpty())names.add(name.getString());
+                        if(accessible.isEmpty()&&field.getDictionaryObject(COSName.TU) instanceof COSString tooltip&&!tooltip.getString().isBlank())accessible=tooltip.getString();
+                        states.add(requiredRef(field)+":"+fieldRefs(field.getItem(COSName.KIDS))+":"+canonical(field,Set.of("Parent","Kids","P","StructParent","AP","DR"),Collections.newSetFromMap(new IdentityHashMap<>()),new int[]{0},0,pagesByDict));
+                        COSBase ancestor=field.getDictionaryObject(COSName.PARENT);if(ancestor!=null&&!(ancestor instanceof COSDictionary))throw new IOException("Invalid widget field parent");field=(COSDictionary)ancestor;
+                    }
+                    Collections.reverse(names);widget.put("fieldName",String.join(".",names));widget.put("fieldStateHash",hash(formState+"|"+String.join("|",states)));widget.put("accessibleName",accessible);
                     widget.put("owners", new ArrayList<Map<String, Object>>()); widgets.put(key, widget);
                 } else annotations.add(digest);
                 annotationIndex++;
@@ -390,6 +406,23 @@ public final class PreservationInspector {
         MessageDigest digest = MessageDigest.getInstance("SHA-256"); byte[] buffer = new byte[8192]; long total = 0; int n;
         while ((n = in.read(buffer)) != -1) { total += n; if (total > limit) throw new IOException("Inspection stream limit exceeded"); digest.update(buffer, 0, n); }
         return HexFormat.of().formatHex(digest.digest());
+    }
+    // Appearance bytes and geometry remain exact. Resource dictionaries may
+    // receive existing separately audited Unicode maps; no appearance is rebuilt.
+    private static String widgetAppearance(COSBase value) throws Exception {
+        value=resolve(value);if(value==null)return "absent";
+        if(value instanceof COSStream)return fingerprint(value,Set.of("Resources"));
+        if(!(value instanceof COSDictionary))throw new IOException("Invalid widget appearance dictionary");
+        List<COSName> keys=new ArrayList<>(((COSDictionary)value).keySet());keys.sort(Comparator.comparing(COSName::getName));StringBuilder result=new StringBuilder();
+        for(COSName key:keys) {
+            COSBase entry=((COSDictionary)value).getDictionaryObject(key);
+            if(entry instanceof COSStream)result.append(key.getName()).append(':').append(fingerprint(entry,Set.of("Resources")));
+            else if(entry instanceof COSDictionary) {
+                List<COSName> states=new ArrayList<>(((COSDictionary)entry).keySet());states.sort(Comparator.comparing(COSName::getName));
+                for(COSName state:states) {COSBase stream=((COSDictionary)entry).getDictionaryObject(state);if(!(stream instanceof COSStream))throw new IOException("Invalid widget appearance state");result.append(key.getName()).append('/').append(state.getName()).append(':').append(fingerprint(stream,Set.of("Resources")));}
+            } else throw new IOException("Invalid widget appearance entry");
+        }
+        return hash(result.toString());
     }
     static String fingerprint(COSBase value, Set<String> skip) throws Exception {
         return hash(canonical(value, skip, Collections.newSetFromMap(new IdentityHashMap<>()), new int[]{0}, 0));

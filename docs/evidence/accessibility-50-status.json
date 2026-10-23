@@ -551,8 +551,12 @@
       "improvement": "Native widget structure ownership",
       "requirement": "Attach every native form widget to the intended Form structure without rebuilding controls.",
       "acceptance": "Multiwidget fields have reciprocal OBJRs and unchanged names, values, actions and appearance streams.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/accessibility-50-batch29-20261023.md",
+        "docs/evidence/accessibility-50-batch29-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A47",

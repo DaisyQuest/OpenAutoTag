@@ -103,6 +103,10 @@ test("cropped, rotated and scaled pages share display geometry through extractio
     const rasterSource=path.join(dir,"raster-source.pdf"),rasterOut=path.join(dir,"raster.pdf"),rasterSemantic=path.join(dir,"raster-semantic.json"),rasterTags=path.join(dir,"raster-tags.json");
     await run(["-cp",jar,probe,"create",rasterSource,font,"raster"]);
     const sem=structuredClone(ordered);sem.nodes=sem.nodes.filter(n=>n.pageNumber<=24);const ids=new Set(sem.nodes.map(n=>n.id));sem.orderedNodeIds=sem.orderedNodeIds.filter(id=>ids.has(id));delete sem.widgets;delete sem.formFields;
+    // This variant contains only the first 24 form-free pages. Drop relationships
+    // to widgets on pages 25-28 alongside their removed semantic nodes.
+    sem.formRelationships=(sem.formRelationships||[]).map(f=>({...f,widgets:f.widgets.filter(w=>w.pageNumber<=24)})).filter(f=>f.widgets.length);
+    assert.deepEqual(sem.formRelationships,[]);delete sem.formNavigation;
     await writeFile(rasterSemantic,JSON.stringify(sem));await writeFile(rasterTags,JSON.stringify(await buildTagTree(rasterSemantic)));
     await writeTaggedArtifacts({pdfPath:rasterSource,outputPath:rasterOut,tagsPath:rasterTags,semanticPath:rasterSemantic,mode:"raster"});
     assert.match((await run(["-cp",jar,probe,"verify-raster",rasterSource,rasterOut])).stdout,/24 raster display transforms/);

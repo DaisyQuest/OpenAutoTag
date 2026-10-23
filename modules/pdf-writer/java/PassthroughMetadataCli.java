@@ -86,6 +86,10 @@ public class PassthroughMetadataCli {
     }
 
     public static String applyPdfUaAccessibilityPass(PDDocument doc, String title, String language, boolean minimal, boolean allowFontSubstitution) throws IOException {
+        return applyPdfUaAccessibilityPass(doc,title,language,minimal,allowFontSubstitution,false);
+    }
+
+    public static String applyPdfUaAccessibilityPass(PDDocument doc, String title, String language, boolean minimal, boolean allowFontSubstitution, boolean preserveWidgets) throws IOException {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -157,7 +161,7 @@ public class PassthroughMetadataCli {
         int toUnicodeAdded = minimal ? 0 : generateMissingToUnicode(doc);
         int linksWrapped = minimal ? 0 : wrapLinkAnnotations(doc, catalog.getStructureTreeRoot());
         int tabsSet = minimal ? 0 : ensureStructureTabOrder(doc);
-        int tooltipsAdded = minimal ? 0 : backfillWidgetTooltips(doc);
+        int tooltipsAdded = minimal || preserveWidgets ? 0 : backfillWidgetTooltips(doc);
         int cidSetsStripped = minimal ? 0 : stripMalformedCidSets(doc);
         // Strip /CharSet from Type1 FontDescriptors. TeX-produced
         // subsets (CMR, CMEX, CMSY, CMMI) include /CharSet strings that
@@ -178,15 +182,9 @@ public class PassthroughMetadataCli {
         int diffsSynthesized = minimal ? 0 : synthesizeSymbolicDifferences(doc);
         int cidGidMapsAdded = minimal ? 0 : syncCidToGidMap(doc);
         int annotsWrapped = minimal ? 0 : wrapMarkupAnnotations(doc, catalog.getStructureTreeRoot());
-        // #12 widget /Form wrapping is disabled by default — VeraPDF
-        // 1.28's PDFBox backend has a stub implementation of
-        // SEForm.hasOneInteractiveChild that always returns false,
-        // so every /Form we emit fires a spurious VERAPDF_7_18_4_2.
-        // Honor OAT_WRAP_WIDGETS=1 for downstream profiles that validate
-        // against a non-PDFBox backend (or newer VeraPDF).
-        // Widget wrap is now always on — VERAPDF_7_18_4_1 suppression
-        // via the WidgetStructProbe handles the PBoxSEForm stub bug.
-        int widgetsWrapped = minimal ? 0 : wrapWidgetAnnotations(doc, catalog.getStructureTreeRoot());
+        // Native rebuilding owns exact source widgets in its intended tree and
+        // preserves authored names. Legacy callers retain the existing wrapper.
+        int widgetsWrapped = minimal || preserveWidgets ? 0 : wrapWidgetAnnotations(doc, catalog.getStructureTreeRoot());
         int figuresArtifacted = minimal ? 0 : promoteEmptyFiguresToArtifact(catalog.getStructureTreeRoot());
         int langPromoted = minimal ? 0 : promoteStructLang(doc);
         int notdefRemapped = minimal ? 0 : remapNotdefGlyphs(doc);
@@ -1689,9 +1687,11 @@ public class PassthroughMetadataCli {
         }
         // AcroForm default resources — widget-rendering fonts live
         // here and our replacement pass's embedded fonts start
-        // without /ToUnicode. Walk /DR so those too get a CMap.
+        // without /ToUnicode. Walk /DR so those too get a CMap. The default
+        // accessor runs PDFBox fixups that invent /DA and default fonts; a
+        // Unicode-only pass must not change how authored form fields render.
         try {
-            var acro = doc.getDocumentCatalog().getAcroForm();
+            var acro = doc.getDocumentCatalog().getAcroForm(null);
             if (acro != null) {
                 PDResources dr = acro.getDefaultResources();
                 if (dr != null) count += addToUnicodeInResources(doc, dr, visited);

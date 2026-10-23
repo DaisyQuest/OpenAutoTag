@@ -1,6 +1,16 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Native widget ownership (A46, 2026-10-23):
+Native mode binds exact source references to distinct Form/OBJR owners and
+reciprocal ParentTree entries. Label anchors guide placement; unresolved
+placement remains review work. Names, values, actions, field topology and AP
+streams remain intact; generic names are not invented. Raster rebuilds refuse
+native fields even if intent omits them. Unicode processing and font auditing
+disable AcroForm accessor fixups so they do not invent /DA or default fonts.
+Saved verification checks source identity, field/global state and exact ownership.
+See docs/accessibility-50-batch29-20261023.md for evidence and limitations.
+
 Caption relationships (A45, 2026-10-23):
 Explicit targets, boundary geometry and adjacency govern captions; unresolved
 targets cannot fall back or move across prose. Table captions are first/last

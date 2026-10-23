@@ -28,7 +28,12 @@ test("continued tables save all page occurrences in order with local headers and
   assert.deepEqual(all(tags.root).flatMap(n=>n.sourceNodeIds||[]),nodes.map(n=>n.id));assert.equal(tags.source.repeatedHeaderRows,4);
   const cases=[];
   for(const mode of ["native","raster"])await t.test(`${mode} keeps occurrences, sections, row order and exact targets`,async()=>{
-    const outputPath=path.join(dir,`${mode}.pdf`);await writeTaggedArtifacts({pdfPath,outputPath,tagsPath,semanticPath,mode});
+    let modeSource=pdfPath;
+    if(mode==='raster') {
+      await assert.rejects(writeTaggedArtifacts({pdfPath,outputPath:path.join(dir,'flattened.pdf'),tagsPath,semanticPath,mode}),/Raster output would flatten native form widgets/);
+      modeSource=path.join(dir,'plain.pdf');await run('TableGridFixture',modeSource,textPath,path.resolve('modules/font-embedder/vendor/fonts/noto-sans/NotoSans-Regular.ttf'),'no-form');
+    }
+    const outputPath=path.join(dir,`${mode}.pdf`);await writeTaggedArtifacts({pdfPath:modeSource,outputPath,tagsPath,semanticPath,mode});
     const doc=await PDFDocument.load(await readFile(outputPath)),objects=new Map(doc.context.enumerateIndirectObjects().filter(([,v])=>v.get?.(key("ID"))?.decodeText).map(([,v])=>[v.get(key("ID")).decodeText(),v]));
     const actualOrder=[];
     const walk=raw=>{const n=doc.context.lookup(raw);if(n instanceof PDFArray)for(let i=0;i<n.size();i++)walk(n.get(i));else if(n?.get?.(key("S"))){const id=n.get(key("ID"))?.decodeText();if(id?.endsWith(":span"))actualOrder.push(id);walk(n.get(key("K")));}};

@@ -1,6 +1,6 @@
 # Tagging quality: claims, evidence and limits
 
-Updated 2026-10-23 for [caption relationships](accessibility-50-batch28-20261023.md), following diagram discrimination and continued tables. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
+Updated 2026-10-23 for [native widget ownership](accessibility-50-batch29-20261023.md), following caption relationships. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
 
 ## Supported description
 
@@ -33,8 +33,11 @@ OpenAutoTag performs deterministic PDF semantic inference, native operator taggi
 
 Implementation filenames without a path in this table live under `modules/semantic-engine/`, `modules/tag-builder/` or `modules/pdf-writer/java/` as appropriate. Exact delivery details and reproduction commands are in [the production plan, section 22](production-tagging-engine-plan.md#22-semantic-quality-improvements-16-and-benchmark-delivery-2026-10-21) and the linked batch reports.
 | C21 | Supported table and image captions retain evidenced identity and saved reading-order placement. | Six native relationships, original image ownership, independent source/presentation/transform checks, negative corruptions and eight preserved page pairs. | Native image XObjects only. Ambiguous relationships, unsupported paint and missing descriptions stay explicit; captions do not prove description quality or reader usability. |
+| C22 | Native widget tagging preserves distinct source controls with reciprocal Form ownership. | Forty-one independently inspected widgets, saved field/action/appearance checks, ten identical rendered pairs, source-bound corruption rejection and tested editing. Unicode/font audits avoid automatic form fixups. | Eight TEST-FORM placements remain unresolved. Names, choice semantics and keyboard order need separate qualification. Raster rebuilds refuse interactive forms. Human review remains required. |
 
 ## Latest accuracy evidence
+
+[Batch 29](accessibility-50-batch29-20261023.md) verifies A46: all 33 TEST-FORM widgets have distinct saved owners, with 25 label-context placements and eight unresolved. Its 5,585 saved checks and 15,112 raw checks pass with zero font errors; controls and rendered appearance remain intact. See the batch report for initial baseline regressions and passing affected reruns.
 
 [Batch 28](accessibility-50-batch28-20261023.md) completes A45: explicit caption identities, safe table boundaries and adjacent Figure captions with real native image ownership. The 916-case baseline and final 82-case affected run pass across overlapping revisions. Six saved relationships pass 656 saved/2,064 raw checks; all eight independent page pairs match and native field editing remains intact. Three fixture font findings and unchanged NASA/NIST failures remain explicit. **A01–A45 complete; A46–A50 pending.**
 

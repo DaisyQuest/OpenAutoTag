@@ -1,0 +1,309 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A46"
+  ],
+  "status": "completed",
+  "baselineCommit": "2f9623fa12b2ee2866d8dd4d87e9ea1697221022",
+  "tests": {
+    "initialBaseline": {
+      "path": "tmp/a46-baseline.log",
+      "sha256": "fe3fd02e715860ea2f104bebfcaa4c9e27d229736e9c02ee69a0f0f56187b19d",
+      "passed": 958,
+      "failed": 4,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "affected": {
+      "path": "tmp/a46-final.log",
+      "sha256": "84aa309961aed43f8bcd445db41fee008b61463ca2cbd45972fd21b4798efe8d",
+      "passed": 80,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "metadataAndForms": {
+      "path": "tmp/a46-metadata-final.log",
+      "sha256": "ba07328b2ea33b9082671aa7c9c4a3475296df869574798964a72722d12ca37b",
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "geometry": {
+      "path": "tmp/a46-geometry-final.log",
+      "sha256": "06f1a345f3a778b389b4f769afde008fe9a6f060aa971b73e9a48b4c77e08964",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "helperCoverage": {
+      "path": "tmp/a46-coverage-final.log",
+      "sha256": "c30337d774e2ce2104607dc4ae153cf7d8607544ea1fc0f7da207754f58066cd",
+      "passed": 43,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "fontAudit": {
+      "path": "tmp/a46-audit-final.log",
+      "sha256": "707be61ce97b33feecf0364685951844850150f73e0f1a8ab8434738eab2bdb6",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "testNote": "The initial serial baseline recorded 958 passes and four failures representing three regressions (one parent/subtest pair): a continued-table raster flattening expectation, explicit raster fallback for forms, and an AcroForm default appearance mutation. Each is corrected and covered by subsequent passing runs: 80 affected, 49 metadata/form, 6 geometry, 43 helper and 21 audit cases. Runs overlap and span successive revisions; no single final-revision full baseline or repository-wide coverage is claimed.",
+  "helperCoverage": {
+    "lines": 100,
+    "functions": 100,
+    "branches": 91.74,
+    "scope": [
+      "modules/tag-builder/widget-ownership.js",
+      "modules/validator/native-widgets.js",
+      "modules/pdf-writer/widget-preservation-guard.js"
+    ]
+  },
+  "records": [
+    {
+      "id": "fixture",
+      "source": {
+        "path": "output\\accessibility-50-batch29-20261023\\fixture\\source.pdf",
+        "sha256": "b4c2bc4ad308fde0b9ac2f53efab58adbfc366e538c11c016ca7912012c40d8e"
+      },
+      "candidate": {
+        "path": "output\\accessibility-50-batch29-20261023\\fixture\\candidate.pdf",
+        "sha256": "3fa987e230176a31c9932d23c9277e85e613e53c84e89d8483145d82025c9c72"
+      },
+      "intent": {
+        "path": "output\\accessibility-50-batch29-20261023\\fixture\\tags.json",
+        "sha256": "26745f6eed06cc2e301e84c7ceb72177c5f36cc1bd98e8c224fc0d4f0d9033a3"
+      },
+      "semantic": {
+        "path": "output\\accessibility-50-batch29-20261023\\fixture\\semantic.json",
+        "sha256": "a48609947df8b39ad5c9a73e03fe335a89b1f876e1b505c48d04a583f001e0dc"
+      },
+      "ownership": {
+        "path": "output\\accessibility-50-batch29-20261023\\fixture\\candidate.pdf.ownership.json",
+        "sha256": "67c25e173d1a0ba9ac560ac852b1c83a94ed03285752751d1462e65277ae9a16"
+      },
+      "saved": {
+        "path": "output/accessibility-50-batch29-20261023/fixture/saved.json",
+        "sha256": "658d5cf5d68aed913f1178fcd337fdd190f44c80947b451c14bf822ad6a00fc8",
+        "passed": 375,
+        "failed": 0
+      },
+      "validation": {
+        "path": "output/accessibility-50-batch29-20261023/fixture/validation.json",
+        "sha256": "7e1f84cb183e4c02d537ae3b427a7856ad5aa551448a68a936bc847c41a187d5",
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 966,
+          "failedChecks": 0
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 0,
+          "warningCount": 0,
+          "blockingPreVeraPdf": false
+        }
+      },
+      "evidence": {
+        "path": "output/accessibility-50-batch29-20261023/fixture/evidence.json",
+        "sha256": "7969fbfa0e416f2de6c52ad3558394fc28e59fc246ad5ab3f293a5ec08acd434"
+      }
+    },
+    {
+      "id": "test-form",
+      "source": {
+        "path": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+        "sha256": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c"
+      },
+      "candidate": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/candidate.pdf",
+        "sha256": "104f069c43a9c723622947806e7631ffa3105beb9d05b517b6a10504303b84fc"
+      },
+      "intent": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/tags.json",
+        "sha256": "254b7af8bb67ec0827104880ce50644b4836e86725a6b0b976d940618c0ed293"
+      },
+      "semantic": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/semantic.json",
+        "sha256": "82d23f70600bf08dcee5a9ee2f24e8fe3824561328f8b5db167e5be0aaebfb0d"
+      },
+      "ownership": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/candidate.pdf.ownership.json",
+        "sha256": "652e9098771a43ff105743e2e1f171dd04ba613842cc048aef12e00c5af6f593"
+      },
+      "saved": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/saved.json",
+        "sha256": "65f6355d5dca778a371a83c7ec35568958f4505a03dc530838e3182460e08f49",
+        "passed": 5585,
+        "failed": 0
+      },
+      "validation": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/validation.json",
+        "sha256": "d2a47c7509f48f3c5b6821d8b4cc4ee20e007bdfb29f27b75aa7ae763fcb6a9e",
+        "raw": {
+          "passedRules": 106,
+          "failedRules": 0,
+          "passedChecks": 15112,
+          "failedChecks": 0
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 0,
+          "warningCount": 0,
+          "blockingPreVeraPdf": false
+        }
+      },
+      "evidence": {
+        "path": "output/accessibility-50-batch29-20261023/test-form/evidence.json",
+        "sha256": "96f0e17bb0f8e87fa2fd1babd3ae86a45f0d374cf86f0096d2f9ae889221297c"
+      }
+    }
+  ],
+  "independent": {
+    "path": "output/accessibility-50-batch29-20261023/independent-verification.json",
+    "sha256": "5e7b17cc91ae025f84a64fb730e958a05c7fe8c5ae21fc35593eb9fc92ee9ddb",
+    "records": [
+      {
+        "case": "fixture",
+        "sourceHash": "b4c2bc4ad308fde0b9ac2f53efab58adbfc366e538c11c016ca7912012c40d8e",
+        "candidateHash": "3fa987e230176a31c9932d23c9277e85e613e53c84e89d8483145d82025c9c72",
+        "widgets": 8,
+        "fields": 6,
+        "reciprocalFormsVerified": 8,
+        "fieldPropertiesUnchanged": true,
+        "appearanceStreamsUnchanged": true,
+        "pageGeometryUnchanged": true,
+        "textOperandsAndSpacingUnchanged": true
+      },
+      {
+        "case": "test-form",
+        "sourceHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+        "candidateHash": "104f069c43a9c723622947806e7631ffa3105beb9d05b517b6a10504303b84fc",
+        "widgets": 33,
+        "fields": 32,
+        "reciprocalFormsVerified": 33,
+        "fieldPropertiesUnchanged": true,
+        "appearanceStreamsUnchanged": true,
+        "pageGeometryUnchanged": true,
+        "textOperandsAndSpacingUnchanged": true
+      }
+    ],
+    "pagePairs": [
+      {
+        "case": "fixture",
+        "state": "original",
+        "page": 1,
+        "pixelHash": "563dd8f2f38bbaa6a7286b30b61dd0381150fa8b5519f4501b58ff24e9364e97"
+      },
+      {
+        "case": "fixture",
+        "state": "original",
+        "page": 2,
+        "pixelHash": "0ccea3588e1fcdcdaeb28bd90f202fdccf4b8813ab47fcf17b71c4641b56ec86"
+      },
+      {
+        "case": "fixture",
+        "state": "filled",
+        "page": 1,
+        "pixelHash": "ce044d21423ba19ea43363f21964e3a95c07d2634b608dd12d0ce92540b73bb0"
+      },
+      {
+        "case": "fixture",
+        "state": "filled",
+        "page": 2,
+        "pixelHash": "79401f76059a2b9efc866c68f3075302d1bb85ab7428d4977240851dde740cea"
+      },
+      {
+        "case": "test-form",
+        "state": "original",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form",
+        "state": "original",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form",
+        "state": "sample1",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form",
+        "state": "sample1",
+        "page": 2,
+        "pixelHash": "26cd15526ef5b19d292f8fb3e21aaa1aa2fc15b8bcf0b0c16dfe98e396e474cd"
+      },
+      {
+        "case": "test-form",
+        "state": "sample2",
+        "page": 1,
+        "pixelHash": "4df44df29a451d8233c3fbfa73b229c99ab0ef64c3d2be658770c5192b8425ff"
+      },
+      {
+        "case": "test-form",
+        "state": "sample2",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      }
+    ],
+    "popplerDpi": 120
+  },
+  "editableSamples": [
+    {
+      "path": "output/accessibility-50-batch29-20261023/test-form/source-probes/proof.json",
+      "sha256": "852275b7c574a0d3f38a8364c8289b92a64d3a6dce640094f008053ef9a2f581",
+      "samples": [
+        {
+          "field": "Print Name",
+          "value": "José café € 123",
+          "status": "verified"
+        },
+        {
+          "field": "Plaintiff/Petitioner",
+          "value": "José Example",
+          "status": "verified"
+        }
+      ]
+    },
+    {
+      "path": "output/accessibility-50-batch29-20261023/test-form/candidate-final-probes/proof.json",
+      "sha256": "da9526ecceaef53af45431de799e25a7a4b4ef9ae3760007f329fcdf65a48c50",
+      "samples": [
+        {
+          "field": "Print Name",
+          "value": "José café € 123",
+          "status": "verified"
+        },
+        {
+          "field": "Plaintiff/Petitioner",
+          "value": "José Example",
+          "status": "verified"
+        }
+      ]
+    }
+  ],
+  "placements": {
+    "unresolved": 8,
+    "label-context": 25
+  },
+  "limits": [
+    "Eight real widget placements remain unresolved; ownership does not qualify reading or keyboard order.",
+    "Missing names are preserved for A47 reviewed repair; no generic labels are invented.",
+    "Radio choice naming, reader behavior and final document eligibility remain A48-A50.",
+    "Appearance stream bytes and geometry are compared; resource font maps retain the separately audited existing Unicode behavior.",
+    "Form-bearing raster rebuilds now refuse, including auto fallback and legacy plans.",
+    "Human review remains required."
+  ]
+}

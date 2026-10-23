@@ -95,6 +95,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
         add('FIGURE_SOURCE_VERIFIED',id,true,ownership.sourceVerified);
         add('FIGURE_DESCRIPTION_REVIEW',id,true,Boolean(n.alt?.trim()));
       }
+      if(n.nativeWidget)add('NATIVE_WIDGET_SOURCE_VERIFIED',id,true,Boolean(ownership.sourceVerified&&ownership.widgetsVerified));
       if(n.captionAssociation) {
         const relation=n.captionAssociation,target=nodes.find(v=>v.n.id===relation.targetId),savedTarget=target&&identifiers.get(target.id);
         let correct=Boolean(savedTarget&&savedTarget.role===relation.targetType);

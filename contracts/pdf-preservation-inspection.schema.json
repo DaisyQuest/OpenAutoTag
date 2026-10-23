@@ -164,6 +164,7 @@
     }, "additionalProperties": false },
     "widget": { "type": "object", "required": ["digest", "page", "owners"], "properties": {
       "digest": { "$ref": "#/$defs/hash" }, "page": { "type": "integer", "minimum": 1 },
+      "annotationIndex":{"type":"integer","minimum":0},"structParent":{"type":"integer","minimum":-1},"nativeDigest":{"$ref":"#/$defs/hash"},"appearanceHash":{"type":"string"},"fieldName":{"type":"string"},"fieldStateHash":{"$ref":"#/$defs/hash"},"accessibleName":{"type":"string"},
       "owners": { "type": "array", "items": { "type": "object", "required": ["form", "listItem", "inBody"], "properties": {
         "form": { "type": "string" }, "listItem": { "type": "string" }, "inBody": { "type": "boolean" }
       }, "additionalProperties": false } }

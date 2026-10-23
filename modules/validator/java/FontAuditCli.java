@@ -163,7 +163,10 @@ public class FontAuditCli {
         }
 
         private void collectAcroFormFonts() {
-            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
+            // Auditing must inspect authored resources. The default accessor
+            // installs fallback fonts and /DA, creating findings about mutations
+            // made by the auditor rather than about the saved PDF.
+            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm(null);
             if (acroForm == null) {
                 return;
             }

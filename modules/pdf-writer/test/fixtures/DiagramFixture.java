@@ -24,8 +24,11 @@ public class DiagramFixture {
     for(int r=0;r<=4;r++){c.moveTo(90,792-100-r*40);c.lineTo(450,792-100-r*40);c.stroke();}
     for(int x:new int[]{90,300,450}){c.moveTo(x,692);c.lineTo(x,532);c.stroke();}
    }
-   PDAcroForm form=new PDAcroForm(doc);doc.getDocumentCatalog().setAcroForm(form);PDResources resources=new PDResources();resources.put(COSName.getPDFName("F1"),f);form.setDefaultResources(resources);form.setDefaultAppearance("/F1 12 Tf 0 g");
-   PDTextField field=new PDTextField(form);field.setPartialName("entry");field.setAlternateFieldName("Preserved diagram field");form.getFields().add(field);var widget=field.getWidgets().get(0);widget.setRectangle(new PDRectangle(72,60,300,24));widget.setPage(doc.getPage(0));widget.setPrinted(true);doc.getPage(0).getAnnotations().add(widget);field.setValue("Original café");doc.save(args[0]);
+   if(args.length<3||!args[2].equals("no-form")) {
+    PDAcroForm form=new PDAcroForm(doc);doc.getDocumentCatalog().setAcroForm(form);PDResources resources=new PDResources();resources.put(COSName.getPDFName("F1"),f);form.setDefaultResources(resources);form.setDefaultAppearance("/F1 12 Tf 0 g");
+    PDTextField field=new PDTextField(form);field.setPartialName("entry");field.setAlternateFieldName("Preserved diagram field");form.getFields().add(field);var widget=field.getWidgets().get(0);widget.setRectangle(new PDRectangle(72,60,300,24));widget.setPage(doc.getPage(0));widget.setPrinted(true);doc.getPage(0).getAnnotations().add(widget);field.setValue("Original café");
+   }
+   doc.save(args[0]);
   }
  }
 }
