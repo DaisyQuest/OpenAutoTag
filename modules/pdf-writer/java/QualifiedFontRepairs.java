@@ -29,6 +29,8 @@ public final class QualifiedFontRepairs {
         "FoxitSerif.pfb", "4f57d2b9d884af8f907bf22df6019b52d86cbf6214fdbd02b1ae05472a543f35");
     private final PDDocument document;
     private final Path fontDir;
+    private record Donor(String target, String sha256, byte[] program) {}
+    private final List<Donor> donors;
     private final List<Map<String, Object>> ledger = new ArrayList<>();
     private final List<COSDictionary> dictionaries = new ArrayList<>();
     private final Set<COSBase> visited = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -39,9 +41,10 @@ public final class QualifiedFontRepairs {
     private boolean replacementTextPresent;
     private final Set<COSStream> invokedForms = Collections.newSetFromMap(new IdentityHashMap<>());
     private int scannedGlyphs, scannedOperators;
+    private int copiedDescriptorNodes;
     private int nodes;
 
-    private QualifiedFontRepairs(PDDocument document, Path fontDir) { this.document = document; this.fontDir = fontDir; }
+    private QualifiedFontRepairs(PDDocument document, Path fontDir, List<Donor> donors) { this.document = document; this.fontDir = fontDir; this.donors = donors; }
     private static COSBase resolve(COSBase v) { return v instanceof COSObject ? ((COSObject)v).getObject() : v; }
     private static String ref(COSBase v) { return v.getKey() == null ? "direct" : v.getKey().getNumber() + " " + v.getKey().getGeneration() + " R"; }
     private static byte[] bytes(COSStream stream) throws IOException {
@@ -52,6 +55,11 @@ public final class QualifiedFontRepairs {
         }
     }
     private static String hash(byte[] data) throws Exception { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(data)); }
+    private static String fileHash(Path file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream in = Files.newInputStream(file)) { byte[] chunk = new byte[65536]; int count; while ((count = in.read(chunk)) != -1) digest.update(chunk, 0, count); }
+        return HexFormat.of().formatHex(digest.digest());
+    }
     private void record(String rule, COSDictionary target, String decision, String reason) {
         ledger.add(Map.of("ruleId", rule, "version", 1, "target", ref(target), "decision", decision, "reason", reason));
     }
@@ -78,7 +86,7 @@ public final class QualifiedFontRepairs {
             COSDictionary dr = d.getCOSDictionary(COSName.DR), fonts = dr == null ? null : dr.getCOSDictionary(COSName.FONT);
             if (fonts != null) for (COSBase raw : fonts.getValues()) if (resolve(raw) instanceof COSDictionary) dynamicFonts.add((COSDictionary)resolve(raw));
         }
-        if (dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)) ||
+        if (!donors.isEmpty() || dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)) ||
             "Type0".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.TO_UNICODE) ||
             "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.CID_TO_GID_MAP))) scanUses();
         // Complete all missing maps before CIDSet qualification examines shared descriptors.
@@ -92,6 +100,87 @@ public final class QualifiedFontRepairs {
             if (subtype.equals("TrueType") && dynamicFonts.contains(d)) repairEditableUnicode(d);
             if (subtype.equals("Type1") && base.equals("Helvetica") && dynamicFonts.contains(d)) repairEditableHelvetica(d);
         }
+        for (Donor donor : donors) {
+            COSDictionary target = dictionaries.stream().filter(d -> ref(d).equals(donor.target)).findFirst().orElse(null);
+            if (target == null) throw new IOException("Font donor target is not reachable: " + donor.target);
+            repairDonorProgram(target, donor);
+        }
+    }
+    private static String fullFontName(String name) { return name == null ? "" : name.replaceFirst("^[A-Z]{6}\\+", ""); }
+    private COSBase copyDirectValue(COSBase value, int depth) throws IOException {
+        if (depth > MAX_DEPTH || ++copiedDescriptorNodes > MAX_NODES) throw new IOException("Font descriptor copy limit exceeded");
+        if (value == null || value instanceof COSObject || value.getKey() != null || value instanceof COSStream) return value;
+        if (value instanceof COSArray) {
+            COSArray copy = new COSArray(); for (COSBase item : (COSArray)value) copy.add(copyDirectValue(item, depth + 1)); return copy;
+        }
+        if (value instanceof COSDictionary) {
+            COSDictionary copy = new COSDictionary(); for (var entry : ((COSDictionary)value).entrySet()) copy.setItem(entry.getKey(), copyDirectValue(entry.getValue(), depth + 1)); return copy;
+        }
+        return value;
+    }
+    private COSDictionary isolatedDescriptor(COSDictionary original) throws IOException {
+        // Direct arrays/dictionaries serialize inline and cannot retain sharing
+        // with the old descriptor. Preserve indirect references, copy inline data.
+        COSDictionary copy = new COSDictionary();
+        for (var entry : original.entrySet()) copy.setItem(entry.getKey(), copyDirectValue(entry.getValue(), 0));
+        return copy;
+    }
+    private void repairDonorProgram(COSDictionary dictionary, Donor donor) throws Exception {
+        String rule = "exact-truetype-program-recovery";
+        COSDictionary descriptor = dictionary.getCOSDictionary(COSName.FONT_DESC);
+        if (!"Font".equals(dictionary.getNameAsString(COSName.TYPE)) || !"TrueType".equals(dictionary.getNameAsString(COSName.SUBTYPE)) || descriptor == null) {
+            record(rule, dictionary, "review", "Requires a simple TrueType font and existing descriptor"); return;
+        }
+        if (descriptor.containsKey(COSName.FONT_FILE) || descriptor.containsKey(COSName.FONT_FILE2) || descriptor.containsKey(COSName.FONT_FILE3)) {
+            record(rule, dictionary, "review", "Existing program entries are retained"); return;
+        }
+        Set<Integer> codes = uses.getOrDefault(dictionary, Set.of());
+        if (!cidUsageComplete || codes.isEmpty() || dynamicFonts.contains(dictionary)) {
+            record(rule, dictionary, "review", "Requires complete observed usage outside editable font defaults"); return;
+        }
+        COSDictionary proposedDescriptor = isolatedDescriptor(descriptor); StringBuilder evidence = new StringBuilder();
+        try (TrueTypeFont ttf = new TTFParser().parseEmbedded(new ByteArrayInputStream(donor.program))) {
+            int glyphCount = validateTrueTypeTables(ttf);
+            if (ttf.getTableMap().containsKey("fvar")) throw new IOException("Variable font programs require separate qualification");
+            var os2 = ttf.getOS2Windows();
+            if (os2 == null || (os2.getFsType() & ~0x0108) != 0) throw new IOException("Donor does not declare installable/editable outline embedding permission");
+            String name = ttf.getName();
+            if (!fullFontName(dictionary.getNameAsString(COSName.BASE_FONT)).equals(name) || !fullFontName(descriptor.getNameAsString(COSName.FONT_NAME)).equals(name))
+                throw new IOException("Donor PostScript name differs from source font identity");
+            PDTrueTypeFont before = new PDTrueTypeFont(dictionary);
+            if (before.isEmbedded() || before.isDamaged() || before.isSymbolic()) throw new IOException("Requires an undamaged nonsymbolic unembedded source font");
+            byte[] resolved;
+            try (InputStream in = before.getTrueTypeFont().getOriginalData()) { resolved = in.readNBytes(MAX_STREAM + 1); }
+            if (resolved.length > MAX_STREAM || !donor.sha256.equals(hash(resolved))) throw new IOException("Donor differs from the exact program currently resolved for source glyphs");
+            COSStream program = stream(donor.program, true); program.setInt(COSName.LENGTH1, donor.program.length); proposedDescriptor.setItem(COSName.FONT_FILE2, program);
+            COSDictionary proposed = new COSDictionary(dictionary); proposed.setItem(COSName.FONT_DESC, proposedDescriptor);
+            PDTrueTypeFont after = new PDTrueTypeFont(proposed);
+            if (!after.isEmbedded() || after.isDamaged()) throw new IOException("Donor failed embedded parsing");
+            for (int code : codes) {
+                int gid = before.codeToGID(code); float width = before.getWidth(code), programWidth = before.getWidthFromFont(code);
+                if (code < 0 || code > 255 || gid <= 0 || gid >= glyphCount || after.codeToGID(code) != gid ||
+                    !Float.isFinite(width) || !Float.isFinite(programWidth) || Math.abs(width - programWidth) > 0.5f ||
+                    width != after.getWidth(code) || programWidth != after.getWidthFromFont(code) ||
+                    !sameVector(before.getDisplacement(code), after.getDisplacement(code)) || !Objects.equals(before.toUnicode(code), after.toUnicode(code)))
+                    throw new IOException("Used glyph, Unicode or advance differs at code " + code);
+                String shape = outline(before, code);
+                if (!shape.equals(outline(after, code))) throw new IOException("Used glyph outline differs at code " + code);
+                // PDFBox PageDrawer scales non-embedded glyphs to explicit PDF widths.
+                // Embedding must not silently remove that scaling, including rounding.
+                float paintWidth = before.getDisplacement(code).getX() * 1000;
+                if (before.hasExplicitWidth(code) && paintWidth > 0 && programWidth > 0 && Math.abs(programWidth - paintWidth) > 0.0001f &&
+                    !before.getPath(code).getPathIterator(null).isDone())
+                    throw new IOException("Embedding would remove source glyph scaling at code " + code + " (PDF " + paintWidth + ", program " + programWidth + ")");
+                evidence.append(code).append(':').append(gid).append(':').append(width).append(':').append(programWidth).append(':').append(before.toUnicode(code)).append(':').append(shape).append('\n');
+            }
+        } catch (IOException | IllegalArgumentException error) { record(rule, dictionary, "review", error.getMessage()); return; }
+        // Isolate the requested font when a descriptor is also used elsewhere.
+        boolean shared = dictionaries.stream().anyMatch(d -> d != dictionary && d.getCOSDictionary(COSName.FONT_DESC) == descriptor);
+        if (shared) dictionary.setItem(COSName.FONT_DESC, proposedDescriptor);
+        else descriptor.setItem(COSName.FONT_FILE2, proposedDescriptor.getItem(COSName.FONT_FILE2));
+        record(rule, dictionary, "apply", "Exact resolved program sha256:" + donor.sha256 + "; " + codes.size() +
+            " used codes; glyph/advance/Unicode/paint evidence sha256:" + hash(evidence.toString().getBytes(StandardCharsets.UTF_8)) +
+            (shared ? "; isolated shared descriptor" : "; original descriptor retained"));
     }
     private void repairEditableUnicode(COSDictionary dictionary) throws Exception {
         if (dictionary.containsKey(COSName.TO_UNICODE)) return;
@@ -256,7 +345,7 @@ public final class QualifiedFontRepairs {
         @Override public void fillAndStrokePath(int r) {}
         @Override public void shadingFill(COSName n) {}
     }
-    private static String outline(PDType0Font font, int code) throws Exception {
+    private static String outline(PDVectorFont font, int code) throws Exception {
         var digest = MessageDigest.getInstance("SHA-256");
         var path = font.getPath(code); if (path == null) throw new IOException("Missing glyph outline");
         var iterator = path.getPathIterator(null); float[] values = new float[6];
@@ -503,12 +592,26 @@ public final class QualifiedFontRepairs {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 4 || !Set.of("repair", "verify").contains(args[0])) throw new IOException("Usage: repair|verify source candidate font-dir");
+        if ((args.length != 4 && (args.length < 8 || (args.length - 5) % 3 != 0)) || !Set.of("repair", "verify").contains(args[0])) throw new IOException("Usage: repair|verify source candidate font-dir [source-hash font-ref program-path program-hash ...]");
         Path source = Path.of(args[1]), target = Path.of(args[2]), fonts = Path.of(args[3]);
         if (source.toAbsolutePath().normalize().equals(target.toAbsolutePath().normalize())) throw new IOException("Output must differ from source");
         if (args[0].equals("repair") && Files.exists(target)) throw new IOException("Refusing to overwrite existing output");
+        List<Donor> donors = new ArrayList<>(); Set<String> targets = new HashSet<>(); long total = 0;
+        if (args.length > 4) {
+            if (!fileHash(source).equals(args[4])) throw new IOException("Stale font donor source hash");
+            if ((args.length - 5) / 3 > 32) throw new IOException("Font donor count limit exceeded");
+            for (int i = 5; i < args.length; i += 3) {
+                if (!targets.add(args[i])) throw new IOException("Duplicate font donor target");
+                Path file = Path.of(args[i + 1]); long size = Files.size(file);
+                if (size < 12 || size > MAX_STREAM || (total += size) > 2L * MAX_STREAM) throw new IOException("Font donor program size limit exceeded");
+                byte[] program;
+                try (InputStream in = Files.newInputStream(file)) { program = in.readNBytes(MAX_STREAM + 1); }
+                if (program.length != size || !hash(program).equals(args[i + 2])) throw new IOException("Font donor program hash mismatch");
+                donors.add(new Donor(args[i], args[i + 2], program));
+            }
+        }
         try (PDDocument doc = Loader.loadPDF(source.toFile())) {
-            QualifiedFontRepairs repairs = new QualifiedFontRepairs(doc, fonts); repairs.apply();
+            QualifiedFontRepairs repairs = new QualifiedFontRepairs(doc, fonts, donors); repairs.apply();
             Map<String, Object> verification;
             if (args[0].equals("verify")) verification = SavedObjectVerifier.verify(doc, target);
             else {
@@ -518,7 +621,7 @@ public final class QualifiedFontRepairs {
                     else try (OutputStream out = Files.newOutputStream(temp)) { doc.saveIncremental(out); }
                     // Rebuild the expectation from source; save may assign new indirect keys in doc.
                     try (PDDocument original = Loader.loadPDF(source.toFile())) {
-                        QualifiedFontRepairs replay = new QualifiedFontRepairs(original, fonts); replay.apply(); verification = SavedObjectVerifier.verify(original, temp);
+                        QualifiedFontRepairs replay = new QualifiedFontRepairs(original, fonts, donors); replay.apply(); verification = SavedObjectVerifier.verify(original, temp);
                     }
                     if (!verification.get("status").equals("pass")) throw new IOException(verification.get("reason").toString());
                     Files.move(temp, target);

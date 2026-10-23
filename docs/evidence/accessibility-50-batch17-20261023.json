@@ -1,0 +1,323 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A33"
+  ],
+  "status": "completed",
+  "baselineCommit": "cc4a3d2f9b2d43af339e2811709d92835580d755",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/accessibility-50-batch17-baseline.log",
+      "sha256": "8c4196c756fc4aa8b3e310f952970241a2f562536eec3392dd18152d1ce356d8",
+      "passed": 500,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "newCases": 31,
+    "focused": {
+      "path": "tmp/a33-release-check.log",
+      "sha256": "1cec51bdbeaaedef1a79d4448a11c5dba131c8f698709bb6ad6a2bef0cec6b85",
+      "passed": 31,
+      "failed": 0,
+      "note": "Final-code rerun overlaps the baseline. Positive render/object evidence uses focused-final artifacts."
+    },
+    "coverageClaim": null
+  },
+  "verification": [
+    {
+      "id": "exact",
+      "sourcePath": "output\\accessibility-50-batch17-20261023\\focused-final\\exact.pdf",
+      "sourceHash": "1c95a92dd857ae7b747ce9f1342eecdb911090d7df5359a861cadf9a6a1f3043",
+      "candidatePath": "output\\accessibility-50-batch17-20261023\\focused-final\\exact-fixed.pdf",
+      "candidateHash": "5fae556733070e9953302ea9e325a3e9a412a2eca99b1629e4cfd03a7e3fd65a",
+      "donorsPath": "output\\accessibility-50-batch17-20261023\\focused-final\\exact-donors.json",
+      "donorManifestHash": "4feebb283f7988a28f91a1c80d8fd19a2cbd671c4aa2c4b7a0333a168c27f62a"
+    },
+    {
+      "id": "shared",
+      "sourcePath": "output\\accessibility-50-batch17-20261023\\focused-final\\shared.pdf",
+      "sourceHash": "81ffc78858131ed2f9f22a0a5e3f99529840d4173c7a3cd36deade4c7e6733c6",
+      "candidatePath": "output\\accessibility-50-batch17-20261023\\focused-final\\shared-fixed.pdf",
+      "candidateHash": "d101bc7e69663b9946bc6806faad7c34fcfe601d4f892d7d7c6f6654a4d5ebdc",
+      "donorsPath": "output\\accessibility-50-batch17-20261023\\focused-final\\shared-donors.json",
+      "donorManifestHash": "7307482d4f62c5f7b2e33f4cd5e26e8b87cd70a0818e3570ad738798d3dd39c7"
+    },
+    {
+      "id": "form",
+      "sourcePath": "output\\accessibility-50-batch17-20261023\\focused-final\\form.pdf",
+      "sourceHash": "0482bfaff2b999307df000e4692c2d7dd8111b163f4dde2de59fcbde14c06654",
+      "candidatePath": "output\\accessibility-50-batch17-20261023\\focused-final\\form-fixed.pdf",
+      "candidateHash": "3919cd8cec26488db9225f8a3c216706691ad8b0189ddd49680d10795558e66b",
+      "donorsPath": "output\\accessibility-50-batch17-20261023\\focused-final\\form-donors.json",
+      "donorManifestHash": "65bf1c38a329434a7254500149f041983dcb537ef359b373de038e9e44f04f6d"
+    },
+    {
+      "id": "pattern",
+      "sourcePath": "output\\accessibility-50-batch17-20261023\\focused-final\\pattern.pdf",
+      "sourceHash": "3e4d02e99fac6faf2c12dc8bc45490d50ee96bda463ad3f01d07c595b373565e",
+      "candidatePath": "output\\accessibility-50-batch17-20261023\\focused-final\\pattern-fixed.pdf",
+      "candidateHash": "d9b8ae495f234b4dab455118ca32004bf55f8837fd5511e544d21c21b9e14445",
+      "donorsPath": "output\\accessibility-50-batch17-20261023\\focused-final\\pattern-donors.json",
+      "donorManifestHash": "3f4600c57d2c623249bd985b29f1c91bc9da6b6e43d9c87472c794a17228672c"
+    },
+    {
+      "id": "appearance",
+      "sourcePath": "output\\accessibility-50-batch17-20261023\\focused-final\\appearance.pdf",
+      "sourceHash": "0a20836345595ddb628e600c8482b26ab2ab0bec7e2a05e24f43eced4af4b492",
+      "candidatePath": "output\\accessibility-50-batch17-20261023\\focused-final\\appearance-fixed.pdf",
+      "candidateHash": "35b7a758c8aaaddcc939d0c6659150a843ea7352d5a6d6856cab75ff3298c803",
+      "donorsPath": "output\\accessibility-50-batch17-20261023\\focused-final\\appearance-donors.json",
+      "donorManifestHash": "90bdd7843c21414389b3c688cfe67ea18c9737ce53a7088e820bcdd751fc3f04"
+    },
+    {
+      "id": "clipping",
+      "sourcePath": "output\\accessibility-50-batch17-20261023\\focused-final\\clipping.pdf",
+      "sourceHash": "a0919ff0429a7da011cd8461d4a594d7faad5b8ced494e18644c166ad6481102",
+      "candidatePath": "output\\accessibility-50-batch17-20261023\\focused-final\\clipping-fixed.pdf",
+      "candidateHash": "25b69682f81912f986aca68c9604ce981c553c952ce8a84505540bf865666e36",
+      "donorsPath": "output\\accessibility-50-batch17-20261023\\focused-final\\clipping-donors.json",
+      "donorManifestHash": "65ab82ff9515fc1637067ae2a3688d0ba43288f90696c1caacc191d679c48b2b"
+    }
+  ],
+  "independentObjects": {
+    "path": "output/accessibility-50-batch17-20261023/independent-object-proof.json",
+    "sha256": "602a07ede31663cca96aa413d64c1c909363bdd5b8a00f43ee300763d7e1a989",
+    "originalStreamsByteIdentical": 12,
+    "cases": [
+      {
+        "id": "exact",
+        "sourceHash": "1c95a92dd857ae7b747ce9f1342eecdb911090d7df5359a861cadf9a6a1f3043",
+        "candidateHash": "5fae556733070e9953302ea9e325a3e9a412a2eca99b1629e4cfd03a7e3fd65a",
+        "objectPairs": 226,
+        "originalStreamsByteIdentical": 4,
+        "changes": [
+          {
+            "fontRef": "15 0 R",
+            "programHash": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a",
+            "isolatedSharedDescriptor": false
+          }
+        ],
+        "sourcePrefixPreserved": true
+      },
+      {
+        "id": "shared",
+        "sourceHash": "81ffc78858131ed2f9f22a0a5e3f99529840d4173c7a3cd36deade4c7e6733c6",
+        "candidateHash": "d101bc7e69663b9946bc6806faad7c34fcfe601d4f892d7d7c6f6654a4d5ebdc",
+        "objectPairs": 16,
+        "originalStreamsByteIdentical": 1,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "programHash": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a",
+            "isolatedSharedDescriptor": true
+          }
+        ],
+        "sourcePrefixPreserved": true
+      },
+      {
+        "id": "form",
+        "sourceHash": "0482bfaff2b999307df000e4692c2d7dd8111b163f4dde2de59fcbde14c06654",
+        "candidateHash": "3919cd8cec26488db9225f8a3c216706691ad8b0189ddd49680d10795558e66b",
+        "objectPairs": 17,
+        "originalStreamsByteIdentical": 2,
+        "changes": [
+          {
+            "fontRef": "8 0 R",
+            "programHash": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a",
+            "isolatedSharedDescriptor": false
+          }
+        ],
+        "sourcePrefixPreserved": true
+      },
+      {
+        "id": "pattern",
+        "sourceHash": "3e4d02e99fac6faf2c12dc8bc45490d50ee96bda463ad3f01d07c595b373565e",
+        "candidateHash": "d9b8ae495f234b4dab455118ca32004bf55f8837fd5511e544d21c21b9e14445",
+        "objectPairs": 17,
+        "originalStreamsByteIdentical": 2,
+        "changes": [
+          {
+            "fontRef": "8 0 R",
+            "programHash": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a",
+            "isolatedSharedDescriptor": false
+          }
+        ],
+        "sourcePrefixPreserved": true
+      },
+      {
+        "id": "appearance",
+        "sourceHash": "0a20836345595ddb628e600c8482b26ab2ab0bec7e2a05e24f43eced4af4b492",
+        "candidateHash": "35b7a758c8aaaddcc939d0c6659150a843ea7352d5a6d6856cab75ff3298c803",
+        "objectPairs": 20,
+        "originalStreamsByteIdentical": 2,
+        "changes": [
+          {
+            "fontRef": "8 0 R",
+            "programHash": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a",
+            "isolatedSharedDescriptor": false
+          }
+        ],
+        "sourcePrefixPreserved": true
+      },
+      {
+        "id": "clipping",
+        "sourceHash": "a0919ff0429a7da011cd8461d4a594d7faad5b8ced494e18644c166ad6481102",
+        "candidateHash": "25b69682f81912f986aca68c9604ce981c553c952ce8a84505540bf865666e36",
+        "objectPairs": 12,
+        "originalStreamsByteIdentical": 1,
+        "changes": [
+          {
+            "fontRef": "7 0 R",
+            "programHash": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a",
+            "isolatedSharedDescriptor": false
+          }
+        ],
+        "sourcePrefixPreserved": true
+      }
+    ]
+  },
+  "rendering": {
+    "path": "output/accessibility-50-batch17-20261023/visual-comparison.json",
+    "sha256": "779d8c1cc4ceb5676c1e64e004b6116f9991e1a55e97adb8cddf72ac96d47061",
+    "popplerPagePairs": 6,
+    "pdfboxPagePairs": 7,
+    "dpi": 150,
+    "allPairsMatch": true,
+    "fieldFillSaveReopen": "José café 987",
+    "note": "PDFBox includes six positive pages and one filled/reopened source-candidate pair. Visual inspection of exact-candidate-p1.png completed."
+  },
+  "fontAudit": {
+    "path": "output/accessibility-50-batch17-20261023/font-audit-comparison.json",
+    "sha256": "cbdf2d7500df08e57f7eba9ce17cbd97f225c3a72b7dee11ce1ef144326ea230",
+    "source": {
+      "path": "output/accessibility-50-batch17-20261023/exact-font-audit.json",
+      "sha256": "330d1962258a67ba01c96756d46cc5a6e186c81f8aeaf9e2fe6dd9c1978d9f85"
+    },
+    "candidate": {
+      "path": "output/accessibility-50-batch17-20261023/exact-fixed-font-audit.json",
+      "sha256": "bd90c4a15a2a93a629e641b5800bca9bab4400d7b762930eaa281108586b7193"
+    },
+    "target": "ArialMT",
+    "missingProgramFindingBefore": 1,
+    "missingProgramFindingAfter": 0,
+    "otherFindingsUnchanged": true,
+    "fullConformanceClaim": false
+  },
+  "booklet": {
+    "sourcePath": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+    "candidatePath": "output/accessibility-50-batch17-20261023/booklet/06-candidate.pdf",
+    "sourceHash": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+    "candidateHash": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+    "donorManifestHash": "bffd20eecc354e581d25de989e2e6fa7ac5501626381663c0053f9e19a09a7fa",
+    "verification": {
+      "reason": "Saved objects equal the source with only the requested qualified repairs applied",
+      "status": "pass",
+      "scope": "catalog-and-info"
+    },
+    "repairLedger": [
+      {
+        "version": 1,
+        "reason": "Requires an embedded TrueType program and explicit Identity CIDToGIDMap",
+        "target": "10002 0 R",
+        "ruleId": "identity-cidset-complete",
+        "decision": "review"
+      },
+      {
+        "version": 1,
+        "reason": "Embedding would remove source glyph scaling at code 38 (PDF 862.0, program 862.3047)",
+        "target": "198 0 R",
+        "ruleId": "exact-truetype-program-recovery",
+        "decision": "review"
+      },
+      {
+        "version": 1,
+        "reason": "Embedding would remove source glyph scaling at code 43 (PDF 564.0, program 563.96484)",
+        "target": "205 0 R",
+        "ruleId": "exact-truetype-program-recovery",
+        "decision": "review"
+      },
+      {
+        "version": 1,
+        "reason": "Embedding would remove source glyph scaling at code 44 (PDF 278.0, program 277.83203)",
+        "target": "211 0 R",
+        "ruleId": "exact-truetype-program-recovery",
+        "decision": "review"
+      },
+      {
+        "version": 1,
+        "reason": "Embedding would remove source glyph scaling at code 38 (PDF 722.0, program 722.16797)",
+        "target": "216 0 R",
+        "ruleId": "exact-truetype-program-recovery",
+        "decision": "review"
+      },
+      {
+        "version": 1,
+        "reason": "Embedding would remove source glyph scaling at code 40 (PDF 273.0, program 272.94922)",
+        "target": "219 0 R",
+        "ruleId": "exact-truetype-program-recovery",
+        "decision": "review"
+      },
+      {
+        "version": 1,
+        "reason": "Embedding would remove source glyph scaling at code 67 (PDF 722.0, program 722.16797)",
+        "target": "234 0 R",
+        "ruleId": "exact-truetype-program-recovery",
+        "decision": "review"
+      }
+    ],
+    "report": {
+      "path": "output/accessibility-50-batch17-20261023/booklet/font-repair.json",
+      "sha256": "ac7412938665757929f11164ea87370173ec3c35be7bb80275e2604f79f0c00b"
+    },
+    "donorManifest": {
+      "path": "output/accessibility-50-batch17-20261023/booklet/font-donors.json",
+      "sha256": "bffd20eecc354e581d25de989e2e6fa7ac5501626381663c0053f9e19a09a7fa"
+    },
+    "byteIdentical": true,
+    "reusedEvidence": "docs/evidence/accessibility-50-batch16-20261023.json",
+    "raw": {
+      "passedRules": 105,
+      "failedRules": 1,
+      "passedChecks": 192908,
+      "failedChecks": 6
+    },
+    "saved": {
+      "passed": 51354,
+      "failed": 196
+    },
+    "ocrReview": {
+      "pending": 158,
+      "recorded": 0
+    },
+    "note": "No repairs applied. Exact byte identity retains prior validation/render evidence; these checks were not rerun."
+  },
+  "control": {
+    "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+    "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+    "unchanged": true,
+    "reusedEvidence": "docs/evidence/accessibility-50-batch8-20261023.json"
+  },
+  "limits": [
+    "Only simple nonsymbolic TrueType outside editable defaults; no arbitrary font substitution.",
+    "Exact bytes of PDFBox-resolved program do not prove historical author provenance or every reader substitution.",
+    "Six booklet fonts remain unembedded because recovery would remove existing glyph scaling.",
+    "Synthetic quality-gate validation input isolates preservation and is not a conformance result.",
+    "Human reader qualification, remaining semantic failures and OCR transcription review are unresolved."
+  ],
+  "research": [
+    {
+      "title": "PDFBox 3.0.8 PageDrawer glyph scaling",
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/rendering/PageDrawer.java"
+    },
+    {
+      "title": "PDFBox 3.0.8 simple TrueType mapping",
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/font/PDTrueTypeFont.java"
+    },
+    {
+      "title": "OpenType OS/2 embedding flags",
+      "url": "https://learn.microsoft.com/en-us/typography/opentype/spec/os2"
+    }
+  ]
+}

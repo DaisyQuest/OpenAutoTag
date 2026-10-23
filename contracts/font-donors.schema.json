@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/font-donors.schema.json",
+  "title": "Source-bound exact font program donors",
+  "type": "object",
+  "required": ["schemaVersion", "sourceHash", "donors"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "donors": {
+      "type": "array", "minItems": 1, "maxItems": 32,
+      "items": {
+        "type": "object", "required": ["fontRef", "programPath", "programSha256"],
+        "properties": {
+          "fontRef": { "type": "string", "pattern": "^[1-9][0-9]{0,15} [0-9]{1,5} R$" },
+          "programPath": { "type": "string", "minLength": 1, "maxLength": 32768 },
+          "programSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }, "additionalProperties": false
+      }
+    }
+  }, "additionalProperties": false
+}

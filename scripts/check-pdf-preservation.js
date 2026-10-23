@@ -2,13 +2,16 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { open, mkdir, writeFile, readFile } from "node:fs/promises";
+import { open, mkdir, writeFile, readFile, stat } from "node:fs/promises";
+import Ajv2020 from "ajv/dist/2020.js";
+import donorSchema from "../contracts/font-donors.schema.json" with { type: "json" };
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { inspectPdfLowLevel } from "./inspect-pdf-low-level.js";
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const validateDonors = new Ajv2020({ allErrors: true }).compile(donorSchema);
 async function hashFile(file) {
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(file)) hash.update(chunk);
@@ -35,7 +38,7 @@ async function retainsPrefix(sourcePath, candidatePath) {
   } finally { await a.close(); await b?.close(); }
 }
 
-export async function checkPdfPreservation({ sourcePdf, candidatePdf, validationReport, semanticPath, outputPath, fontRepairs = false, structureRepairs = false, structureDecisions }) {
+export async function checkPdfPreservation({ sourcePdf, candidatePdf, validationReport, semanticPath, outputPath, fontRepairs = false, fontDonorsPath, structureRepairs = false, structureDecisions }) {
   if (!sourcePdf || !candidatePdf || !validationReport || !outputPath) throw new Error("Required: --source-pdf --candidate-pdf --validation-report --output");
   const dir = path.dirname(path.resolve(outputPath));
   const base = path.basename(outputPath, path.extname(outputPath));
@@ -44,7 +47,15 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
   const fontProofPath = path.join(dir, `${base}.fonts.json`);
   const normalized = (file) => path.resolve(file).toLowerCase();
   if (structureDecisions && !structureRepairs) throw new Error("Structure decisions require structure repair verification");
-  const inputs = [sourcePdf, candidatePdf, validationReport, ...(semanticPath ? [semanticPath] : []), ...(structureDecisions ? [structureDecisions] : [])].map(normalized);
+  if (fontDonorsPath && !fontRepairs) throw new Error("Font donors require font repair verification");
+  const donorInputs = [];
+  if (fontDonorsPath) {
+    if ((await stat(fontDonorsPath)).size > 256 * 1024) throw new Error("Font donor manifest exceeds limit");
+    const donors = JSON.parse(await readFile(fontDonorsPath, "utf8"));
+    if (!validateDonors(donors)) throw new Error("Invalid font donor manifest");
+    donorInputs.push(fontDonorsPath, ...donors.donors.map(d => path.resolve(path.dirname(path.resolve(fontDonorsPath)), d.programPath)));
+  }
+  const inputs = [sourcePdf, candidatePdf, validationReport, ...(semanticPath ? [semanticPath] : []), ...(structureDecisions ? [structureDecisions] : []), ...donorInputs].map(normalized);
   if ([outputPath, sourcePath, candidatePath, ...(fontRepairs ? [fontProofPath] : []), ...(structureRepairs ? [structureProofPath] : [])].some((file) => inputs.includes(normalized(file)))) throw new Error("Quality output must not overwrite an input");
   await mkdir(dir, { recursive: true });
   let identityPreserved = false, inspectionError;
@@ -58,7 +69,7 @@ export async function checkPdfPreservation({ sourcePdf, candidatePdf, validation
     if (fontRepairs) {
       // Execute against the saved PDFs; never accept an unverified writer ledger as a waiver.
       const { stdout } = await execFileAsync(process.execPath, [path.join(root, "modules/pdf-writer/font-repair.js"),
-        "--pdf", path.resolve(sourcePdf), "--verify", path.resolve(candidatePdf)], { cwd: root, windowsHide: true, maxBuffer: 8 * 1024 * 1024 });
+        "--pdf", path.resolve(sourcePdf), "--verify", path.resolve(candidatePdf), ...(fontDonorsPath ? ["--donors", path.resolve(fontDonorsPath)] : [])], { cwd: root, windowsHide: true, maxBuffer: 8 * 1024 * 1024 });
       const proof = JSON.parse(stdout);
       if (proof.sourceHash !== source.sourceHash || proof.candidateHash !== candidate.sourceHash) throw new Error("PDF changed during font verification");
       await writeFile(fontProofPath, JSON.stringify(proof));
@@ -90,7 +101,7 @@ async function main() {
   const args = new Map();
   for (let i = 2; i < process.argv.length; i += 2) args.set(process.argv[i], process.argv[i + 1]);
   const report = await checkPdfPreservation({ sourcePdf: args.get("--source-pdf"), candidatePdf: args.get("--candidate-pdf"),
-    validationReport: args.get("--validation-report"), semanticPath: args.get("--semantic"), outputPath: args.get("--output"), fontRepairs: args.get("--font-repairs") === "true", structureRepairs: args.get("--structure-repairs") === "true", structureDecisions: args.get("--structure-decisions") });
+    validationReport: args.get("--validation-report"), semanticPath: args.get("--semantic"), outputPath: args.get("--output"), fontRepairs: args.get("--font-repairs") === "true", fontDonorsPath: args.get("--font-donors"), structureRepairs: args.get("--structure-repairs") === "true", structureDecisions: args.get("--structure-decisions") });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((error) => {

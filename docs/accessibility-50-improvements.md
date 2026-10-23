@@ -68,6 +68,8 @@ Completion requires an actual engine improvement, targeted positive/adversarial 
 
 ## Delivery evidence
 
+[Batch 17](accessibility-50-batch17-20261023.md) completes A33: source-bound exact TrueType donors qualify only with unchanged glyphs, advances, Unicode and paint scaling. Six positive fixtures embed correctly; 500 baseline cases pass, 12 original streams retain their bytes, and six Poppler/seven PDFBox page pairs match with accented field editing preserved. All six booklet donors are declined because embedding would alter scaling; its exact bytes and prior six raw/196 semantic failures remain unchanged. **A01-A33 complete; A34-A50 pending.**
+
 [Batch 16](accessibility-50-batch16-20261023.md) completes A32: verified symbol Unicode before fresh tagging corrects all 79 booklet bullets and their ActualText. Raw failures decrease from 25 to 6; semantic failures from 248 to 196. All 469 baseline cases pass; 300 original streams remain byte-identical; 66 Poppler/67 PDFBox page pairs match, including accented field fill/save/reopen. All 158 OCR reviews remain pending. **A01–A32 complete; A33–A50 pending.**
 
 [Batch 15](accessibility-50-batch15-20261023.md) completes A31: six verified missing CID mappings reduce booklet raw failures from 31 to 25. All 440 baseline cases pass; exactly six dictionary entries change, all 346 streams retain their bytes, and 69 Poppler/70 PDFBox page pairs match with synthetic field editing preserved. Existing 248 semantic failures and 158 pending OCR segments remain. **A01–A31 complete; A32–A50 pending.**

@@ -213,6 +213,23 @@ including empty/malformed entries, are preserved. Programs and painting are
 unchanged and source replay verifies the full graph. Run before parsing/tagging
 so regenerated intent and ActualText use the corrected extraction. See batch 16.
 
+Optional --donors <manifest.json> enables exact-truetype-program-recovery.
+contracts/font-donors.schema.json binds the source hash, target font references,
+program paths (relative to the manifest or absolute), and program hashes. Limit:
+256 KiB manifest, 32 donors, 64 MiB/program and 128 MiB combined. Duplicate/stale
+or unreachable targets reject. The report adds optional donorManifestHash.
+Only simple nonsymbolic TrueType fonts with complete observed usage outside
+editable defaults qualify. The full donor must match the PostScript identity
+and exact bytes of the program currently resolved by PDFBox. All used glyphs,
+Unicode, advances, outlines and effective paint scaling must agree. Programs
+must permit installable/editable outline embedding; no permission is modified.
+Variable/unsupported programs, existing program entries and uncertain cases
+remain for review. Shared descriptors are isolated only for requested fonts.
+This proves the tested environment's resolved program, not original author
+provenance or every reader's substitution. See batch 17 and its evidence.
+Preservation replay accepts --font-donors <manifest.json> together with
+--font-repairs true. Donor inputs are protected from report output overwrites.
+
 3.7b Qualified link repair (opt-in post-processing)
 
 Command:

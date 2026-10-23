@@ -395,8 +395,11 @@
       "improvement": "Exact font program recovery",
       "requirement": "Recover missing programs only from verified matching donor programs and metrics.",
       "acceptance": "Exact-donor fixtures embed correctly; similar-family substitutions and mismatched advances are refused.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch17-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A34",
