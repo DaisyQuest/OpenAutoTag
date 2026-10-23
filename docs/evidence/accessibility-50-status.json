@@ -311,8 +311,11 @@
       "improvement": "OCR coordinate transforms",
       "requirement": "Map OCR coordinates through crop, rotation and render scale exactly once.",
       "acceptance": "Known image text boxes land correctly on rotated/cropped pages at multiple render resolutions.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch11-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A27",

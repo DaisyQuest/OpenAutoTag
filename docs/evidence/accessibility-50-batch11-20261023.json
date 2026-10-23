@@ -1,0 +1,1262 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "5cf9fb1",
+  "completedItems": [
+    "A26"
+  ],
+  "completedTotal": 26,
+  "pendingTotal": 24,
+  "research": [
+    {
+      "url": "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/rendering/PDFRenderer.java",
+      "usedFor": "Raw user-unit scaling, physical DPI and floored bitmap dimensions"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Balearica/tesseract/2a9c1c49c360462733c386d2a44fcd22c4e21411/src/ccmain/thresholder.cpp",
+      "usedFor": "Pinned Tesseract.js-core 7 submodule: clockwise deskew without canvas expansion"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/DanBloomberg/leptonica/master/src/rotateam.c",
+      "usedFor": "Integer image-center inverse geometry"
+    }
+  ],
+  "tests": {
+    "productionBaseline": {
+      "uniqueCases": 377,
+      "passed": 377,
+      "failed": 0,
+      "skipped": 0,
+      "method": "Full baseline passed 376 cases; final float-edge correction and one new regression passed 14 affected cases. No unrelated production code changed after the baseline."
+    },
+    "additionalParserCompatibility": 14,
+    "newCases": 11,
+    "existingOcrCasesAddedToBaseline": 3,
+    "runs": [
+      {
+        "path": "tmp/accessibility-50-batch11-baseline.log",
+        "sha256": "fc18fcefd3177691782809fc2133da81818cf8d2de88c063d64546dee839b6af",
+        "tests": 376,
+        "passed": 376,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tmp/accessibility-50-batch11-geometry-final.log",
+        "sha256": "6de21e5ae9c91da8abd64e6145431a4c559ca793c887dda8690775d616f4f6a0",
+        "tests": 14,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tmp/accessibility-50-batch11-parser.log",
+        "sha256": "dba471d00e0a4ef2b58a2e4517d1186924d37d7572fcea950212f41a608f50a8",
+        "tests": 14,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0
+      }
+    ],
+    "coverage": {
+      "file": "modules/parser/ocr-geometry.js",
+      "linePercent": 100,
+      "branchPercent": 100,
+      "functionPercent": 100,
+      "scope": "This helper only; no Java or repository coverage claim."
+    }
+  },
+  "geometry": {
+    "sourcePath": "output/accessibility-50-batch11-20261023/geometry/source.pdf",
+    "sourceHash": "a70c8b5051d4e680274f7485b9fb90faa257b4fa2e90115cd6c5b1996fd4221d",
+    "sourceUnchanged": true,
+    "cases": [
+      {
+        "page": 1,
+        "dpi": 96,
+        "rotation": 0,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 1,
+        "dpi": 173,
+        "rotation": 0,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 1,
+        "dpi": 300,
+        "rotation": 0,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 2,
+        "dpi": 96,
+        "rotation": 90,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 2,
+        "dpi": 173,
+        "rotation": 90,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 2,
+        "dpi": 300,
+        "rotation": 90,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 3,
+        "dpi": 96,
+        "rotation": 180,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 3,
+        "dpi": 173,
+        "rotation": 180,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 3,
+        "dpi": 300,
+        "rotation": 180,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 4,
+        "dpi": 96,
+        "rotation": 270,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 4,
+        "dpi": 173,
+        "rotation": 270,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 4,
+        "dpi": 300,
+        "rotation": 270,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 5,
+        "dpi": 96,
+        "rotation": 0,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 5,
+        "dpi": 173,
+        "rotation": 0,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 5,
+        "dpi": 300,
+        "rotation": 0,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 6,
+        "dpi": 96,
+        "rotation": 90,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 6,
+        "dpi": 173,
+        "rotation": 90,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 6,
+        "dpi": 300,
+        "rotation": 90,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 7,
+        "dpi": 96,
+        "rotation": 180,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 7,
+        "dpi": 173,
+        "rotation": 180,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 7,
+        "dpi": 300,
+        "rotation": 180,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 8,
+        "dpi": 96,
+        "rotation": 270,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499999,
+          61.499998,
+          210.749994,
+          20.249999
+        ],
+        "maxError": 0.2916670000000039
+      },
+      {
+        "page": 8,
+        "dpi": 173,
+        "rotation": 270,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 8,
+        "dpi": 300,
+        "rotation": 270,
+        "userUnit": 1,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320001,
+          61.440002,
+          210.720008,
+          20.160001
+        ],
+        "maxError": 0.11332199999998238
+      },
+      {
+        "page": 9,
+        "dpi": 96,
+        "rotation": 0,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 9,
+        "dpi": 173,
+        "rotation": 0,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 9,
+        "dpi": 300,
+        "rotation": 0,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 10,
+        "dpi": 96,
+        "rotation": 90,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 10,
+        "dpi": 173,
+        "rotation": 90,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 10,
+        "dpi": 300,
+        "rotation": 90,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 11,
+        "dpi": 96,
+        "rotation": 180,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 11,
+        "dpi": 173,
+        "rotation": 180,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 11,
+        "dpi": 300,
+        "rotation": 180,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 12,
+        "dpi": 96,
+        "rotation": 270,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 12,
+        "dpi": 173,
+        "rotation": 270,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 12,
+        "dpi": 300,
+        "rotation": 270,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 13,
+        "dpi": 96,
+        "rotation": 0,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 13,
+        "dpi": 173,
+        "rotation": 0,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 13,
+        "dpi": 300,
+        "rotation": 0,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 14,
+        "dpi": 96,
+        "rotation": 90,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 14,
+        "dpi": 173,
+        "rotation": 90,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 14,
+        "dpi": 300,
+        "rotation": 90,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 15,
+        "dpi": 96,
+        "rotation": 180,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 15,
+        "dpi": 173,
+        "rotation": 180,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 15,
+        "dpi": 300,
+        "rotation": 180,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      },
+      {
+        "page": 16,
+        "dpi": 96,
+        "rotation": 270,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.499998,
+          61.499997,
+          210.74999,
+          20.249999
+        ],
+        "maxError": 0.2916659999999993
+      },
+      {
+        "page": 16,
+        "dpi": 173,
+        "rotation": 270,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.127169,
+          61.179193,
+          211.00579,
+          20.393064
+        ],
+        "maxError": 0.23306399999999883
+      },
+      {
+        "page": 16,
+        "dpi": 300,
+        "rotation": 270,
+        "userUnit": 2.5,
+        "expected": [
+          34.208332,
+          61.385002,
+          210.83333,
+          20.16
+        ],
+        "actual": [
+          34.320002,
+          61.440004,
+          210.720013,
+          20.160001
+        ],
+        "maxError": 0.113316999999995
+      }
+    ],
+    "caseCount": 48,
+    "maxErrorPoints": 0.2916670000000039,
+    "proofHash": "8d5c07c68423c4fab5cc6b3dd1c26c45e8c5f589cb25c8bfed950f14a379bac1",
+    "oracleHash": "2c52a5fd61856fb7f1eca4644a73fedd690b251d0c4df571858fecaea1ce97c1",
+    "measuredBy": "Independent raster ink masks; mandatory tests use measured pixel boxes rather than an OCR model."
+  },
+  "deskew": {
+    "engine": "Tesseract.js/core 7.0.0",
+    "language": "eng",
+    "modelHash": "5dc5d8d640a212c9d6184921ba103b186f50e0fed9ee716c53e6b312b400d747",
+    "cases": [
+      {
+        "image": "deskew-negative.png",
+        "text": "ACCESSIBLE TEXT 123",
+        "rotation": 0.13636364042758942,
+        "expected": [
+          44.4,
+          44.4,
+          109.67999999999999,
+          19.919999999999998
+        ],
+        "actual": [
+          43.508862,
+          42.067917,
+          110.885327,
+          24.313669
+        ],
+        "maxEnvelopeDifferencePoints": 4.393669000000003,
+        "previousMaxEnvelopeDifferencePoints": 10.559999999999999,
+        "centerErrorPoints": 0.31860585980564604,
+        "previousCenterErrorPoints": 9.409101976278079
+      },
+      {
+        "image": "deskew-negative.png",
+        "text": "ACCESSIBLE TEXT 124",
+        "rotation": 0.13636364042758942,
+        "expected": [
+          47.04,
+          65.52,
+          109.67999999999999,
+          20.4
+        ],
+        "actual": [
+          46.002279,
+          63.7378,
+          111.057847,
+          23.87075
+        ],
+        "maxEnvelopeDifferencePoints": 3.4707500000000024,
+        "previousMaxEnvelopeDifferencePoints": 11.52,
+        "centerErrorPoints": 0.3519265216366156,
+        "previousCenterErrorPoints": 7.084066628709817
+      },
+      {
+        "image": "deskew-negative.png",
+        "text": "ACCESSIBLE TEXT 125",
+        "rotation": 0.13636364042758942,
+        "expected": [
+          49.68,
+          86.88,
+          109.67999999999999,
+          20.4
+        ],
+        "actual": [
+          48.668216,
+          84.932138,
+          111.090473,
+          24.108522
+        ],
+        "maxEnvelopeDifferencePoints": 3.708522000000002,
+        "previousMaxEnvelopeDifferencePoints": 11.28,
+        "centerErrorPoints": 0.32051913664748105,
+        "previousCenterErrorPoints": 5.620818445742586
+      },
+      {
+        "image": "deskew-positive.png",
+        "text": "ACCESSIBLE TEXT 123",
+        "rotation": -0.12121212482452393,
+        "expected": [
+          57.599999999999994,
+          35.28,
+          110.16,
+          19.68
+        ],
+        "actual": [
+          57.732279,
+          34.501909,
+          110.756843,
+          21.001744
+        ],
+        "maxEnvelopeDifferencePoints": 1.321743999999999,
+        "previousMaxEnvelopeDifferencePoints": 12,
+        "centerErrorPoints": 0.44636668184493583,
+        "previousCenterErrorPoints": 8.067713430706366
+      },
+      {
+        "image": "deskew-positive.png",
+        "text": "ACCESSIBLE TEXT 124",
+        "rotation": -0.12121212482452393,
+        "expected": [
+          55.199999999999996,
+          56.64,
+          109.92,
+          19.919999999999998
+        ],
+        "actual": [
+          55.120504,
+          55.943425,
+          110.756843,
+          21.001744
+        ],
+        "maxEnvelopeDifferencePoints": 1.0817440000000005,
+        "previousMaxEnvelopeDifferencePoints": 12.239999999999998,
+        "centerErrorPoints": 0.37297978331171044,
+        "previousCenterErrorPoints": 6.111759157558483
+      },
+      {
+        "image": "deskew-positive.png",
+        "text": "ACCESSIBLE TEXT 125",
+        "rotation": -0.12121212482452393,
+        "expected": [
+          52.559999999999995,
+          78.24,
+          110.16,
+          19.439999999999998
+        ],
+        "actual": [
+          52.508728,
+          77.384942,
+          110.756843,
+          21.001744
+        ],
+        "maxEnvelopeDifferencePoints": 1.561744000000001,
+        "previousMaxEnvelopeDifferencePoints": 11.759999999999998,
+        "centerErrorPoints": 0.25804348072806726,
+        "previousCenterErrorPoints": 4.837354648979132
+      }
+    ],
+    "proofHash": "69081f035759539782430fd35123bfa102696604342f3b8c9710fc0070b572f7",
+    "imageHashes": {
+      "negative": "0283b45398a41c2b99db992d4e2b6a0ea3734280535b4a8820cb2fec80204ab3",
+      "positive": "64a16cfd859d24c0d4058e6b9a076d8e40096aa156f10e32be0b16c8218448b5"
+    },
+    "maxCenterErrorPoints": 0.44636668184493583,
+    "previousCenterErrorRangePoints": [
+      4.837354648979132,
+      9.409101976278079
+    ],
+    "limitation": "Axis-aligned envelopes include residual skew and need not equal tight ink bounds. The source image was visually inspected."
+  },
+  "officialReplay": [
+    {
+      "id": "nasa-stereo",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+      "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+      "reportPath": "output/accessibility-50-batch11-20261023/nasa-stereo/ocr-result.json",
+      "reportHash": "8d24f4fe2f48895d5b143ef701b602f28147a26191523d441ca48a34ba095944",
+      "pages": [
+        {
+          "page": 1,
+          "blocks": 27,
+          "selected": "gray-300/auto",
+          "rotations": [
+            0
+          ],
+          "clipped": 0,
+          "errors": 0,
+          "firstText": ". ..",
+          "firstBox": [
+            163.440006,
+            18.240001,
+            27.120001,
+            2.16
+          ]
+        },
+        {
+          "page": 2,
+          "blocks": 36,
+          "selected": "gray-300/auto",
+          "rotations": [
+            0
+          ],
+          "clipped": 0,
+          "errors": 0,
+          "firstText": "S . .",
+          "firstBox": [
+            25.680001,
+            9.36,
+            60.480002,
+            3.84
+          ]
+        }
+      ]
+    },
+    {
+      "id": "booklet",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "reportPath": "output/accessibility-50-batch11-20261023/booklet/ocr-result.json",
+      "reportHash": "106ba517173d8c3fec97f37c2bc44b90ace5ef63d34da97ae0b141763053d242",
+      "pages": [
+        {
+          "page": 15,
+          "blocks": 148,
+          "selected": "gray-300/sparse",
+          "rotations": [
+            0
+          ],
+          "clipped": 0,
+          "errors": 0,
+          "firstText": "STEREO BLOCK DIAGRAM",
+          "firstBox": [
+            376.320014,
+            50.880002,
+            254.64001,
+            13.680001
+          ]
+        },
+        {
+          "page": 38,
+          "blocks": 14,
+          "selected": "gray-300/auto",
+          "rotations": [
+            0
+          ],
+          "clipped": 0,
+          "errors": 0,
+          "firstText": "THERMAL DESIGN OVERVIEW",
+          "firstBox": [
+            354.480014,
+            48.000002,
+            298.800011,
+            13.440001
+          ]
+        }
+      ]
+    }
+  ],
+  "selectedOcrBlocks": 225,
+  "preservedCandidates": [
+    {
+      "id": "booklet",
+      "candidatePath": "output/accessibility-50-batch10-20261023/booklet/06-candidate.pdf",
+      "candidateHash": "07c3b6a74f86180fcc70c9c7f21e74f834204a22318b92d9d9ee61b8292f272f"
+    },
+    {
+      "id": "test-form-control",
+      "candidatePath": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+      "candidateHash": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845"
+    },
+    {
+      "id": "nasa-hinode",
+      "candidatePath": "output/accessibility-50-batch10-20261023/hinode/06-candidate.pdf",
+      "candidateHash": "5e61ff73ca51d0ad9da5f07167b2ac6506e5b1da31b928de7cf11a5bf3787b0c"
+    }
+  ],
+  "preservationEvidenceReused": "Exact prior candidate hashes retain batch-10 appearance and batch-8 form-interaction evidence. No candidate was rewritten in this batch.",
+  "remainingLimits": [
+    "A27-A50 remain pending.",
+    "Saved OCR text layers and mixed-page attachments are not implemented by this batch.",
+    "Geometry evidence is not word accuracy, semantic classification or human acceptance.",
+    "NASA border noise and booklet saved attachment/text failures remain unresolved.",
+    "Custom renderer transforms and EXIF-oriented input images are not qualified by these tests.",
+    "Recognition geometry is retained in layout; downstream text-layer/correction integration remains pending.",
+    "Raster size limits reject oversized pages without silently lowering requested DPI."
+  ],
+  "implementationHashes": {
+    "contracts/layout.schema.json": "0632762d1d592d328cba17a8f2856c5545bbc66cf33f1fed76b9fbb3c2610932",
+    "modules/parser/ocr-geometry.js": "cc83c55d78ea266e3b109525d47b25bd5928a7f1178c2c7b23b2880d35584e45",
+    "modules/parser/ocr-pipeline.js": "471d6233be88bd36bbf05810346441bde7c71e79c66b7a8e1ed8c0b23336c3ea",
+    "modules/parser/java/PdfOcrRenderCli.java": "d08d7f40c5c23fbd25f6813f35c3ed97e37884bbf8a7ad3cd917015dedc6253b",
+    "modules/parser/test/ocr-geometry.test.js": "530b81365f29253c6aeb663af6a1aec3ced3fda66bd5d7759eb8f81db6038d86",
+    "modules/parser/test/fixtures/OcrGeometryProbe.java": "ab52aef4d24b88ef9bff61511fe8518e0b6f29046fc821202ab8036d785c106a",
+    "test/integration/ocr-geometry.test.js": "e0e4a4290c72a046def96b867d5992ded600c5a7bd9ef893f8da919a1a3d1277"
+  }
+}

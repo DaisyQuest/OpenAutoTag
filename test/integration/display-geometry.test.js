@@ -80,7 +80,8 @@ test("cropped, rotated and scaled pages share display geometry through extractio
     const result=await renderPageVariantsWithPdfBox({pdfPath,pages:layout.pages.slice(24),outputDir:path.join(dir,"ocr"),renderVariants:[{name:"small",dpi:72,imageType:"RGB"},{name:"large",dpi:144,imageType:"RGB"}]});
     for(const p of result.pages){
       close(p.pdfWidth,612);close(p.pdfHeight,792);
-      for(const v of p.variants){const unit=layout.pages[p.pageNumber-1].userUnit;close(v.imageWidth,612*v.dpi/(72*unit));close(v.imageHeight,792*v.dpi/(72*unit));}
+      assert.equal(p.coordinateSpace,"crop-display-points");
+      for(const v of p.variants){close(v.imageWidth,612*v.dpi/72);close(v.imageHeight,792*v.dpi/72);close(v.pixelToDisplay[0],72/v.dpi);}
     }
   });
   await t.test("the matcher rejects missing scale or an incompatible coordinate frame",async()=>{

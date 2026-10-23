@@ -51,15 +51,27 @@ public class PdfOcrRenderCli {
                 }
 
                 PDPage page = document.getPage(pageIndex);
+                float unit = page.getUserUnit();
+                if (!Float.isFinite(unit) || unit <= 0 || !Float.isFinite(page.getCropBox().getWidth()) ||
+                    !Float.isFinite(page.getCropBox().getHeight()) || page.getCropBox().getWidth() <= 0 || page.getCropBox().getHeight() <= 0)
+                    throw new IllegalArgumentException("Invalid OCR page geometry");
                 Map<String, Object> pageResult = new LinkedHashMap<>();
                 pageResult.put("pageNumber", pageNumber);
+                pageResult.put("coordinateSpace", "crop-display-points");
                 boolean sideways = page.getRotation() == 90 || page.getRotation() == 270;
-                pageResult.put("pdfWidth", round((sideways ? page.getCropBox().getHeight() : page.getCropBox().getWidth()) * page.getUserUnit()));
-                pageResult.put("pdfHeight", round((sideways ? page.getCropBox().getWidth() : page.getCropBox().getHeight()) * page.getUserUnit()));
+                pageResult.put("pdfWidth", (double)(sideways ? page.getCropBox().getHeight() : page.getCropBox().getWidth()) * unit);
+                pageResult.put("pdfHeight", (double)(sideways ? page.getCropBox().getWidth() : page.getCropBox().getHeight()) * unit);
 
                 List<Map<String, Object>> variantResults = new ArrayList<>();
                 for (VariantSpec variant : variants) {
-                    BufferedImage image = renderer.renderImageWithDPI(pageIndex, variant.dpi, variant.imageType);
+                    // PDFRenderer scales raw user units; include UserUnit to
+                    // render at the requested physical DPI exactly once.
+                    float scale = variant.dpi / 72f * unit;
+                    double width = Math.max(1, Math.floor(page.getCropBox().getWidth() * scale));
+                    double height = Math.max(1, Math.floor(page.getCropBox().getHeight() * scale));
+                    if (!Float.isFinite(scale) || width > 32768 || height > 32768 || width * height > 40000000)
+                        throw new IllegalArgumentException("OCR render exceeds 40 million pixels or 32768 pixels per side");
+                    BufferedImage image = renderer.renderImage(pageIndex, scale, variant.imageType);
                     File imageFile = new File(directory, String.format("page-%03d-%s.png", pageNumber, variant.name));
                     ImageIO.write(image, "PNG", imageFile);
 
@@ -71,6 +83,8 @@ public class PdfOcrRenderCli {
                     variantResult.put("imagePath", imageFile.getAbsolutePath());
                     variantResult.put("imageWidth", image.getWidth());
                     variantResult.put("imageHeight", image.getHeight());
+                    double pointsPerPixel = unit / (double)scale;
+                    variantResult.put("pixelToDisplay", List.of(pointsPerPixel, 0, 0, pointsPerPixel, 0, 0));
                     variantResults.add(variantResult);
                 }
 
@@ -135,6 +149,9 @@ public class PdfOcrRenderCli {
             String name = parts[0];
             int dpi = Integer.parseInt(parts[1]);
             ImageType imageType = ImageType.valueOf(parts[2]);
+            if (!name.matches("[A-Za-z0-9][A-Za-z0-9_-]{0,63}") || dpi < 36 || dpi > 1200 ||
+                variants.stream().anyMatch(v -> v.name.equals(name)))
+                throw new IllegalArgumentException("Invalid or duplicate OCR render variant");
             String preprocessing = imageType == ImageType.BINARY ? "binary" : "grayscale";
             variants.add(new VariantSpec(name, dpi, imageType, preprocessing));
         }
@@ -144,10 +161,6 @@ public class PdfOcrRenderCli {
         }
 
         return variants;
-    }
-
-    private static float round(float value) {
-        return (float)(Math.round(value * 1000d) / 1000d);
     }
 
     private static String toJson(Object value) {

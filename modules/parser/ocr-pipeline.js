@@ -6,6 +6,7 @@ import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir, getRuntimeCacheDir } from "../../scripts/runtime-paths.js";
+import { recognitionTransform, mapRecognitionBox } from "./ocr-geometry.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
@@ -58,7 +59,7 @@ export const DEFAULT_RECOGNITION_PROFILES = [
 
 function execCommand(command, args, { env } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { env, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+    execFile(command, args, { env, windowsHide: true, timeout: 120000, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -214,19 +215,7 @@ function serializeRenderVariants(renderVariants) {
   return renderVariants.map((variant) => `${variant.name}:${variant.dpi}:${variant.imageType}`).join(",");
 }
 
-function toPdfBbox(bbox, variant) {
-  const widthScale = variant.pdfWidth / Math.max(variant.imageWidth || 1, 1);
-  const heightScale = variant.pdfHeight / Math.max(variant.imageHeight || 1, 1);
-  return [
-    round((bbox?.x0 || 0) * widthScale),
-    round((bbox?.y0 || 0) * heightScale),
-    round(Math.max(0, ((bbox?.x1 || 0) - (bbox?.x0 || 0)) * widthScale)),
-    round(Math.max(0, ((bbox?.y1 || 0) - (bbox?.y0 || 0)) * heightScale))
-  ];
-}
-
-function estimateFontSize(line, bboxHeight, variant) {
-  const heightScale = variant.pdfHeight / Math.max(variant.imageHeight || 1, 1);
+function estimateFontSize(line, bboxHeight, heightScale) {
   const rowHeight = Number(line?.rowAttributes?.rowHeight || 0);
   if (rowHeight > 0) {
     return round(Math.max(1, rowHeight * heightScale));
@@ -311,16 +300,18 @@ function extractLineRecordsFromBlocks(blocks) {
   return lines;
 }
 
-function normalizeRecognizedTextBlocks(data, variant, pageNumber, candidateName) {
+export function normalizeRecognizedTextBlocks(data, variant, pageNumber, candidateName) {
+  const transform = recognitionTransform(variant, data?.rotateRadians ?? 0);
   const lines = extractLineRecordsFromBlocks(data?.blocks);
   const blocks = lines.map((line, index) => {
-    const bbox = toPdfBbox(line.bbox, variant);
+    const { bbox, evidence } = mapRecognitionBox(line.bbox, variant, transform);
 
     return {
       id: `p${pageNumber}-ocr-${index + 1}`,
       text: line.text,
       bbox,
-      fontSize: estimateFontSize(line, bbox[3], variant),
+      fontSize: estimateFontSize(line, (line.bbox.y1-line.bbox.y0)*transform.scale, transform.scale),
+      ocrGeometry: evidence,
       fontName: "ocr",
       textSource: "ocr",
       ocrConfidence: round(Number(line.confidence || 0)),
@@ -672,6 +663,7 @@ export async function runOcrPipeline({
         const normalizedVariant = {
           ...variant,
           pageNumber: renderedPage.pageNumber,
+          coordinateSpace: renderedPage.coordinateSpace,
           pdfWidth: renderedPage.pdfWidth,
           pdfHeight: renderedPage.pdfHeight
         };

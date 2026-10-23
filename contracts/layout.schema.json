@@ -154,6 +154,21 @@
                     "ocr"
                   ]
                 },
+                "ocrGeometry": {
+                  "type": "object",
+                  "description": "Recognition pixel coordinates mapped once into the displayed CropBox, including inverse recognizer deskew. This is geometry evidence, not text accuracy or acceptance.",
+                  "required": ["coordinateSpace", "imageSize", "recognitionRotationRadians", "pixelBox", "pixelToDisplay", "quad", "clipped"],
+                  "properties": {
+                    "coordinateSpace": { "const": "crop-display-points" },
+                    "imageSize": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 1 } },
+                    "recognitionRotationRadians": { "type": "number", "minimum": -3.141593, "maximum": 3.141593 },
+                    "pixelBox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number", "minimum": 0 } },
+                    "pixelToDisplay": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "number" } },
+                    "quad": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "type": "number" } },
+                    "clipped": { "type": "boolean" }
+                  },
+                  "additionalProperties": false
+                },
                 "referenceMarkers": {
                   "type": "array",
                   "uniqueItems": true,

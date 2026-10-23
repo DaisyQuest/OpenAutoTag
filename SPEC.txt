@@ -444,6 +444,18 @@ bounded inspector fails explicitly on unsupported traversal/output limits.
 Paragraph merging must retain source identities and rebind semantic references.
 Heuristic evidence is not a calibrated probability. Multilingual expansion is
 lower priority than the preservation and semantic qualification gates.
+OCR rendering uses physical DPI including UserUnit, with CropBox and page
+rotation applied by the renderer. Its explicit pixelToDisplay matrix uses the
+actual rendering scale, never a ratio inferred from rounded bitmap dimensions.
+Tesseract deskew is inverted once about the integer image center before display
+coordinates are emitted. Layout text blocks may carry typed ocrGeometry evidence:
+image size, recognition angle, original pixel box, inverse transform, display
+quadrilateral and clipping flag. Missing/mismatched frames or invalid boxes fail
+the recognition candidate. Clipped geometry is explicit and is not acceptance.
+Raster variants are bounded to 36-1200 DPI, 40 million pixels and 32768 pixels
+per side. Oversized pages reject rather than silently changing the requested DPI.
+Geometry evidence does not certify recognized words. Tagged OCR layers, mixed
+native/OCR ownership and correction qualification remain separate requirements.
 Delivery scope and remaining limits: docs/tagging-accuracy-delivery-20261021.md.
 Current evidence: docs/tagging-quality-claims.md. Further proposed work:
 docs/tagging-accuracy-roadmap.md. Delivery history:
