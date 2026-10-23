@@ -486,7 +486,7 @@ fonts and editable form fonts are not substituted by this OCR fallback.
 Line envelopes and proportional list splits do not certify tight word/glyph
 selection, transcription accuracy, diagram meaning, reading order, multilingual
 shaping or reader behavior. Unavailable glyph inspection also fails generated
-text qualification. Low-confidence correction qualification remains separate;
+text qualification. Word confidence and explicit correction qualification remain separate from structural success;
 the three bundled programs do not establish universal Unicode coverage.
 Candidates still require review.
 Delivery scope and remaining limits: docs/tagging-accuracy-delivery-20261021.md.
@@ -511,3 +511,23 @@ push buttons by exact widget reference, with tooltip precedence and explicit
 caption/appearance conflict review. No authored field or appearance rewrite.
 See docs/verified-tagging-improvements-20261021.md for saved native/raster tests,
 TEST-FORM preservation, helper coverage and outstanding qualification limits.
+
+OCR transcription review (A30, 2026-10-23):
+Layout ocrRecognition and semantic/tagging recognition preserve immutable normalized
+original text, UTF-16 ranges, word confidence, alignment and display quads. Missing
+or unmatched evidence remains unknown; list splits retain original word offsets.
+Saved reports expose pending/recorded transcription status independently of
+automated structure checks. Every segment requires explicit review; confidence
+below 85 is only an uncalibrated prioritization heuristic. Production quality
+reports retain an open task for pending OCR.
+node modules/tag-builder/ocr-review.js --pdf <source.pdf> --tags <original.json>
+  --review <decisions.json> --output <reviewed.json>
+The public ocr-review.schema.json binds source PDF and original intent hashes,
+exact segment identity/expected text and explicit reviewer/evidence/decision.
+Corrections only change selected OCR text and exactly mapped replacement metadata;
+roles, geometry, recognition evidence and native content remain fixed. Stale or
+ambiguous inputs reject; output cannot overwrite an existing path. The audit
+binds canonical review and final document hashes. Use final reviewed tagging
+bytes consistently for writing and saved checking, then repeat raw, preservation
+and reader qualification. Review records are not authentication or certification.
+Details and limits: docs/accessibility-50-batch14-20261023.md.

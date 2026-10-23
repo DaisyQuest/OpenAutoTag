@@ -1,5 +1,6 @@
 // Compare identities, never match unrelated content by similar text.
 import { canonicalText, inspectSourceOwnership, savedTextIndex, textWithAuthoredReplacements, authoredReplacementIndex, exactOverprintText } from "./source-ownership.js";
+import { inspectOcrReview } from "./ocr-review.js";
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function emittedIdentifier(node) {
   if (node.type === "TH" && node.headerId) return node.headerId;
@@ -104,9 +105,11 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
       }
     }
   }
+  const ocrReview = tagging ? inspectOcrReview({ tagging, sourceHash: sourceInspection?.sourceHash, ownershipStatus, add }) : undefined;
   const failed = checks.filter(c => c.status === "fail").length;
   return { schemaVersion: "1.0.0", candidateHash: inspection.sourceHash, referenceHash: reference?.sourceHash || null,
     ownershipStatus,
+    ...(ocrReview ? { ocrReview } : {}),
     scope: reference ? "preserved-structure" : "emitted-tagging-intent", disposition: failed ? "rejected" : "automated_pass",
     summary: { passed: checks.length - failed, failed }, checks,
     limitations: ["Checks saved structure against intent; intent still requires independent semantic review.", "Source occurrence ownership is qualified only when ownershipStatus is verified and the report carries source and ownership hashes.", "Text comparison normalizes Unicode compatibility forms and whitespace; layout, clipping, visibility, word-boundary interpretation and reader behavior require separate verification."] };

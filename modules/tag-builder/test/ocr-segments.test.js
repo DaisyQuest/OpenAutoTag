@@ -24,3 +24,13 @@ test("OCR list labels and bodies own disjoint parts of the original line",()=>{
  assert.deepEqual(root.children[0].ocrSegments[0].quad.slice(2,4),root.children[1].ocrSegments[0].quad.slice(0,2));
  const bad=structuredClone(root);assert.throws(()=>attachOcrSegments(bad,document(node())),/marker/);
 });
+
+test("OCR word evidence retains original offsets through separate list label/body ranges",()=>{
+ const text="1. First item",n=node({role:"LI",text,ocrSegments:[segment(text)]});
+ const recognition={originalText:text,range:[0,text.length],alignment:"complete",words:[{text:"1.",start:0,end:2,confidence:50,geometryStatus:"unavailable"},{text:"First",start:3,end:8,confidence:100,geometryStatus:"unavailable"},{text:"item",start:9,end:13,geometryStatus:"unavailable"}]};
+ n.ocrSegments[0].recognition=recognition;
+ const root={id:"li",type:"LI",children:[{id:"label",type:"Lbl",actualText:"1.",children:[]},{id:"body",type:"LBody",sourceNodeIds:["n1"],children:[]}]};
+ attachOcrSegments(root,document(n));
+ assert.deepEqual(root.children.map(c=>c.ocrSegments[0].recognition.range),[[0,2],[2,13]]);
+ assert.deepEqual(root.children[1].ocrSegments[0].recognition.words,recognition.words);assert.deepEqual(recognition.range,[0,13]);
+});

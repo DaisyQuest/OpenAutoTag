@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/ocr-review.schema.json",
+  "title": "OcrTranscriptionReview",
+  "description": "Explicit supplied transcription decisions bound to the exact original PDF and tagging bytes. This is an audit record, not reviewer authentication or overall accessibility approval.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "sourceHash",
+    "intentHash",
+    "reviewer",
+    "evidence",
+    "decisions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "sourceHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "intentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "required": [
+          "tagId",
+          "segmentIndex",
+          "pageNumber",
+          "sourceBlockId",
+          "expectedText",
+          "text",
+          "decision"
+        ],
+        "properties": {
+          "tagId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768
+          },
+          "segmentIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32768
+          },
+          "pageNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceBlockId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768
+          },
+          "expectedText": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768
+          },
+          "decision": {
+            "enum": [
+              "confirm",
+              "correct"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

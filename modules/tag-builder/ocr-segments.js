@@ -41,6 +41,7 @@ export function attachOcrSegments(root, semantic) {
       if (g?.coordinateSpace !== "crop-display-points" || g.clipped || !g.quad?.every(Number.isFinite))
         throw new Error(`Unqualified OCR line geometry: ${key}`);
       const entry = { pageNumber: node.pageNumber, sourceBlockId: segment.sourceBlockId,
+        ...(segment.recognition ? { recognition: structuredClone(segment.recognition) } : {}),
         text: segment.text, quad: [...g.quad], ...(segment.confidence != null ? { confidence: segment.confidence } : {}) };
       if (index === 0 && label) {
         const marker = label.actualText || label.label;
@@ -51,8 +52,9 @@ export function attachOcrSegments(root, semantic) {
         const fraction = marker.length / entry.text.length, q = entry.quad;
         const top = [q[0]+(q[2]-q[0])*fraction, q[1]+(q[3]-q[1])*fraction];
         const bottom = [q[6]+(q[4]-q[6])*fraction, q[7]+(q[5]-q[7])*fraction];
-        append(label, { ...entry, text: marker, quad: [q[0],q[1],...top,...bottom,q[6],q[7]] });
-        append(tag, { ...entry, text: entry.text.slice(marker.length), quad: [...top,q[2],q[3],q[4],q[5],...bottom] });
+        const recognition = (start, end) => entry.recognition ? { recognition: { ...entry.recognition, range: [start, end] } } : {};
+        append(label, { ...entry, ...recognition(0, marker.length), text: marker, quad: [q[0],q[1],...top,...bottom,q[6],q[7]] });
+        append(tag, { ...entry, ...recognition(marker.length, entry.text.length), text: entry.text.slice(marker.length), quad: [...top,q[2],q[3],q[4],q[5],...bottom] });
       } else append(tag, entry);
     }
   }

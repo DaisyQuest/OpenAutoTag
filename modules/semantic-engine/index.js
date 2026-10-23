@@ -581,6 +581,7 @@ function buildSemanticNode(block, pageNumber, index, state, options) {
     ...(block.textProvenance ? { textProvenance: block.textProvenance } : {}),
     ...(block.textProvenance === "ocr" && block.ocrGeometry ? { ocrSegments: [{
       sourceBlockId: block.id, text: block.text, geometry: block.ocrGeometry,
+      ...(block.ocrRecognition ? { recognition: block.ocrRecognition } : {}),
       ...(Number.isFinite(block.ocrConfidence) ? { confidence: block.ocrConfidence } : {})
     }] } : {}),
     ...(block.referenceMarkers ? { referenceMarkers: [...block.referenceMarkers] } : {}),

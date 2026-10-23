@@ -4,6 +4,7 @@ import path from "node:path";
 import { normalizeMlClassifierOptions } from "./ml-tuning.js";
 import { injectProfileEnv } from "./profile-runtime.js";
 import { runJsonStage } from "./workload-runner.js";
+import { appendOcrReviewTask } from "./ocr-review-quality.js";
 
 function sortSemanticNodesForReadingOrder(semanticDocument) {
   const compareNodes = (left, right) =>
@@ -449,6 +450,7 @@ export function createTaggingOutputStages({
                 ...(writer.writerMode === "native" ? ["--source-pdf", filePath, "--ownership", writer.sourceOwnershipPath] : [])],savedPath);
               artifacts.savedSemantics=savedPath;
               const saved=JSON.parse(await readFile(savedPath,"utf8"));
+              appendOcrReviewTask(report, saved, savedPath);
               const pass=saved.disposition==="automated_pass"&&saved.candidateHash===report.candidateHash;
               report.checks.push({id:"saved_semantics",status:pass?"pass":"fail"});
               if(!pass){report.disposition="rejected";report.findings.push({code:"SAVED_SEMANTICS_MISMATCH",description:`Saved structure differs from tagging intent; see ${savedPath}`});}

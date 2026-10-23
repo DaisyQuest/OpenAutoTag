@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { buildJavaExecEnv, ensureJavaBuildArtifact, resolveJavaTool } from "../../scripts/java-runtime.js";
 import { getRuntimeBuildDir, getRuntimeCacheDir } from "../../scripts/runtime-paths.js";
 import { recognitionTransform, mapRecognitionBox } from "./ocr-geometry.js";
+import { recognizeWords } from "./ocr-words.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(moduleDir, "..", "..");
@@ -283,6 +284,7 @@ function extractLineRecordsFromBlocks(blocks) {
 
         lines.push({
           text,
+          words: Array.isArray(line?.words) ? line.words : [],
           confidence: Number.isFinite(line?.confidence)
             ? line.confidence
             : Number.isFinite(paragraph?.confidence)
@@ -312,6 +314,7 @@ export function normalizeRecognizedTextBlocks(data, variant, pageNumber, candida
       bbox,
       fontSize: estimateFontSize(line, (line.bbox.y1-line.bbox.y0)*transform.scale, transform.scale),
       ocrGeometry: evidence,
+      ocrRecognition: recognizeWords(line, variant, transform),
       fontName: "ocr",
       textSource: "ocr",
       ocrConfidence: round(Number(line.confidence || 0)),

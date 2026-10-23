@@ -39,6 +39,10 @@ test("saved invisible OCR preserves scans, native glyphs and editable fields acr
      nodes.push({id:"native",sourceBlockId:"native",pageNumber:1,role:"P",text:b.text,bbox:b.bbox,fontSize:b.fontSize,fontName:b.fontName,textProvenance:"native",confidence:1});
      await t.test("small OCR additions retain native text and carry overlap conflicts into semantic review",async()=>{
        const recognized={id:"recognized",text:"IMAGE TEXT 123",bbox:nodes[0].bbox,fontSize:nodes[0].fontSize,fontName:"OCR",ocrGeometry:nodes[0].ocrSegments[0].geometry,ocrConfidence:100};
+       recognized.ocrRecognition={originalText:recognized.text,range:[0,14],alignment:"complete",words:[
+         {text:"IMAGE",start:0,end:5,confidence:96,geometryStatus:"mapped",quad:[...recognized.ocrGeometry.quad]},
+         {text:"TEXT",start:6,end:10,confidence:41,geometryStatus:"unavailable"},
+         {text:"123",start:11,end:14,geometryStatus:"unavailable"}]};
        const duplicates=[{...b,id:"duplicate"},{...b,id:"conflict",text:"Native words misread"}];
        const options=blocks=>({ocr:{mode:"force",minCharacterGain:10000,
          renderPageVariants:async()=>({pages:[{pageNumber:1,pdfWidth:360.375,pdfHeight:240.625,coordinateSpace:"crop-display-points",variants:[{name:"fixture"}]}]}),
@@ -50,6 +54,7 @@ test("saved invisible OCR preserves scans, native glyphs and editable fields acr
        const conflict=sem.semanticReviewTasks.find(r=>r.code==="OCR_NATIVE_CONFLICT"),native=sem.nodes.find(n=>n.text==="Native words stay once");
        assert.deepEqual(conflict.candidates,[native.id]);assert.equal(conflict.nativeText,native.text);assert.equal(conflict.ocrText,"Native words misread");assert.deepEqual(conflict.bbox,b.bbox);
        assert.deepEqual(sem.nodes.find(n=>n.text==="IMAGE TEXT 123").ocrSegments[0].geometry,recognized.ocrGeometry);
+       assert.deepEqual(sem.nodes.find(n=>n.text==="IMAGE TEXT 123").ocrSegments[0].recognition,recognized.ocrRecognition);
        const retained=await parsePdf(pdfPath,options(duplicates));assert.equal(retained.pages[0].ocr.status,"retained-native-text");
        assert.equal(retained.pages[0].ocr.alignmentReview[0].ocrText,"Native words misread");
      });
@@ -64,9 +69,36 @@ test("saved invisible OCR preserves scans, native glyphs and editable fields acr
    await writeFile(path.join(dir,`${name}-saved.json`),JSON.stringify(saved,null,2));
    assert.equal(saved.summary.failed,0,JSON.stringify(saved.checks.filter(c=>c.status==="fail")));
    assert.equal(saved.ownershipStatus,"verified");assert.equal(saved.checks.filter(c=>c.code==="OCR_TEXT_EXACT").length,16);
+   assert.equal(saved.ocrReview.pending,16);assert.equal(saved.ocrReview.recorded,0);
    assert.match((await run(probe,["verify",pdfPath,outputPath])).stdout,/preserved/);assert.equal(await hash(),before);
    results.push({name,sourceHash:before,candidateHash:saved.candidateHash,summary:saved.summary,ocrLines:report.ocrTextLines});
    if(name==="mixed") {
+     await t.test("explicit OCR corrections change saved text and metadata while preserving native content, appearance and form editing",async()=>{
+       const correctedSemantic=structuredClone(semantic),first=correctedSemantic.nodes[0];
+       first.text="IMAGE TEXT I23";first.ocrSegments[0].text=first.text;
+       first.ocrSegments[0].recognition={originalText:first.text,range:[0,14],alignment:"complete",words:[
+         {text:"IMAGE",start:0,end:5,confidence:99,geometryStatus:"unavailable"},
+         {text:"TEXT",start:6,end:10,confidence:99,geometryStatus:"unavailable"},
+         {text:"I23",start:11,end:14,confidence:35,geometryStatus:"unavailable"}]};
+       const sp=path.join(dir,"review-semantic.json"),tp=path.join(dir,"review-original-tags.json"),rp=path.join(dir,"review-decisions.json"),final=path.join(dir,"reviewed-tags.json"),out=path.join(dir,"reviewed.pdf");
+       await writeFile(sp,JSON.stringify(correctedSemantic));const original=await buildTagTree(sp),bytes=JSON.stringify(original);await writeFile(tp,bytes);
+       let owner;const find=n=>{if(n.ocrSegments?.some(s=>s.pageNumber===1))owner=n;for(const child of n.children||[])find(child);};find(original.root);assert.ok(owner);
+       const review={schemaVersion:"1.0.0",sourceHash:before,intentHash:createHash("sha256").update(bytes).digest("hex"),reviewer:"Synthetic fixture author",evidence:"The independent source raster says IMAGE TEXT 123; deliberately injected I23 transcription error.",decisions:[{tagId:owner.id,segmentIndex:0,pageNumber:1,sourceBlockId:first.sourceBlockId,expectedText:first.text,text:"IMAGE TEXT 123",decision:"correct"}]};
+       await writeFile(rp,JSON.stringify(review));
+       const args=[path.resolve("modules/tag-builder/ocr-review.js"),"--pdf",pdfPath,"--tags",tp,"--review",rp,"--output",final];
+       await promisify(execFile)(process.execPath,args,{windowsHide:true});
+       await assert.rejects(promisify(execFile)(process.execPath,args,{windowsHide:true}),/EEXIST/);
+       const written=await writeTaggedArtifacts({pdfPath,semanticPath:sp,tagsPath:final,outputPath:out,mode:"native"});
+       const checked=await checkSavedSemantics({pdfPath:out,tagsPath:final,sourcePdfPath:pdfPath,ownershipPath:written.sourceOwnershipPath});
+       await writeFile(path.join(dir,"reviewed-saved.json"),JSON.stringify(checked,null,2));
+       assert.equal(checked.summary.failed,0,JSON.stringify(checked.checks.filter(c=>c.status==="fail")));
+       assert.equal(checked.ocrReview.recorded,1);assert.equal(checked.ocrReview.pending,15);
+       assert.equal(checked.ocrReview.segments.find(s=>s.pageNumber===1).recognition.words[2].text,"I23");
+       assert.ok(checked.checks.some(c=>c.code==="ACTUAL_TEXT"&&c.actual==="IMAGE TEXT 123"));
+       assert.match((await run(probe,["verify",pdfPath,out])).stdout,/preserved/);assert.equal(await hash(),before);
+       assert.equal(await readFile(tp,"utf8"),bytes);
+       results.push({name:"reviewed",sourceHash:before,candidateHash:checked.candidateHash,summary:checked.summary,pending:15,recorded:1});
+     });
      for(const [mode,code] of [["visible","OCR_TEXT_INVISIBLE"],["shifted","OCR_LINE_GEOMETRY"],["partial","OCR_TEXT_EXACT"],["owner","SOURCE_PAINT_OWNER"],["duplicate","OCR_LINE_COUNT"],["missing","OCR_LINE_COUNT"]])await t.test(`saved ${mode} OCR is rejected`,async()=>{
        const bad=path.join(dir,`${mode}.pdf`);await run(probe,["mutate",outputPath,bad,mode]);
        const checked=await checkSavedSemantics({pdfPath:bad,tagsPath,sourcePdfPath:pdfPath,ownershipPath:report.sourceOwnershipPath});

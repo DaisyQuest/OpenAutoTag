@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A30"
+  ],
+  "status": "completed",
+  "baselineCommit": "6ab47ff",
+  "tests": {
+    "baseline": {
+      "path": "tmp/accessibility-50-batch14-baseline.log",
+      "sha256": "4e90283483420a3ae212200e3a2b82f8dca11ba018083bcf9c8c28a41a1965d3",
+      "passed": 415,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "scopedCoverage": {
+      "path": "tmp/a30-coverage.log",
+      "sha256": "d9361b229ae8b24124e6c95c167a5c01dab9f2a0f960b46e60cf56f9079a0adf",
+      "cases": 13,
+      "linePercent": 92.64,
+      "branchPercent": 91.3,
+      "scope": [
+        "modules/parser/ocr-words.js",
+        "modules/tag-builder/ocr-review.js",
+        "modules/validator/ocr-review.js",
+        "orchestrator/ocr-review-quality.js"
+      ],
+      "limitation": "Only four new JavaScript files; CLI child-process integration is not included in these coverage percentages. No repository-wide or Java coverage claim."
+    }
+  },
+  "verification": [
+    {
+      "id": "nasa-stereo",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo.pdf",
+      "sourceHash": "6acfbc043bc8693041bc86cb2cba077c4111b1196e2f968052a6199e1d86acbc",
+      "candidatePath": "output/accessibility-50-batch14-20261023/nasa-stereo/06-candidate.pdf",
+      "candidateHash": "7077818d21cfd20449c5b1ca88afd69387be1e83a1824f458825050e00e4139f",
+      "intentPath": "output/accessibility-50-batch14-20261023/nasa-stereo/05-tagging.json",
+      "intentHash": "e09ce12cc692c940fdc7e9d41e2b41890863f41852c77e029d753f6dfbee7811",
+      "saved": {
+        "passed": 1472,
+        "failed": 0
+      },
+      "ownershipStatus": "verified",
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5460,
+        "failedChecks": 0
+      },
+      "rawReused": false,
+      "ocrReview": {
+        "pending": 65,
+        "recorded": 0,
+        "wordEvidence": 65,
+        "lowConfidence": 61
+      },
+      "savedReportPath": "output/accessibility-50-batch14-20261023/nasa-stereo/09-saved-semantics.json",
+      "savedReportHash": "3e435a23d16320daafc1986e599eaa9c2b796b4185d43d9505872b6439bac480",
+      "rawReportPath": "output/accessibility-50-batch14-20261023/nasa-stereo/07-validation.json",
+      "rawReportHash": "3b8d4148cf786e9b1c044aa46a5561b7b12ca45336b09274a41bf7a93fa62ad9"
+    },
+    {
+      "id": "booklet",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidatePath": "output/accessibility-50-batch13-20261023/booklet/06-candidate.pdf",
+      "candidateHash": "b02ff10d0bbb688d7d3f16087dec1af0322ad47abc0da88435b73d60626ef31c",
+      "intentPath": "output/accessibility-50-batch12-20261023/booklet/05-tagging.json",
+      "intentHash": "93070d771b94a3a5d84367a12755216d184b1fbc6e609c3b6a965d55236dd9e4",
+      "saved": {
+        "passed": 51144,
+        "failed": 248
+      },
+      "ownershipStatus": "verified",
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 192138,
+        "failedChecks": 31
+      },
+      "rawReused": true,
+      "ocrReview": {
+        "pending": 158,
+        "recorded": 0,
+        "wordEvidence": 0,
+        "lowConfidence": 0
+      },
+      "savedReportPath": "output/accessibility-50-batch14-20261023/booklet/09-saved-semantics.json",
+      "savedReportHash": "650ae74e06d04fec1a0a1b22d1b65071227f2d85dbb0845caf580c7d5380002f",
+      "rawReportPath": "output/accessibility-50-batch13-20261023/booklet/07-validation.json",
+      "rawReportHash": "cb2d99a3d2dd0ae281766640d05cf7b7bcdfd4a06ca14d8d43bd46d37ce7eeeb"
+    },
+    {
+      "id": "reviewed-fixture",
+      "sourcePath": "output/accessibility-50-batch14-20261023/synthetic/mixed.pdf",
+      "sourceHash": "68d741a0ee3462c0f3812144cdf0f94ac2e9717b5beec37cfbecb973d65231e6",
+      "candidatePath": "output/accessibility-50-batch14-20261023/synthetic/reviewed.pdf",
+      "candidateHash": "0aa625b83bdb765be658932b5b5b8c6d4ddfcea8d4cd584eedd8cb9e9fac1bce",
+      "intentPath": "output/accessibility-50-batch14-20261023/synthetic/reviewed-tags.json",
+      "intentHash": "9f5cd7396d609e3c1e973a73f808a201f19885c318ed2c90feaf98a95ec3975e",
+      "saved": {
+        "passed": 467,
+        "failed": 0
+      },
+      "ownershipStatus": "verified",
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 1529,
+        "failedChecks": 0
+      },
+      "rawReused": false,
+      "ocrReview": {
+        "pending": 15,
+        "recorded": 1,
+        "wordEvidence": 1,
+        "lowConfidence": 1
+      },
+      "savedReportPath": "output/accessibility-50-batch14-20261023/reviewed-fixture/09-saved-semantics.json",
+      "savedReportHash": "a80bdf0aea4f0d8b3043172cf69a328e86113d53ff48a89c8f35aa4d020daa43",
+      "rawReportPath": "output/accessibility-50-batch14-20261023/reviewed-fixture/07-validation.json",
+      "rawReportHash": "5f64f0df1674e5d827cf47e8104a212711b95f106b34bd31d948de31f30b6cd9"
+    }
+  ],
+  "visual": {
+    "path": "output/accessibility-50-batch14-20261023/visual-comparison.json",
+    "sha256": "f29523bd2e671256f1cb67d41aca894d639540cdd35bb1abf1f7bc7569f1cdbc",
+    "pagePairs": 79,
+    "allPixelIdentical": true,
+    "sourceImageBytesPreserved": true
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch14-20261023/synthetic/evidence.json",
+    "sha256": "3a6f89616655505d06755ac0be3e95b90cfc57348868696f6c3018ffd070bf91",
+    "pdfboxPagePairs": 96,
+    "fieldValueAndAppearancePreserved": true,
+    "fillSaveReopenPreserved": true,
+    "correction": "Authored IMAGE TEXT I23 to IMAGE TEXT 123; first page only; original raster says IMAGE TEXT 123. One explicit test decision recorded, 15 segments pending."
+  },
+  "liveRecognition": {
+    "path": "output/accessibility-50-batch14-20261023/nasa-stereo/ocr-words.json",
+    "sha256": "d437bcaf0fd0c2f4e4c1ef9a14a0cdfc4a83dbfdaea7edfa58b9101553bb8552",
+    "pages": 2,
+    "lines": 63,
+    "words": 469,
+    "reviewedRealDecisions": 0
+  },
+  "limitations": [
+    "Confidence below 85 is a review priority heuristic, not a calibrated error probability; every generated OCR segment requires review regardless of confidence.",
+    "Recorded decisions are supplied audit evidence, not authenticated identity or overall accessibility approval.",
+    "Corrections preserve roles, geometry and native content; complex or ambiguous replacement metadata rejects. Reapply a complete review to original tagging intent rather than chaining reviews.",
+    "The booklet candidate and raw report are hash-identical to batch 13; saved checking and rendering were rerun. Its 248 saved semantic and 31 raw failures remain.",
+    "Word geometry is recognition evidence, not tight selection geometry; generated OCR still fits line envelopes. No real NASA transcription decisions or human reader qualification are claimed."
+  ],
+  "references": [
+    "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7"
+  ]
+}
