@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSArray;
@@ -91,6 +90,7 @@ public class NativeContentStreamRewriter {
         PAINT_OPS.add("b*");
         PAINT_OPS.add("Do");
         PAINT_OPS.add("sh");
+        PAINT_OPS.add("BI");
     }
 
     // ---------------------------------------------------------------
@@ -289,6 +289,7 @@ public class NativeContentStreamRewriter {
         int mcid;
         List<OpRef> operators = new ArrayList<>();
         double matchConfidence;
+        boolean startsTagGroup;
     }
 
     /** Per-page plan from the tag plan JSON */
@@ -466,82 +467,34 @@ public class NativeContentStreamRewriter {
         return plans;
     }
 
-    private static int splitAssignmentsIntoMarkedRuns(PagePlan plan, Set<Integer> barrierOperatorIndices) {
-        int addedRuns = 0;
-        TreeSet<Integer> barriers = new TreeSet<>(barrierOperatorIndices);
-
+    /** Each text operator owns one disjoint marked-content run. A semantic node
+     * can own many MCRs; extending a wrapper between its operators can swallow
+     * other nodes, whitespace artifacts or graphics in the source paint order.
+     * Use text sequence identity here, not PDFBox's virtual dispatch indices.
+     */
+    private static int splitAssignmentsIntoMarkedRuns(PagePlan plan) throws IOException {
         int nextMcid = 0;
-        for (Assignment assignment : plan.assignments) {
-            nextMcid = Math.max(nextMcid, assignment.mcid + 1);
-        }
-
+        for (Assignment a : plan.assignments) nextMcid = Math.max(nextMcid, a.mcid + 1);
         List<Assignment> expanded = new ArrayList<>();
-        for (Assignment assignment : plan.assignments) {
-            if (assignment.operators.size() <= 1) {
-                expanded.add(assignment);
-                continue;
+        Set<Integer> assignedSequences = new HashSet<>();
+        int addedRuns = 0;
+        for (Assignment a : plan.assignments) {
+            for (int i = 0; i < a.operators.size(); i++) {
+                OpRef ref = a.operators.get(i);
+                if (!assignedSequences.add(ref.seq)) throw new IOException("Text operator has multiple owners: " + ref.seq);
+                Assignment run = new Assignment();
+                run.tagNodeId = a.tagNodeId;
+                run.tagType = a.tagType;
+                run.matchConfidence = a.matchConfidence;
+                run.mcid = i == 0 ? a.mcid : nextMcid++;
+                run.startsTagGroup = i == 0;
+                run.operators.add(ref);
+                expanded.add(run);
+                if (i > 0) addedRuns++;
             }
-
-            List<List<OpRef>> runs = new ArrayList<>();
-            List<OpRef> currentRun = new ArrayList<>();
-            OpRef previous = null;
-            for (OpRef ref : assignment.operators) {
-                if (previous != null && hasBarrierBetween(previous, ref, barriers)) {
-                    runs.add(currentRun);
-                    currentRun = new ArrayList<>();
-                }
-                currentRun.add(ref);
-                previous = ref;
-            }
-            if (!currentRun.isEmpty()) {
-                runs.add(currentRun);
-            }
-
-            if (runs.size() <= 1) {
-                expanded.add(assignment);
-                continue;
-            }
-
-            for (int runIndex = 0; runIndex < runs.size(); runIndex++) {
-                Assignment split = new Assignment();
-                split.tagNodeId = assignment.tagNodeId;
-                split.tagType = assignment.tagType;
-                split.matchConfidence = assignment.matchConfidence;
-                split.mcid = runIndex == 0 ? assignment.mcid : nextMcid++;
-                split.operators.addAll(runs.get(runIndex));
-                expanded.add(split);
-            }
-            addedRuns += runs.size() - 1;
         }
-
         plan.assignments = expanded;
         return addedRuns;
-    }
-
-    private static boolean hasBarrierBetween(OpRef previous, OpRef next, TreeSet<Integer> barriers) {
-        int low = Math.min(previous.opIndexInStream, next.opIndexInStream);
-        int high = Math.max(previous.opIndexInStream, next.opIndexInStream);
-        if (high - low <= 1) return false;
-        return barriers.ceiling(low + 1) != null && barriers.ceiling(low + 1) < high;
-    }
-
-    private static Set<Integer> collectBarrierOperatorIndices(PDPage page, PagePlan plan) throws IOException {
-        Set<Integer> barriers = new HashSet<>(plan.unmatchedOperatorIndices);
-        PDFStreamParser parser = new PDFStreamParser(page);
-        List<Object> tokens = parser.parse();
-        int operatorIndex = 0;
-
-        for (Object token : tokens) {
-            if (token instanceof Operator) {
-                Operator op = (Operator) token;
-                if (PAINT_OPS.contains(op.getName())) {
-                    barriers.add(operatorIndex);
-                }
-                operatorIndex++;
-            }
-        }
-
-        return barriers;
     }
 
     // ---------------------------------------------------------------
@@ -600,7 +553,6 @@ public class NativeContentStreamRewriter {
         Map<Integer, Assignment> seqToAssignment = new HashMap<>();
         Map<Integer, Boolean> seqIsFirst = new HashMap<>();
         Map<Integer, Boolean> seqIsLast = new HashMap<>();
-        Set<Integer> unmatchedSeqs = new HashSet<>(plan.unmatchedOperatorSeqs);
 
         for (Assignment a : plan.assignments) {
             if (a.operators.isEmpty()) continue;
@@ -617,18 +569,8 @@ public class NativeContentStreamRewriter {
         List<Object> newTokens = new ArrayList<>();
         int textOpSeq = 0;
         boolean inArtifact = false;
-        // LIFO stack of MCIDs whose BDC we've emitted but not yet
-        // closed with a matching EMC. Needed because a tagged group's
-        // seqIsLast op can fall inside a source marked-content block
-        // (where we intentionally skip emission) — without the stack
-        // we'd never close the BDC and the page would ship with
-        // unbalanced marked-content. See PDF 32000-1 §14.6 for the
-        // LIFO requirement on nested marked-content.
+        // Every assignment is one text operator, so tagged runs cannot overlap.
         java.util.Deque<Integer> openMcidStack = new java.util.ArrayDeque<>();
-        // Depth of pre-existing marked-content (BMC/BDC) in the source stream.
-        // When > 0 we are inside a source-owned marker; our own BDC wrappers
-        // would produce invalid nesting, so we leave those operators alone.
-        int sourceMCDepth = 0;
 
         List<COSBase> pendingOperands = new ArrayList<>();
         RewriteResult result = new RewriteResult();
@@ -657,16 +599,7 @@ public class NativeContentStreamRewriter {
                 // Dropping source MC removes that ambiguity; our
                 // struct tree is owned end-to-end by our pipeline.
                 if ("BMC".equals(opName) || "BDC".equals(opName) || "EMC".equals(opName)) {
-                    if ("EMC".equals(opName) && inArtifact) {
-                        // Stray EMC: if it's our own artifact close,
-                        // honor it. But this only happens if a source
-                        // EMC precedes our own artifact close — unusual.
-                        newTokens.add(op);
-                        inArtifact = false;
-                    }
-                    // Otherwise drop the source marker. Don't emit the
-                    // operator or its operands — the visible rendering
-                    // is identical since BMC/BDC/EMC are metadata-only.
+                    // Source markers never close wrappers owned by this rewrite.
                     pendingOperands.clear();
                     continue;
                 }
@@ -684,7 +617,7 @@ public class NativeContentStreamRewriter {
                         }
 
                         TagTreeNode label=listLabels.get(assignment.tagNodeId);
-                        if(label!=null && assignment.operators.size()==1 && "Tj".equals(opName) && pendingOperands.size()==1 && pendingOperands.get(0) instanceof COSString) {
+                        if(label!=null && assignment.startsTagGroup && "Tj".equals(opName) && pendingOperands.size()==1 && pendingOperands.get(0) instanceof COSString) {
                             byte[] bytes=((COSString)pendingOperands.get(0)).getBytes();
                             int boundary=markerByteBoundary(currentFont,bytes,label.actualText);
                             if(boundary>0) {
@@ -722,14 +655,8 @@ public class NativeContentStreamRewriter {
                             }
                         }
                     } else {
-                        // Unmatched or orphaned text op — wrap as /Artifact.
-                        // Do NOT drain openMcidStack here: the next
-                        // tagged op (continuation of the same group)
-                        // would become orphaned from its BDC wrapper
-                        // and Adobe would show a "blank tag" (struct
-                        // leaf points to an MC region with no text).
-                        // Artifact BMC nested inside our own BDC is
-                        // legal per PDF 32000-1 §14.6.
+                        // Unmatched text remains explicitly unqualified as an
+                        // artifact; it must never sit inside a semantic wrapper.
                         if (!inArtifact) {
                             newTokens.add(COSName.ARTIFACT);
                             newTokens.add(Operator.getOperator("BMC"));
@@ -772,9 +699,7 @@ public class NativeContentStreamRewriter {
             newTokens.add(Operator.getOperator("EMC"));
             inArtifact = false;
         }
-        // Drain any remaining open tagged BDCs — the only reason they'd
-        // still be open is seqIsLast fell inside a skipped source MC
-        // block, or the stream ended before the group's last op.
+        // Defensive balance for a truncated source stream.
         while (!openMcidStack.isEmpty()) {
             openMcidStack.pop();
             newTokens.add(Operator.getOperator("EMC"));
@@ -1492,7 +1417,7 @@ public class NativeContentStreamRewriter {
                 }
 
                 PDPage page = doc.getPage(pageIndex);
-                splitMarkedContentRuns += splitAssignmentsIntoMarkedRuns(plan, collectBarrierOperatorIndices(page, plan));
+                splitMarkedContentRuns += splitAssignmentsIntoMarkedRuns(plan);
                 System.err.println("[rewriter] Rewriting page " + plan.pageNumber
                         + " (" + plan.assignments.size() + " assignments, "
                         + plan.unmatchedOperatorSeqs.size() + " unmatched ops)");

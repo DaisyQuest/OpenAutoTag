@@ -1,0 +1,339 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedOn": "2026-10-22",
+  "baseCommit": "e0cc5da",
+  "scope": "Disjoint native marked-content ownership and exact overprint extraction; three development documents, not general tagging accuracy.",
+  "runtimes": {
+    "node": "22.20.0",
+    "java": "21",
+    "pdfbox": "3.0.8",
+    "veraPdf": "1.30.3 Greenfield ua1",
+    "pdfJs": "4.10.38",
+    "finalTestJavaOptions": "-XX:TieredStopAtLevel=1 -Xms32m -Xmx512m",
+    "finalTestConcurrency": 2
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 241,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/content-ownership-production-final2.log"
+    },
+    "focused": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/content-ownership-focused-final.log"
+    },
+    "parserCompatibility": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/overprint-after.log"
+    },
+    "countsOverlap": true,
+    "beforeFix": "Ownership regression failed on nested marked content; three of four overprint regressions failed before extraction fix.",
+    "initialRunLimitation": "An earlier unbounded baseline overlapped OCR and failed on Windows paging-file/JVM startup limits and process spawn errors. Bounded final baseline passed.",
+    "coverage": "No new coverage percentage measured."
+  },
+  "codeSha256NormalizedLf": {
+    "modules/parser/index.js": "1f41d46fdddf8e79a134975d212efa7d57aaff85119c72636a3baa8b36c4e0ab",
+    "modules/parser/test/overprint.test.js": "b126b98c72996e9ad4312ba7096c20f38564e42bf5dbbaef91e3db79420cf2a3",
+    "modules/pdf-writer/java/NativeContentStreamRewriter.java": "0d93d2706f6fbd69fa551f6b03fa2a7d107cb279c67e9942e9a49124db86974e",
+    "modules/pdf-writer/test/fixtures/NativeOwnershipProbe.java": "aeb4b8b9319c7290488c9e2cd8f6125287d30d3af6214e5f5d15f3faab37e5de",
+    "test/integration/native-content-ownership.test.js": "e03948b5a453455775baa085e464ae13243ce2ccaeb97a40f0265e6bb9736912",
+    "package.json": "a24b7e3e72ad1e5c400eb30a3ca312e0a1a69855fbd42f520b0d9e255afd8489"
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "source": {
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+        "sha256": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+        "pages": 61,
+        "publisher": "NASA",
+        "url": "https://stereo-ssc.nascom.nasa.gov/img/STEREObooklet.pdf"
+      },
+      "candidatePath": "output/content-ownership-fixes-20261022/booklet-final/06-candidate.pdf",
+      "candidateHash": "61bb14d43fcab33fea25ee51d4e294ab4d7660700729dc69dd43a1d958eea3fe",
+      "writerMode": "native",
+      "rawVeraPdf": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 178064,
+        "failedChecks": 31
+      },
+      "rawFailureCodes": {
+        "VERAPDF_7_21_4_1_1": 6,
+        "VERAPDF_7_21_3_2_1": 6,
+        "VERAPDF_7_21_7_1": 19
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedSemantics": {
+        "summary": {
+          "passed": 14603,
+          "failed": 267
+        },
+        "disposition": "rejected",
+        "failureCodes": {
+          "CONTENT_ATTACHED": 263,
+          "CHILD_ORDER": 2,
+          "EMITTED_NODE": 2
+        }
+      },
+      "productionDisposition": "rejected",
+      "preservationFindings": [
+        "IDENTITY_MAPPING_REQUIRED",
+        "VALIDATION_REQUIRES_REVIEW",
+        "SAVED_SEMANTICS_MISMATCH"
+      ],
+      "render": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 96,
+        "pixelIdenticalPages": 61
+      },
+      "sourceBytePrefixRetained": false
+    },
+    {
+      "id": "test-form-control",
+      "source": {
+        "path": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+        "sha256": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+        "pages": 2
+      },
+      "candidatePath": "output/content-ownership-fixes-20261022/control-final/06-candidate.pdf",
+      "candidateHash": "25c01974b73282322707977b725590244733bce9d0509ab75df615cae10af8c6",
+      "writerMode": "passthrough",
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "rawFailureCodes": {},
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedSemantics": {
+        "summary": {
+          "passed": 1828,
+          "failed": 0
+        },
+        "disposition": "automated_pass",
+        "failureCodes": {}
+      },
+      "productionDisposition": "review_required",
+      "preservationFindings": [],
+      "render": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 2
+      },
+      "sourceBytePrefixRetained": true
+    },
+    {
+      "id": "nasa-hinode",
+      "source": {
+        "path": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+        "sha256": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+        "pages": 1,
+        "publisher": "NASA",
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hinode-one-pager.pdf"
+      },
+      "candidatePath": "output/content-ownership-fixes-20261022/hinode-final/06-candidate.pdf",
+      "candidateHash": "b1b5459e3aa64506fc5b49a30007521cbe9d44f86685974c2012482be02cca8e",
+      "writerMode": "native",
+      "rawVeraPdf": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 1705,
+        "failedChecks": 0
+      },
+      "rawFailureCodes": {},
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 0,
+        "warningCount": 0,
+        "blockingPreVeraPdf": false
+      },
+      "savedSemantics": {
+        "summary": {
+          "passed": 531,
+          "failed": 0
+        },
+        "disposition": "automated_pass",
+        "failureCodes": {}
+      },
+      "productionDisposition": "review_required",
+      "preservationFindings": [
+        "IDENTITY_MAPPING_REQUIRED"
+      ],
+      "render": {
+        "renderer": "Poppler pdftoppm",
+        "dpi": 150,
+        "pixelIdenticalPages": 1
+      },
+      "sourceBytePrefixRetained": false
+    }
+  ],
+  "independentBookletProof": {
+    "candidateHash": "61bb14d43fcab33fea25ee51d4e294ab4d7660700729dc69dd43a1d958eea3fe",
+    "scope": "Independent pypdf traversal of saved structure and top-level page content streams; does not certify nested Form XObject semantics or reader behavior",
+    "emptyCells": 41,
+    "headerReferences": 143,
+    "duplicateStructureIds": 0,
+    "nestedPageMarkedContent": 0,
+    "unbalancedPageMarkedContent": 0,
+    "unmarkedPagePaintOperators": 0,
+    "duplicatePageMcids": 0,
+    "totals": {
+      "markers": 4723,
+      "paintedOperators": 7289,
+      "artifactPaint": 3296,
+      "taggedPaint": 3993,
+      "mcids": 3993
+    }
+  },
+  "pdfJsAndInteraction": [
+    {
+      "id": "nasa-hinode",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "b1b5459e3aa64506fc5b49a30007521cbe9d44f86685974c2012482be02cca8e",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": []
+    },
+    {
+      "id": "test-form-control",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "25c01974b73282322707977b725590244733bce9d0509ab75df615cae10af8c6",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": [
+        {
+          "variant": "source",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        },
+        {
+          "variant": "candidate",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        }
+      ],
+      "filledPagePixelIdentical": true
+    }
+  ],
+  "bookletBefore": {
+    "candidateHash": "3c4d25c1f89e265d4f2d9904f0a4fd8c7189758fd3a41956a28b171b5e37add2",
+    "rawVeraPdf": {
+      "passedRules": 100,
+      "failedRules": 6,
+      "passedChecks": 112792,
+      "failedChecks": 859
+    },
+    "rawFailureCodes": {
+      "VERAPDF_7_1_1": 290,
+      "VERAPDF_7_21_4_1_1": 6,
+      "VERAPDF_7_21_3_2_1": 6,
+      "VERAPDF_7_1_2": 290,
+      "VERAPDF_7_21_7_1": 19,
+      "VERAPDF_7_1_3": 248
+    },
+    "savedSemantics": {
+      "passed": 15809,
+      "failed": 389
+    }
+  },
+  "bookletExtractionComparison": {
+    "layoutBlocksBefore": 1940,
+    "layoutBlocksAfter": 1818,
+    "semanticNativeNodesBefore": 1006,
+    "semanticNativeNodesAfter": 901,
+    "semanticOcrNodesBefore": 137,
+    "semanticOcrNodesAfter": 137,
+    "matchedOperatorsBefore": 3994,
+    "matchedOperatorsAfter": 3994,
+    "operatorCount": 4089,
+    "interpretation": "Fewer redundant intended nodes, not 122 newly attached text nodes. Saved-check totals and inferred table topology change with extraction; operator match count is unchanged."
+  },
+  "remainingBookletSemanticFailures": {
+    "CONTENT_ATTACHED": 263,
+    "EMITTED_NODE": 2,
+    "CHILD_ORDER": 2,
+    "unattachedRoles": {
+      "Span": 251,
+      "Lbl": 9,
+      "LBody": 3
+    },
+    "unattachedSourceReferences": {
+      "native": 117,
+      "ocr": 137
+    },
+    "labelsWithoutSourceIds": 9
+  },
+  "replayScope": "Full pipeline replay for each document after extraction/wrapper fixes, followed by final tag-builder, writer, validator and production preservation stages after a list-label boundary guard. The final replay reused hash-checked unchanged ordered semantics and produced byte-identical tagging JSON to its full run.",
+  "visualSpotChecks": [
+    "Final booklet pages 14 and 52 inspected; all 64 pages compared in Poppler."
+  ],
+  "limitations": [
+    "Booklet remains rejected. Thirty-one raw failures are font-only: 6 embedding, 6 CIDToGIDMap, 19 Unicode. Semantic attachment and source identity proof remain incomplete.",
+    "All 137 OCR semantic nodes remain unattached; no invisible OCR layer was added. Compound native text operators and stream identity need further work.",
+    "Unmatched text and graphics may remain artifacts; passing raw content-marking rules is not proof of correct semantic classification or complete figure descriptions.",
+    "Marked-content proof covers top-level page streams. Rendering equality is limited to this machine and resolution (96 DPI booklet, 150 DPI controls). Booklet PDF.js rendering remains excluded because of unresolved source fonts.",
+    "Hinode and TEST-FORM remain review_required. Human keyboard/screen-reader qualification is pending. TEST-FORM starts from a previously qualified candidate, not the original download.",
+    "PDFs, raw reports and local probe scripts are ignored artifacts, not distributed with this evidence summary."
+  ],
+  "evidenceFilesSha256": {
+    "output/content-ownership-fixes-20261022/booklet-final/05-tagging.json": "c6806ed5861c210cdbf4391d481a5cedb894a722632560a3871d8711d6697b8e",
+    "output/content-ownership-fixes-20261022/booklet-final/06-writer-report.json": "f5e8b7d9cb7fd8276e7f6b89e1cb82019c6a83fe03eb304e9d9563b066a84bdb",
+    "output/content-ownership-fixes-20261022/booklet-final/07-validation-report.json": "29ccefb57b689f6c011eafef6e6c36c987f1cf288c04e8734bab65d25568f6a9",
+    "output/content-ownership-fixes-20261022/booklet-final/08-quality-report.json": "0c9ac776c50b23d76421855d590a805561d28374e958382bf70149441fb2fef2",
+    "output/content-ownership-fixes-20261022/booklet-final/09-saved-semantics.json": "722b5c8fde640dd34362626930e4fe2f90f79988ed2c7b276ec48e8c67eb890a",
+    "output/content-ownership-fixes-20261022/control-final/05-tagging.json": "92a616bf29d9566ecaacaf51fd75809b8422c2dca7822ead6bdd6d029d90e8f4",
+    "output/content-ownership-fixes-20261022/control-final/06-writer-report.json": "f61691d2b5ccd859cef456c767aaf5931997ee6985f9039ef598352a00fa8eed",
+    "output/content-ownership-fixes-20261022/control-final/07-validation-report.json": "e6f895e7a250bf13c8a17e03ae560aa81476f312533e50f14cbec4b31bb5929c",
+    "output/content-ownership-fixes-20261022/control-final/08-quality-report.json": "78fa5e0bbb4445e69c15e6d3ed77db76ae0c2fa681ab47c804d02e70e30c0c9d",
+    "output/content-ownership-fixes-20261022/control-final/09-saved-semantics.json": "d61efdf625e93021dcbb5b8c18544b5986c783239479b63f50b4cda5e1753c07",
+    "output/content-ownership-fixes-20261022/hinode-final/05-tagging.json": "749f8f82458e467dc07fd21a78f87083bfb0dee5b060896d9c488bef0297ee5a",
+    "output/content-ownership-fixes-20261022/hinode-final/06-writer-report.json": "fecf7d154da53c9dfc1ac2b19468449b3dcfe632ae5d6133b832e50b489e8308",
+    "output/content-ownership-fixes-20261022/hinode-final/07-validation-report.json": "816e00e7baa5b82d41d8fc388f3c195cef63400eaac75600fec7c5910f6e417a",
+    "output/content-ownership-fixes-20261022/hinode-final/08-quality-report.json": "5c3d66dad41a5ae7cf71f6cedb349ac78ae6067afc908eb1e2b2e8bfc1f57df1",
+    "output/content-ownership-fixes-20261022/hinode-final/09-saved-semantics.json": "763a7e7df875c2972ba9fa7ebe02be9ca68391cf77acf5c24ef5582cc31a56d7",
+    "tmp/content-ownership-production-final2.log": "8fdc19c73d81356be152a48b70abee0e4e7faea726dd6929ae1094c4ddea72bc",
+    "tmp/content-ownership-focused-final.log": "0f0c5a111f311f12c45506757f0051912f5c68f86a2f3ae5c8c50a118a5363a2",
+    "tmp/overprint-after.log": "1eb441594b8af88f87a50e22de0a782eeeecb9b409c8924bc94e8c95df520e4f",
+    "tmp/native-ownership-before.log": "e734c34332ea6e96d021acf923b860382535fa10b0011769c040e716b8239d7d",
+    "tmp/overprint-before.log": "57b592e2103fe0ae880301796894b6804a019a8fd0df401c7db639ba22fb7e27",
+    "output/content-ownership-fixes-20261022/visual-comparison.json": "24fbaa0782f1d6b910cebd847840dc44f3276f56c55068d815038cbbcc26f8da",
+    "output/content-ownership-fixes-20261022/interaction-and-pdfjs.json": "b2d2776b8d96f9eecef6efe8d3bc7a9af76eb2c7e7edcbaabda15d7fefa1a6fc",
+    "output/content-ownership-fixes-20261022/independent-structure-proof.json": "e6797f3bf6652aeb7b60a98e42afc33ea0e49061f8f37688c8125e4f046471a3",
+    "output/content-ownership-fixes-20261022/stage-replay-results.json": "b8977033c347944278fc68d1eb14b11c5ddecd310970ea8d9335e4561745836d"
+  }
+}

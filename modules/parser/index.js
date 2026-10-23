@@ -261,8 +261,25 @@ function mergeLineSegments(pageNumber, lineNumber, segments) {
   };
 }
 
+function deduplicateOverprints(items) {
+  const result = [], seen = new Map();
+  for (const item of items) {
+    // Exact overpainting (often simulated bold) has one semantic occurrence.
+    // Do not merge nearby text, different resources, or uncertain geometry.
+    const valid = typeof item.str === "string" && item.str.trim() &&
+      Array.isArray(item.transform) && item.transform.length === 6 && item.transform.every(Number.isFinite) &&
+      Number.isFinite(item.width) && Number.isFinite(item.height) && typeof item.fontName === "string";
+    if (!valid) { result.push(item); continue; }
+    const key = JSON.stringify([item.str, item.transform, item.width, item.height, item.fontName, item.fontResourceName, item.dir]);
+    const index = seen.get(key);
+    if (index === undefined) { seen.set(key, result.length); result.push(item); }
+    else if (item.hasEOL && !result[index].hasEOL) result[index] = { ...result[index], hasEOL: true };
+  }
+  return result;
+}
+
 export function groupTextItemsToBlocks(pageNumber, pageHeight, items) {
-  const segments = items
+  const segments = deduplicateOverprints(items)
     .filter((item) => "str" in item && item.str && item.str.trim())
     .map((item) => toSegment(pageHeight, item))
     .flatMap(splitNumericSegment)
@@ -692,7 +709,7 @@ export async function parsePdf(filePath, options = {}) {
       let font;
       try { font = page.commonObjs.get(item.fontName); } catch { return item; }
       return typeof font?.name === "string" && font.name.trim()
-        ? { ...item, fontName: font.name }
+        ? { ...item, fontResourceName: item.fontName, fontName: font.name }
         : item;
     });
     const textBlocks = reindexBlocks(pageNumber, groupTextItemsToBlocks(pageNumber, height, items));

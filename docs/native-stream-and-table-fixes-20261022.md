@@ -1,5 +1,7 @@
 # Native stream and empty table-cell fixes — 2026-10-22
 
+Follow-up: [content ownership and exact overprint fixes](content-ownership-fixes-20261022.md) reduce the booklet to 31 raw veraPDF and 267 saved semantic failures while retaining appearance. The measurements below describe the preceding build.
+
 Three bounded fixes remove the STEREO booklet's writer blocker and preserve its appearance. All 61 pages now match the frozen NASA source in Poppler. The booklet still fails saved semantic checks and remains rejected; successful writing and identical pixels do not establish accessible reading order or complete tagged content.
 
 This follows the [official-source pilot fixes](public-pdf-pilot-fixes-20261022.md). The [evidence record](evidence/native-stream-and-table-fixes-20261022.json) binds results to source/candidate hashes, code hashes and local reports. No dependency was added, and validation or preservation guards were not weakened.
