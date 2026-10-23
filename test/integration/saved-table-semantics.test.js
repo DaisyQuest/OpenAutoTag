@@ -39,6 +39,50 @@ test("both writer paths save resolvable complex table headers and Roman list sem
   await writeFile(semanticPath, JSON.stringify({ schemaVersion: "1.0.0", documentId: "saved-table", source: { layoutDocumentId: "layout", filePath: pdfPath },
     nodes, orderedNodeIds: nodes.map((n) => n.id) }));
   const tagging = await buildTagTree(semanticPath); await writeFile(tagsPath, JSON.stringify(tagging));
+  await t.test("empty header-row and body cells remain data cells in both saved writer paths", async () => {
+    const sparseNodes = structuredClone(nodes);
+    delete sparseNodes[0].tableColumnSpan;
+    delete sparseNodes[3].tableColumnSpan;
+    const sparseSemantic = path.join(dir, "sparse-semantic.json"), sparseTags = path.join(dir, "sparse-tags.json");
+    await writeFile(sparseSemantic, JSON.stringify({ schemaVersion: "1.0.0", documentId: "sparse-table", source: { layoutDocumentId: "layout", filePath: pdfPath },
+      nodes: sparseNodes, orderedNodeIds: sparseNodes.map(n => n.id) }));
+    const sparse = await buildTagTree(sparseSemantic);
+    const flatten = n => [n, ...n.children.flatMap(flatten)];
+    const blanks = flatten(sparse.root).filter(n => n.synthetic && n.repairReason === "table-row-irregularity" && ["TD", "TH"].includes(n.type));
+    assert.equal(blanks.length, 2);
+    assert.ok(blanks.every(n => n.type === "TD" && !n.headerId && !n.scope));
+    const blankIds = new Set(blanks.map(n => `oat:${n.id}`));
+    await writeFile(sparseTags, JSON.stringify(sparse));
+    for (const mode of ["native", "raster"]) {
+      const outputPath = path.join(dir, `sparse-${mode}.pdf`);
+      await writeTaggedArtifacts({ pdfPath, tagsPath: sparseTags, semanticPath: sparseSemantic, outputPath, mode });
+      const doc = await PDFDocument.load(await readFile(outputPath));
+      const saved = elements(doc).filter(n => n.has(name("ID")) && blankIds.has(n.lookup(name("ID")).decodeText()));
+      assert.equal(saved.length, 2);
+      for (const cell of saved) {
+        assert.equal(cell.get(name("S")), name("TD"));
+        assert.equal(cell.lookup(name("P")).get(name("S")), name("TR"));
+        assert.equal(cell.has(name("ActualText")), false);
+        const kids = cell.lookup(name("K"));
+        assert.ok(!kids || (kids instanceof PDFArray && kids.size() === 0), "blank cells must not claim painted content");
+      }
+      const comparison = await checkSavedSemantics({ pdfPath: outputPath, tagsPath: sparseTags });
+      assert.equal(comparison.summary.failed, 0, JSON.stringify(comparison.checks.filter(c => c.status === "fail")));
+      if (mode === "native") {
+        const { stdout } = await promisify(execFile)(java, ["-cp", jar, probe, pdfPath, outputPath], { env: await buildJavaExecEnv({ bundledJavaHome }), windowsHide: true });
+        assert.match(stdout, /pixels unchanged/);
+      }
+    }
+    // Empty-cell preservation must not conceal missing intended text or keep an orphan cell.
+    const bad = structuredClone(sparse), flat = flatten(bad.root), row = flat.find(n => n.type === "TR");
+    row.children.push({ id: "missing-data", type: "TD", label: "Unattached data", sourceNodeIds: ["absent-source"], children: [] });
+    bad.root.children.push({ id: "orphan-cell", type: "TD", sourceNodeIds: [], children: [] });
+    await writeFile(sparseTags, JSON.stringify(bad));
+    const outputPath = path.join(dir, "sparse-missing.pdf");
+    await writeTaggedArtifacts({ pdfPath, tagsPath: sparseTags, semanticPath: sparseSemantic, outputPath, mode: "native" });
+    const comparison = await checkSavedSemantics({ pdfPath: outputPath, tagsPath: sparseTags });
+    for (const id of ["missing-data", "orphan-cell"]) assert.ok(comparison.checks.some(c => c.code === "EMITTED_NODE" && c.target === `oat:${id}` && c.status === "fail"));
+  });
   for (const mode of ["native", "raster"]) await t.test(mode, async () => {
     const outputPath = path.join(dir, `${mode}.pdf`); await writeTaggedArtifacts({ pdfPath, tagsPath, semanticPath, outputPath, mode });
     const saved = await PDFDocument.load(await readFile(outputPath)), all = elements(saved);

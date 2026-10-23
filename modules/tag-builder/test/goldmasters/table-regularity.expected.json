@@ -359,7 +359,7 @@
                       "children": [
                         {
                           "id": "tag:table:table-2:head:row:1:placeholder:0",
-                          "type": "TH",
+                          "type": "TD",
                           "label": "",
                           "sourceNodeIds": [],
                           "synthetic": true,

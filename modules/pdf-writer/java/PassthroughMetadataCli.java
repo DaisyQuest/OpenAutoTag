@@ -74,14 +74,18 @@ public class PassthroughMetadataCli {
      * fixup pass to an open PDDocument. Callable from both the
      * passthrough CLI (used on already-tagged sources we don't
      * re-tag) and the native rewriter (used on docs we re-tag from
-     * scratch). The fixups are idempotent and safe whether the
-     * source had good, bad, or missing accessibility features.
+     * scratch). Preservation depends on the selected mode and saved
+     * verification; native rebuilding disables font-family substitution.
      *
      * Operates entirely on the in-memory PDDocument — caller is
      * responsible for save. Returns a short summary string suitable
      * for logging.
      */
     public static String applyPdfUaAccessibilityPass(PDDocument doc, String title, String language, boolean minimal) throws IOException {
+        return applyPdfUaAccessibilityPass(doc, title, language, minimal, true);
+    }
+
+    public static String applyPdfUaAccessibilityPass(PDDocument doc, String title, String language, boolean minimal, boolean allowFontSubstitution) throws IOException {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -147,7 +151,9 @@ public class PassthroughMetadataCli {
             pruned = pruneEmptyStructureElements(catalog.getStructureTreeRoot());
             renumbered = normalizeHeadingHierarchy(catalog.getStructureTreeRoot());
         }
-        int fontsEmbedded = minimal ? 0 : embedStandard14Fonts(doc);
+        // Similar family names do not prove equal glyph shapes or widths.
+        // Native tagging preserves the source fonts; qualified repairs are separate.
+        int fontsEmbedded = minimal || !allowFontSubstitution ? 0 : embedStandard14Fonts(doc);
         int toUnicodeAdded = minimal ? 0 : generateMissingToUnicode(doc);
         int linksWrapped = minimal ? 0 : wrapLinkAnnotations(doc, catalog.getStructureTreeRoot());
         int tabsSet = minimal ? 0 : ensureStructureTabOrder(doc);
@@ -1437,6 +1443,10 @@ public class PassthroughMetadataCli {
      * already happened.
      */
     private static boolean isTrulyEmpty(COSDictionary el) {
+        // An empty data cell still occupies a position in its table row.
+        COSDictionary parent = unwrap(el.getDictionaryObject(COSName.P));
+        if ("TD".equals(el.getNameAsString(COSName.S)) && parent != null &&
+            "TR".equals(parent.getNameAsString(COSName.S))) return false;
         COSBase k = el.getDictionaryObject(COSName.K);
         if (k == null) return true;
         if (k instanceof COSInteger) return false;  // raw MCID

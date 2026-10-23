@@ -25,12 +25,12 @@ import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
+import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -315,6 +315,7 @@ public class NativeContentStreamRewriter {
         String lang;
         String alt;
         String actualText;
+        boolean intentionallyEmptyDataCell;
         String footnoteGroupId;
         String headerId;
         String listNumbering;
@@ -371,6 +372,9 @@ public class NativeContentStreamRewriter {
         }
         List<Object> children = asList(m.get("children"));
         for (Object c : children) n.children.add(parseTagNode(c));
+        n.intentionallyEmptyDataCell = "TD".equals(n.type) && children.isEmpty()
+            && asList(m.get("sourceNodeIds")).isEmpty() && asString(m.get("label")).isBlank()
+            && asString(m.get("actualText")).isBlank() && asString(m.get("alt")).isBlank();
         return n;
     }
 
@@ -780,95 +784,12 @@ public class NativeContentStreamRewriter {
 
         PDStream newStream = new PDStream(doc);
         try (OutputStream out = newStream.createOutputStream()) {
-            ContentStreamSerializer.writeTokens(out, newTokens);
+            // PDFBox preserves PDF numeric syntax, escaped names, booleans and
+            // inline-image payloads; Java toString is not a PDF serializer.
+            new ContentStreamWriter(out).writeTokens(newTokens);
         }
         page.setContents(newStream);
         return result;
-    }
-
-    // ---------------------------------------------------------------
-    //  Content stream serialization (manual, since PDFBox 3.x
-    //  ContentStreamWriter is not always accessible)
-    // ---------------------------------------------------------------
-
-    /**
-     * Writes a list of content stream tokens (COSBase operands + Operator objects)
-     * to an output stream in valid PDF content stream syntax.
-     */
-    private static class ContentStreamSerializer {
-
-        static void writeTokens(OutputStream out, List<Object> tokens) throws IOException {
-            boolean needsSpace = false;
-            for (Object token : tokens) {
-                if (token instanceof Operator) {
-                    Operator op = (Operator) token;
-                    if (needsSpace) out.write(' ');
-                    out.write(op.getName().getBytes(StandardCharsets.US_ASCII));
-                    out.write('\n');
-                    needsSpace = false;
-                } else if (token instanceof COSBase) {
-                    if (needsSpace) out.write(' ');
-                    writeCOSBase(out, (COSBase) token);
-                    needsSpace = true;
-                }
-            }
-        }
-
-        static void writeCOSBase(OutputStream out, COSBase obj) throws IOException {
-            if (obj instanceof COSName) {
-                COSName name = (COSName) obj;
-                out.write('/');
-                out.write(name.getName().getBytes(StandardCharsets.US_ASCII));
-            } else if (obj instanceof COSInteger) {
-                out.write(String.valueOf(((COSInteger) obj).intValue()).getBytes(StandardCharsets.US_ASCII));
-            } else if (obj instanceof COSFloat) {
-                // Use a formatting that avoids unnecessary trailing zeros
-                float val = ((COSFloat) obj).floatValue();
-                String s;
-                if (val == Math.floor(val) && !Float.isInfinite(val)) {
-                    s = String.valueOf((int) val);
-                } else {
-                    s = String.valueOf(val);
-                }
-                out.write(s.getBytes(StandardCharsets.US_ASCII));
-            } else if (obj instanceof COSString) {
-                COSString str = (COSString) obj;
-                byte[] bytes = str.getBytes();
-                // Write as hex string to avoid escaping issues
-                out.write('<');
-                for (byte b : bytes) {
-                    out.write(String.format("%02X", b & 0xFF).getBytes(StandardCharsets.US_ASCII));
-                }
-                out.write('>');
-            } else if (obj instanceof COSArray) {
-                COSArray arr = (COSArray) obj;
-                out.write('[');
-                for (int i = 0; i < arr.size(); i++) {
-                    if (i > 0) out.write(' ');
-                    writeCOSBase(out, arr.get(i));
-                }
-                out.write(']');
-            } else if (obj instanceof COSDictionary) {
-                COSDictionary dict = (COSDictionary) obj;
-                out.write('<');
-                out.write('<');
-                for (COSName key : dict.keySet()) {
-                    out.write(' ');
-                    out.write('/');
-                    out.write(key.getName().getBytes(StandardCharsets.US_ASCII));
-                    out.write(' ');
-                    writeCOSBase(out, dict.getItem(key));
-                }
-                out.write(' ');
-                out.write('>');
-                out.write('>');
-            } else if (obj instanceof COSNull) {
-                out.write("null".getBytes(StandardCharsets.US_ASCII));
-            } else {
-                // Fallback: try toString
-                out.write(obj.toString().getBytes(StandardCharsets.US_ASCII));
-            }
-        }
     }
 
     // ---------------------------------------------------------------
@@ -1046,12 +967,14 @@ public class NativeContentStreamRewriter {
      * tracked; keep this tight.
      */
     private static class TreeContext {
+        String parentType;
         boolean insideTHead = false;
         String inheritedLang = null;  // /Lang from nearest ancestor
         int openHeadingLevel = 0;     // highest H# seen in this Sect
 
         TreeContext descend() {
             TreeContext c = new TreeContext();
+            c.parentType = this.parentType;
             c.insideTHead = this.insideTHead;
             c.inheritedLang = this.inheritedLang;
             c.openHeadingLevel = this.openHeadingLevel;
@@ -1172,6 +1095,7 @@ public class NativeContentStreamRewriter {
         // boolean flags happen here before the recursive call so all
         // descendants see the right ancestor state.
         TreeContext childCtx = ctx.descend();
+        childCtx.parentType = node.type;
         if ("THead".equals(node.type)) childCtx.insideTHead = true;
         if (node.lang != null && !node.lang.isEmpty()) childCtx.inheritedLang = node.lang;
 
@@ -1183,7 +1107,10 @@ public class NativeContentStreamRewriter {
         }
         boolean hasSemanticText = node.actualText != null && !node.actualText.isEmpty();
         boolean hasAltText = node.alt != null && !node.alt.isEmpty();
-        if (myRefs.isEmpty() && childElements.isEmpty() && !hasSemanticText && !hasAltText) return null;
+        // Empty TDs carry grid position without painted content. Do not extend
+        // this exception to unmatched source text, empty headers or orphan cells.
+        boolean keepEmptyCell = node.intentionallyEmptyDataCell && "TR".equals(ctx.parentType);
+        if (myRefs.isEmpty() && childElements.isEmpty() && !hasSemanticText && !hasAltText && !keepEmptyCell) return null;
 
         PDStructureElement el = new PDStructureElement(node.type, treeRoot);
         if (node.lang != null && !node.lang.isEmpty()) el.setLanguage(node.lang);
@@ -1584,20 +1511,19 @@ public class NativeContentStreamRewriter {
             // when omitted, for backward compat with older callers.
             buildStructureTreeHierarchical(doc, plans, tagTree);
 
-            // Native rewriter delegates the full PDF/UA metadata +
-            // font + link + XMP pass to the shared
-            // PassthroughMetadataCli.applyPdfUaAccessibilityPass so
-            // both writer modes produce identically-compliant output.
+            // Retain the shared metadata, structure, Unicode and link handling.
+            // Native mode must not substitute source font families merely to
+            // reduce validation findings; those need qualified font repair.
             // The rewriter's own applyMetadata used a single-
             // rdf:Description XMP that VeraPDF's XMPChecker didn't
             // like; the shared pass emits canonical multi-Description
             // XMP synced to /Info (so infoMatchesXmp=true), fills
             // /ViewerPreferences/DisplayDocTitle, attaches /Name to
-            // OCProperties configs, embeds Standard 14 references,
+            // OCProperties configs,
             // auto-generates ToUnicode CMaps, and backfills
             // /Contents on Link annotations.
             try {
-                String summary = PassthroughMetadataCli.applyPdfUaAccessibilityPass(doc, title, language, false);
+                String summary = PassthroughMetadataCli.applyPdfUaAccessibilityPass(doc, title, language, false, false);
                 System.err.println("[rewriter] accessibility pass: " + summary);
             } catch (IOException e) {
                 System.err.println("[rewriter] WARNING: accessibility pass failed, falling back to legacy metadata: " + e.getMessage());

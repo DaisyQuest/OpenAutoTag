@@ -1,5 +1,7 @@
 # Official-source pilot: verified engine fixes
 
+Follow-up: [native stream and table-cell fixes](native-stream-and-table-fixes-20261022.md) resolve the booklet writer blocker and restore all 61 pages visually. Its remaining saved semantic and conformance failures still prevent qualification. The results below describe the earlier build.
+
 Recorded 2026-10-22, America/New_York. This delivery addresses bounded defects from the [eight-document pilot](public-pdf-pilot-20261022.md). Exact input/output hashes, report hashes, implementation fingerprints and assertions are in the [evidence record](evidence/public-pdf-pilot-fixes-20261022.json).
 
 Hinode now reads its left prose column before its right column, with both detached footer elements last. Census retains all 58 page-resource fingerprints and completes its large saved-structure comparison. Checker Unicode corruption, duplicate table-fragment IDs and misleading successful CLI exit codes are corrected. Native writing now stops explicitly when OCR text has no source text operators to attach to.

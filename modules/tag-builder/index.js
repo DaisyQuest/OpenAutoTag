@@ -482,23 +482,11 @@ function sumDeclaredColumnWidths(cells) {
   return cells.reduce((total, cell) => total + Math.max(1, Number(cell.columnSpan || 1)), 0);
 }
 
-function inferPlaceholderCellType(sectionNode, rowNode) {
-  if (sectionNode?.type === "THead") {
-    return "TH";
-  }
-
-  const rowCells = (rowNode?.children || []).filter(isTableCellNode);
-  if (rowCells.length > 0 && rowCells.every((cell) => cell.type === "TH")) {
-    return "TH";
-  }
-
-  return "TD";
-}
-
-function createPlaceholderCell(rowNode, sectionNode, rowIndex, columnIndex, type) {
+function createPlaceholderCell(rowNode, sectionNode, rowIndex, columnIndex) {
   return {
     id: `${rowNode.id}:placeholder:${columnIndex}`,
-    type,
+    // A gap maintains the table grid; it has no header meaning, even in THead.
+    type: "TD",
     label: "",
     sourceNodeIds: [],
     synthetic: true,
@@ -701,9 +689,6 @@ function applySectionKeyToRow(rowNode, sectionKey) {
     }
 
     cell.tableSection = sectionKey;
-    if (sectionKey === "head" && cell.synthetic && (cell.sourceNodeIds || []).length === 0 && !String(cell.label || "").trim()) {
-      cell.type = "TH";
-    }
   }
 }
 
@@ -934,7 +919,6 @@ function normalizeTableNode(tableNode) {
   let shiftedCellCount = 0;
 
   for (const rowPlan of normalizedPlan.plans) {
-    const placeholderType = inferPlaceholderCellType(rowPlan.sectionNode, rowPlan.rowNode);
     const replacementEntries = [];
     const occupiedColumns = new Set(rowPlan.carryColumns);
 
@@ -957,7 +941,7 @@ function normalizeTableNode(tableNode) {
 
       replacementEntries.push({
         startColumn: column,
-        node: createPlaceholderCell(rowPlan.rowNode, rowPlan.sectionNode, rowPlan.rowIndex, column, placeholderType),
+        node: createPlaceholderCell(rowPlan.rowNode, rowPlan.sectionNode, rowPlan.rowIndex, column),
         synthetic: true
       });
       insertedPlaceholderCellCount += 1;
@@ -1008,7 +992,6 @@ function normalizeTableNode(tableNode) {
     syntheticRow.repairReason = "table-rowspan-continuation";
     syntheticRow.tableColumnCount = expectedColumnCount;
 
-    const placeholderType = inferPlaceholderCellType(targetSectionNode, lastRow?.rowNode || syntheticRow);
     const occupiedColumns = new Set();
     for (let column = 0; column < trailingCarry.length; column += 1) {
       if ((trailingCarry[column] || 0) > 0) {
@@ -1023,7 +1006,7 @@ function normalizeTableNode(tableNode) {
       }
 
       syntheticRow.children.push(
-        createPlaceholderCell(syntheticRow, targetSectionNode, nextSyntheticRowIndex, column, placeholderType)
+        createPlaceholderCell(syntheticRow, targetSectionNode, nextSyntheticRowIndex, column)
       );
       insertedPlaceholderCellCount += 1;
     }
@@ -1261,6 +1244,10 @@ function validateTableSections(rootNode) {
         }
 
         for (const cell of row.children || []) {
+          const emptyPlaceholder = cell.synthetic === true && cell.repairReason === "table-row-irregularity" &&
+            !cell.sourceNodeIds?.length && !cell.children?.length &&
+            [cell.label, cell.actualText, cell.alt].every(value => !String(value || "").trim());
+          if (emptyPlaceholder) continue;
           if (cell.type === "TD") {
             cell.type = "TH";
             cell.promotedFromTD = true;
