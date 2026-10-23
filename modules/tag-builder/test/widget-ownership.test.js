@@ -32,7 +32,7 @@ test('excessive or cyclic trees fail before widget placement',()=>{
  const d=fixture();d.root.children[0].children.push(d.root);assert.throws(()=>attachWidgetOwnership(d.root,d.semantic),/Invalid widget intent tree/);
  const deep=fixture();let node=deep.root;for(let i=0;i<130;i++){const child={id:`deep${i}`,type:'Div',children:[]};node.children=[child];node=child;}assert.throws(()=>attachWidgetOwnership(deep.root,deep.semantic),/Invalid widget intent tree/);
 });
-test('labels across distinct paragraphs require placement review',()=>{
- const d=fixture();d.root.children.push({id:'other',type:'P',sourceNodeIds:['other-label'],children:[]});d.semantic.formRelationships[0].widgets[0].labelNodeIds.push('other-label');
+test('labels separated by unrelated prose require placement review',()=>{
+ const d=fixture();d.root.children.push({id:'prose',type:'P',children:[]},{id:'other',type:'P',sourceNodeIds:['other-label'],children:[]});d.semantic.formRelationships[0].widgets[0].labelNodeIds.push('other-label');
  const result=attachWidgetOwnership(d.root,d.semantic);assert.equal(result.reviews[0].code,'WIDGET_PLACEMENT_REVIEW');
 });

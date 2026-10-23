@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/widget-navigation.schema.json",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "policy",
+    "order",
+    "excluded",
+    "unresolved",
+    "inventory",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "policy": {
+      "const": "structure-visible-widgets-v1"
+    },
+    "order": {
+      "type": "array",
+      "maxItems": 10000,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]* [0-9]+ R$"
+      }
+    },
+    "excluded": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "required": [
+          "sourceRef",
+          "reason"
+        ],
+        "properties": {
+          "sourceRef": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]* [0-9]+ R$"
+          },
+          "reason": {
+            "enum": [
+              "hidden",
+              "no-view",
+              "empty-rectangle"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "maxItems": 10000,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]* [0-9]+ R$"
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "maxItems": 10000,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]* [0-9]+ R$"
+      }
+    },
+    "status": {
+      "const": "requires-reader-test"
+    }
+  },
+  "additionalProperties": false
+}

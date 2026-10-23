@@ -1,5 +1,6 @@
 import { PDFDocument, PDFDict, PDFName, PDFString, PDFHexString } from "pdf-lib";
 import {choiceMetadata} from './choice-metadata.js';
+import {widgetNavigationState} from './widget-navigation.js';
 
 // Read only: /MK /CA is authored metadata, distinct from text painted by /AP.
 // Match exact indirect references, never field names shared by several widgets.
@@ -13,7 +14,8 @@ export async function authoredWidgetCaptions(bytes) {
     for (const [ref, object] of document.context.enumerateIndirectObjects()) {
       if (!(object instanceof PDFDict) || object.lookup(PDFName.of("Subtype")) !== PDFName.of("Widget")) continue;
       const widgetId = `${ref.objectNumber}R${ref.generationNumber || ""}`;
-      try { const field = widgetFieldMetadata(object, references,choiceCache); if (field) fields.set(widgetId, field); }
+      fields.set(widgetId,widgetNavigationState(object));
+      try { const field = widgetFieldMetadata(object, references,choiceCache); if (field) fields.set(widgetId, {...fields.get(widgetId),...field}); }
       catch { nameErrors.push(widgetId); }
       const mk = object.lookup(PDFName.of("MK"));
       if (!(mk instanceof PDFDict)) continue;

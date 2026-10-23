@@ -32,7 +32,7 @@ test('native widgets keep distinct source ownership, field properties and editab
  await t.test('missing saved widget rejects',()=>corrupt('missing-widget',doc=>{doc.getPage(0).node.lookup(key('Annots')).remove(0);},['NATIVE_WIDGET_COUNT']));
  await t.test('disconnecting a field from AcroForm rejects',()=>corrupt('missing-field',doc=>{doc.catalog.lookup(key('AcroForm')).lookup(key('Fields')).remove(0);},['NATIVE_WIDGET_FIELDSTATEHASH']));
  await t.test('older intent still owns every widget and raster cannot flatten them',async()=>{
-  const legacy=structuredClone(tags),strip=n=>{n.children=n.children.filter(c=>!c.nativeWidget);n.children.forEach(strip);};strip(legacy.root);
+  const legacy=structuredClone(tags),strip=n=>{n.children=n.children.filter(c=>!c.nativeWidget);n.children.forEach(strip);};strip(legacy.root);delete legacy.source.widgetNavigation;
   const legacyTags=path.join(dir,'legacy-tags.json'),candidate=path.join(dir,'legacy.pdf');await writeFile(legacyTags,JSON.stringify(legacy));
   await writeTaggedArtifacts({pdfPath,outputPath:candidate,semanticPath,tagsPath:legacyTags,mode:'native'});
   const result=await checkSavedSemantics({pdfPath:candidate,tagsPath:legacyTags,sourcePdfPath:pdfPath,ownershipPath:candidate+'.ownership.json'});assert.equal(result.summary.failed,0,JSON.stringify(result.checks.filter(c=>c.status==='fail')));

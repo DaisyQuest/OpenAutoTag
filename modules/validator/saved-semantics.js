@@ -1,6 +1,7 @@
 // Compare identities, never match unrelated content by similar text.
 import { canonicalText, inspectSourceOwnership, savedTextIndex, textWithAuthoredReplacements, authoredReplacementIndex, exactOverprintText } from "./source-ownership.js";
 import { inspectOcrReview } from "./ocr-review.js";
+import {inspectWidgetNavigation} from './widget-navigation.js';
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function emittedIdentifier(node) {
   if (node.type === "TH" && node.headerId) return node.headerId;
@@ -11,7 +12,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
   if (!inspection?.sourceHash || !Array.isArray(inspection.structure)) throw new Error("Saved semantic inspection is required");
   if (Boolean(tagging) === Boolean(reference)) throw new Error("Supply tagging intent or a reference inspection, exclusively");
   const checks = [], add = (code, target, expected, actual) => checks.push({ code, target, status: equal(expected, actual) ? "pass" : "fail", expected: expected ?? null, actual: actual ?? null });
-  let ownershipStatus = "not_provided";
+  let ownershipStatus = "not_provided",formNavigation;
   add("SAVED_CONTENT_INSPECTED", "document", true, Array.isArray(inspection.markedContent));
   const content = new Map();
   for (const item of inspection.markedContent || []) {
@@ -64,6 +65,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
     for (const { n, id } of nodes) if (n.tableGridReview) add("TABLE_GRID_REVIEW", id, null, n.tableGridReview);
     const ownership = inspectSourceOwnership({ inspection, source: sourceInspection, ownership: sourceOwnership, intendedNodes: nodes, choiceReview:tagging.source?.formChoiceReview, add });
     if (sourceOwnership) ownershipStatus = ownership.sourceVerified ? "verified" : "rejected";
+    formNavigation=inspectWidgetNavigation({inspection,source:sourceInspection,intendedNodes:nodes,plan:tagging.source?.widgetNavigation,widgetsVerified:ownership.widgetsVerified,add});
     const replacements = authoredReplacementIndex(sourceInspection, inspection, ownership.sourceVerified, add, expectedIds);
     for(const review of tagging.source?.captionAssociation?.reviews||[])add('CAPTION_RELATION_REVIEW',review.captionId,null,review.code);
     for (const { n, parent, id } of nodes) {
@@ -139,6 +141,7 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
   return { schemaVersion: "1.0.0", candidateHash: inspection.sourceHash, referenceHash: reference?.sourceHash || null,
     ownershipStatus,
     ...(ocrReview ? { ocrReview } : {}),
+    ...(formNavigation?{formNavigation}:{}),
     scope: reference ? "preserved-structure" : "emitted-tagging-intent", disposition: failed ? "rejected" : "automated_pass",
     summary: { passed: checks.length - failed, failed }, checks,
     limitations: ["Checks saved structure against intent; intent still requires independent semantic review.", "Source occurrence ownership is qualified only when ownershipStatus is verified and the report carries source and ownership hashes.", "Text comparison normalizes Unicode compatibility forms and whitespace; layout, clipping, visibility, word-boundary interpretation and reader behavior require separate verification."] };

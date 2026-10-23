@@ -590,8 +590,12 @@
       "improvement": "Widget navigation ordering",
       "requirement": "Qualify structure-based form navigation across multiline, repeated and hidden widgets.",
       "acceptance": "All eligible widgets occur once in expected order; hidden widgets and noninteractive labels are handled explicitly.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/accessibility-50-batch32-20261023.md",
+        "docs/evidence/accessibility-50-batch32-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A50",

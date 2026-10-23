@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/widget-navigation-state.schema.json",
+  "type": "object",
+  "required": [
+    "annotationFlags",
+    "fieldFlags",
+    "hasArea",
+    "optionalContent"
+  ],
+  "properties": {
+    "annotationFlags": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "fieldFlags": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "hasArea": {
+      "type": "boolean"
+    },
+    "optionalContent": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

@@ -7,6 +7,7 @@ import { assignTableHeaders } from "./table-headers.js";
 import { appendTableCell, partitionTableSections, markRepeatedTableHeaders } from "./table-continuation.js";
 import { readFile } from "node:fs/promises";
 import {createHash} from 'node:crypto';
+import {widgetNavigationPlan} from './widget-navigation.js';
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
 import taggingSchema from "../../contracts/tagging.schema.json" with { type: "json" };
@@ -1814,6 +1815,7 @@ export async function buildTagTree(inputPath, overrides = {}) {
       ...(semanticDocument.formChoiceReview?{formChoiceReview:semanticDocument.formChoiceReview}:{}),
       ...(semanticDocument.source.filePath ? { filePath: semanticDocument.source.filePath } : {}),
       ...(widgetOwnership.widgets.length || widgetOwnership.reviews.length ? {widgetOwnership} : {}),
+      ...(widgetOwnership.widgets.length?{widgetNavigation:widgetNavigationPlan(root)}:{}),
       headingNormalization: headingNormalization.summary,
       tableRegularityCorrection,
       ...(tableCellMerges.length ? { tableCellMerges } : {}),

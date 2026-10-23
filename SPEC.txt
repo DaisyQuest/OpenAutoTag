@@ -1,6 +1,15 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Widget navigation qualification (A49, 2026-10-23):
+Exact widget inventory and OBJR order are verified against source visibility
+flags and page Tabs S. Hidden/NoView/empty controls remain owned and explicitly
+excluded; read-only controls remain in the reading sequence. Shared inline
+controls tolerate fractional baseline offsets; complete consecutive multiline
+labels keep their widget after the final fragment. Unresolved placement and
+conditional visibility prevent navigation qualification. Reader testing is
+always required. See docs/accessibility-50-batch32-20261023.md.
+
 Reviewed radio/choice semantics (A48, 2026-10-23):
 Native field identities, radio exports/states and choice display/export pairs
 remain distinct. Hash-bound complete-group reviews change logical labels only.

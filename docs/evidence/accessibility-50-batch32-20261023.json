@@ -1,0 +1,439 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A49"
+  ],
+  "status": "completed",
+  "baselineCommit": "51ac7d588df445efc38fe9b441979c97a8977c7a",
+  "tests": {
+    "baseline": {
+      "path": "tmp/a49-baseline.log",
+      "sha256": "814d4ff510856e927b164e446f5bea7515bf81ae48963b18f96190b0f01ef6ea",
+      "tests": 1123,
+      "pass": 1123,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFocused": {
+      "path": "tmp/a49-coverage-final.log",
+      "sha256": "2095c71ff0b32d6116ace6ffc577f8768aa2c5ec9023e719dff2dcdb5b4cfaee",
+      "tests": 70,
+      "pass": 70,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalFixture": {
+      "path": "tmp/a49-fixture-verified.log",
+      "sha256": "864057fdc475668e221dc97eade3e09ec17e04f46768b900d6970343ca5deda8",
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "scope": "Overlapping runs; final affected run covers row-order and lookup refinements. Final fixture run covers subsequent fixture-only layout and multiline editing changes.",
+    "coverage": {
+      "scope": "Three new JavaScript helpers only",
+      "line": 100,
+      "branch": 93.8,
+      "function": 100
+    },
+    "embeddedContractsConsistent": 5
+  },
+  "fixture": {
+    "sourcePdf": "output\\accessibility-50-batch32-20261023\\fixture-verified\\source.pdf",
+    "candidate": "output\\accessibility-50-batch32-20261023\\fixture-verified\\candidate.pdf",
+    "sourceHash": "3aef77443b1de270d7b2a8b9a845399310938b3ff1fa02d41141732812bdaa2f",
+    "candidateHash": "5ba68dd8dfb0fe491ea670c69595aac84423076b33371a11ede4bad95a8ce406",
+    "tagsPath": "output\\accessibility-50-batch32-20261023\\fixture-verified\\tags.json",
+    "semanticPath": "output\\accessibility-50-batch32-20261023\\fixture-verified\\semantic.json",
+    "fields": 12,
+    "widgets": 14,
+    "expectedOrder": [
+      "name@1",
+      "consent@1",
+      "contact@1",
+      "contact@1",
+      "state@1",
+      "reset@1",
+      "day@1",
+      "month@1",
+      "name@2",
+      "narrative@2",
+      "readonly@2"
+    ],
+    "sourceWidgetOrder": [
+      "34 0 R",
+      "33 0 R",
+      "32 0 R",
+      "31 0 R",
+      "30 0 R",
+      "29 0 R",
+      "27 0 R",
+      "28 0 R",
+      "43 0 R",
+      "41 0 R",
+      "40 0 R"
+    ],
+    "navigation": {
+      "status": "structure_verified",
+      "order": [
+        "34 0 R",
+        "33 0 R",
+        "32 0 R",
+        "31 0 R",
+        "30 0 R",
+        "29 0 R",
+        "27 0 R",
+        "28 0 R",
+        "43 0 R",
+        "41 0 R",
+        "40 0 R"
+      ],
+      "excluded": [
+        {
+          "sourceRef": "42 0 R",
+          "reason": "hidden"
+        },
+        {
+          "sourceRef": "39 0 R",
+          "reason": "no-view"
+        },
+        {
+          "sourceRef": "38 0 R",
+          "reason": "empty-rectangle"
+        }
+      ],
+      "unresolved": [],
+      "readerStatus": "required"
+    },
+    "saved": {
+      "passed": 652,
+      "failed": 0
+    },
+    "filledSource": "output\\accessibility-50-batch32-20261023\\fixture-verified\\filled-source.pdf",
+    "filledCandidate": "output\\accessibility-50-batch32-20261023\\fixture-verified\\filled-candidate.pdf",
+    "sourceUnchanged": true,
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 1522,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    }
+  },
+  "real": {
+    "sourcePdf": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+    "candidate": "output/accessibility-50-batch32-20261023/test-form-final/candidate.pdf",
+    "sourceHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+    "candidateHash": "4b19404838cd1d7cdb0d8ea12db9a3259c46bb6d609a54f8362b27a0f8440ce3",
+    "semanticPath": "output/accessibility-50-batch32-20261023/test-form-final/semantic.json",
+    "reviewedPath": "output/accessibility-50-batch32-20261023/test-form-final/reviewed-semantic.json",
+    "reviewPath": "output/accessibility-50-batch32-20261023/test-form-final/review.json",
+    "tagsPath": "output/accessibility-50-batch32-20261023/test-form-final/tags.json",
+    "saved": {
+      "passed": 5676,
+      "failed": 0
+    },
+    "navigation": {
+      "status": "review_required",
+      "order": [
+        "343 0 R",
+        "344 0 R",
+        "346 0 R",
+        "345 0 R",
+        "347 0 R",
+        "349 0 R",
+        "351 0 R",
+        "353 0 R",
+        "355 0 R",
+        "357 0 R",
+        "359 0 R",
+        "361 0 R",
+        "363 0 R",
+        "64 0 R",
+        "65 0 R",
+        "66 0 R",
+        "67 0 R",
+        "77 0 R",
+        "76 0 R",
+        "85 0 R",
+        "70 0 R",
+        "86 0 R",
+        "80 0 R",
+        "68 0 R",
+        "74 0 R",
+        "69 0 R",
+        "96 0 R",
+        "98 0 R",
+        "337 0 R",
+        "340 0 R",
+        "63 0 R",
+        "79 0 R",
+        "94 0 R"
+      ],
+      "excluded": [],
+      "unresolved": [
+        "337 0 R",
+        "340 0 R",
+        "63 0 R",
+        "79 0 R",
+        "94 0 R"
+      ],
+      "readerStatus": "required"
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 15112,
+      "failedChecks": 0
+    },
+    "fontAudit": {
+      "status": "ok",
+      "errorCount": 0,
+      "warningCount": 0,
+      "blockingPreVeraPdf": false
+    },
+    "reviewedGroups": 1,
+    "choicesReviewed": 63,
+    "nativeChoiceWidgets": 4,
+    "optionsPreserved": 173,
+    "unresolvedPlacementWidgets": 5,
+    "probes": [
+      {
+        "field": "LocalCourt",
+        "index": "1",
+        "source": "output/accessibility-50-batch32-20261023/test-form-final/LocalCourt-source.pdf",
+        "candidate": "output/accessibility-50-batch32-20261023/test-form-final/LocalCourt-candidate.pdf"
+      },
+      {
+        "field": "CountyName",
+        "index": "1",
+        "source": "output/accessibility-50-batch32-20261023/test-form-final/CountyName-source.pdf",
+        "candidate": "output/accessibility-50-batch32-20261023/test-form-final/CountyName-candidate.pdf"
+      },
+      {
+        "field": "AffirmationDay",
+        "index": "31",
+        "source": "output/accessibility-50-batch32-20261023/test-form-final/AffirmationDay-source.pdf",
+        "candidate": "output/accessibility-50-batch32-20261023/test-form-final/AffirmationDay-candidate.pdf"
+      },
+      {
+        "field": "AffirmationMonth",
+        "index": "12",
+        "source": "output/accessibility-50-batch32-20261023/test-form-final/AffirmationMonth-source.pdf",
+        "candidate": "output/accessibility-50-batch32-20261023/test-form-final/AffirmationMonth-candidate.pdf"
+      }
+    ],
+    "originalUnchanged": true
+  },
+  "independent": {
+    "records": [
+      {
+        "case": "fixture-verified",
+        "sourceHash": "3aef77443b1de270d7b2a8b9a845399310938b3ff1fa02d41141732812bdaa2f",
+        "candidateHash": "5ba68dd8dfb0fe491ea670c69595aac84423076b33371a11ede4bad95a8ce406",
+        "widgets": 14,
+        "eligible": 11,
+        "excluded": 3,
+        "widgetOrder": [
+          "34 0 R",
+          "33 0 R",
+          "32 0 R",
+          "31 0 R",
+          "30 0 R",
+          "29 0 R",
+          "27 0 R",
+          "28 0 R",
+          "43 0 R",
+          "41 0 R",
+          "40 0 R"
+        ],
+        "propertiesPreservedExceptAuditedFontMaps": true,
+        "textAndGeometryPreserved": true,
+        "sourceParserStrict": true,
+        "candidateAndProbeParsersStrict": true
+      },
+      {
+        "case": "test-form-final",
+        "sourceHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+        "candidateHash": "4b19404838cd1d7cdb0d8ea12db9a3259c46bb6d609a54f8362b27a0f8440ce3",
+        "widgets": 33,
+        "eligible": 33,
+        "excluded": 0,
+        "widgetOrder": [
+          "343 0 R",
+          "344 0 R",
+          "346 0 R",
+          "345 0 R",
+          "347 0 R",
+          "349 0 R",
+          "351 0 R",
+          "353 0 R",
+          "355 0 R",
+          "357 0 R",
+          "359 0 R",
+          "361 0 R",
+          "363 0 R",
+          "64 0 R",
+          "65 0 R",
+          "66 0 R",
+          "67 0 R",
+          "77 0 R",
+          "76 0 R",
+          "85 0 R",
+          "70 0 R",
+          "86 0 R",
+          "80 0 R",
+          "68 0 R",
+          "74 0 R",
+          "69 0 R",
+          "96 0 R",
+          "98 0 R",
+          "337 0 R",
+          "340 0 R",
+          "63 0 R",
+          "79 0 R",
+          "94 0 R"
+        ],
+        "propertiesPreservedExceptAuditedFontMaps": true,
+        "textAndGeometryPreserved": true,
+        "sourceParserStrict": false,
+        "candidateAndProbeParsersStrict": true
+      }
+    ],
+    "pagePairs": [
+      {
+        "case": "fixture-verified",
+        "state": "original",
+        "page": 1,
+        "pixelHash": "e97b201dd1ce16095479a296a957e24e5e45e8b11bde45e6cd1bd6eef97e7903"
+      },
+      {
+        "case": "fixture-verified",
+        "state": "original",
+        "page": 2,
+        "pixelHash": "25d79e81db1c8e098924c5445c2a5f57234bfb6380ee844f02d3df84ecf4a9e7"
+      },
+      {
+        "case": "fixture-verified",
+        "state": "filled",
+        "page": 1,
+        "pixelHash": "3742111a14e8a52b7bf28cfadca9e98ce344e70990a5fc73544770cbae9b2043"
+      },
+      {
+        "case": "fixture-verified",
+        "state": "filled",
+        "page": 2,
+        "pixelHash": "5a0946d486c01f77dd0bb27c8022523a9c4fd315ddbfaa843ba791de26d10ee0"
+      },
+      {
+        "case": "test-form-final",
+        "state": "original",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form-final",
+        "state": "original",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form-final",
+        "state": "LocalCourt",
+        "page": 1,
+        "pixelHash": "a617f2316a1078c97189920973d8546a0c3b74311de92acd6fe9cc05e36c7525"
+      },
+      {
+        "case": "test-form-final",
+        "state": "LocalCourt",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form-final",
+        "state": "CountyName",
+        "page": 1,
+        "pixelHash": "acdc270e312ccd551d2dbf69d2db84cd548a3461cedb11558d24ca965fd33a65"
+      },
+      {
+        "case": "test-form-final",
+        "state": "CountyName",
+        "page": 2,
+        "pixelHash": "df5505273b60148c0e5881abee87255a51074e3bcf1ce4e2806b7a5080e954de"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationDay",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationDay",
+        "page": 2,
+        "pixelHash": "f54c14780885f5277a93e16741c4add756058d1f575d418c3d79c76dbbb85d02"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationMonth",
+        "page": 1,
+        "pixelHash": "dbe06a3ca2ec157e456584708a2b227f10d8e6671665bb58c2c70ebfd49ee6d6"
+      },
+      {
+        "case": "test-form-final",
+        "state": "AffirmationMonth",
+        "page": 2,
+        "pixelHash": "7165b9c0712ca7bf0483c8dab75c4598da29e03a7e6958a7e335d96c2b455aa6"
+      }
+    ],
+    "popplerDpi": 120,
+    "fontAudits": 112,
+    "fontMapScope": "Widget appearance font maps: valid glyph indices unchanged; only NUL/BOM replacements and missing control-code replacement entries differ, as in A48.",
+    "representativePagesVisuallyInspected": true
+  },
+  "artifacts": [
+    {
+      "path": "output/accessibility-50-batch32-20261023/fixture-verified/evidence.json",
+      "sha256": "2453948c6a8413444269eebb0223b58f0476401a76596b70733654e745a621be"
+    },
+    {
+      "path": "output/accessibility-50-batch32-20261023/fixture-verified/validation.json",
+      "sha256": "753446f13a8e421ae80b7da4992d432f9cffebc8738eb041ab4aa8c060e180cc"
+    },
+    {
+      "path": "output/accessibility-50-batch32-20261023/test-form-final/evidence.json",
+      "sha256": "e42351886db7bbb61c271cbd1c6d69cf8b6ddce236426d56499187bb220d1904"
+    },
+    {
+      "path": "output/accessibility-50-batch32-20261023/test-form-final/validation.json",
+      "sha256": "09aae8f8f58c81d018d5a9b1a10b5dad50b74ca01bda293f12a382a6d4f5ad5f"
+    },
+    {
+      "path": "output/accessibility-50-batch32-20261023/independent-verification.json",
+      "sha256": "5eff42fdddc5bf403141e79bd7b2f32efacbb3e655466806331a1fe338d41437"
+    },
+    {
+      "path": "tmp/a49-independent.py",
+      "sha256": "f86bd619e2765efa3ea25adc8ab1c680eaa5a2b46aab85c1876508cc0f280e57"
+    }
+  ],
+  "limitations": [
+    "Structural widget sequence is not observed keyboard/screen-reader behavior or link/widget interleaving.",
+    "Fixture/County label acceptance uses known automated regression oracles, not human review.",
+    "TEST-FORM retains five unresolved placements and remains review_required.",
+    "Dynamic visibility is unqualified; read-only widgets remain in the reading sequence.",
+    "Earlier TEST-FORM source needs non-strict pypdf cross-reference recovery; candidates/probes load strictly.",
+    "Existing font-map metadata changes are audited separately, not claimed byte-identical.",
+    "A50 remains pending."
+  ]
+}

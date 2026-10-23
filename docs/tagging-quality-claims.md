@@ -1,8 +1,10 @@
 # Tagging quality: claims, evidence and limits
 
-Updated 2026-10-23 for [reviewed radio and choice semantics](accessibility-50-batch31-20261023.md), following reviewed names and native widget ownership. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
+Updated 2026-10-23 for [saved widget navigation](accessibility-50-batch32-20261023.md), following reviewed choices, names and native widget ownership. This register governs current capability statements. Earlier runs remain historical evidence; proposed targets are not achieved accuracy.
 
-Reviewed choices preserve native group names, export/display options and selected values while binding complete visible labels to exact widgets. Independent saved checks and twelve selection/save/reopen cases support this bounded claim. TEST-FORM retains eight unresolved placements. This does not establish observed screen-reader or keyboard usability. See [A48 evidence and limits](accessibility-50-batch31-20261023.md).
+Reviewed choices preserve native group names, export/display options and selected values while binding complete visible labels to exact widgets. Independent saved checks and twelve selection/save/reopen cases support this bounded claim. The A48 replay retained eight unresolved placements; A49 below reduces that count to five. This does not establish observed screen-reader or keyboard usability. See [A48 evidence and limits](accessibility-50-batch31-20261023.md).
+
+Saved widget navigation now verifies exact source inventory, logical OBJR sequence, visibility exclusions and Tabs S. TEST-FORM date fields gain correct day–month–year placement; five other placements remain unresolved. Structural verification does not establish observed keyboard or reader behavior. See [A49 evidence and limits](accessibility-50-batch32-20261023.md).
 
 ## Supported description
 

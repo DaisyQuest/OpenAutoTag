@@ -24,6 +24,16 @@ public final class PreservationInspector {
     private COSDictionary roleMap, classMap;
     private SavedContentInspector savedContent;
     private final ChoiceControlInspector choiceInspector=new ChoiceControlInspector();
+    private static int navigationFlags(COSDictionary d,COSName key)throws IOException {
+        COSBase v=d.getDictionaryObject(key);if(v==null)return 0;
+        if(!(v instanceof COSInteger)||((COSInteger)v).longValue()<0||((COSInteger)v).longValue()>Integer.MAX_VALUE)throw new IOException("Invalid navigation flags");return ((COSInteger)v).intValue();
+    }
+    private static Map<String,Object> widgetNavigation(COSDictionary widget)throws IOException {
+        Set<COSDictionary> seen=Collections.newSetFromMap(new IdentityHashMap<>());COSDictionary node=widget;int ff=0;
+        while(node!=null){if(seen.size()>=128||!seen.add(node))throw new IOException("Invalid navigation ancestry");if(node.containsKey(COSName.FF)){ff=navigationFlags(node,COSName.FF);break;}COSBase p=node.getDictionaryObject(COSName.PARENT);if(p!=null&&!(p instanceof COSDictionary))throw new IOException("Invalid navigation ancestry");node=(COSDictionary)p;}
+        COSArray rect=widget.getCOSArray(COSName.RECT);if(rect==null||rect.size()!=4)throw new IOException("Invalid widget rectangle");float[] v=new float[4];for(int i=0;i<4;i++){if(!(rect.getObject(i) instanceof COSNumber n)||!Float.isFinite(n.floatValue()))throw new IOException("Invalid widget rectangle");v[i]=((COSNumber)rect.getObject(i)).floatValue();}
+        return Map.of("annotationFlags",navigationFlags(widget,COSName.F),"fieldFlags",ff,"hasArea",v[0]!=v[2]&&v[1]!=v[3],"optionalContent",widget.containsKey(COSName.getPDFName("OC")));
+    }
     private final Map<Integer, COSBase> parentSlots = new TreeMap<>();
     private final Map<Integer, COSDictionary> parentScopes = new TreeMap<>();
     private final Set<COSDictionary> registeredScopes = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -53,6 +63,7 @@ public final class PreservationInspector {
                 crop.getLowerLeftX(), crop.getLowerLeftY(), crop.getUpperRightX(), crop.getUpperRightY(), page.getRotation(), page.getUserUnit()));
             item.put("contentHash", fingerprint(page.getCOSObject().getItem(COSName.CONTENTS), Set.of()));
             item.put("resourcesHash", fingerprint(page.getResources() == null ? null : page.getResources().getCOSObject(), Set.of()));
+            item.put("tabOrder",page.getCOSObject().getNameAsString(COSName.getPDFName("Tabs"),"absent"));
             List<String> annotations = new ArrayList<>();
             int annotationIndex=0;
             for (var annotation : page.getAnnotations()) {
@@ -107,6 +118,7 @@ public final class PreservationInspector {
                     }
                     Collections.reverse(names);widget.put("fieldName",String.join(".",names));widget.put("fieldStateHash",hash(formState+"|"+String.join("|",states)));widget.put("accessibleName",accessible);
                     choiceInspector.append(dict,widget);
+                    try{widget.put("navigationState",widgetNavigation(dict));}catch(IOException e){widget.put("navigationStateError",e.getMessage());}
                     widget.put("owners", new ArrayList<Map<String, Object>>()); widgets.put(key, widget);
                 } else annotations.add(digest);
                 annotationIndex++;
