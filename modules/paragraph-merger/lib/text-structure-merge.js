@@ -23,16 +23,6 @@ function isRotatedNode(n) {
   return writingMode !== "horizontal" || Math.abs(textRotation % 180) > 1;
 }
 
-// Some PDFs emit text blocks on the same visual line with tiny
-// fractional-Y differences (font baseline / descent variance). Strict
-// Y-sort then treats them as distinct rows, so the secondary X-sort
-// never kicks in and left-to-right reading order collapses to
-// content-stream order. Bucket Y with floor so the same-row variance
-// falls into one bucket (Math.round splits on half-bucket boundaries
-// and can still separate same-row blocks).
-const ROW_BUCKET_PX = 6;
-function getRow(n) { return Math.floor(getTop(n) / ROW_BUCKET_PX); }
-
 function detectBodyMargin(pNodes) {
   const leftCounts = new Map();
   for (const n of pNodes) {
@@ -81,6 +71,7 @@ function isFootnoteNode(node) {
 }
 
 import { protectedBoundary, preserveSemanticIdentities } from "./semantic-identities.js";
+import { visualRows, joinPairedFragments } from "./visual-rows.js";
 
 const DEFAULT_CONFIG = {
   marginTolerance: 8,
@@ -114,7 +105,12 @@ export function textStructureMerge(semanticDocument, config = {}) {
       continue;
     }
 
-    const sorted = [...pNodes].sort((a, b) => getRow(a) - getRow(b) || getLeft(a) - getLeft(b));
+    // Only qualified pair pages use baseline ordering. Preserve the established
+    // coarse-box policy for other pages, especially fragmented OCR layouts.
+    const hasPairs=pNodes.some(n=>n.labelValuePairId);
+    const rows=hasPairs?visualRows(pNodes):null;
+    const rowById=new Map(rows?rows.flatMap((row,i)=>row.map(n=>[n.id,i])):pNodes.map(n=>[n.id,Math.floor(getTop(n)/6)]));
+    const sorted = rows?rows.flat():[...pNodes].sort((a,b)=>rowById.get(a.id)-rowById.get(b.id)||getLeft(a)-getLeft(b));
     const bodyMargin = detectBodyMargin(sorted);
     const medianSpacing = computeMedianLineSpacing(sorted);
     const gapThreshold = medianSpacing * cfg.gapBreakMultiplier;
@@ -133,7 +129,7 @@ export function textStructureMerge(semanticDocument, config = {}) {
       // positioned blocks — e.g. scanned PDFs with per-word OCR boxes):
       // skip vertical gap and indent checks while retaining semantic and
       // widely separated label boundaries.
-      const sameRow = getRow(prev) === getRow(curr);
+      const sameRow = rowById.get(prev.id) === rowById.get(curr.id);
 
       if (/^[☐☑☒]\s+/.test(String(curr.text || "").trimStart())) {
         breakReasons.push("new checkbox option");
@@ -207,14 +203,14 @@ export function textStructureMerge(semanticDocument, config = {}) {
     for (let gi = 0; gi < groups.length; gi++) {
       const group = groups[gi];
       if (group.length === 1) {
-        group[0].paragraphGroupId = `pg-${pageNumber}-${gi}`;
+        group[0].paragraphGroupId ||= `pg-${pageNumber}-${gi}`;
         allNodes.push(group[0]);
         continue;
       }
 
       const merged = {
         ...group[0],
-        text: group.map((n) => (n.text || "").trim()).join(" "),
+        text: group[0].labelValuePairId ? joinPairedFragments(group) : group.map((n) => (n.text || "").trim()).join(" "),
         bbox: [
           Math.min(...group.map(getLeft)),
           Math.min(...group.map(getTop)),
@@ -222,7 +218,7 @@ export function textStructureMerge(semanticDocument, config = {}) {
           Math.max(...group.map(getBottom)) - Math.min(...group.map(getTop))
         ],
         _mergedFrom: group.map((n) => n.id),
-        paragraphGroupId: `pg-${pageNumber}-${gi}`
+        paragraphGroupId: group[0].paragraphGroupId || `pg-${pageNumber}-${gi}`
       };
 
       if (merged.text.length > 3000) {

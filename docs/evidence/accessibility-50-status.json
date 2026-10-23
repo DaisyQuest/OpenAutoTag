@@ -191,8 +191,11 @@
       "improvement": "Label/value paragraph boundaries",
       "requirement": "Prevent paragraph merging across adjacent label/value columns.",
       "acceptance": "Booklet launch details and acronym rows retain distinct identities and logical pair order.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch7-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A17",

@@ -76,6 +76,16 @@ Command:
 Output:
 `contracts/semantic.schema.json`
 
+Aligned native label/value paragraphs may carry labelValuePairId and
+labelValuePart (label or value); these optional fields must occur together.
+Distinct pairs and parts are paragraph boundaries. Inference precedes quotation
+detection, requires colon or repeated alignment evidence, and emits precedes
+relations through wrapped values. It excludes explicit semantic groups, tables,
+form-linked text, OCR and unsupported directions; crowded pages receive a review
+task. Both paragraph-merger strategies retain the identities and reconstruct
+qualified touching fragments without adding spaces inside words. These are
+reviewable inferences, not a declaration of correct semantics for every row.
+
 3.4 Reading order
 
 Command:

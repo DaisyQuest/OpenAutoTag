@@ -1,6 +1,6 @@
 # Tagging quality: claims, evidence and limits
 
-Updated 2026-10-23 for [crop, scale and rotation handling](accessibility-50-batch6-20261023.md), following [authored replacement text and abbreviations](accessibility-50-batch5-20261023.md). This register governs current OpenAutoTag capability statements. Older design notes and corpus runs are historical evidence for their named builds. Proposed roadmap targets are not achieved accuracy.
+Updated 2026-10-23 for [label/value paragraph boundaries](accessibility-50-batch7-20261023.md), following [crop, scale and rotation handling](accessibility-50-batch6-20261023.md). This register governs current OpenAutoTag capability statements. Older design notes and corpus runs are historical evidence for their named builds. Proposed roadmap targets are not achieved accuracy.
 
 ## Supported description
 
@@ -26,6 +26,8 @@ OpenAutoTag performs deterministic PDF semantic inference, native operator taggi
 Implementation filenames without a path in this table live under `modules/semantic-engine/` or `modules/pdf-writer/java/` as appropriate. Exact delivery details and reproduction commands are in [the production plan, section 22](production-tagging-engine-plan.md#22-semantic-quality-improvements-16-and-benchmark-delivery-2026-10-21).
 
 ## Latest accuracy evidence
+
+The [label/value delivery](accessibility-50-batch7-20261023.md) and [evidence](evidence/accessibility-50-batch7-20261023.json) bring the ledger to **16 completed items, 34 pending**. Both paragraph mergers retain native label/value boundaries and wrapped definitions. Independent saved-tree traversal verifies 101 ordered pairs, including 16 manually transcribed source pairs; exact byte ownership resolves the two previously ambiguous compound operations. All 298 baseline and 144 focused tests pass (overlapping suites). All 64 replayed pages match, with source text bytes, spacing and sampled form interaction preserved. Booklet failures decrease to 154 saved checks with no new failed targets; 31 raw font failures remain. OCR, heading/table issues and human qualification remain open.
 
 The [geometry delivery](accessibility-50-batch6-20261023.md) and [evidence](evidence/accessibility-50-batch6-20261023.json) bring the ledger to **15 completed items, 35 pending**. All 288 baseline, 29 writer compatibility and 49 consumer tests pass; suites overlap. The 28-page fixture passes 3,865 saved and 29,152 raw checks, with source geometry, glyphs, fields and pixels preserved. All 93 candidate-page comparisons match. A full Hinode run passes; the USGS forced rebuild rejects an authored replacement scope with unassigned paint and saves no candidate. Operator matching counts are diagnostic, not qualified accessibility accuracy. Booklet failures remain 155 saved and 31 raw checks. Complete OCR and human qualification remain open.
 

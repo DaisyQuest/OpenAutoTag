@@ -4,7 +4,7 @@ const clean = (s) => String(s || "").normalize("NFKC").replace(/\s+/g, " ").trim
 const column = (a, b) => (a.columnHint ?? 0) === (b.columnHint ?? 0);
 const typeMatch = (a, b) => a.fontName && a.fontName === b.fontName && Number.isFinite(a.fontSize) &&
   Math.abs(a.fontSize - b.fontSize) <= 0.5 && a.direction === b.direction;
-const eligible = (n) => !n.tableId && !n.formFieldIds?.length && !n.artifactType && !n.footnote && !n.footnoteGroupId && !n.semanticRole;
+const eligible = (n) => !n.tableId && !n.formFieldIds?.length && !n.artifactType && !n.footnote && !n.footnoteGroupId && !n.semanticRole && !n.labelValuePairId;
 
 export function refineHeadingMembership(nodes, pages) {
   const tasks = [], pageById = new Map(pages.map((p) => [p.pageNumber, p]));

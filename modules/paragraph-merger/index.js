@@ -11,6 +11,7 @@ import {
 } from "./lib/heuristics.js";
 import { textStructureMerge } from "./lib/text-structure-merge.js";
 import { protectedBoundary, preserveSemanticIdentities } from "./lib/semantic-identities.js";
+import { visualRows, joinPairedFragments } from "./lib/visual-rows.js";
 // TODO: import { runAllValidators } from "./lib/validators.js";
 
 const ajv = new Ajv2020({ allErrors: true });
@@ -84,6 +85,14 @@ function computeMergeConfidence(prev, curr, config) {
   const gap = getNodeTop(curr) - getNodeBottom(prev);
   const maxGap = lineHeight * config.gapMultiplier;
 
+  if(prev.labelValuePairId) {
+    const em=Math.max(prev.fontSize||getNodeHeight(prev),curr.fontSize||getNodeHeight(curr),1);
+    const horizontalGap=getNodeLeft(curr)-getNodeLeft(prev)-getNodeWidth(prev);
+    const sameLine=Math.abs(getNodeBottom(curr)-getNodeBottom(prev))<=em*.3&&horizontalGap>=-em*.1&&horizontalGap<=em*.8;
+    const wrapped=gap>=-em*.1&&gap<=em&&Math.abs(getNodeLeft(curr)-getNodeLeft(prev))<=Math.max(3,em*.3);
+    return {confidence:sameLine||wrapped?1:0,merge:sameLine||wrapped,reasons:["inferred label/value part geometry"]};
+  }
+
   if (gap > maxGap) {
     const excess = (gap - maxGap) / maxGap;
     const penalty = Math.min(0.8, excess * 0.6);
@@ -139,7 +148,7 @@ function computeMergeConfidence(prev, curr, config) {
   };
 }
 
-function mergeTwoNodes(prev, curr) {
+function mergeTwoNodes(prev, curr, originalById) {
   const left = Math.min(getNodeLeft(prev), getNodeLeft(curr));
   const top = Math.min(getNodeTop(prev), getNodeTop(curr));
   const right = Math.max(
@@ -150,7 +159,7 @@ function mergeTwoNodes(prev, curr) {
 
   return {
     ...prev,
-    text: `${prev.text} ${curr.text}`.trim(),
+    text: prev.labelValuePairId ? joinPairedFragments([...new Set([prev.id,...(prev._mergedFrom || []),curr.id])].map(id=>originalById.get(id)).filter(Boolean)) : `${prev.text} ${curr.text}`.trim(),
     bbox: [left, top, right - left, bottom - top],
     _mergedFrom: [...(prev._mergedFrom || [prev.id]), curr.id],
     _mergeConfidence: undefined
@@ -178,7 +187,8 @@ function mergePageParagraphs(pageNodes, config) {
     return { nodes: pageNodes, merges: [], skips: [] };
   }
 
-  const sorted = [...pNodes].sort((a, b) => getNodeTop(a) - getNodeTop(b) || getNodeLeft(a) - getNodeLeft(b));
+  const sorted = pNodes.some(n=>n.labelValuePairId)?visualRows(pNodes).flat():[...pNodes].sort((a,b)=>getNodeTop(a)-getNodeTop(b)||getNodeLeft(a)-getNodeLeft(b));
+  const originalById = new Map(pNodes.map(n=>[n.id,n]));
   const merges = [];
   const skips = [];
   const result = [];
@@ -197,10 +207,10 @@ function mergePageParagraphs(pageNodes, config) {
         confidence: decision.confidence,
         reasons: decision.reasons
       });
-      current = mergeTwoNodes(current, next);
-      current.paragraphGroupId = paragraphGroupId;
+      current = mergeTwoNodes(current, next, originalById);
+      current.paragraphGroupId ||= paragraphGroupId;
     } else {
-      current.paragraphGroupId = paragraphGroupId;
+      current.paragraphGroupId ||= paragraphGroupId;
       result.push(current);
 
       if (config.reportUnmerged) {
@@ -218,7 +228,7 @@ function mergePageParagraphs(pageNodes, config) {
     }
   }
 
-  current.paragraphGroupId = paragraphGroupId;
+  current.paragraphGroupId ||= paragraphGroupId;
   result.push(current);
 
   return { nodes: [...result, ...nonPNodes], merges, skips };

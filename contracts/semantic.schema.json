@@ -54,6 +54,10 @@
           "bbox",
           "confidence"
         ],
+        "dependentRequired": {
+          "labelValuePairId": ["labelValuePart"],
+          "labelValuePart": ["labelValuePairId"]
+        },
         "properties": {
           "id": {
             "type": "string",
@@ -78,6 +82,8 @@
             "minimum": 2
           },
           "paragraphGroupId": { "type": "string", "minLength": 1 },
+          "labelValuePairId": { "type": "string", "minLength": 1, "description": "Stable inferred pair identity; distinct pairs and label/value parts must not merge." },
+          "labelValuePart": { "enum": ["label", "value"], "description": "Pair part; precedes relations order label, wrapped value and successive pairs." },
           "continuesFrom": { "type": "string", "minLength": 1 },
           "listContinuationOf": { "type": "string", "minLength": 1 },
           "captionForId": { "type": "string", "minLength": 1 },

@@ -1,5 +1,6 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { enrichDocumentRelations } from "./document-relations.js";
+import { inferLabelValuePairs } from "./label-value-pairs.js";
 import { refineHeadingMembership } from "./semantic-quality.js";
 import { listOrdinal } from "./semantic-quality.js";
 import { readFile } from "node:fs/promises";
@@ -655,6 +656,7 @@ function isEligibleForBlockQuote(node) {
   if (node.listGroupId) return false;
   if (node.tableId) return false;
   if (node.artifactType) return false;
+  if (node.labelValuePairId) return false;
   return Array.isArray(node.bbox);
 }
 
@@ -897,7 +899,7 @@ export async function buildSemanticDocument(inputPath, options) {
   const effectiveOptions = { tableContinuationAcrossPages: true, ...options };
   const state = { activeList: null, activeTable: null, tableSequence: 0 };
 
-  const nodes = [];
+  const nodes = [], pairRelations = [], pairTasks = [];
   for (let i = 0; i < layoutDocument.pages.length; i++) {
     const page = layoutDocument.pages[i];
     const leadingHeaders = page.textBlocks.filter(b => isTableCandidate(b) && String(b.tableRole || b.cellRole).toLowerCase() === "header" && b.bbox[1] <= page.height * .25).map(b => String(b.text || "").trim());
@@ -914,6 +916,9 @@ export async function buildSemanticDocument(inputPath, options) {
     }
 
     const pageNodes = buildNodesForPage(page, state, effectiveOptions);
+    const pairs = inferLabelValuePairs(pageNodes);
+    pairRelations.push(...pairs.relations);
+    if(pairs.limited)pairTasks.push({code:"LABEL_VALUE_INFERENCE_LIMIT",pageNumber:page.pageNumber});
     // A4 BlockQuote is a page-level pass; run it before cross-page passes so
     // left-margin mode is computed from a single page's paragraphs.
     markBlockQuotesForPage(pageNodes, {
@@ -961,8 +966,8 @@ export async function buildSemanticDocument(inputPath, options) {
     inferenceStatus: "uncalibrated-requires-review",
     headingMergeSummary: headingMerge.summary
   };
-  semanticDocument.relations.push(...regions.relations, ...figures.relations, ...boundaries.relations);
-  semanticDocument.semanticReviewTasks.push(...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
+  semanticDocument.relations.push(...pairRelations, ...regions.relations, ...figures.relations, ...boundaries.relations);
+  semanticDocument.semanticReviewTasks.push(...pairTasks, ...headingReviewTasks, ...headings.tasks, ...regions.tasks, ...tables.tasks, ...figures.tasks, ...boundaries.tasks);
   for(const page of layoutDocument.pages) {
     for(const conflict of page.ocr?.alignmentReview||[]) semanticDocument.semanticReviewTasks.push({code:conflict.code,pageNumber:page.pageNumber,candidates:conflict.nativeBlockIds||[]});
     if(page.imageEvidenceError)semanticDocument.semanticReviewTasks.push({code:"FIGURE_EVIDENCE_INCOMPLETE",pageNumber:page.pageNumber});

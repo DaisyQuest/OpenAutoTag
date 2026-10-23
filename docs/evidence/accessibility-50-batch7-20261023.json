@@ -1,0 +1,985 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "baselineCommit": "e14ddc3",
+  "completedItems": [
+    "A16"
+  ],
+  "completedTotal": 16,
+  "pendingTotal": 34,
+  "tests": {
+    "productionBaseline": {
+      "tests": 298,
+      "passed": 298,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focused": {
+      "tests": 144,
+      "passed": 144,
+      "failed": 0,
+      "skipped": 0
+    },
+    "overlap": true,
+    "javaMode": "Serial tests; TieredStopAtLevel=1, UseSerialGC, Xms32m, Xmx512m"
+  },
+  "documents": [
+    {
+      "id": "booklet",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidate": "output/accessibility-50-batch7-20261023/booklet-final/06-candidate.pdf",
+      "candidateHash": "4c275240f3dee92bd9bf5ee4fa211bbcf5ff0cc8217ea761af03109575930ae9",
+      "saved": {
+        "passed": 15401,
+        "failed": 154
+      },
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 186894,
+        "failedChecks": 31
+      },
+      "disposition": "rejected"
+    },
+    {
+      "id": "hinode",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidate": "output/accessibility-50-batch7-20261023/hinode-final/06-candidate.pdf",
+      "candidateHash": "71beaf1bf6341c01174619d2e7ad3e54590a42d09a2de472b8426144a054b88c",
+      "saved": {
+        "passed": 489,
+        "failed": 0
+      },
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5246,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    },
+    {
+      "id": "control",
+      "source": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidate": "output/accessibility-50-batch7-20261023/control-final/06-candidate.pdf",
+      "candidateHash": "0de3dccaee9f241d705e24451bf3d4cb337cff4bc95e478e8f206115e6e4e6ea",
+      "saved": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    }
+  ],
+  "sourceScope": "Semantic, merger, order and output rebuilt from frozen layout; extraction/OCR unchanged.",
+  "logicalPairs": {
+    "candidateHash": "4c275240f3dee92bd9bf5ee4fa211bbcf5ff0cc8217ea761af03109575930ae9",
+    "independentParser": "pypdf structure tree walk; byte ownership in partition-proof.json",
+    "verifiedPairs": [
+      {
+        "page": 2,
+        "label": "Target Date:",
+        "value": "February 2006",
+        "labelId": "n-2-4",
+        "valueId": "n-2-5",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "Launch Vehicle:",
+        "value": "Delta-II 7925-10L",
+        "labelId": "n-2-6",
+        "valueId": "n-2-7",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "Dimensions:",
+        "value": "1.1 h x 2.0 d x 1.2 w meters (launch configuration)",
+        "labelId": "n-2-18",
+        "valueId": "n-2-19",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "Mass:",
+        "value": "547 kg (dry mass) 610 kg (mass with propellant)",
+        "labelId": "n-2-23",
+        "valueId": "n-2-24",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "Average Power:",
+        "value": "596 watts (EOL)",
+        "labelId": "n-2-27",
+        "valueId": "n-2-28",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "ORBIT:",
+        "value": "Heliocentric orbit at ∼1 AU, one leading Earth, one lagging Earth",
+        "labelId": "n-2-29",
+        "valueId": "n-2-30",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "Inclination:",
+        "value": "Ecliptic",
+        "labelId": "n-2-33",
+        "valueId": "n-2-34",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 2,
+        "label": "Period:",
+        "value": "‘Ahead’ orbits around the Sun in ∼347 days ‘Behind’ orbits around the Sun in ∼387 days",
+        "labelId": "n-2-35",
+        "valueId": "n-2-36",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "AU",
+        "value": "Astronomical Unit",
+        "labelId": "n-56-3",
+        "valueId": "n-56-4",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "BOL",
+        "value": "Beginning Of Life",
+        "labelId": "n-56-5",
+        "valueId": "n-56-6",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "bps",
+        "value": "Bits per second",
+        "labelId": "n-56-7",
+        "valueId": "n-56-8",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "C&DH",
+        "value": "Command and Data Handling",
+        "labelId": "n-56-9",
+        "valueId": "n-56-10",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "CalTech",
+        "value": "California Institute of Technology",
+        "labelId": "n-56-11",
+        "valueId": "n-56-12",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "CCAFS",
+        "value": "Cape Canaveral Air Force Station",
+        "labelId": "n-56-13",
+        "valueId": "n-56-14",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "CCSDS",
+        "value": "Consultative Committee on Space Data Systems",
+        "labelId": "n-56-15",
+        "valueId": "n-56-16",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "CEB",
+        "value": "Camera Electronics Box",
+        "labelId": "n-56-17",
+        "valueId": "n-56-18",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "CIR",
+        "value": "Co-rotating Interaction Region",
+        "labelId": "n-56-19",
+        "valueId": "n-56-20",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "CME",
+        "value": "Coronal Mass Ejection",
+        "labelId": "n-56-21",
+        "valueId": "n-56-22",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "COR",
+        "value": "Coronagraph",
+        "labelId": "n-56-23",
+        "valueId": "n-56-24",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "DPU",
+        "value": "Data Processing Unit",
+        "labelId": "n-56-25",
+        "valueId": "n-56-26",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "DSMS",
+        "value": "Deep Space Mission System",
+        "labelId": "n-56-28",
+        "valueId": "n-56-27",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "DSN",
+        "value": "Deep Space Network",
+        "labelId": "n-56-30",
+        "valueId": "n-56-29",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "E/Q",
+        "value": "Electrostatic Analyzer",
+        "labelId": "n-56-31",
+        "valueId": "n-56-32",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "ELV",
+        "value": "Expendable Launch Vehicle",
+        "labelId": "n-56-33",
+        "valueId": "n-56-34",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "EOL",
+        "value": "End Of Life",
+        "labelId": "n-56-37",
+        "valueId": "n-56-38",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "EPO",
+        "value": "Education and Public Outreach",
+        "labelId": "n-56-39",
+        "valueId": "n-56-40",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "ER",
+        "value": "Eastern Range",
+        "labelId": "n-56-41",
+        "valueId": "n-56-42",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "EUVI",
+        "value": "Extreme Ultraviolet Imager",
+        "labelId": "n-56-43",
+        "valueId": "n-56-44",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "FDF",
+        "value": "Flight Dynamics Facility",
+        "labelId": "n-56-45",
+        "valueId": "n-56-46",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "FFR",
+        "value": "Fixed Frequency Receiver",
+        "labelId": "n-56-47",
+        "valueId": "n-56-48",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "fps",
+        "value": "feet per second",
+        "labelId": "n-56-49",
+        "valueId": "n-56-50",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "G&C",
+        "value": "Guidance and Control",
+        "labelId": "n-56-51",
+        "valueId": "n-56-53",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "GEM",
+        "value": "Graphite-Epoxy Motor",
+        "labelId": "n-56-54",
+        "valueId": "n-56-55",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "GSFC",
+        "value": "Goddard Space Flight Center",
+        "labelId": "n-56-56",
+        "valueId": "n-56-57",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "GT",
+        "value": "Guide Telescope",
+        "labelId": "n-56-58",
+        "valueId": "n-56-59",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "GTDS",
+        "value": "Goddard Trajectory Determination Software",
+        "labelId": "n-56-60",
+        "valueId": "n-56-61",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "HET",
+        "value": "High Energy Telescope",
+        "labelId": "n-56-62",
+        "valueId": "n-56-63",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "HFR",
+        "value": "High Frequency Receiver",
+        "labelId": "n-56-64",
+        "valueId": "n-56-66",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "HGA",
+        "value": "High Gain Antenna",
+        "labelId": "n-56-67",
+        "valueId": "n-56-68",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "HI",
+        "value": "Heliospheric Imager",
+        "labelId": "n-56-71",
+        "valueId": "n-56-70",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "I&T",
+        "value": "Integration and Test",
+        "labelId": "n-56-72",
+        "valueId": "n-56-73",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "ICME",
+        "value": "Interplanetary CME",
+        "labelId": "n-56-74",
+        "valueId": "n-56-75",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 56,
+        "label": "IEM",
+        "value": "Integrated Electronics Module",
+        "labelId": "n-56-76",
+        "valueId": "n-56-77",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "IMPACT",
+        "value": "In-situ Measurement of PArticles and CME Transients",
+        "labelId": "n-57-2",
+        "valueId": "n-57-3",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "IMU",
+        "value": "Inertial Measurement Unit",
+        "labelId": "n-57-7",
+        "valueId": "n-57-6",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "IPS",
+        "value": "Interplanetary Shock",
+        "labelId": "n-57-8",
+        "valueId": "n-57-9",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "JHU/APL",
+        "value": "Johns Hopkins University Applied Physics Laboratory",
+        "labelId": "n-57-10",
+        "valueId": "n-57-11",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "KSC",
+        "value": "Kennedy Space Center",
+        "labelId": "n-57-13",
+        "valueId": "n-57-14",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "LET",
+        "value": "Low Energy Telescope",
+        "labelId": "n-57-15",
+        "valueId": "n-57-16",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "LFR",
+        "value": "Low Frequency Receiver",
+        "labelId": "n-57-17",
+        "valueId": "n-57-18",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "LGA",
+        "value": "Low Gain Antenna",
+        "labelId": "n-57-19",
+        "valueId": "n-57-20",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "MAG",
+        "value": "Magnetometer",
+        "labelId": "n-57-23",
+        "valueId": "n-57-22",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "MDC",
+        "value": "Mission Data Center",
+        "labelId": "n-57-24",
+        "valueId": "n-57-25",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "MEB",
+        "value": "Mechanism Electronics Box",
+        "labelId": "n-57-26",
+        "valueId": "n-57-27",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "MECO",
+        "value": "Main Engine Cut-Off",
+        "labelId": "n-57-28",
+        "valueId": "n-57-29",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "MOC",
+        "value": "Mission Operations Center",
+        "labelId": "n-57-30",
+        "valueId": "n-57-31",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "MO&DA",
+        "value": "Mission Operations and Data Analysis",
+        "labelId": "n-57-33",
+        "valueId": "n-57-34",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "NASA",
+        "value": "National Aeronautics and Space Administration",
+        "labelId": "n-57-35",
+        "valueId": "n-57-36",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "nmi",
+        "value": "nautical miles",
+        "labelId": "n-57-37",
+        "valueId": "n-57-38",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "NOAA",
+        "value": "National Atmospheric and Oceanic Administration",
+        "labelId": "n-57-39",
+        "valueId": "n-57-40",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "NRL",
+        "value": "Naval Research Laboratory",
+        "labelId": "n-57-41",
+        "valueId": "n-57-42",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "nT",
+        "value": "nana Tesla",
+        "labelId": "n-57-43",
+        "valueId": "n-57-44",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "PAF",
+        "value": "Payload Attach Fitting",
+        "labelId": "n-57-45",
+        "valueId": "n-57-46",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "PDU",
+        "value": "Power Distribution Unit",
+        "labelId": "n-57-47",
+        "valueId": "n-57-48",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "PI",
+        "value": "Principal Investigator",
+        "labelId": "n-57-49",
+        "valueId": "n-57-50",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "POC",
+        "value": "Payload Operations Center",
+        "labelId": "n-57-52",
+        "valueId": "n-57-53",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "PPF",
+        "value": "Payload Processing Facility",
+        "labelId": "n-57-54",
+        "valueId": "n-57-55",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "PPT",
+        "value": "Peak Power Tracker",
+        "labelId": "n-57-56",
+        "valueId": "n-57-57",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "PSE",
+        "value": "Power System Electronics",
+        "labelId": "n-57-58",
+        "valueId": "n-57-59",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "REA",
+        "value": "Rocket Engine Assembly",
+        "labelId": "n-57-60",
+        "valueId": "n-57-61",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "RRC",
+        "value": "Redmond Rocket Center",
+        "labelId": "n-57-62",
+        "valueId": "n-57-63",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "Rsun",
+        "value": "Radius of the Sun",
+        "labelId": "n-57-64",
+        "valueId": "n-57-65",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "S/C",
+        "value": "Spacecraft",
+        "labelId": "n-57-66",
+        "valueId": "n-57-67",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "SCIP",
+        "value": "Sun-Centred Imaging Package",
+        "labelId": "n-57-68",
+        "valueId": "n-57-69",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 57,
+        "label": "SDS",
+        "value": "Science Data System",
+        "labelId": "n-57-70",
+        "valueId": "n-57-71",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SECCHI",
+        "value": "Sun-Earth Connection Coronal and Heliospheric Investigation",
+        "labelId": "n-58-2",
+        "valueId": "n-58-3",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SECO",
+        "value": "Second Engine Cutoff",
+        "labelId": "n-58-6",
+        "valueId": "n-58-7",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SEP",
+        "value": "Solar Energetic Particle",
+        "labelId": "n-58-8",
+        "valueId": "n-58-9",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SEPT",
+        "value": "Solar Electron and Proton Telescope",
+        "labelId": "n-58-12",
+        "valueId": "n-58-11",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SIT",
+        "value": "Suprathermal Ion Telescope",
+        "labelId": "n-58-13",
+        "valueId": "n-58-14",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SLC",
+        "value": "Space Launch Complex",
+        "labelId": "n-58-15",
+        "valueId": "n-58-16",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SRM",
+        "value": "Solid Rocket Motor",
+        "labelId": "n-58-21",
+        "valueId": "n-58-20",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SSC",
+        "value": "STEREO Science Center",
+        "labelId": "n-58-22",
+        "valueId": "n-58-23",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "STE",
+        "value": "Suprathermal Electron Telescope",
+        "labelId": "n-58-26",
+        "valueId": "n-58-25",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "STEREO",
+        "value": "Solar TErrestrial RElations Observatory",
+        "labelId": "n-58-29",
+        "valueId": "n-58-30",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "STP",
+        "value": "Solar Terrestrial Probes",
+        "labelId": "n-58-31",
+        "valueId": "n-58-32",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "S/WAVES",
+        "value": "STEREO/WAVES",
+        "labelId": "n-58-34",
+        "valueId": "n-58-35",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SWEA",
+        "value": "Solar Wind Experiment",
+        "labelId": "n-58-36",
+        "valueId": "n-58-37",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "SWS",
+        "value": "Solar Wind Sector",
+        "labelId": "n-58-38",
+        "valueId": "n-58-39",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "TDS",
+        "value": "Time Domain Samplers",
+        "labelId": "n-58-40",
+        "valueId": "n-58-41",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "TECO",
+        "value": "Third Engine Cut-Off",
+        "labelId": "n-58-42",
+        "valueId": "n-58-43",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "TLM",
+        "value": "Telemetry",
+        "labelId": "n-58-44",
+        "valueId": "n-58-45",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "TOF",
+        "value": "Time of Flight",
+        "labelId": "n-58-46",
+        "valueId": "n-58-47",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "TRACE",
+        "value": "Transition Region And Coronal Explorer",
+        "labelId": "n-58-50",
+        "valueId": "n-58-49",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "TWTA",
+        "value": "Traveling Wave Tube Amplifier",
+        "labelId": "n-58-51",
+        "valueId": "n-58-52",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "UCB",
+        "value": "University of California, Berkeley",
+        "labelId": "n-58-53",
+        "valueId": "n-58-54",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "UCLA",
+        "value": "University of California, Los Angeles",
+        "labelId": "n-58-55",
+        "valueId": "n-58-56",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "UMN",
+        "value": "University of Minnesota",
+        "labelId": "n-58-58",
+        "valueId": "n-58-59",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "UNH",
+        "value": "University of New Hampshire",
+        "labelId": "n-58-62",
+        "valueId": "n-58-61",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "VI",
+        "value": "Inertial Velocity",
+        "labelId": "n-58-63",
+        "valueId": "n-58-64",
+        "savedAdjacentParagraphs": true
+      },
+      {
+        "page": 58,
+        "label": "WAP",
+        "value": "Wide-Angle Partition",
+        "labelId": "n-58-65",
+        "valueId": "n-58-66",
+        "savedAdjacentParagraphs": true
+      }
+    ],
+    "manualSourceOraclePairs": 16,
+    "formerlyAmbiguousOperationsVerified": 2
+  },
+  "compoundOwnership": {
+    "partitionedOperators": 104,
+    "verifiedPieces": 209,
+    "textBytes": 53667,
+    "tjAdjustments": 615,
+    "allSourceBytesAndAdjustmentsUnchanged": true,
+    "proofPath": "output/accessibility-50-batch7-20261023/partition-proof.json",
+    "proofHash": "5200ef6453a76f9b7720ae9e8210714d3dea7345a8d1567032b63b1e7788dfec"
+  },
+  "pixels": [
+    {
+      "id": "booklet",
+      "dpi": 96,
+      "pages": 61,
+      "pixelIdenticalPages": 61,
+      "candidateHash": "4c275240f3dee92bd9bf5ee4fa211bbcf5ff0cc8217ea761af03109575930ae9"
+    },
+    {
+      "id": "nasa-hinode",
+      "dpi": 150,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "candidateHash": "71beaf1bf6341c01174619d2e7ad3e54590a42d09a2de472b8426144a054b88c"
+    },
+    {
+      "id": "test-form-control",
+      "dpi": 150,
+      "pages": 2,
+      "pixelIdenticalPages": 2,
+      "candidateHash": "0de3dccaee9f241d705e24451bf3d4cb337cff4bc95e478e8f206115e6e4e6ea"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "nasa-hinode",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "71beaf1bf6341c01174619d2e7ad3e54590a42d09a2de472b8426144a054b88c",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": []
+    },
+    {
+      "id": "test-form-control",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "0de3dccaee9f241d705e24451bf3d4cb337cff4bc95e478e8f206115e6e4e6ea",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": [
+        {
+          "variant": "source",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        },
+        {
+          "variant": "candidate",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        }
+      ],
+      "filledPagePixelIdentical": true
+    }
+  ],
+  "remainingLimits": [
+    "Booklet remains rejected: 154 saved attachment failures, including prior 137 OCR findings; 31 raw font failures.",
+    "Page 2 table misclassification, upstream combined PLASTIC block and heading membership remain outside A16.",
+    "101 inferred pairs are verified in saved structure; 16 manually transcribed source pairs are a bounded oracle, not full document human qualification.",
+    "Human review is required."
+  ]
+}

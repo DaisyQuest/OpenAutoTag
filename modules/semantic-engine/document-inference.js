@@ -1,7 +1,7 @@
 // Document-level evidence refinements. Heuristic scores remain uncalibrated.
 const heading = n => /^H[1-6]$/.test(n.role);
 const style = n => n.fontName && Number.isFinite(n.fontSize) ? `${n.fontName.replace(/^[A-Z]{6}\+/, "")}:${Math.round(n.fontSize * 2)}` : null;
-const eligible = n => !n.tableId && !n.formFieldIds?.length && !n.footnoteGroupId && !n.artifactType && !n.semanticRole;
+const eligible = n => !n.tableId && !n.formFieldIds?.length && !n.footnoteGroupId && !n.artifactType && !n.semanticRole && !n.labelValuePairId;
 const geometry = (a,b) => Math.abs(a.bbox[0]-b.bbox[0]) <= 3 && (a.columnHint??0)===(b.columnHint??0);
 const sameType = (a,b) => style(a) && style(a) === style(b) && a.direction === b.direction;
 const clean = text => String(text || "").normalize("NFKC").replace(/\s+/g," ").trim();

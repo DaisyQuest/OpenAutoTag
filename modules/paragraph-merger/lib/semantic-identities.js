@@ -4,6 +4,7 @@ export function protectedBoundary(a,b) {
   if(a.tableId||b.tableId)return "table boundary";
   if(a.regionId&&b.regionId&&a.regionId!==b.regionId)return "region boundary";
   if(a.semanticRole!==b.semanticRole||a.footnoteGroupId!==b.footnoteGroupId||a.blockQuoteGroupId!==b.blockQuoteGroupId)return "semantic group boundary";
+  if((a.labelValuePairId||b.labelValuePairId)&&(a.labelValuePairId!==b.labelValuePairId||a.labelValuePart!==b.labelValuePart))return "label/value boundary";
   if(a.paragraphGroupId&&b.paragraphGroupId&&a.paragraphGroupId!==b.paragraphGroupId)return "explicit paragraph boundary";
   const fields=n=>[...(n.formFieldIds||[])].sort().join("|");
   if(fields(a)!==fields(b))return "form field boundary";
