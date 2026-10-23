@@ -285,7 +285,7 @@ function buildBlockMappings(layoutDocument, sourceRuns) {
   };
 }
 
-async function extractSourceRuns(pdfPath) {
+async function extractSourceRuns(pdfPath, coordinateSpace) {
   await ensureJavaHelperCompiled();
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
   const stdout = await execCommand(
@@ -295,7 +295,8 @@ async function extractSourceRuns(pdfPath) {
       `${buildDir}${path.delimiter}${pdfboxJarPath}`,
       "SourceTextRunExtractorCli",
       "--pdf",
-      path.resolve(pdfPath)
+      path.resolve(pdfPath),
+      ...(coordinateSpace ? ["--coordinate-space",coordinateSpace] : [])
     ],
     {
       env: await buildJavaExecEnv({ bundledJavaHome })
@@ -314,10 +315,11 @@ export async function buildSourceTextMap({ pdfPath, layoutPath, outputPath }) {
     throw new Error(`Source text map input failed schema validation: ${ajv.errorsText(validateLayout.errors)}`);
   }
 
-  const extracted = await extractSourceRuns(pdfPath);
+  const extracted = await extractSourceRuns(pdfPath, layoutDocument.source.coordinateSpace);
   const mapped = buildBlockMappings(layoutDocument, extracted.runs || []);
   const result = {
     status: "completed",
+    ...(layoutDocument.source.coordinateSpace ? {coordinateSpace:layoutDocument.source.coordinateSpace} : {}),
     pdfPath: path.resolve(pdfPath),
     layoutPath: path.resolve(layoutPath),
     pageCount: layoutDocument.pages.length,

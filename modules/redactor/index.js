@@ -143,7 +143,7 @@ async function buildInstructionFile(outputPath, matches) {
   return instructionPath;
 }
 
-async function runJavaRedactor({ pdfPath, instructionPath, outputPath }) {
+async function runJavaRedactor({ pdfPath, instructionPath, outputPath, coordinateSpace }) {
   await ensureJavaHelperCompiled();
   const pdfboxJarPath = await resolvePdfboxJarPath();
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
@@ -158,7 +158,8 @@ async function runJavaRedactor({ pdfPath, instructionPath, outputPath }) {
       "--instructions",
       path.resolve(instructionPath),
       "--output",
-      path.resolve(outputPath)
+      path.resolve(outputPath),
+      ...(coordinateSpace ? ["--coordinate-space",coordinateSpace] : [])
     ],
     {
       env: await buildJavaExecEnv({ bundledJavaHome })
@@ -205,6 +206,7 @@ export async function redactSsnArtifacts({ pdfPath, layoutPath, outputPath }) {
     const instructionPath = await buildInstructionFile(outputPath, redactionPlan.matches);
     const javaReport = await runJavaRedactor({
       pdfPath,
+      coordinateSpace: layoutDocument.source.coordinateSpace,
       instructionPath,
       outputPath
     });

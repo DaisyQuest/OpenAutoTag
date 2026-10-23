@@ -503,7 +503,7 @@ async function writeSidecarFallback({ pdfPath, taggingDocument, outputPath, mani
   };
 }
 
-async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionInstructionPath, title, language }) {
+async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionInstructionPath, title, language, coordinateSpace, redactionCoordinateSpace }) {
   await ensureJavaHelperCompiled();
   const args = [
     "-cp",
@@ -520,6 +520,8 @@ async function runJavaWriter({ pdfPath, outputPath, instructionPath, redactionIn
     "--language",
     language
   ];
+  if (coordinateSpace) args.push("--coordinate-space", coordinateSpace);
+  if (redactionCoordinateSpace) args.push("--redaction-coordinate-space", redactionCoordinateSpace);
 
   if (redactionInstructionPath) {
     args.push("--redactions", redactionInstructionPath);
@@ -1109,6 +1111,8 @@ export async function writeTaggedArtifacts({
     outputPath: path.resolve(outputPath),
     instructionPath: path.resolve(instructionPath),
     redactionInstructionPath: redactions?.instructionPath ? path.resolve(redactions.instructionPath) : null,
+    coordinateSpace: semanticDocument?.source?.coordinateSpace,
+    redactionCoordinateSpace: redactions?.redactionPlan?.coordinateSpace,
     title,
     language
   });

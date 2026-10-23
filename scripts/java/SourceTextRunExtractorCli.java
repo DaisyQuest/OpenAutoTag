@@ -13,8 +13,12 @@ public class SourceTextRunExtractorCli {
         private final List<Map<String, Object>> runs = new ArrayList<>();
         private int globalSequence = 0;
         private int pageSequence = 0;
+        private final boolean displayPoints;
+        private float userUnit;
+        private int rotation;
 
-        RunCollector() throws Exception {
+        RunCollector(boolean displayPoints) throws Exception {
+            this.displayPoints = displayPoints;
             setSortByPosition(false);
             setSuppressDuplicateOverlappingText(false);
         }
@@ -23,6 +27,7 @@ public class SourceTextRunExtractorCli {
         protected void startPage(org.apache.pdfbox.pdmodel.PDPage page) throws java.io.IOException {
             super.startPage(page);
             pageSequence = 0;
+            userUnit = page.getUserUnit(); rotation = page.getRotation();
         }
 
         @Override
@@ -33,11 +38,25 @@ public class SourceTextRunExtractorCli {
 
             float minX = Float.MAX_VALUE;
             float minY = Float.MAX_VALUE;
-            float maxX = Float.MIN_VALUE;
-            float maxY = Float.MIN_VALUE;
+            float maxX = -Float.MAX_VALUE;
+            float maxY = -Float.MAX_VALUE;
             float fontSizeTotal = 0f;
 
             for (TextPosition position : textPositions) {
+                if (displayPoints) {
+                    double angle = Math.toRadians(rotation - position.getDir());
+                    float x = position.getX()*userUnit, y = position.getY()*userUnit;
+                    float dx = (float)Math.cos(angle), dy = (float)Math.sin(angle);
+                    float width = position.getWidthDirAdj()*userUnit, height = position.getHeightDir()*userUnit;
+                    for (int inline=0; inline<=1; inline++) for (int above=0; above<=1; above++) {
+                        float px=x+inline*width*dx+above*height*dy, py=y+inline*width*dy-above*height*dx;
+                        minX=Math.min(minX,px);maxX=Math.max(maxX,px);minY=Math.min(minY,py);maxY=Math.max(maxY,py);
+                    }
+                    // getFontSizeInPt omits the content-stream CTM. The text
+                    // rendering matrix includes it, before page UserUnit.
+                    fontSizeTotal += (float)Math.hypot(position.getTextMatrix().getShearX(),position.getTextMatrix().getScaleY())*userUnit;
+                    continue;
+                }
                 float x = position.getXDirAdj();
                 float yA = position.getYDirAdj();
                 float yB = position.getYDirAdj() - position.getHeightDir();
@@ -80,7 +99,9 @@ public class SourceTextRunExtractorCli {
         String pdfPath = requireOption(options, "--pdf");
 
         try (PDDocument document = Loader.loadPDF(new File(pdfPath))) {
-            RunCollector collector = new RunCollector();
+            String space = options.getOrDefault("--coordinate-space", "");
+            if (!space.isEmpty() && !"crop-display-points".equals(space)) throw new IllegalArgumentException("Unsupported coordinate space");
+            RunCollector collector = new RunCollector(!space.isEmpty());
             collector.getText(document);
 
             Map<String, Object> output = new LinkedHashMap<>();
@@ -102,7 +123,7 @@ public class SourceTextRunExtractorCli {
     }
 
     private static float round(float value) {
-        return Math.round(value * 1000f) / 1000f;
+        return (float)(Math.round(value * 1000d) / 1000d);
     }
 
     private static String normalizeText(String value) {

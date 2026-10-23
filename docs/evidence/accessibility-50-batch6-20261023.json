@@ -1,0 +1,1481 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedOn": "2026-10-23",
+  "baseCommit": "419a5eb",
+  "completedItems": [
+    "A13",
+    "A14",
+    "A15"
+  ],
+  "scope": "Explicit crop-display-point geometry and its consumers, with legacy plan compatibility; no human usability or complete OCR qualification",
+  "implementationSha256": {
+    "contracts/layout.schema.json": "52622153d9b8a5489bef82fff0f36d13053d4ed79902c303ce6e55128cb5c218",
+    "contracts/semantic.schema.json": "0c2032f3fbecb79f189f6f5955c86d7a752f2fe302affea5b4050b7a840c77e1",
+    "contracts/redaction-plan.schema.json": "dea3c2a4e007b5afee891e52b3d58015724bab23f8cc0b6f00732aec8f2131cf",
+    "contracts/table-structure.schema.json": "64ffaf38388706c306db58fb81d92686240a19e50afaea76cea6e86c7ac7ec41",
+    "modules/parser/index.js": "ebb7913e2c1de321f5f4d14c6acb94a17da8280420372766993cddb264f3c98c",
+    "modules/parser/page-geometry.js": "e9f848cf60c44aae92b99099e745aad8f1d11dfcbedb38aedad517a2c3a75677",
+    "modules/parser/java/PdfOcrRenderCli.java": "787eb90117205ee6909ded29faf5230fa0eaa28f7ee4273fedd970a86df90845",
+    "modules/layout-analyzer/index.js": "39b78d7be3edd3479aec712a0d133d070c921683107e4061571d27eac29608cd",
+    "modules/semantic-engine/index.js": "1be17e840b3e154c5b730757c4308910ab03a60b27eb0a6956e6a18145c17e25",
+    "modules/pdf-writer/index.js": "2a822e864117752c841820080e96579a6bf6ecd110bd9a26835582f0378cc15a",
+    "modules/pdf-writer/java/NativeContentStreamParser.java": "2dfbf92489c9c4de44591625d2d3e97913a36f80c4ba416e532687683e4b7661",
+    "modules/pdf-writer/java/NativeTagMatcher.java": "95d008a13ea6780dfd26519668f690949526563a136d696d661045a85cbf2984",
+    "modules/pdf-writer/java/PdfTagWriterCli.java": "6a7adf9fa2684c8773597ad0438064892a26660abd64e3a9e6a551ac08cb978e",
+    "modules/redactor/index.js": "c56edb992f6b0367e1bfe8d93e748e825fa7ab321078633b68ebb3773a38acb4",
+    "modules/redactor/java/PdfSsnRedactorCli.java": "292607c36bc0f5048c41f736d9199de66a0066f9f1032d294f0e106acacff014",
+    "modules/redactor/semantic-redactor.js": "68916d83e46bfec9c05921c7612ebc568124beb40f3ba0563b178b2d4bb1dda5",
+    "modules/redactor/test/semantic-redactor.test.js": "853c2bac5950791398938037b1f45035371101c76769931e1cd3ee9b1be29837",
+    "scripts/build-source-text-map.js": "2aba98ea53060da7794c676dd4aeeb624b1c54451166abddb7fec7d578ef9fd8",
+    "scripts/build-table-structure-map.js": "8049b55a16147aae5c5932fcc05fc9d3f5cb8e69fcf459bbc7130a347184df2f",
+    "scripts/java/SourceTextRunExtractorCli.java": "a30b6afffe883f3b61a7e88e2dbcad444f6cc4e3305d8c19aa34db90163b1ddd",
+    "scripts/java/TableStructureExtractorCli.java": "4687e9083be0d2180318ecbfcac6b3aa90f5eda1f24c0b5f6cd8ab5f53f18ceb",
+    "modules/pdf-writer/test/fixtures/DisplayGeometryProbe.java": "68aa6e17675161ed91fdbbbc9f799d7fa25187323a3e4362ed6c940bfa3064dd",
+    "test/integration/display-geometry.test.js": "878d39ea8fcb91ceaf21fb40ebe061dd61067ae4ebf257800cbbd856f3e1ee56",
+    "package.json": "a932d19420c89adacc9feafa5ca7cf154c95d3fdd0ed93952b983a4273c6f9c7",
+    "SPEC.txt": "5d2b67ac23b28ed02ba02d07a87400e244e96708f600114c1e47bd6bd677f487"
+  },
+  "tests": {
+    "productionBaseline": {
+      "passed": 288,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch6-baseline-final.log",
+      "logSha256": "0285aacec0210ca39974d936ff502be5c8eec913f7cc19f08d9d2d7e1e5914c8"
+    },
+    "writerCompatibility": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch6-compat-writer.log",
+      "logSha256": "c75bcdd24fcc227f7b154a6bee59e0695bd85a5398fd61c60b6517b656312271"
+    },
+    "consumerCompatibility": {
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "log": "tmp/accessibility-50-batch6-compat-consumers-final.log",
+      "logSha256": "5f188c351e06283121b63a10f9a729c7e5253fc37e382f71c7789255d40d6881"
+    }
+  },
+  "testRuntime": {
+    "javaOptions": "-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xms32m -Xmx512m",
+    "concurrency": 1
+  },
+  "geometry": {
+    "sourceHash": "2e3af8ba01edb25730de0916fb2938602b4a61ee43e0a9c53bd6c8acd3d839c3",
+    "candidateHash": "8950b49240b5838b104c70c45f6a88efd0c182b22fb5a155b61a60ff7d06e7de",
+    "pages": 28,
+    "rotations": [
+      0,
+      90,
+      180,
+      270
+    ],
+    "userUnits": [
+      0.5,
+      1,
+      2
+    ],
+    "cropOrigins": [
+      [
+        0,
+        0
+      ],
+      [
+        47,
+        71
+      ],
+      [
+        -83,
+        -59
+      ],
+      [
+        -43,
+        67
+      ]
+    ],
+    "physicalDisplaySize": [
+      612,
+      792
+    ],
+    "saved": {
+      "passed": 3865,
+      "failed": 0
+    },
+    "raw": {
+      "passedRules": 106,
+      "failedRules": 0,
+      "passedChecks": 29152,
+      "failedChecks": 0
+    },
+    "verified": [
+      "Physical text/font/image/widget coordinates",
+      "24 saved multicolumn sequences with identical labels assigned to their own columns",
+      "Original MediaBox, CropBox, Rotate, UserUnit, glyphs and 96 physical DPI PDFBox pixels",
+      "Four fields retain values and widget rectangles; accented fill/save/reopen pixels match",
+      "Source-text diagnostic bounds/font sizes and vector-table cells share the declared frame",
+      "OCR metadata across four rotations, two scales and two render resolutions",
+      "Missing/zero units, missing dimensions, invalid rotation, incompatible origins and unknown frames reject",
+      "Mixed table/layout or semantic-redaction/layout frames reject"
+    ],
+    "raster": {
+      "pages": 24,
+      "writer": "Image placement, invisible title positions and selected display-coordinate redaction boxes verified at 144 raw-unit DPI",
+      "standalone": "Exact stored redacted bitmaps and all four image corners verified at 200 raw-unit DPI; fractional-DPI rerender interpolation is not asserted pixel-identical",
+      "forms": "Form preservation is claimed for native output only"
+    }
+  },
+  "controls": [
+    {
+      "id": "booklet",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidate": "output/accessibility-50-batch6-20261023/booklet-final/06-candidate.pdf",
+      "candidateHash": "80eee707758ed09162f696cd09884040e27d084f0729084be8cf4ce553480d79",
+      "saved": {
+        "passed": 14727,
+        "failed": 155
+      },
+      "raw": {
+        "passedRules": 103,
+        "failedRules": 3,
+        "passedChecks": 185539,
+        "failedChecks": 31
+      },
+      "disposition": "rejected"
+    },
+    {
+      "id": "hinode",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidate": "output/accessibility-50-batch6-20261023/hinode-final/06-candidate.pdf",
+      "candidateHash": "7b9d0531abb99b79d27252c250af2ab3fc819d530f63f4c71284c92974dfa4ac",
+      "saved": {
+        "passed": 531,
+        "failed": 0
+      },
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5295,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    },
+    {
+      "id": "test-form",
+      "source": "output/TEST-FORM-verified-20261021/06-candidate.pdf",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidate": "output/accessibility-50-batch6-20261023/control-final/06-candidate.pdf",
+      "candidateHash": "4b1b5eaa6d3cbaf48ed4430a3809d94cc2f9c08056788fcf4971df80d50662a1",
+      "saved": {
+        "passed": 1828,
+        "failed": 0
+      },
+      "raw": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 9874,
+        "failedChecks": 0
+      },
+      "disposition": "review_required"
+    }
+  ],
+  "visual": [
+    {
+      "id": "booklet",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 96,
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "candidateHash": "80eee707758ed09162f696cd09884040e27d084f0729084be8cf4ce553480d79",
+      "pages": [
+        {
+          "page": 1,
+          "sourceSize": [
+            1632,
+            1056
+          ],
+          "candidateSize": [
+            1632,
+            1056
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 2,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 3,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 4,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 5,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 6,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 7,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 8,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 9,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 10,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 11,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 12,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 13,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 14,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 15,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 16,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 17,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 18,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 19,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 20,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 21,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 22,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 23,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 24,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 25,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 26,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 27,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 28,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 29,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 30,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 31,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 32,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 33,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 34,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 35,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 36,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 37,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 38,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 39,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 40,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 41,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 42,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 43,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 44,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 45,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 46,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 47,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 48,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 49,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 50,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 51,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 52,
+          "sourceSize": [
+            1344,
+            816
+          ],
+          "candidateSize": [
+            1344,
+            816
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 53,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 54,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 55,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 56,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 57,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 58,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 59,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 60,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 61,
+          "sourceSize": [
+            816,
+            1344
+          ],
+          "candidateSize": [
+            816,
+            1344
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        }
+      ],
+      "pixelIdenticalPages": 61,
+      "status": "completed"
+    },
+    {
+      "id": "test-form-control",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "4b1b5eaa6d3cbaf48ed4430a3809d94cc2f9c08056788fcf4971df80d50662a1",
+      "pages": [
+        {
+          "page": 1,
+          "sourceSize": [
+            1275,
+            1650
+          ],
+          "candidateSize": [
+            1275,
+            1650
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        },
+        {
+          "page": 2,
+          "sourceSize": [
+            1275,
+            1650
+          ],
+          "candidateSize": [
+            1275,
+            1650
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        }
+      ],
+      "pixelIdenticalPages": 2,
+      "status": "completed"
+    },
+    {
+      "id": "nasa-hinode",
+      "renderer": "Poppler pdftoppm",
+      "dpi": 150,
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "7b9d0531abb99b79d27252c250af2ab3fc819d530f63f4c71284c92974dfa4ac",
+      "pages": [
+        {
+          "page": 1,
+          "sourceSize": [
+            1275,
+            1650
+          ],
+          "candidateSize": [
+            1275,
+            1650
+          ],
+          "pixelIdentical": true,
+          "differenceBounds": null
+        }
+      ],
+      "pixelIdenticalPages": 1,
+      "status": "completed"
+    }
+  ],
+  "geometryVisual": [
+    {
+      "id": "geometry",
+      "sourceHash": "2e3af8ba01edb25730de0916fb2938602b4a61ee43e0a9c53bd6c8acd3d839c3",
+      "candidateHash": "8950b49240b5838b104c70c45f6a88efd0c182b22fb5a155b61a60ff7d06e7de",
+      "renderer": "Poppler",
+      "dpi": 96,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true,
+          "size": [
+            870,
+            1136
+          ]
+        },
+        {
+          "page": 2,
+          "pixelIdentical": true,
+          "size": [
+            896,
+            1110
+          ]
+        },
+        {
+          "page": 3,
+          "pixelIdentical": true,
+          "size": [
+            870,
+            1136
+          ]
+        },
+        {
+          "page": 4,
+          "pixelIdentical": true,
+          "size": [
+            896,
+            1110
+          ]
+        },
+        {
+          "page": 5,
+          "pixelIdentical": true,
+          "size": [
+            462,
+            608
+          ]
+        },
+        {
+          "page": 6,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 7,
+          "pixelIdentical": true,
+          "size": [
+            462,
+            608
+          ]
+        },
+        {
+          "page": 8,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 9,
+          "pixelIdentical": true,
+          "size": [
+            870,
+            1136
+          ]
+        },
+        {
+          "page": 10,
+          "pixelIdentical": true,
+          "size": [
+            896,
+            1110
+          ]
+        },
+        {
+          "page": 11,
+          "pixelIdentical": true,
+          "size": [
+            870,
+            1136
+          ]
+        },
+        {
+          "page": 12,
+          "pixelIdentical": true,
+          "size": [
+            896,
+            1110
+          ]
+        },
+        {
+          "page": 13,
+          "pixelIdentical": true,
+          "size": [
+            462,
+            608
+          ]
+        },
+        {
+          "page": 14,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 15,
+          "pixelIdentical": true,
+          "size": [
+            462,
+            608
+          ]
+        },
+        {
+          "page": 16,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 17,
+          "pixelIdentical": true,
+          "size": [
+            870,
+            1136
+          ]
+        },
+        {
+          "page": 18,
+          "pixelIdentical": true,
+          "size": [
+            896,
+            1110
+          ]
+        },
+        {
+          "page": 19,
+          "pixelIdentical": true,
+          "size": [
+            870,
+            1136
+          ]
+        },
+        {
+          "page": 20,
+          "pixelIdentical": true,
+          "size": [
+            896,
+            1110
+          ]
+        },
+        {
+          "page": 21,
+          "pixelIdentical": true,
+          "size": [
+            462,
+            608
+          ]
+        },
+        {
+          "page": 22,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 23,
+          "pixelIdentical": true,
+          "size": [
+            462,
+            608
+          ]
+        },
+        {
+          "page": 24,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 25,
+          "pixelIdentical": true,
+          "size": [
+            1686,
+            2192
+          ]
+        },
+        {
+          "page": 26,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        },
+        {
+          "page": 27,
+          "pixelIdentical": true,
+          "size": [
+            1686,
+            2192
+          ]
+        },
+        {
+          "page": 28,
+          "pixelIdentical": true,
+          "size": [
+            488,
+            582
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hinode-full",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "fabab42acdf9510db1940fcec60d8fd9def357eefb2b0817746f5765f70fa0fc",
+      "renderer": "Poppler",
+      "dpi": 96,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true,
+          "size": [
+            816,
+            1056
+          ]
+        }
+      ]
+    }
+  ],
+  "interaction": [
+    {
+      "id": "nasa-hinode",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "candidateHash": "7b9d0531abb99b79d27252c250af2ab3fc819d530f63f4c71284c92974dfa4ac",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": []
+    },
+    {
+      "id": "test-form-control",
+      "sourceHash": "efe6450b8b060c5536d9f0a655af243b75029b65e752e8a2691fcc7e499a1f45",
+      "candidateHash": "4b1b5eaa6d3cbaf48ed4430a3809d94cc2f9c08056788fcf4971df80d50662a1",
+      "renderer": "PDF.js 4.10.38",
+      "dpi": 150,
+      "pages": [
+        {
+          "page": 1,
+          "pixelIdentical": true
+        }
+      ],
+      "formSmoke": [
+        {
+          "variant": "source",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        },
+        {
+          "variant": "candidate",
+          "terminalFields": 32,
+          "widgets": 33,
+          "textField": "Plaintiff/Petitioner",
+          "checkbox": "Not the person described",
+          "fillSaveReopen": true
+        }
+      ],
+      "filledPagePixelIdentical": true
+    }
+  ],
+  "testFormSourceBytePrefix": true,
+  "officialFullPipeline": [
+    {
+      "id": "usgs",
+      "source": "test/fixtures/external/usgs-of2024-1001.pdf",
+      "sourceHash": "0b16f15d4f43d1fad192ae0c3803c3ed346653fe4ad6d143aa762f2f67c17957",
+      "scope": "Full preparation and forced-native output with OCR off",
+      "stages": [
+        {
+          "key": "layout",
+          "status": "completed"
+        },
+        {
+          "key": "sourceTextMap",
+          "status": "completed"
+        },
+        {
+          "key": "tableStructureMap",
+          "status": "completed"
+        },
+        {
+          "key": "layoutEnriched",
+          "status": "completed"
+        },
+        {
+          "key": "semantic",
+          "status": "completed"
+        },
+        {
+          "key": "paragraphMerger",
+          "status": "completed"
+        },
+        {
+          "key": "readingOrder",
+          "status": "completed"
+        },
+        {
+          "key": "tagBuilder",
+          "status": "completed"
+        },
+        {
+          "key": "pdfWriter",
+          "status": "failed",
+          "error": "Picked up JAVA_TOOL_OPTIONS: -XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xms32m -Xmx512m\n[rewriter] Loading source PDF: C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\test\\fixtures\\external\\usgs-of2024-1001.pdf\r\n[rewriter] Loading tag plan: C:\\Users\\tabur\\PDFIsAbsurd\\OpenAutoTag\\output\\accessibility-50-batch6-20261023\\usgs-full\\06-candidate.pdf.native-tag-plan.json\r\n[rewriter] Tag plan has 68 page(s)\r\n[rewriter] Rewriting page 1 (6 assignments, 0 unmatched ops)\r\n[rewriter] Rewriting page 2 (0 assignments, 0 unmatched ops)\r\n[rewriter] Rewriting page 3 (8 assignments, 0 unmatched ops)\r\n[rewriter] Rewriting page 4 (31 assignments, 0 unmatched ops)\r\n[rewriter] Rewriting page 5 (105 assignments, 0 unmatched ops)\r\nException in thread \"main\" java.io.IOException: Authored text contains unassigned paint; source-tree preservation is required\r\n\tat AuthoredText.own(AuthoredText.java:115)\r\n\tat NativeContentStreamRewriter.rewriteContentStream(NativeContentStreamRewriter.java:992)\r\n\tat NativeContentStreamRewriter.rewritePageContentStream(NativeContentStreamRewriter.java:735)\r\n\tat NativeContentStreamRewriter.main(NativeContentStreamRewriter.java:1785)"
+        }
+      ]
+    },
+    {
+      "id": "hinode",
+      "source": "output/public-pdf-pilot-20261022/inputs/nasa-hinode.pdf",
+      "sourceHash": "045e61fac50f0c6779ea4ae5fd0c67f96a39c0e856b3b5ac7098d1d85e11d7a6",
+      "scope": "Full preparation and forced-native output with OCR off",
+      "stages": [
+        {
+          "key": "layout",
+          "status": "completed"
+        },
+        {
+          "key": "sourceTextMap",
+          "status": "completed"
+        },
+        {
+          "key": "tableStructureMap",
+          "status": "completed"
+        },
+        {
+          "key": "layoutEnriched",
+          "status": "completed"
+        },
+        {
+          "key": "semantic",
+          "status": "completed"
+        },
+        {
+          "key": "paragraphMerger",
+          "status": "completed"
+        },
+        {
+          "key": "readingOrder",
+          "status": "completed"
+        },
+        {
+          "key": "tagBuilder",
+          "status": "completed"
+        },
+        {
+          "key": "pdfWriter",
+          "status": "completed"
+        },
+        {
+          "key": "tagDeltaReport",
+          "status": "completed"
+        },
+        {
+          "key": "validator",
+          "status": "completed"
+        },
+        {
+          "key": "preservationQuality",
+          "status": "completed"
+        }
+      ],
+      "validation": {
+        "passedRules": 106,
+        "failedRules": 0,
+        "passedChecks": 5295,
+        "failedChecks": 0
+      },
+      "quality": "review_required",
+      "saved": {
+        "passed": 531,
+        "failed": 0
+      }
+    }
+  ],
+  "usgsRotatedDiagnostic": {
+    "pages": 24,
+    "totalOperators": 4454,
+    "matchedOperators": 4448,
+    "unmatchedOperators": 6,
+    "candidateSaved": false,
+    "limitation": "Forced rebuilding rejects an authored replacement scope with unassigned paint on page 5. Operator match counts do not qualify semantic ownership."
+  },
+  "limitations": [
+    "A26 full OCR-transform qualification remains pending",
+    "Booklet retains 155 saved attachment and 31 raw font failures",
+    "No human screen-reader qualification",
+    "Initial tests exposed a signed diagnostic font-size bug, corrected and covered in the final passing suites; standalone raster preservation uses exact stored bitmap/corner evidence rather than exact fractional-DPI rerender pixels"
+  ]
+}

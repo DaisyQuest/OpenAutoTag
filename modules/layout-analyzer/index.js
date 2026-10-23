@@ -1737,6 +1737,9 @@ export async function analyzeLayout(inputPath, options = {}) {
   }
 
   const tableStructureMap = await loadOptionalTableStructureMap(options.tableStructurePath);
+  if (tableStructureMap && tableStructureMap.coordinateSpace !== layoutDocument.source.coordinateSpace) {
+    throw new Error("Table structure and layout coordinate spaces must agree");
+  }
   const tableStructurePages = new Map((tableStructureMap?.pages || []).map((page) => [page.pageNumber, page]));
   const allFontSizes = layoutDocument.pages.flatMap((page) => page.textBlocks.map((block) => block.fontSize));
   const baselineFontSize = median(allFontSizes);

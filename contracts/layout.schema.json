@@ -23,6 +23,10 @@
         "filePath"
       ],
       "properties": {
+        "coordinateSpace": {
+          "const": "crop-display-points",
+          "description": "Page dimensions, font sizes and content/widget boxes use physical points (1/72 inch), relative to the displayed CropBox top-left after Rotate and UserUnit. The cropBox metadata retains raw PDF coordinates. Absence denotes legacy unrotated coordinates."
+        },
         "filePath": {
           "type": "string",
           "minLength": 1
@@ -50,6 +54,9 @@
           "textBlocks"
         ],
         "properties": {
+          "cropBox": {"type":"array","minItems":4,"maxItems":4,"items":{"type":"number"},"description":"Visible page bounds in original PDF user coordinates, before rotation and UserUnit."},
+          "rotation": {"enum":[0,90,180,270]},
+          "userUnit": {"type":"number","exclusiveMinimum":0},
           "pageNumber": {
             "type": "integer",
             "minimum": 1

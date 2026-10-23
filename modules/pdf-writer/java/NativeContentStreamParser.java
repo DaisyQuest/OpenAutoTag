@@ -453,8 +453,9 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
                 firstPage = false;
 
                 json.append("{\"pageNumber\":").append(p + 1);
-                json.append(",\"pageWidth\":").append(String.format("%.1f", pageWidth));
-                json.append(",\"pageHeight\":").append(String.format("%.1f", pageHeight));
+                json.append(",\"pageWidth\":").append(Float.toString(pageWidth));
+                json.append(",\"pageHeight\":").append(Float.toString(pageHeight));
+                json.append(",\"userUnit\":").append(Float.toString(page.getUserUnit()));
                 json.append(",\"rotation\":").append(page.getRotation());
                 json.append(",\"operatorCount\":").append(ops.size());
                 int markedOpCount = 0;
@@ -469,8 +470,8 @@ public class NativeContentStreamParser extends org.apache.pdfbox.text.PDFTextStr
                     json.append("\"seq\":").append(r.seq);
                     json.append(",\"op\":").append(escapeJson(r.op));
                     json.append(",\"text\":").append(escapeJson(r.text));
-                    json.append(",\"x\":").append(String.format("%.1f", r.x));
-                    json.append(",\"y\":").append(String.format("%.1f", r.y));
+                    json.append(",\"x\":").append(Float.toString(r.x));
+                    json.append(",\"y\":").append(Float.toString(r.y));
                     json.append(",\"font\":\"").append(escapeStr(r.fontName)).append("\"");
                     json.append(",\"fontSize\":").append(String.format("%.1f", r.fontSize));
                     json.append(",\"glyphs\":").append(r.glyphs);

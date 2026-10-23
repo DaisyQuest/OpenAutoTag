@@ -85,6 +85,7 @@ public class PdfTagWriterCli {
     }
 
     private static class PageState {
+        boolean displayPoints;
         int pageKey;
         int nextMCID;
         COSArray parentArray = new COSArray();
@@ -100,13 +101,18 @@ public class PdfTagWriterCli {
         String title = options.getOrDefault("--title", "Tagged PDF");
         String language = options.getOrDefault("--language", "en-US");
         String redactionsPath = options.get("--redactions");
+        String coordinateSpace = options.getOrDefault("--coordinate-space", "");
+        if (!coordinateSpace.isEmpty() && !"crop-display-points".equals(coordinateSpace)) throw new IllegalArgumentException("Unsupported coordinate space");
+        boolean displayPoints = "crop-display-points".equals(coordinateSpace);
+        String redactionSpace = options.getOrDefault("--redaction-coordinate-space", "");
+        if (!redactionSpace.isEmpty() && !"crop-display-points".equals(redactionSpace)) throw new IllegalArgumentException("Unsupported redaction coordinate space");
 
         List<Instruction> instructions = readInstructions(instructionsPath);
         Map<Integer, List<RedactionInstruction>> redactionsByPage =
             redactionsPath == null || redactionsPath.isBlank() ? Map.of() : readRedactions(redactionsPath);
 
         try (PDDocument sourceDocument = Loader.loadPDF(new File(pdfPath)); PDDocument outputDocument = new PDDocument()) {
-            List<PDPage> outputPages = clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage);
+            List<PDPage> outputPages = clonePagesAsArtifactImages(sourceDocument, outputDocument, redactionsByPage, "crop-display-points".equals(redactionSpace));
             PDDocumentCatalog catalog = outputDocument.getDocumentCatalog();
             applyMetadata(outputDocument, catalog, title, language);
             PDFont overlayFont = loadOverlayFont(outputDocument);
@@ -165,6 +171,7 @@ public class PdfTagWriterCli {
                     PageState pageState = pageStates.get(instruction.pageNumber);
                     if (pageState == null) {
                         pageState = createPageState(outputDocument, page, nextPageKey[0]++);
+                        pageState.displayPoints = displayPoints;
                         pageStates.put(instruction.pageNumber, pageState);
                     }
 
@@ -571,7 +578,8 @@ public class PdfTagWriterCli {
     private static List<PDPage> clonePagesAsArtifactImages(
         PDDocument sourceDocument,
         PDDocument outputDocument,
-        Map<Integer, List<RedactionInstruction>> redactionsByPage
+        Map<Integer, List<RedactionInstruction>> redactionsByPage,
+        boolean redactionsInDisplayPoints
     ) throws Exception {
         PDFRenderer renderer = new PDFRenderer(sourceDocument);
         List<PDPage> outputPages = new ArrayList<>();
@@ -581,16 +589,18 @@ public class PdfTagWriterCli {
             PDPage outputPage = new PDPage(sourcePage.getMediaBox());
             outputPage.setCropBox(sourcePage.getCropBox());
             outputPage.setRotation(sourcePage.getRotation());
+            outputPage.setUserUnit(sourcePage.getUserUnit());
             outputPage.getCOSObject().setItem(COSName.getPDFName("Tabs"), COSName.S);
             outputDocument.addPage(outputPage);
             outputPages.add(outputPage);
 
             BufferedImage renderedPage = renderer.renderImageWithDPI(pageIndex, 144, ImageType.RGB);
-            applyRedactions(renderedPage, sourcePage, redactionsByPage.getOrDefault(pageIndex + 1, List.of()));
+            applyRedactions(renderedPage, sourcePage, redactionsByPage.getOrDefault(pageIndex + 1, List.of()), redactionsInDisplayPoints);
             PDImageXObject image = LosslessFactory.createFromImage(outputDocument, renderedPage);
             try (PDPageContentStream stream = new PDPageContentStream(outputDocument, outputPage)) {
                 stream.beginMarkedContent(COSName.ARTIFACT);
-                stream.drawImage(image, 0, 0, outputPage.getMediaBox().getWidth(), outputPage.getMediaBox().getHeight());
+                stream.transform(displayToUser(outputPage));
+                stream.drawImage(image, 0, 0, displayWidth(outputPage), displayHeight(outputPage));
                 stream.endMarkedContent();
             }
         }
@@ -598,13 +608,13 @@ public class PdfTagWriterCli {
         return outputPages;
     }
 
-    private static void applyRedactions(BufferedImage image, PDPage sourcePage, List<RedactionInstruction> redactions) {
+    private static void applyRedactions(BufferedImage image, PDPage sourcePage, List<RedactionInstruction> redactions, boolean displayPoints) {
         if (redactions == null || redactions.isEmpty()) {
             return;
         }
 
-        float pageWidth = Math.max(sourcePage.getMediaBox().getWidth(), 1f);
-        float pageHeight = Math.max(sourcePage.getMediaBox().getHeight(), 1f);
+        float pageWidth = Math.max(displayPoints ? displayWidth(sourcePage) : sourcePage.getMediaBox().getWidth(), 1f);
+        float pageHeight = Math.max(displayPoints ? displayHeight(sourcePage) : sourcePage.getMediaBox().getHeight(), 1f);
         double scaleX = image.getWidth() / pageWidth;
         double scaleY = image.getHeight() / pageHeight;
         int maxX = Math.max(image.getWidth() - 1, 0);
@@ -768,6 +778,25 @@ public class PdfTagWriterCli {
         return state;
     }
 
+    private static float displayWidth(PDPage page) {
+        return (page.getRotation() == 90 || page.getRotation() == 270 ? page.getCropBox().getHeight() : page.getCropBox().getWidth()) * page.getUserUnit();
+    }
+
+    private static float displayHeight(PDPage page) {
+        return (page.getRotation() == 90 || page.getRotation() == 270 ? page.getCropBox().getWidth() : page.getCropBox().getHeight()) * page.getUserUnit();
+    }
+
+    /** Display bottom-left physical points to original PDF user space. */
+    private static org.apache.pdfbox.util.Matrix displayToUser(PDPage page) {
+        var box = page.getCropBox(); float scale = 1 / page.getUserUnit();
+        return switch (page.getRotation()) {
+            case 90 -> new org.apache.pdfbox.util.Matrix(0,scale,-scale,0,box.getUpperRightX(),box.getLowerLeftY());
+            case 180 -> new org.apache.pdfbox.util.Matrix(-scale,0,0,-scale,box.getUpperRightX(),box.getUpperRightY());
+            case 270 -> new org.apache.pdfbox.util.Matrix(0,-scale,scale,0,box.getLowerLeftX(),box.getUpperRightY());
+            default -> new org.apache.pdfbox.util.Matrix(scale,0,0,scale,box.getLowerLeftX(),box.getLowerLeftY());
+        };
+    }
+
     private static void setParentArrayValue(COSArray parentArray, int index, COSBase value) {
         while (parentArray.size() <= index) {
             parentArray.add(COSNull.NULL);
@@ -776,7 +805,7 @@ public class PdfTagWriterCli {
     }
 
     private static void appendInvisibleText(PageState pageState, PDFont overlayFont, int mcid, Instruction instruction) throws Exception {
-        float pageHeight = pageState.page.getMediaBox().getHeight();
+        float pageHeight = pageState.displayPoints ? displayHeight(pageState.page) : pageState.page.getMediaBox().getHeight();
         float x = instruction.x;
         float y = Math.max(0f, pageHeight - instruction.y - instruction.height);
         float fontSize = Math.max(6f, instruction.height > 0f ? instruction.height : 10f);
@@ -787,6 +816,7 @@ public class PdfTagWriterCli {
         }
 
         pageState.contentStream.saveGraphicsState();
+        if (pageState.displayPoints) pageState.contentStream.transform(displayToUser(pageState.page));
         pageState.contentStream.beginMarkedContent(COSName.getPDFName("Span"), mcid);
         pageState.contentStream.beginText();
         pageState.contentStream.setFont(overlayFont, fontSize);

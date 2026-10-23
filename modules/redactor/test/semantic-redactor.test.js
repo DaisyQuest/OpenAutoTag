@@ -58,4 +58,11 @@ test("semantic redactor masks SSNs in semantic text while preserving redaction g
   assert.equal(result.semanticRedacted.nodes[0].text.includes("***-**-6789"), true);
   assert.equal(result.semanticRedacted.nodes[0].text.includes("***-**-4321"), true);
   assert.equal(result.plan.matches.every((match) => Array.isArray(match.bbox) && match.bbox.length === 4), true);
+  assert.equal(result.plan.coordinateSpace,undefined);
+  semanticDocument.source.coordinateSpace="crop-display-points";
+  assert.throws(()=>buildSemanticRedactionArtifacts({semanticDocument,layoutDocument}),/coordinate spaces must agree/);
+  layoutDocument.source.coordinateSpace="crop-display-points";
+  const display=buildSemanticRedactionArtifacts({semanticDocument,layoutDocument});
+  assert.equal(display.plan.coordinateSpace,"crop-display-points");
+  assert.equal(display.semanticRedacted.source.coordinateSpace,"crop-display-points");
 });

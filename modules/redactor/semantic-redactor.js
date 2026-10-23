@@ -39,6 +39,9 @@ function buildFallbackPage(node) {
 }
 
 export function buildSemanticRedactionArtifacts({ semanticDocument, layoutDocument, workloadId = "tag-and-ssn-redact" }) {
+  if (semanticDocument.source?.coordinateSpace !== layoutDocument.source?.coordinateSpace) {
+    throw new Error("Semantic and layout redaction coordinate spaces must agree");
+  }
   const blocksById = buildBlockLookup(layoutDocument);
   const matches = [];
   const redactedNodeIds = new Set();
@@ -96,6 +99,7 @@ export function buildSemanticRedactionArtifacts({ semanticDocument, layoutDocume
     workloadId,
     sourcePdf: semanticDocument.source?.filePath || layoutDocument.source?.filePath || "",
     semanticDocumentId: semanticDocument.documentId,
+    ...(semanticDocument.source?.coordinateSpace ? {coordinateSpace: semanticDocument.source.coordinateSpace} : {}),
     summary: {
       pagesProcessed: layoutDocument.pages?.length || 0,
       candidateMatches: matches.length,

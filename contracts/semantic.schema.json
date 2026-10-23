@@ -23,6 +23,10 @@
         "layoutDocumentId"
       ],
       "properties": {
+        "coordinateSpace": {
+          "const":"crop-display-points",
+          "description":"Node and relation geometry uses the layout display frame in physical points. Absence retains legacy unrotated coordinates; consumers must not infer a new frame from the source PDF alone."
+        },
         "layoutDocumentId": {
           "type": "string",
           "minLength": 1

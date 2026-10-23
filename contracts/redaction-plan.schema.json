@@ -22,6 +22,10 @@
     "sourcePdf": {
       "type": "string"
     },
+    "coordinateSpace": {
+      "const": "crop-display-points",
+      "description": "Match rectangles use physical points from the displayed CropBox top-left after page rotation and UserUnit. Absence preserves legacy coordinates."
+    },
     "semanticDocumentId": {
       "type": "string"
     },

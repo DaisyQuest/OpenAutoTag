@@ -53,8 +53,9 @@ public class PdfOcrRenderCli {
                 PDPage page = document.getPage(pageIndex);
                 Map<String, Object> pageResult = new LinkedHashMap<>();
                 pageResult.put("pageNumber", pageNumber);
-                pageResult.put("pdfWidth", round(page.getCropBox().getWidth()));
-                pageResult.put("pdfHeight", round(page.getCropBox().getHeight()));
+                boolean sideways = page.getRotation() == 90 || page.getRotation() == 270;
+                pageResult.put("pdfWidth", round((sideways ? page.getCropBox().getHeight() : page.getCropBox().getWidth()) * page.getUserUnit()));
+                pageResult.put("pdfHeight", round((sideways ? page.getCropBox().getWidth() : page.getCropBox().getHeight()) * page.getUserUnit()));
 
                 List<Map<String, Object>> variantResults = new ArrayList<>();
                 for (VariantSpec variant : variants) {
@@ -146,7 +147,7 @@ public class PdfOcrRenderCli {
     }
 
     private static float round(float value) {
-        return Math.round(value * 1000f) / 1000f;
+        return (float)(Math.round(value * 1000d) / 1000d);
     }
 
     private static String toJson(Object value) {

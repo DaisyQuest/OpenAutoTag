@@ -15,6 +15,8 @@ public class TableStructureExtractorCli {
     public static void main(String[] args) throws Exception {
         Map<String, String> options = parseArgs(args);
         String pdfPath = requireOption(options, "--pdf");
+        String space = options.getOrDefault("--coordinate-space", "");
+        if (!space.isEmpty() && !"crop-display-points".equals(space)) throw new IllegalArgumentException("Unsupported coordinate space");
 
         try (PDDocument document = Loader.loadPDF(new File(pdfPath))) {
             Map<String, Object> result = new LinkedHashMap<>();
@@ -22,7 +24,7 @@ public class TableStructureExtractorCli {
 
             int pageNumber = 1;
             for (PDPage page : document.getPages()) {
-                GeometryCollector collector = new GeometryCollector(page);
+                GeometryCollector collector = new GeometryCollector(page, !space.isEmpty());
                 collector.processPage(page);
                 pages.add(collector.toPageResult(pageNumber));
                 pageNumber += 1;
@@ -62,14 +64,16 @@ public class TableStructureExtractorCli {
 
     private static class GeometryCollector extends PDFGraphicsStreamEngine {
         private final PDPage page;
+        private final boolean displayPoints;
         private final List<LineSegment> strokedSegments = new ArrayList<>();
         private final List<LineSegment> currentPathSegments = new ArrayList<>();
         private Point2D currentPoint;
         private Point2D subpathStart;
 
-        GeometryCollector(PDPage page) {
+        GeometryCollector(PDPage page, boolean displayPoints) {
             super(page);
             this.page = page;
+            this.displayPoints = displayPoints;
         }
 
         @Override
@@ -151,11 +155,20 @@ public class TableStructureExtractorCli {
             }
 
             LineSegment segment = new LineSegment();
+            double strokeScale=1;
+            if (displayPoints) {
+                double dx=end.getX()-start.getX(),dy=end.getY()-start.getY(),length=Math.hypot(dx,dy);
+                if (length>0) {
+                    double nx=-dy/length,ny=dx/length;var matrix=getGraphicsState().getCurrentTransformationMatrix();
+                    strokeScale=Math.hypot(matrix.getScaleX()*nx+matrix.getShearY()*ny,matrix.getShearX()*nx+matrix.getScaleY()*ny)*page.getUserUnit();
+                }
+            }
+            if (displayPoints) { start=displayPoint(start); end=displayPoint(end); }
             segment.x1 = start.getX();
             segment.y1 = start.getY();
             segment.x2 = end.getX();
             segment.y2 = end.getY();
-            segment.lineWidth = getGraphicsState().getLineWidth();
+            segment.lineWidth = getGraphicsState().getLineWidth() * strokeScale;
 
             double dx = Math.abs(segment.x2 - segment.x1);
             double dy = Math.abs(segment.y2 - segment.y1);
@@ -169,6 +182,18 @@ public class TableStructureExtractorCli {
             }
 
             currentPathSegments.add(segment);
+        }
+
+        // Keep the extractor's bottom-origin convention. The JS analyzer
+        // performs the single final y flip against the display page height.
+        private Point2D displayPoint(Point2D point) {
+            var box=page.getCropBox();double x=point.getX()-box.getLowerLeftX(),y=point.getY()-box.getLowerLeftY(),unit=page.getUserUnit();
+            return switch(page.getRotation()) {
+                case 90 -> new Point2D.Double(y*unit,(box.getWidth()-x)*unit);
+                case 180 -> new Point2D.Double((box.getWidth()-x)*unit,(box.getHeight()-y)*unit);
+                case 270 -> new Point2D.Double((box.getHeight()-y)*unit,x*unit);
+                default -> new Point2D.Double(x*unit,y*unit);
+            };
         }
 
         private void flushCurrentPath() {
@@ -211,8 +236,9 @@ public class TableStructureExtractorCli {
             }
 
             result.put("pageNumber", pageNumber);
-            result.put("width", round(page.getMediaBox().getWidth()));
-            result.put("height", round(page.getMediaBox().getHeight()));
+            boolean sideways=page.getRotation()==90||page.getRotation()==270;
+            result.put("width", round(displayPoints?(sideways?page.getCropBox().getHeight():page.getCropBox().getWidth())*page.getUserUnit():page.getMediaBox().getWidth()));
+            result.put("height", round(displayPoints?(sideways?page.getCropBox().getWidth():page.getCropBox().getHeight())*page.getUserUnit():page.getMediaBox().getHeight()));
             result.put("segments", segments);
 
             Map<String, Object> summary = new LinkedHashMap<>();

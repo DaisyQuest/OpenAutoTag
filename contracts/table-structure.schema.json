@@ -13,6 +13,10 @@
     "summary"
   ],
   "properties": {
+    "coordinateSpace": {
+      "const": "crop-display-points",
+      "description": "Table and cell rectangles use the layout's physical displayed CropBox coordinates. Absence preserves legacy coordinates."
+    },
     "schemaVersion": {
       "const": "1.0.0"
     },

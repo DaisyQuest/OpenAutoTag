@@ -14,8 +14,9 @@ import java.util.Map;
  * nodes and tag tree MCIDs using position + text matching. Produces a native tag
  * plan JSON that maps each operator to its corresponding structural tag.
  *
- * Key coordinate handling: PDF y=0 is at page bottom; semantic bbox y=0 is at
- * page top. The matcher flips operator y via: convertedY = pageHeight - operator.y
+ * New semantic coordinates are physical points from the displayed CropBox's
+ * top-left. PDFBox positions already include CropBox/Rotate, so only UserUnit
+ * remains. Plans without a coordinate-space marker keep the legacy conversion.
  */
 public class NativeTagMatcher {
 
@@ -294,6 +295,8 @@ public class NativeTagMatcher {
         double pageWidth;
         double pageHeight;
         int rotation;
+        double userUnit;
+        boolean explicitGeometry;
     }
 
     /** Coordinate frame the parser emits operator (x, y) in. */
@@ -318,6 +321,10 @@ public class NativeTagMatcher {
             meta.pageWidth = page.containsKey("pageWidth") ? asDouble(page.get("pageWidth")) : 612.0;
             meta.pageHeight = page.containsKey("pageHeight") ? asDouble(page.get("pageHeight")) : 792.0;
             meta.rotation = page.containsKey("rotation") ? asInt(page.get("rotation")) : 0;
+            meta.userUnit = page.containsKey("userUnit") ? asDouble(page.get("userUnit")) : Double.NaN;
+            meta.explicitGeometry = page.get("pageWidth") instanceof Number && page.get("pageHeight") instanceof Number && page.get("rotation") instanceof Number
+                && Double.isFinite(meta.pageWidth) && meta.pageWidth > 0 && Double.isFinite(meta.pageHeight) && meta.pageHeight > 0
+                && List.of(0,90,180,270).contains(meta.rotation) && asDouble(page.get("rotation")) == meta.rotation;
             outMeta.add(meta);
             for (Object opObj : ops) {
                 Map<String, Object> om = asMap(opObj);
@@ -636,8 +643,9 @@ public class NativeTagMatcher {
      */
     /**
      * Transform an operator (x, y) captured in post-rotation display space
-     * back into the unrotated portrait frame the layout extractor uses for
-     * semantic bboxes. For /Rotate 0 we pass through; for 90/180/270 we
+     * back into the unrotated portrait frame legacy layouts use for
+     * semantic bboxes. New display-point layouts bypass this conversion.
+     * For /Rotate 0 we pass through; for 90/180/270 we
      * apply the inverse of PDFBox's TextPosition rotation so the matcher's
      * bbox check operates in a consistent frame.
      *
@@ -1137,6 +1145,9 @@ public class NativeTagMatcher {
         // Parse all inputs
         Object operatorData = parseJson(operatorsJson);
         Object semanticData = parseJson(semanticJson);
+        String coordinateSpace = asString(asMap(asMap(semanticData).get("source")).get("coordinateSpace"));
+        if (!coordinateSpace.isEmpty() && !"crop-display-points".equals(coordinateSpace))
+            throw new IllegalArgumentException("Unsupported semantic coordinate space: " + coordinateSpace);
         Object tagsData = parseJson(tagsJson);
 
         List<PageMeta> pageMetas = new ArrayList<>();
@@ -1159,7 +1170,9 @@ public class NativeTagMatcher {
 
         // Build output
         StringBuilder json = new StringBuilder();
-        json.append("{\"pages\":[");
+        json.append("{");
+        if (!coordinateSpace.isEmpty()) json.append("\"coordinateSpace\":").append(escapeJson(coordinateSpace)).append(",");
+        json.append("\"pages\":[");
 
         int totalPages = operatorPages.size();
         int pagesAboveThreshold = 0;
@@ -1184,6 +1197,18 @@ public class NativeTagMatcher {
             double pageH = meta != null ? meta.pageHeight : pageHeight;
             double pageW = meta != null ? meta.pageWidth : 612.0;
             int pageRot = meta != null ? meta.rotation : 0;
+            if ("crop-display-points".equals(coordinateSpace)) {
+                if (meta == null || !meta.explicitGeometry || !Double.isFinite(meta.userUnit) || meta.userUnit <= 0 || !"top".equals(parsedCoordinateOrigin))
+                    throw new IllegalArgumentException("Display-point matching requires top-origin operators with verified UserUnit");
+                // PDFBox already removed CropBox offsets and applied Rotate.
+                // Convert its raw user units once; never unrotate new layouts.
+                for (OpInfo op : pageOps) {
+                    op.x *= meta.userUnit; op.y *= meta.userUnit;
+                    if (op.glyphMap != null) for (GlyphInfo glyph : op.glyphMap) { glyph.x *= meta.userUnit; glyph.y *= meta.userUnit; }
+                }
+                if (pageRot == 90 || pageRot == 270) { double swap = pageW; pageW = pageH; pageH = swap; }
+                pageW *= meta.userUnit; pageH *= meta.userUnit; pageRot = 0;
+            }
             MatchResult result = matchPage(pageOps, pageNodes, flatTags, pageW, pageH, pageRot, tolerance);
 
             int matched = result.totalOperators - result.unmatchedOperators.size();

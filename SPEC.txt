@@ -1,5 +1,5 @@
 PDF Accessibility Engine
-Version: tagging-quality-2026-10-21
+Version: tagging-quality-2026-10-23
 
 0. Purpose
 
@@ -39,6 +39,16 @@ Pipeline order:
 8. `validator`
 
 The orchestrator invokes each stage as a separate Node process and stores intermediate JSON artifacts in the job output directory.
+
+2.1 Page geometry
+
+New parser output declares source.coordinateSpace = "crop-display-points". Page dimensions, font sizes, text, image and widget boxes use physical points (1/72 inch), measured from the displayed CropBox top-left after page rotation and UserUnit. The page cropBox metadata remains in original PDF user coordinates; rotation and userUnit describe that source frame.
+
+Layout analysis, semantic inference and reading order preserve the coordinate-space marker. Source-text and ruled-table diagnostics opt into the same frame. Mixed layout/table or layout/semantic-redaction frames reject rather than silently compare different coordinates. Semantic redaction plans declare their frame independently of overlay text.
+
+PDFBox native operator positions already account for CropBox and Rotate; new matching scales these positions and glyph centers by UserUnit exactly once. Display-point matching requires explicit valid page dimensions, rotation, UserUnit and top-origin operators. Native tag plans record the resulting coordinate space. Saved plans without the marker retain the previous matching convention.
+
+Raster writers map displayed images and invisible text back into original page coordinates, retaining CropBox, rotation and UserUnit. Redaction image coordinates use the declared frame. OCR render metadata reports physical displayed dimensions; this does not establish complete OCR orientation, recognition or attachment qualification.
 
 3. Module CLI requirements
 

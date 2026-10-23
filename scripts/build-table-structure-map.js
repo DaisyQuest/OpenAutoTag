@@ -560,7 +560,7 @@ function analyzePageTables(page, pageVector) {
   };
 }
 
-async function extractRuledTableGeometry(pdfPath) {
+async function extractRuledTableGeometry(pdfPath, coordinateSpace) {
   await ensureJavaHelperCompiled();
   const javaCommand = await resolveJavaTool("java", "PIPELINE_JAVA_PATH", { bundledJavaHome });
   const stdout = await execCommand(
@@ -570,7 +570,8 @@ async function extractRuledTableGeometry(pdfPath) {
       `${buildDir}${path.delimiter}${pdfboxJarPath}`,
       "TableStructureExtractorCli",
       "--pdf",
-      path.resolve(pdfPath)
+      path.resolve(pdfPath),
+      ...(coordinateSpace ? ["--coordinate-space",coordinateSpace] : [])
     ],
     {
       env: await buildJavaExecEnv({ bundledJavaHome })
@@ -589,7 +590,7 @@ export async function buildTableStructureMap({ pdfPath, layoutPath, outputPath }
     throw new Error(`Table structure map input failed schema validation: ${ajv.errorsText(validateLayout.errors)}`);
   }
 
-  const extracted = await extractRuledTableGeometry(pdfPath);
+  const extracted = await extractRuledTableGeometry(pdfPath, layoutDocument.source.coordinateSpace);
   const vectorPages = new Map((extracted.pages || []).map((page) => [page.pageNumber, page]));
   const pages = layoutDocument.pages.map((page) =>
     analyzePageTables(page, vectorPages.get(page.pageNumber) || { pageNumber: page.pageNumber, segments: [] })
@@ -597,6 +598,7 @@ export async function buildTableStructureMap({ pdfPath, layoutPath, outputPath }
 
   const result = {
     schemaVersion: "1.0.0",
+    ...(layoutDocument.source.coordinateSpace ? {coordinateSpace:layoutDocument.source.coordinateSpace} : {}),
     status: "completed",
     pdfPath: path.resolve(pdfPath),
     layoutPath: path.resolve(layoutPath),

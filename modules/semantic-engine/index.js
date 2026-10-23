@@ -947,6 +947,7 @@ export async function buildSemanticDocument(inputPath, options) {
     source: {
       layoutDocumentId: layoutDocument.documentId,
       filePath: layoutDocument.source.filePath,
+      ...(layoutDocument.source.coordinateSpace ? {coordinateSpace: layoutDocument.source.coordinateSpace} : {}),
       ...(layoutDocument.source.title ? { title: layoutDocument.source.title } : {}),
       language: layoutDocument.source.language,
       languageConfidence: layoutDocument.source.languageConfidence

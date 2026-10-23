@@ -45,6 +45,9 @@ public class PdfSsnRedactorCli {
         String pdfPath = parsed.get("--pdf");
         String instructionsPath = parsed.get("--instructions");
         String outputPath = parsed.get("--output");
+        String space = parsed.getOrDefault("--coordinate-space", "");
+        if (!space.isEmpty() && !"crop-display-points".equals(space)) throw new IllegalArgumentException("Unsupported coordinate space");
+        boolean displayPoints = !space.isEmpty();
 
         if (pdfPath == null || instructionsPath == null || outputPath == null) {
             throw new IllegalArgumentException(
@@ -55,6 +58,7 @@ public class PdfSsnRedactorCli {
         Map<Integer, List<Instruction>> instructionsByPage = readInstructions(instructionsPath);
 
         try (PDDocument input = Loader.loadPDF(new File(pdfPath)); PDDocument output = new PDDocument()) {
+            if (displayPoints) output.setVersion(Math.max(input.getVersion(),1.6f));
             PDFRenderer renderer = new PDFRenderer(input);
             PDDocumentInformation inputInfo = input.getDocumentInformation();
             if (inputInfo != null) {
@@ -80,15 +84,17 @@ public class PdfSsnRedactorCli {
                 if (!pageInstructions.isEmpty()) {
                     pagesRedacted += 1;
                     redactionCount += pageInstructions.size();
-                    applyRedactions(image, mediaBox, pageInstructions);
+                    applyRedactions(image, displayPoints ? new PDRectangle(displayWidth(inputPage),displayHeight(inputPage)) : mediaBox, pageInstructions);
                 }
 
-                PDPage outputPage = new PDPage(new PDRectangle(mediaBox.getWidth(), mediaBox.getHeight()));
+                PDPage outputPage = new PDPage(displayPoints ? mediaBox : new PDRectangle(mediaBox.getWidth(), mediaBox.getHeight()));
+                if (displayPoints) { outputPage.setCropBox(inputPage.getCropBox());outputPage.setRotation(inputPage.getRotation());outputPage.setUserUnit(inputPage.getUserUnit()); }
                 output.addPage(outputPage);
 
                 PDImageXObject pdfImage = LosslessFactory.createFromImage(output, image);
                 try (PDPageContentStream contentStream = new PDPageContentStream(output, outputPage)) {
-                    contentStream.drawImage(pdfImage, 0, 0, mediaBox.getWidth(), mediaBox.getHeight());
+                    if (displayPoints) contentStream.transform(displayToUser(outputPage));
+                    contentStream.drawImage(pdfImage, 0, 0, displayPoints ? displayWidth(outputPage) : mediaBox.getWidth(), displayPoints ? displayHeight(outputPage) : mediaBox.getHeight());
                 }
             }
 
@@ -111,6 +117,21 @@ public class PdfSsnRedactorCli {
             values.put(args[index], args[index + 1]);
         }
         return values;
+    }
+
+    private static float displayWidth(PDPage page) {
+        return (page.getRotation()==90||page.getRotation()==270?page.getCropBox().getHeight():page.getCropBox().getWidth())*page.getUserUnit();
+    }
+    private static float displayHeight(PDPage page) {
+        return (page.getRotation()==90||page.getRotation()==270?page.getCropBox().getWidth():page.getCropBox().getHeight())*page.getUserUnit();
+    }
+    private static org.apache.pdfbox.util.Matrix displayToUser(PDPage page) {
+        var b=page.getCropBox();float s=1/page.getUserUnit();return switch(page.getRotation()) {
+            case 90 -> new org.apache.pdfbox.util.Matrix(0,s,-s,0,b.getUpperRightX(),b.getLowerLeftY());
+            case 180 -> new org.apache.pdfbox.util.Matrix(-s,0,0,-s,b.getUpperRightX(),b.getUpperRightY());
+            case 270 -> new org.apache.pdfbox.util.Matrix(0,-s,s,0,b.getLowerLeftX(),b.getUpperRightY());
+            default -> new org.apache.pdfbox.util.Matrix(s,0,0,s,b.getLowerLeftX(),b.getLowerLeftY());
+        };
     }
 
     private static Map<Integer, List<Instruction>> readInstructions(String instructionsPath) throws IOException {
