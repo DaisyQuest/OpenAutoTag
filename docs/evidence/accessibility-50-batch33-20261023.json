@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A50"
+  ],
+  "status": "completed",
+  "baselineCommit": "9d205db09c8d5650fc408aeb26173674d15e299c",
+  "tests": {
+    "baseline": {
+      "path": "tmp/a50-baseline.log",
+      "sha256": "8e63b65cc8274afe0c8da2c703fe69c49551f124c0bd5ea8e5880cf26a351911",
+      "tests": 1155,
+      "pass": 1155,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a50-final-affected.log",
+      "sha256": "45ebc0bd7e4ce9454adb6890327f2b375e8e9fa23376b79dce4add4d2e45a58a",
+      "tests": 38,
+      "pass": 38,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "jobContracts": {
+      "path": "tmp/a50-job-contract.log",
+      "sha256": "3ca525d3115ac62b823e080c5574aa0fd7be213d49db2f0132831b26fef77f1e",
+      "tests": 6,
+      "pass": 6,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "scope": "Overlapping suites. Baseline started before retry invalidation and explicit job-artifact schema additions; final affected and job-contract suites verify those changes.",
+    "coverage": {
+      "scope": "Two validator helpers and download policy only",
+      "line": 100,
+      "branch": 97.01,
+      "function": 95
+    }
+  },
+  "historicalEvidenceAudit": {
+    "requirements": 49,
+    "verifiedPathHashPairs": 392,
+    "issues": 0,
+    "record": {
+      "path": "output/accessibility-50-batch33-20261023/historical-evidence-audit.json",
+      "sha256": "a469dd86641357a760eee847fdb8357a3321f4acc42176509aa468229633d03f"
+    }
+  },
+  "fixture": {
+    "report": {
+      "path": "output/accessibility-50-batch33-20261023/fixture-completion.json",
+      "sha256": "dc9a92e1c58fe755ff66e9c2b48229326df75093b484c8bc27175c95c5cd7849"
+    },
+    "sourceHash": "3aef77443b1de270d7b2a8b9a845399310938b3ff1fa02d41141732812bdaa2f",
+    "candidateHash": "5ba68dd8dfb0fe491ea670c69595aac84423076b33371a11ede4bad95a8ce406",
+    "disposition": "review_required",
+    "coverage": {
+      "status": "complete",
+      "totalGlyphs": 239,
+      "taggedGlyphs": 239,
+      "authoredArtifactGlyphs": 0,
+      "unassignedWhitespace": 0,
+      "unassignedGlyphs": 0,
+      "unknownGlyphs": 0,
+      "totalImages": 0,
+      "taggedImages": 0,
+      "authoredArtifactImages": 0,
+      "unassignedImages": 0
+    },
+    "preservationChecks": 103,
+    "fields": 12,
+    "widgets": 14,
+    "rawChecks": 1522
+  },
+  "real": {
+    "report": {
+      "path": "output/accessibility-50-batch33-20261023/test-form-completion.json",
+      "sha256": "de9df889c11a97a43b5b0f17d71a625500655e7da978af6051d220a04e4a43ce"
+    },
+    "sourceHash": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+    "candidateHash": "4b19404838cd1d7cdb0d8ea12db9a3259c46bb6d609a54f8362b27a0f8440ce3",
+    "disposition": "unqualified",
+    "failedChecks": [
+      {
+        "id": "form_navigation",
+        "status": "fail"
+      },
+      {
+        "id": "source_coverage",
+        "status": "fail"
+      },
+      {
+        "id": "preservation",
+        "status": "fail"
+      }
+    ],
+    "coverage": {
+      "status": "incomplete",
+      "totalGlyphs": 3935,
+      "taggedGlyphs": 3575,
+      "authoredArtifactGlyphs": 311,
+      "unassignedWhitespace": 49,
+      "unassignedGlyphs": 0,
+      "unknownGlyphs": 0,
+      "totalImages": 4,
+      "taggedImages": 0,
+      "authoredArtifactImages": 0,
+      "unassignedImages": 4
+    },
+    "unresolvedWidgetPlacements": 5,
+    "fields": 32,
+    "widgets": 33,
+    "options": 173,
+    "rawChecks": 15112,
+    "protectedDifference": "AcroForm DR Font ZaDb Type1 ToUnicode differs. Restoring that map only on a disposable diagnostic copy makes the independent native preservation check verified; delivered PDFs were not edited.",
+    "diagnostic": {
+      "path": "tmp/a50-type1-preservation.json",
+      "sha256": "4e2ed94fa4d71db355c0e3933b5fe3cbbf11c760eec7a4120f3659331263b52a"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "output/accessibility-50-batch33-20261023/fixture-quality.json",
+      "sha256": "e43acee6932fa4ffe1d355735bfbd4c0dedc929e7893360dc7a547be43071c9a"
+    },
+    {
+      "path": "output/accessibility-50-batch33-20261023/test-form-quality.json",
+      "sha256": "73bfdc5b037bdfd4b655d29a71214409b6db0e51daca57c4819e66cc7ee30545"
+    },
+    {
+      "path": "output/accessibility-50-batch33-20261023/independent-verification.json",
+      "sha256": "281e7fe41e3e75c1b394f6d8ea8da7c9440134b4099986cc3010302ddbfb74f4"
+    },
+    {
+      "path": "output/accessibility-50-batch33-20261023/download-verification.json",
+      "sha256": "0cdb4aa94a4afa9f0203395d9b2e80d9089c4bcb5b9b8ba2a8a19159b99e1580"
+    },
+    {
+      "path": "output/accessibility-50-batch33-20261023/pipeline-final/native/10-candidate-completion.json",
+      "sha256": "97dbe427f38c3aa4f754a241b79464514a2141a0fa9ee653cb5a51d2fb2ec7f7"
+    },
+    {
+      "path": "output/accessibility-50-batch33-20261023/pipeline-final/preserved/10-candidate-completion.json",
+      "sha256": "ef271d0c44b88bd52049e263eee1ddcfacec5c98a3b5df98f4393882720de194"
+    },
+    {
+      "path": "output/accessibility-50-batch33-20261023/pipeline-final/omitted/10-candidate-completion.json",
+      "sha256": "0154a487dc4a507a748e00b20b7b1a24d74c25addc5b71f4089a83d891840781"
+    },
+    {
+      "path": "tmp/a50-independent.py",
+      "sha256": "f4fc368a47f2deb6a2bf024a48bbeb9d8648e01b5067c6d152ca045e82a7c258"
+    },
+    {
+      "path": "tmp/a50-audit.mjs",
+      "sha256": "fd8e46c937369e4326f34b6ced1f3651e678cd83f36f1adfd646136c0c9db360"
+    },
+    {
+      "path": "tmp/A50ResourceProbe.java",
+      "sha256": "ddc94b34c0f13a9f2b8e270d5525811016eee263a4f05605e198524a990bbaf2"
+    },
+    {
+      "path": "tmp/a50-type1-probe.log",
+      "sha256": "20524ac75906093ff8796d49011168025de4dc639f646ee12ee6db658a22708e"
+    }
+  ],
+  "limitations": [
+    "Engineering scope completion does not mean all PDFs are fully accessible or all corpus failures are resolved. Human semantic, visual, reader and interactive-form review remains mandatory.",
+    "Production checks remain opt-in; standalone validator and preservation reports retain their existing advisory behavior. Prior reports need a fresh completion report before gated download.",
+    "Preserved mode requires unchanged reference structure/content and source byte prefix. Reviewed transformations that change that reference need separate qualification; this gate grants no new repair waiver.",
+    "Native rendering verifies current VIEW/PRINT states at 120 DPI. Optional-content states, encryption, signatures, XFA, exceeded limits and unavailable evidence remain unqualified.",
+    "Only supported embedded TrueType maps have bounded semantic-equivalence normalization. Other protected font metadata, including Type1 Unicode maps, is compared exactly.",
+    "Source coverage counts inspected text/image occurrences; vector semantics, authored artifact correctness, image meaning and OCR transcription require human review.",
+    "No Java or repository-wide coverage percentage is claimed. Historical corpus failures remain documented in their delivery records."
+  ]
+}

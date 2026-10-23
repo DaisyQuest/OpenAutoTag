@@ -95,6 +95,9 @@
         },
         "candidatePdf": { "type": "string" },
         "qualityReport": { "type": "string" },
+        "completionReport": { "type": "string" },
+        "savedSemantics": { "type": "string" },
+        "sourceOwnership": { "type": "string" },
         "sourceTextMap": {
           "type": "string"
         },

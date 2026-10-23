@@ -369,6 +369,7 @@ export function createTaggingOutputStages({
       label: "pdf-writer",
       outputPath: path.join(resolvedOutputDir, taggedPdfFileName),
       run: async () => {
+        if (productionChecks) delete artifacts.completionReport;
         const taggedPdf = path.join(resolvedOutputDir, taggedPdfFileName);
         const writerReportPath = path.join(resolvedOutputDir, "06-writer-report.json");
         const extraArgs = writerArgs({ artifacts, resolvedOutputDir }) || [];
@@ -430,6 +431,7 @@ export function createTaggingOutputStages({
       label: "preservation-quality",
       outputPath: path.join(resolvedOutputDir, "08-quality-report.json"),
       run: async () => {
+        if (productionChecks) delete artifacts.completionReport;
         const outputPath = path.join(resolvedOutputDir, "08-quality-report.json");
         // The checker writes its report and sidecars before the stage evaluates disposition.
         await runJsonStage("scripts/check-pdf-preservation.js", [
@@ -441,14 +443,16 @@ export function createTaggingOutputStages({
         if (productionChecks) {
           try {
             const writer = JSON.parse(await readFile(artifacts.writerReport, "utf8"));
-            // Preserved-object repairs already use the hash-bound repair verifier.
-            // Rebuilt trees must additionally agree with the emitted tagging intent.
-            if (writer.writerMode !== "passthrough") {
+            if (!['native', 'passthrough'].includes(writer.writerMode)) throw new Error('Writer mode lacks qualified completion evidence');
+            {
               const savedPath=path.join(resolvedOutputDir,"09-saved-semantics.json");
               if (writer.writerMode === "native" && !writer.sourceOwnershipPath) throw new Error("Native writer omitted source ownership evidence");
-              await runJsonStage("scripts/check-saved-semantics.js",["--pdf",artifacts.taggedPdf,"--tags",artifacts.tagging,"--report-only","true",
+              await runJsonStage("scripts/check-saved-semantics.js",["--pdf",artifacts.taggedPdf,"--report-only","true",
+                ...(writer.writerMode === 'passthrough' ? ['--reference', filePath] : ['--tags', artifacts.tagging]),
                 ...(writer.writerMode === "native" ? ["--source-pdf", filePath, "--ownership", writer.sourceOwnershipPath] : [])],savedPath);
               artifacts.savedSemantics=savedPath;
+              if (writer.writerMode === 'native') artifacts.sourceOwnership = writer.sourceOwnershipPath;
+              else delete artifacts.sourceOwnership;
               const saved=JSON.parse(await readFile(savedPath,"utf8"));
               appendOcrReviewTask(report, saved, savedPath);
               const pass=saved.disposition==="automated_pass"&&saved.candidateHash===report.candidateHash;
@@ -463,13 +467,32 @@ export function createTaggingOutputStages({
           await writeFile(outputPath,JSON.stringify(report,null,2)+"\n");
         }
         artifacts.qualityReport = outputPath;
+        if (productionChecks) {
+          delete artifacts.completionReport;
+          if (report.disposition === 'review_required') {
+            const completionPath = path.join(resolvedOutputDir, '10-candidate-completion.json');
+            await runJsonStage('scripts/check-candidate-completion.js', [
+              '--source-pdf', filePath, '--candidate-pdf', artifacts.candidatePdf || artifacts.taggedPdf,
+              '--quality-report', outputPath, '--validation-report', artifacts.validationReport, '--saved-semantics', artifacts.savedSemantics, '--manifest', artifacts.tagManifest,
+              ...(artifacts.sourceOwnership ? ['--tags', artifacts.tagging, '--ownership', artifacts.sourceOwnership] : [])
+            ], completionPath);
+            artifacts.completionReport = completionPath;
+            const completion = JSON.parse(await readFile(completionPath, 'utf8'));
+            if (completion.disposition !== 'review_required') {
+              delete artifacts.taggedPdf;
+              const error = new Error(`Candidate evidence is incomplete; see ${completionPath}`);
+              error.retryable = false;
+              throw error;
+            }
+          }
+        }
         if (productionChecks) delete artifacts.taggedPdf;
         if (report.disposition !== "review_required") {
           const error = new Error(`Preservation check ${report.disposition}; see ${outputPath}`);
           error.retryable = false;
           throw error;
         }
-        return { outputPath, artifacts: { qualityReport: outputPath }, disposition: report.disposition };
+        return { outputPath, artifacts: { qualityReport: outputPath, ...(artifacts.completionReport ? { completionReport: artifacts.completionReport } : {}) }, disposition: report.disposition };
       }
     });
   }

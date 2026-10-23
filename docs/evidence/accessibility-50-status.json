@@ -603,8 +603,12 @@
       "improvement": "Hash-bound completion gate",
       "requirement": "Integrate source coverage, semantic failures and preservation into final candidate eligibility.",
       "acceptance": "Stale, partial or failed evidence cannot publish a qualified result; complete machine evidence still requires human review.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/accessibility-50-batch33-20261023.md",
+        "docs/evidence/accessibility-50-batch33-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     }
   ]
 }

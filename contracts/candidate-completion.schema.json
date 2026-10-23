@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/contracts/candidate-completion.schema.json",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "policy",
+    "mode",
+    "disposition",
+    "humanReviewRequired",
+    "sourceHash",
+    "candidateHash",
+    "checks",
+    "coverage",
+    "evidence",
+    "limitations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "policy": {
+      "const": "candidate-completion-v1"
+    },
+    "mode": {
+      "enum": [
+        "native",
+        "preserved"
+      ]
+    },
+    "disposition": {
+      "enum": [
+        "review_required",
+        "unqualified"
+      ]
+    },
+    "humanReviewRequired": {
+      "const": true
+    },
+    "sourceHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "candidateHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "status",
+        "totalGlyphs",
+        "taggedGlyphs",
+        "authoredArtifactGlyphs",
+        "unassignedWhitespace",
+        "unassignedGlyphs",
+        "unknownGlyphs",
+        "totalImages",
+        "taggedImages",
+        "authoredArtifactImages",
+        "unassignedImages"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "unavailable"
+          ]
+        },
+        "totalGlyphs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "taggedGlyphs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "authoredArtifactGlyphs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unassignedWhitespace": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unassignedGlyphs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknownGlyphs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalImages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "taggedImages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "authoredArtifactImages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unassignedImages": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "path",
+          "sha256",
+          "size"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "sourcePdf",
+              "candidatePdf",
+              "qualityReport",
+              "validationReport",
+              "savedSemantics",
+            "tagManifest",
+              "tagging",
+              "sourceOwnership"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "nativePreservation": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "policy",
+        "sourceHash",
+        "candidateHash",
+        "status",
+        "dpi",
+        "pageCount",
+        "checks",
+        "unavailable",
+        "limitations"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "policy": {
+          "const": "native-preservation-v1"
+        },
+        "sourceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "candidateHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "status": {
+          "enum": [
+            "verified",
+            "incomplete",
+            "rejected"
+          ]
+        },
+        "dpi": {
+          "const": 120
+        },
+        "pageCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "status",
+              "source",
+              "candidate"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail"
+                ]
+              },
+              "source": {},
+              "candidate": {}
+            },
+            "additionalProperties": false
+          }
+        },
+        "unavailable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [{ "if": { "properties": { "mode": { "const": "native" } } }, "then": { "required": ["nativePreservation"] } }],
+  "additionalProperties": false
+}

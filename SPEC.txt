@@ -1,6 +1,17 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Candidate completion qualification (A50, 2026-10-23):
+Opt-in production output requires fresh source/saved semantic comparison,
+complete text/image ownership, raw validation/font replay, preservation and
+resolved widget navigation. Native rebuilds additionally require protected form
+resources and exact current VIEW/PRINT rendering. Every supporting file is
+hash-bound and rechecked at download. Failed retries invalidate prior evidence.
+Only review_required is released; human review remains mandatory. Unsupported
+states and incomplete evidence stay unqualified. A01-A50 are complete within
+their documented acceptance scope, not a universal accessibility guarantee.
+See docs/accessibility-50-batch33-20261023.md and the completion audit.
+
 Widget navigation qualification (A49, 2026-10-23):
 Exact widget inventory and OBJR order are verified against source visibility
 flags and page Tabs S. Hidden/NoView/empty controls remain owned and explicitly

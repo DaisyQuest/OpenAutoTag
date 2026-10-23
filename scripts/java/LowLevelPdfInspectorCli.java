@@ -32,6 +32,10 @@ public class LowLevelPdfInspectorCli {
         String pdfPath = requireOption(options, "--pdf");
 
         try (PDDocument document = Loader.loadPDF(new File(pdfPath))) {
+            if(options.containsKey("--compare-source")){
+                File sourceFile=new File(requireOption(options,"--compare-source"));
+                try(PDDocument source=Loader.loadPDF(sourceFile)){writeJson(NativePreservationVerifier.inspect(source,document,sourceFile,new File(pdfPath)));}return;
+            }
             if ("true".equals(options.get("--preservation"))) {
                 writeJson(PreservationInspector.inspect(document, new File(pdfPath)));
                 return;

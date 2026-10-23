@@ -13,6 +13,7 @@ const preservationSourcePath = path.join(scriptDir, "java", "PreservationInspect
 const contentSourcePath = path.join(scriptDir, "java", "SavedContentInspector.java");
 const navigationSourcePath = path.join(scriptDir, "java", "NavigationInspector.java");
 const choiceSourcePath = path.join(scriptDir, "java", "ChoiceControlInspector.java");
+const nativePreservationSourcePath = path.join(scriptDir, "java", "NativePreservationVerifier.java");
 const javaClassPath = path.join(buildDir, "LowLevelPdfInspectorCli.class");
 const pdfboxJarPath = path.join(repoRoot, "modules", "pdf-writer", "vendor", "pdfbox-app-3.0.8.jar");
 const bundledJavaHome = path.join(repoRoot, "modules", "validator", "vendor", "java");
@@ -25,13 +26,14 @@ function parseArgs(argv) {
 
   return {
     pdfPath: args.get("--pdf"),
-    preservation: args.get("--preservation") === "true"
+    preservation: args.get("--preservation") === "true",
+    sourcePdfPath: args.get("--compare-source")
   };
 }
 
-function execCommand(command, args, { env } = {}) {
+function execCommand(command, args, { env, timeout } = {}) {
   return new Promise((resolve, reject) => {
-    execFile(command, args, { cwd: repoRoot, env, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+    execFile(command, args, { cwd: repoRoot, env, timeout, windowsHide: true, maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || stdout || error.message));
         return;
@@ -44,9 +46,9 @@ function execCommand(command, args, { env } = {}) {
 
 async function needsCompilation() {
   try {
-    const [sourceStats, preservationStats, contentStats, navigationStats, choiceStats, classStats, helperStats, contentClass, navigationClass, choiceClass] = await Promise.all([
-      stat(javaSourcePath), stat(preservationSourcePath), stat(contentSourcePath),stat(navigationSourcePath),stat(choiceSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class")), stat(path.join(buildDir, "SavedContentInspector.class")),stat(path.join(buildDir,"NavigationInspector.class")),stat(path.join(buildDir,'ChoiceControlInspector.class'))]);
-    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs, contentStats.mtimeMs,navigationStats.mtimeMs,choiceStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs, contentClass.mtimeMs,navigationClass.mtimeMs,choiceClass.mtimeMs);
+    const [sourceStats, preservationStats, contentStats, navigationStats, choiceStats, nativeStats, classStats, helperStats, contentClass, navigationClass, choiceClass, nativeClass] = await Promise.all([
+      stat(javaSourcePath), stat(preservationSourcePath), stat(contentSourcePath),stat(navigationSourcePath),stat(choiceSourcePath),stat(nativePreservationSourcePath), stat(javaClassPath), stat(path.join(buildDir, "PreservationInspector.class")), stat(path.join(buildDir, "SavedContentInspector.class")),stat(path.join(buildDir,"NavigationInspector.class")),stat(path.join(buildDir,'ChoiceControlInspector.class')),stat(path.join(buildDir,'NativePreservationVerifier.class'))]);
+    return Math.max(sourceStats.mtimeMs, preservationStats.mtimeMs, contentStats.mtimeMs,navigationStats.mtimeMs,choiceStats.mtimeMs,nativeStats.mtimeMs) > Math.min(classStats.mtimeMs, helperStats.mtimeMs, contentClass.mtimeMs,navigationClass.mtimeMs,choiceClass.mtimeMs,nativeClass.mtimeMs);
   } catch {
     return true;
   }
@@ -68,7 +70,7 @@ async function ensureJavaHelperCompiled() {
             pdfboxJarPath,
             "-d",
             buildDir,
-            javaSourcePath, preservationSourcePath, contentSourcePath, navigationSourcePath,choiceSourcePath
+            javaSourcePath, preservationSourcePath, contentSourcePath, navigationSourcePath,choiceSourcePath,nativePreservationSourcePath
           ],
           {
             env: await buildJavaExecEnv({ bundledJavaHome })
@@ -83,7 +85,7 @@ async function ensureJavaHelperCompiled() {
   });
 }
 
-export async function inspectPdfLowLevel({ pdfPath, preservation = false }) {
+export async function inspectPdfLowLevel({ pdfPath, preservation = false, sourcePdfPath }) {
   if (!pdfPath) {
     throw new Error("Usage: node scripts/inspect-pdf-low-level.js --pdf <input.pdf>");
   }
@@ -100,10 +102,12 @@ export async function inspectPdfLowLevel({ pdfPath, preservation = false }) {
         "LowLevelPdfInspectorCli",
         "--pdf",
         path.resolve(pdfPath),
-        ...(preservation ? ["--preservation", "true"] : [])
+        ...(preservation ? ["--preservation", "true"] : []),
+        ...(sourcePdfPath ? ["--compare-source", path.resolve(sourcePdfPath)] : [])
       ],
       {
-        env: await buildJavaExecEnv({ bundledJavaHome })
+        env: await buildJavaExecEnv({ bundledJavaHome }),
+        timeout: sourcePdfPath ? 120000 : undefined
       }
     );
   } catch (error) {
