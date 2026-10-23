@@ -68,6 +68,8 @@ Completion requires an actual engine improvement, targeted positive/adversarial 
 
 ## Delivery evidence
 
+[Batch 15](accessibility-50-batch15-20261023.md) completes A31: six verified missing CID mappings reduce booklet raw failures from 31 to 25. All 440 baseline cases pass; exactly six dictionary entries change, all 346 streams retain their bytes, and 69 Poppler/70 PDFBox page pairs match with synthetic field editing preserved. Existing 248 semantic failures and 158 pending OCR segments remain. **A01–A31 complete; A32–A50 pending.**
+
 [Batch 14](accessibility-50-batch14-20261023.md) completes A30: word uncertainty survives the pipeline and exact-source/intent-bound corrections update only targeted OCR text and matching metadata. All 415 baseline tests pass; all 79 Poppler page pairs and image bytes match; synthetic form fill/save/reopen remains intact. Fresh NASA poster OCR exposes 469 words and 65 pending segments (61 with low-confidence words); the booklet retains 248 semantic and 31 raw failures. **A01–A30 complete; A31–A50 pending.**
 
 **26 / 50 complete:** A01–A26. [Batch 11](accessibility-50-batch11-20261023.md) corrects OCR pixel scaling, physical DPI and inverse deskew, with typed coordinate evidence. Forty-eight raster geometry cases have at most 0.292-point error; six live deskew cases improve location-center error to 0.26–0.45 points. All 377 baseline cases are verified across the full run and affected-suite rerun; 14 additional parser tests pass. The NASA replay carries geometry for 225 OCR blocks, but recognition accuracy and saved OCR attachments remain unqualified. Source PDFs and prior candidates are unchanged. A27–A50 remain pending.

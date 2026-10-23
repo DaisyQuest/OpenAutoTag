@@ -531,3 +531,16 @@ binds canonical review and final document hashes. Use final reviewed tagging
 bytes consistently for writing and saved checking, then repeat raw, preservation
 and reader qualification. Review records are not authentication or certification.
 Details and limits: docs/accessibility-50-batch14-20261023.md.
+
+Missing embedded TrueType CID mapping repair (A31, 2026-10-23):
+The qualified incremental font CLI may add Identity only to an absent
+CIDToGIDMap after bounded supported usage and embedded-program checks. Each
+Type0 parent retains its used code/CID/GID, widths, displacement, vertical
+origins, Unicode and outlines. FontFile2 bytes, encodings and text stay fixed.
+Patterns, Forms and inactive appearances contribute usage; constructor-populated
+Type/Subtype entries are restored before applying qualified changes. Existing
+maps, missing programs, glyph zero, out-of-range codes, invalid glyph/metric
+tables, unresolved contexts, recursion and Type3 execution do not qualify.
+No-op output remains byte-identical; saved-object replay verifies the complete
+catalog and Info graph. This opt-in repair does not establish Unicode semantics
+or arbitrary future form-input coverage. See docs/accessibility-50-batch15-20261023.md.

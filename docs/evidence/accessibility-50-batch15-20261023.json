@@ -1,0 +1,336 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A31"
+  ],
+  "status": "completed",
+  "baselineCommit": "ce817fe",
+  "tests": {
+    "baseline": {
+      "path": "tmp/accessibility-50-batch15-baseline.log",
+      "sha256": "a7ff20ead1c78a66ee864e878b90928295f416035f533d6c98d86ee066d6162a",
+      "passed": 440,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "focused": {
+      "path": "tmp/a31-focused-final.log",
+      "sha256": "3d1a018ad503a582928cca72d009a0560f4e50474e917289583a535df90014fc",
+      "passed": 50,
+      "failed": 0,
+      "note": "Overlaps the baseline; the final baseline additionally covers invalid unitsPerEm. No Java or repository-wide coverage percentage is claimed."
+    }
+  },
+  "verification": [
+    {
+      "id": "booklet",
+      "sourcePath": "output/accessibility-50-batch13-20261023/booklet/06-candidate.pdf",
+      "sourceHash": "b02ff10d0bbb688d7d3f16087dec1af0322ad47abc0da88435b73d60626ef31c",
+      "candidatePath": "output/accessibility-50-batch15-20261023/booklet/06-candidate-final.pdf",
+      "candidateHash": "d781363f8666341cf4c327ed05f65def2442f72ecdf34c3b1f8051b29da3a1d1",
+      "repair": [
+        {
+          "target": "2120 0 R",
+          "reason": "Explicit Identity; 57 used codes across 1 parents; 245 TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:06c9bb0ac20e837e8422c135c474508afe3fb5aa2560a22591a6de8010798c09; unchanged program sha256:d1a689c2edbf7b507fe4dbb9b920e453ec3f3adda495d24cbb57d8010ecfac5b",
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "embedded-truetype-missing-cidmap"
+        },
+        {
+          "target": "2126 0 R",
+          "reason": "Explicit Identity; 5 used codes across 1 parents; 245 TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:a2739162c0f4aac83a1a93cc47ae6886158a6bd82d3414c9d0da79d3158e4ca6; unchanged program sha256:60498402fb0a48f6cbdd853145be364eb252d5576343e3a3cb8bf2f1a0f18be7",
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "embedded-truetype-missing-cidmap"
+        },
+        {
+          "target": "193 0 R",
+          "reason": "Explicit Identity; 4 used codes across 1 parents; 192 TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:f932c3350b29d11aaa0cf2cf873f8d4622454cafc2d026a6575782b7aa44e78a; unchanged program sha256:3859ff63a5e7aae3e07c8043b1e2fcd38bdcf89e7ac268e959b52c5f5d1795e4",
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "embedded-truetype-missing-cidmap"
+        },
+        {
+          "target": "208 0 R",
+          "reason": "Explicit Identity; 1 used codes across 1 parents; 226 TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:d3045e1b827f00ed3c30bc3c11aeb00e996ded3553f04eeea10da5f944eb950e; unchanged program sha256:d6259159a256b91009af8319b6ed8243a531e8e210f93f8ce9c86c7a05e43a6d",
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "embedded-truetype-missing-cidmap"
+        },
+        {
+          "target": "56 0 R",
+          "reason": "Explicit Identity; 1 used codes across 1 parents; 893 TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:947f06931a667f751b248c482f45f2c26425cd984e43026b68818902c679a132; unchanged program sha256:2d7d33ba613f078e910878e91791a9443d4f82339c9385781c4f300f75769db1",
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "embedded-truetype-missing-cidmap"
+        },
+        {
+          "target": "147 0 R",
+          "reason": "Explicit Identity; 1 used codes across 1 parents; 50377 TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:fe9ae084ac16cae730f551ffed09be4f36982ad08b63c4367098cc3cdd847381; unchanged program sha256:9945c4d3156757d9967be1e5913770f166faab35b355aa9dcc218f127f2124a0",
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "embedded-truetype-missing-cidmap"
+        }
+      ],
+      "saved": {
+        "passed": 51144,
+        "failed": 248
+      },
+      "ownershipStatus": "verified",
+      "ocrReview": {
+        "pending": 158,
+        "recorded": 0
+      },
+      "raw": {
+        "passedRules": 104,
+        "failedRules": 2,
+        "passedChecks": 192144,
+        "failedChecks": 25
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "quality": {
+        "disposition": "review_required",
+        "checks": [
+          {
+            "id": "qualifiedFontChanges",
+            "status": "pass"
+          },
+          {
+            "id": "inspection",
+            "status": "pass"
+          },
+          {
+            "id": "objectIdentity",
+            "status": "pass"
+          },
+          {
+            "id": "pageContentAndResources",
+            "status": "pass"
+          },
+          {
+            "id": "fields",
+            "status": "pass"
+          },
+          {
+            "id": "widgets",
+            "status": "pass"
+          },
+          {
+            "id": "headingContent",
+            "status": "pass"
+          },
+          {
+            "id": "links",
+            "status": "pass"
+          },
+          {
+            "id": "observedStructure",
+            "status": "pass"
+          },
+          {
+            "id": "requiredValidation",
+            "status": "fail"
+          }
+        ]
+      },
+      "savedReportPath": "output/accessibility-50-batch15-20261023/booklet/09-saved-semantics.json",
+      "savedReportHash": "e2c2b8642c5c7890ded507536f69425fc2a445902d3b6a8afec824be2dab610d",
+      "rawReportPath": "output/accessibility-50-batch15-20261023/booklet/07-validation.json",
+      "rawReportHash": "b0e83b019790ef573b55ff7381d550f8b969915326b73ae92b7ae085e833c067",
+      "qualityReportPath": "output/accessibility-50-batch15-20261023/booklet/08-quality-report.json",
+      "qualityReportHash": "2d497538e1ec79640dc29f5d45380d7a2d0584ec126981648266f270aeddab9c"
+    },
+    {
+      "id": "horizontal",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/horizontal.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/horizontal-fixed.pdf",
+      "sourceHash": "f52598c64543f181f9c5f5d4e7a20f4ab938300c9b58f07d81d5ede61c329ffe",
+      "candidateHash": "9be25bc5bd7ff829e7015375fb1892dc91a032574ad500280bdba858d9f51bae",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "vertical",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/vertical.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/vertical-fixed.pdf",
+      "sourceHash": "f8177d306f936e4f874d98681d362fc3bab89e7d5cbf2d1f30e1ee6205bbd4be",
+      "candidateHash": "9af843a5073e5fbecb943cdd496a6080c5ebe471cb8ee0d46b85f7a9b418858a",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "custom-cmap",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/custom-cmap.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/custom-cmap-fixed.pdf",
+      "sourceHash": "cdc6a39f4dc383b062e323616fe4b2eec6b771b62127f25608b29aa46229cad0",
+      "candidateHash": "1774d413b38bf6a9b45f582fd0a4c2a8df2c970223511d9160727cdd5b750492",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "shared",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/shared.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/shared-fixed.pdf",
+      "sourceHash": "eb3068dcd8a8feb85ce6161e014a0959d12f772561834056291a48c2ee71b869",
+      "candidateHash": "4838023948648107a774632b09ee49371227bb6ba0ea0af819007fc7d3322790",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "inherited-form",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/inherited-form.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/inherited-form-fixed.pdf",
+      "sourceHash": "73a43b0bcfb6412678ae1e2986f9c3d2ff96397775d87a2f500bb07bcad68e79",
+      "candidateHash": "a5d784927b37d1aca59a34b25bb4b88d44f874fcda479fb5306f3977c6e39962",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "inherited-no-type",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/inherited-no-type.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/inherited-no-type-fixed.pdf",
+      "sourceHash": "263ed0af70f61d106226a50cd0fdb017a6c6f9c0a0e01d236d026b33ce3e527f",
+      "candidateHash": "5d0559dc591fd85932e38306e920cdc2f1c470458349b12bc6184bcefb0a32c2",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "pattern",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/pattern.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/pattern-fixed.pdf",
+      "sourceHash": "5ad2d8f0d5b8332e9977fdd6b913b6bba0d4c50fee9da8c51c4daf34d4320798",
+      "candidateHash": "96b4239f2b40e5a4c7e66b2174b0344751d1984ee0adb3563138eb8a88f4397a",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "id": "inactive-appearance",
+      "sourcePath": "output/accessibility-50-batch15-20261023/focused-final/inactive-appearance.pdf",
+      "candidatePath": "output/accessibility-50-batch15-20261023/focused-final/inactive-appearance-fixed.pdf",
+      "sourceHash": "4e2362a426abc2f30828e47d57b0e20744bb1124574f8eac6289128c9b47909d",
+      "candidateHash": "fc9560da017e900f11ebfde334d3b6cb429bcfed105eb7ec88b8bc2bce6acc63",
+      "programHash": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    }
+  ],
+  "repair": {
+    "path": "output/accessibility-50-batch15-20261023/booklet/font-repair-final.json",
+    "sha256": "015c12b089ed3fb7e0d3e0416443be8442d0671039eae81ab7a44860ffbcff5c",
+    "finalReplayPath": "output/accessibility-50-batch15-20261023/booklet/font-replay-final.json",
+    "finalReplayHash": "1a040090dafeb38e4689f313daa81642a35d5d52268978a316c5c4a885511ceb",
+    "appliedFontMappings": 6,
+    "usedCodesAcrossFonts": 69
+  },
+  "independentObjectProof": {
+    "path": "output/accessibility-50-batch15-20261023/booklet/object-proof.json",
+    "sha256": "63a594ce5fd72c2519e56e9b1e47c2cf065f181fad5596c9680a566853f29f47",
+    "sourceHash": "b02ff10d0bbb688d7d3f16087dec1af0322ad47abc0da88435b73d60626ef31c",
+    "candidateHash": "d781363f8666341cf4c327ed05f65def2442f72ecdf34c3b1f8051b29da3a1d1",
+    "objectPairs": 12637,
+    "streamsByteIdentical": 346,
+    "changes": [
+      {
+        "object": [
+          2120,
+          0
+        ],
+        "path": "Root/Pages/Kids[0]/Kids[0]/Kids[0]/Resources/Font/C2_0/DescendantFonts[0]",
+        "font": "/NKLGSQ+CenturyGothic",
+        "change": "add explicit Identity"
+      },
+      {
+        "object": [
+          2126,
+          0
+        ],
+        "path": "Root/Pages/Kids[0]/Kids[0]/Kids[0]/Resources/Font/C2_1/DescendantFonts[0]",
+        "font": "/KMHOCW+CenturyGothic-Bold",
+        "change": "add explicit Identity"
+      },
+      {
+        "object": [
+          193,
+          0
+        ],
+        "path": "Root/Pages/Kids[0]/Kids[0]/Kids[1]/Resources/Font/C2_0/DescendantFonts[0]",
+        "font": "/ILFBIM+SymbolMT",
+        "change": "add explicit Identity"
+      },
+      {
+        "object": [
+          208,
+          0
+        ],
+        "path": "Root/Pages/Kids[0]/Kids[1]/Kids[0]/Resources/Font/C2_0/DescendantFonts[0]",
+        "font": "/ILFDJE+Wingdings-Regular",
+        "change": "add explicit Identity"
+      },
+      {
+        "object": [
+          56,
+          0
+        ],
+        "path": "Root/Pages/Kids[0]/Kids[3]/Kids[3]/Resources/Font/C2_1/DescendantFonts[0]",
+        "font": "/ILFABB+Verdana",
+        "change": "add explicit Identity"
+      },
+      {
+        "object": [
+          147,
+          0
+        ],
+        "path": "Root/Pages/Kids[1]/Kids[2]/Kids[2]/Resources/Font/C2_0/DescendantFonts[0]",
+        "font": "/ILMKIB+ArialUnicodeMS",
+        "change": "add explicit Identity"
+      }
+    ],
+    "sourcePrefixPreserved": true
+  },
+  "visual": {
+    "path": "output/accessibility-50-batch15-20261023/visual-comparison.json",
+    "sha256": "e8c89dfdc997ef79adfc25bc3666cf69351ccee1bc351bb5cb9dce12d8be7d10",
+    "popplerPagePairs": 69,
+    "pdfboxPagePairs": 70,
+    "originalStreamsByteIdentical": true,
+    "syntheticFieldValueAppearanceAndFillSaveReopenPreserved": true
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch15-20261023/baseline-synthetic/evidence.json",
+    "sha256": "1354ffecbfe5b25d7e5ee0f387b05e3af38a286cdab8ce41d189a9ed95b27885",
+    "cases": 25,
+    "positiveModes": [
+      "horizontal",
+      "vertical",
+      "custom-cmap",
+      "shared",
+      "inherited-form",
+      "inherited-no-type",
+      "pattern",
+      "inactive-appearance"
+    ]
+  },
+  "research": {
+    "pdf17": {
+      "url": "https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf",
+      "sha256": "9de0ca9e8570d6209e8bd48a355be8eb6ec376acfc3fc3ae97cd8730351417ff",
+      "pdfPages": [
+        278,
+        279
+      ],
+      "clauses": [
+        "Table 117",
+        "9.7.4.2"
+      ]
+    },
+    "pdfbox": [
+      "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/font/PDCIDFontType2.java",
+      "https://raw.githubusercontent.com/apache/pdfbox/3.0.8/pdfbox/src/main/java/org/apache/pdfbox/pdmodel/graphics/PDXObject.java"
+    ]
+  },
+  "limitations": [
+    "Only missing mappings of qualifying embedded TrueType CIDFontType2 programs; existing, malformed, conflicting or unembedded mappings are not guessed.",
+    "Used CID 0, out-of-range codes, invalid programs/metrics, unresolved resource contexts, recursive Forms and Type3 usage do not qualify.",
+    "This is the existing opt-in incremental font repair CLI. Native tagging does not silently substitute font programs.",
+    "The 19 Wingdings Unicode failures and six embedding failures remain. All 248 semantic failures and 158 pending booklet OCR reviews remain.",
+    "The current glyph proof and selected field edits do not establish arbitrary future editable-font coverage, transcription accuracy or human reader qualification."
+  ]
+}

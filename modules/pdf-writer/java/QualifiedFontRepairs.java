@@ -4,6 +4,7 @@ import java.nio.file.*;
 import java.security.MessageDigest;
 import java.util.*;
 import java.awt.geom.Point2D;
+import java.awt.geom.PathIterator;
 import org.apache.fontbox.cff.*;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -13,6 +14,8 @@ import org.apache.pdfbox.cos.*;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.font.*;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDTransparencyGroup;
+import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
@@ -32,6 +35,9 @@ public final class QualifiedFontRepairs {
     private final Map<COSDictionary, Set<Integer>> uses = new IdentityHashMap<>();
     private final Set<COSDictionary> dynamicFonts = Collections.newSetFromMap(new IdentityHashMap<>());
     private boolean usageComplete = true;
+    private boolean cidUsageComplete = true;
+    private final Set<COSStream> invokedForms = Collections.newSetFromMap(new IdentityHashMap<>());
+    private int scannedGlyphs, scannedOperators;
     private int nodes;
 
     private QualifiedFontRepairs(PDDocument document, Path fontDir) { this.document = document; this.fontDir = fontDir; }
@@ -57,6 +63,7 @@ public final class QualifiedFontRepairs {
             COSDictionary d = (COSDictionary)v; dictionaries.add(d);
             // Pattern/Type3 text execution is outside the whitespace-only qualification boundary.
             if (d.containsKey(COSName.PATTERN) || "Type3".equals(d.getNameAsString(COSName.SUBTYPE))) usageComplete = false;
+            if ("Type3".equals(d.getNameAsString(COSName.SUBTYPE))) cidUsageComplete = false;
             List<COSName> keys = new ArrayList<>(d.keySet()); keys.sort(Comparator.comparing(COSName::getName));
             for (COSName key : keys) walk(d.getItem(key), depth + 1);
         }
@@ -69,7 +76,10 @@ public final class QualifiedFontRepairs {
             COSDictionary dr = d.getCOSDictionary(COSName.DR), fonts = dr == null ? null : dr.getCOSDictionary(COSName.FONT);
             if (fonts != null) for (COSBase raw : fonts.getValues()) if (resolve(raw) instanceof COSDictionary) dynamicFonts.add((COSDictionary)resolve(raw));
         }
-        if (dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)))) scanUses();
+        if (dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)) ||
+            "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.CID_TO_GID_MAP))) scanUses();
+        // Complete all missing maps before CIDSet qualification examines shared descriptors.
+        for (COSDictionary d : dictionaries) if ("Font".equals(d.getNameAsString(COSName.TYPE)) && "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE))) repairMissingCidMap(d);
         for (COSDictionary d : dictionaries) {
             if (!"Font".equals(d.getNameAsString(COSName.TYPE))) continue;
             String subtype = d.getNameAsString(COSName.SUBTYPE, ""), base = d.getNameAsString(COSName.BASE_FONT, "");
@@ -152,13 +162,22 @@ public final class QualifiedFontRepairs {
         record(rule, dictionary, "apply", "Unused editable default; original encoding and 256 advances retained; authored Arial program sha256:" + hash(data));
     }
     private void scanUses() {
+        // PDXObject constructors set /Type and /Subtype even when used to read.
+        // Restore these exact authored entries for every reachable stream,
+        // including objects instantiated indirectly during page traversal.
+        Map<COSStream, COSBase[]> streamTypes = new IdentityHashMap<>();
+        for (COSDictionary dictionary : dictionaries) if (dictionary instanceof COSStream)
+            streamTypes.put((COSStream)dictionary, new COSBase[]{dictionary.getItem(COSName.TYPE), dictionary.getItem(COSName.SUBTYPE)});
         try {
-            if (document.getNumberOfPages() == 0) { usageComplete = false; return; }
+            if (document.getNumberOfPages() == 0) { usageComplete = false; cidUsageComplete = false; return; }
             for (PDPage page : document.getPages()) new UsageScanner(page).processPage(page);
             PDPage page = document.getPage(0);
             Set<COSStream> appearances = Collections.newSetFromMap(new IdentityHashMap<>());
             for (COSDictionary d : dictionaries) {
                 if (d instanceof COSStream && "Form".equals(d.getNameAsString(COSName.SUBTYPE))) appearances.add((COSStream)d);
+                // Tiling patterns have their own resource dictionary. Scanning their
+                // text once is sufficient for glyph selection, independent of tiling.
+                if (d instanceof COSStream && d.getInt(COSName.PATTERN_TYPE, 0) == 1) appearances.add((COSStream)d);
                 COSDictionary ap = d.getCOSDictionary(COSName.AP);
                 if (ap != null) for (COSBase raw : ap.getValues()) {
                     COSBase v = resolve(raw);
@@ -168,22 +187,52 @@ public final class QualifiedFontRepairs {
                     }
                 }
             }
-            for (COSStream stream : appearances) new UsageScanner(page).scan(new PDFormXObject(stream), page);
-        } catch (IOException | RuntimeException e) { usageComplete = false; }
+            for (COSStream stream : appearances) {
+                if (stream.getCOSDictionary(COSName.RESOURCES) == null) {
+                    if (invokedForms.contains(stream)) continue; // Already scanned in its real inherited context.
+                    // Empty/off appearances need no font resources. Text or resource
+                    // invocations in an unvisited context cannot establish usage.
+                    for (Object token : new org.apache.pdfbox.pdfparser.PDFStreamParser(bytes(stream)).parse())
+                        if (token instanceof Operator && Set.of("Tf", "Tj", "TJ", "'", "\"", "Do", "gs", "scn", "SCN").contains(((Operator)token).getName())) {
+                            usageComplete = false; cidUsageComplete = false;
+                        }
+                    continue;
+                }
+                new UsageScanner(page).scan(new PDFormXObject(stream), page);
+            }
+        } catch (IOException | RuntimeException e) { usageComplete = false; cidUsageComplete = false; }
+        finally {
+            for (var entry : streamTypes.entrySet()) {
+                entry.getKey().setItem(COSName.TYPE, entry.getValue()[0]);
+                entry.getKey().setItem(COSName.SUBTYPE, entry.getValue()[1]);
+            }
+        }
     }
     private final class UsageScanner extends PDFGraphicsStreamEngine {
         private final Set<COSStream> active = Collections.newSetFromMap(new IdentityHashMap<>());
-        private int glyphs;
         private Point2D point = new Point2D.Float();
         UsageScanner(PDPage page) { super(page); }
-        void scan(PDFormXObject form, PDPage page) throws IOException { processChildStream(form, page); }
+        void scan(PDFormXObject form, PDPage page) throws IOException { active.add(form.getCOSObject()); try { processChildStream(form, page); } finally { active.remove(form.getCOSObject()); } }
+        @Override protected void processOperator(Operator operator, List<COSBase> arguments) throws IOException {
+            if (++scannedOperators > 2000000) throw new IOException("Font usage operator limit exceeded");
+            if (operator.getName().equals("Tf") && (arguments.size() != 2 || !(arguments.get(0) instanceof COSName) || getResources() == null || getResources().getFont((COSName)arguments.get(0)) == null))
+                throw new IOException("Unresolved font usage resource");
+            super.processOperator(operator, arguments);
+        }
+        @Override protected void operatorException(Operator operator, List<COSBase> arguments, IOException error) throws IOException { throw error; }
         @Override protected void showGlyph(Matrix m, PDFont font, int code, Vector displacement) throws IOException {
-            if (++glyphs > 1000000) throw new IOException("Glyph scan limit exceeded");
+            if (++scannedGlyphs > 2000000) throw new IOException("Glyph scan limit exceeded");
             uses.computeIfAbsent(font.getCOSObject(), ignored -> new TreeSet<>()).add(code);
         }
         @Override public void showForm(PDFormXObject form) throws IOException {
             if (active.size() >= 64 || !active.add(form.getCOSObject())) throw new IOException("Recursive form XObject");
+            invokedForms.add(form.getCOSObject());
             try { super.showForm(form); } finally { active.remove(form.getCOSObject()); }
+        }
+        @Override public void showTransparencyGroup(PDTransparencyGroup group) throws IOException {
+            if (active.size() >= 64 || !active.add(group.getCOSObject())) throw new IOException("Recursive transparency group");
+            invokedForms.add(group.getCOSObject());
+            try { super.showTransparencyGroup(group); } finally { active.remove(group.getCOSObject()); }
         }
         @Override public void appendRectangle(Point2D a, Point2D b, Point2D c, Point2D d) { point = a; }
         @Override public void drawImage(PDImage i) {}
@@ -198,6 +247,78 @@ public final class QualifiedFontRepairs {
         @Override public void fillPath(int r) {}
         @Override public void fillAndStrokePath(int r) {}
         @Override public void shadingFill(COSName n) {}
+    }
+    private static String outline(PDType0Font font, int code) throws Exception {
+        var digest = MessageDigest.getInstance("SHA-256");
+        var path = font.getPath(code); if (path == null) throw new IOException("Missing glyph outline");
+        var iterator = path.getPathIterator(null); float[] values = new float[6];
+        while (!iterator.isDone()) {
+            int kind = iterator.currentSegment(values), count = switch (kind) { case PathIterator.SEG_MOVETO, PathIterator.SEG_LINETO -> 2; case PathIterator.SEG_QUADTO -> 4; case PathIterator.SEG_CUBICTO -> 6; default -> 0; };
+            digest.update((byte)kind);
+            for (int i = 0; i < count; i++) {
+                if (!Float.isFinite(values[i])) throw new IOException("Invalid glyph outline coordinate");
+                int bits = Float.floatToIntBits(values[i]);
+                digest.update(new byte[]{(byte)(bits >>> 24), (byte)(bits >>> 16), (byte)(bits >>> 8), (byte)bits});
+            }
+            iterator.next();
+        }
+        return HexFormat.of().formatHex(digest.digest());
+    }
+    private static boolean sameVector(Vector a, Vector b) {
+        return Float.isFinite(a.getX()) && Float.isFinite(a.getY()) && a.getX() == b.getX() && a.getY() == b.getY();
+    }
+    private void repairMissingCidMap(COSDictionary dictionary) throws Exception {
+        if (dictionary.containsKey(COSName.CID_TO_GID_MAP)) return; // Existing maps, including malformed ones, require a different repair.
+        String rule = "embedded-truetype-missing-cidmap";
+        COSDictionary descriptor = dictionary.getCOSDictionary(COSName.FONT_DESC);
+        COSStream program = descriptor == null ? null : descriptor.getCOSStream(COSName.FONT_FILE2);
+        if (!cidUsageComplete || program == null || descriptor.containsKey(COSName.FONT_FILE) || descriptor.containsKey(COSName.FONT_FILE3)) {
+            record(rule, dictionary, "review", "Requires complete supported usage and one embedded FontFile2 program"); return;
+        }
+        List<COSDictionary> parents = dictionaries.stream().filter(d -> "Type0".equals(d.getNameAsString(COSName.SUBTYPE)) &&
+            d.getCOSArray(COSName.DESCENDANT_FONTS) != null && d.getCOSArray(COSName.DESCENDANT_FONTS).toList().stream().anyMatch(raw -> resolve(raw) == dictionary)).toList();
+        if (parents.isEmpty()) { record(rule, dictionary, "review", "No Type0 parent identifies this descendant"); return; }
+        byte[] data = bytes(program);
+        var evidence = new StringBuilder(); int codeCount = 0, glyphCount;
+        try (TrueTypeFont ttf = new TTFParser().parseEmbedded(new ByteArrayInputStream(data))) {
+            glyphCount = ttf.getNumberOfGlyphs();
+            var glyf = ttf.getTableMap().get("glyf"); var loca = ttf.getIndexToLocation();
+            if (glyphCount < 1 || glyphCount > 65535 || glyf == null || loca == null || ttf.getHorizontalMetrics() == null || ttf.getUnitsPerEm() < 16 || ttf.getUnitsPerEm() > 16384)
+                throw new IOException("Unsupported TrueType glyph tables");
+            long[] offsets = loca.getOffsets();
+            if (offsets.length != glyphCount + 1) throw new IOException("Incomplete TrueType glyph offsets");
+            long previous = 0;
+            for (long offset : offsets) { if (offset < previous || offset > glyf.getLength()) throw new IOException("Invalid TrueType glyph offsets"); previous = offset; }
+            for (COSDictionary parent : parents) {
+                if (parent.getCOSArray(COSName.DESCENDANT_FONTS).size() != 1) throw new IOException("Ambiguous descendant fonts");
+                PDType0Font before = new PDType0Font(parent);
+                COSDictionary proposed = new COSDictionary(dictionary); proposed.setItem(COSName.CID_TO_GID_MAP, COSName.IDENTITY);
+                COSArray descendants = new COSArray(); descendants.add(proposed);
+                COSDictionary parentCopy = new COSDictionary(parent); parentCopy.setItem(COSName.DESCENDANT_FONTS, descendants);
+                PDType0Font after = new PDType0Font(parentCopy);
+                if (!before.isEmbedded() || before.isDamaged() || !after.isEmbedded() || after.isDamaged() || !(before.getDescendantFont() instanceof PDCIDFontType2))
+                    throw new IOException("Embedded TrueType program did not parse without fallback");
+                evidence.append(ref(parent)).append('\n');
+                for (int code : uses.getOrDefault(parent, Set.of())) {
+                    int cid = before.codeToCID(code), gid = before.codeToGID(code);
+                    if (cid <= 0 || cid >= glyphCount || gid != cid || after.codeToCID(code) != cid || after.codeToGID(code) != gid ||
+                        !Float.isFinite(before.getWidth(code)) || before.getWidth(code) != after.getWidth(code) ||
+                        !sameVector(before.getDisplacement(code), after.getDisplacement(code)) ||
+                        before.isVertical() && !sameVector(before.getPositionVector(code), after.getPositionVector(code)) ||
+                        !Objects.equals(before.toUnicode(code), after.toUnicode(code)))
+                        throw new IOException("Used code/CID/GID or advance is not preserved at code " + code);
+                    String shape = outline(before, code);
+                    if (!shape.equals(outline(after, code))) throw new IOException("Used glyph outline changed");
+                    evidence.append(code).append(':').append(cid).append(':').append(gid).append(':').append(ttf.getAdvanceWidth(gid))
+                        .append(':').append(before.getWidth(code)).append(':').append(before.toUnicode(code)).append(':').append(shape).append('\n');
+                    codeCount++;
+                }
+            }
+        } catch (IOException | IllegalArgumentException error) { record(rule, dictionary, "review", error.getMessage()); return; }
+        if (codeCount == 0) { record(rule, dictionary, "review", "No observed used codes establish a mapping repair"); return; }
+        dictionary.setItem(COSName.CID_TO_GID_MAP, COSName.IDENTITY);
+        record(rule, dictionary, "apply", "Explicit Identity; " + codeCount + " used codes across " + parents.size() + " parents; " + glyphCount +
+            " TrueType glyphs; code/CID/GID/advance/Unicode/outline sha256:" + hash(evidence.toString().getBytes(StandardCharsets.UTF_8)) + "; unchanged program sha256:" + hash(data));
     }
     private void repairCidSet(COSDictionary font) throws Exception {
         COSDictionary fd = font.getCOSDictionary(COSName.FONT_DESC);

@@ -371,8 +371,11 @@
       "improvement": "Missing CIDToGIDMap repair",
       "requirement": "Qualify missing mappings using the existing embedded TrueType program.",
       "acceptance": "Booklet mapping failures reduce only with proven used-code/GID equivalence and pixel preservation.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch15-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A32",
