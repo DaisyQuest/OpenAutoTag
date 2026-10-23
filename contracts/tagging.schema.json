@@ -109,6 +109,7 @@
         },
         "tableGridReview": { "$ref": "#/$defs/tableGridReview" },
         "mergedCellIds": { "type": "array", "minItems": 2, "maxItems": 10000, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "tableHeaderEvidence": {"type":"object","required":["algorithm","columnHeaders","rowHeaders"],"properties":{"algorithm":{"const":"directional-grid-v1"},"scopeSource":{"enum":["explicit","thead","body-default"]},"columnHeaders":{"type":"array","maxItems":10000,"uniqueItems":true,"items":{"type":"string","minLength":1}},"rowHeaders":{"type":"array","maxItems":10000,"uniqueItems":true,"items":{"type":"string","minLength":1}}},"additionalProperties":false},
         "headerId": { "type": "string", "minLength": 1 },
         "scope": { "enum": ["Row", "Column", "Both"] },
         "listNumbering": { "enum": ["None", "Disc", "Circle", "Square", "Decimal", "UpperRoman", "LowerRoman", "UpperAlpha", "LowerAlpha"] },

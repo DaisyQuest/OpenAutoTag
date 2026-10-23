@@ -1,6 +1,7 @@
 import Ajv2020 from "ajv/dist/2020.js";
 import { attachOcrSegments } from "./ocr-segments.js";
 import { planTableGrid, tableGridReview, mergeDeclaredCellFragments } from "./table-grid.js";
+import { assignTableHeaders } from "./table-headers.js";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import semanticSchema from "../../contracts/semantic.schema.json" with { type: "json" };
@@ -1104,51 +1105,6 @@ function repairMergedTableTextCells(rootNode) {
   return summary;
 }
 
-function validateTableSections(rootNode) {
-  let tableStructureRepairs = 0;
-
-  const visit = (node) => {
-    if (!node) {
-      return;
-    }
-
-    for (const child of node.children || []) {
-      visit(child);
-    }
-
-    if (node.type !== "Table" || node.tableGridReview) {
-      return;
-    }
-
-    for (const section of node.children || []) {
-      if (section.type !== "THead") {
-        continue;
-      }
-
-      for (const row of section.children || []) {
-        if (row.type !== "TR") {
-          continue;
-        }
-
-        for (const cell of row.children || []) {
-          const emptyPlaceholder = cell.synthetic === true && cell.repairReason === "table-row-irregularity" &&
-            !cell.sourceNodeIds?.length && !cell.children?.length &&
-            [cell.label, cell.actualText, cell.alt].every(value => !String(value || "").trim());
-          if (emptyPlaceholder) continue;
-          if (cell.type === "TD") {
-            cell.type = "TH";
-            cell.promotedFromTD = true;
-            tableStructureRepairs += 1;
-          }
-        }
-      }
-    }
-  };
-
-  visit(rootNode);
-  return tableStructureRepairs;
-}
-
 function getRowCellSignature(rowNode) {
   const cells = (rowNode?.children || []).filter(isTableCellNode);
   return cells.map((cell) => {
@@ -1381,120 +1337,8 @@ function applyLayoutAttrsToTree(node, sourceNodesById) {
 
 // ---- A15: Table /Headers + ColSpan/RowSpan ----------------------------
 function assignHeaderIdsAndTableAttrs(rootNode) {
-  const decorateTable = (tableNode) => {
-    if (tableNode.tableGridReview) return;
-    // Step 1: walk the table subtree, marking which TH/TD cells
-    // live inside a THead ancestor — they act as column headers.
-    const thCells = [];
-    const annotate = (n, inHead) => {
-      if (!n || (n !== tableNode && n.type === "Table")) return;
-      const nextInHead = inHead || n.type === "THead";
-      if (n.type === "TH" || n.type === "TD") {
-        n._inTHead = nextInHead;
-        if (n.type === "TH") thCells.push(n);
-      }
-      for (const kid of n.children || []) annotate(kid, nextInHead);
-    };
-    annotate(tableNode, false);
-
-    // Step 2: assign stable IDs to TH cells.
-    let thFallback = 0;
-    for (const th of thCells) {
-      const rowIndex = Number.isInteger(th.tableRowIndex) ? th.tableRowIndex : thFallback;
-      const columnIndex = Number.isInteger(th.tableColumnIndex) ? th.tableColumnIndex : thFallback;
-      th.headerId = `${tableNode.id}:H_r${rowIndex}c${columnIndex}_${thFallback}`;
-      thFallback += 1;
-    }
-
-    // Step 3: build column/row header lookups. Column headers come
-    // from TH-in-THead; row headers come from TH in other contexts.
-    const headersByColumn = new Map();
-    const rowHeaderByRowIndex = new Map();
-    for (const th of thCells) {
-      const rowIndex = Number.isInteger(th.tableRowIndex) ? th.tableRowIndex : 0;
-      const columnIndex = Number.isInteger(th.tableColumnIndex) ? th.tableColumnIndex : 0;
-      const columnSpan = Math.max(1, Number(th.columnSpan || 1));
-      const rowSpan = Math.max(1, Number(th.rowSpan || 1));
-      const scope = ["Row", "Column", "Both"].includes(th.scope) ? th.scope : th._inTHead ? "Column" : "Row";
-      if (scope === "Column" || scope === "Both") {
-        for (let col = columnIndex; col < columnIndex + columnSpan; col += 1) {
-          if (!headersByColumn.has(col)) headersByColumn.set(col, []);
-          headersByColumn.get(col).push(th);
-        }
-      }
-      if (scope === "Row" || scope === "Both") {
-        for (let row = rowIndex; row < rowIndex + rowSpan; row += 1) {
-          if (!rowHeaderByRowIndex.has(row)) rowHeaderByRowIndex.set(row, []);
-          rowHeaderByRowIndex.get(row).push(th);
-        }
-      }
-    }
-
-    // Step 4: attach /Table attrs with ColSpan/RowSpan and /Headers
-    // arrays on TD/TH cells that need them. Also attach /Scope on TH
-    // cells (PDF/UA Matterhorn 13-004).
-    const decorate = (n) => {
-      if (!n || (n !== tableNode && n.type === "Table")) return;
-      if (n.type === "TD" || n.type === "TH") {
-        const cs = Math.max(1, Number(n.columnSpan || 1));
-        const rs = Math.max(1, Number(n.rowSpan || 1));
-        const attrs = { O: "Table" };
-        let meaningful = false;
-        if (cs > 1) { attrs.ColSpan = cs; meaningful = true; }
-        if (rs > 1) { attrs.RowSpan = rs; meaningful = true; }
-        if (n.type === "TH") {
-          // Assign /Scope: Column headers live in THead, row headers elsewhere.
-          // Spanning multiple rows alone does not make a column header a row header.
-          const isColHeader = Boolean(n._inTHead);
-          let scope;
-          if (["Row", "Column", "Both"].includes(n.scope)) {
-            scope = n.scope;
-          } else if (isColHeader) {
-            scope = "Column";
-          } else {
-            scope = "Row";
-          }
-          n.scope = scope;
-        }
-        if (n.type === "TD" || n.type === "TH") {
-          const colIdx = Number.isInteger(n.tableColumnIndex) ? n.tableColumnIndex : null;
-          const rowIdx = Number.isInteger(n.tableRowIndex) ? n.tableRowIndex : null;
-          const colHeaders = colIdx != null ? Array.from({ length: cs }, (_, i) => headersByColumn.get(colIdx + i) || []).flat() : [];
-          const rowHeaders = rowIdx != null ? Array.from({ length: rs }, (_, i) => rowHeaderByRowIndex.get(rowIdx + i) || []).flat() : [];
-          const eligible = [...colHeaders.filter((h) => h !== n && Number.isInteger(h.tableRowIndex) && h.tableRowIndex < rowIdx),
-            ...rowHeaders.filter((h) => h !== n && Number.isInteger(h.tableColumnIndex) && h.tableColumnIndex < colIdx)];
-          // Prefer the latest occurrence of an otherwise identical repeated header.
-          const repeated = new Map();
-          for (const h of eligible) {
-            const key = `${h.scope || (h._inTHead ? "Column" : "Row")}:${h.tableColumnIndex}:${h.columnSpan || 1}:${h.label || ""}`;
-            const prior = repeated.get(key);
-            if (!prior || h.tableRowIndex >= prior.tableRowIndex) repeated.set(key, h);
-          }
-          const headerIds = [...new Set([...repeated.values()].map((h) => h.headerId))];
-          if (headerIds.length > 0) {
-            attrs.Headers = headerIds;
-            meaningful = true;
-          }
-        }
-        if (meaningful) n.tableAttrs = attrs;
-      }
-      for (const kid of n.children || []) decorate(kid);
-    };
-    decorate(tableNode);
-
-    // Step 5: clean up the temporary marker so the flag doesn't
-    // leak into the emitted tree.
-    const cleanup = (n) => {
-      if (!n || (n !== tableNode && n.type === "Table")) return;
-      delete n._inTHead;
-      for (const kid of n.children || []) cleanup(kid);
-    };
-    cleanup(tableNode);
-  };
-
-  const visit = (node) => {
-    if (!node) return;
-    if (node.type === "Table") decorateTable(node);
+  const visit = node => {
+    if (node.type === "Table") assignTableHeaders(node, collectTableRowDescriptors(node));
     for (const child of node.children || []) visit(child);
   };
   visit(rootNode);
@@ -2035,7 +1879,8 @@ export async function buildTagTree(inputPath, overrides = {}) {
   const tableRegularityCorrection = normalizeTableRegularity(root);
   const mergedTableTextCellRepair = repairMergedTableTextCells(root);
   normalizeTableSections(root);
-  const tableStructureRepairs = validateTableSections(root);
+  // THead can contain mixed TH/TD cells. Section placement cannot override a cell role.
+  const tableStructureRepairs = 0;
   const repeatedHeaderRows = detectRepeatedHeaders(root);
   flattenRedundantTableBodySections(root);
 

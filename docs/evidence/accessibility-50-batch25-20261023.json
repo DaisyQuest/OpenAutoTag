@@ -1,0 +1,309 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A42"
+  ],
+  "status": "completed",
+  "baselineCommit": "3926a9acb6ecd4ce4843f111b9d23bde913d7b9d",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/a42-baseline.log",
+      "sha256": "4f821ebcd338cbd0acb406ad581d98e78455d316a0c0173c68d3c55833be7e4c",
+      "passed": 816,
+      "failed": 0,
+      "skipped": 0
+    },
+    "headerUnit": {
+      "path": "tmp/a42-coverage-final.log",
+      "sha256": "601ef4bb601c872703d38ffb7fe9f81126e24febe0dde9f886a9df087c48848b",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0
+    },
+    "savedFocused": {
+      "path": "tmp/a42-saved.log",
+      "sha256": "4d0aa912572b1633563474c90ed80fb9ed0e00ff76fa9fa0d02ea92a5b80d386",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalAffected": {
+      "path": "tmp/a42-final-affected.log",
+      "sha256": "66f164c05bb645f947837a27c5c537afb0328b381a5dfa413f21900bb1e522b0",
+      "passed": 52,
+      "failed": 0,
+      "skipped": 0
+    },
+    "currentConfiguredBaselineCases": 817,
+    "builderCompatibility": {
+      "path": "tmp/a42-builder-final.log",
+      "sha256": "b533e0ecc162bc9989daa978d91c7509bb41ada0e452dd3e846ea4f8575f12f4",
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0
+    },
+    "coverage": {
+      "file": "modules/tag-builder/table-headers.js",
+      "lines": 100,
+      "branches": 100,
+      "functions": 100
+    },
+    "note": "The 816-case full baseline preceded the final future-header guard. The final 52-case affected run includes its new regression and covers the changed paths; current 817 configured cases are covered across overlapping runs. Coverage is for the new module only."
+  },
+  "oracle": {
+    "path": "test/fixtures/mixed-table-headers.json",
+    "sha256": "d01e1a28ebe88d96b283eceeeafaddebde7badc3ead0bd104a72e2892ce948fc"
+  },
+  "fixture": {
+    "pdfPath": "output\\accessibility-50-batch25-20261023\\fixture-final\\source.pdf",
+    "semanticPath": "output\\accessibility-50-batch25-20261023\\fixture-final\\semantic.json",
+    "tagsPath": "output\\accessibility-50-batch25-20261023\\fixture-final\\tagging.json",
+    "cases": [
+      {
+        "mode": "native",
+        "outputPath": "output\\accessibility-50-batch25-20261023\\fixture-final\\native.pdf",
+        "saved": {
+          "passed": 1344,
+          "failed": 0
+        }
+      },
+      {
+        "mode": "raster",
+        "outputPath": "output\\accessibility-50-batch25-20261023\\fixture-final\\raster.pdf",
+        "saved": {
+          "passed": 1066,
+          "failed": 0
+        }
+      }
+    ],
+    "cellCount": 44,
+    "nativeFillSaveReopen": true,
+    "corruptionsRejected": 4,
+    "source": {
+      "path": "output\\accessibility-50-batch25-20261023\\fixture-final\\source.pdf",
+      "sha256": "42a352a1c64b3e370fb23fc79844d1a8bd1914a332cc4dbdd5223ad6403ff144"
+    },
+    "semantic": {
+      "path": "output\\accessibility-50-batch25-20261023\\fixture-final\\semantic.json",
+      "sha256": "a5ca3c38acf59248dea2f096ae43a6e879678dcfd0ee06ca0e0762ce2e4398d7"
+    },
+    "tagging": {
+      "path": "output\\accessibility-50-batch25-20261023\\fixture-final\\tagging.json",
+      "sha256": "e0f6ec491a0ba0b67b5d79eebdf0ac55fc95aeec595f4a7285cdedc3c18e44e5"
+    },
+    "outputs": [
+      {
+        "mode": "native",
+        "pdf": {
+          "path": "output/accessibility-50-batch25-20261023/fixture-final/native.pdf",
+          "sha256": "67a023d5f8794b04d53bc99774f8700868c5f444abaef3471942a2b67f136951"
+        },
+        "saved": {
+          "path": "output/accessibility-50-batch25-20261023/fixture-final/native-saved.json",
+          "sha256": "af26dab8a8f59975127d62025c4cffae03e700dc47a0d6455b6e9e6997dbc235",
+          "summary": {
+            "passed": 1344,
+            "failed": 0
+          }
+        },
+        "validation": {
+          "path": "output/accessibility-50-batch25-20261023/fixture-final/native-validation.json",
+          "sha256": "98294a6060a7b0300ad414bae06906748b68d1ab9fb79e43db627ff8ea22c225",
+          "raw": {
+            "passedRules": 106,
+            "failedRules": 0,
+            "passedChecks": 2210,
+            "failedChecks": 0
+          },
+          "fontAudit": {
+            "status": "ok",
+            "errorCount": 3,
+            "warningCount": 0,
+            "blockingPreVeraPdf": true
+          }
+        }
+      },
+      {
+        "mode": "raster",
+        "pdf": {
+          "path": "output/accessibility-50-batch25-20261023/fixture-final/raster.pdf",
+          "sha256": "ca749880ed2719a1891a0c1109987a2d989b80283eedb33f2afcfe5b84aa2e42"
+        },
+        "saved": {
+          "path": "output/accessibility-50-batch25-20261023/fixture-final/raster-saved.json",
+          "sha256": "ec1389e309e9c5ff7fcd388ba3fdbac51c38727faab8912e2bde0a2dd16a3afa",
+          "summary": {
+            "passed": 1066,
+            "failed": 0
+          }
+        },
+        "validation": {
+          "path": "output/accessibility-50-batch25-20261023/fixture-final/raster-validation.json",
+          "sha256": "464ec5fbd35705d097f9da853fa1e8b32e14c6aad2bbc0b1b5da825aacb32d31",
+          "raw": {
+            "passedRules": 106,
+            "failedRules": 0,
+            "passedChecks": 2163,
+            "failedChecks": 0
+          },
+          "fontAudit": {
+            "status": "ok",
+            "errorCount": 0,
+            "warningCount": 0,
+            "blockingPreVeraPdf": false
+          }
+        }
+      }
+    ]
+  },
+  "independent": {
+    "path": "output/accessibility-50-batch25-20261023/independent-verification.json",
+    "sha256": "fb001bcacef52cb772849c072e180146390456697c3c9b9085b1002c5fb564eb",
+    "pagePairs": 25,
+    "popplerDpi": 120,
+    "cases": [
+      {
+        "id": "mixed",
+        "sourceHash": "42a352a1c64b3e370fb23fc79844d1a8bd1914a332cc4dbdd5223ad6403ff144",
+        "candidateHash": "67a023d5f8794b04d53bc99774f8700868c5f444abaef3471942a2b67f136951",
+        "pairs": 8,
+        "fields": 1,
+        "preservedTextBytes": true,
+        "preservedAnnotationsAndFields": true,
+        "preservedWidgetAppearanceBytes": true,
+        "preservedPageGeometry": true
+      },
+      {
+        "id": "nist-1299",
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "candidateHash": "9bf47be594229bf36a35e02f66ad258ad1bb0e0bd4d2819c7802aa72182ad3de",
+        "pairs": 8,
+        "fields": 0,
+        "preservedTextBytes": true,
+        "preservedAnnotationsAndFields": true,
+        "preservedWidgetAppearanceBytes": true,
+        "preservedPageGeometry": true
+      },
+      {
+        "id": "nist-1300",
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "candidateHash": "4424a655b74bff597637a8ad6b79930a1f9b5766ca1bb5a8a2945326b5623dd6",
+        "pairs": 9,
+        "fields": 0,
+        "preservedTextBytes": true,
+        "preservedAnnotationsAndFields": true,
+        "preservedWidgetAppearanceBytes": true,
+        "preservedPageGeometry": true
+      }
+    ],
+    "visuallyInspected": [
+      "mixed-filled-1-candidate.png",
+      "mixed-original-4-candidate.png"
+    ]
+  },
+  "real": {
+    "evidence": {
+      "path": "output/accessibility-50-batch25-20261023/real-evidence.json",
+      "sha256": "3b58d7c4639d513248d7f3f679323e30203d12998fa305f2fd7f1936f22dee51"
+    },
+    "relationshipChanges": {
+      "path": "output/accessibility-50-batch25-20261023/relationship-changes.json",
+      "sha256": "912dc0e87e25f92e9f659b4109d75223268e711fe254286133f7a426feeaca5a"
+    },
+    "cases": [
+      {
+        "id": "nist-1299",
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1299.pdf",
+        "sourceHash": "5db59917d92013f06dfefdc62604230959ee34b93db1fd22de726f83d9345f09",
+        "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1299.pdf",
+        "candidatePath": "output/accessibility-50-batch25-20261023/nist-1299/candidate.pdf",
+        "candidateHash": "9bf47be594229bf36a35e02f66ad258ad1bb0e0bd4d2819c7802aa72182ad3de",
+        "saved": {
+          "passed": 8907,
+          "failed": 15
+        },
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 41572,
+          "failedChecks": 1
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 3,
+          "warningCount": 0,
+          "blockingPreVeraPdf": true
+        },
+        "links": {
+          "bound": 8,
+          "review": 15
+        },
+        "gridReviews": 0,
+        "refused": false,
+        "unchangedSavedFailures": true
+      },
+      {
+        "id": "nist-1300",
+        "sourcePath": "output/public-pdf-pilot-20261022/inputs/nist-1300.pdf",
+        "sourceHash": "1e77c1bd63d1e15c48c870b7c17b7c9a2edf6bd5103b0940e72828515c9f1881",
+        "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1300.pdf",
+        "candidatePath": "output/accessibility-50-batch25-20261023/nist-1300/candidate.pdf",
+        "candidateHash": "4424a655b74bff597637a8ad6b79930a1f9b5766ca1bb5a8a2945326b5623dd6",
+        "saved": {
+          "passed": 13055,
+          "failed": 28
+        },
+        "raw": {
+          "passedRules": 105,
+          "failedRules": 1,
+          "passedChecks": 52000,
+          "failedChecks": 1
+        },
+        "fontAudit": {
+          "status": "ok",
+          "errorCount": 3,
+          "warningCount": 0,
+          "blockingPreVeraPdf": true
+        },
+        "links": {
+          "bound": 12,
+          "review": 33
+        },
+        "gridReviews": 0,
+        "refused": false,
+        "unchangedSavedFailures": true
+      },
+      {
+        "id": "booklet",
+        "sourcePath": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+        "sourceHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+        "gridReviews": 6,
+        "refused": true,
+        "unchangedSavedFailures": false
+      }
+    ]
+  },
+  "retainedControls": [
+    {
+      "id": "TEST-FORM",
+      "path": "output/accessibility-50-batch23-20261023/test-form/candidate.pdf",
+      "sha256": "72e6f446e361248d3edd6c3e2ecb31677e4655b5fa57e539c668b2a732b3086c",
+      "rerun": false
+    },
+    {
+      "id": "booklet",
+      "path": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "sha256": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "rerun": false
+    }
+  ],
+  "limits": [
+    "Supplied roles/scopes and fixture oracle are engineering intent, not authenticated human review.",
+    "New tagging plans only; no arbitrary authored Headers or writing-mode qualification.",
+    "Cross-page header continuity remains A43.",
+    "Native fixture has three font-audit findings; raster form editing not qualified.",
+    "NIST 1299/1300 remain unqualified with 15/28 saved failures, one raw optional-content failure and three font findings each.",
+    "Booklet overlaps still block a new candidate; OCR reviews and source text defects remain explicit."
+  ]
+}

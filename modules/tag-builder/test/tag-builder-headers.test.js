@@ -67,7 +67,7 @@ test("table with first row all TH creates THead with TH cells", async () => {
   assert.deepEqual(thead.children[0].children.map((c) => c.label), ["Name", "Age", "City"]);
 });
 
-test("table with first row 75% TH is promoted to full THead", async () => {
+test("header-majority row retains its declared data cell", async () => {
   const nodes = [
     makeNode("h1", "TH", "Name", "t1", 0, 0),
     makeNode("h2", "TH", "Age", "t1", 0, 1),
@@ -87,9 +87,9 @@ test("table with first row 75% TH is promoted to full THead", async () => {
 
   const thead = table.children[0];
   assert.equal(thead.children.length, 1);
-  // The TD in THead should have been promoted to TH
-  assert.deepEqual(thead.children[0].children.map((c) => c.type), ["TH", "TH", "TH", "TH"]);
-  assert.equal(tagging.source.tableStructureRepairs, 1);
+  // Section inference does not establish that every cell is a header.
+  assert.deepEqual(thead.children[0].children.map((c) => c.type), ["TH", "TH", "TH", "TD"]);
+  assert.equal(tagging.source.tableStructureRepairs, 0);
 });
 
 test("table with TH in column 0 of every row preserves row headers in TBody", async () => {
@@ -114,7 +114,7 @@ test("table with TH in column 0 of every row preserves row headers in TBody", as
   assert.deepEqual(table.children[2].children.map((c) => c.type), ["TH", "TD"]);
 });
 
-test("TD cell in THead is promoted to TH", async () => {
+test("TD cell in explicit THead retains data semantics", async () => {
   // Build a table where a TD ends up in THead via explicit section metadata
   const nodes = [
     makeNode("h1", "TH", "Name", "t1", 0, 0, { tableSection: "head" }),
@@ -130,12 +130,12 @@ test("TD cell in THead is promoted to TH", async () => {
   assert.deepEqual(table.children.map((c) => c.type), ["THead", "TBody"]);
 
   const thead = table.children[0];
-  // The TD should have been promoted to TH
-  assert.deepEqual(thead.children[0].children.map((c) => c.type), ["TH", "TH"]);
-  // The promoted cell should be marked
+  // THead permits both header and data cells.
+  assert.deepEqual(thead.children[0].children.map((c) => c.type), ["TH", "TD"]);
+  // No role repair is inferred from section metadata.
   const promotedCell = thead.children[0].children[1];
-  assert.equal(promotedCell.promotedFromTD, true);
-  assert.equal(tagging.source.tableStructureRepairs, 1);
+  assert.equal(promotedCell.promotedFromTD, undefined);
+  assert.equal(tagging.source.tableStructureRepairs, 0);
 });
 
 test("empty cells are preserved in table structure", async () => {

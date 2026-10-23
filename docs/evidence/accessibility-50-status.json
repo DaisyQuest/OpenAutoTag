@@ -503,8 +503,11 @@
       "improvement": "Mixed row and column headers",
       "requirement": "Improve corner and multirow header association with explicit scope evidence.",
       "acceptance": "Reviewed mixed-header fixtures expose correct Headers relations with no unrelated header targets.",
-      "status": "pending",
-      "evidence": []
+      "status": "completed",
+      "evidence": [
+        "docs/evidence/accessibility-50-batch25-20261023.json"
+      ],
+      "completedOn": "2026-10-23"
     },
     {
       "id": "A43",

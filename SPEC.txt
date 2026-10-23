@@ -1,6 +1,16 @@
 PDF Accessibility Engine
 Version: tagging-quality-2026-10-23
 
+Mixed table headers (A42, 2026-10-23):
+Header association uses bounded directional searches over validated cell spans.
+Explicit Row/Column/Both scope overrides section defaults; tableHeaderEvidence
+records the scope source and separate ordered column/row targets. Specific
+headers precede general ones. Data separates header bands; opposite-axis
+headers neither contribute nor stop the directional search. TD roles survive
+THead placement. Saved validation checks ordered Headers and scope absence.
+Five million search visits is the limit; exhaustion rejects without partial
+header edits. See docs/accessibility-50-batch25-20261023.md for evidence/limits.
+
 Declared table grids (A41, 2026-10-23):
 Table planning reserves explicit cell rectangles before assigning missing column
 positions. Valid spans and sparse hints are retained; conflicting rectangles,

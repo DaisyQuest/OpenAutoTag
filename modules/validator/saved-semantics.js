@@ -77,8 +77,8 @@ export function compareSavedSemantics({ inspection, tagging, reference, sourceIn
       const intendedChildren=saved.children.flatMap(ref=>qualifiedGroup(ref)?byRef.get(ref).children:[ref]);
       add("CHILD_ORDER", id, (n.children || []).map(emittedIdentifier), intendedChildren.map(ref => byRef.get(ref)?.identifier).filter(v => expectedIds.has(v)));
       if (["TH", "TD"].includes(n.type)) {
-        add("TABLE_HEADERS", id, [...(n.tableAttrs?.Headers || [])].sort(), [...saved.headers].sort());
-        if (n.scope || n.tableAttrs?.Scope) add("TABLE_SCOPE", id, n.scope || n.tableAttrs.Scope, saved.scope);
+        add("TABLE_HEADERS", id, n.tableAttrs?.Headers || [], saved.headers);
+        add("TABLE_SCOPE", id, n.scope || n.tableAttrs?.Scope || "", saved.scope || "");
         add("ROW_SPAN", id, n.rowSpan || 1, saved.rowSpan);
         add("COLUMN_SPAN", id, n.columnSpan || 1, saved.columnSpan);
       }
