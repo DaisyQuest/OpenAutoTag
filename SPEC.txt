@@ -202,6 +202,17 @@ the verification CLI on its source and candidate. Only exact hash-bound proof
 permits the expected resource fingerprint changes. Other preservation checks,
 mandatory validation and the review-only disposition remain in force.
 
+The verified-symbol-unicode rule adds absent ToUnicode to qualifying symbolic
+embedded TrueType Type0 fonts with Identity-H/V, explicit Identity CIDToGIDMap
+and complete observed usage. Unique nonprivate embedded Unicode cmap evidence
+or an audited outline/units/advance fingerprint identifies each used glyph.
+The current fallback fingerprint is Wingdings index 118 / U+2756; font names
+and code values alone are not evidence. Conflicting aliases, unsupported glyphs,
+editable defaults and any authored ActualText remain for review. Existing maps,
+including empty/malformed entries, are preserved. Programs and painting are
+unchanged and source replay verifies the full graph. Run before parsing/tagging
+so regenerated intent and ActualText use the corrected extraction. See batch 16.
+
 3.7b Qualified link repair (opt-in post-processing)
 
 Command:

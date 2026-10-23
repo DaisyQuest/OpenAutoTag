@@ -1,0 +1,320 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "improvements": [
+    "A32"
+  ],
+  "status": "completed",
+  "baselineCommit": "44d24ef",
+  "tests": {
+    "productionBaseline": {
+      "path": "tmp/accessibility-50-batch16-baseline.log",
+      "sha256": "e74cbb01f413a9803815c7c9ca6fefd81281378b0c29d1abb16d6e9c781883e1",
+      "passed": 469,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "newCases": 29,
+    "focused": {
+      "path": "tmp/a32-focused-final.log",
+      "sha256": "32e9a6bfaecc4df1433b36ee399e988dddb40b86357b6536286d0e6f580b3ca6",
+      "passed": 29,
+      "failed": 0,
+      "note": "Overlaps the baseline. The full baseline also includes final shared TrueType-table validation."
+    },
+    "coverageClaim": null
+  },
+  "verification": [
+    {
+      "id": "booklet",
+      "sourcePath": "output/public-pdf-pilot-20261022/inputs/nasa-stereo-booklet.pdf",
+      "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+      "qualifiedSourcePath": "output/accessibility-50-batch16-20261023/booklet/01-qualified-source.pdf",
+      "qualifiedSourceHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+      "candidatePath": "output/accessibility-50-batch16-20261023/booklet/06-candidate.pdf",
+      "candidateHash": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+      "intentPath": "output/accessibility-50-batch16-20261023/booklet/05-tagging.json",
+      "intentHash": "94207afaa43631ff945411b232defb3ccb204256c15d0e4d5c9a3b82d1c577b0",
+      "cachedOcrPath": "output/accessibility-50-batch11-20261023/booklet/ocr-result.json",
+      "cachedOcrHash": "106ba517173d8c3fec97f37c2bc44b90ace5ef63d34da97ae0b141763053d242",
+      "saved": {
+        "passed": 51354,
+        "failed": 196
+      },
+      "ownershipStatus": "verified",
+      "ocrReview": {
+        "pending": 158,
+        "recorded": 0
+      },
+      "raw": {
+        "passedRules": 105,
+        "failedRules": 1,
+        "passedChecks": 192908,
+        "failedChecks": 6
+      },
+      "fontAudit": {
+        "status": "ok",
+        "errorCount": 6,
+        "warningCount": 1,
+        "blockingPreVeraPdf": true
+      },
+      "savedReportPath": "output/accessibility-50-batch16-20261023/booklet/09-saved-semantics.json",
+      "savedReportHash": "a5474bada8e9e4a4790570dfc940d337b699074a0d52234aacb159ac895b241b",
+      "rawReportPath": "output/accessibility-50-batch16-20261023/booklet/07-validation.json",
+      "rawReportHash": "a850aef7994f1459175d44e5827c9f1da39a643229745cdd5de55a4c9cb20d98"
+    },
+    {
+      "id": "fingerprint",
+      "sourcePath": "output\\accessibility-50-batch16-20261023\\focused-final\\fingerprint.pdf",
+      "sourceHash": "dfc7cb34bb71b62ffb31c63e45884e28637092aba079573f4e971195ec498ba0",
+      "candidatePath": "output\\accessibility-50-batch16-20261023\\focused-final\\fingerprint-fixed.pdf",
+      "candidateHash": "81358b93936f7c62b1ed89f10e3fdd64a8bfa8820d2adf1db68936ec20fa74b9",
+      "expected": "❖",
+      "repair": [
+        {
+          "decision": "apply",
+          "version": 1,
+          "reason": "1 observed codes; exact glyph-to-Unicode evidence sha256:a957af08dc5b711dd34e0150da8862c73077935434fbb6976d00ecbf72bc8d1d; unchanged program sha256:507dc9aa8572046d53c9df88e17fc188200c71680a4209084b23d0444aa16471; mappings [1=U+2756]",
+          "target": "15 0 R",
+          "ruleId": "verified-symbol-unicode"
+        }
+      ],
+      "verification": {
+        "reason": "Saved objects equal the source with only the requested qualified repairs applied",
+        "status": "pass",
+        "scope": "catalog-and-info"
+      }
+    },
+    {
+      "id": "vertical",
+      "sourcePath": "output\\accessibility-50-batch16-20261023\\focused-final\\vertical.pdf",
+      "sourceHash": "7cc66388d8e3ead39b589d676d59e1beda54a936b3bab3a6eefba294705e5ba7",
+      "candidatePath": "output\\accessibility-50-batch16-20261023\\focused-final\\vertical-fixed.pdf",
+      "candidateHash": "deb65fa6dfc94c279cc8f2624c2b755fd0af46777239730cf73e2508bec0c170",
+      "expected": "❖",
+      "repair": [
+        {
+          "ruleId": "verified-symbol-unicode",
+          "target": "7 0 R",
+          "reason": "1 observed codes; exact glyph-to-Unicode evidence sha256:a957af08dc5b711dd34e0150da8862c73077935434fbb6976d00ecbf72bc8d1d; unchanged program sha256:507dc9aa8572046d53c9df88e17fc188200c71680a4209084b23d0444aa16471; mappings [1=U+2756]",
+          "version": 1,
+          "decision": "apply"
+        }
+      ],
+      "verification": {
+        "scope": "catalog-and-info",
+        "status": "pass",
+        "reason": "Saved objects equal the source with only the requested qualified repairs applied"
+      }
+    },
+    {
+      "id": "renamed",
+      "sourcePath": "output\\accessibility-50-batch16-20261023\\focused-final\\renamed.pdf",
+      "sourceHash": "91f5750d32f30c07438a093e7cf4cc21fba90a8b91c2af8e0f6dd9ec1004a579",
+      "candidatePath": "output\\accessibility-50-batch16-20261023\\focused-final\\renamed-fixed.pdf",
+      "candidateHash": "3e537ae0e5e117fb63fccba7a950d755b6172e83361d555c7415959743435433",
+      "expected": "❖",
+      "repair": [
+        {
+          "target": "7 0 R",
+          "ruleId": "verified-symbol-unicode",
+          "decision": "apply",
+          "version": 1,
+          "reason": "1 observed codes; exact glyph-to-Unicode evidence sha256:a957af08dc5b711dd34e0150da8862c73077935434fbb6976d00ecbf72bc8d1d; unchanged program sha256:507dc9aa8572046d53c9df88e17fc188200c71680a4209084b23d0444aa16471; mappings [1=U+2756]"
+        }
+      ],
+      "verification": {
+        "status": "pass",
+        "scope": "catalog-and-info",
+        "reason": "Saved objects equal the source with only the requested qualified repairs applied"
+      }
+    },
+    {
+      "id": "unicode-bmp",
+      "sourcePath": "output\\accessibility-50-batch16-20261023\\focused-final\\unicode-bmp.pdf",
+      "sourceHash": "bf5edb67ef24a32ff83576e92ff25a7cb21e893fa1d5d7f912f2c004645db615",
+      "candidatePath": "output\\accessibility-50-batch16-20261023\\focused-final\\unicode-bmp-fixed.pdf",
+      "candidateHash": "0a058a7d160f18a58a63295e985ab0fcf5630bc6e7c6fe689f0fad800325a55c",
+      "expected": "△",
+      "repair": [
+        {
+          "ruleId": "verified-symbol-unicode",
+          "decision": "apply",
+          "version": 1,
+          "reason": "1 observed codes; exact glyph-to-Unicode evidence sha256:d54db51804c61274f437aa8f50ff8253d1afb177c062a2d5765eaa1b4c3a7a94; unchanged program sha256:7ff5859146ba99056019770bdc805ba4fda4868bc327569ce22642c1a6491439; mappings [2=U+25B3]",
+          "target": "7 0 R"
+        }
+      ],
+      "verification": {
+        "scope": "catalog-and-info",
+        "reason": "Saved objects equal the source with only the requested qualified repairs applied",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "unicode-supplementary",
+      "sourcePath": "output\\accessibility-50-batch16-20261023\\focused-final\\unicode-supplementary.pdf",
+      "sourceHash": "c4a4f411a239da1a9b24ac95ecac92874c9142ad8cfa67c7880437f7eb364363",
+      "candidatePath": "output\\accessibility-50-batch16-20261023\\focused-final\\unicode-supplementary-fixed.pdf",
+      "candidateHash": "7ad9aab61cdb69d5b537f0ff8d51ea1842a92f790e56799c20eb3eb3593b3548",
+      "expected": "🚀",
+      "repair": [
+        {
+          "version": 1,
+          "decision": "apply",
+          "ruleId": "verified-symbol-unicode",
+          "target": "7 0 R",
+          "reason": "1 observed codes; exact glyph-to-Unicode evidence sha256:8d0a5032fe01dd5edd1c0114af0e08bd9e8a49417ad8ad421ec484858e6ffb41; unchanged program sha256:5021df04adc4354fba93ec46aff7b9c1b903f0f4e7a6bf1ff44e297c04cc6a7e; mappings [2=U+1F680]"
+        }
+      ],
+      "verification": {
+        "reason": "Saved objects equal the source with only the requested qualified repairs applied",
+        "scope": "catalog-and-info",
+        "status": "pass"
+      }
+    }
+  ],
+  "sourceRepair": {
+    "path": "output/accessibility-50-batch16-20261023/booklet/source-repair.json",
+    "sha256": "7e579d876c71e20e1f602ef5e9e694c8d44a9c60e86a4df4735002a5d97bef5d",
+    "finalReplayPath": "output/accessibility-50-batch16-20261023/booklet/source-replay.json",
+    "finalReplayHash": "0f834b2c2aba273994119fc926c65bd9da25238ca7e3efb884064a950aec19ea",
+    "sourceHash": "ab96274a8c7160f667cc27afa2e27a5bb4b3e7ab189c6c98b052b74ea87c9c96",
+    "candidateHash": "277e7710096573df6e1d30253348ad40e0e39b0e2906058bcddc36aa482ce34d",
+    "objectPairs": 7271,
+    "streamsByteIdentical": 300,
+    "changes": [
+      {
+        "object": [
+          2120,
+          0
+        ],
+        "font": "/NKLGSQ+CenturyGothic",
+        "change": "Identity"
+      },
+      {
+        "object": [
+          2126,
+          0
+        ],
+        "font": "/KMHOCW+CenturyGothic-Bold",
+        "change": "Identity"
+      },
+      {
+        "object": [
+          193,
+          0
+        ],
+        "font": "/ILFBIM+SymbolMT",
+        "change": "Identity"
+      },
+      {
+        "object": [
+          209,
+          0
+        ],
+        "font": "/ILFDJE+Wingdings-Regular",
+        "change": "ToUnicode code 153 -> U+2756",
+        "mapHash": "a8c377681538c19a6f56b1b7dd354cc42a8a781fb689db5127a423546267e3e9"
+      },
+      {
+        "object": [
+          208,
+          0
+        ],
+        "font": "/ILFDJE+Wingdings-Regular",
+        "change": "Identity"
+      },
+      {
+        "object": [
+          56,
+          0
+        ],
+        "font": "/ILFABB+Verdana",
+        "change": "Identity"
+      },
+      {
+        "object": [
+          147,
+          0
+        ],
+        "font": "/ILMKIB+ArialUnicodeMS",
+        "change": "Identity"
+      }
+    ],
+    "sourcePrefixPreserved": true
+  },
+  "textProof": {
+    "path": "output/accessibility-50-batch16-20261023/booklet/text-proof.json",
+    "sha256": "8e57281530c8d5a0d12afd96b701f9b11155a1c80cc10668fdf99996002e4ece",
+    "previousHash": "d781363f8666341cf4c327ed05f65def2442f72ecdf34c3b1f8051b29da3a1d1",
+    "candidateHash": "f07b2995cdfb9e2bac268fb4e9130e35ed7abc0b0589ba3c6b3c65531e963f71",
+    "actualTextEntries": 963,
+    "correctedActualTextEntries": 79,
+    "correctlyExtractedBullets": 79,
+    "allOtherActualTextAndExtractedTextUnchanged": true,
+    "extractor": "pypdf"
+  },
+  "visual": {
+    "path": "output/accessibility-50-batch16-20261023/visual-comparison.json",
+    "sha256": "1fb2836775155218142d14fcaf387ef19d8934be45c56502cdaebbb2633e9dfd",
+    "popplerPagePairs": 66,
+    "pdfboxPagePairs": 67,
+    "sourceImageBytesPreserved": true,
+    "syntheticFieldValueAppearanceAndFillSaveReopenPreserved": true,
+    "visuallyInspectedPage": 7
+  },
+  "synthetic": {
+    "path": "output/accessibility-50-batch16-20261023/baseline-synthetic/evidence.json",
+    "sha256": "42f49fc5c2876fa59d0cbb15e66579fc2ffcc0a571bab8661d1e60f92b8b5cc0",
+    "positiveModes": [
+      "fingerprint",
+      "vertical",
+      "renamed",
+      "unicode-bmp",
+      "unicode-supplementary"
+    ],
+    "fixtureFont": "Test-generated geometric outlines, no proprietary program or system-font dependency"
+  },
+  "control": {
+    "path": "output/accessibility-50-batch8-20261023/control-final/06-candidate.pdf",
+    "sha256": "9eef8f3c12da92b6e2f052e52fbb2fcf20b470f3caccad1be8657a86e3c06845",
+    "fields": 32,
+    "widgets": 33,
+    "newInteractionTest": false
+  },
+  "research": {
+    "mapping": "https://www.unicode.org/wg2/docs/n4363.pdf",
+    "mappingLocation": "Annex A: 02756;1118, Wingdings decimal index 118",
+    "cmap": "https://learn.microsoft.com/en-us/typography/opentype/spec/cmap",
+    "pdf": "https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf",
+    "fingerprint": {
+      "shapeSha256": "f328c16311f42d7aae4d83d5626acfb9fb0885c9513c2ee9dc1507c6038cf9df",
+      "unitsPerEm": 2048,
+      "advance": 1825,
+      "localCorroboratingFontSha256": "9bcd6064e3b52fa30a347edd6e82506e2ec8b1602930b423c629a82c10468a5b",
+      "localCmaps": [
+        "platform 1/0: index 118 -> GID 153",
+        "platform 3/0: F076 -> GID 153"
+      ],
+      "bookletProgramSha256": "d6259159a256b91009af8319b6ed8243a531e8e210f93f8ce9c86c7a05e43a6d",
+      "runtimeUsesSystemFont": false,
+      "redistributesProgram": false
+    }
+  },
+  "limitations": [
+    "Opt-in before parsing/tagging. Existing ToUnicode entries, including empty or malformed streams, are preserved for separate review.",
+    "Only symbolic embedded TrueType Type0 fonts with Identity-H/V and explicit Identity CIDToGIDMap, complete observed usage, no editable default and no authored ActualText qualify.",
+    "Generic recovery requires one unambiguous nonprivate scalar from embedded Unicode cmaps; the audited fallback currently recognizes one exact geometric symbol fingerprint.",
+    "Correct font decoding does not prove authored meaning, reading order, alternative descriptions, OCR transcription or human reader usability.",
+    "The booklet retains six embedding failures, 196 saved semantic failures and 158 pending OCR reviews. The broader goal remains active."
+  ],
+  "semanticComparison": {
+    "previousFailures": 248,
+    "currentFailures": 196,
+    "resolvedFailureTargets": 52,
+    "newFailureTargets": 0,
+    "key": "code + target"
+  }
+}

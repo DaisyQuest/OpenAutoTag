@@ -36,6 +36,7 @@ public final class QualifiedFontRepairs {
     private final Set<COSDictionary> dynamicFonts = Collections.newSetFromMap(new IdentityHashMap<>());
     private boolean usageComplete = true;
     private boolean cidUsageComplete = true;
+    private boolean replacementTextPresent;
     private final Set<COSStream> invokedForms = Collections.newSetFromMap(new IdentityHashMap<>());
     private int scannedGlyphs, scannedOperators;
     private int nodes;
@@ -61,6 +62,7 @@ public final class QualifiedFontRepairs {
         if (v instanceof COSArray) for (COSBase child : (COSArray)v) walk(child, depth + 1);
         if (v instanceof COSDictionary) {
             COSDictionary d = (COSDictionary)v; dictionaries.add(d);
+            if (d.containsKey(COSName.ACTUAL_TEXT)) replacementTextPresent = true;
             // Pattern/Type3 text execution is outside the whitespace-only qualification boundary.
             if (d.containsKey(COSName.PATTERN) || "Type3".equals(d.getNameAsString(COSName.SUBTYPE))) usageComplete = false;
             if ("Type3".equals(d.getNameAsString(COSName.SUBTYPE))) cidUsageComplete = false;
@@ -77,6 +79,7 @@ public final class QualifiedFontRepairs {
             if (fonts != null) for (COSBase raw : fonts.getValues()) if (resolve(raw) instanceof COSDictionary) dynamicFonts.add((COSDictionary)resolve(raw));
         }
         if (dictionaries.stream().anyMatch(d -> "Times-Roman".equals(d.getNameAsString(COSName.BASE_FONT)) || "Helvetica".equals(d.getNameAsString(COSName.BASE_FONT)) ||
+            "Type0".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.TO_UNICODE) ||
             "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE)) && !d.containsKey(COSName.CID_TO_GID_MAP))) scanUses();
         // Complete all missing maps before CIDSet qualification examines shared descriptors.
         for (COSDictionary d : dictionaries) if ("Font".equals(d.getNameAsString(COSName.TYPE)) && "CIDFontType2".equals(d.getNameAsString(COSName.SUBTYPE))) repairMissingCidMap(d);
@@ -84,6 +87,7 @@ public final class QualifiedFontRepairs {
             if (!"Font".equals(d.getNameAsString(COSName.TYPE))) continue;
             String subtype = d.getNameAsString(COSName.SUBTYPE, ""), base = d.getNameAsString(COSName.BASE_FONT, "");
             if (subtype.equals("CIDFontType2")) repairCidSet(d);
+            if (subtype.equals("Type0")) repairSymbolUnicode(d);
             if (subtype.equals("Type1") && (base.equals("ZapfDingbats") || base.equals("Times-Roman"))) repairStandard(d, base);
             if (subtype.equals("TrueType") && dynamicFonts.contains(d)) repairEditableUnicode(d);
             if (subtype.equals("Type1") && base.equals("Helvetica") && dynamicFonts.contains(d)) repairEditableHelvetica(d);
@@ -220,6 +224,10 @@ public final class QualifiedFontRepairs {
             super.processOperator(operator, arguments);
         }
         @Override protected void operatorException(Operator operator, List<COSBase> arguments, IOException error) throws IOException { throw error; }
+        @Override public void beginMarkedContentSequence(COSName tag, COSDictionary properties) {
+            if (properties != null && properties.containsKey(COSName.ACTUAL_TEXT)) replacementTextPresent = true;
+            super.beginMarkedContentSequence(tag, properties);
+        }
         @Override protected void showGlyph(Matrix m, PDFont font, int code, Vector displacement) throws IOException {
             if (++scannedGlyphs > 2000000) throw new IOException("Glyph scan limit exceeded");
             uses.computeIfAbsent(font.getCOSObject(), ignored -> new TreeSet<>()).add(code);
@@ -267,6 +275,97 @@ public final class QualifiedFontRepairs {
     private static boolean sameVector(Vector a, Vector b) {
         return Float.isFinite(a.getX()) && Float.isFinite(a.getY()) && a.getX() == b.getX() && a.getY() == b.getY();
     }
+    private static boolean usableUnicode(int cp) {
+        int type = Character.getType(cp);
+        return Character.isValidCodePoint(cp) && type != Character.UNASSIGNED && type != Character.CONTROL &&
+            type != Character.FORMAT && type != Character.PRIVATE_USE && type != Character.SURROGATE;
+    }
+    private static int validateTrueTypeTables(TrueTypeFont ttf) throws IOException {
+        int count = ttf.getNumberOfGlyphs();
+        var glyf = ttf.getTableMap().get("glyf"); var loca = ttf.getIndexToLocation();
+        if (count < 1 || count > 65535 || glyf == null || loca == null || ttf.getHorizontalMetrics() == null || ttf.getUnitsPerEm() < 16 || ttf.getUnitsPerEm() > 16384)
+            throw new IOException("Unsupported TrueType glyph tables");
+        long[] offsets = loca.getOffsets();
+        if (offsets.length != count + 1) throw new IOException("Incomplete TrueType glyph offsets");
+        long previous = 0;
+        for (long offset : offsets) { if (offset < previous || offset > glyf.getLength()) throw new IOException("Invalid TrueType glyph offsets"); previous = offset; }
+        return count;
+    }
+    private void repairSymbolUnicode(COSDictionary dictionary) throws Exception {
+        // Existing maps (including empty or malformed streams) belong to a separate repair.
+        if (dictionary.containsKey(COSName.TO_UNICODE)) return;
+        String rule = "verified-symbol-unicode";
+        Set<Integer> codes = uses.getOrDefault(dictionary, Set.of());
+        if (!cidUsageComplete || codes.isEmpty() || dynamicFonts.contains(dictionary) || replacementTextPresent) {
+            record(rule, dictionary, "review", "Requires complete observed usage, no editable default, and no authored replacement text; qualify before tagging"); return;
+        }
+        COSBase encoding = dictionary.getDictionaryObject(COSName.ENCODING);
+        COSArray descendants = dictionary.getCOSArray(COSName.DESCENDANT_FONTS);
+        if ((!COSName.IDENTITY_H.equals(encoding) && !COSName.IDENTITY_V.equals(encoding)) || descendants == null || descendants.size() != 1) {
+            record(rule, dictionary, "review", "Requires a two-byte Identity-H/V encoding and one embedded TrueType descendant"); return;
+        }
+        COSBase raw = resolve(descendants.get(0));
+        COSDictionary cid = raw instanceof COSDictionary ? (COSDictionary)raw : null;
+        COSDictionary descriptor = cid == null ? null : cid.getCOSDictionary(COSName.FONT_DESC);
+        COSStream program = descriptor == null ? null : descriptor.getCOSStream(COSName.FONT_FILE2);
+        if (cid == null || !"CIDFontType2".equals(cid.getNameAsString(COSName.SUBTYPE)) || program == null ||
+            descriptor.containsKey(COSName.FONT_FILE) || descriptor.containsKey(COSName.FONT_FILE3) ||
+            (descriptor.getInt(COSName.FLAGS, 0) & 36) != 4 || !COSName.IDENTITY.equals(cid.getDictionaryObject(COSName.CID_TO_GID_MAP))) {
+            record(rule, dictionary, "review", "Requires symbolic embedded FontFile2 with explicit Identity CIDToGIDMap"); return;
+        }
+        byte[] data = bytes(program); TreeMap<Integer, String> mappings = new TreeMap<>(); StringBuilder evidence = new StringBuilder();
+        COSStream map;
+        try (TrueTypeFont ttf = new TTFParser().parseEmbedded(new ByteArrayInputStream(data))) {
+            PDType0Font before = new PDType0Font(dictionary);
+            int glyphCount = validateTrueTypeTables(ttf);
+            if (!before.isEmbedded() || before.isDamaged() || ttf.getGlyph() == null)
+                throw new IOException("Unsupported or damaged embedded TrueType program");
+            for (int code : codes) {
+                int gid = before.codeToGID(code);
+                if (code < 1 || code > 65535 || gid < 1 || gid >= glyphCount || before.codeToCID(code) != gid)
+                    throw new IOException("Invalid observed code/CID/GID at code " + code);
+                String shape = outline(before, code); int advance = ttf.getAdvanceWidth(gid);
+                // Audited geometric fingerprint, independent of PDF code, GID and font name.
+                // Unicode WG2 N4363 Annex A: Wingdings index 118 -> U+2756.
+                // Confirmed against a full program's 3/0 F076 and 1/0 118 cmaps;
+                // no Microsoft program is bundled or loaded by this repair.
+                Integer fingerprint = ttf.getUnitsPerEm() == 2048 && advance == 1825 &&
+                    shape.equals("f328c16311f42d7aae4d83d5626acfb9fb0885c9513c2ee9dc1507c6038cf9df") ? 0x2756 : null;
+                Set<Integer> unicode = new TreeSet<>();
+                if (ttf.getCmap() != null) for (var cmap : ttf.getCmap().getCmaps()) {
+                    int platform = cmap.getPlatformId(), id = cmap.getPlatformEncodingId();
+                    if (!(platform == 0 && Set.of(0, 1, 2, 3, 4, 6).contains(id) || platform == 3 && (id == 1 || id == 10))) continue;
+                    List<Integer> values = cmap.getCharCodes(gid);
+                    if (values != null) for (int value : values) {
+                        if (!usableUnicode(value)) throw new IOException("Private, invalid or non-text Unicode cmap evidence at code " + code);
+                        unicode.add(value);
+                    }
+                }
+                if (unicode.size() > 1 || fingerprint != null && !unicode.isEmpty() && !unicode.contains(fingerprint))
+                    throw new IOException("Ambiguous or conflicting glyph-to-Unicode evidence at code " + code);
+                Integer cp = fingerprint != null ? fingerprint : unicode.stream().findFirst().orElse(null);
+                if (cp == null) throw new IOException("No verified Unicode identity for used glyph at code " + code);
+                mappings.put(code, new String(Character.toChars(cp)));
+                evidence.append(code).append(':').append(gid).append(':').append(cp).append(':').append(advance).append(':').append(shape)
+                    .append(':').append(fingerprint == null ? "embedded-unicode-cmap" : "wg2-n4363-1118").append('\n');
+            }
+            StringBuilder s = new StringBuilder("/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /VerifiedSymbolUnicode def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n");
+            for (var entry : mappings.entrySet()) s.append("1 beginbfchar\n<").append(String.format(Locale.ROOT, "%04X", entry.getKey())).append("> <")
+                .append(HexFormat.of().formatHex(entry.getValue().getBytes(StandardCharsets.UTF_16BE))).append(">\nendbfchar\n");
+            s.append("endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend\n");
+            map = stream(s.toString().getBytes(StandardCharsets.US_ASCII), true);
+            COSDictionary proposed = new COSDictionary(dictionary); proposed.setItem(COSName.TO_UNICODE, map);
+            PDType0Font after = new PDType0Font(proposed);
+            for (int code : codes) if (!mappings.get(code).equals(after.toUnicode(code)) || before.codeToGID(code) != after.codeToGID(code) ||
+                !Float.isFinite(before.getWidth(code)) || before.getWidth(code) != after.getWidth(code) ||
+                !sameVector(before.getDisplacement(code), after.getDisplacement(code)) ||
+                before.isVertical() && !sameVector(before.getPositionVector(code), after.getPositionVector(code)) || !outline(before, code).equals(outline(after, code)))
+                throw new IOException("Proposed Unicode map changed glyph selection or geometry");
+        } catch (IOException | IllegalArgumentException error) { record(rule, dictionary, "review", error.getMessage()); return; }
+        dictionary.setItem(COSName.TO_UNICODE, map);
+        record(rule, dictionary, "apply", mappings.size() + " observed codes; exact glyph-to-Unicode evidence sha256:" + hash(evidence.toString().getBytes(StandardCharsets.UTF_8)) +
+            "; unchanged program sha256:" + hash(data) + "; mappings " + mappings.entrySet().stream().map(e -> e.getKey() + "=U+" + Integer.toHexString(e.getValue().codePointAt(0)).toUpperCase(Locale.ROOT)).toList());
+    }
     private void repairMissingCidMap(COSDictionary dictionary) throws Exception {
         if (dictionary.containsKey(COSName.CID_TO_GID_MAP)) return; // Existing maps, including malformed ones, require a different repair.
         String rule = "embedded-truetype-missing-cidmap";
@@ -281,14 +380,7 @@ public final class QualifiedFontRepairs {
         byte[] data = bytes(program);
         var evidence = new StringBuilder(); int codeCount = 0, glyphCount;
         try (TrueTypeFont ttf = new TTFParser().parseEmbedded(new ByteArrayInputStream(data))) {
-            glyphCount = ttf.getNumberOfGlyphs();
-            var glyf = ttf.getTableMap().get("glyf"); var loca = ttf.getIndexToLocation();
-            if (glyphCount < 1 || glyphCount > 65535 || glyf == null || loca == null || ttf.getHorizontalMetrics() == null || ttf.getUnitsPerEm() < 16 || ttf.getUnitsPerEm() > 16384)
-                throw new IOException("Unsupported TrueType glyph tables");
-            long[] offsets = loca.getOffsets();
-            if (offsets.length != glyphCount + 1) throw new IOException("Incomplete TrueType glyph offsets");
-            long previous = 0;
-            for (long offset : offsets) { if (offset < previous || offset > glyf.getLength()) throw new IOException("Invalid TrueType glyph offsets"); previous = offset; }
+            glyphCount = validateTrueTypeTables(ttf);
             for (COSDictionary parent : parents) {
                 if (parent.getCOSArray(COSName.DESCENDANT_FONTS).size() != 1) throw new IOException("Ambiguous descendant fonts");
                 PDType0Font before = new PDType0Font(parent);
